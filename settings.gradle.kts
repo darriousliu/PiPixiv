@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import java.io.FileInputStream
-import java.util.Properties
+import java.util.*
 
 
 val localProperties = Properties()
@@ -45,6 +45,11 @@ dependencyResolutionManagement {
                 password = localProperties.getProperty("github.package.token")
                     ?: System.getenv("GH_PACKAGE_TOKEN")
             }
+        }
+        maven {
+            // You can find the maven URL for other artifacts (e.g. KMP, METALAVA) on their
+            // build pages.
+            url = uri("https://androidx.dev/snapshots/builds/13570461/artifacts/repository")
         }
     }
 }
