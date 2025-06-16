@@ -32,7 +32,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.compose.KoinContext
 import org.koin.core.qualifier.named
 
 class MainActivity : BaseActivity() {
@@ -52,38 +51,41 @@ class MainActivity : BaseActivity() {
                 navigationBarStyle = if (isSystemInDarkTheme) darkStyle else lightStyle,
             )
         }
-        KoinContext {
-            val errorImage =
-                AppCompatResources.getDrawable(this, R.drawable.ic_error_outline_24)?.asImage()
-            setSingletonImageLoaderFactory { context ->
-                ImageLoader.Builder(context)
-                    .error(errorImage)
-                    .allowRgb565(getSystemService<ActivityManager>()!!.isLowRamDevice)
-                    .diskCache(CoilDiskCache.get(this))
-                    .memoryCache(CoilMemoryCache.get(this))
-                    .components {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            add(AnimatedImageDecoder.Factory())
-                        } else {
-                            add(GifDecoder.Factory())
-                        }
-                        add(KtorNetworkFetcherFactory(imageHttpClient))
-                    }
-                    // Coil spawns a new thread for every image load by default
-                    .fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(8))
-                    .decoderCoroutineContext(Dispatchers.IO.limitedParallelism(2))
-                    .build()
-            }
+        SetUpImageLoaderFactory()
 
-            LaunchedEffect(Unit) {
-                handleIntent(intent)
+        LaunchedEffect(Unit) {
+            handleIntent(intent)
+        }
+        PiPixivTheme {
+            val state = splashViewModel.asState()
+            state.startDestination?.let {
+                MainGraph(startDestination = it)
             }
-            PiPixivTheme {
-                val state = splashViewModel.asState()
-                state.startDestination?.let {
-                    MainGraph(startDestination = it)
+        }
+    }
+
+    @Composable
+    private fun SetUpImageLoaderFactory() {
+        val errorImage =
+            AppCompatResources.getDrawable(this, R.drawable.ic_error_outline_24)?.asImage()
+        setSingletonImageLoaderFactory { context ->
+            ImageLoader.Builder(context)
+                .error(errorImage)
+                .allowRgb565(getSystemService<ActivityManager>()!!.isLowRamDevice)
+                .diskCache(CoilDiskCache.get(this))
+                .memoryCache(CoilMemoryCache.get(this))
+                .components {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        add(AnimatedImageDecoder.Factory())
+                    } else {
+                        add(GifDecoder.Factory())
+                    }
+                    add(KtorNetworkFetcherFactory(imageHttpClient))
                 }
-            }
+                // Coil spawns a new thread for every image load by default
+                .fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(8))
+                .decoderCoroutineContext(Dispatchers.IO.limitedParallelism(2))
+                .build()
         }
     }
 
