@@ -1,13 +1,11 @@
 package com.mrl.pixiv.common.util
 
+import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory.decodeFile
 import android.os.Environment
-import okio.Path.Companion.toPath
+import android.provider.MediaStore
 import java.io.File
-import java.io.FileOutputStream
-import java.net.URL
-import javax.net.ssl.HttpsURLConnection
 
 
 // 下载文件夹为DCIM/PiPixiv
@@ -28,9 +26,30 @@ enum class PictureType(val extension: String) {
     }
 }
 
+private fun isImageExists(fileName: String, type: PictureType): Boolean {
+    val context = AppUtil.appContext
+    val projection = arrayOf(MediaStore.Images.Media._ID)
+    val selection =
+        "${MediaStore.Images.Media.DISPLAY_NAME} = ? AND ${MediaStore.Images.Media.RELATIVE_PATH} = ?"
+    val selectionArgs = arrayOf(
+        fileName + type.extension,
+        "${Environment.DIRECTORY_DCIM}/${DOWNLOAD_DIR}/"
+    )
+    context.contentResolver.query(
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        projection,
+        selection,
+        selectionArgs,
+        null
+    )?.use { cursor ->
+        return cursor.count > 0
+    }
+    return false
+}
+
 fun Bitmap.saveToAlbum(
     fileName: String,
-    type: PictureType,
+    type: PictureType = PictureType.PNG,
     callback: (Boolean) -> Unit = {}
 ) {
     val compressFormat = when (type) {
@@ -39,41 +58,34 @@ fun Bitmap.saveToAlbum(
         PictureType.JPG -> Bitmap.CompressFormat.JPEG
     }
     try {
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-            .absolutePath
-            .let { path ->
-                val dir = path.toPath() / DOWNLOAD_DIR
-                dir.toFile().mkdirs()
-                val filePath = dir / "$fileName${type.extension}"
-                FileOutputStream(filePath.toFile()).use { out ->
-                    if (compress(compressFormat, 100, out)) {
-                        callback(true)
-                    }
+        if (isImageExists(fileName, type)) {
+            callback(true)
+            return
+        }
+        val context = AppUtil.appContext
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + type.extension)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/${type.name.lowercase()}")
+            put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                "${Environment.DIRECTORY_DCIM}/${DOWNLOAD_DIR}"
+            )
+        }
+        val uri = context.contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            contentValues
+        )
+        if (uri != null) {
+            context.contentResolver.openOutputStream(uri)?.use { out ->
+                if (compress(compressFormat, 100, out)) {
+                    callback(true)
+                    return
                 }
             }
+        }
+        callback(false)
     } catch (_: Exception) {
         callback(false)
-    }
-}
-
-fun calculateImageSize(url: String): Float {
-    return try {
-        val connection = URL(url).openConnection() as HttpsURLConnection
-        connection.requestMethod = "HEAD"
-        connection.setRequestProperty("Referer", "https://www.pixiv.net/")
-        val responseCode = connection.responseCode
-        if (responseCode == HttpsURLConnection.HTTP_OK) {
-            val contentLength = connection.getHeaderField("Content-Length")
-            if (contentLength != null) {
-                val sizeInBytes = contentLength.toLong()
-                return sizeInBytes / 1024f / 1024f
-            }
-        }
-        connection.disconnect()
-        return 0f
-    } catch (e: Exception) {
-        e.printStackTrace()
-        0f
     }
 }
 

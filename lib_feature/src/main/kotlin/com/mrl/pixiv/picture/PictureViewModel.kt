@@ -6,14 +6,13 @@ import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.runtime.Stable
-import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import coil3.SingletonImageLoader
-import coil3.asDrawable
 import coil3.request.ImageRequest
+import coil3.toBitmap
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Type
@@ -231,13 +230,12 @@ class PictureViewModel(
                 closeBottomSheet()
                 return@launchIO
             }
-            result.image?.asDrawable(AppUtil.appContext.resources)?.toBitmap()
-                ?.saveToAlbum("${illustId}_$index", PictureType.PNG) {
-                    with(AppUtil.appContext) {
-                        closeBottomSheet()
-                        handleError(Exception(getString(if (it) RString.download_success else RString.download_failed)))
-                    }
+            result.image?.toBitmap()?.saveToAlbum("${illustId}_$index") {
+                with(AppUtil.appContext) {
+                    closeBottomSheet()
+                    handleError(Exception(getString(if (it) RString.download_success else RString.download_failed)))
                 }
+            }
             closeBottomSheet()
             showLoading(false)
         }
@@ -305,7 +303,7 @@ class PictureViewModel(
         }
     }
 
-    private fun showLoading(show: Boolean) {
+    fun showLoading(show: Boolean) {
         updateState {
             copy(loading = show)
         }

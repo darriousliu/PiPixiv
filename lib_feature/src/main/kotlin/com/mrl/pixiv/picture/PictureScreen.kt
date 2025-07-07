@@ -6,6 +6,7 @@ import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.READ_MEDIA_IMAGES
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -155,15 +156,14 @@ internal fun PictureScreen(
             }
         }
     val lazyListState = rememberLazyListState()
-    val currPage =
-        remember {
-            derivedStateOf {
-                minOf(
-                    lazyListState.firstVisibleItemIndex,
-                    illust.pageCount - 1
-                )
-            }
+    val currPage by remember {
+        derivedStateOf {
+            minOf(
+                lazyListState.firstVisibleItemIndex,
+                illust.pageCount - 1
+            )
         }
+    }
     val isBarVisible by remember { derivedStateOf { lazyListState.firstVisibleItemIndex <= illust.pageCount } }
     val isScrollToBottom = lazyListState.onScrollToBottom(illust.pageCount, illust.id)
 
@@ -205,59 +205,15 @@ internal fun PictureScreen(
                 clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(10.dp))
             ),
             topBar = {
-                TopAppBar(
-                    title = {},
-                    actions = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.CenterStart),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                                    contentDescription = null,
-                                    modifier = Modifier.throttleClick { onBack() },
-                                )
-                                Icon(
-                                    imageVector = Icons.Rounded.Home,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .padding(start = 15.dp)
-                                        .throttleClick { popBackToHomeScreen() }
-                                )
-                            }
-                            // 分享按钮
-                            Icon(
-                                imageVector = Icons.Rounded.Share,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .throttleClick {
-                                        val shareIntent = ShareUtil.createShareIntent(
-                                            "${illust.title} | ${illust.user.name} #pixiv https://www.pixiv.net/artworks/${illust.id}"
-                                        )
-                                        shareLauncher.launch(shareIntent)
-                                    },
-                            )
-                            this@TopAppBar.AnimatedVisibility(
-                                modifier = Modifier.align(Alignment.Center),
-                                visible = isBarVisible,
-                                enter = fadeIn(),
-                                exit = fadeOut(),
-                            ) {
-                                Text(
-                                    text = "${currPage.value + 1}/${illust.pageCount}",
-                                )
-                            }
-                        }
+                PictureTopBar(
+                    onBack = onBack,
+                    popBackToHomeScreen = popBackToHomeScreen,
+                    illust = illust,
+                    onShare = {
+                        shareLauncher.launch(it)
                     },
-                    colors = TopAppBarDefaults.topAppBarColors()
-                        .copy(containerColor = Color.Transparent)
+                    isBarVisible = isBarVisible,
+                    currPage = currPage,
                 )
             },
             floatingActionButton = {
@@ -653,83 +609,146 @@ internal fun PictureScreen(
                     onDismissRequest = {
                         pictureViewModel.closeBottomSheet()
                     },
-                    modifier = Modifier
-                        .heightIn(getScreenHeight() / 2),
+                    modifier = Modifier.heightIn(getScreenHeight() / 2),
                     sheetState = bottomSheetState,
                     containerColor = MaterialTheme.colorScheme.background,
                 ) {
-                    Box {
-                        Column(
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                    ) {
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 20.dp)
+                                .throttleClick {
+                                    // 下载原始图片
+                                    dispatch(
+                                        PictureAction.DownloadIllust(
+                                            illust.id,
+                                            state.bottomSheetState.index,
+                                            state.bottomSheetState.downloadUrl
+                                        )
+                                    )
+                                }
+                                .padding(vertical = 10.dp)
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .throttleClick {
-                                        // 下载原始图片
-                                        dispatch(
-                                            PictureAction.DownloadIllust(
-                                                illust.id,
-                                                state.bottomSheetState.index,
-                                                state.bottomSheetState.downloadUrl
-                                            )
+                            Icon(
+                                imageVector = Icons.Rounded.Download,
+                                contentDescription = null
+                            )
+                            Text(
+                                text = stringResource(
+                                    RString.download_with_size,
+                                    state.bottomSheetState.downloadSize
+                                ),
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .throttleClick {
+                                    readMediaImagePermission.launchMultiplePermissionRequest()
+                                    if (readMediaImagePermission.allPermissionsGranted) {
+                                        pictureViewModel.shareImage(
+                                            state.bottomSheetState.index,
+                                            state.bottomSheetState.downloadUrl,
+                                            illust,
+                                            shareLauncher
                                         )
                                     }
-                                    .padding(vertical = 10.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Download,
-                                    contentDescription = null
-                                )
-                                Text(
-                                    text = stringResource(
-                                        RString.download_with_size,
-                                        state.bottomSheetState.downloadSize
-                                    ),
-                                    modifier = Modifier.padding(start = 10.dp)
-                                )
-                            }
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .throttleClick {
-                                        readMediaImagePermission.launchMultiplePermissionRequest()
-                                        if (readMediaImagePermission.allPermissionsGranted) {
-                                            pictureViewModel.shareImage(
-                                                state.bottomSheetState.index,
-                                                state.bottomSheetState.downloadUrl,
-                                                illust,
-                                                shareLauncher
-                                            )
-                                        }
-                                    }
-                                    .padding(vertical = 10.dp)
-                            ) {
-                                Icon(imageVector = Icons.Rounded.Share, contentDescription = null)
-                                Text(
-                                    text = stringResource(RString.share),
-                                    modifier = Modifier.padding(start = 10.dp)
-                                )
-                            }
-                        }
-                        if (state.loading) {
-                            Box(
-                                modifier = Modifier
-                                    .matchParentSize()
-                                    .throttleClick {},
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            }
+                                }
+                                .padding(vertical = 10.dp)
+                        ) {
+                            Icon(imageVector = Icons.Rounded.Share, contentDescription = null)
+                            Text(
+                                text = stringResource(RString.share),
+                                modifier = Modifier.padding(start = 10.dp)
+                            )
                         }
                     }
                 }
             }
+            if (state.loading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .throttleClick {},
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun PictureTopBar(
+    onBack: () -> Unit,
+    popBackToHomeScreen: () -> Unit,
+    illust: Illust,
+    onShare: (Intent) -> Unit,
+    isBarVisible: Boolean,
+    currPage: Int,
+    modifier: Modifier = Modifier,
+) {
+    TopAppBar(
+        title = {},
+        modifier = modifier,
+        actions = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = null,
+                        modifier = Modifier.throttleClick { onBack() },
+                    )
+                    Icon(
+                        imageVector = Icons.Rounded.Home,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(start = 15.dp)
+                            .throttleClick { popBackToHomeScreen() }
+                    )
+                }
+                // 分享按钮
+                Icon(
+                    imageVector = Icons.Rounded.Share,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .throttleClick {
+                            val shareIntent = ShareUtil.createShareIntent(
+                                "${illust.title} | ${illust.user.name} #pixiv https://www.pixiv.net/artworks/${illust.id}"
+                            )
+                            onShare(shareIntent)
+                        },
+                )
+                this@TopAppBar.AnimatedVisibility(
+                    modifier = Modifier.align(Alignment.Center),
+                    visible = isBarVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Text(
+                        text = "${currPage + 1}/${illust.pageCount}",
+                    )
+                }
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors()
+            .copy(containerColor = Color.Transparent)
+    )
 }
 
 @Composable

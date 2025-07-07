@@ -106,6 +106,7 @@ private fun Project.configureKotlin() {
                     "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
                     "-opt-in=kotlin.uuid.ExperimentalUuidApi",
                     "-opt-in=kotlin.time.ExperimentalTime",
+                    "-Xannotation-default-target=param-property",
                     "-Xstring-concat=inline"
                 )
             )
