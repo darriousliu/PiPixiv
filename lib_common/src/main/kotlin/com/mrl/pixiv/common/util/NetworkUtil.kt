@@ -13,6 +13,7 @@ import kotlinx.datetime.format.char
 import okio.ByteString.Companion.toByteString
 import org.koin.core.component.KoinComponent
 import javax.net.ssl.HostnameVerifier
+import kotlin.time.Clock
 
 internal const val TAG = "HttpManager"
 internal const val HashSalt =
@@ -56,10 +57,10 @@ internal fun encode(text: String): String {
 suspend fun addAuthHeader(request: HttpRequestBuilder) {
     val local = Locale.current
     val instantNow = Clock.System.now()
-    val isoDate = "${
-        instantNow.toLocalDateTime(TimeZone.currentSystemDefault())
-            .format(iso8601DateTimeFormat)
-    }${instantNow.offsetIn(TimeZone.currentSystemDefault())}"
+    val timeZone = TimeZone.currentSystemDefault()
+    val isoDate = "${instantNow.toLocalDateTime(timeZone).format(iso8601DateTimeFormat)}${
+        instantNow.offsetIn(timeZone)
+    }"
     request.headers.apply {
         remove("User-Agent")
         set(

@@ -48,7 +48,7 @@ object ShareUtil {
                     )
                 )
             }
-        if (!isFileExists(file)) {
+        if (!file.isExist) {
             val imageLoader = SingletonImageLoader.get(AppUtil.appContext)
             val request = ImageRequest
                 .Builder(AppUtil.appContext)

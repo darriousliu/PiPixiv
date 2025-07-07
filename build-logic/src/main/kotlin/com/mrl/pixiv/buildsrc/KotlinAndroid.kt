@@ -105,6 +105,7 @@ private fun Project.configureKotlin() {
                     "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
                     "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
                     "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+                    "-opt-in=kotlin.time.ExperimentalTime",
                     "-Xstring-concat=inline"
                 )
             )
