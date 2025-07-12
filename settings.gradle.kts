@@ -1,7 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import java.io.FileInputStream
-import java.util.*
+import java.util.Properties
 
 
 val localProperties = Properties()
@@ -49,7 +49,7 @@ dependencyResolutionManagement {
         maven {
             // You can find the maven URL for other artifacts (e.g. KMP, METALAVA) on their
             // build pages.
-            url = uri("https://androidx.dev/snapshots/builds/13570461/artifacts/repository")
+            url = uri("https://androidx.dev/snapshots/builds/13771876/artifacts/repository")
         }
     }
 }
