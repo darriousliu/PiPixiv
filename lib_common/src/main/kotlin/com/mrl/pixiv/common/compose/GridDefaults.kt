@@ -53,3 +53,24 @@ object RecommendGridDefaults {
         )
     }
 }
+
+object IllustGridDefaults {
+    @Composable
+    fun coverLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
+        val windowSizeClass = windowAdaptiveInfo.windowSizeClass
+        val horizontalArrangement = when {
+            windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
+            windowSizeClass.isWidthAtLeastMedium -> 5f.spaceBy
+            else -> 5f.spaceBy
+        }
+        return GridLayoutParams(
+            gridCells = when {
+                windowSizeClass.isWidthCompact -> GridCells.Fixed(2)
+                else -> GridCells.Adaptive(minSize = 150.dp)
+            },
+            horizontalArrangement = horizontalArrangement,
+            verticalArrangement = horizontalArrangement,
+            cardShape = MaterialTheme.shapes.medium
+        )
+    }
+}

@@ -8,18 +8,17 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.mrl.pixiv.collection.CollectionViewModel
-import com.mrl.pixiv.common.compose.LocalNavigator
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
-import com.mrl.pixiv.common.util.navigateToPictureScreen
+import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.viewmodel.bookmark.isBookmark
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 @Composable
@@ -27,7 +26,7 @@ fun CollectionPage(
     uid: Long,
     modifier: Modifier = Modifier,
     viewModel: CollectionViewModel = koinViewModel { parametersOf(uid) },
-    navHostController: NavHostController = LocalNavigator.current
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
@@ -53,7 +52,7 @@ fun CollectionPage(
                     illust = illust,
                     isBookmarked = isBookmarked,
                     navToPictureScreen = { prefix ->
-                        navHostController.navigateToPictureScreen(
+                        navigationManager.navigateToPictureScreen(
                             userBookmarksIllusts.itemSnapshotList.items,
                             index,
                             prefix

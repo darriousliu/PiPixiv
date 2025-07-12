@@ -8,6 +8,7 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.NavKey
 import com.mrl.pixiv.common.util.RString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -19,7 +20,7 @@ sealed class Destination(
     val title: Int = 0,
     @Transient
     val icon: @Composable (() -> Unit) = {},
-) {
+) : NavKey {
     @Serializable
     data object LoginOptionScreen : Destination()
 
@@ -84,7 +85,7 @@ sealed class Destination(
     data class PictureScreen(
         val index: Int,
         val prefix: String,
-    )
+    ) : Destination()
 
     @Serializable
     data class PictureDeeplinkScreen(

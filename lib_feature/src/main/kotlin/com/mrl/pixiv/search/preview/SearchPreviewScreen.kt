@@ -1,13 +1,24 @@
 package com.mrl.pixiv.search.preview
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,21 +29,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import com.mrl.pixiv.common.compose.LocalNavigator
+import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
-import com.mrl.pixiv.common.util.navigateToSearchResultScreen
-import com.mrl.pixiv.common.util.navigateToSearchScreen
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.search.preview.components.TrendingItem
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 fun SearchPreviewScreen(
     modifier: Modifier = Modifier,
     viewModel: SearchPreviewViewModel = koinViewModel(),
-    navHostController: NavHostController = LocalNavigator.current,
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
     val textState by remember { mutableStateOf(TextFieldValue()) }
@@ -50,7 +59,7 @@ fun SearchPreviewScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .throttleClick {
-                                navHostController.navigateToSearchScreen()
+                                navigationManager.navigateToSearchScreen()
                             },
                         placeholder = { Text(stringResource(RString.enter_keywords)) },
                         colors = TextFieldDefaults.colors(
@@ -95,7 +104,7 @@ fun SearchPreviewScreen(
                     TrendingItem(
                         trendingTag = tag,
                         onSearch = {
-                            navHostController.navigateToSearchResultScreen(it)
+                            navigationManager.navigateToSearchResultScreen(it)
                             viewModel.dispatch(SearchPreviewAction.AddSearchHistory(it))
                         }
                     )

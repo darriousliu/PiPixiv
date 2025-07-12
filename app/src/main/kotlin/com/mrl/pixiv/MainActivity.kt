@@ -24,7 +24,7 @@ import com.mrl.pixiv.common.activity.BaseActivity
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.common.viewmodel.state
-import com.mrl.pixiv.navigation.MainGraph
+import com.mrl.pixiv.navigation.Navigation3MainGraph
 import com.mrl.pixiv.splash.SplashViewModel
 import com.mrl.pixiv.theme.PiPixivTheme
 import io.ktor.client.HttpClient
@@ -59,7 +59,7 @@ class MainActivity : BaseActivity() {
         PiPixivTheme {
             val state = splashViewModel.asState()
             state.startDestination?.let {
-                MainGraph(startDestination = it)
+                Navigation3MainGraph(startDestination = it)
             }
         }
     }

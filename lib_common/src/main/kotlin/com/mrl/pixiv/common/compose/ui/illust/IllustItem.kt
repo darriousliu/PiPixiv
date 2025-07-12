@@ -2,7 +2,15 @@ package com.mrl.pixiv.common.compose.ui.illust
 
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,10 +19,29 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FileCopy
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,11 +59,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowRgb565
 import coil3.request.crossfade
-import com.mrl.pixiv.common.compose.LocalAnimatedContentScope
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.lightBlue
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
@@ -76,7 +103,7 @@ fun SquareIllustItem(
         showPopupTip =
             shouldShowTip && !SettingRepository.userPreferenceFlow.value.hasShowBookmarkTip
     }
-    val animatedContentScope = LocalAnimatedContentScope.current
+    val animatedContentScope = LocalNavAnimatedContentScope.current
     with(LocalSharedTransitionScope.current) {
         Box(
             modifier = modifier
@@ -96,7 +123,7 @@ fun SquareIllustItem(
                     .matchParentSize()
                     .sharedElement(
                         rememberSharedContentState(key = "${prefix}-$imageKey"),
-                        animatedVisibilityScope = LocalAnimatedContentScope.current,
+                        animatedVisibilityScope = LocalNavAnimatedContentScope.current,
                         placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
                     ),
                 model = ImageRequest.Builder(LocalContext.current)
@@ -222,7 +249,7 @@ fun RectangleIllustItem(
 ) {
     val scale = illust.width * 1.0f / illust.height
     val sharedTransitionScope = LocalSharedTransitionScope.current
-    val animatedContentScope = LocalAnimatedContentScope.current
+    val animatedContentScope = LocalNavAnimatedContentScope.current
     val prefix = rememberSaveable { Uuid.random().toHexString() }
     var showBottomSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
