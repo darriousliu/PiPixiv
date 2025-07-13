@@ -28,9 +28,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -188,12 +188,6 @@ internal fun PictureScreen(
     val currentWindowAdaptiveInfo = currentWindowAdaptiveInfo()
     val layoutParams = IllustGridDefaults.coverLayoutParameters()
     val density = LocalDensity.current
-    val userSpanCount = with(GridCells.Adaptive(minSize = 120.dp)) {
-        density.calculateCrossAxisCellSizes(
-            with(density) { currentWindowAdaptiveInfo.windowSizeClass.minWidthDp.dp.roundToPx() },
-            with(density) { layoutParams.horizontalArrangement.spacing.roundToPx() },
-        ).size
-    }
     val relatedSpanCount = with(layoutParams.gridCells) {
         density.calculateCrossAxisCellSizes(
             with(density) { currentWindowAdaptiveInfo.windowSizeClass.minWidthDp.dp.roundToPx() },
@@ -549,19 +543,20 @@ internal fun PictureScreen(
                     }
                 }
                 item(key = KEY_ILLUST_AUTHOR_OTHER_WORKS) {
-                    Row(
+                    FlowRow(
                         modifier = Modifier
                             .padding(horizontal = 15.dp)
                             .padding(top = 10.dp),
-                        horizontalArrangement = 5f.spaceBy
+                        horizontalArrangement = 5f.spaceBy,
+                        maxLines = 1,
                     ) {
                         val otherPrefix = rememberSaveable { Uuid.random().toHexString() }
                         CompositionLocalProvider(
                             LocalSharedKeyPrefix provides otherPrefix
                         ) {
-                            val illusts = state.userIllusts.take(userSpanCount)
+                            val illusts = state.userIllusts
                             illusts.forEachIndexed { index, it ->
-                                val innerIsBookmarked = illust.isBookmark
+                                val innerIsBookmarked = it.isBookmark
                                 SquareIllustItem(
                                     illust = it,
                                     isBookmarked = innerIsBookmarked,
@@ -575,7 +570,9 @@ internal fun PictureScreen(
                                     navToPictureScreen = { prefix ->
                                         navToPictureScreen(illusts, index, prefix)
                                     },
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier
+                                        .widthIn(100.dp)
+                                        .weight(1f),
                                 )
                             }
                         }
