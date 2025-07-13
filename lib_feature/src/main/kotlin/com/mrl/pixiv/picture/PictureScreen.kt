@@ -104,6 +104,7 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.AppUtil.getString
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
+import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
 import com.mrl.pixiv.common.util.getScreenHeight
 import com.mrl.pixiv.common.util.throttleClick
@@ -337,16 +338,16 @@ internal fun PictureScreen(
                                         contentDescription = null,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .then(
-                                                if (index == 0) Modifier.sharedElement(
+                                            .conditionally(index == 0 && currentWindowAdaptiveInfo.isWidthCompact) {
+                                                sharedElement(
                                                     sharedTransitionScope.rememberSharedContentState(
                                                         key = "${prefix}-$firstImageKey"
                                                     ),
                                                     animatedVisibilityScope = animatedContentScope,
                                                     placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
                                                 )
-                                                else Modifier
-                                            )
+                                            }
+
                                             .throttleClick(
                                                 onLongClick = {
                                                     dispatch(PictureAction.GetPictureInfo(index))
@@ -365,14 +366,13 @@ internal fun PictureScreen(
                                     contentDescription = null,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .then(
-                                            if (index == 0) Modifier.sharedElement(
+                                        .conditionally(index == 0 && currentWindowAdaptiveInfo.isWidthCompact) {
+                                            sharedElement(
                                                 sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$firstImageKey"),
                                                 animatedVisibilityScope = animatedContentScope,
                                                 placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
                                             )
-                                            else Modifier
-                                        )
+                                        }
                                         .throttleClick(
                                             onLongClick = {
                                                 dispatch(PictureAction.GetPictureInfo(0))
