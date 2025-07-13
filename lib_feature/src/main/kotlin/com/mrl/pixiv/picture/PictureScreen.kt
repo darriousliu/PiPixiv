@@ -91,6 +91,7 @@ import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.deepBlue
+import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.compose.ui.bar.TextSnackbar
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
@@ -571,7 +572,12 @@ internal fun PictureScreen(
                                         navToPictureScreen(illusts, index, prefix)
                                     },
                                     modifier = Modifier
-                                        .widthIn(100.dp)
+                                        .widthIn(
+                                            when {
+                                                currentWindowAdaptiveInfo.isWidthCompact -> 100.dp
+                                                else -> 120.dp
+                                            }
+                                        )
                                         .weight(1f),
                                 )
                             }
