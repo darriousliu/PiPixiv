@@ -14,7 +14,6 @@ import androidx.paging.compose.itemKey
 import com.mrl.pixiv.collection.CollectionViewModel
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.viewmodel.bookmark.isBookmark
 import org.koin.androidx.compose.koinViewModel
@@ -28,7 +27,6 @@ fun CollectionPage(
     viewModel: CollectionViewModel = koinViewModel { parametersOf(uid) },
     navigationManager: NavigationManager = koinInject(),
 ) {
-    val state = viewModel.asState()
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
     val pullRefreshState = rememberPullToRefreshState()
 
