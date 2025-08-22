@@ -601,7 +601,7 @@ internal fun PictureScreen(
                                         prefix
                                     )
                                 },
-                                modifier = Modifier.weight(1f / illustsPair.size),
+                                modifier = Modifier.weight(1f / relatedSpanCount.toFloat()),
                                 shouldShowTip = index == 0
                             )
                         }
