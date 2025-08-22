@@ -17,18 +17,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -36,33 +25,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -101,13 +67,8 @@ import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.util.*
 import com.mrl.pixiv.common.util.AppUtil.getString
-import com.mrl.pixiv.common.util.RString
-import com.mrl.pixiv.common.util.ShareUtil
-import com.mrl.pixiv.common.util.conditionally
-import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
-import com.mrl.pixiv.common.util.getScreenHeight
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
@@ -188,13 +149,24 @@ internal fun PictureScreen(
 //        relatedIllusts.itemCount / relatedSpanCount + 1
 //    }
     val currentWindowAdaptiveInfo = currentWindowAdaptiveInfo()
-    val layoutParams = IllustGridDefaults.coverLayoutParameters()
+    val relatedLayoutParams = IllustGridDefaults.relatedLayoutParameters()
+    val userLayoutParams = IllustGridDefaults.userLayoutParameters()
     val density = LocalDensity.current
-    val relatedSpanCount = with(layoutParams.gridCells) {
-        density.calculateCrossAxisCellSizes(
-            with(density) { currentWindowAdaptiveInfo.windowSizeClass.minWidthDp.dp.roundToPx() },
-            with(density) { layoutParams.horizontalArrangement.spacing.roundToPx() },
-        ).size
+    val userSpanCount = with(userLayoutParams.gridCells) {
+        with(density) {
+            density.calculateCrossAxisCellSizes(
+                currentWindowAdaptiveInfo.windowSizeClass.minWidthDp.dp.roundToPx(),
+                relatedLayoutParams.horizontalArrangement.spacing.roundToPx(),
+            ).size
+        }
+    }
+    val relatedSpanCount = with(relatedLayoutParams.gridCells) {
+        with(density) {
+            density.calculateCrossAxisCellSizes(
+                currentWindowAdaptiveInfo.windowSizeClass.minWidthDp.dp.roundToPx(),
+                relatedLayoutParams.horizontalArrangement.spacing.roundToPx()
+            ).size
+        }
     }
     val relatedRowCount = if (relatedIllusts.itemCount % relatedSpanCount == 0) {
         relatedIllusts.itemCount / relatedSpanCount
@@ -347,7 +319,6 @@ internal fun PictureScreen(
                                                     placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
                                                 )
                                             }
-
                                             .throttleClick(
                                                 onLongClick = {
                                                     dispatch(PictureAction.GetPictureInfo(index))
@@ -555,7 +526,7 @@ internal fun PictureScreen(
                         CompositionLocalProvider(
                             LocalSharedKeyPrefix provides otherPrefix
                         ) {
-                            val illusts = state.userIllusts
+                            val illusts = state.userIllusts.take(userSpanCount)
                             illusts.forEachIndexed { index, it ->
                                 val innerIsBookmarked = it.isBookmark
                                 SquareIllustItem(
@@ -571,14 +542,7 @@ internal fun PictureScreen(
                                     navToPictureScreen = { prefix ->
                                         navToPictureScreen(illusts, index, prefix)
                                     },
-                                    modifier = Modifier
-                                        .widthIn(
-                                            when {
-                                                currentWindowAdaptiveInfo.isWidthCompact -> 100.dp
-                                                else -> 120.dp
-                                            }
-                                        )
-                                        .weight(1f),
+                                    modifier = Modifier.weight(1f),
                                 )
                             }
                         }
@@ -617,7 +581,7 @@ internal fun PictureScreen(
                     // 相关作品
                     Row(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 5.dp),
-                        horizontalArrangement = layoutParams.horizontalArrangement
+                        horizontalArrangement = relatedLayoutParams.horizontalArrangement
                     ) {
                         illustsPair.forEach { (illust, isBookmarked, index) ->
                             SquareIllustItem(

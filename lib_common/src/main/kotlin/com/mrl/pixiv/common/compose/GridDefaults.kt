@@ -56,7 +56,7 @@ object RecommendGridDefaults {
 
 object IllustGridDefaults {
     @Composable
-    fun coverLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
+    fun relatedLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
         val windowSizeClass = windowAdaptiveInfo.windowSizeClass
         val horizontalArrangement = when {
             windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
@@ -71,6 +71,25 @@ object IllustGridDefaults {
             horizontalArrangement = horizontalArrangement,
             verticalArrangement = horizontalArrangement,
             cardShape = MaterialTheme.shapes.medium
+        )
+    }
+
+    @Composable
+    fun userLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
+        val windowSizeClass = windowAdaptiveInfo.windowSizeClass
+        val horizontalArrangement = when {
+            windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
+            windowSizeClass.isWidthAtLeastMedium -> 5f.spaceBy
+            else -> 5f.spaceBy
+        }
+        return GridLayoutParams(
+            gridCells = when {
+                windowSizeClass.isWidthCompact -> GridCells.Fixed(3)
+                else -> GridCells.Adaptive(minSize = 120.dp)
+            },
+            horizontalArrangement = horizontalArrangement,
+            verticalArrangement = horizontalArrangement,
+            cardShape = MaterialTheme.shapes.small
         )
     }
 }
