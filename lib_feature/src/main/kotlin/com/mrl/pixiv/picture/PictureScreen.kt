@@ -16,12 +16,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -32,8 +30,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -248,29 +244,26 @@ internal fun PictureScreen(
                 )
             },
             floatingActionButton = {
-                Box(
-                    Modifier
+                IconButton(
+                    onClick = throttleClick {
+                        onBookmarkClick(Restrict.PUBLIC, null)
+                    },
+                    modifier = Modifier
+                        .size(50.dp)
                         .sharedElement(
                             rememberSharedContentState(key = "${prefix}-favorite-${illust.id}"),
                             animatedContentScope,
                             placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                        )
-                        .throttleClick {
-                            onBookmarkClick(Restrict.PUBLIC, null)
-                        }
-                        .shadow(5.dp, CircleShape)
-                        .background(
-                            if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
-                        )
-                        .padding(10.dp)
+                        ),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    )
                 ) {
                     Icon(
                         imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                         contentDescription = null,
                         tint = if (isBookmarked) Color.Red else LocalContentColor.current,
-                        modifier = Modifier
-                            .size(35.dp)
-                            .clip(CircleShape)
+                        modifier = Modifier.size(35.dp)
                     )
                 }
             },

@@ -4,10 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.semantics.Role
@@ -45,6 +42,24 @@ inline fun Modifier.throttleClick(
         if (currentTimeMillis - time >= lastClickTime) {//判断点击间隔,如果在间隔内则不回调
             onClick()
             lastClickTime = currentTimeMillis
+        }
+    }
+}
+
+@Composable
+fun throttleClick(
+    time: Long = VIEW_CLICK_INTERVAL_TIME,
+    onClick: () -> Unit
+): () -> Unit {
+    // 使用remember函数记录上次点击的时间
+    var lastClickTime by remember { mutableLongStateOf(value = 0L) }
+    return remember(onClick) {
+        {
+            val currentTimeMillis = System.currentTimeMillis()
+            if (currentTimeMillis - time >= lastClickTime) {//判断点击间隔,如果在间隔内则不回调
+                onClick()
+                lastClickTime = currentTimeMillis
+            }
         }
     }
 }
