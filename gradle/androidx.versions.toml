@@ -30,7 +30,6 @@ lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-com
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 
 work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
-guava = "com.google.guava:guava:33.4.8-jre"
 
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 
@@ -52,4 +51,4 @@ baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprof
 [bundles]
 lifecycle = ["lifecycle-common", "lifecycle-process", "lifecycle-runtime-compose", "lifecycle-viewmodel-compose"]
 paging = ["paging", "paging-compose"]
-workmanager = ["work-runtime", "guava"]
+workmanager = ["work-runtime"]

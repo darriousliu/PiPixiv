@@ -3,7 +3,7 @@ compose-bom = "2025.08.00"
 accompanist = "0.37.3"
 navigation3 = "1.0.0-alpha07"
 material3-navigation3 = "1.0.0-SNAPSHOT"
-viewmodel-navigation3 = "1.0.0-alpha04"
+viewmodel-navigation3 = "2.10.0-alpha02"
 
 [libraries]
 bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
