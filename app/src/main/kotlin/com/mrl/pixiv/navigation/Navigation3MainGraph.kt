@@ -2,17 +2,8 @@ package com.mrl.pixiv.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.only
+import androidx.compose.animation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationRailDefaults
@@ -37,6 +28,7 @@ import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.mrl.pixiv.collection.CollectionScreen
+import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
@@ -258,12 +250,27 @@ fun Navigation3MainGraph(
                             entry<Destination.PictureScreen>(
                                 metadata = ListDetailSceneStrategy.detailPane() +
                                         NavDisplay.transitionSpec {
-                                            scaleIn(initialScale = 0.9f) + fadeIn() togetherWith
-                                                    scaleOut(targetScale = 1.1f) + fadeOut()
-                                        } + NavDisplay.predictivePopTransitionSpec {
-                                    scaleIn(initialScale = 1.1f) + fadeIn() togetherWith
-                                            scaleOut(targetScale = 0.9f) + fadeOut()
-                                }
+                                            scaleIn(
+                                                DefaultFloatAnimationSpec,
+                                                initialScale = 0.9f
+                                            ) + fadeIn(
+                                                DefaultFloatAnimationSpec
+                                            ) togetherWith scaleOut(
+                                                DefaultFloatAnimationSpec,
+                                                targetScale = 1.1f
+                                            ) + fadeOut(DefaultFloatAnimationSpec)
+                                        } +
+                                        NavDisplay.predictivePopTransitionSpec {
+                                            scaleIn(
+                                                DefaultFloatAnimationSpec,
+                                                initialScale = 1.1f
+                                            ) + fadeIn(
+                                                DefaultFloatAnimationSpec
+                                            ) togetherWith scaleOut(
+                                                DefaultFloatAnimationSpec,
+                                                0.9f
+                                            ) + fadeOut(DefaultFloatAnimationSpec)
+                                        }
                             ) {
                                 val params = it
                                 val illusts = remember { IllustCacheRepo[params.prefix] }

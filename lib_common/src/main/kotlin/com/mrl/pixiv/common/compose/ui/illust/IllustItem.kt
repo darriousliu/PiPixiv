@@ -1,16 +1,11 @@
 package com.mrl.pixiv.common.compose.ui.illust
 
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,29 +14,10 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FileCopy
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.ripple
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +40,8 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowRgb565
 import coil3.request.crossfade
+import com.mrl.pixiv.common.animation.DefaultAnimationDuration
+import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.lightBlue
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
@@ -111,20 +89,23 @@ fun SquareIllustItem(
                 .sharedBounds(
                     rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
                     animatedContentScope,
-                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(10.dp))
+                    enter = fadeIn(DefaultFloatAnimationSpec),
+                    exit = fadeOut(DefaultFloatAnimationSpec),
+                    boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
+                    renderInOverlayDuringTransition = false
                 )
                 .shadow(elevation, shape)
                 .background(MaterialTheme.colorScheme.background)
                 .throttleClick { onClick() }
         ) {
-            val imageKey = "image-${illust.id}-0"
+            val imageKey = illust.imageUrls.medium
             AsyncImage(
                 modifier = Modifier
                     .matchParentSize()
                     .sharedElement(
                         rememberSharedContentState(key = "${prefix}-$imageKey"),
                         animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
                     ),
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(illust.imageUrls.squareMedium)
@@ -187,11 +168,6 @@ fun SquareIllustItem(
             ) {
                 Box(
                     modifier = Modifier
-                        .sharedElement(
-                            rememberSharedContentState(key = "${prefix}-favorite-${illust.id}"),
-                            animatedContentScope,
-                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                        )
                         .minimumInteractiveComponentSize()
                         .throttleClick(
                             role = Role.Button,
@@ -264,7 +240,10 @@ fun RectangleIllustItem(
                 .sharedBounds(
                     rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
                     animatedContentScope,
-                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(10.dp))
+                    enter = fadeIn(DefaultFloatAnimationSpec),
+                    exit = fadeOut(DefaultFloatAnimationSpec),
+                    boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
+                    renderInOverlayDuringTransition = false
                 )
                 .padding(horizontal = 5.dp)
                 .padding(bottom = 5.dp)
@@ -276,7 +255,7 @@ fun RectangleIllustItem(
                 .clip(shape),
         ) {
             Column {
-                val imageKey = "image-${illust.id}-0"
+                val imageKey = illust.imageUrls.medium
                 AsyncImage(
                     model = remember {
                         ImageRequest.Builder(context)
@@ -293,7 +272,7 @@ fun RectangleIllustItem(
                         .sharedElement(
                             sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$imageKey"),
                             animatedVisibilityScope = animatedContentScope,
-                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
                         ),
                     alignment = Alignment.TopCenter,
                 )
@@ -309,13 +288,6 @@ fun RectangleIllustItem(
                         Text(
                             text = illust.title,
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier
-                                .sharedElement(
-                                    rememberSharedContentState(key = "${prefix}-title-${illust.id}"),
-                                    animatedContentScope,
-                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                                )
-                                .skipToLookaheadSize(),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -323,13 +295,6 @@ fun RectangleIllustItem(
                         Text(
                             text = illust.user.name,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier
-                                .sharedElement(
-                                    rememberSharedContentState(key = "${prefix}-user-name-${illust.user.id}"),
-                                    animatedContentScope,
-                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                                )
-                                .skipToLookaheadSize(),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -337,11 +302,6 @@ fun RectangleIllustItem(
 
                     Box(
                         modifier = Modifier
-                            .sharedElement(
-                                rememberSharedContentState(key = "${prefix}-favorite-${illust.id}"),
-                                animatedContentScope,
-                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                            )
                             .minimumInteractiveComponentSize()
                             .throttleClick(
                                 role = Role.Button,

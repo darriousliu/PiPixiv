@@ -1,10 +1,6 @@
 package com.mrl.pixiv.common.compose.ui.bar
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuite
@@ -17,6 +13,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.animation.DefaultIntOffsetAnimationSpec
 import com.mrl.pixiv.common.router.Destination
 
 @Composable
@@ -37,8 +34,16 @@ fun HomeBottomBar(
     AnimatedVisibility(
         visible = bottomBarVisibility,
         modifier = modifier,
-        enter = if (layoutType == NavigationSuiteType.NavigationBar) slideInVertically { it } else slideInHorizontally { if (isRtl) it else -it },
-        exit = if (layoutType == NavigationSuiteType.NavigationBar) slideOutVertically { it } else slideOutHorizontally { if (isRtl) it else -it },
+        enter = if (layoutType == NavigationSuiteType.NavigationBar) {
+            slideInVertically(DefaultIntOffsetAnimationSpec) { it }
+        } else {
+            slideInHorizontally(DefaultIntOffsetAnimationSpec) { if (isRtl) it else -it }
+        },
+        exit = if (layoutType == NavigationSuiteType.NavigationBar) {
+            slideOutVertically(DefaultIntOffsetAnimationSpec) { it }
+        } else {
+            slideOutHorizontally(DefaultIntOffsetAnimationSpec) { if (isRtl) it else -it }
+        },
     ) {
         NavigationSuite(
             layoutType = layoutType,

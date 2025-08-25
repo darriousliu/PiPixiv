@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.*
@@ -49,6 +49,8 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.mrl.pixiv.common.animation.DefaultAnimationDuration
+import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
@@ -226,11 +228,16 @@ internal fun PictureScreen(
     val animatedContentScope = LocalNavAnimatedContentScope.current
     with(sharedTransitionScope) {
         Scaffold(
-            modifier = modifier.sharedBounds(
-                rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
-                animatedContentScope,
-                clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(10.dp))
-            ),
+            modifier = modifier
+                .skipToLookaheadSize()
+                .sharedBounds(
+                    rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
+                    animatedContentScope,
+                    enter = fadeIn(DefaultFloatAnimationSpec),
+                    exit = fadeOut(DefaultFloatAnimationSpec),
+                    boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
+                    renderInOverlayDuringTransition = false
+                ),
             topBar = {
                 PictureTopBar(
                     onBack = onBack,
@@ -248,13 +255,7 @@ internal fun PictureScreen(
                     onClick = throttleClick {
                         onBookmarkClick(Restrict.PUBLIC, null)
                     },
-                    modifier = Modifier
-                        .size(50.dp)
-                        .sharedElement(
-                            rememberSharedContentState(key = "${prefix}-favorite-${illust.id}"),
-                            animatedContentScope,
-                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                        ),
+                    modifier = Modifier.size(50.dp),
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer,
                     )
@@ -309,7 +310,7 @@ internal fun PictureScreen(
                                                         key = "${prefix}-$firstImageKey"
                                                     ),
                                                     animatedVisibilityScope = animatedContentScope,
-                                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
                                                 )
                                             }
                                             .throttleClick(
@@ -334,7 +335,7 @@ internal fun PictureScreen(
                                             sharedElement(
                                                 sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$firstImageKey"),
                                                 animatedVisibilityScope = animatedContentScope,
-                                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
                                             )
                                         }
                                         .throttleClick(
@@ -444,13 +445,6 @@ internal fun PictureScreen(
                         ) {
                             Text(
                                 text = illust.user.name,
-                                modifier = Modifier
-                                    .sharedElement(
-                                        rememberSharedContentState(key = "${prefix}-user-name-${illust.user.id}"),
-                                        animatedContentScope,
-                                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                                    )
-                                    .skipToLookaheadSize(),
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium,
