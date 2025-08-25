@@ -5,7 +5,10 @@ import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
+import com.mrl.pixiv.common.data.user.UserBookmarksIllustResp
 import com.mrl.pixiv.common.data.user.UserDetailResp
+import com.mrl.pixiv.common.data.user.UserIllustsResp
+import com.mrl.pixiv.common.data.user.UserNovelsResp
 import com.mrl.pixiv.common.datasource.local.mmkv.requireUserInfoValue
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
@@ -14,6 +17,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import org.koin.android.annotation.KoinViewModel
 
 @Stable
@@ -48,46 +53,41 @@ class ProfileDetailViewModel(
     private fun loadUserData() {
         launchIO {
             val userId = uid ?: requireUserInfoValue.user.id
-            async {
-                val resp = PixivRepository.getUserIllusts(
-                    userId = userId,
-                    type = Type.Illust.value,
+            val resp = awaitAll(
+                async {
+                    PixivRepository.getUserIllusts(
+                        userId = userId,
+                        type = Type.Illust.value,
+                    )
+                },
+                async {
+                    PixivRepository.getUserBookmarksNovels(
+                        restrict = Restrict.PUBLIC,
+                        userId = userId
+                    )
+                },
+                async {
+                    PixivRepository.getUserBookmarksIllust(
+                        restrict = Restrict.PUBLIC,
+                        userId = userId
+                    )
+                },
+                async {
+                    PixivRepository.getUserDetail(userId = userId)
+                }
+            )
+            val userIllusts = resp[0] as UserIllustsResp
+            val userBookmarksNovels = resp[1] as UserNovelsResp
+            val userBookmarksIllusts = resp[2] as UserBookmarksIllustResp
+            val userInfo = resp[3] as UserDetailResp
+            delay(5000)
+            updateState {
+                copy(
+                    userIllusts = userIllusts.illusts.toImmutableList(),
+                    userBookmarksNovels = userBookmarksNovels.novels.toImmutableList(),
+                    userBookmarksIllusts = userBookmarksIllusts.illusts.toImmutableList(),
+                    userInfo = userInfo
                 )
-                updateState {
-                    copy(
-                        userIllusts = resp.illusts.toImmutableList(),
-                    )
-                }
-            }
-            async {
-                val resp = PixivRepository.getUserBookmarksNovels(
-                    restrict = Restrict.PUBLIC,
-                    userId = userId
-                )
-                updateState {
-                    copy(
-                        userBookmarksNovels = resp.novels.toImmutableList(),
-                    )
-                }
-            }
-            async {
-                val resp = PixivRepository.getUserBookmarksIllust(
-                    restrict = Restrict.PUBLIC,
-                    userId = userId
-                )
-                updateState {
-                    copy(
-                        userBookmarksIllusts = resp.illusts.toImmutableList(),
-                    )
-                }
-            }
-            async {
-                val resp = PixivRepository.getUserDetail(userId = userId)
-                updateState {
-                    copy(
-                        userInfo = resp
-                    )
-                }
             }
         }
     }
