@@ -18,7 +18,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import org.koin.android.annotation.KoinViewModel
 
 @Stable
@@ -80,7 +79,6 @@ class ProfileDetailViewModel(
             val userBookmarksNovels = resp[1] as UserNovelsResp
             val userBookmarksIllusts = resp[2] as UserBookmarksIllustResp
             val userInfo = resp[3] as UserDetailResp
-            delay(5000)
             updateState {
                 copy(
                     userIllusts = userIllusts.illusts.toImmutableList(),
