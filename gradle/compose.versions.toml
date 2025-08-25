@@ -4,6 +4,7 @@ accompanist = "0.37.3"
 navigation3 = "1.0.0-alpha07"
 material3-navigation3 = "1.0.0-SNAPSHOT"
 viewmodel-navigation3 = "2.10.0-alpha02"
+adaptive = "1.2.0-alpha11"
 
 [libraries]
 bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
@@ -14,7 +15,7 @@ ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 
 material3-core = { module = "androidx.compose.material3:material3" }
 material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive" }
-material3-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout" }
+material3-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "adaptive" }
 material3-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation" }
 material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
 material3-window-size = { module = "androidx.compose.material3:material3-window-size-class" }
@@ -35,5 +36,5 @@ accompanist = ["accompanist-permissions"]
 baselibs = ["foundation", "animation", "ui", "ui-tooling", "material-icons", "material3-core", "material3-adaptive", "material3-adaptive-layout", "material3-adaptive-navigation", "material3-adaptive-navigation-suite", "material3-window-size", "material-icons-core"]
 navigation3 = [
     "androidx-navigation3-runtime", "androidx-navigation3-ui",
-    "androidx-material3-adaptive-navigation3", "androidx-lifecycle-viewmodel-navigation3"
+    "androidx-lifecycle-viewmodel-navigation3"
 ]
