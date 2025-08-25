@@ -165,8 +165,7 @@ fun Navigation3MainGraph(
 
                             // 详情页
                             entry<Destination.ProfileDetailScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane() +
-                                        ListDetailSceneStrategy.extraPane()
+                                metadata = ListDetailSceneStrategy.detailPane()
                             ) {
                                 ProfileDetailScreen(
                                     uid = it.userId
