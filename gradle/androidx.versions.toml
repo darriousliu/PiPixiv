@@ -11,7 +11,7 @@ profileinstaller = "1.4.1"
 navigation = "2.9.1"
 datastore = "1.1.7"
 paging = "3.3.6"
-work = "2.10.2"
+work = "2.10.5"
 window = "1.4.0"
 
 [libraries]
