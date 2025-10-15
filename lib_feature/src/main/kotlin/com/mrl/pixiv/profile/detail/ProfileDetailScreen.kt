@@ -278,11 +278,11 @@ private fun ProfileDetailAppBar(
         },
         expandedHeight = expandedHeight,
         windowInsets = WindowInsets(0),
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
             scrolledContainerColor = Color.Transparent,
             navigationIconContentColor = Color.White,
-            titleContentColor = Color.White,
+            titleContentColor = Color.White
         ),
         scrollBehavior = scrollBehavior
     )
