@@ -34,28 +34,28 @@ internal operator fun MMKV_KMP.set(key: String, value: ByteArray?) = if (value =
 }
 
 fun MMKVOwner.mmkvInt(default: Int = 0) =
-    MMKVProperty(MMKV_KMP::takeInt, MMKV_KMP::set, default)
+    MMKVProperty(MMKV_KMP::getInt, MMKV_KMP::set, default)
 
 fun MMKVOwner.mmkvLong(default: Long = 0L) =
-    MMKVProperty(MMKV_KMP::takeLong, MMKV_KMP::set, default)
+    MMKVProperty(MMKV_KMP::getLong, MMKV_KMP::set, default)
 
 fun MMKVOwner.mmkvBool(default: Boolean = false) =
-    MMKVProperty(MMKV_KMP::takeBoolean, MMKV_KMP::set, default)
+    MMKVProperty(MMKV_KMP::getBoolean, MMKV_KMP::set, default)
 
 fun MMKVOwner.mmkvFloat(default: Float = 0f) =
-    MMKVProperty(MMKV_KMP::takeFloat, MMKV_KMP::set, default)
+    MMKVProperty(MMKV_KMP::getFloat, MMKV_KMP::set, default)
 
 fun MMKVOwner.mmkvDouble(default: Double = 0.0) =
-    MMKVProperty(MMKV_KMP::takeDouble, MMKV_KMP::set, default)
+    MMKVProperty(MMKV_KMP::getDouble, MMKV_KMP::set, default)
 
 fun MMKVOwner.mmkvString(default: String = "") =
-    MMKVProperty(MMKV_KMP::takeString, MMKV_KMP::set, default)
+    MMKVProperty(MMKV_KMP::getString, MMKV_KMP::set, default)
 
 fun MMKVOwner.mmkvStringSet(default: Set<String>? = null) =
-    MMKVProperty(MMKV_KMP::takeStringSet, MMKV_KMP::set, default)
+    MMKVProperty(MMKV_KMP::getStringSet, MMKV_KMP::set, default)
 
 fun MMKVOwner.mmkvBytes(default: ByteArray = byteArrayOf()) =
-    MMKVProperty(MMKV_KMP::takeByteArray, MMKV_KMP::set, default)
+    MMKVProperty(MMKV_KMP::getByteArray, MMKV_KMP::set, default)
 
 inline fun <reified V : Any?> MMKVOwner.mmkvSerializable(defaultValue: V) =
     MMKVSerializableProperty(serializer(), defaultValue)
