@@ -1,24 +1,13 @@
 package com.mrl.pixiv.search.preview
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,6 +34,7 @@ fun SearchPreviewScreen(
 ) {
     val state = viewModel.asState()
     val textState by remember { mutableStateOf(TextFieldValue()) }
+    val lazyGridState = viewModel.lazyGridState
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -86,6 +76,7 @@ fun SearchPreviewScreen(
         ) {
             LazyVerticalGrid(
                 modifier = Modifier.fillMaxSize(),
+                state = lazyGridState,
                 columns = GridCells.Fixed(3),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),

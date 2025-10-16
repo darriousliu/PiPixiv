@@ -20,15 +20,17 @@ import com.mrl.pixiv.follow.FollowingPage
 import com.mrl.pixiv.follow.FollowingScreenBody
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 @Composable
 fun LatestScreen(
     modifier: Modifier = Modifier,
+    viewModel: LatestViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
 ) {
     val pages = remember { LatestPage.entries.toList() }
-    val pagerState = rememberPagerState { pages.size }
+    val pagerState = viewModel.pagerState
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     Scaffold(
