@@ -3,18 +3,9 @@ package com.mrl.pixiv.navigation
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.DrawerDefaults
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationRailDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.WindowAdaptiveInfo
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldLayout
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -25,32 +16,26 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.mrl.pixiv.MainScreen
 import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
-import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
-import com.mrl.pixiv.common.compose.ui.bar.HomeBottomBar
 import com.mrl.pixiv.common.repository.IllustCacheRepo
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.DestinationsDeepLink
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.follow.FollowingScreen
 import com.mrl.pixiv.history.HistoryScreen
-import com.mrl.pixiv.home.HomeScreen
-import com.mrl.pixiv.latest.LatestScreen
 import com.mrl.pixiv.login.LoginOptionScreen
 import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
-import com.mrl.pixiv.profile.ProfileScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.search.SearchScreen
-import com.mrl.pixiv.search.preview.SearchPreviewScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.SettingScreen
-import com.mrl.pixiv.setting.SettingViewModel
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import com.mrl.pixiv.splash.SplashViewModel
 import kotlinx.collections.immutable.toImmutableList
@@ -66,12 +51,6 @@ fun Navigation3MainGraph(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager = koinInject { parametersOf(arrayOf(startDestination)) }
 ) {
-    val settingViewModel: SettingViewModel =
-        koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
-    val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(windowAdaptiveInfo)
-    val currentRoute = navigationManager.currentDestination
-    val bottomBarVisibility = bottomBarVisibility(currentRoute, windowAdaptiveInfo)
     val listDetailStrategy = rememberListDetailSceneStrategy<Any>()
 
     HandleDeeplink(navigationManager)
@@ -79,211 +58,151 @@ fun Navigation3MainGraph(
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this
         ) {
-            NavigationSuiteScaffoldLayout(
-                navigationSuite = {
-                    HomeBottomBar(
-                        bottomBarVisibility = bottomBarVisibility,
-                        layoutType = layoutType,
-                        currentRoute = currentRoute,
-                        onSwitch = {
-                            navigationManager.addSingleTop(it)
-                        }
-                    )
-                },
-                layoutType = layoutType
-            ) {
-                Box(
-                    Modifier.consumeWindowInsets(
-                        when (layoutType) {
-                            NavigationSuiteType.NavigationBar ->
-                                NavigationBarDefaults.windowInsets.only(WindowInsetsSides.Bottom)
+            NavDisplay(
+                backStack = navigationManager.backStack,
+                modifier = modifier,
+                entryDecorators = listOf(
+                    // Add the default decorators for managing scenes and saving state
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    // Then add the view model store decorator
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                sceneStrategy = listDetailStrategy,
+                entryProvider = entryProvider {
+                    entry<Destination.LoginOptionScreen> {
+                        LoginOptionScreen()
+                    }
+                    // 登陆
+                    entry<Destination.LoginScreen> {
+                        val startUrl = it.startUrl
+                        LoginScreen(startUrl = startUrl)
+                    }
+                    // OAuth token登陆
+                    entry<Destination.OAuthLoginScreen> {
+                        OAuthLoginScreen()
+                    }
 
-                            NavigationSuiteType.NavigationRail ->
-                                NavigationRailDefaults.windowInsets.only(WindowInsetsSides.Start)
+                    entry<Destination.MainScreen> {
+                        MainScreen()
+                    }
 
-                            NavigationSuiteType.NavigationDrawer ->
-                                DrawerDefaults.windowInsets.only(WindowInsetsSides.Start)
+                    // 详情页
+                    entry<Destination.ProfileDetailScreen>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        ProfileDetailScreen(
+                            uid = it.userId
+                        )
+                    }
 
-                            else -> WindowInsets(0, 0, 0, 0)
-                        }
-                    )
-                ) {
-                    NavDisplay(
-                        backStack = navigationManager.backStack,
-                        modifier = modifier,
-                        entryDecorators = listOf(
-                            // Add the default decorators for managing scenes and saving state
-                            rememberSaveableStateHolderNavEntryDecorator(),
-                            // Then add the view model store decorator
-                            rememberViewModelStoreNavEntryDecorator()
-                        ),
-                        sceneStrategy = listDetailStrategy,
-                        entryProvider = entryProvider {
-                            entry<Destination.LoginOptionScreen> {
-                                LoginOptionScreen()
-                            }
-                            // 登陆
-                            entry<Destination.LoginScreen> {
-                                val startUrl = it.startUrl
-                                LoginScreen(startUrl = startUrl)
-                            }
-                            // OAuth token登陆
-                            entry<Destination.OAuthLoginScreen> {
-                                OAuthLoginScreen()
-                            }
+                    // 作品详情页（深度链接）
+                    entry<Destination.PictureDeeplinkScreen>(
+                        metadata = ListDetailSceneStrategy.detailPane() +
+                                NavDisplay.transitionSpec {
+                                    scaleIn(initialScale = 0.9f) + fadeIn() togetherWith
+                                            scaleOut(targetScale = 1.1f) + fadeOut()
+                                } + NavDisplay.predictivePopTransitionSpec {
+                            scaleIn(initialScale = 1.1f) + fadeIn() togetherWith
+                                    scaleOut(targetScale = 0.9f) + fadeOut()
+                        },
+                    ) {
+                        val illustId = it.illustId
+                        PictureDeeplinkScreen(
+                            illustId = illustId,
+                        )
+                    }
 
-                            // 首页
-                            entry<Destination.HomeScreen>(
-                                metadata = ListDetailSceneStrategy.listPane()
-                            ) {
-                                HomeScreen()
-                            }
+                    // 搜索页
+                    entry<Destination.SearchScreen> {
+                        SearchScreen()
+                    }
 
-                            // 新作页面
-                            entry<Destination.LatestScreen>(
-                                metadata = ListDetailSceneStrategy.listPane()
-                            ) {
-                                LatestScreen()
-                            }
+                    // 搜索结果页
+                    entry<Destination.SearchResultsScreen>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        val searchWord = it.searchWords
+                        SearchResultsScreen(
+                            searchWords = searchWord,
+                        )
+                    }
 
-                            // 搜索预览页
-                            entry<Destination.SearchPreviewScreen>(
-                                metadata = ListDetailSceneStrategy.listPane()
-                            ) {
-                                SearchPreviewScreen()
-                            }
+                    // 设置页
+                    entry<Destination.SettingScreen>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        SettingScreen()
+                    }
 
-                            // 个人主页
-                            entry<Destination.ProfileScreen>(
-                                metadata = ListDetailSceneStrategy.listPane()
-                            ) {
-                                ProfileScreen()
-                            }
+                    // 网络设置页
+                    entry<Destination.NetworkSettingScreen>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        NetworkSettingScreen()
+                    }
 
-                            // 详情页
-                            entry<Destination.ProfileDetailScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane()
-                            ) {
-                                ProfileDetailScreen(
-                                    uid = it.userId
-                                )
-                            }
+                    // 历史记录
+                    entry<Destination.HistoryScreen>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        HistoryScreen()
+                    }
 
-                            // 作品详情页（深度链接）
-                            entry<Destination.PictureDeeplinkScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane() +
-                                        NavDisplay.transitionSpec {
-                                            scaleIn(initialScale = 0.9f) + fadeIn() togetherWith
-                                                    scaleOut(targetScale = 1.1f) + fadeOut()
-                                        } + NavDisplay.predictivePopTransitionSpec {
-                                    scaleIn(initialScale = 1.1f) + fadeIn() togetherWith
-                                            scaleOut(targetScale = 0.9f) + fadeOut()
-                                },
-                            ) {
-                                val illustId = it.illustId
-                                PictureDeeplinkScreen(
-                                    illustId = illustId,
-                                )
-                            }
+                    // 本人收藏页
+                    entry<Destination.CollectionScreen>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        val userId = it.userId
+                        CollectionScreen(uid = userId)
+                    }
 
-                            // 搜索页
-                            entry<Destination.SearchScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane() +
-                                        ListDetailSceneStrategy.extraPane()
-                            ) {
-                                SearchScreen()
-                            }
+                    entry<Destination.FollowingScreen>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        val uid = it.userId
+                        FollowingScreen(uid = uid)
+                    }
 
-                            // 搜索结果页
-                            entry<Destination.SearchResultsScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane() +
-                                        ListDetailSceneStrategy.extraPane()
-                            ) {
-                                val searchWord = it.searchWords
-                                SearchResultsScreen(
-                                    searchWords = searchWord,
-                                )
-                            }
-
-                            // 设置页
-                            entry<Destination.SettingScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane()
-                            ) {
-                                SettingScreen()
-                            }
-
-                            // 网络设置页
-                            entry<Destination.NetworkSettingScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane() +
-                                        ListDetailSceneStrategy.extraPane()
-                            ) {
-                                NetworkSettingScreen(viewModel = settingViewModel)
-                            }
-
-                            // 历史记录
-                            entry<Destination.HistoryScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane()
-                            ) {
-                                HistoryScreen()
-                            }
-
-                            // 本人收藏页
-                            entry<Destination.CollectionScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane()
-                            ) {
-                                val userId = it.userId
-                                CollectionScreen(uid = userId)
-                            }
-
-                            entry<Destination.FollowingScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane()
-                            ) {
-                                val uid = it.userId
-                                FollowingScreen(uid = uid)
-                            }
-
-                            // 横向滑动作品详情页
-                            entry<Destination.PictureScreen>(
-                                metadata = ListDetailSceneStrategy.detailPane() +
-                                        NavDisplay.transitionSpec {
-                                            scaleIn(
-                                                DefaultFloatAnimationSpec,
-                                                initialScale = 0.9f
-                                            ) + fadeIn(
-                                                DefaultFloatAnimationSpec
-                                            ) togetherWith scaleOut(
-                                                DefaultFloatAnimationSpec,
-                                                targetScale = 1.1f
-                                            ) + fadeOut(DefaultFloatAnimationSpec)
-                                        } +
-                                        NavDisplay.predictivePopTransitionSpec {
-                                            scaleIn(
-                                                DefaultFloatAnimationSpec,
-                                                initialScale = 1.1f
-                                            ) + fadeIn(
-                                                DefaultFloatAnimationSpec
-                                            ) togetherWith scaleOut(
-                                                DefaultFloatAnimationSpec,
-                                                0.9f
-                                            ) + fadeOut(DefaultFloatAnimationSpec)
-                                        }
-                            ) {
-                                val params = it
-                                val illusts = remember { IllustCacheRepo[params.prefix] }
-                                CompositionLocalProvider(
-                                    LocalSharedKeyPrefix provides params.prefix
-                                ) {
-                                    HorizontalSwipePictureScreen(
-                                        illusts = illusts.toImmutableList(),
-                                        index = params.index,
-                                        prefix = params.prefix,
-                                    )
+                    // 横向滑动作品详情页
+                    entry<Destination.PictureScreen>(
+                        metadata = ListDetailSceneStrategy.detailPane() +
+                                NavDisplay.transitionSpec {
+                                    scaleIn(
+                                        DefaultFloatAnimationSpec,
+                                        initialScale = 0.9f
+                                    ) + fadeIn(
+                                        DefaultFloatAnimationSpec
+                                    ) togetherWith scaleOut(
+                                        DefaultFloatAnimationSpec,
+                                        targetScale = 1.1f
+                                    ) + fadeOut(DefaultFloatAnimationSpec)
+                                } +
+                                NavDisplay.predictivePopTransitionSpec {
+                                    scaleIn(
+                                        DefaultFloatAnimationSpec,
+                                        initialScale = 1.1f
+                                    ) + fadeIn(
+                                        DefaultFloatAnimationSpec
+                                    ) togetherWith scaleOut(
+                                        DefaultFloatAnimationSpec,
+                                        0.9f
+                                    ) + fadeOut(DefaultFloatAnimationSpec)
                                 }
-                            }
+                    ) {
+                        val params = it
+                        val illusts = remember { IllustCacheRepo[params.prefix] }
+                        CompositionLocalProvider(
+                            LocalSharedKeyPrefix provides params.prefix
+                        ) {
+                            HorizontalSwipePictureScreen(
+                                illusts = illusts.toImmutableList(),
+                                index = params.index,
+                                prefix = params.prefix,
+                            )
                         }
-                    )
+                    }
                 }
-            }
+            )
         }
     }
 }
@@ -317,19 +236,4 @@ private fun HandleDeeplink(
             }
         }
     }
-}
-
-@Composable
-private fun bottomBarVisibility(
-    currentRoute: Destination,
-    windowAdaptiveInfo: WindowAdaptiveInfo,
-): Boolean {
-    return currentRoute in remember {
-        listOf(
-            Destination.HomeScreen,
-            Destination.LatestScreen,
-            Destination.SearchPreviewScreen,
-            Destination.ProfileScreen
-        )
-    } || windowAdaptiveInfo.isWidthAtLeastExpanded
 }

@@ -14,25 +14,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.animation.DefaultIntOffsetAnimationSpec
-import com.mrl.pixiv.common.router.Destination
+import com.mrl.pixiv.common.router.MainScreenPage
 
 @Composable
 fun HomeBottomBar(
-    bottomBarVisibility: Boolean,
     layoutType: NavigationSuiteType,
-    currentRoute: Destination,
-    onSwitch: (Destination) -> Unit,
+    currentPage: MainScreenPage,
+    onSwitch: (MainScreenPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val screens = listOf(
-        Destination.HomeScreen,
-        Destination.LatestScreen,
-        Destination.SearchPreviewScreen,
-        Destination.ProfileScreen,
+        MainScreenPage.HOME,
+        MainScreenPage.LATEST,
+        MainScreenPage.SEARCH,
+        MainScreenPage.PROFILE,
     )
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     AnimatedVisibility(
-        visible = bottomBarVisibility,
+        visible = true,
         modifier = modifier,
         enter = if (layoutType == NavigationSuiteType.NavigationBar) {
             slideInVertically(DefaultIntOffsetAnimationSpec) { it }
@@ -53,9 +52,9 @@ fun HomeBottomBar(
             content = {
                 screens.forEach { screen ->
                     item(
-                        selected = currentRoute == screen,
+                        selected = currentPage == screen,
                         onClick = {
-                            if (currentRoute != screen) {
+                            if (currentPage != screen) {
                                 onSwitch(screen)
                             }
                         },

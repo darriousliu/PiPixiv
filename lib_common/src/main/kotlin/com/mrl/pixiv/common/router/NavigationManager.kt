@@ -1,6 +1,9 @@
 package com.mrl.pixiv.common.router
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.repository.IllustCacheRepo
@@ -13,10 +16,19 @@ typealias NavigateToHorizontalPictureScreen = (illusts: List<Illust>, index: Int
 class NavigationManager(
     vararg initialBackStack: Destination
 ) {
+    var currentMainPage by mutableStateOf(MainScreenPage.HOME)
+        private set
+
     val backStack = mutableStateListOf(*initialBackStack)
 
     val currentDestination: Destination
         get() = backStack.last()
+
+    fun switchMainPage(page: MainScreenPage) {
+        if (currentMainPage != page) {
+            currentMainPage = page
+        }
+    }
 
     fun addSingleTop(route: Destination): Boolean {
         val currentIndex = backStack.indexOfFirst { it == route }
@@ -52,11 +64,11 @@ class NavigationManager(
 
     fun loginToMainScreen() {
         backStack.clear()
-        backStack.add(Destination.HomeScreen)
+        backStack.add(Destination.MainScreen)
     }
 
     fun popBackToMainScreen() {
-        popBackStack(route = Destination.HomeScreen, inclusive = false)
+        popBackStack(route = Destination.MainScreen, inclusive = false)
     }
 
     fun navigateToPictureScreen(

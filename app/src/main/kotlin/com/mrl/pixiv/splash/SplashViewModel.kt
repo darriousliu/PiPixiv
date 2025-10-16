@@ -77,7 +77,7 @@ class SplashViewModel : BaseMviViewModel<SplashState, SplashAction>(
         updateState {
             copy(
                 isLoading = false,
-                startDestination = Destination.HomeScreen
+                startDestination = Destination.MainScreen
             )
         }
 }

@@ -3,17 +3,10 @@ package com.mrl.pixiv.home
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -37,7 +30,7 @@ fun HomeScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val recommendImageList = viewModel.recommendImageList.collectAsLazyPagingItems()
-    val lazyStaggeredGridState = rememberLazyStaggeredGridState()
+    val lazyStaggeredGridState = viewModel.lazyStaggeredGridState
     val scope = rememberCoroutineScope()
     val pullRefreshState = rememberPullToRefreshState()
     val onRefresh = recommendImageList::refresh

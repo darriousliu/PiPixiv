@@ -1,5 +1,6 @@
 package com.mrl.pixiv.home
 
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -20,6 +21,7 @@ sealed class HomeAction : ViewIntent
 class HomeViewModel : BaseMviViewModel<HomeState, HomeAction>(
     initialState = HomeState
 ), KoinComponent {
+    val lazyStaggeredGridState = LazyStaggeredGridState()
     val recommendImageList = Pager(PagingConfig(pageSize = 20)) {
         IllustRecommendedPagingSource()
     }.flow.cachedIn(viewModelScope)

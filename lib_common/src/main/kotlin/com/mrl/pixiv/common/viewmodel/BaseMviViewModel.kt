@@ -1,16 +1,22 @@
 package com.mrl.pixiv.common.viewmodel
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.mrl.pixiv.common.coroutine.CancelException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.currentKoinScope
+import org.koin.core.parameter.ParametersDefinition
+import org.koin.core.qualifier.Qualifier
+import org.koin.core.scope.Scope
+import org.koin.viewmodel.defaultExtras
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
@@ -148,3 +154,20 @@ abstract class BaseMviViewModel<State, Intent : ViewIntent>(
     }
 }
 
+@Suppress("UndeclaredKoinUsage")
+@Composable
+inline fun <reified VM: ViewModel> activityKoinViewModel(
+    qualifier: Qualifier? = null,
+    viewModelStoreOwner: ViewModelStoreOwner = LocalActivity.current as ComponentActivity,
+    key: String? = null,
+    extras: CreationExtras = defaultExtras(viewModelStoreOwner),
+    scope: Scope = currentKoinScope(),
+    noinline parameters: ParametersDefinition? = null,
+) = koinViewModel<VM>(
+    qualifier = qualifier,
+    viewModelStoreOwner = viewModelStoreOwner,
+    key = key,
+    extras = extras,
+    scope = scope,
+    parameters = parameters
+)

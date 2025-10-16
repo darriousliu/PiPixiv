@@ -7,13 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -25,16 +19,16 @@ import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ToastUtil
+import com.mrl.pixiv.common.viewmodel.activityKoinViewModel
 import com.mrl.pixiv.setting.SettingAction
 import com.mrl.pixiv.setting.SettingViewModel
 import com.mrl.pixiv.setting.network.components.PictureSourceWidget
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 @Composable
 fun NetworkSettingScreen(
     modifier: Modifier = Modifier,
-    viewModel: SettingViewModel = koinViewModel(),
+    viewModel: SettingViewModel = activityKoinViewModel(),
     navigationManager: NavigationManager = koinInject(),
 ) {
     val userPreference by requireUserPreferenceFlow.collectAsStateWithLifecycle()

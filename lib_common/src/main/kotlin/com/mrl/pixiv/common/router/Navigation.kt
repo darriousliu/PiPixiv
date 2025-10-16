@@ -14,13 +14,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
-sealed class Destination(
-    @Transient
-    @StringRes
-    val title: Int = 0,
-    @Transient
-    val icon: @Composable (() -> Unit) = {},
-) : NavKey {
+sealed class Destination : NavKey {
     @Serializable
     data object LoginOptionScreen : Destination()
 
@@ -33,48 +27,7 @@ sealed class Destination(
     data object OAuthLoginScreen : Destination()
 
     @Serializable
-    data object HomeScreen : Destination(
-        title = RString.home,
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Home,
-                contentDescription = null,
-            )
-        }
-    )
-
-    @Serializable
-    data object LatestScreen : Destination(
-        title = RString.new_artworks,
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Favorite,
-                contentDescription = null,
-            )
-        }
-    )
-
-    @Serializable
-    data object SearchPreviewScreen : Destination(
-        title = RString.search,
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Search,
-                contentDescription = null,
-            )
-        }
-    )
-
-    @Serializable
-    data object ProfileScreen : Destination(
-        title = RString.my,
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.AccountCircle,
-                contentDescription = null,
-            )
-        }
-    )
+    data object MainScreen : Destination()
 
     @Serializable
     data class ProfileDetailScreen(
@@ -118,4 +71,50 @@ sealed class Destination(
     data class FollowingScreen(
         val userId: Long,
     ) : Destination()
+}
+
+@Serializable
+enum class MainScreenPage(
+    @Transient
+    @StringRes
+    val title: Int = 0,
+    @Transient
+    val icon: @Composable (() -> Unit) = {},
+) {
+    HOME(
+        title = RString.home,
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.Home,
+                contentDescription = null,
+            )
+        }
+    ),
+    LATEST(
+        title = RString.new_artworks,
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.Favorite,
+                contentDescription = null,
+            )
+        }
+    ),
+    SEARCH(
+        title = RString.search,
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.Search,
+                contentDescription = null,
+            )
+        }
+    ),
+    PROFILE(
+        title = RString.my,
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.AccountCircle,
+                contentDescription = null,
+            )
+        }
+    )
 }
