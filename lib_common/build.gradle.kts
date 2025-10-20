@@ -38,8 +38,8 @@ dependencies {
     api(compose.bundles.accompanist)
     api(libs.compose.webview.multiplatform)
     api(compose.bundles.navigation3) {
-        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime")
-        exclude(group = "androidx.lifecycle", module = "lifecycle-runtime-compose")
+        exclude(group = "androidx.compose.runtime", module = "runtime")
+        exclude(group = "androidx.compose.runtime", module = "runtime-saveable")
     }
     // Navigation
     api(androidx.navigation.compose)
