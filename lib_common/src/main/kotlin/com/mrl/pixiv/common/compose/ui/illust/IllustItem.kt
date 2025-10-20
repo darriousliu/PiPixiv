@@ -71,7 +71,7 @@ import coil3.request.crossfade
 import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
-import com.mrl.pixiv.common.compose.layout.isWidthCompact
+import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.lightBlue
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
 import com.mrl.pixiv.common.data.Illust
@@ -98,7 +98,7 @@ fun SquareIllustItem(
     elevation: Dp = 5.dp,
     shouldShowTip: Boolean = false,
     shape: Shape = MaterialTheme.shapes.medium,
-    enableTransition: Boolean = currentWindowAdaptiveInfo().isWidthCompact,
+    enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
@@ -254,7 +254,7 @@ fun RectangleIllustItem(
     isBookmarked: Boolean,
     onBookmarkClick: (String, List<String>?) -> Unit,
     modifier: Modifier = Modifier,
-    enableTransition: Boolean = currentWindowAdaptiveInfo().isWidthCompact,
+    enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
 ) {
     val scale = illust.width * 1.0f / illust.height
     val sharedTransitionScope = LocalSharedTransitionScope.current
