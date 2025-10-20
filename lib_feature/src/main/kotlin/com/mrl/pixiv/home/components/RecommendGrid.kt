@@ -47,7 +47,8 @@ fun RecommendGrid(
                     } else {
                         BookmarkState.bookmarkIllust(illust.id, restrict, tags)
                     }
-                }
+                },
+                enableTransition = true
             )
         }
     }

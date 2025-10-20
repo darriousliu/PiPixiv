@@ -17,16 +17,51 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.runtime.*
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,8 +100,13 @@ import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.*
 import com.mrl.pixiv.common.util.AppUtil.getString
+import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.ShareUtil
+import com.mrl.pixiv.common.util.conditionally
+import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
+import com.mrl.pixiv.common.util.getScreenHeight
+import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
@@ -230,14 +270,16 @@ internal fun PictureScreen(
         Scaffold(
             modifier = modifier
                 .skipToLookaheadSize()
-                .sharedBounds(
-                    rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
-                    animatedContentScope,
-                    enter = fadeIn(DefaultFloatAnimationSpec),
-                    exit = fadeOut(DefaultFloatAnimationSpec),
-                    boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
-                    renderInOverlayDuringTransition = false
-                ),
+                .conditionally(prefix.isNotEmpty()) {
+                    sharedBounds(
+                        rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
+                        animatedContentScope,
+                        enter = fadeIn(DefaultFloatAnimationSpec),
+                        exit = fadeOut(DefaultFloatAnimationSpec),
+                        boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
+//                    renderInOverlayDuringTransition = false
+                    )
+                },
             topBar = {
                 PictureTopBar(
                     onBack = onBack,

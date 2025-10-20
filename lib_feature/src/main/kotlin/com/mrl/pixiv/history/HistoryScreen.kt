@@ -1,13 +1,11 @@
 package com.mrl.pixiv.history
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.text.KeyboardActions
@@ -35,6 +33,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
+import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.router.NavigationManager
@@ -73,15 +72,16 @@ fun HistoryScreen(
         },
         contentWindowInsets = WindowInsets.statusBars
     ) {
+        val layoutParams = IllustGridDefaults.relatedLayoutParameters()
         val lazyGridState = rememberLazyGridState()
         LazyVerticalGrid(
             state = lazyGridState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it),
-            columns = GridCells.Fixed(2),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            columns = layoutParams.gridCells,
+            verticalArrangement = layoutParams.verticalArrangement,
+            horizontalArrangement = layoutParams.horizontalArrangement,
             contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 20.dp),
         ) {
             illustGrid(
