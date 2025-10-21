@@ -95,8 +95,8 @@ fun IllustWidget(
                             BookmarkState.bookmarkIllust(illust.id, restrict, tags)
                         }
                     },
-                    navToPictureScreen = { prefix ->
-                        navToPictureScreen(takenIllusts, index, prefix)
+                    navToPictureScreen = { prefix, enableTransition ->
+                        navToPictureScreen(takenIllusts, index, prefix, enableTransition)
                     },
                     modifier = Modifier.weight(1f)
                 )

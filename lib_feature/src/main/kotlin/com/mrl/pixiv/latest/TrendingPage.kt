@@ -78,11 +78,12 @@ fun TrendingPage(
                     RectangleIllustItem(
                         illust = illust,
                         isBookmarked = isBookmarked,
-                        navToPictureScreen = { prefix ->
+                        navToPictureScreen = { prefix, enableTransition ->
                             navigationManager.navigateToPictureScreen(
                                 illustsFollowing.itemSnapshotList.items,
                                 index,
-                                prefix
+                                prefix,
+                                enableTransition
                             )
                         },
                         onBookmarkClick = { restrict, tags ->

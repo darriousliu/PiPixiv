@@ -277,8 +277,8 @@ private fun FollowingUserCard(
                             BookmarkState.bookmarkIllust(it.id, restrict, tags)
                         }
                     },
-                    navToPictureScreen = { prefix ->
-                        navToPictureScreen(illusts, index, prefix)
+                    navToPictureScreen = { prefix, enableTransition ->
+                        navToPictureScreen(illusts, index, prefix, enableTransition)
                     },
                     modifier = Modifier.weight(1f),
                     elevation = 0.dp,
@@ -345,7 +345,7 @@ private fun FollowingUserCardPreview() {
         userId = 0,
         userAvatar = "http://iph.href.lu/200x200",
         isFollowed = false,
-        navToPictureScreen = { _, _, _ -> },
+        navToPictureScreen = { _, _, _, _ -> },
         navToUserProfile = { },
     )
 }

@@ -93,11 +93,12 @@ fun CollectionPage(
                     RectangleIllustItem(
                         illust = illust,
                         isBookmarked = isBookmarked,
-                        navToPictureScreen = { prefix ->
+                        navToPictureScreen = { prefix, enableTransition ->
                             navigationManager.navigateToPictureScreen(
                                 userBookmarksIllusts.itemSnapshotList.items,
                                 index,
-                                prefix
+                                prefix,
+                                enableTransition
                             )
                         },
                         onBookmarkClick = { restrict, tags ->

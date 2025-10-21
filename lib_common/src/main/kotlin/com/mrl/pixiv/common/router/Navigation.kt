@@ -38,6 +38,7 @@ sealed class Destination : NavKey {
     data class PictureScreen(
         val index: Int,
         val prefix: String,
+        val enableTransition: Boolean,
     ) : Destination()
 
     @Serializable
