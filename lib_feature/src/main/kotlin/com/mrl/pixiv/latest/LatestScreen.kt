@@ -1,14 +1,16 @@
 package com.mrl.pixiv.latest
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -17,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.datasource.local.mmkv.requireUserInfoFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
@@ -37,15 +40,19 @@ fun LatestScreen(
     val pagerState = viewModel.pagerState
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+
     Scaffold(
         modifier = modifier,
         floatingActionButton = {},
         floatingActionButtonPosition = FabPosition.Center
     ) {
         Column(modifier = Modifier.padding(it)) {
-            SecondaryTabRow(
+            PrimaryTabRow(
                 selectedTabIndex = pagerState.currentPage,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth(if (windowAdaptiveInfo.isWidthCompact) 1f else 0.5f)
+                    .padding(horizontal = 16.dp)
             ) {
                 pages.forEachIndexed { index, it ->
                     Tab(

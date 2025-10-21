@@ -161,9 +161,7 @@ fun Navigation3MainGraph(
                         CollectionScreen(uid = userId)
                     }
 
-                    entry<Destination.FollowingScreen>(
-                        metadata = ListDetailSceneStrategy.listPane()
-                    ) {
+                    entry<Destination.FollowingScreen> {
                         val uid = it.userId
                         FollowingScreen(uid = uid)
                     }
