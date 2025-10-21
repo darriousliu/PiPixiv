@@ -2,14 +2,31 @@ package com.mrl.pixiv.follow
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -28,15 +45,19 @@ import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.mrl.pixiv.common.compose.LocalNavigator
+import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.deepBlue
+import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.datasource.local.mmkv.isSelf
 import com.mrl.pixiv.common.kts.spaceBy
-import com.mrl.pixiv.common.util.*
+import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
+import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.viewmodel.follow.FollowState
@@ -46,6 +67,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 enum class FollowingPage {
@@ -57,10 +79,10 @@ enum class FollowingPage {
 fun FollowingScreen(
     uid: Long,
     modifier: Modifier = Modifier,
-    viewModel: FollowingViewModel = koinViewModel { parametersOf(uid) }
+    viewModel: FollowingViewModel = koinViewModel { parametersOf(uid) },
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val scope = rememberCoroutineScope()
-    val navigator = LocalNavigator.current
     val pages = remember {
         if (uid.isSelf) listOf(FollowingPage.PUBLIC, FollowingPage.PRIVATE)
         else listOf(FollowingPage.PUBLIC)
@@ -78,7 +100,7 @@ fun FollowingScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = rememberThrottleClick {
-                            navigator.popBackStack()
+                            navigationManager.popBackStack()
                         }
                     ) {
                         Icon(
@@ -97,7 +119,7 @@ fun FollowingScreen(
                 .fillMaxSize(),
         ) {
             if (pages.size > 1) {
-                TabRow(
+                SecondaryTabRow(
                     selectedTabIndex = pagerState.currentPage,
                 ) {
                     pages.forEachIndexed { index, page ->
@@ -116,8 +138,8 @@ fun FollowingScreen(
             }
             FollowingScreenBody(
                 uid = uid,
-                navToPictureScreen = navigator::navigateToPictureScreen,
-                navToUserProfile = navigator::navigateToProfileDetailScreen,
+                navToPictureScreen = navigationManager::navigateToPictureScreen,
+                navToUserProfile = navigationManager::navigateToProfileDetailScreen,
                 pages = pages.toImmutableList(),
                 pagerState = pagerState,
                 modifier = Modifier.weight(1f),
@@ -139,6 +161,7 @@ fun FollowingScreenBody(
     userScrollEnabled: Boolean = true,
 ) {
     val pullRefreshState = rememberPullToRefreshState()
+    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
     HorizontalPager(
         state = pagerState,
         modifier = modifier,
@@ -155,32 +178,66 @@ fun FollowingScreenBody(
             onRefresh = { followingUsers.refresh() },
             state = pullRefreshState
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    top = 10.dp,
-                    end = 16.dp,
-                    bottom = 20.dp
-                ),
-                verticalArrangement = 10f.spaceBy,
-            ) {
-                items(
-                    followingUsers.itemCount,
-                    key = followingUsers.itemKey { it.user.id }
+            if (windowAdaptiveInfo.isWidthAtLeastMedium) {
+                val layoutParams = IllustGridDefaults.userFollowingParameters()
+                LazyVerticalGrid(
+                    columns = layoutParams.gridCells,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        top = 10.dp,
+                        end = 16.dp,
+                        bottom = 20.dp
+                    ),
+                    horizontalArrangement = layoutParams.horizontalArrangement,
+                    verticalArrangement = layoutParams.verticalArrangement,
                 ) {
-                    val userPreview = followingUsers[it] ?: return@items
-                    FollowingUserCard(
-                        illusts = userPreview.illusts.toImmutableList(),
-                        userName = userPreview.user.name,
-                        userId = userPreview.user.id,
-                        userAvatar = userPreview.user.profileImageUrls.medium,
-                        isFollowed = userPreview.user.isFollowing,
-                        navToPictureScreen = navToPictureScreen,
-                        navToUserProfile = {
-                            navToUserProfile(userPreview.user.id)
-                        }
-                    )
+                    items(
+                        followingUsers.itemCount,
+                        key = followingUsers.itemKey { it.user.id }
+                    ) {
+                        val userPreview = followingUsers[it] ?: return@items
+                        FollowingUserCard(
+                            illusts = userPreview.illusts.toImmutableList(),
+                            userName = userPreview.user.name,
+                            userId = userPreview.user.id,
+                            userAvatar = userPreview.user.profileImageUrls.medium,
+                            isFollowed = userPreview.user.isFollowing,
+                            navToPictureScreen = navToPictureScreen,
+                            navToUserProfile = {
+                                navToUserProfile(userPreview.user.id)
+                            }
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        top = 10.dp,
+                        end = 16.dp,
+                        bottom = 20.dp
+                    ),
+                    verticalArrangement = 10f.spaceBy,
+                ) {
+                    items(
+                        followingUsers.itemCount,
+                        key = followingUsers.itemKey { it.user.id }
+                    ) {
+                        val userPreview = followingUsers[it] ?: return@items
+                        FollowingUserCard(
+                            illusts = userPreview.illusts.toImmutableList(),
+                            userName = userPreview.user.name,
+                            userId = userPreview.user.id,
+                            userAvatar = userPreview.user.profileImageUrls.medium,
+                            isFollowed = userPreview.user.isFollowing,
+                            navToPictureScreen = navToPictureScreen,
+                            navToUserProfile = {
+                                navToUserProfile(userPreview.user.id)
+                            }
+                        )
+                    }
                 }
             }
         }

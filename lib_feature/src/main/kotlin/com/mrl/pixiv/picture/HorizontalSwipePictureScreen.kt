@@ -7,8 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.repository.IllustCacheRepo
-import com.mrl.pixiv.common.compose.LocalNavigator
+import com.mrl.pixiv.common.router.NavigationManager
 import kotlinx.collections.immutable.ImmutableList
+import org.koin.compose.koinInject
 
 @Composable
 fun HorizontalSwipePictureScreen(
@@ -18,10 +19,10 @@ fun HorizontalSwipePictureScreen(
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(index) { illusts.size }
-    val navigator = LocalNavigator.current
+    val navigationManager = koinInject<NavigationManager>()
     val onBack: () -> Unit = {
         IllustCacheRepo.removeList(prefix)
-        navigator.popBackStack()
+        navigationManager.popBackStack()
     }
     BackHandler(onBack = onBack)
     HorizontalPager(

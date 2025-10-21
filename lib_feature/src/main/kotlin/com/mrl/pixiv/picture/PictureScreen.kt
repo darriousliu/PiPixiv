@@ -7,38 +7,69 @@ import android.Manifest.permission.READ_MEDIA_IMAGES
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -47,13 +78,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.mrl.pixiv.common.compose.*
+import com.mrl.pixiv.common.animation.DefaultAnimationDuration
+import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
+import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
+import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
+import com.mrl.pixiv.common.compose.deepBlue
+import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.compose.ui.bar.TextSnackbar
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
@@ -62,8 +99,14 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
-import com.mrl.pixiv.common.util.*
+import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.AppUtil.getString
+import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.ShareUtil
+import com.mrl.pixiv.common.util.conditionally
+import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
+import com.mrl.pixiv.common.util.getScreenHeight
+import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
@@ -74,6 +117,7 @@ import com.mrl.pixiv.picture.components.UgoiraPlayer
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import kotlin.uuid.Uuid
 
@@ -81,15 +125,15 @@ import kotlin.uuid.Uuid
 fun PictureDeeplinkScreen(
     modifier: Modifier = Modifier,
     illustId: Long,
-    navHostController: NavHostController = LocalNavigator.current,
     pictureViewModel: PictureViewModel = koinViewModel { parametersOf(null, illustId) },
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val state = pictureViewModel.asState()
     val illust = state.illust
     if (illust != null) {
         PictureScreen(
             illust = illust,
-            onBack = navHostController::popBackStack,
+            onBack = navigationManager::popBackStack,
             modifier = modifier,
         )
     } else {
@@ -118,24 +162,49 @@ internal fun PictureScreen(
     illust: Illust,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    navHostController: NavHostController = LocalNavigator.current,
     pictureViewModel: PictureViewModel = koinViewModel { parametersOf(illust, null) },
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val sideEffect by pictureViewModel.sideEffect.filterIsInstance<SideEffect.Error>()
         .collectAsStateWithLifecycle(null)
     val exception = sideEffect?.throwable
     val relatedIllusts = pictureViewModel.relatedIllusts.collectAsLazyPagingItems()
-    val navToPictureScreen = navHostController::navigateToPictureScreen
+    val navToPictureScreen = navigationManager::navigateToPictureScreen
     val dispatch = pictureViewModel::dispatch
-    val navToSearchResultScreen = navHostController::navigateToSearchResultScreen
-    val popBackToHomeScreen = navHostController::popBackToMainScreen
-    val navToUserDetailScreen = navHostController::navigateToProfileDetailScreen
+    val navToSearchResultScreen = navigationManager::navigateToSearchResultScreen
+    val popBackToHomeScreen = navigationManager::popBackToMainScreen
+    val navToUserDetailScreen = navigationManager::navigateToProfileDetailScreen
     val state = pictureViewModel.asState()
     val context = LocalContext.current
-    val (relatedSpanCount, userSpanCount) = when (LocalConfiguration.current.orientation) {
-        Configuration.ORIENTATION_PORTRAIT -> Pair(2, 3)
-        Configuration.ORIENTATION_LANDSCAPE -> Pair(4, 6)
-        else -> Pair(2, 3)
+//    val (relatedSpanCount, userSpanCount) = when (LocalConfiguration.current.orientation) {
+//        Configuration.ORIENTATION_PORTRAIT -> Pair(2, 3)
+//        Configuration.ORIENTATION_LANDSCAPE -> Pair(4, 6)
+//        else -> Pair(2, 3)
+//    }
+//    val relatedRowCount = if (relatedIllusts.itemCount % relatedSpanCount == 0) {
+//        relatedIllusts.itemCount / relatedSpanCount
+//    } else {
+//        relatedIllusts.itemCount / relatedSpanCount + 1
+//    }
+    val currentWindowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val relatedLayoutParams = IllustGridDefaults.relatedLayoutParameters()
+    val userLayoutParams = IllustGridDefaults.userLayoutParameters()
+    val density = LocalDensity.current
+    val userSpanCount = with(userLayoutParams.gridCells) {
+        with(density) {
+            density.calculateCrossAxisCellSizes(
+                currentWindowAdaptiveInfo.windowSizeClass.minWidthDp.dp.roundToPx(),
+                relatedLayoutParams.horizontalArrangement.spacing.roundToPx(),
+            ).size
+        }
+    }
+    val relatedSpanCount = with(relatedLayoutParams.gridCells) {
+        with(density) {
+            density.calculateCrossAxisCellSizes(
+                currentWindowAdaptiveInfo.windowSizeClass.minWidthDp.dp.roundToPx(),
+                relatedLayoutParams.horizontalArrangement.spacing.roundToPx()
+            ).size
+        }
     }
     val relatedRowCount = if (relatedIllusts.itemCount % relatedSpanCount == 0) {
         relatedIllusts.itemCount / relatedSpanCount
@@ -196,14 +265,21 @@ internal fun PictureScreen(
 
     val prefix = LocalSharedKeyPrefix.current
     val sharedTransitionScope = LocalSharedTransitionScope.current
-    val animatedContentScope = LocalAnimatedContentScope.current
+    val animatedContentScope = LocalNavAnimatedContentScope.current
     with(sharedTransitionScope) {
         Scaffold(
-            modifier = modifier.sharedBounds(
-                rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
-                animatedContentScope,
-                clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(10.dp))
-            ),
+            modifier = modifier
+                .skipToLookaheadSize()
+                .conditionally(prefix.isNotEmpty()) {
+                    sharedBounds(
+                        rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
+                        animatedContentScope,
+                        enter = fadeIn(DefaultFloatAnimationSpec),
+                        exit = fadeOut(DefaultFloatAnimationSpec),
+                        boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
+//                    renderInOverlayDuringTransition = false
+                    )
+                },
             topBar = {
                 PictureTopBar(
                     onBack = onBack,
@@ -217,29 +293,20 @@ internal fun PictureScreen(
                 )
             },
             floatingActionButton = {
-                Box(
-                    Modifier
-                        .sharedElement(
-                            rememberSharedContentState(key = "${prefix}-favorite-${illust.id}"),
-                            animatedContentScope,
-                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                        )
-                        .throttleClick {
-                            onBookmarkClick(Restrict.PUBLIC, null)
-                        }
-                        .shadow(5.dp, CircleShape)
-                        .background(
-                            if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
-                        )
-                        .padding(10.dp)
+                IconButton(
+                    onClick = throttleClick {
+                        onBookmarkClick(Restrict.PUBLIC, null)
+                    },
+                    modifier = Modifier.size(50.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    )
                 ) {
                     Icon(
                         imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                         contentDescription = null,
                         tint = if (isBookmarked) Color.Red else LocalContentColor.current,
-                        modifier = Modifier
-                            .size(35.dp)
-                            .clip(CircleShape)
+                        modifier = Modifier.size(35.dp)
                     )
                 }
             },
@@ -279,16 +346,15 @@ internal fun PictureScreen(
                                         contentDescription = null,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .then(
-                                                if (index == 0) Modifier.sharedElement(
+                                            .conditionally(index == 0 && currentWindowAdaptiveInfo.isWidthCompact) {
+                                                sharedElement(
                                                     sharedTransitionScope.rememberSharedContentState(
                                                         key = "${prefix}-$firstImageKey"
                                                     ),
                                                     animatedVisibilityScope = animatedContentScope,
-                                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
                                                 )
-                                                else Modifier
-                                            )
+                                            }
                                             .throttleClick(
                                                 onLongClick = {
                                                     dispatch(PictureAction.GetPictureInfo(index))
@@ -307,14 +373,13 @@ internal fun PictureScreen(
                                     contentDescription = null,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .then(
-                                            if (index == 0) Modifier.sharedElement(
+                                        .conditionally(index == 0 && currentWindowAdaptiveInfo.isWidthCompact) {
+                                            sharedElement(
                                                 sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$firstImageKey"),
                                                 animatedVisibilityScope = animatedContentScope,
-                                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
                                             )
-                                            else Modifier
-                                        )
+                                        }
                                         .throttleClick(
                                             onLongClick = {
                                                 dispatch(PictureAction.GetPictureInfo(0))
@@ -422,13 +487,6 @@ internal fun PictureScreen(
                         ) {
                             Text(
                                 text = illust.user.name,
-                                modifier = Modifier
-                                    .sharedElement(
-                                        rememberSharedContentState(key = "${prefix}-user-name-${illust.user.id}"),
-                                        animatedContentScope,
-                                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                                    )
-                                    .skipToLookaheadSize(),
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium,
@@ -486,11 +544,12 @@ internal fun PictureScreen(
                     }
                 }
                 item(key = KEY_ILLUST_AUTHOR_OTHER_WORKS) {
-                    Row(
+                    FlowRow(
                         modifier = Modifier
                             .padding(horizontal = 15.dp)
                             .padding(top = 10.dp),
-                        horizontalArrangement = 5f.spaceBy
+                        horizontalArrangement = 5f.spaceBy,
+                        maxLines = 1,
                     ) {
                         val otherPrefix = rememberSaveable { Uuid.random().toHexString() }
                         CompositionLocalProvider(
@@ -498,7 +557,7 @@ internal fun PictureScreen(
                         ) {
                             val illusts = state.userIllusts.take(userSpanCount)
                             illusts.forEachIndexed { index, it ->
-                                val innerIsBookmarked = illust.isBookmark
+                                val innerIsBookmarked = it.isBookmark
                                 SquareIllustItem(
                                     illust = it,
                                     isBookmarked = innerIsBookmarked,
@@ -550,9 +609,8 @@ internal fun PictureScreen(
                     if (illustsPair.isEmpty()) return@items
                     // 相关作品
                     Row(
-                        modifier = Modifier
-                            .padding(start = 16.dp, end = 16.dp, bottom = 5.dp),
-                        horizontalArrangement = 5f.spaceBy
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 5.dp),
+                        horizontalArrangement = relatedLayoutParams.horizontalArrangement
                     ) {
                         illustsPair.forEach { (illust, isBookmarked, index) ->
                             SquareIllustItem(
@@ -572,12 +630,12 @@ internal fun PictureScreen(
                                         prefix
                                     )
                                 },
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f / relatedSpanCount.toFloat()),
                                 shouldShowTip = index == 0
                             )
                         }
-                        if (illustsPair.size.isOdd()) {
-                            Spacer(modifier = Modifier.weight(1f))
+                        if (illustsPair.size < relatedSpanCount) {
+                            Spacer(modifier = Modifier.weight((relatedSpanCount - illustsPair.size) / relatedSpanCount.toFloat()))
                         }
                     }
                 }

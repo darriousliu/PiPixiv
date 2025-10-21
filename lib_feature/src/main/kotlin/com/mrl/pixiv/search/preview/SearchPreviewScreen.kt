@@ -18,24 +18,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import com.mrl.pixiv.common.compose.LocalNavigator
+import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
-import com.mrl.pixiv.common.util.navigateToSearchResultScreen
-import com.mrl.pixiv.common.util.navigateToSearchScreen
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.search.preview.components.TrendingItem
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 fun SearchPreviewScreen(
     modifier: Modifier = Modifier,
     viewModel: SearchPreviewViewModel = koinViewModel(),
-    navHostController: NavHostController = LocalNavigator.current,
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
     val textState by remember { mutableStateOf(TextFieldValue()) }
+    val lazyGridState = viewModel.lazyGridState
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -50,7 +49,7 @@ fun SearchPreviewScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .throttleClick {
-                                navHostController.navigateToSearchScreen()
+                                navigationManager.navigateToSearchScreen()
                             },
                         placeholder = { Text(stringResource(RString.enter_keywords)) },
                         colors = TextFieldDefaults.colors(
@@ -77,6 +76,7 @@ fun SearchPreviewScreen(
         ) {
             LazyVerticalGrid(
                 modifier = Modifier.fillMaxSize(),
+                state = lazyGridState,
                 columns = GridCells.Fixed(3),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -95,7 +95,7 @@ fun SearchPreviewScreen(
                     TrendingItem(
                         trendingTag = tag,
                         onSearch = {
-                            navHostController.navigateToSearchResultScreen(it)
+                            navigationManager.navigateToSearchResultScreen(it)
                             viewModel.dispatch(SearchPreviewAction.AddSearchHistory(it))
                         }
                     )

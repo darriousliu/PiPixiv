@@ -25,20 +25,22 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowRgb565
-import com.mrl.pixiv.common.compose.LocalNavigator
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.kts.spaceBy
-import com.mrl.pixiv.common.util.*
+import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.copyToClipboard
+import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.feature.R
 import com.mrl.pixiv.profile.detail.components.IllustWidget
 import com.mrl.pixiv.profile.detail.components.NovelBookmarkWidget
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import kotlin.math.pow
 
@@ -52,8 +54,8 @@ private const val KEY_SPACE = "space"
 fun ProfileDetailScreen(
     uid: Long,
     modifier: Modifier = Modifier,
-    navHostController: NavHostController = LocalNavigator.current,
     viewModel: ProfileDetailViewModel = koinViewModel { parametersOf(uid) },
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
     val userInfo = state.userInfo
@@ -68,7 +70,7 @@ fun ProfileDetailScreen(
             ProfileDetailAppBar(
                 userInfo = userInfo,
                 scrollBehavior = scrollBehavior,
-                onBack = navHostController::popBackStack
+                onBack = navigationManager::popBackStack
             )
         },
     ) {
@@ -110,7 +112,7 @@ fun ProfileDetailScreen(
                             append(stringResource(RString.followed))
                         },
                         modifier = Modifier.throttleClick {
-                            navHostController.navigateToFollowingScreen(userInfo.user.id)
+                            navigationManager.navigateToFollowingScreen(userInfo.user.id)
                         },
                         style = TextStyle(
                             fontSize = 14.sp,
@@ -161,7 +163,7 @@ fun ProfileDetailScreen(
                             RString.illustration_count,
                             userInfo.profile.totalIllusts
                         ),
-                        navToPictureScreen = navHostController::navigateToPictureScreen,
+                        navToPictureScreen = navigationManager::navigateToPictureScreen,
                         illusts = state.userIllusts,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -174,11 +176,11 @@ fun ProfileDetailScreen(
                     IllustWidget(
                         title = stringResource(RString.illust_and_manga_liked),
                         endText = stringResource(RString.view_all),
-                        navToPictureScreen = navHostController::navigateToPictureScreen,
+                        navToPictureScreen = navigationManager::navigateToPictureScreen,
                         illusts = state.userBookmarksIllusts,
                         modifier = Modifier.fillMaxWidth(),
                         onAllClick = {
-                            navHostController.navigateToCollectionScreen(uid)
+                            navigationManager.navigateToCollectionScreen(uid)
                         }
                     )
                 }
@@ -276,11 +278,11 @@ private fun ProfileDetailAppBar(
         },
         expandedHeight = expandedHeight,
         windowInsets = WindowInsets(0),
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
             scrolledContainerColor = Color.Transparent,
             navigationIconContentColor = Color.White,
-            titleContentColor = Color.White,
+            titleContentColor = Color.White
         ),
         scrollBehavior = scrollBehavior
     )

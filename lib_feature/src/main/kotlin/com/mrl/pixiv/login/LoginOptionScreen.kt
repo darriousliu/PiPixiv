@@ -19,15 +19,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.router.Destination
-import com.mrl.pixiv.common.compose.LocalNavigator
+import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RDrawable
 import com.mrl.pixiv.common.util.RString
+import org.koin.compose.koinInject
 
 @Composable
 fun LoginOptionScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navigationManager: NavigationManager = koinInject(),
 ) {
-    val navHostController = LocalNavigator.current
     Scaffold(modifier = modifier) {
         Column(
             modifier = Modifier
@@ -45,7 +46,7 @@ fun LoginOptionScreen(
             )
             Button(
                 onClick = {
-                    navHostController.navigate(Destination.LoginScreen(generateWebViewUrl(false)))
+                    navigationManager.navigate(Destination.LoginScreen(generateWebViewUrl(false)))
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -55,7 +56,7 @@ fun LoginOptionScreen(
             }
             Button(
                 onClick = {
-                    navHostController.navigate(Destination.LoginScreen(generateWebViewUrl(true)))
+                    navigationManager.navigate(Destination.LoginScreen(generateWebViewUrl(true)))
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -65,7 +66,7 @@ fun LoginOptionScreen(
             }
             OutlinedButton(
                 onClick = {
-                    navHostController.navigate(Destination.OAuthLoginScreen)
+                    navigationManager.navigate(Destination.OAuthLoginScreen)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

@@ -8,50 +8,54 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaul
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
-import com.mrl.pixiv.common.router.Destination
+import com.mrl.pixiv.common.animation.DefaultIntOffsetAnimationSpec
+import com.mrl.pixiv.common.router.MainScreenPage
 
 @Composable
 fun HomeBottomBar(
-    navController: NavController,
-    bottomBarVisibility: Boolean,
     layoutType: NavigationSuiteType,
-    currentRoute: NavDestination?,
+    currentPage: MainScreenPage,
+    onSwitch: (MainScreenPage) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val screens = listOf(
-        Destination.HomeScreen,
-        Destination.LatestScreen,
-        Destination.SearchPreviewScreen,
-        Destination.ProfileScreen,
+        MainScreenPage.HOME,
+        MainScreenPage.LATEST,
+        MainScreenPage.SEARCH,
+        MainScreenPage.PROFILE,
     )
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     AnimatedVisibility(
-        visible = bottomBarVisibility,
-        enter = if (layoutType == NavigationSuiteType.NavigationBar) slideInVertically { it } else slideInHorizontally { if (isRtl) it else -it },
-        exit = if (layoutType == NavigationSuiteType.NavigationBar) slideOutVertically { it } else slideOutHorizontally { if (isRtl) it else -it },
+        visible = true,
+        modifier = modifier,
+        enter = if (layoutType == NavigationSuiteType.NavigationBar) {
+            slideInVertically(DefaultIntOffsetAnimationSpec) { it }
+        } else {
+            slideInHorizontally(DefaultIntOffsetAnimationSpec) { if (isRtl) it else -it }
+        },
+        exit = if (layoutType == NavigationSuiteType.NavigationBar) {
+            slideOutVertically(DefaultIntOffsetAnimationSpec) { it }
+        } else {
+            slideOutHorizontally(DefaultIntOffsetAnimationSpec) { if (isRtl) it else -it }
+        },
     ) {
         NavigationSuite(
             layoutType = layoutType,
-            colors = NavigationSuiteDefaults.colors(),
+            colors = NavigationSuiteDefaults.colors(
+                navigationBarContainerColor = Color.Transparent
+            ),
             content = {
                 screens.forEach { screen ->
                     item(
-                        selected = currentRoute?.hasRoute(screen::class) == true,
+                        selected = currentPage == screen,
                         onClick = {
-                            if (currentRoute?.hasRoute(screen::class) == false) {
-                                navController.navigate(screen) {
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                            if (currentPage != screen) {
+                                onSwitch(screen)
                             }
                         },
                         icon = screen.icon,
@@ -65,4 +69,3 @@ fun HomeBottomBar(
         )
     }
 }
-

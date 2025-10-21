@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.mrl.pixiv.collection.RestrictBookmarkTag
-import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.compose.lightBlue
+import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
@@ -51,7 +50,7 @@ fun FilterDialog(
                     LaunchedEffect(pagerState.currentPage) {
                         selectedTab = pagerState.currentPage
                     }
-                    TabRow(
+                    SecondaryTabRow(
                         selectedTabIndex = selectedTab,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -61,7 +60,7 @@ fun FilterDialog(
                         indicator = {
                             Surface(
                                 modifier = Modifier
-                                    .tabIndicatorOffset(it[selectedTab])
+                                    .tabIndicatorOffset(selectedTab)
                                     .fillMaxHeight(),
                                 shape = MaterialTheme.shapes.small,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)

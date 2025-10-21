@@ -13,24 +13,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import com.mrl.pixiv.common.compose.LocalNavigator
 import com.mrl.pixiv.common.datasource.local.mmkv.requireUserInfoFlow
+import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
-import com.mrl.pixiv.common.util.navigateToPictureScreen
-import com.mrl.pixiv.common.util.navigateToProfileDetailScreen
 import com.mrl.pixiv.follow.FollowingPage
 import com.mrl.pixiv.follow.FollowingScreenBody
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 fun LatestScreen(
     modifier: Modifier = Modifier,
-    navHostController: NavHostController = LocalNavigator.current,
+    viewModel: LatestViewModel = koinViewModel(),
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val pages = remember { LatestPage.entries.toList() }
-    val pagerState = rememberPagerState { pages.size }
+    val pagerState = viewModel.pagerState
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     Scaffold(
@@ -39,7 +39,7 @@ fun LatestScreen(
         floatingActionButtonPosition = FabPosition.Center
     ) {
         Column(modifier = Modifier.padding(it)) {
-            TabRow(
+            SecondaryTabRow(
                 selectedTabIndex = pagerState.currentPage,
                 modifier = Modifier.padding(horizontal = 16.dp)
             ) {
@@ -74,6 +74,7 @@ fun LatestScreen(
                     LatestPage.TREND -> {
                         TrendingPage()
                     }
+
                     LatestPage.COLLECTION -> {
                         CollectionPage(
                             uid = userInfo.user.id,
@@ -87,8 +88,8 @@ fun LatestScreen(
                         val pagerState = rememberPagerState { pages.size }
                         FollowingScreenBody(
                             uid = userInfo.user.id,
-                            navToPictureScreen = navHostController::navigateToPictureScreen,
-                            navToUserProfile = navHostController::navigateToProfileDetailScreen,
+                            navToPictureScreen = navigationManager::navigateToPictureScreen,
+                            navToUserProfile = navigationManager::navigateToProfileDetailScreen,
                             pages = pages,
                             pagerState = pagerState,
                             userScrollEnabled = false,

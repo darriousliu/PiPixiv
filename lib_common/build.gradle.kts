@@ -37,6 +37,10 @@ dependencies {
     api(androidx.activity.compose)
     api(compose.bundles.accompanist)
     api(libs.compose.webview.multiplatform)
+    api(compose.bundles.navigation3) {
+        exclude(group = "androidx.compose.runtime", module = "runtime")
+        exclude(group = "androidx.compose.runtime", module = "runtime-saveable")
+    }
     // Navigation
     api(androidx.navigation.compose)
     // Koin

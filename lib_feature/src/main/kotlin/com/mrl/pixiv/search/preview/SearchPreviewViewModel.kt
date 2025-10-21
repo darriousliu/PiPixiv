@@ -1,5 +1,6 @@
 package com.mrl.pixiv.search.preview
 
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.search.TrendingTag
 import com.mrl.pixiv.common.repository.PixivRepository
@@ -26,6 +27,8 @@ data class SearchPreviewState(
 class SearchPreviewViewModel : BaseMviViewModel<SearchPreviewState, SearchPreviewAction>(
     initialState = SearchPreviewState()
 ) {
+    val lazyGridState = LazyGridState()
+
     override suspend fun handleIntent(intent: SearchPreviewAction) {
         when (intent) {
             is SearchPreviewAction.LoadTrendingTags -> loadTrendingTags()

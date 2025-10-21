@@ -18,9 +18,6 @@ object DestinationsDeepLink {
     )
 
 
-    val HomePattern = BaseUri.map {
-        "$it/${Destination.HomeScreen}"
-    }
     val ProfileDetailPattern = BaseUri.map {
         "$it/users"
     }

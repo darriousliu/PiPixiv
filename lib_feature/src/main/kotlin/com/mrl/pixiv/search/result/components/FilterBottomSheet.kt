@@ -2,7 +2,6 @@ package com.mrl.pixiv.search.result.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -116,14 +115,14 @@ private fun SelectedTabRow(
             .padding(horizontal = 16.dp),
         shape = MaterialTheme.shapes.medium
     ) {
-        TabRow(
+        SecondaryTabRow(
             selectedTabIndex = selectedIndex,
             containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
             contentColor = MaterialTheme.colorScheme.onSurface,
             indicator = {
                 Surface(
                     modifier = Modifier
-                        .tabIndicatorOffset(it[selectedIndex])
+                        .tabIndicatorOffset(selectedIndex)
                         .fillMaxHeight(),
                     shape = MaterialTheme.shapes.medium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)

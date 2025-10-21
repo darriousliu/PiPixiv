@@ -177,4 +177,9 @@ object PixivRepository : KoinComponent {
     suspend fun loadMoreUserFollowing(
         queryMap: Map<String, String>
     ) = apiApi.loadMoreUserFollowing(queryMap)
+
+    suspend fun getFollowingIllusts(
+        restrict: String = Restrict.ALL,
+        offset: Long? = null
+    ) = apiApi.getFollowingIllusts(restrict, offset)
 }

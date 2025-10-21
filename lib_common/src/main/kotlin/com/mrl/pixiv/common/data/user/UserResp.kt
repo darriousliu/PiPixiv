@@ -29,27 +29,11 @@ data class UserDetailResp(
 )
 
 @Serializable
-data class UserBookmarksIllustResp(
-    val illusts: List<Illust>,
-
-    @SerialName("next_url")
-    val nextURL: String?
-)
-
-@Serializable
 data class UserNovelsResp(
     val novels: List<Novel>,
 
     @SerialName("next_url")
     val nextUrl: JsonElement? = null
-)
-
-@Serializable
-data class UserHistoryIllustsResp(
-    val illusts: List<Illust>,
-
-    @SerialName("next_url")
-    val nextURL: String? = null
 )
 
 @Serializable
@@ -78,4 +62,11 @@ data class UserPreview(
     val novels: List<Novel>,
     @SerialName("is_muted")
     val isMuted: Boolean
+)
+
+@Serializable
+data class IllustsWithNextUrl(
+    val illusts: List<Illust>,
+    @SerialName("next_url")
+    val nextUrl: String? = null
 )

@@ -1,31 +1,42 @@
 package com.mrl.pixiv.collection
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.collection.components.FilterDialog
-import com.mrl.pixiv.common.compose.LocalNavigator
+import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.datasource.local.mmkv.isSelf
+import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
-import com.mrl.pixiv.common.util.navigateToPictureScreen
 import com.mrl.pixiv.common.viewmodel.asState
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 @Composable
@@ -33,23 +44,25 @@ fun CollectionScreen(
     uid: Long,
     modifier: Modifier = Modifier,
     viewModel: CollectionViewModel = koinViewModel { parametersOf(uid) },
-    navHostController: NavHostController = LocalNavigator.current
+    navigationManager: NavigationManager = koinInject()
 ) {
     val state = viewModel.asState()
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
     val dispatch = viewModel::dispatch
     var showFilterDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         topBar = {
             CollectionTopAppBar(
                 uid = uid,
                 showFilterDialog = { showFilterDialog = true },
-                onBack = { navHostController.popBackStack() }
+                onBack = { navigationManager.popBackStack() }
             )
         },
         contentWindowInsets = WindowInsets.statusBars
     ) {
+        val layoutParams = IllustGridDefaults.relatedLayoutParameters()
         val lazyGridState = rememberLazyGridState()
         val pullRefreshState = rememberPullToRefreshState()
 
@@ -62,9 +75,9 @@ fun CollectionScreen(
             LazyVerticalGrid(
                 state = lazyGridState,
                 modifier = Modifier.fillMaxSize(),
-                columns = GridCells.Fixed(2),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                columns = layoutParams.gridCells,
+                verticalArrangement = layoutParams.verticalArrangement,
+                horizontalArrangement = layoutParams.horizontalArrangement,
                 contentPadding = PaddingValues(
                     start = 8.dp,
                     top = 10.dp,
@@ -74,7 +87,7 @@ fun CollectionScreen(
             ) {
                 illustGrid(
                     illusts = userBookmarksIllusts,
-                    navToPictureScreen = navHostController::navigateToPictureScreen,
+                    navToPictureScreen = navigationManager::navigateToPictureScreen,
                 )
             }
         }

@@ -21,7 +21,6 @@ val requireUserInfoValue
 val requireUserInfoFlow
     get() = UserManager.userInfoFlow
 
-@Suppress("KotlinConstantConditions")
 val Long.isSelf: Boolean
     get() = requireUserInfoValue.user.id == this
 
