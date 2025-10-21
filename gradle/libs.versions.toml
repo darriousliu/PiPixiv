@@ -1,7 +1,7 @@
 [versions]
 composeWebviewMultiplatform = "2.0.3"
 material = "1.13.0"
-okio = "3.16.1"
+okio = "3.16.2"
 coil3 = "3.3.0"
 richtext = "0.20.0"
 koin = "4.1.1"
