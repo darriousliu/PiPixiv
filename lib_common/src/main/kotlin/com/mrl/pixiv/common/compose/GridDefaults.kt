@@ -92,4 +92,25 @@ object IllustGridDefaults {
             cardShape = MaterialTheme.shapes.small
         )
     }
+
+    @Composable
+    fun userFollowingParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
+        val windowSizeClass = windowAdaptiveInfo.windowSizeClass
+        val horizontalArrangement = when {
+            windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
+            windowSizeClass.isWidthAtLeastMedium -> 5f.spaceBy
+            else -> 5f.spaceBy
+        }
+        return GridLayoutParams(
+            gridCells = when {
+                windowSizeClass.isWidthAtLeastExpanded -> GridCells.Fixed(3)
+                windowSizeClass.isWidthAtLeastMedium -> GridCells.Fixed(2)
+                windowSizeClass.isWidthCompact -> GridCells.Fixed(1)
+                else -> GridCells.Fixed(1)
+            },
+            horizontalArrangement = horizontalArrangement,
+            verticalArrangement = horizontalArrangement,
+            cardShape = MaterialTheme.shapes.small
+        )
+    }
 }
