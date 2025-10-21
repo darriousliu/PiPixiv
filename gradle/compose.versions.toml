@@ -13,7 +13,7 @@ animation = { module = "androidx.compose.animation:animation" }
 ui = { module = "androidx.compose.ui:ui" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 
-material3-core = { module = "androidx.compose.material3:material3" }
+material3-core = { module = "androidx.compose.material3:material3", version = "1.5.0-alpha06" }
 material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive" }
 material3-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "adaptive" }
 material3-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation" }
