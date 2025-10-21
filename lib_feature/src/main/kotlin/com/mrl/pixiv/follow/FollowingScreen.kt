@@ -166,8 +166,8 @@ fun FollowingScreenBody(
     modifier: Modifier = Modifier,
     viewModel: FollowingViewModel = koinViewModel { parametersOf(uid) },
     userScrollEnabled: Boolean = true,
-    lazyListState: LazyListState = rememberLazyListState(),
-    lazyGridState: LazyGridState = rememberLazyGridState(),
+    lazyListState: List<LazyListState> = List(pagerState.pageCount) { rememberLazyListState() },
+    lazyGridState: List<LazyGridState> = List(pagerState.pageCount) { rememberLazyGridState() },
 ) {
     val pullRefreshState = rememberPullToRefreshState()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
@@ -191,7 +191,7 @@ fun FollowingScreenBody(
                 val layoutParams = IllustGridDefaults.userFollowingParameters()
                 LazyVerticalGrid(
                     columns = layoutParams.gridCells,
-                    state = lazyGridState,
+                    state = lazyGridState[it],
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = 16.dp,
@@ -223,7 +223,7 @@ fun FollowingScreenBody(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    state = lazyListState,
+                    state = lazyListState[it],
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         top = 10.dp,
