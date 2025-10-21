@@ -93,7 +93,7 @@ fun SquareIllustItem(
     illust: Illust,
     isBookmarked: Boolean,
     onBookmarkClick: (Restrict, List<String>?) -> Unit,
-    navToPictureScreen: (String) -> Unit,
+    navToPictureScreen: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     elevation: Dp = 5.dp,
     shouldShowTip: Boolean = false,
@@ -103,11 +103,9 @@ fun SquareIllustItem(
     var showBottomSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
     var showPopupTip by remember { mutableStateOf(false) }
-    val prefix = rememberSaveable(enableTransition) {
-        if (enableTransition) Uuid.random().toHexString() else ""
-    }
+    val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     val onClick = {
-        navToPictureScreen(prefix)
+        navToPictureScreen(prefix, enableTransition)
     }
     LaunchedEffect(Unit) {
         showPopupTip =
@@ -249,7 +247,7 @@ fun SquareIllustItem(
 
 @Composable
 fun RectangleIllustItem(
-    navToPictureScreen: (String) -> Unit,
+    navToPictureScreen: (String, Boolean) -> Unit,
     illust: Illust,
     isBookmarked: Boolean,
     onBookmarkClick: (Restrict, List<String>?) -> Unit,
@@ -259,9 +257,7 @@ fun RectangleIllustItem(
     val scale = illust.width * 1.0f / illust.height
     val sharedTransitionScope = LocalSharedTransitionScope.current
     val animatedContentScope = LocalNavAnimatedContentScope.current
-    val prefix = rememberSaveable(enableTransition) {
-        if (enableTransition) Uuid.random().toHexString() else ""
-    }
+    val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     var showBottomSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
     val onBookmarkLongClick = {
@@ -283,7 +279,7 @@ fun RectangleIllustItem(
                 .padding(horizontal = 5.dp)
                 .padding(bottom = 5.dp)
                 .throttleClick {
-                    navToPictureScreen(prefix)
+                    navToPictureScreen(prefix, enableTransition)
                 }
                 .shadow(4.dp, shape, clip = false)
                 .background(color = MaterialTheme.colorScheme.surface, shape = shape)

@@ -90,7 +90,6 @@ import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.deepBlue
-import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.compose.ui.bar.TextSnackbar
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
@@ -134,6 +133,7 @@ fun PictureDeeplinkScreen(
         PictureScreen(
             illust = illust,
             onBack = navigationManager::popBackStack,
+            enableTransition = false,
             modifier = modifier,
         )
     } else {
@@ -161,6 +161,7 @@ private const val KEY_SPACER = "spacer"
 internal fun PictureScreen(
     illust: Illust,
     onBack: () -> Unit,
+    enableTransition: Boolean,
     modifier: Modifier = Modifier,
     pictureViewModel: PictureViewModel = koinViewModel { parametersOf(illust, null) },
     navigationManager: NavigationManager = koinInject(),
@@ -270,7 +271,7 @@ internal fun PictureScreen(
         Scaffold(
             modifier = modifier
                 .skipToLookaheadSize()
-                .conditionally(prefix.isNotEmpty()) {
+                .conditionally(enableTransition) {
                     sharedBounds(
                         rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
                         animatedContentScope,
@@ -346,7 +347,7 @@ internal fun PictureScreen(
                                         contentDescription = null,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .conditionally(index == 0 && currentWindowAdaptiveInfo.isWidthCompact) {
+                                            .conditionally(index == 0 && enableTransition) {
                                                 sharedElement(
                                                     sharedTransitionScope.rememberSharedContentState(
                                                         key = "${prefix}-$firstImageKey"
@@ -373,7 +374,7 @@ internal fun PictureScreen(
                                     contentDescription = null,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .conditionally(index == 0 && currentWindowAdaptiveInfo.isWidthCompact) {
+                                        .conditionally(index == 0 && enableTransition) {
                                             sharedElement(
                                                 sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$firstImageKey"),
                                                 animatedVisibilityScope = animatedContentScope,
@@ -568,8 +569,8 @@ internal fun PictureScreen(
                                             BookmarkState.bookmarkIllust(it.id, restrict, tags)
                                         }
                                     },
-                                    navToPictureScreen = { prefix ->
-                                        navToPictureScreen(illusts, index, prefix)
+                                    navToPictureScreen = { prefix, enableTransition ->
+                                        navToPictureScreen(illusts, index, prefix, enableTransition)
                                     },
                                     modifier = Modifier.weight(1f),
                                 )
@@ -623,11 +624,12 @@ internal fun PictureScreen(
                                         BookmarkState.bookmarkIllust(illust.id, restrict, tags)
                                     }
                                 },
-                                navToPictureScreen = { prefix ->
+                                navToPictureScreen = { prefix, enableTransition ->
                                     navToPictureScreen(
                                         relatedIllusts.itemSnapshotList.items,
                                         index,
-                                        prefix
+                                        prefix,
+                                        enableTransition
                                     )
                                 },
                                 modifier = Modifier.weight(1f / relatedSpanCount.toFloat()),

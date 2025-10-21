@@ -16,6 +16,7 @@ fun HorizontalSwipePictureScreen(
     illusts: ImmutableList<Illust>,
     index: Int,
     prefix: String,
+    enableTransition: Boolean,
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(index) { illusts.size }
@@ -31,7 +32,8 @@ fun HorizontalSwipePictureScreen(
     ) {
         PictureScreen(
             illust = illusts[it],
-            onBack = onBack
+            onBack = onBack,
+            enableTransition = enableTransition,
         )
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -25,8 +26,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -52,6 +53,7 @@ import androidx.paging.compose.itemKey
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.deepBlue
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
+import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
@@ -92,7 +94,7 @@ fun FollowingScreen(
         else listOf(FollowingPage.PUBLIC)
     }
     val pagerState = rememberPagerState { pages.size }
-
+    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
 
     Scaffold(
         modifier = modifier,
@@ -123,8 +125,9 @@ fun FollowingScreen(
                 .fillMaxSize(),
         ) {
             if (pages.size > 1) {
-                SecondaryTabRow(
+                PrimaryTabRow(
                     selectedTabIndex = pagerState.currentPage,
+                    modifier = Modifier.fillMaxWidth(if (windowAdaptiveInfo.isWidthCompact) 1f else 0.5f),
                 ) {
                     pages.forEachIndexed { index, page ->
                         Tab(
@@ -163,8 +166,8 @@ fun FollowingScreenBody(
     modifier: Modifier = Modifier,
     viewModel: FollowingViewModel = koinViewModel { parametersOf(uid) },
     userScrollEnabled: Boolean = true,
-    lazyListState: LazyListState = rememberLazyListState(),
-    lazyGridState: LazyGridState = rememberLazyGridState(),
+    lazyListState: List<LazyListState> = List(pagerState.pageCount) { rememberLazyListState() },
+    lazyGridState: List<LazyGridState> = List(pagerState.pageCount) { rememberLazyGridState() },
 ) {
     val pullRefreshState = rememberPullToRefreshState()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
@@ -188,7 +191,7 @@ fun FollowingScreenBody(
                 val layoutParams = IllustGridDefaults.userFollowingParameters()
                 LazyVerticalGrid(
                     columns = layoutParams.gridCells,
-                    state = lazyGridState,
+                    state = lazyGridState[it],
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = 16.dp,
@@ -220,7 +223,7 @@ fun FollowingScreenBody(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    state = lazyListState,
+                    state = lazyListState[it],
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         top = 10.dp,
@@ -277,8 +280,8 @@ private fun FollowingUserCard(
                             BookmarkState.bookmarkIllust(it.id, restrict, tags)
                         }
                     },
-                    navToPictureScreen = { prefix ->
-                        navToPictureScreen(illusts, index, prefix)
+                    navToPictureScreen = { prefix, enableTransition ->
+                        navToPictureScreen(illusts, index, prefix, enableTransition)
                     },
                     modifier = Modifier.weight(1f),
                     elevation = 0.dp,
@@ -345,7 +348,7 @@ private fun FollowingUserCardPreview() {
         userId = 0,
         userAvatar = "http://iph.href.lu/200x200",
         isFollowed = false,
-        navToPictureScreen = { _, _, _ -> },
+        navToPictureScreen = { _, _, _, _ -> },
         navToUserProfile = { },
     )
 }

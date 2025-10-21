@@ -10,7 +10,12 @@ import com.mrl.pixiv.common.repository.IllustCacheRepo
 import org.koin.core.annotation.Single
 import kotlin.time.measureTime
 
-typealias NavigateToHorizontalPictureScreen = (illusts: List<Illust>, index: Int, prefix: String) -> Unit
+typealias NavigateToHorizontalPictureScreen = (
+    illusts: List<Illust>,
+    index: Int,
+    prefix: String,
+    enableTransition: Boolean
+) -> Unit
 
 @Single
 class NavigationManager(
@@ -74,11 +79,12 @@ class NavigationManager(
     fun navigateToPictureScreen(
         illusts: List<Illust>,
         index: Int,
-        prefix: String
+        prefix: String,
+        enableTransition: Boolean,
     ) {
         measureTime {
             IllustCacheRepo[prefix] = illusts
-            navigate(Destination.PictureScreen(index, prefix))
+            navigate(Destination.PictureScreen(index, prefix, enableTransition))
         }.let {
             Logger.i("Navigation") { "navigateToPictureScreen cost: $it" }
         }

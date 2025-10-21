@@ -52,8 +52,8 @@ fun LazyGridScope.illustGrid(
                     BookmarkState.bookmarkIllust(illust.id, restrict, tags)
                 }
             },
-            navToPictureScreen = { prefix ->
-                navToPictureScreen(illusts.itemSnapshotList.items, index, prefix)
+            navToPictureScreen = { prefix, enableTransition ->
+                navToPictureScreen(illusts.itemSnapshotList.items, index, prefix, enableTransition)
             },
             shouldShowTip = index == 0,
         )

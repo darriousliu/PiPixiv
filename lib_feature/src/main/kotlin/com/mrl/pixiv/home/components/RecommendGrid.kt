@@ -36,8 +36,13 @@ fun RecommendGrid(
             val illust = recommendImageList[it] ?: return@items
             val isBookmarked = illust.isBookmark
             RectangleIllustItem(
-                navToPictureScreen = { prefix ->
-                    navToPictureScreen(recommendImageList.itemSnapshotList.items, it, prefix)
+                navToPictureScreen = { prefix, enableTransition ->
+                    navToPictureScreen(
+                        recommendImageList.itemSnapshotList.items,
+                        it,
+                        prefix,
+                        enableTransition
+                    )
                 },
                 illust = illust,
                 isBookmarked = isBookmarked,

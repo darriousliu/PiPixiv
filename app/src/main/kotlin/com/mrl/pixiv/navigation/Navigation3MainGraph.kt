@@ -2,7 +2,12 @@ package com.mrl.pixiv.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.*
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
@@ -156,9 +161,7 @@ fun Navigation3MainGraph(
                         CollectionScreen(uid = userId)
                     }
 
-                    entry<Destination.FollowingScreen>(
-                        metadata = ListDetailSceneStrategy.listPane()
-                    ) {
+                    entry<Destination.FollowingScreen> {
                         val uid = it.userId
                         FollowingScreen(uid = uid)
                     }
@@ -198,6 +201,7 @@ fun Navigation3MainGraph(
                                 illusts = illusts.toImmutableList(),
                                 index = params.index,
                                 prefix = params.prefix,
+                                enableTransition = params.enableTransition,
                             )
                         }
                     }
