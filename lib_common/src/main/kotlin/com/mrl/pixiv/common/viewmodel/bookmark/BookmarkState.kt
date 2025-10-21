@@ -15,7 +15,7 @@ object BookmarkState {
 
     fun bookmarkIllust(
         illustId: Long,
-        restrict: String = Restrict.PUBLIC,
+        restrict: Restrict = Restrict.PUBLIC,
         tags: List<String>? = null
     ) {
         launchProcess(Dispatchers.IO) {

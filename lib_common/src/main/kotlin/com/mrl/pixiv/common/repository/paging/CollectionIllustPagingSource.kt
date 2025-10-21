@@ -24,7 +24,7 @@ class CollectionIllustPagingSource(
             val query = resp.nextUrl?.queryParams
             if (query != null) {
                 val nextKey = UserBookmarksIllustQuery(
-                    restrict = query["restrict"] ?: Restrict.PUBLIC,
+                    restrict = query["restrict"]?.let { Restrict.fromValue(it) } ?: Restrict.PUBLIC,
                     tag = query["tag"],
                     userId = query["user_id"]?.toLongOrNull() ?: userId,
                     maxBookmarkId = query["max_bookmark_id"]?.toLongOrNull()

@@ -262,7 +262,7 @@ private fun FollowingUserCard(
                 SquareIllustItem(
                     illust = it,
                     isBookmarked = isBookmarked,
-                    onBookmarkClick = { restrict: String, tags: List<String>? ->
+                    onBookmarkClick = { restrict, tags ->
                         if (isBookmarked) {
                             BookmarkState.deleteBookmarkIllust(it.id)
                         } else {

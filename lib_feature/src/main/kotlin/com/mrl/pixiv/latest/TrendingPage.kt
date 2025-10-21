@@ -84,7 +84,7 @@ fun TrendingPage(
                                 prefix
                             )
                         },
-                        onBookmarkClick = { restrict: String, tags: List<String>? ->
+                        onBookmarkClick = { restrict, tags ->
                             if (isBookmarked) {
                                 BookmarkState.deleteBookmarkIllust(illust.id)
                             } else {

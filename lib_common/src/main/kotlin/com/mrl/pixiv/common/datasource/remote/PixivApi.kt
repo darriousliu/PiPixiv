@@ -43,7 +43,7 @@ interface PixivApi {
     @POST("v2/illust/bookmark/add")
     suspend fun postIllustBookmarkAdd(
         @Field("illust_id") illustId: Long,
-        @Field("restrict") restrict: String = Restrict.PUBLIC,
+        @Field("restrict") restrict: String = Restrict.PUBLIC.value,
         @Field("tags") tags: List<String>? = null,
     ): EmptyResp
 
@@ -182,7 +182,7 @@ interface PixivApi {
     suspend fun getUserFollowing(
         @Query("filter") filter: String = Filter.ANDROID.value,
         @Query("user_id") userId: Long,
-        @Query("restrict") restrict: String = Restrict.PUBLIC,
+        @Query("restrict") restrict: String = Restrict.PUBLIC.value,
         @Query("offset") offset: Int? = null,
     ): UserFollowingResp
 
@@ -193,7 +193,7 @@ interface PixivApi {
 
     @GET("v2/illust/follow")
     suspend fun getFollowingIllusts(
-        @Query("restrict") restrict: String = Restrict.PUBLIC,
+        @Query("restrict") restrict: String = Restrict.PUBLIC.value,
         @Query("offset") offset: Long? = null,
     ): IllustsWithNextUrl
 }

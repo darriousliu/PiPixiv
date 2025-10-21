@@ -1,21 +1,18 @@
 package com.mrl.pixiv.common.data
 
-import androidx.annotation.StringDef
-
-enum class Filter(override val value: String) : IBaseEnum {
+enum class Filter(val value: String) {
     ANDROID("for_android"),
     IOS("for_ios"),
 }
 
-interface IBaseEnum {
-    val value: Any
-}
+enum class Restrict(val value: String) {
+    PUBLIC("public"),
+    PRIVATE("private"),
+    ALL("all");
 
-@StringDef(Restrict.PUBLIC, Restrict.PRIVATE, Restrict.ALL)
-annotation class Restrict {
     companion object {
-        const val PUBLIC = "public"
-        const val PRIVATE = "private"
-        const val ALL = "all"
+        fun fromValue(value: String): Restrict {
+            return entries.find { it.value == value } ?: PUBLIC
+        }
     }
 }

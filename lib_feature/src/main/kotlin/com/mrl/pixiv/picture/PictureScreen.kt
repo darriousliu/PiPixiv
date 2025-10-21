@@ -237,7 +237,7 @@ internal fun PictureScreen(
     val isScrollToBottom = lazyListState.onScrollToBottom(illust.pageCount, illust.id)
 
     val isBookmarked = illust.isBookmark
-    val onBookmarkClick = { restrict: String, tags: List<String>? ->
+    val onBookmarkClick = { restrict: Restrict, tags: List<String>? ->
         if (isBookmarked) {
             BookmarkState.deleteBookmarkIllust(illust.id)
         } else {
@@ -561,7 +561,7 @@ internal fun PictureScreen(
                                 SquareIllustItem(
                                     illust = it,
                                     isBookmarked = innerIsBookmarked,
-                                    onBookmarkClick = { restrict: String, tags: List<String>? ->
+                                    onBookmarkClick = { restrict, tags ->
                                         if (innerIsBookmarked) {
                                             BookmarkState.deleteBookmarkIllust(it.id)
                                         } else {
@@ -616,7 +616,7 @@ internal fun PictureScreen(
                             SquareIllustItem(
                                 illust = illust,
                                 isBookmarked = isBookmarked,
-                                onBookmarkClick = { restrict: String, tags: List<String>? ->
+                                onBookmarkClick = { restrict, tags ->
                                     if (isBookmarked) {
                                         BookmarkState.deleteBookmarkIllust(illust.id)
                                     } else {

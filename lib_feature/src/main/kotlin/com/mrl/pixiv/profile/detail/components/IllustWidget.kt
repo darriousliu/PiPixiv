@@ -88,7 +88,7 @@ fun IllustWidget(
                 SquareIllustItem(
                     illust = illust,
                     isBookmarked = isBookmarked,
-                    onBookmarkClick = { restrict: String, tags: List<String>? ->
+                    onBookmarkClick = { restrict, tags ->
                         if (isBookmarked) {
                             BookmarkState.deleteBookmarkIllust(illust.id)
                         } else {

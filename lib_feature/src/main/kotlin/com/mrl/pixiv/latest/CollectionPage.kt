@@ -97,7 +97,7 @@ fun CollectionPage(
                                 prefix
                             )
                         },
-                        onBookmarkClick = { restrict: String, tags: List<String>? ->
+                        onBookmarkClick = { restrict, tags ->
                             if (isBookmarked) {
                                 BookmarkState.deleteBookmarkIllust(illust.id)
                             } else {
@@ -156,7 +156,7 @@ fun CollectionPage(
             onLoadUserBookmarksTags = {
                 viewModel.dispatch(CollectionAction.LoadUserBookmarksTagsIllust(it))
             },
-            onSelected = { restrict: String, tag: String? ->
+            onSelected = { restrict, tag ->
                 viewModel.updateFilterTag(restrict, tag)
                 userBookmarksIllusts.refresh()
             }

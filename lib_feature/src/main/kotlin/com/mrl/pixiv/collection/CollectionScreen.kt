@@ -101,7 +101,7 @@ fun CollectionScreen(
                 onLoadUserBookmarksTags = {
                     dispatch(CollectionAction.LoadUserBookmarksTagsIllust(it))
                 },
-                onSelected = { restrict: String, tag: String? ->
+                onSelected = { restrict, tag ->
                     viewModel.updateFilterTag(restrict, tag)
                     userBookmarksIllusts.refresh()
                 }

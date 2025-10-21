@@ -92,7 +92,7 @@ import kotlin.uuid.Uuid
 fun SquareIllustItem(
     illust: Illust,
     isBookmarked: Boolean,
-    onBookmarkClick: (String, List<String>?) -> Unit,
+    onBookmarkClick: (Restrict, List<String>?) -> Unit,
     navToPictureScreen: (String) -> Unit,
     modifier: Modifier = Modifier,
     elevation: Dp = 5.dp,
@@ -252,7 +252,7 @@ fun RectangleIllustItem(
     navToPictureScreen: (String) -> Unit,
     illust: Illust,
     isBookmarked: Boolean,
-    onBookmarkClick: (String, List<String>?) -> Unit,
+    onBookmarkClick: (Restrict, List<String>?) -> Unit,
     modifier: Modifier = Modifier,
     enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
 ) {
@@ -420,7 +420,7 @@ fun BottomBookmarkSheet(
     hideBottomSheet: () -> Unit,
     illust: Illust,
     bottomSheetState: SheetState,
-    onBookmarkClick: (String, List<String>?) -> Unit,
+    onBookmarkClick: (Restrict, List<String>?) -> Unit,
     isBookmarked: Boolean,
 ) {
     if (showBottomSheet) {
@@ -428,7 +428,7 @@ fun BottomBookmarkSheet(
         val illustBookmarkDetailTags = remember { mutableStateListOf<BookmarkDetailTag>() }
         LaunchedEffect(Unit) {
             GetIllustBookmarkDetailUseCase.invoke(illust.id) {
-                publicSwitch = it.bookmarkDetail.restrict == Restrict.PUBLIC
+                publicSwitch = it.bookmarkDetail.restrict == Restrict.PUBLIC.value
                 illustBookmarkDetailTags.clear()
                 illustBookmarkDetailTags.addAll(it.bookmarkDetail.tags)
             }

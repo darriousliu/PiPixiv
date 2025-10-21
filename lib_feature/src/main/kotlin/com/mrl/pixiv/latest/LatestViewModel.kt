@@ -21,7 +21,7 @@ class LatestViewModel : ViewModel() {
         IllustFollowingPagingSource(restrict = trendingFilter.value)
     }.flow.cachedIn(viewModelScope)
 
-    fun updateRestrict(restrict: String) {
+    fun updateRestrict(restrict: Restrict) {
         trendingFilter.value = restrict
     }
 }

@@ -8,8 +8,7 @@ import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.util.queryParams
 
 class IllustFollowingPagingSource(
-    @Restrict
-    private val restrict: String
+    private val restrict: Restrict
 ) : PagingSource<Long, Illust>() {
     override fun getRefreshKey(state: PagingState<Long, Illust>): Long? {
         return null
