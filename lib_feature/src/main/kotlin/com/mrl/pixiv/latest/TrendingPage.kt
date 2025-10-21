@@ -58,6 +58,7 @@ fun TrendingPage(
             LazyVerticalStaggeredGrid(
                 columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
+                state = viewModel.trendingLazyGirdState,
                 contentPadding = PaddingValues(horizontal = 5.dp, vertical = 10.dp),
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,

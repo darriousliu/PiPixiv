@@ -54,6 +54,7 @@ fun CollectionPage(
     uid: Long,
     modifier: Modifier = Modifier,
     viewModel: CollectionViewModel = koinViewModel { parametersOf(uid) },
+    latestViewModel: LatestViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
 ) {
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
@@ -71,6 +72,8 @@ fun CollectionPage(
         Box {
             LazyVerticalStaggeredGrid(
                 columns = layoutParams.gridCells,
+                modifier = Modifier.fillMaxSize(),
+                state = latestViewModel.collectionLazyGirdState,
                 contentPadding = PaddingValues(horizontal = 5.dp, vertical = 10.dp),
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,

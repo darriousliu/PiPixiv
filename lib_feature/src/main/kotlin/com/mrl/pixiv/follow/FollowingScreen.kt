@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -159,6 +163,8 @@ fun FollowingScreenBody(
     modifier: Modifier = Modifier,
     viewModel: FollowingViewModel = koinViewModel { parametersOf(uid) },
     userScrollEnabled: Boolean = true,
+    lazyListState: LazyListState = rememberLazyListState(),
+    lazyGridState: LazyGridState = rememberLazyGridState(),
 ) {
     val pullRefreshState = rememberPullToRefreshState()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
@@ -182,6 +188,7 @@ fun FollowingScreenBody(
                 val layoutParams = IllustGridDefaults.userFollowingParameters()
                 LazyVerticalGrid(
                     columns = layoutParams.gridCells,
+                    state = lazyGridState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = 16.dp,
@@ -213,6 +220,7 @@ fun FollowingScreenBody(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
+                    state = lazyListState,
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         top = 10.dp,
