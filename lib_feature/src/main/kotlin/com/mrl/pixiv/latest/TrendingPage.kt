@@ -52,7 +52,7 @@ fun TrendingPage(
         modifier = modifier.fillMaxSize(),
         state = pullRefreshState
     ) {
-        Box(modifier = Modifier) {
+        Box {
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
@@ -62,7 +62,7 @@ fun TrendingPage(
                     key = KEY_TOP_SPACE,
                     span = StaggeredGridItemSpan.FullLine
                 ) {
-                    Spacer(modifier = Modifier.height(48.dp))
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
                 items(
                     count = illustsFollowing.itemCount,
