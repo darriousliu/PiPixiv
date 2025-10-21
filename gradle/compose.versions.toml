@@ -4,7 +4,7 @@ accompanist = "0.37.3"
 navigation3 = "1.0.0-alpha11"
 material3-navigation3 = "1.3.0-alpha01"
 viewmodel-navigation3 = "2.10.0-alpha05"
-adaptive = "1.2.0-rc01"
+adaptive = "1.2.0-SNAPSHOT"
 
 [libraries]
 bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
