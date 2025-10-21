@@ -6,14 +6,13 @@ import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.runtime.Stable
-import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import coil3.SingletonImageLoader
-import coil3.asDrawable
 import coil3.request.ImageRequest
+import coil3.toBitmap
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Type
@@ -21,7 +20,12 @@ import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.paging.RelatedIllustPaging
-import com.mrl.pixiv.common.util.*
+import com.mrl.pixiv.common.util.AppUtil
+import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.ShareUtil
+import com.mrl.pixiv.common.util.TAG
+import com.mrl.pixiv.common.util.saveToAlbum
+import com.mrl.pixiv.common.util.toBitmap
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
@@ -231,13 +235,12 @@ class PictureViewModel(
                 closeBottomSheet()
                 return@launchIO
             }
-            result.image?.asDrawable(AppUtil.appContext.resources)?.toBitmap()
-                ?.saveToAlbum("${illustId}_$index", PictureType.PNG) {
-                    with(AppUtil.appContext) {
-                        closeBottomSheet()
-                        handleError(Exception(getString(if (it) RString.download_success else RString.download_failed)))
-                    }
+            result.image?.toBitmap()?.saveToAlbum("${illustId}_$index") {
+                with(AppUtil.appContext) {
+                    closeBottomSheet()
+                    handleError(Exception(getString(if (it) RString.download_success else RString.download_failed)))
                 }
+            }
             closeBottomSheet()
             showLoading(false)
         }
@@ -305,7 +308,7 @@ class PictureViewModel(
         }
     }
 
-    private fun showLoading(show: Boolean) {
+    fun showLoading(show: Boolean) {
         updateState {
             copy(loading = show)
         }

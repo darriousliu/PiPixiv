@@ -30,11 +30,17 @@ dependencies {
     api(androidx.profileinstaller)
     // Paging
     api(androidx.bundles.paging)
+    api(androidx.window)
     // Compose
     api(platform(compose.bom))
     api(compose.bundles.baselibs)
     api(androidx.activity.compose)
     api(compose.bundles.accompanist)
+    api(libs.compose.webview.multiplatform)
+    api(compose.bundles.navigation3) {
+        exclude(group = "androidx.compose.runtime", module = "runtime")
+        exclude(group = "androidx.compose.runtime", module = "runtime-saveable")
+    }
     // Navigation
     api(androidx.navigation.compose)
     // Koin

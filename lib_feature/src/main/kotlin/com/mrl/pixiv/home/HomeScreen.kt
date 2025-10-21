@@ -3,36 +3,40 @@ package com.mrl.pixiv.home
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.*
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.mrl.pixiv.common.compose.LocalNavigator
+import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
-import com.mrl.pixiv.common.util.navigateToPictureScreen
 import com.mrl.pixiv.home.components.RecommendGrid
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    navHostController: NavHostController = LocalNavigator.current,
     viewModel: HomeViewModel = koinViewModel(),
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val recommendImageList = viewModel.recommendImageList.collectAsLazyPagingItems()
-    val lazyStaggeredGridState = rememberLazyStaggeredGridState()
+    val lazyStaggeredGridState = viewModel.lazyStaggeredGridState
     val scope = rememberCoroutineScope()
     val pullRefreshState = rememberPullToRefreshState()
     val onRefresh = recommendImageList::refresh
@@ -86,7 +90,7 @@ fun HomeScreen(
             ) {
                 RecommendGrid(
                     recommendImageList = recommendImageList,
-                    navToPictureScreen = navHostController::navigateToPictureScreen,
+                    navToPictureScreen = navigationManager::navigateToPictureScreen,
                     lazyStaggeredGridState = lazyStaggeredGridState,
                 )
             }

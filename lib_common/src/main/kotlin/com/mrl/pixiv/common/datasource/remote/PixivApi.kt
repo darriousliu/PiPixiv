@@ -6,11 +6,25 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.illust.IllustBookmarkDetailResp
 import com.mrl.pixiv.common.data.illust.IllustDetailResp
 import com.mrl.pixiv.common.data.illust.IllustRecommendedResp
-import com.mrl.pixiv.common.data.illust.IllustRelatedResp
-import com.mrl.pixiv.common.data.search.*
+import com.mrl.pixiv.common.data.search.SearchAiType
+import com.mrl.pixiv.common.data.search.SearchAutoCompleteResp
+import com.mrl.pixiv.common.data.search.SearchIllustResp
+import com.mrl.pixiv.common.data.search.SearchSort
+import com.mrl.pixiv.common.data.search.SearchTarget
+import com.mrl.pixiv.common.data.search.TrendingTagsResp
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadataResp
-import com.mrl.pixiv.common.data.user.*
-import de.jensklingenberg.ktorfit.http.*
+import com.mrl.pixiv.common.data.user.IllustsWithNextUrl
+import com.mrl.pixiv.common.data.user.UserBookmarkTagsResp
+import com.mrl.pixiv.common.data.user.UserDetailResp
+import com.mrl.pixiv.common.data.user.UserFollowingResp
+import com.mrl.pixiv.common.data.user.UserIllustsResp
+import com.mrl.pixiv.common.data.user.UserNovelsResp
+import de.jensklingenberg.ktorfit.http.Field
+import de.jensklingenberg.ktorfit.http.FormUrlEncoded
+import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.POST
+import de.jensklingenberg.ktorfit.http.Query
+import de.jensklingenberg.ktorfit.http.QueryMap
 
 interface PixivApi {
     @GET("v1/illust/recommended")
@@ -29,7 +43,7 @@ interface PixivApi {
     @POST("v2/illust/bookmark/add")
     suspend fun postIllustBookmarkAdd(
         @Field("illust_id") illustId: Long,
-        @Field("restrict") restrict: String = Restrict.PUBLIC,
+        @Field("restrict") restrict: String = Restrict.PUBLIC.value,
         @Field("tags") tags: List<String>? = null,
     ): EmptyResp
 
@@ -43,12 +57,12 @@ interface PixivApi {
     suspend fun getIllustRelated(
         @Query("illust_id") illustId: Long,
         @Query("filter") filter: String,
-    ): IllustRelatedResp
+    ): IllustsWithNextUrl
 
     @GET("v2/illust/related")
     suspend fun loadMoreIllustRelated(
         @QueryMap queryMap: Map<String, String>,
-    ): IllustRelatedResp
+    ): IllustsWithNextUrl
 
     @GET("v1/illust/detail")
     suspend fun getIllustDetail(
@@ -117,12 +131,12 @@ interface PixivApi {
         @Query("user_id") userId: Long,
         @Query("tag") tag: String? = null,
         @Query("max_bookmark_id") maxBookmarkId: Long? = null,
-    ): UserBookmarksIllustResp
+    ): IllustsWithNextUrl
 
     @GET("v1/user/bookmarks/illust")
     suspend fun loadMoreUserBookmarksIllust(
         @QueryMap queryMap: Map<String, String>,
-    ): UserBookmarksIllustResp
+    ): IllustsWithNextUrl
 
     @GET("v1/user/bookmarks/novel")
     suspend fun getUserBookmarksNovels(
@@ -145,12 +159,12 @@ interface PixivApi {
     ): EmptyResp
 
     @GET("v1/user/browsing-history/illusts")
-    suspend fun getUserBrowsingHistoryIllusts(): UserHistoryIllustsResp
+    suspend fun getUserBrowsingHistoryIllusts(): IllustsWithNextUrl
 
     @GET("v1/user/browsing-history/illusts")
     suspend fun loadMoreUserBrowsingHistoryIllusts(
         @QueryMap queryMap: Map<String, String>,
-    ): UserHistoryIllustsResp
+    ): IllustsWithNextUrl
 
     @GET("v1/user/bookmark-tags/illust")
     suspend fun getUserBookmarkTagsIllust(
@@ -168,7 +182,7 @@ interface PixivApi {
     suspend fun getUserFollowing(
         @Query("filter") filter: String = Filter.ANDROID.value,
         @Query("user_id") userId: Long,
-        @Query("restrict") restrict: String = Restrict.PUBLIC,
+        @Query("restrict") restrict: String = Restrict.PUBLIC.value,
         @Query("offset") offset: Int? = null,
     ): UserFollowingResp
 
@@ -176,4 +190,10 @@ interface PixivApi {
     suspend fun loadMoreUserFollowing(
         @QueryMap queryMap: Map<String, String>,
     ): UserFollowingResp
+
+    @GET("v2/illust/follow")
+    suspend fun getFollowingIllusts(
+        @Query("restrict") restrict: String = Restrict.PUBLIC.value,
+        @Query("offset") offset: Long? = null,
+    ): IllustsWithNextUrl
 }

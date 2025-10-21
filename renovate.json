@@ -5,5 +5,13 @@
   ],
   "baseBranches": [
     "develop"
+  ],
+  "packageRules": [
+    {
+      "groupName": "all-dependencies",
+      "matchPackageNames": [
+        "*"
+      ]
+    }
   ]
 }

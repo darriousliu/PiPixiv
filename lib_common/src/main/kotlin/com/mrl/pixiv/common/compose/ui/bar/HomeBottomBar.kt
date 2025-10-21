@@ -1,64 +1,75 @@
 package com.mrl.pixiv.common.compose.ui.bar
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuite
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.mrl.pixiv.common.router.Destination
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.animation.DefaultIntOffsetAnimationSpec
+import com.mrl.pixiv.common.router.MainScreenPage
 
 @Composable
 fun HomeBottomBar(
-    navController: NavController,
-    bottomBarState: Boolean,
+    layoutType: NavigationSuiteType,
+    currentPage: MainScreenPage,
+    onSwitch: (MainScreenPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val screens = listOf(
-        Destination.HomeScreen,
-        Destination.SearchPreviewScreen,
-        Destination.ProfileScreen,
+        MainScreenPage.HOME,
+        MainScreenPage.LATEST,
+        MainScreenPage.SEARCH,
+        MainScreenPage.PROFILE,
     )
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     AnimatedVisibility(
-        visible = bottomBarState,
-        enter = slideInVertically(initialOffsetY = { it }),
-        exit = slideOutVertically(targetOffsetY = { it }),
+        visible = true,
+        modifier = modifier,
+        enter = if (layoutType == NavigationSuiteType.NavigationBar) {
+            slideInVertically(DefaultIntOffsetAnimationSpec) { it }
+        } else {
+            slideInHorizontally(DefaultIntOffsetAnimationSpec) { if (isRtl) it else -it }
+        },
+        exit = if (layoutType == NavigationSuiteType.NavigationBar) {
+            slideOutVertically(DefaultIntOffsetAnimationSpec) { it }
+        } else {
+            slideOutHorizontally(DefaultIntOffsetAnimationSpec) { if (isRtl) it else -it }
+        },
     ) {
-        NavigationBar(
-            modifier = modifier,
-            containerColor = MaterialTheme.colorScheme.background,
-        ) {
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination
-            screens.forEach { screen ->
-                screen.icon
-                NavigationBarItem(
-                    icon = screen.icon!!,
-                    label = {
-                        Text(text = screen.title())
-                    },
-                    selected = currentRoute?.hasRoute(screen::class) == true,
-                    onClick = {
-                        if (currentRoute?.hasRoute(screen::class) == false) {
-                            navController.navigate(screen) {
-                                popUpTo(navController.graph.startDestinationId) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
+        NavigationSuite(
+            layoutType = layoutType,
+            colors = NavigationSuiteDefaults.colors(
+                navigationBarContainerColor = Color.Transparent
+            ),
+            content = {
+                screens.forEach { screen ->
+                    item(
+                        selected = currentPage == screen,
+                        onClick = {
+                            if (currentPage != screen) {
+                                onSwitch(screen)
                             }
+                        },
+                        icon = screen.icon,
+                        modifier = Modifier.requiredHeightIn(max = 56.dp),
+                        label = {
+                            Text(text = stringResource(screen.title))
                         }
-                    }
-                )
+                    )
+                }
             }
-        }
+        )
     }
 }
-

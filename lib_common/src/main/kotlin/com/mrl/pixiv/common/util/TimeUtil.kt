@@ -1,12 +1,13 @@
 package com.mrl.pixiv.common.util
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
+import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 fun currentTimeMillis() = Clock.System.now().toEpochMilliseconds()
 
@@ -20,7 +21,7 @@ fun convertUtcStringToLocalDateTime(utcString: String): String {
         char('-')
         monthNumber()
         char('-')
-        dayOfMonth()
+        day(padding = Padding.ZERO)
         char(' ')
         hour()
         char(':')

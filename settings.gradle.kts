@@ -46,6 +46,11 @@ dependencyResolutionManagement {
                     ?: System.getenv("GH_PACKAGE_TOKEN")
             }
         }
+        maven {
+            // You can find the maven URL for other artifacts (e.g. KMP, METALAVA) on their
+            // build pages.
+            url = uri("https://androidx.dev/snapshots/builds/13970376/artifacts/repository")
+        }
     }
 }
 rootProject.name = "PiPixiv"

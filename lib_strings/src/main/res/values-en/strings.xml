@@ -74,4 +74,7 @@
     <string name="sign_out">Sign Out</string>
     <string name="copy_to_clipboard">Copy to clipboard</string>
     <string name="export_token">Export Token</string>
+    <string name="new_artworks">New Artworks</string>
+    <string name="latest_tab_trend">Trend</string>
+    <string name="latest_tab_following">Following</string>
 </resources>

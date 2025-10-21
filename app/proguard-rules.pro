@@ -19,8 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--dontwarn dalvik.system.CloseGuard
-
 
 -assumenosideeffects public class androidx.compose.runtime.ComposerKt {
 
@@ -31,24 +29,6 @@
    void traceEventEnd();
 
 }
-
-# 对于使用了 @Keep 注解的类和成员，不进行混淆处理
--keep @androidx.annotation.Keep class * {
-
-}
-
-# 保持 Kotlin 标准库不被混淆
--keep class kotlin.concurrent.** { *; }
--keep class kotlin.coroutines.** { *; }
--dontwarn kotlin.coroutines.**
-
-# 如果使用了 Kotlin 协程
--keep class kotlinx.coroutines.** { *; }
--dontwarn kotlinx.coroutines.**
-
--dontwarn org.slf4j.impl.StaticLoggerBinder
--dontwarn org.slf4j.impl.StaticMDCBinder
--dontwarn org.koin.ksp.generated.*
 
 -keep class de.jensklingenberg.ktorfit.** { *; }
 -keepclassmembers class de.jensklingenberg.ktorfit.** { *; }

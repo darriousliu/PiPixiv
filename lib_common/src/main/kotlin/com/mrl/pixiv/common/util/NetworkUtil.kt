@@ -1,18 +1,24 @@
 package com.mrl.pixiv.common.util
 
+import android.os.Build
 import androidx.compose.ui.text.intl.Locale
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.datasource.local.mmkv.AuthManager
 import com.mrl.pixiv.common.repository.SettingRepository
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.encodedPath
-import kotlinx.datetime.*
 import kotlinx.datetime.LocalDate.Formats.ISO
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
 import kotlinx.datetime.format.alternativeParsing
 import kotlinx.datetime.format.char
+import kotlinx.datetime.offsetIn
+import kotlinx.datetime.toLocalDateTime
 import okio.ByteString.Companion.toByteString
 import org.koin.core.component.KoinComponent
 import javax.net.ssl.HostnameVerifier
+import kotlin.time.Clock
 
 internal const val TAG = "HttpManager"
 internal const val HashSalt =
@@ -56,23 +62,23 @@ internal fun encode(text: String): String {
 suspend fun addAuthHeader(request: HttpRequestBuilder) {
     val local = Locale.current
     val instantNow = Clock.System.now()
-    val isoDate = "${
-        instantNow.toLocalDateTime(TimeZone.currentSystemDefault())
-            .format(iso8601DateTimeFormat)
-    }${instantNow.offsetIn(TimeZone.currentSystemDefault())}"
+    val timeZone = TimeZone.currentSystemDefault()
+    val isoDate = "${instantNow.toLocalDateTime(timeZone).format(iso8601DateTimeFormat)}${
+        instantNow.offsetIn(timeZone)
+    }"
     request.headers.apply {
         remove("User-Agent")
         set(
             "User-Agent",
-            "PixivAndroidApp/5.0.166 (Android 14; 2210132C)"
+            "PixivAndroidApp/6.158.0 (Android ${Build.VERSION.RELEASE}; ${Build.MODEL})"
         )
         if (!request.url.encodedPath.contains("/auth/token")) {
             set("Authorization", "Bearer ${AuthManager.requireUserAccessToken()}")
         }
         set("Accept-Language", "${local.language}_${local.region}")
-        set("App-OS", "Android")
-        set("App-OS-Version", "14")
-        set("App-Version", "5.0.166")
+        set("App-OS", "android")
+        set("App-OS-Version", Build.VERSION.RELEASE)
+        set("App-Version", "6.158.0")
         set("X-Client-Time", isoDate)
         set("X-Client-Hash", encode("$isoDate$HashSalt"))
 //            set("Host", request.host)

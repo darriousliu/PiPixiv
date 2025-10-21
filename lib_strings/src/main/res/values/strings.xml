@@ -77,4 +77,7 @@
     <string name="sign_out">登出</string>
     <string name="copy_to_clipboard">复制到剪切板</string>
     <string name="export_token">导出Token</string>
+    <string name="new_artworks">新作</string>
+    <string name="latest_tab_trend">动态</string>
+    <string name="latest_tab_following">关注</string>
 </resources>

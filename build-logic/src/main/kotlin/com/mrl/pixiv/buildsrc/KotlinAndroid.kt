@@ -21,7 +21,11 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -32,7 +36,7 @@ internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
-        compileSdk = 35
+        compileSdk = 36
 
         defaultConfig {
             minSdk = 23
@@ -100,10 +104,13 @@ private fun Project.configureKotlin() {
                     "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
                     "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
                     "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
+                    "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
                     "-opt-in=coil3.annotation.ExperimentalCoilApi",
                     "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
                     "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
                     "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+                    "-opt-in=kotlin.time.ExperimentalTime",
+                    "-Xannotation-default-target=param-property",
                     "-Xstring-concat=inline"
                 )
             )

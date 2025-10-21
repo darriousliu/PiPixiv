@@ -22,7 +22,7 @@ import org.koin.android.annotation.KoinViewModel
 
 @Stable
 data class CollectionState(
-    @Restrict val restrict: String = Restrict.PUBLIC,
+    val restrict: Restrict = Restrict.PUBLIC,
     val filterTag: String? = null,
     val userBookmarksNovels: ImmutableList<Novel> = persistentListOf(),
     val userBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
@@ -38,7 +38,7 @@ data class RestrictBookmarkTag(
 )
 
 sealed class CollectionAction : ViewIntent {
-    data class LoadUserBookmarksTagsIllust(@Restrict val restrict: String) : CollectionAction()
+    data class LoadUserBookmarksTagsIllust(val restrict: Restrict) : CollectionAction()
 }
 
 @KoinViewModel
@@ -63,7 +63,7 @@ class CollectionViewModel(
         }
     }
 
-    fun updateFilterTag(@Restrict restrict: String, filterTag: String?) {
+    fun updateFilterTag(restrict: Restrict, filterTag: String?) {
         updateState {
             copy(
                 restrict = restrict,
@@ -72,11 +72,11 @@ class CollectionViewModel(
         }
     }
 
-    private fun loadUserBookmarkTagsIllust(@Restrict restrict: String) {
+    private fun loadUserBookmarkTagsIllust(restrict: Restrict) {
         launchIO {
             val resp = PixivRepository.getUserBookmarkTagsIllust(
                 userId = uid,
-                restrict = restrict
+                restrict = restrict.value
             )
             val isPublic = restrict == Restrict.PUBLIC
             updateState {

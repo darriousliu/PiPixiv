@@ -1,8 +1,19 @@
 package com.mrl.pixiv.common.compose.ui.illust
 
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,12 +22,33 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FileCopy
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -25,16 +57,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowRgb565
-import com.mrl.pixiv.common.compose.LocalAnimatedContentScope
+import coil3.request.crossfade
+import com.mrl.pixiv.common.animation.DefaultAnimationDuration
+import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
+import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.lightBlue
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
 import com.mrl.pixiv.common.data.Illust
@@ -43,35 +80,38 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.illust.BookmarkDetailTag
 import com.mrl.pixiv.common.domain.illust.GetIllustBookmarkDetailUseCase
+import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.throttleClick
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 @Composable
 fun SquareIllustItem(
     illust: Illust,
     isBookmarked: Boolean,
-    onBookmarkClick: (String, List<String>?) -> Unit,
-    navToPictureScreen: (String) -> Unit,
+    onBookmarkClick: (Restrict, List<String>?) -> Unit,
+    navToPictureScreen: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     elevation: Dp = 5.dp,
     shouldShowTip: Boolean = false,
     shape: Shape = MaterialTheme.shapes.medium,
+    enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
     var showPopupTip by remember { mutableStateOf(false) }
-    val prefix = rememberSaveable { Uuid.random().toHexString() }
+    val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     val onClick = {
-        navToPictureScreen(prefix)
+        navToPictureScreen(prefix, enableTransition)
     }
     LaunchedEffect(Unit) {
         showPopupTip =
             shouldShowTip && !SettingRepository.userPreferenceFlow.value.hasShowBookmarkTip
     }
-    val animatedContentScope = LocalAnimatedContentScope.current
+    val animatedContentScope = LocalNavAnimatedContentScope.current
     with(LocalSharedTransitionScope.current) {
         Box(
             modifier = modifier
@@ -79,20 +119,23 @@ fun SquareIllustItem(
                 .sharedBounds(
                     rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
                     animatedContentScope,
-                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(10.dp))
+                    enter = fadeIn(DefaultFloatAnimationSpec),
+                    exit = fadeOut(DefaultFloatAnimationSpec),
+                    boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
+//                    renderInOverlayDuringTransition = false
                 )
                 .shadow(elevation, shape)
                 .background(MaterialTheme.colorScheme.background)
                 .throttleClick { onClick() }
         ) {
-            val imageKey = "image-${illust.id}-0"
+            val imageKey = illust.imageUrls.medium
             AsyncImage(
                 modifier = Modifier
                     .matchParentSize()
                     .sharedElement(
                         rememberSharedContentState(key = "${prefix}-$imageKey"),
-                        animatedVisibilityScope = LocalAnimatedContentScope.current,
-                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                        animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
                     ),
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(illust.imageUrls.squareMedium)
@@ -155,11 +198,6 @@ fun SquareIllustItem(
             ) {
                 Box(
                     modifier = Modifier
-                        .sharedElement(
-                            rememberSharedContentState(key = "${prefix}-favorite-${illust.id}"),
-                            animatedContentScope,
-                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                        )
                         .minimumInteractiveComponentSize()
                         .throttleClick(
                             role = Role.Button,
@@ -208,12 +246,177 @@ fun SquareIllustItem(
 }
 
 @Composable
+fun RectangleIllustItem(
+    navToPictureScreen: (String, Boolean) -> Unit,
+    illust: Illust,
+    isBookmarked: Boolean,
+    onBookmarkClick: (Restrict, List<String>?) -> Unit,
+    modifier: Modifier = Modifier,
+    enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
+) {
+    val scale = illust.width * 1.0f / illust.height
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedContentScope = LocalNavAnimatedContentScope.current
+    val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState()
+    val onBookmarkLongClick = {
+        showBottomSheet = true
+    }
+    val context = LocalContext.current
+    with(sharedTransitionScope) {
+        val shape = 10f.round
+        Box(
+            modifier = modifier
+                .sharedBounds(
+                    rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
+                    animatedContentScope,
+                    enter = fadeIn(DefaultFloatAnimationSpec),
+                    exit = fadeOut(DefaultFloatAnimationSpec),
+                    boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
+//                    renderInOverlayDuringTransition = false
+                )
+                .padding(horizontal = 5.dp)
+                .padding(bottom = 5.dp)
+                .throttleClick {
+                    navToPictureScreen(prefix, enableTransition)
+                }
+                .shadow(4.dp, shape, clip = false)
+                .background(color = MaterialTheme.colorScheme.surface, shape = shape)
+                .clip(shape),
+        ) {
+            Column {
+                val imageKey = illust.imageUrls.medium
+                AsyncImage(
+                    model = remember {
+                        ImageRequest.Builder(context)
+                            .data(illust.imageUrls.medium).allowRgb565(true)
+                            .crossfade(1.seconds.inWholeMilliseconds.toInt())
+                            .placeholderMemoryCacheKey(imageKey)
+                            .memoryCacheKey(imageKey)
+                            .build()
+                    },
+                    contentDescription = null,
+                    modifier = Modifier
+                        .aspectRatio(scale)
+                        .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$imageKey"),
+                            animatedVisibilityScope = animatedContentScope,
+                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                        ),
+                    alignment = Alignment.TopCenter,
+                )
+                Row(
+                    modifier = Modifier
+                        .padding(start = 5.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = illust.title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            text = illust.user.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .minimumInteractiveComponentSize()
+                            .throttleClick(
+                                role = Role.Button,
+                                indication = ripple(bounded = false, radius = 20.dp),
+                                onLongClick = onBookmarkLongClick
+                            ) {
+                                onBookmarkClick(Restrict.PUBLIC, null)
+                            },
+                    ) {
+                        Icon(
+                            imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                            contentDescription = "",
+                            modifier = Modifier.size(24.dp),
+                            tint = if (isBookmarked) Color.Red else Color.Gray
+                        )
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (illust.illustAIType == IllustAiType.AiGeneratedWorks) {
+                    Text(
+                        text = "AI",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        modifier = Modifier
+                            .background(lightBlue, MaterialTheme.shapes.small)
+                            .padding(horizontal = 5.dp)
+                    )
+                }
+                if (illust.type == Type.Ugoira) {
+                    Row(
+                        modifier = Modifier
+                            .background(lightBlue, MaterialTheme.shapes.small)
+                            .padding(horizontal = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "GIF", color = Color.White, fontSize = 10.sp)
+                    }
+                }
+                if (illust.pageCount > 1) {
+                    Row(
+                        modifier = Modifier
+                            .background(
+                                Color.Black.copy(alpha = 0.5f),
+                                MaterialTheme.shapes.small
+                            )
+                            .padding(horizontal = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.FileCopy,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(10.dp)
+                        )
+                        Text(text = "${illust.pageCount}", color = Color.White, fontSize = 10.sp)
+                    }
+                }
+            }
+        }
+    }
+    BottomBookmarkSheet(
+        showBottomSheet = showBottomSheet,
+        hideBottomSheet = { showBottomSheet = false },
+        illust = illust,
+        bottomSheetState = bottomSheetState,
+        onBookmarkClick = onBookmarkClick,
+        isBookmarked = isBookmarked
+    )
+}
+
+@Composable
 fun BottomBookmarkSheet(
     showBottomSheet: Boolean,
     hideBottomSheet: () -> Unit,
     illust: Illust,
     bottomSheetState: SheetState,
-    onBookmarkClick: (String, List<String>?) -> Unit,
+    onBookmarkClick: (Restrict, List<String>?) -> Unit,
     isBookmarked: Boolean,
 ) {
     if (showBottomSheet) {
@@ -221,7 +424,7 @@ fun BottomBookmarkSheet(
         val illustBookmarkDetailTags = remember { mutableStateListOf<BookmarkDetailTag>() }
         LaunchedEffect(Unit) {
             GetIllustBookmarkDetailUseCase.invoke(illust.id) {
-                publicSwitch = it.bookmarkDetail.restrict == Restrict.PUBLIC
+                publicSwitch = it.bookmarkDetail.restrict == Restrict.PUBLIC.value
                 illustBookmarkDetailTags.clear()
                 illustBookmarkDetailTags.addAll(it.bookmarkDetail.tags)
             }

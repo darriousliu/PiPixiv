@@ -2,19 +2,20 @@ package com.mrl.pixiv.common.viewmodel.bookmark
 
 import androidx.compose.runtime.mutableStateMapOf
 import com.mrl.pixiv.common.coroutine.launchProcess
+import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.repository.PixivRepository
 import kotlinx.coroutines.Dispatchers
 
-val requireBookmarkState
-    get() = BookmarkState.state
+val Illust.isBookmark: Boolean
+    get() = BookmarkState.state[id] ?: isBookmarked
 
 object BookmarkState {
     internal val state = mutableStateMapOf<Long, Boolean>()
 
     fun bookmarkIllust(
         illustId: Long,
-        restrict: String = Restrict.PUBLIC,
+        restrict: Restrict = Restrict.PUBLIC,
         tags: List<String>? = null
     ) {
         launchProcess(Dispatchers.IO) {

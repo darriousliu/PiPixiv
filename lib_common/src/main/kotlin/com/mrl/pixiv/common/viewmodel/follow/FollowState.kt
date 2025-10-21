@@ -7,14 +7,11 @@ import com.mrl.pixiv.common.data.User
 import com.mrl.pixiv.common.repository.PixivRepository
 import kotlinx.coroutines.Dispatchers
 
-val requireFollowState
-    get() = FollowState.state
+val User.isFollowing: Boolean
+    get() = FollowState.state[id] ?: isFollowed
 
 object FollowState {
     internal val state = mutableStateMapOf<Long, Boolean>()
-
-    val User.isFollowing: Boolean
-        get() = state[id] ?: isFollowed
 
     fun followUser(userId: Long) {
         launchProcess(Dispatchers.IO) {

@@ -14,7 +14,7 @@ class MMKVSerializableProperty<V>(
     private val defaultValue: V
 ) : ReadWriteProperty<MMKVOwner, V> {
     override fun getValue(thisRef: MMKVOwner, property: KProperty<*>): V =
-        thisRef.kv.takeByteArray(property.name)?.let {
+        thisRef.kv.getByteArray(property.name)?.let {
             mmkvProtobuf.decodeFromByteArray(serializer, it)
         } ?: defaultValue
 

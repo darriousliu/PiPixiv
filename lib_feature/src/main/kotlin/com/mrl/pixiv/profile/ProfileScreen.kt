@@ -1,31 +1,52 @@
 package com.mrl.pixiv.profile
 
 import android.os.Build
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.rounded.Bookmarks
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.ImportExport
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import com.mrl.pixiv.common.compose.LocalAnimatedContentScope
-import com.mrl.pixiv.common.compose.LocalNavigator
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.ui.SettingItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.data.setting.getAppCompatDelegateThemeMode
 import com.mrl.pixiv.common.datasource.local.mmkv.requireUserInfoFlow
-import com.mrl.pixiv.common.util.*
+import com.mrl.pixiv.common.datasource.local.mmkv.requireUserInfoValue
+import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.util.RString
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 private val options = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
     mapOf(
@@ -48,7 +69,7 @@ private const val KEY_SETTINGS = "settings"
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = koinViewModel(),
-    navHostController: NavHostController = LocalNavigator.current,
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
     LifecycleResumeEffect(Unit) {
@@ -82,31 +103,17 @@ fun ProfileScreen(
                             url = userInfo.user.profileImageUrls.medium,
                             modifier = Modifier.size(80.dp),
                             onClick = {
-                                navHostController.navigateToProfileDetailScreen(userInfo.user.id)
+                                navigationManager.navigateToProfileDetailScreen(userInfo.user.id)
                             }
                         )
                         Column {
                             // 昵称
                             Text(
                                 text = userInfo.user.name,
-                                modifier = Modifier
-                                    .sharedElement(
-                                        rememberSharedContentState(key = "user-name-${userInfo.user.id}"),
-                                        LocalAnimatedContentScope.current,
-                                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                                    )
-                                    .skipToLookaheadSize()
                             )
                             // ID
                             Text(
                                 text = "ID: ${userInfo.user.id}",
-                                modifier = Modifier
-                                    .sharedElement(
-                                        rememberSharedContentState(key = "user-id-${userInfo.user.id}"),
-                                        LocalAnimatedContentScope.current,
-                                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
-                                    )
-                                    .skipToLookaheadSize()
                             )
                         }
                     }
@@ -119,7 +126,7 @@ fun ProfileScreen(
                 Column {
                     // 偏好设置
                     SettingItem(
-                        onClick = navHostController::navigateToSettingScreen,
+                        onClick = navigationManager::navigateToSettingScreen,
                         icon = {
                             Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
                         },
@@ -131,7 +138,7 @@ fun ProfileScreen(
                     }
                     // 历史记录
                     SettingItem(
-                        onClick = navHostController::navigateToHistoryScreen,
+                        onClick = navigationManager::navigateToHistoryScreen,
                         icon = {
                             Icon(
                                 imageVector = Icons.Rounded.History,
@@ -146,7 +153,9 @@ fun ProfileScreen(
                     }
                     // 收藏
                     SettingItem(
-                        onClick = navHostController::navigateToSelfCollectionScreen,
+                        onClick = {
+                            navigationManager.navigateToCollectionScreen(requireUserInfoValue.user.id)
+                        },
                         icon = {
                             Icon(
                                 imageVector = Icons.Rounded.Bookmarks,
@@ -181,7 +190,7 @@ fun ProfileScreen(
                     SettingItem(
                         onClick = {
                             viewModel.logout()
-                            navHostController.navigateToLoginOptionScreen()
+                            navigationManager.navigateToLoginOptionScreen()
                         },
                         icon = {
                             Icon(

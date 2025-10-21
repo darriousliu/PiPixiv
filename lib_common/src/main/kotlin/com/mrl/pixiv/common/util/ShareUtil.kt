@@ -1,16 +1,15 @@
 package com.mrl.pixiv.common.util
 
+import android.content.ContentValues
 import android.content.Intent
 import android.os.Environment
+import android.provider.MediaStore
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
-import androidx.core.content.FileProvider
-import androidx.core.graphics.drawable.toBitmap
 import coil3.SingletonImageLoader
-import coil3.asDrawable
 import coil3.request.ImageRequest
+import coil3.toBitmap
 import com.mrl.pixiv.common.data.Illust
-import java.io.File
 
 object ShareUtil {
     fun createShareIntent(text: String): Intent {
@@ -38,38 +37,40 @@ object ShareUtil {
         illust: Illust,
         shareLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
     ) {
-        val file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-            .absolutePath.let {
-                File(
-                    joinPaths(
-                        it,
-                        DOWNLOAD_DIR,
-                        "${illust.id}_${index}${PictureType.PNG.extension}"
-                    )
-                )
-            }
-        if (!isFileExists(file)) {
-            val imageLoader = SingletonImageLoader.get(AppUtil.appContext)
+        val fileName = "${illust.id}_${index}${PictureType.PNG.extension}"
+        val context = AppUtil.appContext
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+            put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                "${Environment.DIRECTORY_DCIM}/${DOWNLOAD_DIR}"
+            )
+        }
+
+        val uri = context.contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            contentValues
+        )
+        if (uri != null) {
+            val imageLoader = SingletonImageLoader.get(context)
             val request = ImageRequest
-                .Builder(AppUtil.appContext)
+                .Builder(context)
                 .data(downloadUrl)
                 .build()
             val result = imageLoader.execute(request)
-            result.image?.asDrawable(AppUtil.appContext.resources)
-                ?.toBitmap()
-                ?.saveToAlbum(file.nameWithoutExtension, PictureType.PNG)
-                ?: return
+            val bitmap = result.image?.toBitmap() ?: return
+
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, outputStream)
+            }
+
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = "image/*"
+            intent.putExtra(Intent.EXTRA_STREAM, uri)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            shareLauncher.launch(intent)
         }
-        val uri = FileProvider.getUriForFile(
-            AppUtil.appContext,
-            "${AppUtil.appContext.packageName}.fileprovider",
-            file
-        )
-        // 分享图片
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "image/*"
-        intent.putExtra(Intent.EXTRA_STREAM, uri)
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        shareLauncher.launch(intent)
     }
 }

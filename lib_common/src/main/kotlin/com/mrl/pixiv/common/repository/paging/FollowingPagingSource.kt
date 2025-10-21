@@ -11,8 +11,7 @@ import com.mrl.pixiv.common.util.queryParams
 
 class FollowingPagingSource(
     private val userId: Long,
-    @Restrict
-    private val restrict: String
+    private val restrict: Restrict
 ) : PagingSource<FollowingReq, UserPreview>() {
     override suspend fun load(params: LoadParams<FollowingReq>): LoadResult<FollowingReq, UserPreview> {
 
@@ -26,7 +25,7 @@ class FollowingPagingSource(
             if (query != null) {
                 val nextKey = FollowingReq(
                     filter = query["filter"] ?: Filter.ANDROID.value,
-                    restrict = query["restrict"] ?: Restrict.PUBLIC,
+                    restrict = query["restrict"]?.let { Restrict.fromValue(it) } ?: Restrict.PUBLIC,
                     userId = query["user_id"]?.toLongOrNull() ?: userId,
                     offset = query["offset"]?.toIntOrNull()
                 )

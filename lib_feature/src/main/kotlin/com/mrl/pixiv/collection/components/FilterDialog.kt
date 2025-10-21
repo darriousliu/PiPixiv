@@ -1,22 +1,39 @@
 package com.mrl.pixiv.collection.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.mrl.pixiv.collection.RestrictBookmarkTag
-import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.compose.lightBlue
+import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
@@ -28,10 +45,10 @@ fun FilterDialog(
     onDismissRequest: () -> Unit,
     userBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag>,
     privateBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag>,
-    @Restrict restrict: String,
+    restrict: Restrict,
     filterTag: String?,
-    onLoadUserBookmarksTags: (String) -> Unit,
-    onSelected: (restrict: String, tag: String?) -> Unit,
+    onLoadUserBookmarksTags: (Restrict) -> Unit,
+    onSelected: (restrict: Restrict, tag: String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
@@ -51,7 +68,7 @@ fun FilterDialog(
                     LaunchedEffect(pagerState.currentPage) {
                         selectedTab = pagerState.currentPage
                     }
-                    TabRow(
+                    SecondaryTabRow(
                         selectedTabIndex = selectedTab,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -61,7 +78,7 @@ fun FilterDialog(
                         indicator = {
                             Surface(
                                 modifier = Modifier
-                                    .tabIndicatorOffset(it[selectedTab])
+                                    .tabIndicatorOffset(selectedTab)
                                     .fillMaxHeight(),
                                 shape = MaterialTheme.shapes.small,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)

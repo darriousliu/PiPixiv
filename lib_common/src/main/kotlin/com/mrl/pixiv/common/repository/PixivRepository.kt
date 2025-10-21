@@ -71,9 +71,9 @@ object PixivRepository : KoinComponent {
 
     suspend fun postIllustBookmarkAdd(
         illustId: Long,
-        restrict: String = Restrict.PUBLIC,
+        restrict: Restrict = Restrict.PUBLIC,
         tags: List<String>? = null,
-    ) = apiApi.postIllustBookmarkAdd(illustId, restrict, tags)
+    ) = apiApi.postIllustBookmarkAdd(illustId, restrict.value, tags)
 
     suspend fun postIllustBookmarkDelete(illustId: Long) =
         apiApi.postIllustBookmarkDelete(illustId)
@@ -128,25 +128,25 @@ object PixivRepository : KoinComponent {
     ) = apiApi.getUserIllusts(filter.value, userId, type)
 
     suspend fun getUserBookmarksIllust(
-        restrict: String,
+        restrict: Restrict,
         userId: Long,
         tag: String? = null,
         maxBookmarkId: Long? = null
-    ) = apiApi.getUserBookmarksIllust(restrict, userId, tag, maxBookmarkId)
+    ) = apiApi.getUserBookmarksIllust(restrict.value, userId, tag, maxBookmarkId)
 
     suspend fun loadMoreUserBookmarksIllust(queryMap: Map<String, String>) =
         apiApi.loadMoreUserBookmarksIllust(queryMap)
 
     suspend fun getUserBookmarksNovels(
-        restrict: String,
+        restrict: Restrict,
         userId: Long,
         tag: String = ""
-    ) = apiApi.getUserBookmarksNovels(restrict, userId, tag)
+    ) = apiApi.getUserBookmarksNovels(restrict.value, userId, tag)
 
     suspend fun followUser(
         userId: Long,
-        restrict: String
-    ) = apiApi.followUser(userId, restrict)
+        restrict: Restrict
+    ) = apiApi.followUser(userId, restrict.value)
 
     suspend fun unFollowUser(
         userId: Long
@@ -170,11 +170,16 @@ object PixivRepository : KoinComponent {
     suspend fun getUserFollowing(
         filter: Filter = Filter.ANDROID,
         userId: Long,
-        restrict: String = Restrict.PUBLIC,
+        restrict: Restrict = Restrict.PUBLIC,
         offset: Int? = null
-    ) = apiApi.getUserFollowing(filter.value, userId, restrict, offset)
+    ) = apiApi.getUserFollowing(filter.value, userId, restrict.value, offset)
 
     suspend fun loadMoreUserFollowing(
         queryMap: Map<String, String>
     ) = apiApi.loadMoreUserFollowing(queryMap)
+
+    suspend fun getFollowingIllusts(
+        restrict: Restrict = Restrict.ALL,
+        offset: Long? = null
+    ) = apiApi.getFollowingIllusts(restrict.value, offset)
 }

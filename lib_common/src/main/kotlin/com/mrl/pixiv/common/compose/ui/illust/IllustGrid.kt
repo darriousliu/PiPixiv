@@ -13,9 +13,9 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import com.mrl.pixiv.common.data.Illust
-import com.mrl.pixiv.common.util.NavigateToHorizontalPictureScreen
+import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
-import com.mrl.pixiv.common.viewmodel.bookmark.requireBookmarkState
+import com.mrl.pixiv.common.viewmodel.bookmark.isBookmark
 
 private const val KEY_LOADING = "loading"
 
@@ -41,19 +41,19 @@ fun LazyGridScope.illustGrid(
         key = illusts.itemKey { it.id }
     ) { index ->
         val illust = illusts[index] ?: return@items
-        val isBookmarked = requireBookmarkState[illust.id] ?: illust.isBookmarked
+        val isBookmarked = illust.isBookmark
         SquareIllustItem(
             illust = illust,
             isBookmarked = isBookmarked,
-            onBookmarkClick = { restrict: String, tags: List<String>? ->
+            onBookmarkClick = { restrict, tags ->
                 if (isBookmarked) {
                     BookmarkState.deleteBookmarkIllust(illust.id)
                 } else {
                     BookmarkState.bookmarkIllust(illust.id, restrict, tags)
                 }
             },
-            navToPictureScreen = { prefix ->
-                navToPictureScreen(illusts.itemSnapshotList.items, index, prefix)
+            navToPictureScreen = { prefix, enableTransition ->
+                navToPictureScreen(illusts.itemSnapshotList.items, index, prefix, enableTransition)
             },
             shouldShowTip = index == 0,
         )

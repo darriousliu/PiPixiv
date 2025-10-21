@@ -8,12 +8,11 @@ import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.annotation.KoinViewModel
-import kotlin.reflect.KClass
 
 @Stable
 data class SplashState(
     val isLoading: Boolean = true,
-    val startDestination: KClass<*>? = null,
+    val startDestination: Destination? = null,
 )
 
 sealed class SplashAction : ViewIntent {
@@ -69,7 +68,7 @@ class SplashViewModel : BaseMviViewModel<SplashState, SplashAction>(
         updateState {
             copy(
                 isLoading = false,
-                startDestination = Destination.LoginOptionScreen::class
+                startDestination = Destination.LoginOptionScreen
             )
         }
 
@@ -78,7 +77,7 @@ class SplashViewModel : BaseMviViewModel<SplashState, SplashAction>(
         updateState {
             copy(
                 isLoading = false,
-                startDestination = Destination.HomeScreen::class
+                startDestination = Destination.MainScreen
             )
         }
 }
