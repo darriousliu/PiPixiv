@@ -26,12 +26,13 @@ fun apiHttpClient() = baseHttpClient.apply {
             execute(request)
         }
         intercept { request ->
-            val call = execute(request)
+            var call = execute(request)
             if (call.response.status in HttpStatusCode.BadRequest..HttpStatusCode.RequestHeaderFieldTooLarge) {
                 AuthManager.requireUserAccessToken()
                 addAuthHeader(request)
+                call = execute(request)
             }
-            execute(request)
+            call
         }
     }
     config {
