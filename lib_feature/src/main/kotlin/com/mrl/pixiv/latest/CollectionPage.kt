@@ -1,6 +1,7 @@
 package com.mrl.pixiv.latest
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -33,7 +34,7 @@ fun CollectionPage(
     PullToRefreshBox(
         isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading,
         onRefresh = { userBookmarksIllusts.refresh() },
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         state = pullRefreshState
     ) {
         LazyVerticalStaggeredGrid(

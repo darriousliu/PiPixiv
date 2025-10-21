@@ -5,7 +5,7 @@ import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
-import com.mrl.pixiv.common.data.user.UserBookmarksIllustResp
+import com.mrl.pixiv.common.data.user.IllustsWithNextUrl
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.data.user.UserIllustsResp
 import com.mrl.pixiv.common.data.user.UserNovelsResp
@@ -77,7 +77,7 @@ class ProfileDetailViewModel(
             )
             val userIllusts = resp[0] as UserIllustsResp
             val userBookmarksNovels = resp[1] as UserNovelsResp
-            val userBookmarksIllusts = resp[2] as UserBookmarksIllustResp
+            val userBookmarksIllusts = resp[2] as IllustsWithNextUrl
             val userInfo = resp[3] as UserDetailResp
             updateState {
                 copy(

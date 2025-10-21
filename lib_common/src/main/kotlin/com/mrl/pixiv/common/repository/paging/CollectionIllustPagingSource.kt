@@ -21,7 +21,7 @@ class CollectionIllustPagingSource(
             } else {
                 PixivRepository.loadMoreUserBookmarksIllust(params.key?.toMap() ?: emptyMap())
             }
-            val query = resp.nextURL?.queryParams
+            val query = resp.nextUrl?.queryParams
             if (query != null) {
                 val nextKey = UserBookmarksIllustQuery(
                     restrict = query["restrict"] ?: Restrict.PUBLIC,

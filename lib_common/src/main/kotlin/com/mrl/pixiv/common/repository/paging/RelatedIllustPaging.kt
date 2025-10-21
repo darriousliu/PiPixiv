@@ -22,7 +22,7 @@ class RelatedIllustPaging(
                     params.key?.queryParams ?: emptyMap()
                 )
             }
-            val query = resp.nextURL
+            val query = resp.nextUrl
             LoadResult.Page(
                 data = resp.illusts.distinctBy { it.id },
                 prevKey = params.key,
