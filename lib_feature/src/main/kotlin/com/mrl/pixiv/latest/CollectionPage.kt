@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FilterList
@@ -35,6 +34,7 @@ import androidx.paging.compose.itemKey
 import com.mrl.pixiv.collection.CollectionAction
 import com.mrl.pixiv.collection.CollectionViewModel
 import com.mrl.pixiv.collection.components.FilterDialog
+import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.spaceBy
@@ -60,6 +60,7 @@ fun CollectionPage(
     val pullRefreshState = rememberPullToRefreshState()
     val state = viewModel.asState()
     var showFilterDialog by remember { mutableStateOf(false) }
+    val layoutParams = RecommendGridDefaults.coverLayoutParameters()
 
     PullToRefreshBox(
         isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading,
@@ -69,8 +70,10 @@ fun CollectionPage(
     ) {
         Box {
             LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(2),
+                columns = layoutParams.gridCells,
                 contentPadding = PaddingValues(horizontal = 5.dp, vertical = 10.dp),
+                verticalItemSpacing = layoutParams.verticalArrangement.spacing,
+                horizontalArrangement = layoutParams.horizontalArrangement,
             ) {
                 item(
                     key = KEY_TOP_SPACE,

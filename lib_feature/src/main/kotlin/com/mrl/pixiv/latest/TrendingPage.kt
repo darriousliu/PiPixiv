@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -25,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.spaceBy
@@ -46,6 +46,8 @@ fun TrendingPage(
     val pullRefreshState = rememberPullToRefreshState()
     val illustsFollowing = viewModel.illustsFollowing.collectAsLazyPagingItems()
     val trendingFilter by viewModel.trendingFilter.collectAsStateWithLifecycle()
+    val layoutParams = RecommendGridDefaults.coverLayoutParameters()
+
     PullToRefreshBox(
         isRefreshing = illustsFollowing.loadState.refresh is LoadState.Loading,
         onRefresh = { illustsFollowing.refresh() },
@@ -54,9 +56,11 @@ fun TrendingPage(
     ) {
         Box {
             LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(2),
+                columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 5.dp, vertical = 10.dp),
+                verticalItemSpacing = layoutParams.verticalArrangement.spacing,
+                horizontalArrangement = layoutParams.horizontalArrangement,
             ) {
                 item(
                     key = KEY_TOP_SPACE,

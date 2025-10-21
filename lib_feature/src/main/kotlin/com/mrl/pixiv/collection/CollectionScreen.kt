@@ -50,6 +50,7 @@ fun CollectionScreen(
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
     val dispatch = viewModel::dispatch
     var showFilterDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         topBar = {
