@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -184,10 +185,18 @@ fun FollowingScreenBody(
         } else {
             viewModel.privateFollowingPageSource.collectAsLazyPagingItems()
         }
+        val isRefreshing = followingUsers.loadState.refresh is LoadState.Loading
         PullToRefreshBox(
-            isRefreshing = followingUsers.loadState.refresh is LoadState.Loading,
+            isRefreshing = isRefreshing,
             onRefresh = { followingUsers.refresh() },
-            state = pullRefreshState
+            state = pullRefreshState,
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = pullRefreshState,
+                    isRefreshing = isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+            }
         ) {
             if (windowAdaptiveInfo.isWidthAtLeastMedium) {
                 val layoutParams = IllustGridDefaults.userFollowingParameters()

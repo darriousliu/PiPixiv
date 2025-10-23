@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,12 +63,20 @@ fun CollectionPage(
     val state = viewModel.asState()
     var showFilterDialog by remember { mutableStateOf(false) }
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
+    val isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading
 
     PullToRefreshBox(
-        isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading,
+        isRefreshing = isRefreshing,
         onRefresh = { userBookmarksIllusts.refresh() },
         modifier = modifier.fillMaxSize(),
-        state = pullRefreshState
+        state = pullRefreshState,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = pullRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
     ) {
         Box {
             LazyVerticalStaggeredGrid(

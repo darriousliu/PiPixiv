@@ -14,9 +14,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.paging.LoadState
@@ -79,11 +81,19 @@ fun HomeScreen(
             }
         }
     ) {
+        val isRefreshing =  recommendImageList.loadState.refresh is LoadState.Loading
         PullToRefreshBox(
-            isRefreshing = recommendImageList.loadState.refresh is LoadState.Loading,
+            isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             modifier = Modifier.padding(it),
-            state = pullRefreshState
+            state = pullRefreshState,
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = pullRefreshState,
+                    isRefreshing = isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+            }
         ) {
             Box(
                 modifier = Modifier.fillMaxSize()
