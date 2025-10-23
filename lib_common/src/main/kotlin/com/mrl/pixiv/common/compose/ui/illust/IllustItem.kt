@@ -481,6 +481,7 @@ fun BottomBookmarkSheet(
                                 )
                                 hideBottomSheet()
                             },
+                            shapes = ButtonDefaults.shapes(),
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.filledTonalButtonColors().copy(
                                 containerColor = lightBlue
