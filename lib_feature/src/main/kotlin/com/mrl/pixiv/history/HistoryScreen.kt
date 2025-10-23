@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -114,7 +115,10 @@ private fun HistoryAppBar(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
-                    IconButton(onClick = { onValueChange(TextFieldValue()) }) {
+                    IconButton(
+                        onClick = { onValueChange(TextFieldValue()) },
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.Clear,
                             contentDescription = "Clear"
@@ -128,7 +132,8 @@ private fun HistoryAppBar(
         },
         navigationIcon = {
             IconButton(
-                onClick = onBack
+                onClick = onBack,
+                shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowBack,

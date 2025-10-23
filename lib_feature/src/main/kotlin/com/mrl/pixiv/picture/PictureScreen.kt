@@ -298,6 +298,7 @@ internal fun PictureScreen(
                     onClick = throttleClick {
                         onBookmarkClick(Restrict.PUBLIC, null)
                     },
+                    shapes = IconButtonDefaults.shapes(),
                     modifier = Modifier.size(50.dp),
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer,

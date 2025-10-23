@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -63,7 +64,10 @@ fun SettingScreen(
                     Text(text = stringResource(RString.setting))
                 },
                 navigationIcon = {
-                    IconButton(onClick = navigationManager::popBackStack) {
+                    IconButton(
+                        onClick = navigationManager::popBackStack,
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
                     }
                 },

@@ -138,6 +138,7 @@ fun CollectionPage(
                 }
                 IconButton(
                     onClick = { showFilterDialog = true },
+                    shapes = IconButtonDefaults.shapes(),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     )

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -122,13 +123,19 @@ private fun CollectionTopAppBar(
             Text(text = stringResource(RString.collection))
         },
         navigationIcon = {
-            IconButton(onClick = onBack) {
+            IconButton(
+                onClick = onBack,
+                shapes = IconButtonDefaults.shapes(),
+            ) {
                 Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
             }
         },
         actions = {
             if (uid.isSelf) {
-                IconButton(onClick = showFilterDialog) {
+                IconButton(
+                    onClick = showFilterDialog,
+                    shapes = IconButtonDefaults.shapes(),
+                ) {
                     Icon(Icons.Rounded.FilterList, contentDescription = null)
                 }
             }

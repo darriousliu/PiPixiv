@@ -6,7 +6,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.*
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -47,7 +53,8 @@ fun HomeScreen(
                                 lazyStaggeredGridState.scrollToItem(0)
                             }
                             onRefresh()
-                        }
+                        },
+                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(imageVector = Icons.Rounded.Refresh, contentDescription = null)
                     }
@@ -63,7 +70,6 @@ fun HomeScreen(
                             lazyStaggeredGridState.scrollToItem(0)
                         }
                     },
-                    containerColor = MaterialTheme.colorScheme.background,
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.ArrowUpward,
