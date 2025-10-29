@@ -135,7 +135,7 @@ fun SquareIllustItem(
                     .sharedElement(
                         rememberSharedContentState(key = "${prefix}-$imageKey"),
                         animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                        placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
                     ),
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(illust.imageUrls.squareMedium)
@@ -303,7 +303,7 @@ fun RectangleIllustItem(
                         .sharedElement(
                             sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$imageKey"),
                             animatedVisibilityScope = animatedContentScope,
-                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                            placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
                         ),
                     alignment = Alignment.TopCenter,
                 )

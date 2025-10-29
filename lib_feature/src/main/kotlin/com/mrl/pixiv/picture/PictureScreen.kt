@@ -39,7 +39,7 @@ import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -141,7 +141,7 @@ fun PictureDeeplinkScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            CircularWavyProgressIndicator()
         }
     }
 }
@@ -354,7 +354,7 @@ internal fun PictureScreen(
                                                         key = "${prefix}-$firstImageKey"
                                                     ),
                                                     animatedVisibilityScope = animatedContentScope,
-                                                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                                                    placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
                                                 )
                                             }
                                             .throttleClick(
@@ -379,7 +379,7 @@ internal fun PictureScreen(
                                             sharedElement(
                                                 sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$firstImageKey"),
                                                 animatedVisibilityScope = animatedContentScope,
-                                                placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
+                                                placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
                                             )
                                         }
                                         .throttleClick(
@@ -598,8 +598,8 @@ internal fun PictureScreen(
                     key = { index -> "${illust.id}_related_${index}" },
                     contentType = { "related_illusts" }
                 ) { rowIndex ->
-                    val illustsPair = (0..relatedSpanCount - 1).mapNotNull { it ->
-                        val index = rowIndex * relatedSpanCount + it
+                    val illustsPair = (0..<relatedSpanCount).mapNotNull { columnIndex ->
+                        val index = rowIndex * relatedSpanCount + columnIndex
                         if (index >= relatedIllusts.itemCount) return@mapNotNull null
                         val illust = relatedIllusts[index] ?: return@mapNotNull null
                         Triple(
@@ -737,7 +737,7 @@ internal fun PictureScreen(
                         .fillMaxSize()
                         .throttleClick {},
                 ) {
-                    CircularProgressIndicator(
+                    CircularWavyProgressIndicator(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }

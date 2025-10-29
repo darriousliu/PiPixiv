@@ -1,7 +1,7 @@
 package com.mrl.pixiv.common.compose.ui.image
 
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,7 +20,7 @@ fun UserAvatar(
     contentScale: ContentScale = ContentScale.Crop,
 ) {
     if (url.isEmpty()) {
-        CircularProgressIndicator(modifier)
+        CircularWavyProgressIndicator(modifier)
     } else {
         LoadingImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -33,7 +33,7 @@ fun UserAvatar(
                 .throttleClick(onClick = onClick)
                 .clip(CircleShape),
             loadingContent = {
-                CircularProgressIndicator(modifier)
+                CircularWavyProgressIndicator(modifier)
             }
         )
     }

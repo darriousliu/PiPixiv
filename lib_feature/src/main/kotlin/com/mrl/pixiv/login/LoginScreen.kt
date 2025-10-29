@@ -14,11 +14,11 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
@@ -89,8 +89,8 @@ fun LoginScreen(
             when (loadingState) {
                 LoadingState.Finished -> {}
 
-                LoadingState.Initializing -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                is LoadingState.Loading -> LinearProgressIndicator(
+                LoadingState.Initializing -> LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
+                is LoadingState.Loading -> LinearWavyProgressIndicator(
                     modifier = Modifier.fillMaxWidth(),
                     progress = { loadingState.progress }
                 )
@@ -133,7 +133,7 @@ fun LoginScreen(
                 .background(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f))
                 .throttleClick()
         ) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            CircularWavyProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     }
 }
