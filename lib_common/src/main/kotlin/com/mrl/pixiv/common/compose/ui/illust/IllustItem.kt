@@ -139,6 +139,7 @@ fun SquareIllustItem(
                     ),
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(illust.imageUrls.squareMedium)
+                    .crossfade(1.seconds.inWholeMilliseconds.toInt())
                     .allowRgb565(true)
                     .placeholderMemoryCacheKey(imageKey)
                     .memoryCacheKey(imageKey)
