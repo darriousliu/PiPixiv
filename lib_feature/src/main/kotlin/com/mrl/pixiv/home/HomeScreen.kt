@@ -1,7 +1,10 @@
 package com.mrl.pixiv.home
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowUpward
@@ -11,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -79,9 +83,10 @@ fun HomeScreen(
                     )
                 }
             }
-        }
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
-        val isRefreshing =  recommendImageList.loadState.refresh is LoadState.Loading
+        val isRefreshing = recommendImageList.loadState.refresh is LoadState.Loading
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,

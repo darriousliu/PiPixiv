@@ -5,14 +5,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.router.MainScreenPage
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.home.HomeScreen
@@ -47,13 +47,13 @@ fun MainScreen(
                         }
                     },
                     icon = screen.icon,
-                    modifier = Modifier.requiredHeightIn(max = 56.dp),
                     label = {
                         Text(text = stringResource(screen.title))
                     }
                 )
             }
         },
+        layoutType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
     ) {
         AnimatedContent(
             targetState = page,
@@ -61,7 +61,6 @@ fun MainScreen(
             transitionSpec = {
                 fadeIn(animationSpec = tween(220, delayMillis = 90))
                     .togetherWith(fadeOut(animationSpec = tween(90)))
-
             }
         ) {
             when (it) {

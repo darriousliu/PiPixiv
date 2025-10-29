@@ -2,9 +2,13 @@ package com.mrl.pixiv.search.preview
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -15,6 +19,7 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -82,7 +87,8 @@ fun SearchPreviewScreen(
                     )
                 }
             )
-        }
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         PullToRefreshBox(
             isRefreshing = state.refreshing,
@@ -101,7 +107,12 @@ fun SearchPreviewScreen(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyGridState,
                 columns = GridCells.Fixed(3),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    top = 8.dp,
+                    end = 16.dp,
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                ),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
