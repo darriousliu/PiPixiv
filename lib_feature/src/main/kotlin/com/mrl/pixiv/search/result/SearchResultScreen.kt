@@ -1,10 +1,15 @@
 package com.mrl.pixiv.search.result
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -57,7 +62,8 @@ fun SearchResultsScreen(
                     scope.launch { bottomSheetState.show() }
                 }
             )
-        }
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -77,7 +83,11 @@ fun SearchResultsScreen(
                 columns = layoutParams.gridCells,
                 verticalArrangement = layoutParams.verticalArrangement,
                 horizontalArrangement = layoutParams.horizontalArrangement,
-                contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 20.dp),
+                contentPadding = PaddingValues(
+                    start = 8.dp,
+                    end = 8.dp,
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                ),
             ) {
                 illustGrid(
                     illusts = searchResults,

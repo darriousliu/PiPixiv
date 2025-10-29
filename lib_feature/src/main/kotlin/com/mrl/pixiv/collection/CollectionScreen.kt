@@ -2,9 +2,11 @@ package com.mrl.pixiv.collection
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
@@ -14,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -63,7 +66,7 @@ fun CollectionScreen(
                 onBack = { navigationManager.popBackStack() }
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         val layoutParams = IllustGridDefaults.relatedLayoutParameters()
         val lazyGridState = rememberLazyGridState()
@@ -91,9 +94,8 @@ fun CollectionScreen(
                 horizontalArrangement = layoutParams.horizontalArrangement,
                 contentPadding = PaddingValues(
                     start = 8.dp,
-                    top = 10.dp,
                     end = 8.dp,
-                    bottom = 20.dp
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 ),
             ) {
                 illustGrid(
