@@ -235,7 +235,7 @@ internal fun PictureScreen(
         }
     }
     val isBarVisible by remember { derivedStateOf { lazyListState.firstVisibleItemIndex <= illust.pageCount } }
-    val isScrollToBottom = lazyListState.onScrollToBottom(illust.pageCount, illust.id)
+    val isUserInfoFullyVisible = lazyListState.isItemFullyVisible(KEY_ILLUST_TITLE)
 
     val isBookmarked = illust.isBookmark
     val onBookmarkClick = { restrict: Restrict, tags: List<String>? ->
@@ -653,7 +653,7 @@ internal fun PictureScreen(
                     .fillMaxSize()
             ) {
                 AnimatedVisibility(
-                    visible = !isScrollToBottom,
+                    visible = !isUserInfoFullyVisible,
                     enter = fadeIn(),
                     exit = fadeOut(),
                     modifier = Modifier
@@ -857,22 +857,19 @@ private fun UserInfo(
 
 
 @Composable
-private fun LazyListState.onScrollToBottom(
-    pageCount: Int,
-    id: Long
-): Boolean {
-    val isToBottom by remember {
+private fun LazyListState.isItemFullyVisible(key: String): Boolean {
+    val fullyVisible by remember(key) {
         derivedStateOf {
-            val lastVisibleItem =
-                layoutInfo.visibleItemsInfo.find { it.key == "${id}_${pageCount - 1}" }
+            val item = layoutInfo.visibleItemsInfo.firstOrNull { it.key == key }
+                ?: return@derivedStateOf false
 
-            if (lastVisibleItem != null) {
-                return@derivedStateOf lastVisibleItem.index == pageCount - 1
-                        && lastVisibleItem.let { it.offset + it.size } <= layoutInfo.let { it.viewportEndOffset - it.viewportStartOffset }
-            } else {
-                return@derivedStateOf false
-            }
+            val viewportStart = layoutInfo.viewportStartOffset
+            val viewportEnd = layoutInfo.viewportEndOffset
+            val itemStart = item.offset
+            val itemEnd = item.offset + item.size
+
+            itemStart >= viewportStart && itemEnd <= viewportEnd
         }
     }
-    return isToBottom
+    return fullyVisible
 }
