@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FileCopy
+import androidx.compose.material3.Badge
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -61,7 +62,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import coil3.compose.AsyncImage
@@ -70,6 +70,7 @@ import coil3.request.allowRgb565
 import coil3.request.crossfade
 import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
+import com.mrl.pixiv.common.compose.FavoriteDualColor
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.lightBlue
@@ -80,6 +81,7 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.illust.BookmarkDetailTag
 import com.mrl.pixiv.common.domain.illust.GetIllustBookmarkDetailUseCase
+import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.RString
@@ -155,43 +157,15 @@ fun SquareIllustItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (illust.illustAIType == IllustAiType.AiGeneratedWorks) {
-                    Text(
-                        text = "AI",
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        modifier = Modifier
-                            .background(lightBlue, MaterialTheme.shapes.small)
-                            .padding(horizontal = 5.dp)
-                    )
+                    AIBadge()
                 }
                 if (illust.type == Type.Ugoira) {
-                    Row(
-                        modifier = Modifier
-                            .background(lightBlue, MaterialTheme.shapes.small)
-                            .padding(horizontal = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "GIF", color = Color.White, fontSize = 10.sp)
-                    }
+                    GifBadge()
                 }
                 if (illust.pageCount > 1) {
-                    Row(
-                        modifier = Modifier
-                            .background(
-                                Color.Black.copy(alpha = 0.5f),
-                                MaterialTheme.shapes.small
-                            )
-                            .padding(horizontal = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.FileCopy,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(10.dp)
-                        )
-                        Text(text = "${illust.pageCount}", color = Color.White, fontSize = 10.sp)
-                    }
+                    PageBadge(
+                        pageCount = illust.pageCount,
+                    )
                 }
             }
             Box(
@@ -212,7 +186,7 @@ fun SquareIllustItem(
                         imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                         contentDescription = "",
                         modifier = Modifier.size(24.dp),
-                        tint = if (isBookmarked) Color.Red else Color.Gray
+                        tint = FavoriteDualColor(isBookmarked)
                     )
                 }
                 if (showPopupTip) {
@@ -347,7 +321,7 @@ fun RectangleIllustItem(
                             imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                             contentDescription = "",
                             modifier = Modifier.size(24.dp),
-                            tint = if (isBookmarked) Color.Red else Color.Gray
+                            tint = FavoriteDualColor(isBookmarked)
                         )
                     }
                 }
@@ -360,43 +334,15 @@ fun RectangleIllustItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (illust.illustAIType == IllustAiType.AiGeneratedWorks) {
-                    Text(
-                        text = "AI",
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        modifier = Modifier
-                            .background(lightBlue, MaterialTheme.shapes.small)
-                            .padding(horizontal = 5.dp)
-                    )
+                    AIBadge()
                 }
                 if (illust.type == Type.Ugoira) {
-                    Row(
-                        modifier = Modifier
-                            .background(lightBlue, MaterialTheme.shapes.small)
-                            .padding(horizontal = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "GIF", color = Color.White, fontSize = 10.sp)
-                    }
+                    GifBadge()
                 }
                 if (illust.pageCount > 1) {
-                    Row(
-                        modifier = Modifier
-                            .background(
-                                Color.Black.copy(alpha = 0.5f),
-                                MaterialTheme.shapes.small
-                            )
-                            .padding(horizontal = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.FileCopy,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(10.dp)
-                        )
-                        Text(text = "${illust.pageCount}", color = Color.White, fontSize = 10.sp)
-                    }
+                    PageBadge(
+                        pageCount = illust.pageCount,
+                    )
                 }
             }
         }
@@ -470,7 +416,7 @@ fun BottomBookmarkSheet(
                         Icon(
                             imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                             contentDescription = null,
-                            tint = if (isBookmarked) Color.Red else Color.Gray
+                            tint = FavoriteDualColor(isBookmarked)
                         )
                     }
                     if (isBookmarked) {
@@ -586,6 +532,68 @@ fun BottomBookmarkSheet(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AIBadge(
+    modifier: Modifier = Modifier
+) {
+    Badge(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    ) {
+        Text(
+            text = "AI",
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+        )
+    }
+}
+
+@Composable
+private fun GifBadge(
+    modifier: Modifier = Modifier
+) {
+    Badge(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    ) {
+        Text(
+            text = "GIF",
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+        )
+    }
+}
+
+@Composable
+private fun PageBadge(
+    pageCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    Badge(
+        modifier = modifier,
+        containerColor = Color.Black.copy(alpha = 0.5f),
+        contentColor = Color.White,
+    ) {
+        5f.HSpacer
+        Icon(
+            imageVector = Icons.Rounded.FileCopy,
+            contentDescription = null,
+            modifier = Modifier
+
+                .size(10.dp)
+        )
+        2f.HSpacer
+        Text(
+            text = "$pageCount",
+            modifier = Modifier.padding(vertical = 2.dp),
+            style = MaterialTheme.typography.labelSmall,
+        )
+        5f.HSpacer
     }
 }
 
