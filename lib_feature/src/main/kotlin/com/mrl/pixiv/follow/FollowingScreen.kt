@@ -1,7 +1,5 @@
 package com.mrl.pixiv.follow
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,11 +20,12 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -41,19 +40,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.mrl.pixiv.common.compose.IllustGridDefaults
-import com.mrl.pixiv.common.compose.deepBlue
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.compose.rememberThrottleClick
@@ -65,7 +59,6 @@ import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.viewmodel.follow.FollowState
@@ -314,38 +307,27 @@ private fun FollowingUserCard(
                 text = userName,
                 modifier = Modifier.weight(1f)
             )
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .then(
-                        if (isFollowed)
-                            Modifier.background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = MaterialTheme.shapes.medium
-                            )
-                        else
-                            Modifier.border(
-                                width = 1.dp,
-                                color = deepBlue,
-                                shape = MaterialTheme.shapes.medium
-                            )
+            if (isFollowed) {
+                OutlinedButton(
+                    onClick = {
+                        FollowState.unFollowUser(userId)
+                    }
+                ) {
+                    Text(
+                        text = stringResource(RString.followed),
                     )
-                    .padding(horizontal = 10.dp, vertical = 8.dp)
-                    .throttleClick {
-                        if (isFollowed) {
-                            FollowState.unFollowUser(userId)
-                        } else {
-                            FollowState.followUser(userId)
-                        }
-                    },
-                text = stringResource(if (isFollowed) RString.followed else RString.follow),
-                style = TextStyle(
-                    color = if (isFollowed) Color.White else deepBlue,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                ),
-            )
-
+                }
+            } else {
+                Button(
+                    onClick = {
+                        FollowState.followUser(userId)
+                    }
+                ) {
+                    Text(
+                        text = stringResource(RString.follow),
+                    )
+                }
+            }
         }
     }
 }

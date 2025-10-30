@@ -16,7 +16,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -39,6 +38,7 @@ import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,6 +47,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -504,44 +505,25 @@ internal fun PictureScreen(
                         }
                         Spacer(modifier = Modifier.weight(1f))
                         if (isFollowed) {
-                            Text(
-                                modifier = Modifier
-                                    .align(Alignment.CenterVertically)
-                                    .background(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        shape = MaterialTheme.shapes.medium
-                                    )
-                                    .padding(horizontal = 10.dp, vertical = 8.dp)
-                                    .throttleClick {
-                                        FollowState.unFollowUser(illust.user.id)
-                                    },
-                                text = stringResource(RString.followed),
-                                style = TextStyle(
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium,
-                                ),
-                            )
+                            OutlinedButton(
+                                onClick = {
+                                    FollowState.unFollowUser(illust.user.id)
+                                }
+                            ) {
+                                Text(
+                                    text = stringResource(RString.followed),
+                                )
+                            }
                         } else {
-                            Text(
-                                modifier = Modifier
-                                    .align(Alignment.CenterVertically)
-                                    .border(
-                                        width = 1.dp,
-                                        color = deepBlue,
-                                        shape = MaterialTheme.shapes.medium
-                                    )
-                                    .padding(horizontal = 10.dp, vertical = 8.dp)
-                                    .throttleClick {
-                                        FollowState.followUser(illust.user.id)
-                                    },
-                                text = stringResource(RString.follow),
-                                style = TextStyle(
-                                    color = deepBlue,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium,
-                                ),
-                            )
+                            Button(
+                                onClick = {
+                                    FollowState.followUser(illust.user.id)
+                                }
+                            ) {
+                                Text(
+                                    text = stringResource(RString.follow),
+                                )
+                            }
                         }
                     }
                 }
