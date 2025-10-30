@@ -16,66 +16,66 @@ import kotlinx.serialization.Transient
 @Serializable
 sealed class Destination : NavKey {
     @Serializable
-    data object LoginOptionScreen : Destination()
+    data object LoginOption : Destination()
 
     @Serializable
-    data class LoginScreen(
+    data class Login(
         val startUrl: String,
     ) : Destination()
 
     @Serializable
-    data object OAuthLoginScreen : Destination()
+    data object OAuthLogin : Destination()
 
     @Serializable
-    data object MainScreen : Destination()
+    data object Main : Destination()
 
     @Serializable
-    data class ProfileDetailScreen(
+    data class ProfileDetail(
         val userId: Long,
     ) : Destination()
 
     @Serializable
-    data class PictureScreen(
+    data class Picture(
         val index: Int,
         val prefix: String,
         val enableTransition: Boolean,
     ) : Destination()
 
     @Serializable
-    data class PictureDeeplinkScreen(
+    data class PictureDeeplink(
         val illustId: Long,
     ) : Destination()
 
     @Serializable
-    data object SearchScreen : Destination()
+    data object Search : Destination()
 
     @Serializable
-    data class SearchResultsScreen(
+    data class SearchResults(
         val searchWords: String,
     ) : Destination()
 
     @Serializable
-    data object SettingScreen : Destination()
+    data object Setting : Destination()
 
     @Serializable
-    data object NetworkSettingScreen : Destination()
+    data object NetworkSetting : Destination()
 
     @Serializable
-    data object HistoryScreen : Destination()
+    data object History : Destination()
 
     @Serializable
-    data class CollectionScreen(
+    data class Collection(
         val userId: Long,
     ) : Destination()
 
     @Serializable
-    data class FollowingScreen(
+    data class Following(
         val userId: Long,
     ) : Destination()
 }
 
 @Serializable
-enum class MainScreenPage(
+enum class MainPage(
     @Transient
     @StringRes
     val title: Int = 0,

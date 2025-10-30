@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.mrl.pixiv.common.router.MainScreenPage
+import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.home.HomeScreen
 import com.mrl.pixiv.latest.LatestScreen
@@ -29,10 +29,10 @@ fun MainScreen(
     val page = navigationManager.currentMainPage
     val screens = remember {
         listOf(
-            MainScreenPage.HOME,
-            MainScreenPage.LATEST,
-            MainScreenPage.SEARCH,
-            MainScreenPage.PROFILE,
+            MainPage.HOME,
+            MainPage.LATEST,
+            MainPage.SEARCH,
+            MainPage.PROFILE,
         )
     }
 
@@ -64,10 +64,10 @@ fun MainScreen(
             }
         ) {
             when (it) {
-                MainScreenPage.HOME -> HomeScreen()
-                MainScreenPage.LATEST -> LatestScreen()
-                MainScreenPage.SEARCH -> SearchPreviewScreen()
-                MainScreenPage.PROFILE -> ProfileScreen()
+                MainPage.HOME -> HomeScreen()
+                MainPage.LATEST -> LatestScreen()
+                MainPage.SEARCH -> SearchPreviewScreen()
+                MainPage.PROFILE -> ProfileScreen()
             }
         }
     }

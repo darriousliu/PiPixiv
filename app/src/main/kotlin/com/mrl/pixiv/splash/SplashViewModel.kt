@@ -68,7 +68,7 @@ class SplashViewModel : BaseMviViewModel<SplashState, SplashAction>(
         updateState {
             copy(
                 isLoading = false,
-                startDestination = Destination.LoginOptionScreen
+                startDestination = Destination.LoginOption
             )
         }
 
@@ -77,7 +77,7 @@ class SplashViewModel : BaseMviViewModel<SplashState, SplashAction>(
         updateState {
             copy(
                 isLoading = false,
-                startDestination = Destination.MainScreen
+                startDestination = Destination.Main
             )
         }
 }

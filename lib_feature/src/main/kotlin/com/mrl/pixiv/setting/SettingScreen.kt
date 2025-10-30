@@ -139,7 +139,7 @@ fun SettingScreen(
 
             item {
                 SettingItem(
-                    onClick = { navigationManager.navigate(route = Destination.NetworkSettingScreen) },
+                    onClick = { navigationManager.navigate(route = Destination.NetworkSetting) },
                     icon = {
                         Icon(imageVector = Icons.Rounded.NetworkWifi, contentDescription = null)
                     },

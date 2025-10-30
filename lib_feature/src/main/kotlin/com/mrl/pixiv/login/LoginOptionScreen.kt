@@ -47,7 +47,7 @@ fun LoginOptionScreen(
             )
             Button(
                 onClick = {
-                    navigationManager.navigate(Destination.LoginScreen(generateWebViewUrl(false)))
+                    navigationManager.navigate(Destination.Login(generateWebViewUrl(false)))
                 },
                 shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.fillMaxWidth()
@@ -58,7 +58,7 @@ fun LoginOptionScreen(
             }
             Button(
                 onClick = {
-                    navigationManager.navigate(Destination.LoginScreen(generateWebViewUrl(true)))
+                    navigationManager.navigate(Destination.Login(generateWebViewUrl(true)))
                 },
                 shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.fillMaxWidth()
@@ -69,7 +69,7 @@ fun LoginOptionScreen(
             }
             OutlinedButton(
                 onClick = {
-                    navigationManager.navigate(Destination.OAuthLoginScreen)
+                    navigationManager.navigate(Destination.OAuthLogin)
                 },
                 shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.fillMaxWidth()
