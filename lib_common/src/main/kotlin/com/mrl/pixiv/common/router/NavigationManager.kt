@@ -68,6 +68,7 @@ class NavigationManager(
     }
 
     fun loginToMainScreen() {
+        currentMainPage = MainPage.HOME
         backStack.clear()
         backStack.add(Destination.Main)
     }
