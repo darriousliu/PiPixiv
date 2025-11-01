@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,6 +27,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
@@ -34,9 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,8 +55,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -103,7 +103,6 @@ fun SquareIllustItem(
     enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState()
     var showPopupTip by remember { mutableStateOf(false) }
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     val onClick = {
@@ -171,16 +170,11 @@ fun SquareIllustItem(
             Box(
                 modifier = Modifier.align(Alignment.BottomEnd)
             ) {
-                Box(
-                    modifier = Modifier
-                        .minimumInteractiveComponentSize()
-                        .throttleClick(
-                            role = Role.Button,
-                            indication = ripple(bounded = false, radius = 20.dp),
-                            onLongClick = { showBottomSheet = true }
-                        ) {
-                            onBookmarkClick(Restrict.PUBLIC, null)
-                        },
+                IconButton(
+                    onClick = throttleClick {
+                        onBookmarkClick(Restrict.PUBLIC, null)
+                    },
+                    onLongClick = { showPopupTip = true },
                 ) {
                     Icon(
                         imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
@@ -210,14 +204,16 @@ fun SquareIllustItem(
             }
         }
     }
-    BottomBookmarkSheet(
-        showBottomSheet = showBottomSheet,
-        hideBottomSheet = { showBottomSheet = false },
-        illust = illust,
-        bottomSheetState = bottomSheetState,
-        onBookmarkClick = onBookmarkClick,
-        isBookmarked = isBookmarked
-    )
+    if (showBottomSheet) {
+        val bottomSheetState = rememberModalBottomSheetState()
+        BottomBookmarkSheet(
+            hideBottomSheet = { showBottomSheet = false },
+            illust = illust,
+            bottomSheetState = bottomSheetState,
+            onBookmarkClick = onBookmarkClick,
+            isBookmarked = isBookmarked
+        )
+    }
 }
 
 @Composable
@@ -234,7 +230,6 @@ fun RectangleIllustItem(
     val animatedContentScope = LocalNavAnimatedContentScope.current
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     var showBottomSheet by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState()
     val onBookmarkLongClick = {
         showBottomSheet = true
     }
@@ -306,16 +301,11 @@ fun RectangleIllustItem(
                         )
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .minimumInteractiveComponentSize()
-                            .throttleClick(
-                                role = Role.Button,
-                                indication = ripple(bounded = false, radius = 20.dp),
-                                onLongClick = onBookmarkLongClick
-                            ) {
-                                onBookmarkClick(Restrict.PUBLIC, null)
-                            },
+                    IconButton(
+                        onClick = throttleClick {
+                            onBookmarkClick(Restrict.PUBLIC, null)
+                        },
+                        onLongClick = onBookmarkLongClick,
                     ) {
                         Icon(
                             imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
@@ -347,188 +337,176 @@ fun RectangleIllustItem(
             }
         }
     }
-    BottomBookmarkSheet(
-        showBottomSheet = showBottomSheet,
-        hideBottomSheet = { showBottomSheet = false },
-        illust = illust,
-        bottomSheetState = bottomSheetState,
-        onBookmarkClick = onBookmarkClick,
-        isBookmarked = isBookmarked
-    )
+    if (showBottomSheet) {
+        val bottomSheetState = rememberModalBottomSheetState()
+        BottomBookmarkSheet(
+            hideBottomSheet = { showBottomSheet = false },
+            illust = illust,
+            bottomSheetState = bottomSheetState,
+            onBookmarkClick = onBookmarkClick,
+            isBookmarked = isBookmarked
+        )
+    }
 }
 
 @Composable
 fun BottomBookmarkSheet(
-    showBottomSheet: Boolean,
     hideBottomSheet: () -> Unit,
     illust: Illust,
     bottomSheetState: SheetState,
     onBookmarkClick: (Restrict, List<String>?) -> Unit,
     isBookmarked: Boolean,
 ) {
-    if (showBottomSheet) {
-        var publicSwitch by remember { mutableStateOf(true) }
-        val illustBookmarkDetailTags = remember { mutableStateListOf<BookmarkDetailTag>() }
-        LaunchedEffect(Unit) {
-            GetIllustBookmarkDetailUseCase.invoke(illust.id) {
-                publicSwitch = it.bookmarkDetail.restrict == Restrict.PUBLIC.value
-                illustBookmarkDetailTags.clear()
-                illustBookmarkDetailTags.addAll(it.bookmarkDetail.tags)
+    var publicSwitch by remember { mutableStateOf(true) }
+    val illustBookmarkDetailTags = remember { mutableStateListOf<BookmarkDetailTag>() }
+    val screenHeight = LocalWindowInfo.current.containerDpSize.height
+    LaunchedEffect(Unit) {
+        val resp = GetIllustBookmarkDetailUseCase(illust.id)
+        publicSwitch = resp.bookmarkDetail.restrict == Restrict.PUBLIC.value
+        illustBookmarkDetailTags.clear()
+        illustBookmarkDetailTags.addAll(resp.bookmarkDetail.tags)
+    }
+    ModalBottomSheet(
+        onDismissRequest = hideBottomSheet,
+        modifier = Modifier.imePadding(),
+        sheetState = bottomSheetState,
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
+        val allTags = remember(illustBookmarkDetailTags.size) {
+            illustBookmarkDetailTags.map { it.name to it.isRegistered }.toMutableStateList()
+        }
+        val selectedTagsIndex = allTags.indices.filter { allTags[it].second }
+        var inputTag by remember { mutableStateOf(TextFieldValue()) }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = screenHeight / 2)
+                .padding(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = throttleClick {
+                        onBookmarkClick(
+                            if (publicSwitch) Restrict.PUBLIC else Restrict.PRIVATE,
+                            selectedTagsIndex.map { allTags[it].first }
+                        )
+                        hideBottomSheet()
+                    }
+                ) {
+                    Icon(
+                        imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                        contentDescription = null,
+                        tint = FavoriteDualColor(isBookmarked)
+                    )
+                }
+                if (isBookmarked) {
+                    TextButton(
+                        onClick = {
+                            onBookmarkClick(
+                                if (publicSwitch) Restrict.PUBLIC else Restrict.PRIVATE,
+                                selectedTagsIndex.map { allTags[it].first }
+                            )
+                            hideBottomSheet()
+                        },
+                        shapes = ButtonDefaults.shapes(),
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.filledTonalButtonColors().copy(
+                            containerColor = lightBlue
+                        )
+                    ) {
+                        Text(text = stringResource(RString.save))
+                    }
+                }
             }
         }
-        ModalBottomSheet(
-            onDismissRequest = hideBottomSheet,
+        Text(
+            text = if (isBookmarked) stringResource(RString.edit_favorite) else stringResource(
+                RString.add_to_favorite
+            ),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Row(
             modifier = Modifier
-                .imePadding(),
-            sheetState = bottomSheetState,
-            containerColor = MaterialTheme.colorScheme.background,
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val allTags = remember(illustBookmarkDetailTags.size) {
-                illustBookmarkDetailTags.map { it.name to it.isRegistered }.toMutableStateList()
-            }
-            val selectedTagsIndex = allTags.indices.filter { allTags[it].second }
-            var inputTag by remember { mutableStateOf(TextFieldValue()) }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+            Text(
+                text = if (publicSwitch) stringResource(RString.word_public)
+                else stringResource(RString.word_private)
+            )
+            Switch(checked = publicSwitch, onCheckedChange = { publicSwitch = it })
+        }
+        Row(
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .fillMaxWidth()
+//                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = stringResource(RString.bookmark_tags),
+                style = MaterialTheme.typography.labelMedium,
+            )
+            Text(
+                text = "${selectedTagsIndex.size} / 10",
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = inputTag,
+                onValueChange = { inputTag = it },
+                modifier = Modifier.weight(1f),
+                enabled = selectedTagsIndex.size < 10,
+                placeholder = { Text(text = stringResource(RString.add_tags)) },
+                shape = MaterialTheme.shapes.small,
+                colors = transparentIndicatorColors
+            )
+            IconButton(
+                onClick = throttleClick {
+                    handleInputTag(inputTag, allTags)
+                    inputTag = inputTag.copy(text = "")
+                },
             ) {
+                Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
+            }
+        }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            itemsIndexed(allTags) { index, item ->
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .minimumInteractiveComponentSize()
-                            .throttleClick(
-                                role = Role.Button,
-                                indication = ripple(bounded = false, radius = 20.dp),
-                            ) {
-                                onBookmarkClick(
-                                    if (publicSwitch) Restrict.PUBLIC else Restrict.PRIVATE,
-                                    selectedTagsIndex.map { allTags[it].first }
-                                )
-                                hideBottomSheet()
-                            }
-                    ) {
-                        Icon(
-                            imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                            contentDescription = null,
-                            tint = FavoriteDualColor(isBookmarked)
-                        )
-                    }
-                    if (isBookmarked) {
-                        TextButton(
-                            onClick = {
-                                onBookmarkClick(
-                                    if (publicSwitch) Restrict.PUBLIC else Restrict.PRIVATE,
-                                    selectedTagsIndex.map { allTags[it].first }
-                                )
-                                hideBottomSheet()
-                            },
-                            shapes = ButtonDefaults.shapes(),
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.filledTonalButtonColors().copy(
-                                containerColor = lightBlue
-                            )
-                        ) {
-                            Text(text = stringResource(RString.save))
+                    Text(
+                        text = item.first,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Checkbox(
+                        checked = item.second,
+                        onCheckedChange = {
+                            allTags[index] = item.first to it
                         }
-                    }
-                }
-            }
-            Text(
-                text = if (isBookmarked) stringResource(RString.edit_favorite) else stringResource(
-                    RString.add_to_favorite
-                ),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = if (publicSwitch) stringResource(RString.word_public)
-                    else stringResource(RString.word_private)
-                )
-                Switch(checked = publicSwitch, onCheckedChange = { publicSwitch = it })
-            }
-            Row(
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .fillMaxWidth()
-//                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = stringResource(RString.bookmark_tags),
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                Text(
-                    text = "${selectedTagsIndex.size} / 10",
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextField(
-                    value = inputTag,
-                    onValueChange = { inputTag = it },
-                    modifier = Modifier.weight(1f),
-                    enabled = selectedTagsIndex.size < 10,
-                    placeholder = { Text(text = stringResource(RString.add_tags)) },
-                    shape = MaterialTheme.shapes.small,
-                    colors = transparentIndicatorColors
-                )
-                Box(
-                    modifier = Modifier
-                        .minimumInteractiveComponentSize()
-                        .throttleClick(
-                            role = Role.Button,
-                            indication = ripple(bounded = false, radius = 20.dp),
-                        ) {
-                            handleInputTag(inputTag, allTags)
-                            inputTag = inputTag.copy(text = "")
-                        }
-                ) {
-                    Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
-                }
-            }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                itemsIndexed(allTags) { index, item ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = item.first,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Checkbox(
-                            checked = item.second,
-                            onCheckedChange = {
-                                allTags[index] = item.first to it
-                            }
-                        )
-                    }
+                    )
                 }
             }
         }
