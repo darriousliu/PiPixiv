@@ -545,11 +545,11 @@ internal fun PictureScreen(
                                 SquareIllustItem(
                                     illust = it,
                                     isBookmarked = innerIsBookmarked,
-                                    onBookmarkClick = { restrict, tags ->
-                                        if (innerIsBookmarked) {
-                                            BookmarkState.deleteBookmarkIllust(it.id)
-                                        } else {
+                                    onBookmarkClick = { restrict, tags, isEdit ->
+                                        if (isEdit || !innerIsBookmarked) {
                                             BookmarkState.bookmarkIllust(it.id, restrict, tags)
+                                        } else {
+                                            BookmarkState.deleteBookmarkIllust(it.id)
                                         }
                                     },
                                     navToPictureScreen = { prefix, enableTransition ->
@@ -600,11 +600,11 @@ internal fun PictureScreen(
                             SquareIllustItem(
                                 illust = illust,
                                 isBookmarked = isBookmarked,
-                                onBookmarkClick = { restrict, tags ->
-                                    if (isBookmarked) {
-                                        BookmarkState.deleteBookmarkIllust(illust.id)
-                                    } else {
+                                onBookmarkClick = { restrict, tags, isEdit ->
+                                    if (isEdit || !isBookmarked) {
                                         BookmarkState.bookmarkIllust(illust.id, restrict, tags)
+                                    } else {
+                                        BookmarkState.deleteBookmarkIllust(illust.id)
                                     }
                                 },
                                 navToPictureScreen = { prefix, enableTransition ->

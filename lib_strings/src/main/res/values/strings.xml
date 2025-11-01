@@ -80,4 +80,5 @@
     <string name="new_artworks">新作</string>
     <string name="latest_tab_trend">动态</string>
     <string name="latest_tab_following">关注</string>
+    <string name="cancle_favorite">取消喜欢</string>
 </resources>

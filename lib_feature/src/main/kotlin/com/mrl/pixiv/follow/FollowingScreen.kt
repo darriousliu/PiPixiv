@@ -277,11 +277,11 @@ private fun FollowingUserCard(
                 SquareIllustItem(
                     illust = it,
                     isBookmarked = isBookmarked,
-                    onBookmarkClick = { restrict, tags ->
-                        if (isBookmarked) {
-                            BookmarkState.deleteBookmarkIllust(it.id)
-                        } else {
+                    onBookmarkClick = { restrict, tags, isEdit ->
+                        if (isEdit || !isBookmarked) {
                             BookmarkState.bookmarkIllust(it.id, restrict, tags)
+                        } else {
+                            BookmarkState.deleteBookmarkIllust(it.id)
                         }
                     },
                     navToPictureScreen = { prefix, enableTransition ->

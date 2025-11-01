@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,16 +24,16 @@ import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FileCopy
 import androidx.compose.material3.Badge
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -83,6 +83,7 @@ import com.mrl.pixiv.common.data.illust.BookmarkDetailTag
 import com.mrl.pixiv.common.domain.illust.GetIllustBookmarkDetailUseCase
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.round
+import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.throttleClick
@@ -94,7 +95,7 @@ import kotlin.uuid.Uuid
 fun SquareIllustItem(
     illust: Illust,
     isBookmarked: Boolean,
-    onBookmarkClick: (Restrict, List<String>?) -> Unit,
+    onBookmarkClick: (Restrict, List<String>?, Boolean) -> Unit,
     navToPictureScreen: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     elevation: Dp = 5.dp,
@@ -172,9 +173,9 @@ fun SquareIllustItem(
             ) {
                 IconButton(
                     onClick = throttleClick {
-                        onBookmarkClick(Restrict.PUBLIC, null)
+                        onBookmarkClick(Restrict.PUBLIC, null, false)
                     },
-                    onLongClick = { showPopupTip = true },
+                    onLongClick = { showBottomSheet = true },
                 ) {
                     Icon(
                         imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
@@ -221,7 +222,7 @@ fun RectangleIllustItem(
     navToPictureScreen: (String, Boolean) -> Unit,
     illust: Illust,
     isBookmarked: Boolean,
-    onBookmarkClick: (Restrict, List<String>?) -> Unit,
+    onBookmarkClick: (Restrict, List<String>?, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
 ) {
@@ -303,7 +304,7 @@ fun RectangleIllustItem(
 
                     IconButton(
                         onClick = throttleClick {
-                            onBookmarkClick(Restrict.PUBLIC, null)
+                            onBookmarkClick(Restrict.PUBLIC, null, false)
                         },
                         onLongClick = onBookmarkLongClick,
                     ) {
@@ -354,12 +355,11 @@ fun BottomBookmarkSheet(
     hideBottomSheet: () -> Unit,
     illust: Illust,
     bottomSheetState: SheetState,
-    onBookmarkClick: (Restrict, List<String>?) -> Unit,
+    onBookmarkClick: (Restrict, List<String>?, Boolean) -> Unit,
     isBookmarked: Boolean,
 ) {
     var publicSwitch by remember { mutableStateOf(true) }
     val illustBookmarkDetailTags = remember { mutableStateListOf<BookmarkDetailTag>() }
-    val screenHeight = LocalWindowInfo.current.containerDpSize.height
     LaunchedEffect(Unit) {
         val resp = GetIllustBookmarkDetailUseCase(illust.id)
         publicSwitch = resp.bookmarkDetail.restrict == Restrict.PUBLIC.value
@@ -377,52 +377,7 @@ fun BottomBookmarkSheet(
         }
         val selectedTagsIndex = allTags.indices.filter { allTags[it].second }
         var inputTag by remember { mutableStateOf(TextFieldValue()) }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = screenHeight / 2)
-                .padding(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = throttleClick {
-                        onBookmarkClick(
-                            if (publicSwitch) Restrict.PUBLIC else Restrict.PRIVATE,
-                            selectedTagsIndex.map { allTags[it].first }
-                        )
-                        hideBottomSheet()
-                    }
-                ) {
-                    Icon(
-                        imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = null,
-                        tint = FavoriteDualColor(isBookmarked)
-                    )
-                }
-                if (isBookmarked) {
-                    TextButton(
-                        onClick = {
-                            onBookmarkClick(
-                                if (publicSwitch) Restrict.PUBLIC else Restrict.PRIVATE,
-                                selectedTagsIndex.map { allTags[it].first }
-                            )
-                            hideBottomSheet()
-                        },
-                        shapes = ButtonDefaults.shapes(),
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.filledTonalButtonColors().copy(
-                            containerColor = lightBlue
-                        )
-                    ) {
-                        Text(text = stringResource(RString.save))
-                    }
-                }
-            }
-        }
+
         Text(
             text = if (isBookmarked) stringResource(RString.edit_favorite) else stringResource(
                 RString.add_to_favorite
@@ -486,6 +441,7 @@ fun BottomBookmarkSheet(
         }
         LazyColumn(
             modifier = Modifier
+                .height(LocalWindowInfo.current.containerDpSize.height / 3)
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
@@ -506,6 +462,49 @@ fun BottomBookmarkSheet(
                         onCheckedChange = {
                             allTags[index] = item.first to it
                         }
+                    )
+                }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(8.dp),
+            horizontalArrangement = 8f.spaceBy,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+                onClick = throttleClick {
+                    onBookmarkClick(
+                        if (publicSwitch) Restrict.PUBLIC else Restrict.PRIVATE,
+                        selectedTagsIndex.map { allTags[it].first },
+                        isBookmarked
+                    )
+                    hideBottomSheet()
+                },
+                modifier = Modifier
+            ) {
+                Icon(
+                    imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                    contentDescription = null,
+                    tint = FavoriteDualColor(isBookmarked)
+                )
+                8f.HSpacer
+                Text(
+                    text = stringResource(if (isBookmarked) RString.edit_favorite else RString.add_to_favorite),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+            if (isBookmarked) {
+                OutlinedButton(
+                    onClick = throttleClick {
+                        onBookmarkClick(Restrict.PUBLIC, null, false)
+                        hideBottomSheet()
+                    },
+                ) {
+                    Text(
+                        text = stringResource(RString.cancle_favorite),
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
