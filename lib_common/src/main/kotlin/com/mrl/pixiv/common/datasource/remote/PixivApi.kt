@@ -44,7 +44,7 @@ interface PixivApi {
     suspend fun postIllustBookmarkAdd(
         @Field("illust_id") illustId: Long,
         @Field("restrict") restrict: String = Restrict.PUBLIC.value,
-        @Field("tags") tags: List<String>? = null,
+        @Field("tags[]") tags: List<String>? = null,
     ): EmptyResp
 
     @FormUrlEncoded
