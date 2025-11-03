@@ -12,7 +12,7 @@
 
 一个完全由 [Jetpack Compose](https://developer.android.com/develop/ui/compose) 编写的第三方 Pixiv 应用
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.2.21-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/master-lzh/PiPixiv/release.yml)](https://github.com/master-lzh/PiPixiv/actions/workflows/release.yml)
 [![License: Apache-2.0](https://img.shields.io/github/license/master-lzh/PiPixiv?labelColor=27303D&color=0877d2)](/LICENSE)
 
@@ -37,11 +37,11 @@
 
 ### 待办事项
 
-- [x] 翻译
-- [x] 深度链接支持（从 https://www.pixiv.net/illust/xxxxxx 打开）
+* **欢迎提出Feature和PR**
 * 更多...
 
 ### v1.1.0
+
 - [x] 重构网络层，将OkHttp换成Ktor
 - [x] 重构datastore为MMKV
 - [x] 将一些全局状态重构成单例模式，简化代码，便于依赖注入
@@ -50,6 +50,8 @@
 - [x] 收藏页面
 - [x] 关注页面
 - [x] 历史页面
+- [x] 英文翻译
+- [x] 深度链接支持（从 https://www.pixiv.net/illust/xxxxxx 打开）
 
 </div>
 
@@ -61,13 +63,15 @@
 | ![Picture Detail](https://github.com/master-lzh/PiPixiv/assets/60057825/dfe36948-525c-486d-a339-6c2c78b5aebf) |                                                                                                              |
 
 ## 星标历史
+
 [![Star History](https://starchart.cc/master-lzh/PiPixiv.svg?variant=adaptive)](https://starchart.cc/master-lzh/PiPixiv)
 
-
 ## 鸣谢
+
 <div align="left">
 
 本项目使用或参考了几个开源项目：
+
 - **[Coil](https://github.com/coil-kt/coil)**: 一个由 Kotlin Coroutines 支持的 Android 图像加载库
 - **[Koin](https://github.com/InsertKoinIO/koin)**: 面向 Kotlin 开发者的实用轻量级依赖注入框架
 - **[Mihon](https://github.com/mihonapp/mihon)**: 发现并阅读漫画、网络漫画、漫画等。参考应用程序语言切换功能
