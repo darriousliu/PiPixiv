@@ -7,7 +7,7 @@ viewmodel-navigation3 = "2.10.0-beta01"
 material3 = "1.5.0-alpha07"
 
 [libraries]
-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+bom = { group = "androidx.compose", name = "compose-bom-beta", version.ref = "compose-bom" }
 foundation = { module = "androidx.compose.foundation:foundation" }
 animation = { module = "androidx.compose.animation:animation" }
 ui = { module = "androidx.compose.ui:ui" }
