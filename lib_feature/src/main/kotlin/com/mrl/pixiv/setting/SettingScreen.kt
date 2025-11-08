@@ -51,10 +51,11 @@ fun SettingScreen(
     navigationManager: NavigationManager = koinInject()
 ) {
     val context = LocalContext.current
+    val labelDefault = stringResource(RString.label_default)
     val languages = remember { getLangs(context) }
-    var currentLanguage by remember {
+    var currentLanguage by remember(labelDefault) {
         mutableStateOf(
-            AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag() ?: "Default"
+            AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag() ?: labelDefault
         )
     }
     Scaffold(
@@ -86,8 +87,8 @@ fun SettingScreen(
                         Icon(Icons.Rounded.Translate, contentDescription = null)
                     },
                     content = {
-                        LaunchedEffect(currentLanguage) {
-                            val locale = if (currentLanguage == "Default") {
+                        LaunchedEffect(currentLanguage, labelDefault) {
+                            val locale = if (currentLanguage == labelDefault) {
                                 LocaleListCompat.getEmptyLocaleList()
                             } else {
                                 LocaleListCompat.forLanguageTags(currentLanguage)
@@ -125,8 +126,8 @@ fun SettingScreen(
                                                 )
                                             }
                                         }
-
-                                    }, onClick = {
+                                    },
+                                    onClick = {
                                         currentLanguage = it.langTag
                                         expanded = false
                                     }
