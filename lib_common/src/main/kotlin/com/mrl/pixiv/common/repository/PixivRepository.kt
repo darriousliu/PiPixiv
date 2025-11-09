@@ -127,6 +127,9 @@ object PixivRepository : KoinComponent {
         type: String
     ) = apiApi.getUserIllusts(filter.value, userId, type)
 
+    suspend fun loadMoreUserIllusts(queryMap: Map<String, String>) =
+        apiApi.getUserIllusts(queryMap)
+
     suspend fun getUserBookmarksIllust(
         restrict: Restrict,
         userId: Long,

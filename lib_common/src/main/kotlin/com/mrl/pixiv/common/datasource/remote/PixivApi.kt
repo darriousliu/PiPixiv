@@ -125,6 +125,11 @@ interface PixivApi {
         @Query("type") type: String,
     ): UserIllustsResp
 
+    @GET("v1/user/illusts")
+    suspend fun getUserIllusts(
+        @QueryMap queryMap: Map<String, String>
+    ): UserIllustsResp
+
     @GET("v1/user/bookmarks/illust")
     suspend fun getUserBookmarksIllust(
         @Query("restrict") restrict: String,

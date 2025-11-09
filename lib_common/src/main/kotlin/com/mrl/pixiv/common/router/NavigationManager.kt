@@ -123,4 +123,8 @@ class NavigationManager(
         backStack.clear()
         addSingleTop(route = Destination.LoginOption)
     }
+
+    fun navigateToUserIllustScreen(userId: Long) {
+        navigate(route = Destination.UserArtwork(userId))
+    }
 }

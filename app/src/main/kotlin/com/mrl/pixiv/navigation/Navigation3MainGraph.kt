@@ -22,6 +22,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.mrl.pixiv.MainScreen
+import com.mrl.pixiv.artwork.ArtworkScreen
 import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
@@ -204,6 +205,12 @@ fun Navigation3MainGraph(
                                 enableTransition = params.enableTransition,
                             )
                         }
+                    }
+
+                    entry<Destination.UserArtwork> {
+                        ArtworkScreen(
+                            userId = it.userId,
+                        )
                     }
                 }
             )

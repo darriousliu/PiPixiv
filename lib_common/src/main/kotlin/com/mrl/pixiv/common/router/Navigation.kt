@@ -72,6 +72,11 @@ sealed class Destination : NavKey {
     data class Following(
         val userId: Long,
     ) : Destination()
+
+    @Serializable
+    data class UserArtwork(
+        val userId: Long,
+    ) : Destination()
 }
 
 @Serializable
