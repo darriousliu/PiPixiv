@@ -88,7 +88,7 @@ suspend fun addAuthHeader(request: HttpRequestBuilder) {
             set("Authorization", "Bearer ${AuthManager.requireUserAccessToken()}")
         }
         // zh_CN
-        set("Accept-Language", "${locale.language}_${locale.region}")
+        set("Accept-Language", locale.toLanguageTag().replace("-", "_"))
         // zh-hans
         set("App-Accept-Language", appAcceptLanguage)
         set("App-OS", "android")
