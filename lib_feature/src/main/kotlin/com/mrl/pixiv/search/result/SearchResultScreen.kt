@@ -85,6 +85,7 @@ fun SearchResultsScreen(
                 horizontalArrangement = layoutParams.horizontalArrangement,
                 contentPadding = PaddingValues(
                     start = 8.dp,
+                    top = 8.dp,
                     end = 8.dp,
                     bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 ),
