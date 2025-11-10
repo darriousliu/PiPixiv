@@ -180,16 +180,6 @@ internal fun PictureScreen(
     val popBackToHomeScreen = navigationManager::popBackToMainScreen
     val navToUserDetailScreen = navigationManager::navigateToProfileDetailScreen
     val state = pictureViewModel.asState()
-//    val (relatedSpanCount, userSpanCount) = when (LocalConfiguration.current.orientation) {
-//        Configuration.ORIENTATION_PORTRAIT -> Pair(2, 3)
-//        Configuration.ORIENTATION_LANDSCAPE -> Pair(4, 6)
-//        else -> Pair(2, 3)
-//    }
-//    val relatedRowCount = if (relatedIllusts.itemCount % relatedSpanCount == 0) {
-//        relatedIllusts.itemCount / relatedSpanCount
-//    } else {
-//        relatedIllusts.itemCount / relatedSpanCount + 1
-//    }
     val currentWindowAdaptiveInfo = currentWindowAdaptiveInfo()
     val relatedLayoutParams = IllustGridDefaults.relatedLayoutParameters()
     val userLayoutParams = IllustGridDefaults.userLayoutParameters()
