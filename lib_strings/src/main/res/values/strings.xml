@@ -80,9 +80,12 @@
     <string name="new_artworks">新作</string>
     <string name="latest_tab_trend">动态</string>
     <string name="latest_tab_following">关注</string>
-    <string name="cancle_favorite">取消喜欢</string>
+    <string name="cancel_favorite">取消喜欢</string>
     <string name="artworks">作品</string>
     <string name="block_settings">屏蔽设定</string>
     <string name="block_user">屏蔽用户</string>
     <string name="block_tags">屏蔽标签</string>
+    <string name="block_illust">屏蔽该作品</string>
+    <string name="illust_hidden">该作品已隐藏</string>
+    <string name="show_illust">显示该作品</string>
 </resources>

@@ -77,9 +77,12 @@
     <string name="new_artworks">नई कलाकृतियाँ</string>
     <string name="latest_tab_trend">ट्रेंड</string>
     <string name="latest_tab_following">फॉलो कर रहे हैं</string>
-    <string name="cancle_favorite">पसंदीदा रद्द करें</string>
+    <string name="cancel_favorite">पसंदीदा रद्द करें</string>
     <string name="artworks">कलाकृतियाँ</string>
     <string name="block_settings">ब्लॉक सेटिंग्स</string>
     <string name="block_user">उपयोगकर्ता को ब्लॉक करें</string>
     <string name="block_tags">टैग ब्लॉक करें</string>
+    <string name="block_illust">इस चित्र को ब्लॉक करें</string>
+    <string name="illust_hidden">यह चित्र छिपा हुआ है</string>
+    <string name="show_illust">इस चित्र को दिखाएँ</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -32,9 +33,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.HideImage
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Refresh
@@ -52,11 +55,13 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -102,6 +107,7 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.AppUtil.getString
 import com.mrl.pixiv.common.util.RString
@@ -240,6 +246,7 @@ internal fun PictureScreen(
         }
     }
     val isFollowed = illust.user.isFollowing
+    val isBlocked = BlockingRepository.collectIllustBlockAsState(illustId = illust.id)
     val placeholder = rememberVectorPainter(Icons.Rounded.Refresh)
     val bottomSheetState = rememberModalBottomSheetState()
     val readMediaImagePermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -264,7 +271,6 @@ internal fun PictureScreen(
     with(sharedTransitionScope) {
         Scaffold(
             modifier = modifier
-                .skipToLookaheadSize()
                 .conditionally(enableTransition) {
                     sharedBounds(
                         rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
@@ -277,34 +283,39 @@ internal fun PictureScreen(
                 },
             topBar = {
                 PictureTopBar(
+                    illust = illust,
+                    currPage = currPage,
+                    isBarVisible = isBarVisible,
+                    isBlocked = isBlocked,
                     onBack = onBack,
                     popBackToHomeScreen = popBackToHomeScreen,
-                    illust = illust,
                     onShare = {
                         shareLauncher.launch(it)
                     },
-                    isBarVisible = isBarVisible,
-                    currPage = currPage,
                     navToUserDetailScreen = navToUserDetailScreen,
+                    onBlock = pictureViewModel::blockIllust,
+                    onRemoveBlock = pictureViewModel::removeBlockIllust
                 )
             },
             floatingActionButton = {
-                IconButton(
-                    onClick = throttleClick {
-                        onBookmarkClick(Restrict.PUBLIC, null)
-                    },
-                    shapes = IconButtonDefaults.shapes(),
-                    modifier = Modifier.size(50.dp),
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    )
-                ) {
-                    Icon(
-                        imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = null,
-                        tint = if (isBookmarked) Color.Red else LocalContentColor.current,
-                        modifier = Modifier.size(35.dp)
-                    )
+                if (!isBlocked) {
+                    IconButton(
+                        onClick = throttleClick {
+                            onBookmarkClick(Restrict.PUBLIC, null)
+                        },
+                        shapes = IconButtonDefaults.shapes(),
+                        modifier = Modifier.size(50.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        )
+                    ) {
+                        Icon(
+                            imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                            contentDescription = null,
+                            tint = if (isBookmarked) Color.Red else LocalContentColor.current,
+                            modifier = Modifier.size(35.dp)
+                        )
+                    }
                 }
             },
             snackbarHost = {
@@ -669,6 +680,37 @@ internal fun PictureScreen(
                     )
                 }
             }
+            if (isBlocked) {
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(
+                            10.dp,
+                            Alignment.CenterVertically
+                        ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.HideImage,
+                            contentDescription = null,
+                            modifier = Modifier.size(100.dp),
+                        )
+                        Text(
+                            text = stringResource(RString.illust_hidden),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Button(
+                            onClick = pictureViewModel::removeBlockIllust
+                        ) {
+                            Text(
+                                text = stringResource(RString.show_illust)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -739,13 +781,16 @@ private fun UserFollowInfo(
 
 @Composable
 private fun PictureTopBar(
+    illust: Illust,
+    currPage: Int,
+    isBarVisible: Boolean,
+    isBlocked: Boolean,
     onBack: () -> Unit,
     popBackToHomeScreen: () -> Unit,
-    illust: Illust,
     onShare: (Intent) -> Unit,
-    isBarVisible: Boolean,
-    currPage: Int,
     navToUserDetailScreen: (Long) -> Unit,
+    onBlock: () -> Unit,
+    onRemoveBlock: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showBottomMenu by remember { mutableStateOf(false) }
@@ -809,7 +854,6 @@ private fun PictureTopBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 15.dp),
-                verticalArrangement = 10.spaceBy
             ) {
                 UserFollowInfo(
                     illust = illust,
@@ -825,10 +869,24 @@ private fun PictureTopBar(
                         showBottomMenu = false
                     },
                     text = stringResource(RString.share),
-                    modifier = Modifier.padding(vertical = 10.dp),
+                    modifier = Modifier.padding(vertical = 15.dp),
                     icon = {
                         Icon(
                             imageVector = Icons.Rounded.Share,
+                            contentDescription = null,
+                        )
+                    }
+                )
+                BottomMenuItem(
+                    onClick = {
+                        if (isBlocked) onRemoveBlock() else onBlock()
+                        showBottomMenu = false
+                    },
+                    text = stringResource(if (isBlocked) RString.show_illust else RString.block_illust),
+                    modifier = Modifier.padding(vertical = 15.dp),
+                    icon = {
+                        Icon(
+                            imageVector = if (isBlocked) Icons.Rounded.Refresh else Icons.Rounded.Block,
                             contentDescription = null,
                         )
                     }
@@ -846,9 +904,13 @@ private fun BottomMenuItem(
     icon: @Composable () -> Unit = {},
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
+            .throttleClick(
+                indication = ripple(),
+                onClick = onClick
+            )
             .fillMaxWidth()
-            .throttleClick(onClick = onClick),
+            .then(modifier),
         horizontalArrangement = 10f.spaceBy,
         verticalAlignment = Alignment.CenterVertically,
     ) {

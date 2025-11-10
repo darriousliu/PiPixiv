@@ -77,9 +77,12 @@
     <string name="new_artworks">أعمال جديدة</string>
     <string name="latest_tab_trend">الرائج</string>
     <string name="latest_tab_following">المتابعون</string>
-    <string name="cancle_favorite">إلغاء المفضلة</string>
+    <string name="cancel_favorite">إلغاء المفضلة</string>
     <string name="artworks">الأعمال الفنية</string>
     <string name="block_settings">إعدادات الحظر</string>
     <string name="block_user">حظر المستخدم</string>
     <string name="block_tags">حظر العلامات</string>
+    <string name="block_illust">حظر هذا العمل</string>
+    <string name="illust_hidden">تم إخفاء هذا العمل</string>
+    <string name="show_illust">إظهار هذا العمل</string>
 </resources>

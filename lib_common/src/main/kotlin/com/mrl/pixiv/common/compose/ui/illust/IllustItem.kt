@@ -49,6 +49,8 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -84,8 +86,10 @@ import com.mrl.pixiv.common.domain.illust.GetIllustBookmarkDetailUseCase
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
@@ -106,6 +110,7 @@ fun SquareIllustItem(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showPopupTip by remember { mutableStateOf(false) }
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
+    val isBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
     val onClick = {
         navToPictureScreen(prefix, enableTransition)
     }
@@ -126,6 +131,9 @@ fun SquareIllustItem(
                     boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
 //                    renderInOverlayDuringTransition = false
                 )
+                .conditionally(isBlocked) {
+                    blur(50.dp, BlurredEdgeTreatment(shape))
+                }
                 .shadow(elevation, shape)
                 .background(MaterialTheme.colorScheme.background)
                 .throttleClick { onClick() }
@@ -230,6 +238,7 @@ fun RectangleIllustItem(
     val sharedTransitionScope = LocalSharedTransitionScope.current
     val animatedContentScope = LocalNavAnimatedContentScope.current
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
+    val isBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
     var showBottomSheet by remember { mutableStateOf(false) }
     val onBookmarkLongClick = {
         showBottomSheet = true
@@ -258,6 +267,7 @@ fun RectangleIllustItem(
         ) {
             Column {
                 val imageKey = illust.imageUrls.medium
+                val imageShape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
                 AsyncImage(
                     model = remember {
                         ImageRequest.Builder(context)
@@ -270,7 +280,10 @@ fun RectangleIllustItem(
                     contentDescription = null,
                     modifier = Modifier
                         .aspectRatio(scale)
-                        .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
+                        .conditionally(isBlocked) {
+                            blur(50.dp, BlurredEdgeTreatment(imageShape))
+                        }
+                        .clip(imageShape)
                         .sharedElement(
                             sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$imageKey"),
                             animatedVisibilityScope = animatedContentScope,
@@ -503,7 +516,7 @@ fun BottomBookmarkSheet(
                     },
                 ) {
                     Text(
-                        text = stringResource(RString.cancle_favorite),
+                        text = stringResource(RString.cancel_favorite),
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }

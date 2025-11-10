@@ -77,9 +77,12 @@
     <string name="new_artworks">新着作品</string>
     <string name="latest_tab_trend">トレンド</string>
     <string name="latest_tab_following">フォロー中</string>
-    <string name="cancle_favorite">お気に入りを解除</string>
+    <string name="cancel_favorite">お気に入りを解除</string>
     <string name="artworks">作品</string>
     <string name="block_settings">ブロック設定</string>
     <string name="block_user">ユーザーをブロック</string>
     <string name="block_tags">タグをブロック</string>
+    <string name="block_illust">この作品をブロック</string>
+    <string name="illust_hidden">この作品は非表示になっています</string>
+    <string name="show_illust">作品を表示</string>
 </resources>
