@@ -42,6 +42,7 @@ import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.SettingScreen
+import com.mrl.pixiv.setting.block.BlockSettingsScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import com.mrl.pixiv.splash.SplashViewModel
 import kotlinx.collections.immutable.toImmutableList
@@ -211,6 +212,9 @@ fun Navigation3MainGraph(
                         ArtworkScreen(
                             userId = it.userId,
                         )
+                    }
+                    entry<Destination.BlockSettings> {
+                        BlockSettingsScreen()
                     }
                 }
             )

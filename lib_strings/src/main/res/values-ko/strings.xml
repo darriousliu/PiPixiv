@@ -82,4 +82,7 @@
     <string name="latest_tab_following">팔로잉</string>
     <string name="cancle_favorite">좋아요 취소</string>
     <string name="artworks">작품</string>
+    <string name="block_settings">차단 설정</string>
+    <string name="block_user">사용자 차단</string>
+    <string name="block_tags">태그 차단</string>
 </resources>

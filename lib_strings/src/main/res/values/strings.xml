@@ -82,4 +82,7 @@
     <string name="latest_tab_following">关注</string>
     <string name="cancle_favorite">取消喜欢</string>
     <string name="artworks">作品</string>
+    <string name="block_settings">屏蔽设定</string>
+    <string name="block_user">屏蔽用户</string>
+    <string name="block_tags">屏蔽标签</string>
 </resources>

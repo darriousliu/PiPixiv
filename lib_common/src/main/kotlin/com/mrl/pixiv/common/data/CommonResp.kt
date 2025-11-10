@@ -144,7 +144,10 @@ data class User(
     val isFollowed: Boolean = false,
 
     @SerialName("is_access_blocking_user")
-    val isAccessBlockingUser: Boolean = false
+    val isAccessBlockingUser: Boolean = false,
+
+    @SerialName("is_accept_request")
+    val isAcceptRequest: Boolean = false,
 )
 
 @Serializable

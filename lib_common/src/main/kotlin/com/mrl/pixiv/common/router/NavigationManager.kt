@@ -127,4 +127,8 @@ class NavigationManager(
     fun navigateToUserIllustScreen(userId: Long) {
         navigate(route = Destination.UserArtwork(userId))
     }
+
+    fun navigateToBlockSettings() {
+        navigate(route = Destination.BlockSettings)
+    }
 }

@@ -77,6 +77,9 @@ sealed class Destination : NavKey {
     data class UserArtwork(
         val userId: Long,
     ) : Destination()
+
+    @Serializable
+    data object BlockSettings : Destination()
 }
 
 @Serializable

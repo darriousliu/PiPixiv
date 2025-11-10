@@ -79,4 +79,7 @@
     <string name="latest_tab_following">Abonnements</string>
     <string name="cancle_favorite">Annuler le favori</string>
     <string name="artworks">Œuvres</string>
+    <string name="block_settings">Paramètres de blocage</string>
+    <string name="block_user">Bloquer l\'utilisateur</string>
+    <string name="block_tags">Bloquer les tags</string>
 </resources>

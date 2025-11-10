@@ -185,4 +185,13 @@ object PixivRepository : KoinComponent {
         restrict: Restrict = Restrict.ALL,
         offset: Long? = null
     ) = apiApi.getFollowingIllusts(restrict.value, offset)
+
+    suspend fun getMuteList() = apiApi.getMuteList()
+
+    suspend fun postMuteSetting(
+        addUserIds: List<Long>? = null,
+        deleteUserIds: List<Long>? = null,
+        addTags: List<String>? = null,
+        deleteTags: List<String>? = null
+    ) = apiApi.postMuteSetting(addUserIds, deleteUserIds, addTags, deleteTags)
 }

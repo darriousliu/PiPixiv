@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.History
@@ -170,6 +171,23 @@ fun ProfileScreen(
                     ) {
                         Text(
                             text = stringResource(RString.collection),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                    // 屏蔽设定
+                    SettingItem(
+                        onClick = {
+                            navigationManager.navigateToBlockSettings()
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Block,
+                                contentDescription = null
+                            )
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(RString.block_settings),
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
