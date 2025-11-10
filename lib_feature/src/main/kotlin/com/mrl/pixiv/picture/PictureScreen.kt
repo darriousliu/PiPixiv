@@ -36,6 +36,7 @@ import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Button
@@ -61,9 +62,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -177,7 +180,6 @@ internal fun PictureScreen(
     val popBackToHomeScreen = navigationManager::popBackToMainScreen
     val navToUserDetailScreen = navigationManager::navigateToProfileDetailScreen
     val state = pictureViewModel.asState()
-    val context = LocalContext.current
 //    val (relatedSpanCount, userSpanCount) = when (LocalConfiguration.current.orientation) {
 //        Configuration.ORIENTATION_PORTRAIT -> Pair(2, 3)
 //        Configuration.ORIENTATION_LANDSCAPE -> Pair(4, 6)
@@ -215,12 +217,13 @@ internal fun PictureScreen(
     }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val sharingSuccess = stringResource(RString.sharing_success)
     val shareLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             // 处理分享结果
             if (result.resultCode == Activity.RESULT_OK) {
                 scope.launch {
-                    snackbarHostState.showSnackbar(context.getString(RString.sharing_success))
+                    snackbarHostState.showSnackbar(sharingSuccess)
                 }
             } else {
                 // 分享失败或取消
@@ -292,6 +295,7 @@ internal fun PictureScreen(
                     },
                     isBarVisible = isBarVisible,
                     currPage = currPage,
+                    navToUserDetailScreen = navToUserDetailScreen,
                 )
             },
             floatingActionButton = {
@@ -469,63 +473,14 @@ internal fun PictureScreen(
                 }
                 item(key = KEY_ILLUST_AUTHOR) {
                     //作者头像、名字、关注按钮
-                    Row(
+                    UserFollowInfo(
+                        illust = illust,
+                        navToUserDetailScreen = navToUserDetailScreen,
+                        isFollowed = isFollowed,
                         modifier = Modifier
                             .padding(horizontal = 15.dp)
                             .padding(top = 10.dp)
-                    ) {
-                        UserAvatar(
-                            url = illust.user.profileImageUrls.medium,
-                            modifier = Modifier
-                                .size(30.dp)
-                                .align(Alignment.CenterVertically),
-                            onClick = {
-                                navToUserDetailScreen(illust.user.id)
-                            },
-                        )
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 10.dp)
-                                .align(Alignment.CenterVertically)
-                        ) {
-                            Text(
-                                text = illust.user.name,
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium,
-                                ),
-                            )
-                            Text(
-                                text = "ID: ${illust.user.id}",
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium,
-                                ),
-                            )
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        if (isFollowed) {
-                            OutlinedButton(
-                                onClick = {
-                                    FollowState.unFollowUser(illust.user.id)
-                                }
-                            ) {
-                                Text(
-                                    text = stringResource(RString.followed),
-                                )
-                            }
-                        } else {
-                            Button(
-                                onClick = {
-                                    FollowState.followUser(illust.user.id)
-                                }
-                            ) {
-                                Text(
-                                    text = stringResource(RString.follow),
-                                )
-                            }
-                        }
-                    }
+                    )
                 }
                 item(key = KEY_ILLUST_AUTHOR_OTHER_WORKS) {
                     FlowRow(
@@ -729,6 +684,70 @@ internal fun PictureScreen(
 }
 
 @Composable
+private fun UserFollowInfo(
+    illust: Illust,
+    navToUserDetailScreen: (Long) -> Unit,
+    isFollowed: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+    ) {
+        UserAvatar(
+            url = illust.user.profileImageUrls.medium,
+            modifier = Modifier
+                .size(30.dp)
+                .align(Alignment.CenterVertically),
+            onClick = {
+                navToUserDetailScreen(illust.user.id)
+            },
+        )
+        Column(
+            modifier = Modifier
+                .padding(start = 10.dp)
+                .align(Alignment.CenterVertically)
+        ) {
+            Text(
+                text = illust.user.name,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+            )
+            Text(
+                text = "ID: ${illust.user.id}",
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        if (isFollowed) {
+            OutlinedButton(
+                onClick = {
+                    FollowState.unFollowUser(illust.user.id)
+                }
+            ) {
+                Text(
+                    text = stringResource(RString.followed),
+                )
+            }
+        } else {
+            Button(
+                onClick = {
+                    FollowState.followUser(illust.user.id)
+                }
+            ) {
+                Text(
+                    text = stringResource(RString.follow),
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun PictureTopBar(
     onBack: () -> Unit,
     popBackToHomeScreen: () -> Unit,
@@ -736,8 +755,10 @@ private fun PictureTopBar(
     onShare: (Intent) -> Unit,
     isBarVisible: Boolean,
     currPage: Int,
+    navToUserDetailScreen: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var showBottomMenu by remember { mutableStateOf(false) }
     TopAppBar(
         title = {},
         modifier = modifier,
@@ -766,15 +787,12 @@ private fun PictureTopBar(
                 }
                 // 分享按钮
                 Icon(
-                    imageVector = Icons.Rounded.Share,
+                    imageVector = Icons.Rounded.MoreVert,
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .throttleClick {
-                            val shareIntent = ShareUtil.createShareIntent(
-                                "${illust.title} | ${illust.user.name} #pixiv https://www.pixiv.net/artworks/${illust.id}"
-                            )
-                            onShare(shareIntent)
+                            showBottomMenu = true
                         },
                 )
                 this@TopAppBar.AnimatedVisibility(
@@ -789,9 +807,68 @@ private fun PictureTopBar(
                 }
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors()
-            .copy(containerColor = Color.Transparent)
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+        )
     )
+    if (showBottomMenu) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomMenu = false }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp),
+                verticalArrangement = 10.spaceBy
+            ) {
+                UserFollowInfo(
+                    illust = illust,
+                    navToUserDetailScreen = navToUserDetailScreen,
+                    isFollowed = illust.user.isFollowing
+                )
+                BottomMenuItem(
+                    onClick = {
+                        val shareIntent = ShareUtil.createShareIntent(
+                            "${illust.title} | ${illust.user.name} #pixiv https://www.pixiv.net/artworks/${illust.id}"
+                        )
+                        onShare(shareIntent)
+                        showBottomMenu = false
+                    },
+                    text = stringResource(RString.share),
+                    modifier = Modifier.padding(vertical = 10.dp),
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Share,
+                            contentDescription = null,
+                        )
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomMenuItem(
+    onClick: () -> Unit,
+    text: String,
+    modifier: Modifier = Modifier,
+    icon: @Composable () -> Unit = {},
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .throttleClick(onClick = onClick),
+        horizontalArrangement = 10f.spaceBy,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        icon()
+        Text(
+            text = text,
+            style = TextStyle(fontSize = 16.sp),
+            modifier = Modifier.weight(1f)
+        )
+    }
 }
 
 @Composable

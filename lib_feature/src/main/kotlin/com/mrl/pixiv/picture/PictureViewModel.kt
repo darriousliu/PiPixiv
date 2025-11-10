@@ -20,7 +20,12 @@ import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.paging.RelatedIllustPaging
-import com.mrl.pixiv.common.util.*
+import com.mrl.pixiv.common.util.AppUtil
+import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.ShareUtil
+import com.mrl.pixiv.common.util.TAG
+import com.mrl.pixiv.common.util.saveToAlbum
+import com.mrl.pixiv.common.util.toBitmap
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
@@ -90,7 +95,7 @@ class PictureViewModel(
     illust: Illust?,
     illustId: Long?,
 ) : BaseMviViewModel<PictureState, PictureAction>(
-    initialState = PictureState(),
+    initialState = PictureState(illust = illust),
 ), KoinComponent {
     private val imageOkHttpClient: HttpClient by inject(named<ImageClient>())
     val relatedIllusts = Pager(PagingConfig(pageSize = 20)) {
@@ -125,7 +130,6 @@ class PictureViewModel(
                 if (illust.type == Type.Ugoira) {
                     dispatch(PictureAction.DownloadUgoira(illust.id))
                 }
-                updateState { copy(illust = illust) }
             }
 
             illustId != null -> {
