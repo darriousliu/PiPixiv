@@ -33,12 +33,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.HideImage
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
@@ -886,7 +886,7 @@ private fun PictureTopBar(
                     modifier = Modifier.padding(vertical = 15.dp),
                     icon = {
                         Icon(
-                            imageVector = if (isBlocked) Icons.Rounded.Refresh else Icons.Rounded.Block,
+                            imageVector = if (isBlocked) Icons.Rounded.Image else Icons.Rounded.HideImage,
                             contentDescription = null,
                         )
                     }
