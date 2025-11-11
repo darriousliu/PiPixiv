@@ -82,7 +82,7 @@
     <string name="block_settings">Paramètres de blocage</string>
     <string name="block_user">Bloquer l\'utilisateur</string>
     <string name="block_tags">Bloquer les tags</string>
-    <string name="block_illust">Bloquer cette œuvre</string>
+    <string name="hide_illust">Masquer cette œuvre</string>
     <string name="illust_hidden">Cette œuvre est masquée</string>
     <string name="show_illust">Afficher cette œuvre</string>
 </resources>

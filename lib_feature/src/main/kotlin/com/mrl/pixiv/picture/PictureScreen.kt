@@ -882,7 +882,7 @@ private fun PictureTopBar(
                         if (isBlocked) onRemoveBlock() else onBlock()
                         showBottomMenu = false
                     },
-                    text = stringResource(if (isBlocked) RString.show_illust else RString.block_illust),
+                    text = stringResource(if (isBlocked) RString.show_illust else RString.hide_illust),
                     modifier = Modifier.padding(vertical = 15.dp),
                     icon = {
                         Icon(

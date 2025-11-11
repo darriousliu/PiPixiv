@@ -82,7 +82,7 @@
     <string name="block_settings">ब्लॉक सेटिंग्स</string>
     <string name="block_user">उपयोगकर्ता को ब्लॉक करें</string>
     <string name="block_tags">टैग ब्लॉक करें</string>
-    <string name="block_illust">इस चित्र को ब्लॉक करें</string>
+    <string name="hide_illust">इस चित्र को छिपाएँ</string>
     <string name="illust_hidden">यह चित्र छिपा हुआ है</string>
     <string name="show_illust">इस चित्र को दिखाएँ</string>
 </resources>
