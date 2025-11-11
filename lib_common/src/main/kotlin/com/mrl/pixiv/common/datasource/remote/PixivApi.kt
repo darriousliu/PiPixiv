@@ -214,4 +214,10 @@ interface PixivApi {
         @Field("add_tags[]") addTags: List<String>? = null,
         @Field("delete_tags[]") deleteTags: List<String>? = null,
     ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v2/user/browsing-history/illust/add")
+    suspend fun addIllustBrowsingHistory(
+        @Field("illust_ids[]") illustId: List<Long>,
+    ): EmptyResp
 }

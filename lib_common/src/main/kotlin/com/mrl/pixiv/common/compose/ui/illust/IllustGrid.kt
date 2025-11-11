@@ -38,7 +38,7 @@ fun LazyGridScope.illustGrid(
     }
     items(
         illusts.itemCount,
-        key = illusts.itemKey { it.id }
+        key = { index -> illusts.itemKey { "${index}_${it.id}" }(index) }
     ) { index ->
         val illust = illusts[index] ?: return@items
         val isBookmarked = illust.isBookmark

@@ -13,6 +13,7 @@ import androidx.paging.cachedIn
 import coil3.SingletonImageLoader
 import coil3.request.ImageRequest
 import coil3.toBitmap
+import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Type
@@ -43,6 +44,7 @@ import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
@@ -334,6 +336,12 @@ class PictureViewModel(
 
     fun removeBlockIllust() {
         BlockingRepository.removeBlockIllust(state.illust?.id ?: return)
+    }
+
+    fun addHistory() {
+        launchProcess(Dispatchers.IO) {
+            PixivRepository.addIllustBrowsingHistory(state.illust?.id ?: return@launchProcess)
+        }
     }
 
     override fun onCleared() {

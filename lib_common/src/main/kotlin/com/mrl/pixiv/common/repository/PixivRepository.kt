@@ -194,4 +194,10 @@ object PixivRepository : KoinComponent {
         addTags: List<String>? = null,
         deleteTags: List<String>? = null
     ) = apiApi.postMuteSetting(addUserIds, deleteUserIds, addTags, deleteTags)
+
+    suspend fun addIllustBrowsingHistory(vararg illustIds: Long) =
+        apiApi.addIllustBrowsingHistory(illustIds.toList())
+
+    suspend fun addIllustBrowsingHistory(illustIds: List<Long>) =
+        apiApi.addIllustBrowsingHistory(illustIds)
 }

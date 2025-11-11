@@ -64,6 +64,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -152,6 +153,11 @@ fun PictureDeeplinkScreen(
             contentAlignment = Alignment.Center
         ) {
             CircularWavyProgressIndicator()
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            pictureViewModel.addHistory()
         }
     }
 }
