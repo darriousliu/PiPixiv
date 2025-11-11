@@ -79,7 +79,8 @@ fun BlockSettingsScreen(
                             viewModel.editMuteList {
                                 navigationManager.popBackStack()
                             }
-                        }
+                        },
+                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Save,

@@ -25,6 +25,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -241,7 +242,10 @@ private fun ProfileAppBar(
     TopAppBar(
         title = {},
         actions = {
-            IconButton(onClick = { expanded = true }) {
+            IconButton(
+                onClick = { expanded = true },
+                shapes = IconButtonDefaults.shapes(),
+            ) {
                 Icon(imageVector = Icons.Rounded.Palette, contentDescription = null)
             }
             DropdownMenu(

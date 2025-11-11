@@ -20,8 +20,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -294,9 +296,21 @@ private fun ProfileDetailAppBar(
         navigationIcon = {
             IconButton(
                 onClick = onBack,
-                modifier = Modifier.padding(vertical = 10.dp)
+                shapes = IconButtonDefaults.shapes(),
+                modifier = Modifier.padding(vertical = 10.dp),
             ) {
                 Icon(imageVector = Icons.Rounded.ArrowBackIosNew, contentDescription = null)
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = {
+
+                },
+                shapes = IconButtonDefaults.shapes(),
+                modifier = Modifier.padding(vertical = 10.dp),
+            ) {
+                Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = null)
             }
         },
         expandedHeight = expandedHeight,
@@ -305,7 +319,8 @@ private fun ProfileDetailAppBar(
             containerColor = Color.Transparent,
             scrolledContainerColor = Color.Transparent,
             navigationIconContentColor = Color.White,
-            titleContentColor = Color.White
+            titleContentColor = Color.White,
+            actionIconContentColor = Color.White
         ),
         scrollBehavior = scrollBehavior
     )
