@@ -21,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -31,6 +33,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -51,13 +57,16 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowRgb565
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
+import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.copyToClipboard
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.common.viewmodel.follow.isFollowing
 import com.mrl.pixiv.feature.R
 import com.mrl.pixiv.profile.detail.components.IllustWidget
 import com.mrl.pixiv.profile.detail.components.NovelBookmarkWidget
@@ -92,7 +101,13 @@ fun ProfileDetailScreen(
             ProfileDetailAppBar(
                 userInfo = userInfo,
                 scrollBehavior = scrollBehavior,
-                onBack = navigationManager::popBackStack
+                onBack = navigationManager::popBackStack,
+                onPrivateFollow = { userId ->
+                    viewModel.followUser(userId, Restrict.PRIVATE)
+                },
+                onBlockUser = { userId ->
+                    viewModel.blockUser(userId)
+                }
             )
         },
     ) {
@@ -237,6 +252,8 @@ private fun ProfileDetailAppBar(
     userInfo: UserDetailResp,
     scrollBehavior: TopAppBarScrollBehavior,
     onBack: () -> Unit,
+    onPrivateFollow: (Long) -> Unit,
+    onBlockUser: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val avatarSize = 50.dp
@@ -250,6 +267,8 @@ private fun ProfileDetailAppBar(
     val backgroundUrl = userInfo.profile.backgroundImageURL.ifEmpty {
         userInfo.user.profileImageUrls.medium
     }
+    var showMenu by remember { mutableStateOf(false) }
+
     if (backgroundUrl.isNotEmpty()) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -304,13 +323,54 @@ private fun ProfileDetailAppBar(
         },
         actions = {
             IconButton(
-                onClick = {
-
-                },
+                onClick = { showMenu = true },
                 shapes = IconButtonDefaults.shapes(),
                 modifier = Modifier.padding(vertical = 10.dp),
             ) {
                 Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = null)
+            }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                val isBlocked = BlockingRepository.collectUserBlockAsState(userInfo.user.id)
+                if (!userInfo.user.isFollowing) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(RString.private_follow),
+                            )
+                        },
+                        onClick = {
+                            onPrivateFollow(userInfo.user.id)
+                            showMenu = false
+                        }
+                    )
+                }
+                if (!isBlocked) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(RString.block_user),
+                            )
+                        },
+                        onClick = {
+                            onBlockUser(userInfo.user.id)
+                            showMenu = false
+                        }
+                    )
+                }
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(RString.report_user),
+                        )
+                    },
+                    onClick = {
+                        // todo report
+                        showMenu = false
+                    }
+                )
             }
         },
         expandedHeight = expandedHeight,

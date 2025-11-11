@@ -88,4 +88,6 @@
     <string name="hide_illust">隐藏该作品</string>
     <string name="illust_hidden">该作品已隐藏</string>
     <string name="show_illust">显示该作品</string>
+    <string name="private_follow">悄悄关注</string>
+    <string name="report_user">举报用户</string>
 </resources>
