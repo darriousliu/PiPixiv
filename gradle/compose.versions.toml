@@ -15,7 +15,7 @@ ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive" }
-material3-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout"}
+material3-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout" }
 material3-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation" }
 material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3" }
 material3-window-size = { module = "androidx.compose.material3:material3-window-size-class" }

@@ -88,7 +88,9 @@ fun UgoiraPlayer(
                         imageVector = Icons.Rounded.PlayCircle,
                         contentDescription = null,
                         tint = Color.Gray,
-                        modifier = Modifier.size(100.dp).shadow(4.dp, shape = CircleShape),
+                        modifier = Modifier
+                            .size(100.dp)
+                            .shadow(4.dp, shape = CircleShape),
                     )
                 }
             }
