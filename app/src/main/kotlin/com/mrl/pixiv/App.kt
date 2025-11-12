@@ -9,11 +9,16 @@ import com.mrl.pixiv.common.data.setting.setAppCompatDelegateThemeMode
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.deleteFiles
+import com.mrl.pixiv.common.util.initKotzilla
 import com.mrl.pixiv.common.util.initializeFirebase
 import com.mrl.pixiv.common.util.isExist
 import com.mrl.pixiv.di.allModule
 import com.tencent.mmkv.MMKV
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import okio.Path.Companion.toOkioPath
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -38,6 +43,7 @@ class App : Application() {
         startKoin {
             androidLogger()
             androidContext(this@App)
+            initKotzilla()
             modules(allModule)
         }
         migrateDataStoreToMMKV()

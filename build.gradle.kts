@@ -12,4 +12,5 @@ plugins {
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
     alias(kotlinx.plugins.parcelize) apply false
+    alias(libs.plugins.kotzilla) apply false
 }

@@ -62,12 +62,14 @@ dependencies {
     // Okio
     api(libs.okio)
     // Firebase
-    "defaultApi"(platform(libs.firebase.bom))
-    "defaultApi"(libs.bundles.firebase)
+    defaultApi(platform(libs.firebase.bom))
+    defaultApi(libs.bundles.firebase)
     // MMKV
     api(libs.mmkv)
     api(libs.mmkv.kotlin)
     // Logger
     api(libs.kermit)
     api(libs.material)
+    // Kotzilla
+    defaultApi(libs.kotzilla.sdk.ktor3)
 }
