@@ -85,4 +85,8 @@
     <string name="hide_illust">Скрыть эту работу</string>
     <string name="illust_hidden">Эта работа скрыта</string>
     <string name="show_illust">Показать эту работу</string>
+    <string name="private_follow">Скрытая подписка</string>
+    <string name="report_user">Пожаловаться на пользователя</string>
+    <string name="user_blocked">Пользователь заблокирован</string>
+    <string name="cancel_user_blocked">Разблокировать пользователя</string>
 </resources>

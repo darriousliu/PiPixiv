@@ -85,4 +85,8 @@
     <string name="hide_illust">إخفاء هذا العمل</string>
     <string name="illust_hidden">تم إخفاء هذا العمل</string>
     <string name="show_illust">إظهار هذا العمل</string>
+    <string name="private_follow">متابعة خاصة</string>
+    <string name="report_user">الإبلاغ عن مستخدم</string>
+    <string name="user_blocked">تم حظر المستخدم</string>
+    <string name="cancel_user_blocked">إلغاء حظر المستخدم</string>
 </resources>

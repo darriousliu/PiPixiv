@@ -85,4 +85,8 @@
     <string name="hide_illust">Dieses Werk ausblenden</string>
     <string name="illust_hidden">Dieses Werk ist verborgen</string>
     <string name="show_illust">Werk anzeigen</string>
+    <string name="private_follow">Privat folgen</string>
+    <string name="report_user">Benutzer melden</string>
+    <string name="user_blocked">Benutzer blockiert</string>
+    <string name="cancel_user_blocked">Benutzer freigeben</string>
 </resources>

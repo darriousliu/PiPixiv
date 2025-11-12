@@ -85,4 +85,8 @@
     <string name="hide_illust">Ocultar esta obra</string>
     <string name="illust_hidden">Esta obra está oculta</string>
     <string name="show_illust">Mostrar esta obra</string>
+    <string name="private_follow">Seguir en privado</string>
+    <string name="report_user">Reportar usuario</string>
+    <string name="user_blocked">Usuario bloqueado</string>
+    <string name="cancel_user_blocked">Desbloquear usuario</string>
 </resources>

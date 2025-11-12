@@ -85,4 +85,8 @@
     <string name="hide_illust">Hide this artwork</string>
     <string name="illust_hidden">This artwork is hidden</string>
     <string name="show_illust">Show this artwork</string>
+    <string name="private_follow">Private Follow</string>
+    <string name="report_user">Report User</string>
+    <string name="user_blocked">User Blocked</string>
+    <string name="cancel_user_blocked">Unblock User</string>
 </resources>

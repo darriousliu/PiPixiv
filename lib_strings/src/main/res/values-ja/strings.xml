@@ -85,4 +85,8 @@
     <string name="hide_illust">この作品を非表示</string>
     <string name="illust_hidden">この作品は非表示になっています</string>
     <string name="show_illust">作品を表示</string>
+    <string name="private_follow">こっそりフォロー</string>
+    <string name="report_user">ユーザーを報告</string>
+    <string name="user_blocked">ユーザーはブロックされています</string>
+    <string name="cancel_user_blocked">ユーザーのブロックを解除</string>
 </resources>

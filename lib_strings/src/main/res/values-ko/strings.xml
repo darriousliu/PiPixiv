@@ -15,11 +15,9 @@
     <string name="edit_favorite">좋아요 편집</string>
     <string name="save">저장</string>
     <string name="long_click_to_edit_favorite">길게 눌러 즐겨찾기 편집</string>
-    <string name="non_translate_uncategorized" translatable="false">未分類</string>
     <string name="all">전체</string>
     <string name="uncategorized">미분류</string>
     <string name="search_by_title_author">제목 또는 작가 이름 검색</string>
-    <string name="app_name" translatable="false">PiPixiv</string>
     <string name="refresh_token_success">토큰 새로고침 성공</string>
     <string name="unknown_error">알 수 없는 오류</string>
     <string name="revoke">취소</string>
@@ -72,7 +70,6 @@
     <string name="self_defined_source">사용자 정의 이미지 소스</string>
     <string name="default_open">기본 링크 열기</string>
     <string name="allow_open_link">앱이 해당 링크를 열 수 있도록 허용</string>
-    <string name="token" translatable="false">Token</string>
     <string name="network_error">네트워크 오류, 연결을 확인해주세요</string>
     <string name="sign_out">로그아웃</string>
     <string name="copy_to_clipboard">클립보드에 복사</string>
@@ -88,4 +85,8 @@
     <string name="hide_illust">이 작품 숨기기</string>
     <string name="illust_hidden">이 작품은 숨겨졌습니다</string>
     <string name="show_illust">이 작품 표시</string>
+    <string name="private_follow">비공개 팔로우</string>
+    <string name="report_user">사용자 신고</string>
+    <string name="user_blocked">사용자 차단됨</string>
+    <string name="cancel_user_blocked">사용자 차단 해제</string>
 </resources>

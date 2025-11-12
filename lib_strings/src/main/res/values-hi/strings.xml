@@ -85,4 +85,8 @@
     <string name="hide_illust">इस चित्र को छिपाएँ</string>
     <string name="illust_hidden">यह चित्र छिपा हुआ है</string>
     <string name="show_illust">इस चित्र को दिखाएँ</string>
+    <string name="private_follow">निजी फॉलो</string>
+    <string name="report_user">उपयोगकर्ता की रिपोर्ट करें</string>
+    <string name="user_blocked">उपयोगकर्ता ब्लॉक किया गया</string>
+    <string name="cancel_user_blocked">उपयोगकर्ता को अनब्लॉक करें</string>
 </resources>
