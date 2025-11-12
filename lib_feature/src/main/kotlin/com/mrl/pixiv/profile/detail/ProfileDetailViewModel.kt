@@ -98,8 +98,15 @@ class ProfileDetailViewModel(
 
     fun blockUser(userId: Long) {
         launchIO {
-            PixivRepository.postMuteSetting(addUserIds = listOf(userId))
-            BlockingRepository.blockUser(userId)
+            async { PixivRepository.postMuteSetting(addUserIds = listOf(userId)) }
+            async { BlockingRepository.blockUser(userId) }
+        }
+    }
+
+    fun removeBlockUser(userId: Long) {
+        launchIO {
+            async { PixivRepository.postMuteSetting(deleteUserIds = listOf(userId)) }
+            async { BlockingRepository.removeBlockUser(userId) }
         }
     }
 }

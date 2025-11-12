@@ -18,17 +18,21 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.automirrored.rounded.ArrowBackIos
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.PersonOff
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.ripple
@@ -56,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowRgb565
+import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.user.UserDetailResp
@@ -92,156 +97,205 @@ fun ProfileDetailScreen(
     val userInfo = state.userInfo
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val lazyListState = rememberLazyListState()
+    val isBlocked = BlockingRepository.collectUserBlockAsState(uid)
 
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            ProfileDetailAppBar(
-                userInfo = userInfo,
-                scrollBehavior = scrollBehavior,
-                onBack = navigationManager::popBackStack,
-                onPrivateFollow = { userId ->
-                    viewModel.followUser(userId, Restrict.PRIVATE)
-                },
-                onBlockUser = { userId ->
-                    viewModel.blockUser(userId)
-                }
-            )
-        },
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .padding(it)
-                .fillMaxWidth(),
-            state = lazyListState,
-            contentPadding = PaddingValues(horizontal = 15.dp)
-        ) {
-            item(key = KEY_USER_INFO) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Row(
-                        verticalAlignment = CenterVertically
-                    ) {
-                        Text(
-                            text = userInfo.user.name,
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                            ),
-                        )
-                        if (userInfo.profile.isPremium) {
-                            Image(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_profile_premium),
-                                modifier = Modifier
-                                    .padding(start = 5.dp)
-                                    .size(20.dp),
+            if (isBlocked) {
+                TopAppBar(
+                    title = {},
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navigationManager.popBackStack() },
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowBackIos,
                                 contentDescription = null
                             )
                         }
                     }
-                    Text(
-                        text = buildString {
-                            append(userInfo.profile.totalFollowUsers.toString())
-                            append(" ")
-                            append(stringResource(RString.followed))
-                        },
-                        modifier = Modifier.throttleClick {
-                            navigationManager.navigateToFollowingScreen(userInfo.user.id)
-                        },
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                        )
+                )
+            } else {
+                ProfileDetailAppBar(
+                    userInfo = userInfo,
+                    scrollBehavior = scrollBehavior,
+                    isBlocked = isBlocked,
+                    onBack = navigationManager::popBackStack,
+                    onPrivateFollow = { userId ->
+                        viewModel.followUser(userId, Restrict.PRIVATE)
+                    },
+                    onBlockUser = { userId ->
+                        viewModel.blockUser(userId)
+                    }
+                )
+            }
+        },
+    ) {
+        if (isBlocked) {
+            BlockSurface(
+                modifier = Modifier.fillMaxSize(),
+                icon = {
+                    Icon(
+                        imageVector = Icons.Rounded.PersonOff,
+                        contentDescription = null,
+                        modifier = Modifier.size(100.dp)
                     )
-                    //id点击可复制
-                    Row(
-                        horizontalArrangement = 5f.spaceBy,
-                        verticalAlignment = CenterVertically,
+                },
+                title = {
+                    Text(
+                        text = stringResource(RString.user_blocked),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                },
+                button = {
+                    Button(
+                        onClick = {
+                            viewModel.removeBlockUser(uid)
+                        }
                     ) {
                         Text(
-                            text = "ID: ${userInfo.user.id}",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                            ),
-                        )
-                        Icon(
-                            imageVector = Icons.Rounded.ContentCopy,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(30.dp)
-                                .throttleClick(indication = ripple(radius = 15.dp)) {
-                                    copyToClipboard(userInfo.user.id.toString())
-                                }
-                                .padding(5.dp)
+                            text = stringResource(RString.cancel_user_blocked)
                         )
                     }
-                    // 个人简介
-                    if (userInfo.user.comment.isNotEmpty()) {
+                }
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxWidth(),
+                state = lazyListState,
+                contentPadding = PaddingValues(horizontal = 15.dp)
+            ) {
+                item(key = KEY_USER_INFO) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = CenterVertically
+                        ) {
+                            Text(
+                                text = userInfo.user.name,
+                                style = TextStyle(
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Medium,
+                                ),
+                            )
+                            if (userInfo.profile.isPremium) {
+                                Image(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_profile_premium),
+                                    modifier = Modifier
+                                        .padding(start = 5.dp)
+                                        .size(20.dp),
+                                    contentDescription = null
+                                )
+                            }
+                        }
                         Text(
-                            text = userInfo.user.comment,
+                            text = buildString {
+                                append(userInfo.profile.totalFollowUsers.toString())
+                                append(" ")
+                                append(stringResource(RString.followed))
+                            },
+                            modifier = Modifier.throttleClick {
+                                navigationManager.navigateToFollowingScreen(userInfo.user.id)
+                            },
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
+                            )
+                        )
+                        //id点击可复制
+                        Row(
+                            horizontalArrangement = 5f.spaceBy,
+                            verticalAlignment = CenterVertically,
+                        ) {
+                            Text(
+                                text = "ID: ${userInfo.user.id}",
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                ),
+                            )
+                            Icon(
+                                imageVector = Icons.Rounded.ContentCopy,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .throttleClick(indication = ripple(radius = 15.dp)) {
+                                        copyToClipboard(userInfo.user.id.toString())
+                                    }
+                                    .padding(5.dp)
+                            )
+                        }
+                        // 个人简介
+                        if (userInfo.user.comment.isNotEmpty()) {
+                            Text(
+                                text = userInfo.user.comment,
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                ),
+                            )
+                        }
+                    }
+                }
+                if (state.userIllusts.isNotEmpty()) {
+                    item(key = KEY_USER_ILLUSTS) {
+                        // 插画、漫画网格组件
+                        IllustWidget(
+                            title = stringResource(RString.illustration_works),
+                            endText = stringResource(
+                                RString.illustration_count,
+                                userInfo.profile.totalIllusts
                             ),
+                            navToPictureScreen = navigationManager::navigateToPictureScreen,
+                            illusts = state.userIllusts,
+                            modifier = Modifier.fillMaxWidth(),
+                            onAllClick = {
+                                navigationManager.navigateToUserIllustScreen(uid)
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
+                if (state.userBookmarksIllusts.isNotEmpty()) {
+                    item(key = KEY_USER_BOOKMARKS_ILLUSTS) {
+                        // 插画、漫画收藏网格组件
+                        IllustWidget(
+                            title = stringResource(RString.illust_and_manga_liked),
+                            endText = stringResource(RString.view_all),
+                            navToPictureScreen = navigationManager::navigateToPictureScreen,
+                            illusts = state.userBookmarksIllusts,
+                            modifier = Modifier.fillMaxWidth(),
+                            onAllClick = {
+                                navigationManager.navigateToCollectionScreen(uid)
+                            }
                         )
                     }
                 }
-            }
-            if (state.userIllusts.isNotEmpty()) {
-                item(key = KEY_USER_ILLUSTS) {
-                    // 插画、漫画网格组件
-                    IllustWidget(
-                        title = stringResource(RString.illustration_works),
-                        endText = stringResource(
-                            RString.illustration_count,
-                            userInfo.profile.totalIllusts
-                        ),
-                        navToPictureScreen = navigationManager::navigateToPictureScreen,
-                        illusts = state.userIllusts,
-                        modifier = Modifier.fillMaxWidth(),
-                        onAllClick = {
-                            navigationManager.navigateToUserIllustScreen(uid)
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
+                item(key = KEY_USER_BOOKMARKS_NOVELS) {
+                    if (state.userBookmarksNovels.isNotEmpty()) {
+                        // 小说收藏网格组件
+                        NovelBookmarkWidget(
+                            novels = state.userBookmarksNovels,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 20.dp)
+                        )
+                    }
                 }
-            }
-            if (state.userBookmarksIllusts.isNotEmpty()) {
-                item(key = KEY_USER_BOOKMARKS_ILLUSTS) {
-                    // 插画、漫画收藏网格组件
-                    IllustWidget(
-                        title = stringResource(RString.illust_and_manga_liked),
-                        endText = stringResource(RString.view_all),
-                        navToPictureScreen = navigationManager::navigateToPictureScreen,
-                        illusts = state.userBookmarksIllusts,
-                        modifier = Modifier.fillMaxWidth(),
-                        onAllClick = {
-                            navigationManager.navigateToCollectionScreen(uid)
-                        }
-                    )
-                }
-            }
-            item(key = KEY_USER_BOOKMARKS_NOVELS) {
-                if (state.userBookmarksNovels.isNotEmpty()) {
-                    // 小说收藏网格组件
-                    NovelBookmarkWidget(
-                        novels = state.userBookmarksNovels,
+                item(key = KEY_SPACE) {
+                    Spacer(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 20.dp)
+                            .height(150.dp)
                     )
                 }
-            }
-            item(key = KEY_SPACE) {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                )
             }
         }
     }
@@ -251,6 +305,7 @@ fun ProfileDetailScreen(
 private fun ProfileDetailAppBar(
     userInfo: UserDetailResp,
     scrollBehavior: TopAppBarScrollBehavior,
+    isBlocked: Boolean,
     onBack: () -> Unit,
     onPrivateFollow: (Long) -> Unit,
     onBlockUser: (Long) -> Unit,
@@ -318,22 +373,26 @@ private fun ProfileDetailAppBar(
                 shapes = IconButtonDefaults.shapes(),
                 modifier = Modifier.padding(vertical = 10.dp),
             ) {
-                Icon(imageVector = Icons.Rounded.ArrowBackIosNew, contentDescription = null)
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBackIos,
+                    contentDescription = null
+                )
             }
         },
         actions = {
-            IconButton(
-                onClick = { showMenu = true },
-                shapes = IconButtonDefaults.shapes(),
-                modifier = Modifier.padding(vertical = 10.dp),
-            ) {
-                Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = null)
+            if (!isBlocked) {
+                IconButton(
+                    onClick = { showMenu = true },
+                    shapes = IconButtonDefaults.shapes(),
+                    modifier = Modifier.padding(vertical = 10.dp),
+                ) {
+                    Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = null)
+                }
             }
             DropdownMenu(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false }
             ) {
-                val isBlocked = BlockingRepository.collectUserBlockAsState(userInfo.user.id)
                 if (!userInfo.user.isFollowing) {
                     DropdownMenuItem(
                         text = {
@@ -347,19 +406,17 @@ private fun ProfileDetailAppBar(
                         }
                     )
                 }
-                if (!isBlocked) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = stringResource(RString.block_user),
-                            )
-                        },
-                        onClick = {
-                            onBlockUser(userInfo.user.id)
-                            showMenu = false
-                        }
-                    )
-                }
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(RString.block_user),
+                        )
+                    },
+                    onClick = {
+                        onBlockUser(userInfo.user.id)
+                        showMenu = false
+                    }
+                )
                 DropdownMenuItem(
                     text = {
                         Text(

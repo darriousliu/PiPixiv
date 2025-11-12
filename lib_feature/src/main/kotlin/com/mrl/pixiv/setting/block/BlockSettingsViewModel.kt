@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import com.mrl.pixiv.common.coroutine.withUIContext
 import com.mrl.pixiv.common.data.mute.MutedTag
 import com.mrl.pixiv.common.data.mute.MutedUser
+import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -68,6 +69,7 @@ class BlockSettingsViewModel : BaseMviViewModel<BlockSettingsState, ViewIntent>(
                 deleteTags = state.toEditBlockTag,
                 deleteUserIds = state.toEditBlockUser,
             )
+            BlockingRepository.removeBlockUserList(state.toEditBlockUser)
             withUIContext {
                 onSuccess()
             }

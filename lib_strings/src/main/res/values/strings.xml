@@ -90,4 +90,6 @@
     <string name="show_illust">显示该作品</string>
     <string name="private_follow">悄悄关注</string>
     <string name="report_user">举报用户</string>
+    <string name="user_blocked">用户已被屏蔽</string>
+    <string name="cancel_user_blocked">取消屏蔽用户</string>
 </resources>

@@ -110,7 +110,8 @@ fun SquareIllustItem(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showPopupTip by remember { mutableStateOf(false) }
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
-    val isBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
+    val isIllustBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
+    val isUserBlocked = BlockingRepository.collectUserBlockAsState(illust.user.id)
     val onClick = {
         navToPictureScreen(prefix, enableTransition)
     }
@@ -131,7 +132,7 @@ fun SquareIllustItem(
                     boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
 //                    renderInOverlayDuringTransition = false
                 )
-                .conditionally(isBlocked) {
+                .conditionally(isIllustBlocked || isUserBlocked) {
                     blur(50.dp, BlurredEdgeTreatment(shape))
                 }
                 .shadow(elevation, shape)
@@ -238,7 +239,8 @@ fun RectangleIllustItem(
     val sharedTransitionScope = LocalSharedTransitionScope.current
     val animatedContentScope = LocalNavAnimatedContentScope.current
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
-    val isBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
+    val isIllustBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
+    val isUserBlocked = BlockingRepository.collectUserBlockAsState(illust.user.id)
     var showBottomSheet by remember { mutableStateOf(false) }
     val onBookmarkLongClick = {
         showBottomSheet = true
@@ -280,7 +282,7 @@ fun RectangleIllustItem(
                     contentDescription = null,
                     modifier = Modifier
                         .aspectRatio(scale)
-                        .conditionally(isBlocked) {
+                        .conditionally(isIllustBlocked || isUserBlocked) {
                             blur(50.dp, BlurredEdgeTreatment(imageShape))
                         }
                         .clip(imageShape)
