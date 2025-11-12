@@ -27,6 +27,10 @@ object BlockingRepository : MMKVUser {
         blockUsers.value = (blockUsers.value ?: emptySet()) + userId.toString()
     }
 
+    fun blockUserList(userIds: List<Long>) {
+        blockUsers.value = (blockUsers.value ?: emptySet()) + userIds.map { it.toString() }.toSet()
+    }
+
     fun removeBlockUser(userId: Long) {
         blockUsers.value = blockUsers.value?.minus(userId.toString())
     }
@@ -46,4 +50,5 @@ object BlockingRepository : MMKVUser {
         val blockingUsers by blockUsersFlow.collectAsStateWithLifecycle()
         return blockingUsers?.contains(userId.toString()) ?: false
     }
+
 }

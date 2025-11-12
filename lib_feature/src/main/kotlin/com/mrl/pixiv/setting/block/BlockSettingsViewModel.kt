@@ -30,6 +30,7 @@ class BlockSettingsViewModel : BaseMviViewModel<BlockSettingsState, ViewIntent>(
     fun loadMuteList() {
         launchIO {
             val resp = PixivRepository.getMuteList()
+            BlockingRepository.blockUserList(resp.mutedUsers.map { it.user.id })
             updateState {
                 copy(
                     allMutedTags = resp.mutedTags,
