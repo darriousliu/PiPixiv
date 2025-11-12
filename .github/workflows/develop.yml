@@ -48,6 +48,12 @@ jobs:
         run: |
           echo $GOOGLE_SERVICE_JSON > app/google-services.json
 
+      - name: Add Kotzilla Sdk
+        env:
+          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
+        run: |
+          echo $KOTZILLA_SDK_JSON > app/kotzilla.json
+
       - name: Build Foss Release apk
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
