@@ -353,7 +353,11 @@ internal fun PictureScreen(
                     },
                     button = {
                         Button(
-                            onClick = pictureViewModel::removeBlockIllust
+                            onClick = if (isIllustBlocked) {
+                                pictureViewModel::removeBlockIllust
+                            } else {
+                                pictureViewModel::removeBlockUser
+                            }
                         ) {
                             Text(
                                 text = stringResource(if (isIllustBlocked) RString.show_illust else RString.cancel_user_blocked)

@@ -344,6 +344,14 @@ class PictureViewModel(
         }
     }
 
+    fun removeBlockUser() {
+        val userId = state.illust?.user?.id ?: return
+        launchIO {
+            PixivRepository.postMuteSetting(deleteUserIds = listOf(userId))
+        }
+        BlockingRepository.removeBlockUser(userId)
+    }
+
     override fun onCleared() {
         cachedDownloadSize.clear()
     }
