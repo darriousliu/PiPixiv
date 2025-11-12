@@ -9,7 +9,5 @@ android {
 dependencies {
     implementation(project(":lib_common"))
 
-    if (project.findProperty("applyFirebasePlugins") == "true") {
-        ksp(libs.koin.ksp.compiler)
-    }
+    ksp(libs.koin.ksp.compiler)
 }

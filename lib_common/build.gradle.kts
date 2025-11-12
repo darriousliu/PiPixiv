@@ -42,9 +42,7 @@ dependencies {
     api(androidx.navigation.compose)
     // Koin
     api(libs.bundles.koin)
-    if (project.findProperty("applyFirebasePlugins") == "true") {
-        ksp(libs.koin.ksp.compiler)
-    }
+    ksp(libs.koin.ksp.compiler)
     // Ktor
     api(kotlinx.bundles.ktor)
     // Coroutines

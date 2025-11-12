@@ -54,7 +54,6 @@ internal fun Project.configureKotlinAndroid(
     }
 
     configureKotlin()
-    configureSortKoinKspGeneration()
 
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 

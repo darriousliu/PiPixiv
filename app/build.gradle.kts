@@ -99,7 +99,5 @@ dependencies {
     implementation(project(":lib_feature"))
 
     baselineProfile(project(":baselineprofile"))
-    if (project.findProperty("applyFirebasePlugins") == "true") {
-        ksp(libs.koin.ksp.compiler)
-    }
+    ksp(libs.koin.ksp.compiler)
 }

@@ -3,10 +3,8 @@ on:
   push:
     branches:
       - master
-      - master-fdroid # Foss 构建
     tags:
       - 'v*'
-      - 'v*-fdroid' # Foss 发版
   workflow_dispatch:
     inputs:
       name:
@@ -51,19 +49,6 @@ jobs:
 
         run: |
           echo $GOOGLE_SERVICE_JSON > app/google-services.json
-      # 根据分支决定构建类型
-      - name: Determine Build Variant
-        id: variant
-        run: |
-          if [[ "${{ github.ref }}" == refs/heads/master-fdroid ]] || [[ "${{ github.ref }}" == refs/tags/v*-fdroid ]]; then
-            echo "build_foss=true" >> $GITHUB_OUTPUT
-            echo "build_default=false" >> $GITHUB_OUTPUT
-            echo "Building Foss variant only (master-fdroid branch)"
-          else
-            echo "build_foss=false" >> $GITHUB_OUTPUT
-            echo "build_default=true" >> $GITHUB_OUTPUT
-            echo "Building Default variant only (master branch)"
-          fi
 
       - name: Add Kotzilla Sdk
         env:
@@ -72,7 +57,6 @@ jobs:
           echo $KOTZILLA_SDK_JSON > app/kotzilla.json
 
       - name: Build Foss Release apk
-        if: steps.variant.outputs.build_foss == 'true'
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
@@ -81,7 +65,6 @@ jobs:
           GH_PACKAGE_TOKEN: ${{ secrets.GH_PACKAGE_TOKEN }}
         run: ./gradlew assembleFossRelease -PapplyFirebasePlugins=false --stacktrace
       - name: Build Default Release apk
-        if: steps.variant.outputs.build_default == 'true'
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
