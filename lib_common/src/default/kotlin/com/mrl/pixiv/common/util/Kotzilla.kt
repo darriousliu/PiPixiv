@@ -4,5 +4,7 @@ import io.kotzilla.sdk.analytics.koin.analytics
 import org.koin.core.KoinApplication
 
 fun KoinApplication.initKotzilla() {
-    analytics()
+    if (!isDebug) {
+        analytics()
+    }
 }
