@@ -22,6 +22,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.mrl.pixiv.MainScreen
+import com.mrl.pixiv.artwork.ArtworkScreen
 import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
@@ -41,6 +42,7 @@ import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.SettingScreen
+import com.mrl.pixiv.setting.block.BlockSettingsScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import com.mrl.pixiv.splash.SplashViewModel
 import kotlinx.collections.immutable.toImmutableList
@@ -74,25 +76,25 @@ fun Navigation3MainGraph(
                 ),
                 sceneStrategy = listDetailStrategy,
                 entryProvider = entryProvider {
-                    entry<Destination.LoginOptionScreen> {
+                    entry<Destination.LoginOption> {
                         LoginOptionScreen()
                     }
                     // 登陆
-                    entry<Destination.LoginScreen> {
+                    entry<Destination.Login> {
                         val startUrl = it.startUrl
                         LoginScreen(startUrl = startUrl)
                     }
                     // OAuth token登陆
-                    entry<Destination.OAuthLoginScreen> {
+                    entry<Destination.OAuthLogin> {
                         OAuthLoginScreen()
                     }
 
-                    entry<Destination.MainScreen> {
+                    entry<Destination.Main> {
                         MainScreen()
                     }
 
                     // 详情页
-                    entry<Destination.ProfileDetailScreen>(
+                    entry<Destination.ProfileDetail>(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
                         ProfileDetailScreen(
@@ -101,7 +103,7 @@ fun Navigation3MainGraph(
                     }
 
                     // 作品详情页（深度链接）
-                    entry<Destination.PictureDeeplinkScreen>(
+                    entry<Destination.PictureDeeplink>(
                         metadata = ListDetailSceneStrategy.detailPane() +
                                 NavDisplay.transitionSpec {
                                     scaleIn(initialScale = 0.9f) + fadeIn() togetherWith
@@ -118,12 +120,12 @@ fun Navigation3MainGraph(
                     }
 
                     // 搜索页
-                    entry<Destination.SearchScreen> {
+                    entry<Destination.Search> {
                         SearchScreen()
                     }
 
                     // 搜索结果页
-                    entry<Destination.SearchResultsScreen>(
+                    entry<Destination.SearchResults>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
                         val searchWord = it.searchWords
@@ -133,41 +135,41 @@ fun Navigation3MainGraph(
                     }
 
                     // 设置页
-                    entry<Destination.SettingScreen>(
+                    entry<Destination.Setting>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
                         SettingScreen()
                     }
 
                     // 网络设置页
-                    entry<Destination.NetworkSettingScreen>(
+                    entry<Destination.NetworkSetting>(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
                         NetworkSettingScreen()
                     }
 
                     // 历史记录
-                    entry<Destination.HistoryScreen>(
+                    entry<Destination.History>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
                         HistoryScreen()
                     }
 
                     // 本人收藏页
-                    entry<Destination.CollectionScreen>(
+                    entry<Destination.Collection>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
                         val userId = it.userId
                         CollectionScreen(uid = userId)
                     }
 
-                    entry<Destination.FollowingScreen> {
+                    entry<Destination.Following> {
                         val uid = it.userId
                         FollowingScreen(uid = uid)
                     }
 
                     // 横向滑动作品详情页
-                    entry<Destination.PictureScreen>(
+                    entry<Destination.Picture>(
                         metadata = ListDetailSceneStrategy.detailPane() +
                                 NavDisplay.transitionSpec {
                                     scaleIn(
@@ -205,6 +207,15 @@ fun Navigation3MainGraph(
                             )
                         }
                     }
+
+                    entry<Destination.UserArtwork> {
+                        ArtworkScreen(
+                            userId = it.userId,
+                        )
+                    }
+                    entry<Destination.BlockSettings> {
+                        BlockSettingsScreen()
+                    }
                 }
             )
         }
@@ -224,7 +235,7 @@ private fun HandleDeeplink(
             when {
                 DestinationsDeepLink.illustRegex.matches(data.toString()) -> {
                     navigationManager.navigate(
-                        Destination.PictureDeeplinkScreen(
+                        Destination.PictureDeeplink(
                             data.lastPathSegment?.toLong() ?: 0
                         )
                     )
@@ -232,7 +243,7 @@ private fun HandleDeeplink(
 
                 DestinationsDeepLink.userRegex.matches(data.toString()) -> {
                     navigationManager.navigate(
-                        Destination.ProfileDetailScreen(
+                        Destination.ProfileDetail(
                             data.lastPathSegment?.toLong() ?: 0
                         )
                     )

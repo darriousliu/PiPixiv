@@ -4,12 +4,16 @@ import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.History
@@ -21,8 +25,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -83,7 +89,8 @@ fun ProfileScreen(
                     viewModel.dispatch(ProfileAction.ChangeAppTheme(theme = theme))
                 }
             )
-        }
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         LazyColumn(
             modifier = modifier
@@ -168,6 +175,23 @@ fun ProfileScreen(
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
+                    // 屏蔽设定
+                    SettingItem(
+                        onClick = {
+                            navigationManager.navigateToBlockSettings()
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Block,
+                                contentDescription = null
+                            )
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(RString.block_settings),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     // 导出Token
                     SettingItem(
@@ -218,10 +242,18 @@ private fun ProfileAppBar(
     TopAppBar(
         title = {},
         actions = {
-            IconButton(onClick = { expanded = true }) {
+            IconButton(
+                onClick = { expanded = true },
+                shapes = IconButtonDefaults.shapes(),
+            ) {
                 Icon(imageVector = Icons.Rounded.Palette, contentDescription = null)
             }
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = {
+                    expanded = false
+                }
+            ) {
                 options.forEach { (theme, resId) ->
                     DropdownMenuItem(
                         text = {

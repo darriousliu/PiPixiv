@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,8 +47,9 @@ fun LoginOptionScreen(
             )
             Button(
                 onClick = {
-                    navigationManager.navigate(Destination.LoginScreen(generateWebViewUrl(false)))
+                    navigationManager.navigate(Destination.Login(generateWebViewUrl(false)))
                 },
+                shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -56,8 +58,9 @@ fun LoginOptionScreen(
             }
             Button(
                 onClick = {
-                    navigationManager.navigate(Destination.LoginScreen(generateWebViewUrl(true)))
+                    navigationManager.navigate(Destination.Login(generateWebViewUrl(true)))
                 },
+                shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -66,8 +69,9 @@ fun LoginOptionScreen(
             }
             OutlinedButton(
                 onClick = {
-                    navigationManager.navigate(Destination.OAuthLoginScreen)
+                    navigationManager.navigate(Destination.OAuthLogin)
                 },
+                shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(

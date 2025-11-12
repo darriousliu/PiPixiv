@@ -77,4 +77,16 @@
     <string name="new_artworks">New Artworks</string>
     <string name="latest_tab_trend">Trend</string>
     <string name="latest_tab_following">Following</string>
+    <string name="cancel_favorite">Cancel Favorite</string>
+    <string name="artworks">Artworks</string>
+    <string name="block_settings">Block Settings</string>
+    <string name="block_user">Block User</string>
+    <string name="block_tags">Block Tags</string>
+    <string name="hide_illust">Hide this artwork</string>
+    <string name="illust_hidden">This artwork is hidden</string>
+    <string name="show_illust">Show this artwork</string>
+    <string name="private_follow">Private Follow</string>
+    <string name="report_user">Report User</string>
+    <string name="user_blocked">User Blocked</string>
+    <string name="cancel_user_blocked">Unblock User</string>
 </resources>

@@ -127,6 +127,9 @@ object PixivRepository : KoinComponent {
         type: String
     ) = apiApi.getUserIllusts(filter.value, userId, type)
 
+    suspend fun loadMoreUserIllusts(queryMap: Map<String, String>) =
+        apiApi.getUserIllusts(queryMap)
+
     suspend fun getUserBookmarksIllust(
         restrict: Restrict,
         userId: Long,
@@ -182,4 +185,19 @@ object PixivRepository : KoinComponent {
         restrict: Restrict = Restrict.ALL,
         offset: Long? = null
     ) = apiApi.getFollowingIllusts(restrict.value, offset)
+
+    suspend fun getMuteList() = apiApi.getMuteList()
+
+    suspend fun postMuteSetting(
+        addUserIds: List<Long>? = null,
+        deleteUserIds: List<Long>? = null,
+        addTags: List<String>? = null,
+        deleteTags: List<String>? = null
+    ) = apiApi.postMuteSetting(addUserIds, deleteUserIds, addTags, deleteTags)
+
+    suspend fun addIllustBrowsingHistory(vararg illustIds: Long) =
+        apiApi.addIllustBrowsingHistory(illustIds.toList())
+
+    suspend fun addIllustBrowsingHistory(illustIds: List<Long>) =
+        apiApi.addIllustBrowsingHistory(illustIds)
 }

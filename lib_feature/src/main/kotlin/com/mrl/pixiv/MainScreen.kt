@@ -5,22 +5,15 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.only
-import androidx.compose.material3.DrawerDefaults
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationRailDefaults
+import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldLayout
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.mrl.pixiv.common.compose.ui.bar.HomeBottomBar
-import com.mrl.pixiv.common.router.MainScreenPage
+import androidx.compose.ui.res.stringResource
+import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.home.HomeScreen
 import com.mrl.pixiv.latest.LatestScreen
@@ -34,53 +27,48 @@ fun MainScreen(
 ) {
     val navigationManager = koinInject<NavigationManager>()
     val page = navigationManager.currentMainPage
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
-    val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(windowAdaptiveInfo)
-    NavigationSuiteScaffoldLayout(
-        navigationSuite = {
-            HomeBottomBar(
-                layoutType = layoutType,
-                currentPage = navigationManager.currentMainPage,
-                onSwitch = { destination ->
-                    navigationManager.switchMainPage(destination)
-                }
-            )
+    val screens = remember {
+        listOf(
+            MainPage.HOME,
+            MainPage.LATEST,
+            MainPage.SEARCH,
+            MainPage.PROFILE,
+        )
+    }
+
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            screens.forEach { screen ->
+                item(
+                    selected = page == screen,
+                    onClick = {
+                        if (page != screen) {
+                            navigationManager.switchMainPage(screen)
+                        }
+                    },
+                    icon = screen.icon,
+                    label = {
+                        Text(text = stringResource(screen.title))
+                    }
+                )
+            }
         },
-        layoutType = layoutType
+        layoutType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
     ) {
-        Box(
-            Modifier.consumeWindowInsets(
-                when (layoutType) {
-                    NavigationSuiteType.NavigationBar ->
-                        NavigationBarDefaults.windowInsets.only(WindowInsetsSides.Bottom)
-
-                    NavigationSuiteType.NavigationRail ->
-                        NavigationRailDefaults.windowInsets.only(WindowInsetsSides.Start)
-
-                    NavigationSuiteType.NavigationDrawer ->
-                        DrawerDefaults.windowInsets.only(WindowInsetsSides.Start)
-
-                    else -> WindowInsets(0, 0, 0, 0)
-                }
-            )
+        AnimatedContent(
+            targetState = page,
+            modifier = modifier,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(220, delayMillis = 90))
+                    .togetherWith(fadeOut(animationSpec = tween(90)))
+            }
         ) {
-            AnimatedContent(
-                targetState = page,
-                modifier = modifier,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(220, delayMillis = 90))
-                        .togetherWith(fadeOut(animationSpec = tween(90)))
-
-                }
-            ) {
-                when (it) {
-                    MainScreenPage.HOME -> HomeScreen()
-                    MainScreenPage.LATEST -> LatestScreen()
-                    MainScreenPage.SEARCH -> SearchPreviewScreen()
-                    MainScreenPage.PROFILE -> ProfileScreen()
-                }
+            when (it) {
+                MainPage.HOME -> HomeScreen()
+                MainPage.LATEST -> LatestScreen()
+                MainPage.SEARCH -> SearchPreviewScreen()
+                MainPage.PROFILE -> ProfileScreen()
             }
         }
     }
-
 }

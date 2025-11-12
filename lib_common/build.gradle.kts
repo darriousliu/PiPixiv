@@ -37,10 +37,7 @@ dependencies {
     api(androidx.activity.compose)
     api(compose.bundles.accompanist)
     api(libs.compose.webview.multiplatform)
-    api(compose.bundles.navigation3) {
-        exclude(group = "androidx.compose.runtime", module = "runtime")
-        exclude(group = "androidx.compose.runtime", module = "runtime-saveable")
-    }
+    api(compose.bundles.navigation3)
     // Navigation
     api(androidx.navigation.compose)
     // Koin
@@ -65,12 +62,14 @@ dependencies {
     // Okio
     api(libs.okio)
     // Firebase
-    "defaultApi"(platform(libs.firebase.bom))
-    "defaultApi"(libs.bundles.firebase)
+    defaultApi(platform(libs.firebase.bom))
+    defaultApi(libs.bundles.firebase)
     // MMKV
     api(libs.mmkv)
     api(libs.mmkv.kotlin)
     // Logger
     api(libs.kermit)
     api(libs.material)
+    // Kotzilla
+    defaultApi(libs.kotzilla.sdk.ktor3)
 }

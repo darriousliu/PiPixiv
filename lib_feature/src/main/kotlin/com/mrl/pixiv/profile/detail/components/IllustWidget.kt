@@ -88,11 +88,11 @@ fun IllustWidget(
                 SquareIllustItem(
                     illust = illust,
                     isBookmarked = isBookmarked,
-                    onBookmarkClick = { restrict, tags ->
-                        if (isBookmarked) {
-                            BookmarkState.deleteBookmarkIllust(illust.id)
-                        } else {
+                    onBookmarkClick = { restrict, tags, isEdit ->
+                        if (isEdit || !isBookmarked) {
                             BookmarkState.bookmarkIllust(illust.id, restrict, tags)
+                        } else {
+                            BookmarkState.deleteBookmarkIllust(illust.id)
                         }
                     },
                     navToPictureScreen = { prefix, enableTransition ->

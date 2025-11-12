@@ -13,7 +13,13 @@ if (localFile.exists()) {
 pluginManagement {
     includeBuild("build-logic")
     repositories {
-        google()
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
         maven(url = "https://www.jitpack.io")
@@ -33,24 +39,15 @@ dependencyResolutionManagement {
     }
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()
-        mavenCentral()
-        maven(url = "https://www.jitpack.io")
-        maven(url = "https://androidx.dev/storage/compose-compiler/repository/")
-        maven {
-            url = uri("https://maven.pkg.github.com/master-lzh/MMKV")
-            credentials {
-                username =
-                    localProperties.getProperty("github.user") ?: System.getenv("GH_USERNAME")
-                password = localProperties.getProperty("github.package.token")
-                    ?: System.getenv("GH_PACKAGE_TOKEN")
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
             }
         }
-        maven {
-            // You can find the maven URL for other artifacts (e.g. KMP, METALAVA) on their
-            // build pages.
-            url = uri("https://androidx.dev/snapshots/builds/13970376/artifacts/repository")
-        }
+        mavenCentral()
+        maven(url = "https://www.jitpack.io")
     }
 }
 rootProject.name = "PiPixiv"

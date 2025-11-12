@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -46,7 +47,10 @@ fun NetworkSettingScreen(
                     Text(text = stringResource(RString.network_setting))
                 },
                 navigationIcon = {
-                    IconButton(onClick = navigationManager::popBackStack) {
+                    IconButton(
+                        onClick = navigationManager::popBackStack,
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
                     }
                 }

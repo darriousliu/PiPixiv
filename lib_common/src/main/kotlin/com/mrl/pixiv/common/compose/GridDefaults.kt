@@ -114,3 +114,27 @@ object IllustGridDefaults {
         )
     }
 }
+
+object BlockingGridDefaults {
+    @Composable
+    fun blockingLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
+        val windowSizeClass = windowAdaptiveInfo.windowSizeClass
+
+        val horizontalArrangement = when {
+            windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
+            windowSizeClass.isWidthAtLeastMedium -> 5f.spaceBy
+            else -> 5f.spaceBy
+        }
+        return GridLayoutParams(
+            gridCells = when {
+                windowSizeClass.isWidthAtLeastExpanded -> GridCells.Fixed(4)
+                windowSizeClass.isWidthAtLeastMedium -> GridCells.Fixed(2)
+                windowSizeClass.isWidthCompact -> GridCells.Fixed(1)
+                else -> GridCells.Fixed(1)
+            },
+            horizontalArrangement = horizontalArrangement,
+            verticalArrangement = horizontalArrangement,
+            cardShape = MaterialTheme.shapes.small
+        )
+    }
+}

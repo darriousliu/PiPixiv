@@ -6,6 +6,7 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.illust.IllustBookmarkDetailResp
 import com.mrl.pixiv.common.data.illust.IllustDetailResp
 import com.mrl.pixiv.common.data.illust.IllustRecommendedResp
+import com.mrl.pixiv.common.data.mute.MutedResp
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchAutoCompleteResp
 import com.mrl.pixiv.common.data.search.SearchIllustResp
@@ -44,7 +45,7 @@ interface PixivApi {
     suspend fun postIllustBookmarkAdd(
         @Field("illust_id") illustId: Long,
         @Field("restrict") restrict: String = Restrict.PUBLIC.value,
-        @Field("tags") tags: List<String>? = null,
+        @Field("tags[]") tags: List<String>? = null,
     ): EmptyResp
 
     @FormUrlEncoded
@@ -125,6 +126,11 @@ interface PixivApi {
         @Query("type") type: String,
     ): UserIllustsResp
 
+    @GET("v1/user/illusts")
+    suspend fun getUserIllusts(
+        @QueryMap queryMap: Map<String, String>
+    ): UserIllustsResp
+
     @GET("v1/user/bookmarks/illust")
     suspend fun getUserBookmarksIllust(
         @Query("restrict") restrict: String,
@@ -196,4 +202,22 @@ interface PixivApi {
         @Query("restrict") restrict: String = Restrict.PUBLIC.value,
         @Query("offset") offset: Long? = null,
     ): IllustsWithNextUrl
+
+    @GET("v1/mute/list")
+    suspend fun getMuteList(): MutedResp
+
+    @FormUrlEncoded
+    @POST("v1/mute/edit")
+    suspend fun postMuteSetting(
+        @Field("add_user_ids[]") userIds: List<Long>? = null,
+        @Field("delete_user_ids[]") deleteUserIds: List<Long>? = null,
+        @Field("add_tags[]") addTags: List<String>? = null,
+        @Field("delete_tags[]") deleteTags: List<String>? = null,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v2/user/browsing-history/illust/add")
+    suspend fun addIllustBrowsingHistory(
+        @Field("illust_ids[]") illustId: List<Long>,
+    ): EmptyResp
 }

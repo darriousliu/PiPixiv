@@ -6,6 +6,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.FilterAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -30,7 +31,10 @@ internal fun SearchResultAppBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = popBack) {
+            IconButton(
+                onClick = popBack,
+                shapes = IconButtonDefaults.shapes(),
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                     contentDescription = "Back"
@@ -40,7 +44,8 @@ internal fun SearchResultAppBar(
         actions = {
             //筛选按钮
             IconButton(
-                onClick = showBottomSheet
+                onClick = showBottomSheet,
+                shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(
                     imageVector = Icons.Rounded.FilterAlt,

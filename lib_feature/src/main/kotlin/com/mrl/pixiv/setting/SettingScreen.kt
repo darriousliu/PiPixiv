@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -50,10 +51,11 @@ fun SettingScreen(
     navigationManager: NavigationManager = koinInject()
 ) {
     val context = LocalContext.current
+    val labelDefault = stringResource(RString.label_default)
     val languages = remember { getLangs(context) }
-    var currentLanguage by remember {
+    var currentLanguage by remember(labelDefault) {
         mutableStateOf(
-            AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag() ?: "Default"
+            AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag() ?: labelDefault
         )
     }
     Scaffold(
@@ -63,7 +65,10 @@ fun SettingScreen(
                     Text(text = stringResource(RString.setting))
                 },
                 navigationIcon = {
-                    IconButton(onClick = navigationManager::popBackStack) {
+                    IconButton(
+                        onClick = navigationManager::popBackStack,
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
                     }
                 },
@@ -82,8 +87,8 @@ fun SettingScreen(
                         Icon(Icons.Rounded.Translate, contentDescription = null)
                     },
                     content = {
-                        LaunchedEffect(currentLanguage) {
-                            val locale = if (currentLanguage == "Default") {
+                        LaunchedEffect(currentLanguage, labelDefault) {
+                            val locale = if (currentLanguage == labelDefault) {
                                 LocaleListCompat.getEmptyLocaleList()
                             } else {
                                 LocaleListCompat.forLanguageTags(currentLanguage)
@@ -121,8 +126,8 @@ fun SettingScreen(
                                                 )
                                             }
                                         }
-
-                                    }, onClick = {
+                                    },
+                                    onClick = {
                                         currentLanguage = it.langTag
                                         expanded = false
                                     }
@@ -135,7 +140,7 @@ fun SettingScreen(
 
             item {
                 SettingItem(
-                    onClick = { navigationManager.navigate(route = Destination.NetworkSettingScreen) },
+                    onClick = { navigationManager.navigate(route = Destination.NetworkSetting) },
                     icon = {
                         Icon(imageVector = Icons.Rounded.NetworkWifi, contentDescription = null)
                     },

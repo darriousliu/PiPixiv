@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PlayCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,6 +80,7 @@ fun UgoiraPlayer(
                 )
                 IconButton(
                     onClick = { playUgoira = true },
+                    shapes = IconButtonDefaults.shapes(),
                     modifier = Modifier.align(Alignment.Center)
 
                 ) {
@@ -86,7 +88,9 @@ fun UgoiraPlayer(
                         imageVector = Icons.Rounded.PlayCircle,
                         contentDescription = null,
                         tint = Color.Gray,
-                        modifier = Modifier.size(100.dp).shadow(4.dp, shape = CircleShape),
+                        modifier = Modifier
+                            .size(100.dp)
+                            .shadow(4.dp, shape = CircleShape),
                     )
                 }
             }

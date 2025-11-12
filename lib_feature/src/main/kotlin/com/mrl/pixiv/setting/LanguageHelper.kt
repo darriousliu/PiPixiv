@@ -34,7 +34,14 @@ internal fun getLangs(context: Context): ImmutableList<Language> {
     }
 
     langs.sortBy { it.displayName }
-    langs.add(0, Language("Default", context.getString(RString.label_default), null))
+    langs.add(
+        0,
+        Language(
+            context.getString(RString.label_default),
+            context.getString(RString.label_default),
+            null
+        )
+    )
 
     return langs.toImmutableList()
 }

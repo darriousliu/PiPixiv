@@ -8,9 +8,10 @@
 
 ### Third-party Pixiv Client
 
-A third-party Pixiv App entirely written by [Jetpack Compose](https://developer.android.com/develop/ui/compose)
+A third-party Pixiv App entirely written
+by [Jetpack Compose](https://developer.android.com/develop/ui/compose)
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.2.21-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/master-lzh/PiPixiv/release.yml)](https://github.com/master-lzh/PiPixiv/actions/workflows/release.yml)
 [![License: Apache-2.0](https://img.shields.io/github/license/master-lzh/PiPixiv?labelColor=27303D&color=0877d2)](/LICENSE)
 
@@ -35,19 +36,22 @@ A third-party Pixiv App entirely written by [Jetpack Compose](https://developer.
 
 ### To-do List
 
-- [x] Translation
-- [x] Deep link support (open from https://www.pixiv.net/illust/xxxxxx)
+* **Features and PRs are welcome**
 * More...
 
 ### v1.1.0
+
 - [x] Refactor the network layer, replacing OkHttp with Ktor
 - [x] Refactor datastore to MMKV
-- [x] Refactor some global states into a singleton pattern for code simplification and easier dependency injection
+- [x] Refactor some global states into a singleton pattern for code simplification and easier
+  dependency injection
 - [x] Adapt new navigation
 - [x] Settings page
 - [x] Favourites page
 - [x] Followed page
 - [x] History page
+- [x] Translation
+- [x] Deep link support (open from https://www.pixiv.net/illust/xxxxxx)
 
 </div>
 
@@ -59,16 +63,21 @@ A third-party Pixiv App entirely written by [Jetpack Compose](https://developer.
 | ![Picture Detail](https://github.com/master-lzh/PiPixiv/assets/60057825/dfe36948-525c-486d-a339-6c2c78b5aebf) |                                                                                                              |
 
 ## Star History
+
 [![Star History](https://starchart.cc/master-lzh/PiPixiv.svg?variant=adaptive)](https://starchart.cc/master-lzh/PiPixiv)
 
-
 ## Acknowledgments
+
 <div align="left">
 
 This project uses or references several open-source projects:
-- **[Coil](https://github.com/coil-kt/coil)**: An Android image loading library supported by Kotlin Coroutines
-- **[Koin](https://github.com/InsertKoinIO/koin)**: A pragmatic lightweight dependency injection framework for Kotlin developers
-- **[Mihon](https://github.com/mihonapp/mihon)**: Discover and read manga, webtoons, comics, etc. Reference application language switching feature
+
+- **[Coil](https://github.com/coil-kt/coil)**: An Android image loading library supported by Kotlin
+  Coroutines
+- **[Koin](https://github.com/InsertKoinIO/koin)**: A pragmatic lightweight dependency injection
+  framework for Kotlin developers
+- **[Mihon](https://github.com/mihonapp/mihon)**: Discover and read manga, webtoons, comics, etc.
+  Reference application language switching feature
 - **[pixez-flutter](https://github.com/Notsfsssf/pixez-flutter)**: Reference login implementation
 
 </div>

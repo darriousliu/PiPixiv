@@ -110,6 +110,7 @@ private fun Project.configureKotlin() {
                     "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
                     "-opt-in=kotlin.uuid.ExperimentalUuidApi",
                     "-opt-in=kotlin.time.ExperimentalTime",
+                    "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
                     "-Xannotation-default-target=param-property",
                     "-Xstring-concat=inline"
                 )

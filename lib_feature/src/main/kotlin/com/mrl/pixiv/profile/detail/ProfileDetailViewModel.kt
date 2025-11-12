@@ -10,9 +10,11 @@ import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.data.user.UserIllustsResp
 import com.mrl.pixiv.common.data.user.UserNovelsResp
 import com.mrl.pixiv.common.datasource.local.mmkv.requireUserInfoValue
+import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import com.mrl.pixiv.common.viewmodel.follow.FollowState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -87,6 +89,24 @@ class ProfileDetailViewModel(
                     userInfo = userInfo
                 )
             }
+        }
+    }
+
+    fun followUser(userId: Long, restrict: Restrict = Restrict.PUBLIC) {
+        FollowState.followUser(userId, restrict)
+    }
+
+    fun blockUser(userId: Long) {
+        launchIO {
+            async { PixivRepository.postMuteSetting(addUserIds = listOf(userId)) }
+            async { BlockingRepository.blockUser(userId) }
+        }
+    }
+
+    fun removeBlockUser(userId: Long) {
+        launchIO {
+            async { PixivRepository.postMuteSetting(deleteUserIds = listOf(userId)) }
+            async { BlockingRepository.removeBlockUser(userId) }
         }
     }
 }

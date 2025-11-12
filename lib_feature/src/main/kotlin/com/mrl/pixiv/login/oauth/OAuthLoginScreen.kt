@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -54,7 +56,10 @@ fun OAuthLoginScreen(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    IconButton(onClick = { navigationManager.popBackStack() }) {
+                    IconButton(
+                        onClick = { navigationManager.popBackStack() },
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Back"
@@ -89,6 +94,7 @@ fun OAuthLoginScreen(
                         focusManager.clearFocus()
                         viewModel.dispatch(OAuthLoginAction.Login(token))
                     },
+                    shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
@@ -97,7 +103,7 @@ fun OAuthLoginScreen(
                 }
             }
             if (state.loading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                CircularWavyProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
         }
     }

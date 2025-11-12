@@ -13,6 +13,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,12 +48,20 @@ fun TrendingPage(
     val illustsFollowing = viewModel.illustsFollowing.collectAsLazyPagingItems()
     val trendingFilter by viewModel.trendingFilter.collectAsStateWithLifecycle()
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
+    val isRefreshing = illustsFollowing.loadState.refresh is LoadState.Loading
 
     PullToRefreshBox(
-        isRefreshing = illustsFollowing.loadState.refresh is LoadState.Loading,
+        isRefreshing = isRefreshing,
         onRefresh = { illustsFollowing.refresh() },
         modifier = modifier.fillMaxSize(),
-        state = pullRefreshState
+        state = pullRefreshState,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = pullRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
     ) {
         Box {
             LazyVerticalStaggeredGrid(
@@ -86,11 +95,11 @@ fun TrendingPage(
                                 enableTransition
                             )
                         },
-                        onBookmarkClick = { restrict, tags ->
-                            if (isBookmarked) {
-                                BookmarkState.deleteBookmarkIllust(illust.id)
-                            } else {
+                        onBookmarkClick = { restrict, tags, isEdit ->
+                            if (isEdit || !isBookmarked) {
                                 BookmarkState.bookmarkIllust(illust.id, restrict, tags)
+                            } else {
+                                BookmarkState.deleteBookmarkIllust(illust.id)
                             }
                         }
                     )

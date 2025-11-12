@@ -13,9 +13,9 @@ val User.isFollowing: Boolean
 object FollowState {
     internal val state = mutableStateMapOf<Long, Boolean>()
 
-    fun followUser(userId: Long) {
+    fun followUser(userId: Long, restrict: Restrict = Restrict.PUBLIC) {
         launchProcess(Dispatchers.IO) {
-            PixivRepository.followUser(userId, Restrict.PUBLIC)
+            PixivRepository.followUser(userId, restrict)
             state[userId] = true
         }
     }

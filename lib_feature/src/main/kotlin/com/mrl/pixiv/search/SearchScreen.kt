@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -68,7 +69,7 @@ fun SearchScreen(
     val dispatch = viewModel::dispatch
     val state = viewModel.asState()
     val searchHistory by SearchRepository.searchHistoryFlow.collectAsStateWithLifecycle()
-    var textState by remember { mutableStateOf(TextFieldValue(state.searchWords)) }
+    var textState by remember { mutableStateOf(TextFieldValue(viewModel.searchWords)) }
     val focusRequester = remember { FocusRequester() }
     LifecycleResumeEffect(Unit) {
         try {
@@ -95,7 +96,7 @@ fun SearchScreen(
                 onValueChange = {
                     textState = it
                     dispatch(SearchAction.UpdateSearchWords(it.text))
-                    if (it.text.isNotBlank() && it.text != state.searchWords) {
+                    if (it.text.isNotBlank()) {
                         DebounceUtil.debounce {
                             dispatch(SearchAction.SearchAutoComplete(it.text))
                         }
@@ -129,7 +130,7 @@ fun SearchScreen(
                         .background(MaterialTheme.colorScheme.background),
                 ) {
                     Text(
-                        text = if (state.searchWords.isEmpty())
+                        text = if (textState.text.isEmpty())
                             stringResource(RString.search_history)
                         else
                             stringResource(RString.find_for),
@@ -138,7 +139,7 @@ fun SearchScreen(
                     )
                 }
             }
-            if (state.searchWords.isEmpty()) {
+            if (textState.text.isEmpty()) {
                 items(searchHistory.searchHistoryList) {
                     Row(
                         modifier = Modifier
@@ -168,30 +169,31 @@ fun SearchScreen(
                         )
                     }
                 }
-            }
-            items(state.autoCompleteSearchWords, key = { it.name }) { word ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .throttleClick(indication = ripple()) {
-                            dispatch(SearchAction.AddSearchHistory(word.name))
-                            focusRequester.freeFocus()
-                            navigationManager.navigateToSearchResultScreen(word.name)
-                        }
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(
-                        text = word.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(bottom = 4.dp),
-                    )
-                    if (word.translatedName.isNotBlank()) {
+            } else {
+                items(state.autoCompleteSearchWords, key = { it.name }) { word ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .throttleClick(indication = ripple()) {
+                                dispatch(SearchAction.AddSearchHistory(word.name))
+                                focusRequester.freeFocus()
+                                navigationManager.navigateToSearchResultScreen(word.name)
+                            }
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.Center,
+                    ) {
                         Text(
-                            text = word.translatedName,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(bottom = 8.dp),
+                            text = word.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(bottom = 4.dp),
                         )
+                        if (word.translatedName.isNotBlank()) {
+                            Text(
+                                text = word.translatedName,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -220,7 +222,8 @@ private fun SearchScreenAppBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = onBack
+                    onClick = onBack,
+                    shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,

@@ -21,7 +21,7 @@ typealias NavigateToHorizontalPictureScreen = (
 class NavigationManager(
     vararg initialBackStack: Destination
 ) {
-    var currentMainPage by mutableStateOf(MainScreenPage.HOME)
+    var currentMainPage by mutableStateOf(MainPage.HOME)
         private set
 
     val backStack = mutableStateListOf(*initialBackStack)
@@ -29,7 +29,7 @@ class NavigationManager(
     val currentDestination: Destination
         get() = backStack.last()
 
-    fun switchMainPage(page: MainScreenPage) {
+    fun switchMainPage(page: MainPage) {
         if (currentMainPage != page) {
             currentMainPage = page
         }
@@ -68,12 +68,13 @@ class NavigationManager(
     }
 
     fun loginToMainScreen() {
+        currentMainPage = MainPage.HOME
         backStack.clear()
-        backStack.add(Destination.MainScreen)
+        backStack.add(Destination.Main)
     }
 
     fun popBackToMainScreen() {
-        popBackStack(route = Destination.MainScreen, inclusive = false)
+        popBackStack(route = Destination.Main, inclusive = false)
     }
 
     fun navigateToPictureScreen(
@@ -84,42 +85,50 @@ class NavigationManager(
     ) {
         measureTime {
             IllustCacheRepo[prefix] = illusts
-            navigate(Destination.PictureScreen(index, prefix, enableTransition))
+            navigate(Destination.Picture(index, prefix, enableTransition))
         }.let {
             Logger.i("Navigation") { "navigateToPictureScreen cost: $it" }
         }
     }
 
     fun navigateToSearchResultScreen(searchWord: String) {
-        navigate(route = Destination.SearchResultsScreen(searchWord))
+        navigate(route = Destination.SearchResults(searchWord))
     }
 
     fun navigateToProfileDetailScreen(userId: Long) {
-        navigate(route = Destination.ProfileDetailScreen(userId))
+        navigate(route = Destination.ProfileDetail(userId))
     }
 
     fun navigateToFollowingScreen(userId: Long) {
-        navigate(route = Destination.FollowingScreen(userId))
+        navigate(route = Destination.Following(userId))
     }
 
     fun navigateToCollectionScreen(userId: Long) {
-        navigate(route = Destination.CollectionScreen(userId))
+        navigate(route = Destination.Collection(userId))
     }
 
     fun navigateToSearchScreen() {
-        addSingleTop(route = Destination.SearchScreen)
+        addSingleTop(route = Destination.Search)
     }
 
     fun navigateToHistoryScreen() {
-        navigate(route = Destination.HistoryScreen)
+        navigate(route = Destination.History)
     }
 
     fun navigateToSettingScreen() {
-        navigate(route = Destination.SettingScreen)
+        navigate(route = Destination.Setting)
     }
 
     fun navigateToLoginOptionScreen() {
         backStack.clear()
-        addSingleTop(route = Destination.LoginOptionScreen)
+        addSingleTop(route = Destination.LoginOption)
+    }
+
+    fun navigateToUserIllustScreen(userId: Long) {
+        navigate(route = Destination.UserArtwork(userId))
+    }
+
+    fun navigateToBlockSettings() {
+        navigate(route = Destination.BlockSettings)
     }
 }

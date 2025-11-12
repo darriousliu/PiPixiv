@@ -2,10 +2,12 @@ package com.mrl.pixiv.history
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.text.KeyboardActions
@@ -15,7 +17,9 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -70,7 +74,7 @@ fun HistoryScreen(
                 onBack = { navigationManager.popBackStack() }
             )
         },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         val layoutParams = IllustGridDefaults.relatedLayoutParameters()
         val lazyGridState = rememberLazyGridState()
@@ -82,7 +86,12 @@ fun HistoryScreen(
             columns = layoutParams.gridCells,
             verticalArrangement = layoutParams.verticalArrangement,
             horizontalArrangement = layoutParams.horizontalArrangement,
-            contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 20.dp),
+            contentPadding = PaddingValues(
+                start = 8.dp,
+                top = 8.dp,
+                end = 8.dp,
+                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            ),
         ) {
             illustGrid(
                 illusts = illusts,
@@ -114,7 +123,10 @@ private fun HistoryAppBar(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
-                    IconButton(onClick = { onValueChange(TextFieldValue()) }) {
+                    IconButton(
+                        onClick = { onValueChange(TextFieldValue()) },
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.Clear,
                             contentDescription = "Clear"
@@ -128,7 +140,8 @@ private fun HistoryAppBar(
         },
         navigationIcon = {
             IconButton(
-                onClick = onBack
+                onClick = onBack,
+                shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowBack,

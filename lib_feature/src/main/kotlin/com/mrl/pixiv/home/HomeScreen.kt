@@ -1,7 +1,10 @@
 package com.mrl.pixiv.home
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowUpward
@@ -9,14 +12,17 @@ import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.paging.LoadState
@@ -53,7 +59,8 @@ fun HomeScreen(
                                 lazyStaggeredGridState.scrollToItem(0)
                             }
                             onRefresh()
-                        }
+                        },
+                        shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(imageVector = Icons.Rounded.Refresh, contentDescription = null)
                     }
@@ -69,7 +76,6 @@ fun HomeScreen(
                             lazyStaggeredGridState.scrollToItem(0)
                         }
                     },
-                    containerColor = MaterialTheme.colorScheme.background,
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.ArrowUpward,
@@ -77,13 +83,22 @@ fun HomeScreen(
                     )
                 }
             }
-        }
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
+        val isRefreshing = recommendImageList.loadState.refresh is LoadState.Loading
         PullToRefreshBox(
-            isRefreshing = recommendImageList.loadState.refresh is LoadState.Loading,
+            isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             modifier = Modifier.padding(it),
-            state = pullRefreshState
+            state = pullRefreshState,
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = pullRefreshState,
+                    isRefreshing = isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+            }
         ) {
             Box(
                 modifier = Modifier.fillMaxSize()

@@ -60,12 +60,24 @@ internal fun encode(text: String): String {
 }
 
 suspend fun addAuthHeader(request: HttpRequestBuilder) {
-    val local = Locale.current
+    val locale = Locale.current
     val instantNow = Clock.System.now()
     val timeZone = TimeZone.currentSystemDefault()
     val isoDate = "${instantNow.toLocalDateTime(timeZone).format(iso8601DateTimeFormat)}${
         instantNow.offsetIn(timeZone)
     }"
+
+    val appAcceptLanguage = locale.language.lowercase().let { lang ->
+        when (lang) {
+            "zh" -> {
+                val country = locale.region.lowercase()
+                if (country == "cn") "zh-hans" else "zh-hant"
+            }
+
+            "ja", "ko", "es" -> lang // hashCode 3241, 3383, 3428 可能对应这些语言
+            else -> "en"
+        }
+    }
     request.headers.apply {
         remove("User-Agent")
         set(
@@ -75,7 +87,10 @@ suspend fun addAuthHeader(request: HttpRequestBuilder) {
         if (!request.url.encodedPath.contains("/auth/token")) {
             set("Authorization", "Bearer ${AuthManager.requireUserAccessToken()}")
         }
-        set("Accept-Language", "${local.language}_${local.region}")
+        // zh_CN
+        set("Accept-Language", locale.toLanguageTag().replace("-", "_"))
+        // zh-hans
+        set("App-Accept-Language", appAcceptLanguage)
         set("App-OS", "android")
         set("App-OS-Version", Build.VERSION.RELEASE)
         set("App-Version", "6.158.0")
