@@ -8,12 +8,14 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.navigation3.runtime.NavKey
 import com.mrl.pixiv.common.util.RString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
+@Stable
 sealed class Destination : NavKey {
     @Serializable
     data object LoginOption : Destination()

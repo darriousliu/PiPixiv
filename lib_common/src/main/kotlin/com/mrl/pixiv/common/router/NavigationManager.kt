@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.router
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +19,7 @@ typealias NavigateToHorizontalPictureScreen = (
 ) -> Unit
 
 @Single
+@Stable
 class NavigationManager(
     vararg initialBackStack: Destination
 ) {
