@@ -139,7 +139,7 @@ fun SquareIllustItem(
                 .background(MaterialTheme.colorScheme.background)
                 .throttleClick { onClick() }
         ) {
-            val imageKey = illust.imageUrls.medium
+            val imageKey = illust.imageUrls.squareMedium
             AsyncImage(
                 modifier = Modifier
                     .matchParentSize()
@@ -273,7 +273,8 @@ fun RectangleIllustItem(
                 AsyncImage(
                     model = remember {
                         ImageRequest.Builder(context)
-                            .data(illust.imageUrls.medium).allowRgb565(true)
+                            .data(illust.imageUrls.medium)
+                            .allowRgb565(true)
                             .crossfade(1.seconds.inWholeMilliseconds.toInt())
                             .placeholderMemoryCacheKey(imageKey)
                             .memoryCacheKey(imageKey)
