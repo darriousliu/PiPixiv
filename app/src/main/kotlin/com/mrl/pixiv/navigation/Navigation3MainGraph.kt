@@ -31,6 +31,7 @@ import com.mrl.pixiv.common.repository.IllustCacheRepo
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.DestinationsDeepLink
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.util.logEvent
 import com.mrl.pixiv.follow.FollowingScreen
 import com.mrl.pixiv.history.HistoryScreen
 import com.mrl.pixiv.login.LoginOptionScreen
@@ -46,6 +47,8 @@ import com.mrl.pixiv.setting.block.BlockSettingsScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import com.mrl.pixiv.splash.SplashViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.serializer
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -61,6 +64,7 @@ fun Navigation3MainGraph(
     val listDetailStrategy = rememberListDetailSceneStrategy<Any>()
 
     HandleDeeplink(navigationManager)
+    LogScreen(navigationManager)
     SharedTransitionLayout {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this
@@ -194,16 +198,15 @@ fun Navigation3MainGraph(
                                     ) + fadeOut(DefaultFloatAnimationSpec)
                                 }
                     ) {
-                        val params = it
-                        val illusts = remember { IllustCacheRepo[params.prefix] }
+                        val illusts = remember { IllustCacheRepo[it.prefix] }
                         CompositionLocalProvider(
-                            LocalSharedKeyPrefix provides params.prefix
+                            LocalSharedKeyPrefix provides it.prefix
                         ) {
                             HorizontalSwipePictureScreen(
                                 illusts = illusts.toImmutableList(),
-                                index = params.index,
-                                prefix = params.prefix,
-                                enableTransition = params.enableTransition,
+                                index = it.index,
+                                prefix = it.prefix,
+                                enableTransition = it.enableTransition,
                             )
                         }
                     }
@@ -250,5 +253,73 @@ private fun HandleDeeplink(
                 }
             }
         }
+    }
+}
+
+@OptIn(InternalSerializationApi::class)
+@Composable
+private fun LogScreen(
+    navigationManager: NavigationManager,
+) {
+    LaunchedEffect(navigationManager.currentDestination) {
+        // Get current destination
+        val currentDestination = navigationManager.currentDestination
+
+        // Log screen view event
+        logEvent("screen_view", buildMap {
+            val screenName = currentDestination::class.serializer().descriptor.serialName
+                .split(".")
+                .lastOrNull()
+                .orEmpty()
+            put("screen_name", screenName)
+            put("screen_class", screenName)
+
+            // Add additional parameters for specific destinations
+            when (currentDestination) {
+                is Destination.Main -> {
+                    put("current_main_page", navigationManager.currentMainPage.name)
+                }
+
+                is Destination.ProfileDetail -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.PictureDeeplink -> {
+                    put("illust_id", currentDestination.illustId.toString())
+                }
+
+                is Destination.SearchResults -> {
+                    put("search_words", currentDestination.searchWords)
+                }
+
+                is Destination.Picture -> {
+                    put("index", currentDestination.index.toString())
+                    put("prefix", currentDestination.prefix)
+                }
+
+                is Destination.Collection -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.Following -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.UserArtwork -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.Login, Destination.LoginOption, Destination.OAuthLogin,
+                Destination.Search, Destination.Setting, Destination.NetworkSetting,
+                Destination.History, Destination.BlockSettings -> Unit
+            }
+        })
+    }
+    LaunchedEffect(navigationManager.currentMainPage) {
+        logEvent("screen_view", buildMap {
+            val screenName = navigationManager.currentMainPage.name
+            put("screen_name", screenName)
+            put("screen_class", screenName)
+        })
     }
 }
