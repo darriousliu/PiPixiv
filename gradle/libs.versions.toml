@@ -1,7 +1,7 @@
 [versions]
 composeWebviewMultiplatform = "2.0.3"
 material = "1.13.0"
-okio = "3.16.3"
+okio = "3.16.4"
 coil3 = "3.3.0"
 richtext = "0.20.0"
 koin = "4.1.1"
@@ -18,7 +18,7 @@ kermit = "2.0.8"
 mmkv = "2.2.4"
 mmkv-kotlin = "1.3.1"
 desugar = "2.1.5"
-kotzilla = "1.3.1"
+kotzilla = "1.4.0"
 
 [libraries]
 compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
@@ -61,7 +61,7 @@ kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 
 mmkv = { module = "com.tencent:mmkv", version.ref = "mmkv" }
 mmkv-kotlin = { module = "com.ctrip.flight.mmkv:mmkv-kotlin", version.ref = "mmkv-kotlin" }
-kotzilla-sdk-ktor3 = { group = "io.kotzilla", name = "kotzilla-sdk-ktor3", version.ref = "kotzilla" }
+kotzilla-sdk = { group = "io.kotzilla", name = "kotzilla-sdk", version.ref = "kotzilla" }
 
 [bundles]
 koin = ["koin", "koin-compose", "koin-annotations"]

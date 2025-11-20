@@ -71,5 +71,5 @@ dependencies {
     api(libs.kermit)
     api(libs.material)
     // Kotzilla
-    defaultApi(libs.kotzilla.sdk.ktor3)
+    defaultApi(libs.kotzilla.sdk)
 }
