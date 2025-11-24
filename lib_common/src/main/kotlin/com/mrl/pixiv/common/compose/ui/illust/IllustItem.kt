@@ -112,6 +112,7 @@ fun SquareIllustItem(
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     val isIllustBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
     val isUserBlocked = BlockingRepository.collectUserBlockAsState(illust.user.id)
+    val enableTransition = enableTransition && !isIllustBlocked && !isUserBlocked
     val onClick = {
         navToPictureScreen(prefix, enableTransition)
     }
@@ -120,6 +121,7 @@ fun SquareIllustItem(
             shouldShowTip && !SettingRepository.userPreferenceFlow.value.hasShowBookmarkTip
     }
     val animatedContentScope = LocalNavAnimatedContentScope.current
+
     with(LocalSharedTransitionScope.current) {
         Box(
             modifier = modifier
@@ -241,11 +243,13 @@ fun RectangleIllustItem(
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     val isIllustBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
     val isUserBlocked = BlockingRepository.collectUserBlockAsState(illust.user.id)
+    val enableTransition = enableTransition && !isIllustBlocked && !isUserBlocked
     var showBottomSheet by remember { mutableStateOf(false) }
     val onBookmarkLongClick = {
         showBottomSheet = true
     }
     val context = LocalContext.current
+
     with(sharedTransitionScope) {
         val shape = 10f.round
         Box(
@@ -309,7 +313,6 @@ fun RectangleIllustItem(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-
                         Text(
                             text = illust.user.name,
                             style = MaterialTheme.typography.bodyMedium,
@@ -317,7 +320,6 @@ fun RectangleIllustItem(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-
                     IconButton(
                         onClick = throttleClick {
                             onBookmarkClick(Restrict.PUBLIC, null, false)
