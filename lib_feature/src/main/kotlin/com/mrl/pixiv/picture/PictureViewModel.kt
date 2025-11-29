@@ -26,6 +26,7 @@ import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.paging.RelatedIllustPaging
 import com.mrl.pixiv.common.util.AppUtil
+import com.mrl.pixiv.common.util.AppUtil.getString
 import com.mrl.pixiv.common.util.PictureType
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
@@ -403,14 +404,19 @@ class PictureViewModel(
             }
 
             if (state.ugoiraImages.isNotEmpty()) {
-                val outputStream = createDownloadFile(illustId.toString(), PictureType.GIF)
-                val sink = outputStream?.asSink()?.buffered() ?: return@launchIO
-                val encoder = GifEncoder(sink)
-                state.ugoiraImages.forEach {
-                    encoder.writeFrame(it.first.asAndroidBitmap(), it.second.milliseconds)
+                try {
+                    val outputStream = createDownloadFile(illustId.toString(), PictureType.GIF)
+                    val sink = outputStream?.asSink()?.buffered() ?: return@launchIO
+                    val encoder = GifEncoder(sink)
+                    state.ugoiraImages.forEach {
+                        encoder.writeFrame(it.first.asAndroidBitmap(), it.second.milliseconds)
+                    }
+                    encoder.close()
+                } catch (_: Exception) {
+                    handleError(Exception(getString(RString.download_failed)))
                 }
-                encoder.close()
             }
+            handleError(Exception(getString(RString.download_success)))
             closeBottomSheet()
             showLoading(false)
         }
