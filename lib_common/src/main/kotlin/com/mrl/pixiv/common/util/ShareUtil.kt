@@ -2,7 +2,6 @@ package com.mrl.pixiv.common.util
 
 import android.content.ContentValues
 import android.content.Intent
-import android.os.Environment
 import android.provider.MediaStore
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -43,10 +42,7 @@ object ShareUtil {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-            put(
-                MediaStore.MediaColumns.RELATIVE_PATH,
-                "${Environment.DIRECTORY_DCIM}/${DOWNLOAD_DIR}"
-            )
+            put(MediaStore.MediaColumns.RELATIVE_PATH, DOWNLOAD_DIR)
         }
 
         val uri = context.contentResolver.insert(

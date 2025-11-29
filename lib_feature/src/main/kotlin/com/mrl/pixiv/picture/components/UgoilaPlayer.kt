@@ -35,6 +35,8 @@ import kotlinx.collections.immutable.ImmutableList
 fun UgoiraPlayer(
     images: ImmutableList<Pair<ImageBitmap, Long>>,
     placeholder: VectorPainter,
+    downloadUgoira: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     if (images.isNotEmpty()) {
         var playUgoira by remember { mutableStateOf(false) }
@@ -62,26 +64,30 @@ fun UgoiraPlayer(
                 bitmap = images[currentIndex].first,
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth,
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
-                    .throttleClick {
+                    .throttleClick(
+                        onLongClick = downloadUgoira
+                    ) {
                         playUgoira = false
                     },
             )
         } else {
-            Box {
+            Box(modifier = modifier) {
                 Image(
                     bitmap = images[0].first,
                     contentDescription = null,
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .throttleClick(
+                            onLongClick = downloadUgoira
+                        ),
                 )
                 IconButton(
                     onClick = { playUgoira = true },
                     shapes = IconButtonDefaults.shapes(),
-                    modifier = Modifier.align(Alignment.Center)
-
+                    modifier = Modifier.align(Alignment.Center),
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.PlayCircle,
@@ -99,7 +105,7 @@ fun UgoiraPlayer(
             painter = placeholder,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth(),
         )
     }

@@ -6,6 +6,7 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -18,21 +19,26 @@ import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Type
+import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.paging.RelatedIllustPaging
 import com.mrl.pixiv.common.util.AppUtil
+import com.mrl.pixiv.common.util.PictureType
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.TAG
+import com.mrl.pixiv.common.util.createDownloadFile
+import com.mrl.pixiv.common.util.isImageExists
 import com.mrl.pixiv.common.util.saveToAlbum
 import com.mrl.pixiv.common.util.toBitmap
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.common.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.viewmodel.state
+import com.shakster.gifkt.GifEncoder
 import io.ktor.client.HttpClient
 import io.ktor.client.request.request
 import io.ktor.client.request.url
@@ -47,6 +53,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.io.asSink
+import kotlinx.io.buffered
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -54,6 +62,7 @@ import org.koin.core.qualifier.named
 import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipFile
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @Stable
@@ -107,6 +116,8 @@ class PictureViewModel(
     }.flow.cachedIn(viewModelScope)
 
     private val cachedDownloadSize = mutableMapOf<Int, Float>()
+    private val ugoiraDir = AppUtil.appContext.cacheDir.resolve("ugoira")
+    private var cachedUgoiraMetadata: UgoiraMetadata? = null
 
     override suspend fun handleIntent(intent: PictureAction) {
         when (intent) {
@@ -145,7 +156,9 @@ class PictureViewModel(
     private fun downloadUgoira(illustId: Long) {
         launchIO {
             val resp = PixivRepository.getUgoiraMetadata(illustId)
-            val file = AppUtil.appContext.cacheDir.resolve("$illustId.zip")
+            cachedUgoiraMetadata = resp.ugoiraMetadata
+            if (!ugoiraDir.exists()) ugoiraDir.mkdirs()
+            val file = ugoiraDir.resolve("$illustId.zip")
             if (file.exists() && file.length() > 0) {
                 val imageFiles =
                     unzipUgoira(ZipFile(file), illustId).mapIndexed { index, img ->
@@ -182,7 +195,7 @@ class PictureViewModel(
     }
 
     private fun unzipUgoira(zipFile: ZipFile, illustId: Long): MutableList<File> {
-        val unzipDir = AppUtil.appContext.cacheDir.resolve("$illustId")
+        val unzipDir = ugoiraDir.resolve("$illustId")
         val list = mutableListOf<File>()
         unzipDir.mkdirs()
         zipFile.entries().asSequence().forEach { zipEntry ->
@@ -220,7 +233,7 @@ class PictureViewModel(
         SearchRepository.addSearchHistory(keyword)
     }
 
-    private fun downloadIllust(
+    fun downloadIllust(
         illustId: Long,
         index: Int,
         originalUrl: String,
@@ -292,6 +305,30 @@ class PictureViewModel(
         }
     }
 
+    fun getUgoiraInfo() {
+        launchIO {
+            val illustId = state.illust?.id ?: return@launchIO
+            val metadata = cachedUgoiraMetadata
+                ?: PixivRepository.getUgoiraMetadata(illustId).ugoiraMetadata.also {
+                    cachedUgoiraMetadata = it
+                }
+            val url = metadata.zipUrls.medium
+            val cachedSize = cachedDownloadSize[0]
+            updateState {
+                copy(bottomSheetState = BottomSheetState(0, url, cachedSize ?: 0f))
+            }
+            if (cachedSize == null) {
+                launchIO {
+                    val downloadSize = calculateImageSize(url)
+                    updateState {
+                        cachedDownloadSize[0] = downloadSize
+                        copy(bottomSheetState = bottomSheetState?.copy(downloadSize = downloadSize))
+                    }
+                }
+            }
+        }
+    }
+
     private suspend fun calculateImageSize(url: String): Float {
         return try {
             val response = imageOkHttpClient.request {
@@ -352,6 +389,31 @@ class PictureViewModel(
             PixivRepository.postMuteSetting(deleteUserIds = listOf(userId))
         }
         BlockingRepository.removeBlockUser(userId)
+    }
+
+    fun downloadUgoiraAsGIF() {
+        launchIO {
+            showLoading(true)
+            // 判断是已经下载过zip
+            val illustId = state.illust?.id
+            if (illustId == null || isImageExists(illustId.toString(), PictureType.GIF)) {
+                closeBottomSheet()
+                showLoading(false)
+                return@launchIO
+            }
+
+            if (state.ugoiraImages.isNotEmpty()) {
+                val outputStream = createDownloadFile(illustId.toString(), PictureType.GIF)
+                val sink = outputStream?.asSink()?.buffered() ?: return@launchIO
+                val encoder = GifEncoder(sink)
+                state.ugoiraImages.forEach {
+                    encoder.writeFrame(it.first.asAndroidBitmap(), it.second.milliseconds)
+                }
+                encoder.close()
+            }
+            closeBottomSheet()
+            showLoading(false)
+        }
     }
 
     override fun onCleared() {

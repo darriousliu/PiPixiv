@@ -375,7 +375,10 @@ internal fun PictureScreen(
                             item(key = KEY_UGOIRA) {
                                 UgoiraPlayer(
                                     images = state.ugoiraImages,
-                                    placeholder = placeholder
+                                    placeholder = placeholder,
+                                    downloadUgoira = {
+                                        pictureViewModel.getUgoiraInfo()
+                                    }
                                 )
                             }
                         } else {
@@ -670,13 +673,15 @@ internal fun PictureScreen(
                                 .fillMaxWidth()
                                 .throttleClick {
                                     // 下载原始图片
-                                    dispatch(
-                                        PictureAction.DownloadIllust(
+                                    if (illust.type == Type.Ugoira) {
+                                        pictureViewModel.downloadUgoiraAsGIF()
+                                    } else {
+                                        pictureViewModel.downloadIllust(
                                             illust.id,
                                             state.bottomSheetState.index,
                                             state.bottomSheetState.downloadUrl
                                         )
-                                    )
+                                    }
                                 }
                                 .padding(vertical = 10.dp)
                         ) {

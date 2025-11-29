@@ -72,4 +72,6 @@ dependencies {
     api(libs.material)
     // Kotzilla
     defaultApi(libs.kotzilla.sdk)
+    // GIF encoder
+    api(libs.gifkt)
 }
