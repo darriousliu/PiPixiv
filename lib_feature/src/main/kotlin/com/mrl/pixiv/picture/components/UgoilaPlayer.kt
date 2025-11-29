@@ -1,6 +1,5 @@
 package com.mrl.pixiv.picture.components
 
-import android.graphics.Bitmap
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateValue
 import androidx.compose.animation.core.infiniteRepeatable
@@ -25,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -34,7 +33,7 @@ import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun UgoiraPlayer(
-    images: ImmutableList<Pair<Bitmap, Long>>,
+    images: ImmutableList<Pair<ImageBitmap, Long>>,
     placeholder: VectorPainter,
 ) {
     if (images.isNotEmpty()) {
@@ -60,7 +59,7 @@ fun UgoiraPlayer(
                 label = "ugoiraPlayerTransition"
             )
             Image(
-                bitmap = images[currentIndex].first.asImageBitmap(),
+                bitmap = images[currentIndex].first,
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
@@ -72,7 +71,7 @@ fun UgoiraPlayer(
         } else {
             Box {
                 Image(
-                    bitmap = images[0].first.asImageBitmap(),
+                    bitmap = images[0].first,
                     contentDescription = null,
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier

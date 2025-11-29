@@ -1,11 +1,12 @@
 package com.mrl.pixiv.picture
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -59,7 +60,7 @@ import kotlin.time.Duration.Companion.seconds
 data class PictureState(
     val illust: Illust? = null,
     val userIllusts: ImmutableList<Illust> = persistentListOf(),
-    val ugoiraImages: ImmutableList<Pair<Bitmap, Long>> = persistentListOf(),
+    val ugoiraImages: ImmutableList<Pair<ImageBitmap, Long>> = persistentListOf(),
     val bottomSheetState: BottomSheetState? = null,
     val loading: Boolean = false,
 )
@@ -148,7 +149,7 @@ class PictureViewModel(
             if (file.exists() && file.length() > 0) {
                 val imageFiles =
                     unzipUgoira(ZipFile(file), illustId).mapIndexed { index, img ->
-                        img.toBitmap()!! to resp.ugoiraMetadata.frames[index].delay
+                        img.toBitmap()!!.asImageBitmap() to resp.ugoiraMetadata.frames[index].delay
                     }
                 Log.e(TAG, "downloadUgoira: $imageFiles")
                 updateState {
@@ -168,7 +169,8 @@ class PictureViewModel(
                     // 解压
                     val imageFiles =
                         unzipUgoira(ZipFile(file), illustId).mapIndexed { index, img ->
-                            img.toBitmap()!! to resp.ugoiraMetadata.frames[index].delay
+                            img.toBitmap()!!
+                                .asImageBitmap() to resp.ugoiraMetadata.frames[index].delay
                         }
                     Log.e(TAG, "downloadUgoira: $imageFiles")
                     updateState {
