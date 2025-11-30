@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ToastUtil
@@ -60,6 +61,7 @@ fun AppDataScreen(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
+                .padding(horizontal = 8.dp)
                 .verticalScroll(rememberScrollState())
                 .imePadding()
         ) {
