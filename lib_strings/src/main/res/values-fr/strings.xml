@@ -89,4 +89,7 @@
     <string name="report_user">Signaler l\'utilisateur</string>
     <string name="user_blocked">Utilisateur bloqué</string>
     <string name="cancel_user_blocked">Débloquer l\'utilisateur</string>
+    <string name="app_data">Données de l\'application</string>
+    <string name="clear_cache">Vider le cache</string>
+    <string name="cache_cleared">%1$s d\'espace libéré</string>
 </resources>

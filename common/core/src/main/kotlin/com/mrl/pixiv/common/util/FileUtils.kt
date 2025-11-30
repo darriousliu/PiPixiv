@@ -44,3 +44,34 @@ fun deleteFiles(file: File): Boolean {
     }
     return file.delete()
 }
+
+
+/**
+ * 计算文件或文件夹的大小。
+ *
+ * 如果是文件夹，则递归计算其所有子文件和子文件夹的大小之和；
+ * 如果是文件，则直接返回该文件的大小（单位为B）。
+ *
+ * @return 文件或文件夹的大小，单位为KB。如果是空文件夹，返回值为0。
+ */
+fun File.calculateSize(): Long {
+    if (isDirectory) {
+        return listFiles()?.sumOf { it.calculateSize() } ?: 0
+    }
+    return length().coerceAtMost(
+        Long.MAX_VALUE
+    )
+}
+
+private const val KB = 1024
+private const val MB = KB * 1024
+private const val GB = MB * 1024
+
+fun Long.adaptiveFileSize(): String {
+    return when (this) {
+        in 0L..<KB -> "$this B"
+        in KB..<MB -> "${this / KB} KB"
+        in MB..<GB -> "${this / MB} MB"
+        else -> "${this / GB} GB"
+    }
+}

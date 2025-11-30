@@ -89,4 +89,7 @@
     <string name="report_user">ユーザーを報告</string>
     <string name="user_blocked">ユーザーはブロックされています</string>
     <string name="cancel_user_blocked">ユーザーのブロックを解除</string>
+    <string name="app_data">アプリデータ</string>
+    <string name="clear_cache">キャッシュを削除</string>
+    <string name="cache_cleared">%1$s の空き容量を確保しました</string>
 </resources>

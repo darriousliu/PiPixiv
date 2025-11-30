@@ -89,4 +89,7 @@
     <string name="report_user">Report User</string>
     <string name="user_blocked">User Blocked</string>
     <string name="cancel_user_blocked">Unblock User</string>
+    <string name="app_data">App data</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="cache_cleared">Cleared %1$s space</string>
 </resources>

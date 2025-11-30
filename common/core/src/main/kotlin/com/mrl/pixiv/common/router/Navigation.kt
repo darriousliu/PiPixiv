@@ -82,6 +82,9 @@ sealed class Destination : NavKey {
 
     @Serializable
     data object BlockSettings : Destination()
+
+    @Serializable
+    data object AppData : Destination()
 }
 
 @Serializable

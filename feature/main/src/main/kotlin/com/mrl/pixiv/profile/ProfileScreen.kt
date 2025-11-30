@@ -20,6 +20,7 @@ import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.ImportExport
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -215,6 +216,28 @@ fun ProfileScreen(
                         leadingContent = {
                             Icon(
                                 imageVector = Icons.Rounded.Block,
+                                contentDescription = null
+                            )
+                        }
+                    )
+                    // 应用数据
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.app_data),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
+                                navigationManager.navigateToAppDataScreen()
+                            }
+                            .then(itemModifier),
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Rounded.Storage,
                                 contentDescription = null
                             )
                         }

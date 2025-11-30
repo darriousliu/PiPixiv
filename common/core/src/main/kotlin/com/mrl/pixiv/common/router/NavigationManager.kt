@@ -133,4 +133,8 @@ class NavigationManager(
     fun navigateToBlockSettings() {
         navigate(route = Destination.BlockSettings)
     }
+
+    fun navigateToAppDataScreen() {
+        navigate(route = Destination.AppData)
+    }
 }

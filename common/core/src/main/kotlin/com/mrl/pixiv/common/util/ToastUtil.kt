@@ -7,16 +7,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 
 object ToastUtil : CoroutineScope by MainScope() {
-    fun safeShortToast(@StringRes strId: Int) {
+    fun safeShortToast(@StringRes strId: Int, vararg params: Any) {
         launchCatch {
-            val text = AppUtil.appContext.getString(strId)
+            val text = AppUtil.appContext.getString(strId, *params)
             Toast.makeText(AppUtil.appContext, text, Toast.LENGTH_SHORT).show()
         }
     }
 
-    fun safeLongToast(@StringRes strId: Int) {
+    fun safeLongToast(@StringRes strId: Int, vararg params: Any) {
         launchCatch {
-            val text = AppUtil.appContext.getString(strId)
+            val text = AppUtil.appContext.getString(strId, *params)
             Toast.makeText(AppUtil.appContext, text, Toast.LENGTH_LONG).show()
         }
     }
