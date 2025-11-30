@@ -12,11 +12,13 @@ import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,9 +32,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.mrl.pixiv.common.compose.ui.SettingItem
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.throttleClick
 
 @Preview
 @Composable
@@ -57,32 +59,26 @@ fun PictureSourceWidget(
         shadowElevation = 4.dp
     ) {
         Column {
-            SettingItem(content = {
-                Text(text = stringResource(RString.image_source))
-                IconButton(
-                    onClick = {
-                        val host = map.entries.first().key
-                        savePictureSourceHost(host)
-                        imageHost = imageHost.copy(text = host)
-                    },
-                    shapes = IconButtonDefaults.shapes(),
-                ) {
-                    Icon(imageVector = Icons.Rounded.Refresh, contentDescription = null)
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(RString.image_source))
+                },
+                trailingContent = {
+                    IconButton(
+                        onClick = {
+                            val host = map.entries.first().key
+                            savePictureSourceHost(host)
+                            imageHost = imageHost.copy(text = host)
+                        },
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
+                        Icon(imageVector = Icons.Rounded.Refresh, contentDescription = null)
+                    }
                 }
-            })
+            )
             map.forEach { (key, value) ->
-                SettingItem(
-                    modifier = Modifier.then(
-                        if (key == currentSelected) {
-                            Modifier.background(MaterialTheme.colorScheme.primary)
-                        } else Modifier
-                    ),
-                    onClick = {
-                        focusManager.clearFocus()
-                        savePictureSourceHost(key)
-                        imageHost = imageHost.copy(text = key)
-                    },
-                    content = {
+                ListItem(
+                    headlineContent = {
                         Text(text = value)
                         if (key == currentSelected) {
                             Icon(
@@ -92,37 +88,50 @@ fun PictureSourceWidget(
                             )
                         }
                     },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            focusManager.clearFocus()
+                            savePictureSourceHost(key)
+                            imageHost = imageHost.copy(text = key)
+                        }
+                        .then(
+                            if (key == currentSelected) {
+                                Modifier.background(MaterialTheme.colorScheme.primary)
+                            } else Modifier
+                        ),
                 )
             }
-            SettingItem(content = {
-                val imeVisible = WindowInsets.isImeVisible
-                LaunchedEffect(WindowInsets.isImeVisible) {
-                    if (!imeVisible) {
-                        focusManager.clearFocus()
-                    }
+            val imeVisible = WindowInsets.isImeVisible
+            LaunchedEffect(WindowInsets.isImeVisible) {
+                if (!imeVisible) {
+                    focusManager.clearFocus()
                 }
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = imageHost,
-                    onValueChange = { imageHost = it },
-                    singleLine = true,
-                    label = { Text(text = stringResource(RString.self_defined_source)) },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = { savePictureSourceHost(imageHost.text) },
-                            shapes = IconButtonDefaults.shapes(),
-                        ) {
-                            Icon(imageVector = Icons.Rounded.Check, contentDescription = null)
-                        }
-                    },
-                    colors = TextFieldDefaults.colors(
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent
-                    ),
-                )
-            })
+            }
+            TextField(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth(),
+                value = imageHost,
+                onValueChange = { imageHost = it },
+                singleLine = true,
+                label = { Text(text = stringResource(RString.self_defined_source)) },
+                trailingIcon = {
+                    IconButton(
+                        onClick = { savePictureSourceHost(imageHost.text) },
+                        shapes = IconButtonDefaults.shapes(),
+                    ) {
+                        Icon(imageVector = Icons.Rounded.Check, contentDescription = null)
+                    }
+                },
+                colors = TextFieldDefaults.colors(
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent
+                ),
+            )
         }
     }
 }

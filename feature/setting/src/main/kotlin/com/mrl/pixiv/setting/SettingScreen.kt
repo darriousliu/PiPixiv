@@ -5,7 +5,6 @@ import android.os.Build
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +19,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,7 +37,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.os.LocaleListCompat
-import com.mrl.pixiv.common.compose.ui.SettingItem
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
@@ -77,16 +76,13 @@ fun SettingScreen(
     ) {
         LazyColumn(
             modifier = modifier.padding(it),
-            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
+            val itemModifier = Modifier.padding(horizontal = 8.dp)
             item {
                 var expanded by remember { mutableStateOf(false) }
                 // 语言
-                SettingItem(
-                    icon = {
-                        Icon(Icons.Rounded.Translate, contentDescription = null)
-                    },
-                    content = {
+                ListItem(
+                    headlineContent = {
                         LaunchedEffect(currentLanguage, labelDefault) {
                             val locale = if (currentLanguage == labelDefault) {
                                 LocaleListCompat.getEmptyLocaleList()
@@ -100,6 +96,12 @@ fun SettingScreen(
                             text = stringResource(RString.app_language),
                             style = MaterialTheme.typography.bodyLarge
                         )
+                    },
+                    modifier = itemModifier,
+                    leadingContent = {
+                        Icon(Icons.Rounded.Translate, contentDescription = null)
+                    },
+                    trailingContent = {
                         DropDownSelector(
                             modifier = Modifier.throttleClick {
                                 expanded = !expanded
@@ -139,16 +141,23 @@ fun SettingScreen(
             }
 
             item {
-                SettingItem(
-                    onClick = { navigationManager.navigate(route = Destination.NetworkSetting) },
-                    icon = {
-                        Icon(imageVector = Icons.Rounded.NetworkWifi, contentDescription = null)
-                    },
-                    content = {
+                ListItem(
+                    headlineContent = {
                         Text(
                             text = stringResource(RString.network_setting),
                             style = MaterialTheme.typography.bodyLarge
                         )
+
+                    },
+                    modifier = Modifier
+                        .throttleClick {
+                            navigationManager.navigate(route = Destination.NetworkSetting)
+                        }
+                        .then(itemModifier),
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.NetworkWifi, contentDescription = null)
+                    },
+                    trailingContent = {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
                             contentDescription = null
@@ -158,27 +167,8 @@ fun SettingScreen(
             }
 
             item {
-                SettingItem(
-                    onClick = {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            try {
-                                val intent = Intent().apply {
-                                    action =
-                                        Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS
-                                    addCategory(Intent.CATEGORY_DEFAULT)
-                                    data = "package:${context.packageName}".toUri()
-                                    addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                                    addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                                }
-                                context.startActivity(intent)
-                            } catch (_: Throwable) {
-                            }
-                        }
-                    },
-                    icon = {
-                        Icon(imageVector = Icons.Rounded.AddLink, contentDescription = null)
-                    },
-                    content = {
+                ListItem(
+                    headlineContent = {
                         Column {
                             Text(
                                 text = stringResource(RString.default_open),
@@ -189,8 +179,30 @@ fun SettingScreen(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
-                    }
-                )
+                    },
+                    modifier = Modifier
+                        .throttleClick {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                try {
+                                    val intent = Intent().apply {
+                                        action =
+                                            Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS
+                                        addCategory(Intent.CATEGORY_DEFAULT)
+                                        data = "package:${context.packageName}".toUri()
+                                        addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                                        addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                                    }
+                                    context.startActivity(intent)
+                                } catch (_: Throwable) {
+                                }
+                            }
+                        }
+                        .then(itemModifier),
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.AddLink, contentDescription = null)
+                    },
+
+                    )
             }
         }
     }

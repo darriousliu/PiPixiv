@@ -10,7 +10,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mrl.pixiv.common.compose.ui.SettingItem
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
@@ -61,26 +60,30 @@ fun NetworkSettingScreen(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .padding(it)
-                .padding(horizontal = 16.dp)
                 .imePadding()
         ) {
-            SettingItem(content = {
-                Column {
+            val itemModifier = Modifier.padding(horizontal = 8.dp)
+            ListItem(
+                headlineContent = {
                     Text(
                         text = stringResource(RString.enable_bypass_sniffing),
-                        style = MaterialTheme.typography.bodyLarge
                     )
+                },
+                modifier = itemModifier,
+                supportingContent = {
                     Text(
                         text = stringResource(RString.close_to_use_ip_directly),
-                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                trailingContent = {
+                    Switch(
+                        checked = userPreference.enableBypassSniffing,
+                        onCheckedChange = { viewModel.dispatch(SettingAction.SwitchBypassSniffing) }
                     )
                 }
-                Switch(
-                    checked = userPreference.enableBypassSniffing,
-                    onCheckedChange = { viewModel.dispatch(SettingAction.SwitchBypassSniffing) }
-                )
-            })
+            )
             PictureSourceWidget(
+                modifier = itemModifier,
                 currentSelected = userPreference.imageHost,
                 savePictureSourceHost = {
                     viewModel.dispatch(SettingAction.SavePictureSourceHost(it))

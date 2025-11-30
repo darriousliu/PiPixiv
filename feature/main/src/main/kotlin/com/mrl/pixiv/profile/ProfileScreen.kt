@@ -26,11 +26,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,13 +45,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
-import com.mrl.pixiv.common.compose.ui.SettingItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.data.setting.getAppCompatDelegateThemeMode
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.throttleClick
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
@@ -95,12 +97,13 @@ fun ProfileScreen(
             modifier = modifier
                 .padding(it)
                 .fillMaxSize()
-                .padding(start = 16.dp, top = 16.dp, end = 16.dp),
+                .padding(top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item(key = KEY_USER_INFO) {
                 // 头像和昵称
                 Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -126,107 +129,144 @@ fun ProfileScreen(
                 }
             }
             item(key = KEY_DIVIDER) {
-                HorizontalDivider()
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             }
             item(key = KEY_SETTINGS) {
                 Column {
+                    val itemModifier = Modifier.padding(horizontal = 8.dp)
                     // 偏好设置
-                    SettingItem(
-                        onClick = navigationManager::navigateToSettingScreen,
-                        icon = {
-                            Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.preference),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         },
-                    ) {
-                        Text(
-                            text = stringResource(RString.preference),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
+                                navigationManager.navigateToSettingScreen()
+                            }
+                            .then(itemModifier),
+                        leadingContent = {
+                            Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
+                        }
+                    )
                     // 历史记录
-                    SettingItem(
-                        onClick = navigationManager::navigateToHistoryScreen,
-                        icon = {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.history),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
+                                navigationManager.navigateToHistoryScreen()
+                            }
+                            .then(itemModifier),
+                        leadingContent = {
                             Icon(
                                 imageVector = Icons.Rounded.History,
                                 contentDescription = null
                             )
                         },
-                    ) {
-                        Text(
-                            text = stringResource(RString.history),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                    )
                     // 收藏
-                    SettingItem(
-                        onClick = {
-                            navigationManager.navigateToCollectionScreen(userInfo.user.id)
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.collection),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         },
-                        icon = {
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
+                                navigationManager.navigateToCollectionScreen(userInfo.user.id)
+                            }
+                            .then(itemModifier),
+                        leadingContent = {
                             Icon(
                                 imageVector = Icons.Rounded.Bookmarks,
                                 contentDescription = null
                             )
                         },
-                    ) {
-                        Text(
-                            text = stringResource(RString.collection),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                    )
                     // 屏蔽设定
-                    SettingItem(
-                        onClick = {
-                            navigationManager.navigateToBlockSettings()
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.block_settings),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         },
-                        icon = {
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
+                                navigationManager.navigateToBlockSettings()
+                            }
+                            .then(itemModifier),
+                        leadingContent = {
                             Icon(
                                 imageVector = Icons.Rounded.Block,
                                 contentDescription = null
                             )
                         }
-                    ) {
-                        Text(
-                            text = stringResource(RString.block_settings),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
                     // 导出Token
-                    SettingItem(
-                        onClick = {
-                            viewModel.dispatch(ProfileAction.ExportToken)
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.export_token),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         },
-                        icon = {
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
+                                viewModel.dispatch(ProfileAction.ExportToken)
+                            }
+                            .then(itemModifier),
+                        leadingContent = {
                             Icon(
                                 imageVector = Icons.Rounded.ImportExport,
                                 contentDescription = null
                             )
                         },
-                    ) {
-                        Text(
-                            text = stringResource(RString.export_token),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                    )
                     // 退出登录
-                    SettingItem(
-                        onClick = {
-                            viewModel.logout()
-                            navigationManager.navigateToLoginOptionScreen()
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.sign_out),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         },
-                        icon = {
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
+                                viewModel.logout()
+                                navigationManager.navigateToLoginOptionScreen()
+                            }
+                            .then(itemModifier),
+                        leadingContent = {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.Logout,
                                 contentDescription = null
                             )
                         },
-                    ) {
-                        Text(
-                            text = stringResource(RString.sign_out),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                    )
                 }
             }
         }
