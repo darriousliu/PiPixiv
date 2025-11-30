@@ -49,6 +49,7 @@ baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprof
 
 
 [bundles]
+androidx = ["activity-compose", "appcompat", "core-ktx"]
 lifecycle = ["lifecycle-common", "lifecycle-process", "lifecycle-runtime-compose", "lifecycle-viewmodel-compose"]
 paging = ["paging", "paging-compose"]
 workmanager = ["work-runtime"]

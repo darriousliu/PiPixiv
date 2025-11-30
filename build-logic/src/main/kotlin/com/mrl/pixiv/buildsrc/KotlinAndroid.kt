@@ -36,7 +36,9 @@ internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
-        compileSdk = 36
+        compileSdk {
+            version = release(36)
+        }
 
         defaultConfig {
             minSdk = 24
@@ -56,9 +58,22 @@ internal fun Project.configureKotlinAndroid(
     configureKotlin()
 
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+    val kotlinx = extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
+    val androidx = extensions.getByType<VersionCatalogsExtension>().named("androidx")
 
     dependencies {
         coreLibraryDesugaring(libs.findLibrary("desugar").get())
+        implementation(androidx.findBundle("androidx").get())
+        // Lifecycle
+        implementation(androidx.findBundle("lifecycle").get())
+        // Coroutines
+        implementation(platform(kotlinx.findLibrary("coroutines-bom").get()))
+        implementation(kotlinx.findBundle("coroutines").get())
+        // Koin
+        implementation(libs.findBundle("koin").get())
+        ksp(libs.findLibrary("koin-ksp-compiler").get())
+        // Logger
+        implementation(libs.findLibrary("kermit").get())
     }
 }
 

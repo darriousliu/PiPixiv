@@ -15,63 +15,41 @@ android {
 
 dependencies {
     api(project(":lib_strings"))
+    implementation(project(":common:data"))
 
-    // core-ktx
-    api(androidx.core.ktx)
-    api(androidx.appcompat)
-    // Lifecycle
-    api(androidx.bundles.lifecycle)
-    // splash screen
-    api(androidx.splashscreen)
-    // DataStore
-//    api(androidx.datastore)
-//    api(androidx.datastore.preferences)
-    // ProfileInstaller
-    api(androidx.profileinstaller)
     // Paging
-    api(androidx.bundles.paging)
-    api(androidx.window)
-    // Compose
-    api(platform(compose.bom))
-    api(compose.bundles.baselibs)
-    api(androidx.activity.compose)
-    api(compose.bundles.accompanist)
-    api(libs.compose.webview.multiplatform)
-    api(compose.bundles.navigation3)
-    // Navigation
-    api(androidx.navigation.compose)
-    // Koin
-    api(libs.bundles.koin)
-    ksp(libs.koin.ksp.compiler)
+    implementation(androidx.bundles.paging)
+    implementation(androidx.window)
+
+    implementation(compose.bundles.accompanist)
+    implementation(compose.bundles.navigation3)
+
+
     // Ktor
-    api(kotlinx.bundles.ktor)
-    // Coroutines
-    api(platform(kotlinx.coroutines.bom))
-    api(kotlinx.bundles.coroutines)
+    implementation(kotlinx.bundles.ktor)
+
     // Serialization
-    api(kotlinx.bundles.serialization)
+    implementation(kotlinx.bundles.serialization)
     // DateTime
-    api(kotlinx.datetime)
+    implementation(kotlinx.datetime)
     // KotlinX Collections Immutable
-    api(kotlinx.collections.immutable)
+    implementation(kotlinx.collections.immutable)
     // Reflect
-    api(kotlinx.reflect)
+    implementation(kotlinx.reflect)
     // Coil3
-    api(platform(libs.coil3.bom))
-    api(libs.bundles.coil3)
+    implementation(platform(libs.coil3.bom))
+    implementation(libs.bundles.coil3)
     // Okio
-    api(libs.okio)
+    implementation(libs.okio)
     // Firebase
-    defaultApi(platform(libs.firebase.bom))
-    defaultApi(libs.bundles.firebase)
+    defaultImplementation(platform(libs.firebase.bom))
+    defaultImplementation(libs.bundles.firebase)
     // MMKV
-    api(libs.mmkv)
-    api(libs.mmkv.kotlin)
+    implementation(libs.mmkv)
+    implementation(libs.mmkv.kotlin)
     // Logger
-    api(libs.kermit)
-    api(libs.material)
+    implementation(libs.kermit)
+    implementation(libs.material)
     // Kotzilla
-    defaultApi(libs.kotzilla.sdk)
-    // GIF encoder
-    api(libs.gifkt)
+    defaultImplementation(libs.kotzilla.sdk)
 }

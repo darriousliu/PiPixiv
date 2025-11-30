@@ -1,6 +1,12 @@
 package com.mrl.pixiv.common.serialize
 
-import com.mrl.pixiv.common.network.JSON
+import kotlinx.serialization.json.Json
+
+val JSON = Json {
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+    isLenient = true
+}
 
 inline fun <reified T> T.toJson() = JSON.encodeToString(this)
 
