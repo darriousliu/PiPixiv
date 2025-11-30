@@ -2,21 +2,25 @@ package com.mrl.pixiv.common.util
 
 import android.content.ContentValues
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory.decodeFile
+import android.graphics.BitmapFactory
 import android.os.Environment
 import android.provider.MediaStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.OutputStream
 
-
-// 下载文件夹为Pictures/PiPixiv
 val DOWNLOAD_DIR = "${Environment.DIRECTORY_PICTURES}/PiPixiv/"
 
-enum class PictureType(val extension: String) {
-    PNG(".png"),
-    JPG(".jpg"),
-    JPEG(".jpeg"),
-    GIF(".gif")
+enum class PictureType(
+    val extension: String,
+    val mimeType: String,
+    val compressFormat: Bitmap.CompressFormat? = null
+) {
+    PNG(".png", "image/png", Bitmap.CompressFormat.PNG),
+    JPG(".jpg", "image/jpeg", Bitmap.CompressFormat.JPEG),
+    JPEG(".jpeg", "image/jpeg", Bitmap.CompressFormat.JPEG),
+    GIF(".gif", "image/gif", null)
 }
 
 fun isImageExists(fileName: String, type: PictureType): Boolean {
@@ -25,77 +29,77 @@ fun isImageExists(fileName: String, type: PictureType): Boolean {
     val selection =
         "${MediaStore.Images.Media.DISPLAY_NAME} = ? AND ${MediaStore.Images.Media.RELATIVE_PATH} = ?"
     val selectionArgs = arrayOf(fileName + type.extension, DOWNLOAD_DIR)
-    context.contentResolver.query(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-        projection,
-        selection,
-        selectionArgs,
-        null
-    )?.use { cursor ->
-        return cursor.count > 0
+
+    return try {
+        context.contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )?.use { it.count > 0 } == true
+    } catch (e: Exception) {
+        false
     }
-    return false
 }
 
-fun Bitmap.saveToAlbum(
+suspend fun Bitmap.saveToAlbum(
     fileName: String,
-    type: PictureType = PictureType.PNG,
-    callback: (Boolean) -> Unit = {}
-) {
-    val compressFormat = when (type) {
-        PictureType.PNG -> Bitmap.CompressFormat.PNG
-        PictureType.JPEG -> Bitmap.CompressFormat.JPEG
-        PictureType.JPG -> Bitmap.CompressFormat.JPEG
-        else -> return
+    mimeType: String?,
+): Boolean = withContext(Dispatchers.IO) {
+    val type = when (mimeType?.lowercase()) {
+        PictureType.PNG.mimeType -> PictureType.PNG
+        PictureType.JPG.mimeType, PictureType.JPEG.mimeType -> PictureType.JPG
+        else -> return@withContext false
     }
+    val compressFormat = type.compressFormat ?: return@withContext false
+
+    if (isImageExists(fileName, type)) {
+        return@withContext true
+    }
+
+    val context = AppUtil.appContext
+    val contentValues = createContentValues(fileName, type)
+
     try {
-        if (isImageExists(fileName, type)) {
-            callback(true)
-            return
-        }
-        val context = AppUtil.appContext
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + type.extension)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/${type.name.lowercase()}")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, DOWNLOAD_DIR)
-        }
         val uri = context.contentResolver.insert(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             contentValues
         )
-        if (uri != null) {
-            context.contentResolver.openOutputStream(uri)?.use { out ->
-                if (compress(compressFormat, 100, out)) {
-                    callback(true)
-                    return
-                }
+        uri?.let {
+            context.contentResolver.openOutputStream(it)?.use { out ->
+                compress(compressFormat, 100, out)
             }
-        }
-        callback(false)
-    } catch (_: Exception) {
-        callback(false)
+        } ?: false
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
     }
 }
 
 fun File.toBitmap(): Bitmap? {
     return try {
-        decodeFile(absolutePath)
+        BitmapFactory.decodeFile(absolutePath)
     } catch (e: Exception) {
         e.printStackTrace()
         null
     }
 }
 
-fun createDownloadFile(fileName: String, type: PictureType): OutputStream? {
+fun createDownloadOutputStream(fileName: String, type: PictureType): OutputStream? {
     val context = AppUtil.appContext
-    val contentValues = ContentValues().apply {
-        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + type.extension)
-        put(MediaStore.MediaColumns.MIME_TYPE, "image/${type.name.lowercase()}")
-        put(MediaStore.MediaColumns.RELATIVE_PATH, DOWNLOAD_DIR)
-    }
+    val contentValues = createContentValues(fileName, type)
     val uri = context.contentResolver.insert(
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
         contentValues
     )
     return uri?.let { context.contentResolver.openOutputStream(it) }
+}
+
+private fun createContentValues(fileName: String, type: PictureType): ContentValues {
+    return ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + type.extension)
+        put(MediaStore.MediaColumns.MIME_TYPE, type.mimeType)
+        put(MediaStore.MediaColumns.RELATIVE_PATH, DOWNLOAD_DIR)
+    }
 }

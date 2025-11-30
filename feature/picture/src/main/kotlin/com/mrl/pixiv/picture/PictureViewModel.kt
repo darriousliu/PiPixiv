@@ -13,8 +13,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import coil3.SingletonImageLoader
+import coil3.annotation.InternalCoilApi
 import coil3.request.ImageRequest
 import coil3.toBitmap
+import coil3.util.MimeTypeMap
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
@@ -32,7 +34,7 @@ import com.mrl.pixiv.common.util.PictureType
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.TAG
-import com.mrl.pixiv.common.util.createDownloadFile
+import com.mrl.pixiv.common.util.createDownloadOutputStream
 import com.mrl.pixiv.common.util.isImageExists
 import com.mrl.pixiv.common.util.saveToAlbum
 import com.mrl.pixiv.common.util.toBitmap
@@ -234,6 +236,7 @@ class PictureViewModel(
         SearchRepository.addSearchHistory(keyword)
     }
 
+    @OptIn(InternalCoilApi::class)
     fun downloadIllust(
         illustId: Long,
         index: Int,
@@ -253,11 +256,11 @@ class PictureViewModel(
                 closeBottomSheet()
                 return@launchIO
             }
-            result.image?.toBitmap()?.saveToAlbum("${illustId}_$index") {
-                with(AppUtil.appContext) {
-                    closeBottomSheet()
-                    handleError(Exception(getString(if (it) RString.download_success else RString.download_failed)))
-                }
+            val mimeType = MimeTypeMap.getMimeTypeFromUrl(originalUrl)
+            val success = result.image?.toBitmap()?.saveToAlbum("${illustId}_$index", mimeType)
+            with(AppUtil.appContext) {
+                closeBottomSheet()
+                handleError(Exception(getString(if (success == true) RString.download_success else RString.download_failed)))
             }
             closeBottomSheet()
             showLoading(false)
@@ -405,7 +408,8 @@ class PictureViewModel(
 
             if (state.ugoiraImages.isNotEmpty()) {
                 try {
-                    val outputStream = createDownloadFile(illustId.toString(), PictureType.GIF)
+                    val outputStream =
+                        createDownloadOutputStream(illustId.toString(), PictureType.GIF)
                     val sink = outputStream?.asSink()?.buffered() ?: return@launchIO
                     val encoder = GifEncoder(sink)
                     state.ugoiraImages.forEach {
