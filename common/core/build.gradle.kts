@@ -16,37 +16,24 @@ android {
 dependencies {
     api(project(":lib_strings"))
     implementation(project(":common:data"))
-    
-    implementation(androidx.window)
 
+    implementation(libs.material)
     implementation(compose.bundles.navigation3)
-
-
     // Ktor
     implementation(kotlinx.bundles.ktor)
-
     // Serialization
     implementation(kotlinx.bundles.serialization)
     // DateTime
     implementation(kotlinx.datetime)
-    // KotlinX Collections Immutable
-    implementation(kotlinx.collections.immutable)
-    // Reflect
-    implementation(kotlinx.reflect)
     // Coil3
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)
-    // Okio
-    implementation(libs.okio)
     // Firebase
     defaultImplementation(platform(libs.firebase.bom))
     defaultImplementation(libs.bundles.firebase)
     // MMKV
     implementation(libs.mmkv)
     implementation(libs.mmkv.kotlin)
-    // Logger
-    implementation(libs.kermit)
-    implementation(libs.material)
     // Kotzilla
     defaultImplementation(libs.kotzilla.sdk)
 }

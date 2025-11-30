@@ -9,7 +9,7 @@ android {
 
 dependencies {
     implementation(project(":common:data"))
-    implementation(project(":lib_common"))
+    implementation(project(":common:core"))
 
     // Serialization
     implementation(kotlinx.bundles.serialization)

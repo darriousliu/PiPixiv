@@ -10,7 +10,7 @@ dependencies {
     implementation(project(":common:data"))
     implementation(project(":common:repository"))
     implementation(project(":common:ui"))
-    implementation(project(":lib_common"))
+    implementation(project(":common:core"))
     implementation(project(":feature:collection"))
     implementation(project(":feature:follow"))
 

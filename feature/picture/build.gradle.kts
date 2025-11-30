@@ -11,7 +11,7 @@ dependencies {
     implementation(project(":common:network"))
     implementation(project(":common:repository"))
     implementation(project(":common:ui"))
-    implementation(project(":lib_common"))
+    implementation(project(":common:core"))
 
     // Paging
     implementation(androidx.bundles.paging)

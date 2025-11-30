@@ -7,6 +7,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":lib_common"))
+    implementation(project(":common:core"))
 
 }

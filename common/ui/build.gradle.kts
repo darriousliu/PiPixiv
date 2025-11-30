@@ -9,7 +9,7 @@ android {
 dependencies {
     implementation(project(":common:data"))
     implementation(project(":common:repository"))
-    implementation(project(":lib_common"))
+    implementation(project(":common:core"))
 
     // Paging
     implementation(androidx.bundles.paging)

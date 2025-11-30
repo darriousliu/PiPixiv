@@ -13,7 +13,7 @@ dependencies {
     implementation(project(":common:network"))
     implementation(project(":common:datasource-local"))
     implementation(project(":common:datasource-remote"))
-    implementation(project(":lib_common"))
+    implementation(project(":common:core"))
 
     // Paging
     implementation(androidx.bundles.paging)

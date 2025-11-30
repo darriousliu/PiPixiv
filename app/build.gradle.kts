@@ -100,7 +100,7 @@ dependencies {
     implementation(project(":common:network"))
     implementation(project(":common:repository"))
     implementation(project(":common:ui"))
-    implementation(project(":lib_common"))
+    implementation(project(":common:core"))
     rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
         implementation(project(":feature:${it.name}"))
     }
