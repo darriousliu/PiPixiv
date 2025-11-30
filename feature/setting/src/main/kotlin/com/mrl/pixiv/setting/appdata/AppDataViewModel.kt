@@ -135,12 +135,8 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
                             }
                         }
 
-                        if (deleteSuccess || pendingDeleteUris.contains(
-                                getMediaUri(
-                                    resolver,
-                                    file
-                                )
-                            )
+                        if (deleteSuccess ||
+                            pendingDeleteUris.contains(getMediaUri(resolver, file))
                         ) {
                             // 即使放入待删除列表，也算作迁移步骤完成（等待最后确认）
                             successCount++
