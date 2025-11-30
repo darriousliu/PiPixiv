@@ -10,6 +10,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.OutputStream
 
+
+val OLD_DOWNLOAD_DIR = "${Environment.DIRECTORY_DCIM}/PiPixiv/"
 val DOWNLOAD_DIR = "${Environment.DIRECTORY_PICTURES}/PiPixiv/"
 
 enum class PictureType(

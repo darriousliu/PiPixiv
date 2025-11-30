@@ -92,4 +92,14 @@
     <string name="app_data">アプリデータ</string>
     <string name="clear_cache">キャッシュを削除</string>
     <string name="cache_cleared">%1$s の空き容量を確保しました</string>
+    <string name="migrate_data_title">旧データが見つかりました</string>
+    <string name="migrate_data_desc">古いフォルダに %1$d 枚の画像があります。新しいフォルダへの移行を推奨します</string>
+    <string name="migrate_confirm_title">移行しますか？</string>
+    <string name="migrate_confirm_desc">DCIM/PiPixiv から Pictures/PiPixiv へ移行します。完了後、元のファイルは削除されます。</string>
+    <string name="migrating">移行中… (%1$d/%2$d)</string>
+    <string name="migration_success">移行完了</string>
+    <string name="migration_failed">移行失敗</string>
+    <string name="cancel">キャンセル</string>
+    <string name="confirm">確認</string>
+    <string name="permission_rationale">旧データを移行するにはストレージ権限が必要です</string>
 </resources>

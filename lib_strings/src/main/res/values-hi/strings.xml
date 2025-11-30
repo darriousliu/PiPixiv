@@ -92,4 +92,14 @@
     <string name="app_data">ऐप्लिकेशन डेटा</string>
     <string name="clear_cache">कैश साफ़ करें</string>
     <string name="cache_cleared">%1$s जगह खाली की गई</string>
+    <string name="migrate_data_title">पुराना डेटा मिला</string>
+    <string name="migrate_data_desc">पुरानी निर्देशिका में %1$d चित्र मिले, नई निर्देशिका में स्थानांतरित करने का सुझाव दिया जाता है</string>
+    <string name="migrate_confirm_title">स्थानांतरण की पुष्टि करें?</string>
+    <string name="migrate_confirm_desc">DCIM/PiPixiv से Pictures/PiPixiv में स्थानांतरित किया जाएगा। पूरा होने पर मूल फ़ाइलें हटा दी जाएंगी।</string>
+    <string name="migrating">स्थानांतरण जारी है… (%1$d/%2$d)</string>
+    <string name="migration_success">स्थानांतरण सफल</string>
+    <string name="migration_failed">स्थानांतरण विफल</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="confirm">पुष्टि करें</string>
+    <string name="permission_rationale">पुराने डेटा को स्थानांतरित करने के लिए संग्रहण अनुमति की आवश्यकता है</string>
 </resources>

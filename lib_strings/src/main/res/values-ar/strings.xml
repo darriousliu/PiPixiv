@@ -92,4 +92,14 @@
     <string name="app_data">بيانات التطبيق</string>
     <string name="clear_cache">مسح ذاكرة التخزين المؤقت</string>
     <string name="cache_cleared">تم إخلاء %1$s من المساحة</string>
+    <string name="migrate_data_title">تم اكتشاف بيانات قديمة</string>
+    <string name="migrate_data_desc">تم اكتشاف %1$d صورة في الدليل القديم، يوصى بنقلها إلى الدليل الجديد</string>
+    <string name="migrate_confirm_title">تأكيد النقل؟</string>
+    <string name="migrate_confirm_desc">سيتم النقل من DCIM/PiPixiv إلى Pictures/PiPixiv. سيتم حذف الملفات الأصلية بعد الانتهاء.</string>
+    <string name="migrating">جارٍ النقل… (%1$d/%2$d)</string>
+    <string name="migration_success">تم النقل بنجاح</string>
+    <string name="migration_failed">فشل النقل</string>
+    <string name="cancel">إلغاء</string>
+    <string name="confirm">تأكيد</string>
+    <string name="permission_rationale">إذن التخزين مطلوب لنقل البيانات القديمة</string>
 </resources>

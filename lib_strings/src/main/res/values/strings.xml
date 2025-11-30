@@ -95,4 +95,14 @@
     <string name="app_data">应用数据</string>
     <string name="clear_cache">清除缓存</string>
     <string name="cache_cleared">已清除%1$s空间</string>
+    <string name="migrate_data_title">发现旧版数据</string>
+    <string name="migrate_data_desc">旧目录检测到 %1$d 张图片，建议迁移至新目录</string>
+    <string name="migrate_confirm_title">确认迁移？</string>
+    <string name="migrate_confirm_desc">将从 DCIM/PiPixiv 迁移至 Pictures/PiPixiv。迁移完成后原文件将被删除。</string>
+    <string name="migrating">正在迁移… (%1$d/%2$d)</string>
+    <string name="migration_success">迁移成功</string>
+    <string name="migration_failed">迁移失败</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="permission_rationale">需要存储权限以迁移旧数据</string>
 </resources>

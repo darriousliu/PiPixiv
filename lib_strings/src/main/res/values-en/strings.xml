@@ -92,4 +92,14 @@
     <string name="app_data">App data</string>
     <string name="clear_cache">Clear cache</string>
     <string name="cache_cleared">Cleared %1$s space</string>
+    <string name="migrate_data_title">Legacy data detected</string>
+    <string name="migrate_data_desc">Detected %1$d images in old directory. Migration to new directory is recommended</string>
+    <string name="migrate_confirm_title">Confirm migration?</string>
+    <string name="migrate_confirm_desc">Will migrate from DCIM/PiPixiv to Pictures/PiPixiv. Original files will be deleted upon completion.</string>
+    <string name="migrating">Migrating… (%1$d/%2$d)</string>
+    <string name="migration_success">Migration successful</string>
+    <string name="migration_failed">Migration failed</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="permission_rationale">Storage permission is required to migrate legacy data</string>
 </resources>

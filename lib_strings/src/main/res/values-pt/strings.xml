@@ -92,4 +92,14 @@
     <string name="app_data">Dados do aplicativo</string>
     <string name="clear_cache">Limpar cache</string>
     <string name="cache_cleared">%1$s de espaço liberado</string>
+    <string name="migrate_data_title">Dados antigos detectados</string>
+    <string name="migrate_data_desc">%1$d imagens detectadas no diretório antigo. Recomenda-se migrar para o novo diretório</string>
+    <string name="migrate_confirm_title">Confirmar migração?</string>
+    <string name="migrate_confirm_desc">Será movido de DCIM/PiPixiv para Pictures/PiPixiv. Os arquivos originais serão excluídos após a conclusão.</string>
+    <string name="migrating">Migrando… (%1$d/%2$d)</string>
+    <string name="migration_success">Migração concluída</string>
+    <string name="migration_failed">Falha na migração</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="permission_rationale">Permissão de armazenamento necessária para migrar dados antigos</string>
 </resources>
