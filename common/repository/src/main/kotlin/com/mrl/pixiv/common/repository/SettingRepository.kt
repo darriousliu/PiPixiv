@@ -42,6 +42,10 @@ object SettingRepository : MMKVUser {
         it.copy(hasShowBookmarkTip = hasShow)
     }
 
+    fun setDownloadSubFolderByUser(enable: Boolean) = userPreference.update {
+        it.copy(downloadSubFolderByUser = enable)
+    }
+
     fun updateSettings(block: (UserPreference) -> UserPreference) {
         userPreference.update(block)
     }

@@ -25,12 +25,13 @@ enum class PictureType(
     GIF(".gif", "image/gif", null)
 }
 
-fun isImageExists(fileName: String, type: PictureType): Boolean {
+fun isImageExists(fileName: String, type: PictureType, subFolder: String? = null): Boolean {
     val context = AppUtil.appContext
     val projection = arrayOf(MediaStore.Images.Media._ID)
     val selection =
         "${MediaStore.Images.Media.DISPLAY_NAME} = ? AND ${MediaStore.Images.Media.RELATIVE_PATH} = ?"
-    val selectionArgs = arrayOf(fileName + type.extension, DOWNLOAD_DIR)
+    val downloadDir = if (subFolder != null) "$DOWNLOAD_DIR$subFolder/" else DOWNLOAD_DIR
+    val selectionArgs = arrayOf(fileName + type.extension, downloadDir)
 
     return try {
         context.contentResolver.query(
@@ -48,6 +49,7 @@ fun isImageExists(fileName: String, type: PictureType): Boolean {
 suspend fun Bitmap.saveToAlbum(
     fileName: String,
     mimeType: String?,
+    subFolder: String? = null,
 ): Boolean = withContext(Dispatchers.IO) {
     val type = when (mimeType?.lowercase()) {
         PictureType.PNG.mimeType -> PictureType.PNG
@@ -56,12 +58,12 @@ suspend fun Bitmap.saveToAlbum(
     }
     val compressFormat = type.compressFormat ?: return@withContext false
 
-    if (isImageExists(fileName, type)) {
+    if (isImageExists(fileName, type, subFolder)) {
         return@withContext true
     }
 
     val context = AppUtil.appContext
-    val contentValues = createContentValues(fileName, type)
+    val contentValues = createContentValues(fileName, type, subFolder)
 
     try {
         val uri = context.contentResolver.insert(
@@ -88,9 +90,13 @@ fun File.toBitmap(): Bitmap? {
     }
 }
 
-fun createDownloadOutputStream(fileName: String, type: PictureType): OutputStream? {
+fun createDownloadOutputStream(
+    fileName: String,
+    type: PictureType,
+    subFolder: String? = null
+): OutputStream? {
     val context = AppUtil.appContext
-    val contentValues = createContentValues(fileName, type)
+    val contentValues = createContentValues(fileName, type, subFolder)
     val uri = context.contentResolver.insert(
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
         contentValues
@@ -98,10 +104,15 @@ fun createDownloadOutputStream(fileName: String, type: PictureType): OutputStrea
     return uri?.let { context.contentResolver.openOutputStream(it) }
 }
 
-private fun createContentValues(fileName: String, type: PictureType): ContentValues {
+private fun createContentValues(
+    fileName: String,
+    type: PictureType,
+    subFolder: String? = null
+): ContentValues {
+    val downloadDir = if (subFolder != null) "$DOWNLOAD_DIR$subFolder/" else DOWNLOAD_DIR
     return ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, fileName + type.extension)
         put(MediaStore.MediaColumns.MIME_TYPE, type.mimeType)
-        put(MediaStore.MediaColumns.RELATIVE_PATH, DOWNLOAD_DIR)
+        put(MediaStore.MediaColumns.RELATIVE_PATH, downloadDir)
     }
 }

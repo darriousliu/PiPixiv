@@ -102,4 +102,6 @@
     <string name="cancel">Cancelar</string>
     <string name="confirm">Confirmar</string>
     <string name="permission_rationale">Se necesita permiso de almacenamiento para migrar datos antiguos</string>
+    <string name="download_single_folder_by_user_title">Carpeta separada</string>
+    <string name="download_single_folder_by_user_desc">Crear una carpeta separada para cada artista para guardar sus obras</string>
 </resources>

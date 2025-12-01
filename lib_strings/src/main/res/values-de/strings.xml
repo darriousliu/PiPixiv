@@ -102,4 +102,6 @@
     <string name="cancel">Abbrechen</string>
     <string name="confirm">Bestätigen</string>
     <string name="permission_rationale">Speicherberechtigung erforderlich, um alte Daten zu migrieren</string>
+    <string name="download_single_folder_by_user_title">Separater Ordner</string>
+    <string name="download_single_folder_by_user_desc">Einen separaten Ordner für jeden Künstler erstellen, um dessen Werke zu speichern</string>
 </resources>

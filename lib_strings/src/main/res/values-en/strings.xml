@@ -102,4 +102,6 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="permission_rationale">Storage permission is required to migrate legacy data</string>
+    <string name="download_single_folder_by_user_title">Separate folder</string>
+    <string name="download_single_folder_by_user_desc">Create a separate folder for each artist to store their works</string>
 </resources>

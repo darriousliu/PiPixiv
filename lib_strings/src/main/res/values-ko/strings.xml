@@ -102,4 +102,6 @@
     <string name="cancel">취소</string>
     <string name="confirm">확인</string>
     <string name="permission_rationale">이전 데이터를 이동하려면 저장소 권한이 필요합니다</string>
+    <string name="download_single_folder_by_user_title">개별 폴더</string>
+    <string name="download_single_folder_by_user_desc">작가별로 개별 폴더를 생성하여 작품을 저장합니다</string>
 </resources>

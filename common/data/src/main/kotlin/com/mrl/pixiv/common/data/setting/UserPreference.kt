@@ -10,4 +10,5 @@ data class UserPreference(
     val isR18Enabled: Boolean = false,
     val imageHost: String = IMAGE_HOST,
     val hasShowBookmarkTip: Boolean = false,
+    val downloadSubFolderByUser: Boolean = false,
 )

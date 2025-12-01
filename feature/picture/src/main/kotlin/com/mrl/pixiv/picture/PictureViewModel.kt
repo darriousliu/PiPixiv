@@ -27,6 +27,7 @@ import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.paging.RelatedIllustPaging
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.AppUtil.getString
@@ -257,7 +258,13 @@ class PictureViewModel(
                 return@launchIO
             }
             val mimeType = MimeTypeMap.getMimeTypeFromUrl(originalUrl)
-            val success = result.image?.toBitmap()?.saveToAlbum("${illustId}_$index", mimeType)
+            val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
+                state.illust?.user?.id?.toString()
+            } else {
+                null
+            }
+            val success =
+                result.image?.toBitmap()?.saveToAlbum("${illustId}_$index", mimeType, subFolder)
             with(AppUtil.appContext) {
                 closeBottomSheet()
                 handleError(Exception(getString(if (success == true) RString.download_success else RString.download_failed)))
@@ -400,7 +407,14 @@ class PictureViewModel(
             showLoading(true)
             // 判断是已经下载过zip
             val illustId = state.illust?.id
-            if (illustId == null || isImageExists(illustId.toString(), PictureType.GIF)) {
+            val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
+                state.illust?.user?.id?.toString()
+            } else {
+                null
+            }
+            if (illustId == null ||
+                isImageExists(illustId.toString(), PictureType.GIF, subFolder)
+            ) {
                 closeBottomSheet()
                 showLoading(false)
                 return@launchIO
@@ -409,7 +423,7 @@ class PictureViewModel(
             if (state.ugoiraImages.isNotEmpty()) {
                 try {
                     val outputStream =
-                        createDownloadOutputStream(illustId.toString(), PictureType.GIF)
+                        createDownloadOutputStream(illustId.toString(), PictureType.GIF, subFolder)
                     val sink = outputStream?.asSink()?.buffered() ?: return@launchIO
                     val encoder = GifEncoder(sink)
                     state.ugoiraImages.forEach {

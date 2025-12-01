@@ -4,8 +4,12 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -13,6 +17,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.AddLink
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.NetworkWifi
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.DropdownMenuItem
@@ -20,12 +25,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.os.LocaleListCompat
+import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
@@ -57,6 +65,8 @@ fun SettingScreen(
             AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag() ?: labelDefault
         )
     }
+    val userPreference by SettingRepository.userPreferenceFlow.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -94,7 +104,6 @@ fun SettingScreen(
 
                         Text(
                             text = stringResource(RString.app_language),
-                            style = MaterialTheme.typography.bodyLarge
                         )
                     },
                     modifier = itemModifier,
@@ -119,7 +128,6 @@ fun SettingScreen(
                                             Text(
                                                 text = it.displayName,
                                                 modifier = Modifier.padding(16.dp),
-                                                style = MaterialTheme.typography.bodyMedium,
                                             )
                                             if (currentLanguage == it.langTag) {
                                                 Icon(
@@ -145,12 +153,12 @@ fun SettingScreen(
                     headlineContent = {
                         Text(
                             text = stringResource(RString.network_setting),
-                            style = MaterialTheme.typography.bodyLarge
                         )
-
                     },
                     modifier = Modifier
-                        .throttleClick {
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
                             navigationManager.navigate(route = Destination.NetworkSetting)
                         }
                         .then(itemModifier),
@@ -169,19 +177,51 @@ fun SettingScreen(
             item {
                 ListItem(
                     headlineContent = {
-                        Column {
-                            Text(
-                                text = stringResource(RString.default_open),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = stringResource(RString.allow_open_link),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                        Text(
+                            text = stringResource(RString.download_single_folder_by_user_title),
+                        )
+                    },
+                    modifier = itemModifier
+                        .height(IntrinsicSize.Min)
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            SettingRepository.setDownloadSubFolderByUser(!userPreference.downloadSubFolderByUser)
+                        },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(RString.download_single_folder_by_user_desc),
+                        )
+                    },
+                    leadingContent = {
+                        Column(
+                            modifier = Modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(imageVector = Icons.Rounded.Folder, contentDescription = null)
                         }
                     },
+                    trailingContent = {
+                        Switch(
+                            checked = userPreference.downloadSubFolderByUser,
+                            onCheckedChange = { SettingRepository.setDownloadSubFolderByUser(it) }
+                        )
+                    }
+                )
+            }
+
+            item {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RString.default_open),
+                        )
+                    },
                     modifier = Modifier
-                        .throttleClick {
+                        .height(IntrinsicSize.Min)
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 try {
                                     val intent = Intent().apply {
@@ -198,13 +238,21 @@ fun SettingScreen(
                             }
                         }
                         .then(itemModifier),
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded.AddLink, contentDescription = null)
+                    supportingContent = {
+                        Text(
+                            text = stringResource(RString.allow_open_link),
+                        )
                     },
-
-                    )
+                    leadingContent = {
+                        Column(
+                            modifier = Modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(imageVector = Icons.Rounded.AddLink, contentDescription = null)
+                        }
+                    },
+                )
             }
         }
     }
 }
-

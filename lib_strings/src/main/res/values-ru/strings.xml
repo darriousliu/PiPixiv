@@ -102,4 +102,6 @@
     <string name="cancel">Отмена</string>
     <string name="confirm">ОК</string>
     <string name="permission_rationale">Для переноса старых данных требуется разрешение на доступ к хранилищу</string>
+    <string name="download_single_folder_by_user_title">Отдельная папка</string>
+    <string name="download_single_folder_by_user_desc">Создавать отдельную папку для каждого художника для хранения его работ</string>
 </resources>

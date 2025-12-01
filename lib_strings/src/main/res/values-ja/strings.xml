@@ -102,4 +102,6 @@
     <string name="cancel">キャンセル</string>
     <string name="confirm">確認</string>
     <string name="permission_rationale">旧データを移行するにはストレージ権限が必要です</string>
+    <string name="download_single_folder_by_user_title">個別のフォルダー</string>
+    <string name="download_single_folder_by_user_desc">各作者ごとに個別のフォルダーを作成して作品を保存します</string>
 </resources>
