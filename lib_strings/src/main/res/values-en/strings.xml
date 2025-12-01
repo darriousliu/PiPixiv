@@ -25,7 +25,7 @@
     <string name="sign_up">Sign up</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_with_token">Sign in with Token</string>
-    <string name="download_with_size">Download (%1$.2fMB)</string>
+    <string name="download_with_size">Download (%s)</string>
     <string name="followed">Followed</string>
     <string name="follow">Follow</string>
     <string name="related_artworks">Related artworks</string>

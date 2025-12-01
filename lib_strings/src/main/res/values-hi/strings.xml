@@ -25,7 +25,7 @@
     <string name="sign_up">साइन अप करें</string>
     <string name="sign_in">साइन इन करें</string>
     <string name="sign_with_token">टोकन के साथ साइन इन करें</string>
-    <string name="download_with_size">डाउनलोड करें (%1$.2fMB)</string>
+    <string name="download_with_size">डाउनलोड करें (%s)</string>
     <string name="followed">फॉलो किया गया</string>
     <string name="follow">फॉलो करें</string>
     <string name="related_artworks">संबंधित कलाकृतियाँ</string>

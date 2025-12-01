@@ -117,6 +117,7 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.AppUtil.getString
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
+import com.mrl.pixiv.common.util.adaptiveFileSize
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
 import com.mrl.pixiv.common.util.getScreenHeight
@@ -692,7 +693,7 @@ internal fun PictureScreen(
                             Text(
                                 text = stringResource(
                                     RString.download_with_size,
-                                    state.bottomSheetState.downloadSize
+                                    state.bottomSheetState.downloadSize.adaptiveFileSize()
                                 ),
                                 modifier = Modifier.padding(start = 10.dp)
                             )

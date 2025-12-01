@@ -69,9 +69,9 @@ private const val GB = MB * 1024
 
 fun Long.adaptiveFileSize(): String {
     return when (this) {
-        in 0L..<KB -> "$this B"
-        in KB..<MB -> "${this / KB} KB"
-        in MB..<GB -> "${this / MB} MB"
-        else -> "${this / GB} GB"
+        in 0L..<KB -> "%.2f B".format(toFloat())
+        in KB..<MB -> "%.2f KB".format(toFloat() / KB)
+        in MB..<GB -> "%.2f MB".format(toFloat() / MB)
+        else -> "%.2f GB".format(toFloat() / GB)
     }
 }

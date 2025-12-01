@@ -25,7 +25,7 @@
     <string name="sign_up">新規登録</string>
     <string name="sign_in">ログイン</string>
     <string name="sign_with_token">トークンでログイン</string>
-    <string name="download_with_size">ダウンロード (%1$.2fMB)</string>
+    <string name="download_with_size">ダウンロード (%s)</string>
     <string name="followed">フォロー中</string>
     <string name="follow">フォロー</string>
     <string name="related_artworks">関連作品</string>

@@ -25,7 +25,7 @@
     <string name="sign_up">التسجيل</string>
     <string name="sign_in">تسجيل الدخول</string>
     <string name="sign_with_token">تسجيل الدخول بالرمز</string>
-    <string name="download_with_size">تنزيل (%1$.2f ميجابايت)</string>
+    <string name="download_with_size">تنزيل (%s)</string>
     <string name="followed">متابَع</string>
     <string name="follow">متابعة</string>
     <string name="related_artworks">أعمال ذات صلة</string>

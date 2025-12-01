@@ -25,7 +25,7 @@
     <string name="sign_up">S\'inscrire</string>
     <string name="sign_in">Se connecter</string>
     <string name="sign_with_token">Se connecter avec Token</string>
-    <string name="download_with_size">Télécharger (%1$.2fMo)</string>
+    <string name="download_with_size">Télécharger (%21$.fMo)</string>
     <string name="followed">Abonné</string>
     <string name="follow">S\'abonner</string>
     <string name="related_artworks">Œuvres connexes</string>

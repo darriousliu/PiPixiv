@@ -27,7 +27,7 @@
     <string name="sign_in">登录</string>
     <string name="sign_up">注册</string>
     <string name="sign_with_token">使用Token登陆</string>
-    <string name="download_with_size">下载 (%1$.2fMB)</string>
+    <string name="download_with_size">下载 (%s)</string>
     <string name="followed">已关注</string>
     <string name="follow">关注</string>
     <string name="related_artworks">相关作品</string>

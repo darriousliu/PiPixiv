@@ -25,7 +25,7 @@
     <string name="sign_up">Регистрация</string>
     <string name="sign_in">Войти</string>
     <string name="sign_with_token">Войти с токеном</string>
-    <string name="download_with_size">Скачать (%1$.2fМБ)</string>
+    <string name="download_with_size">Скачать (%s)</string>
     <string name="followed">Подписан</string>
     <string name="follow">Подписаться</string>
     <string name="related_artworks">Похожие работы</string>

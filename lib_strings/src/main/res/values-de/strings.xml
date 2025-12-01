@@ -25,7 +25,7 @@
     <string name="sign_up">Registrieren</string>
     <string name="sign_in">Anmelden</string>
     <string name="sign_with_token">Mit Token anmelden</string>
-    <string name="download_with_size">Herunterladen (%1$.2fMB)</string>
+    <string name="download_with_size">Herunterladen (%s)</string>
     <string name="followed">Gefolgt</string>
     <string name="follow">Folgen</string>
     <string name="related_artworks">Verwandte Kunstwerke</string>

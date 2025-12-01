@@ -82,7 +82,7 @@ data class PictureState(
 data class BottomSheetState(
     val index: Int = 0,
     val downloadUrl: String = "",
-    val downloadSize: Float = 0f,
+    val downloadSize: Long = 0L,
 )
 
 sealed class PictureAction : ViewIntent {
@@ -119,7 +119,7 @@ class PictureViewModel(
         RelatedIllustPaging(illust?.id ?: illustId!!)
     }.flow.cachedIn(viewModelScope)
 
-    private val cachedDownloadSize = mutableMapOf<Int, Float>()
+    private val cachedDownloadSize = mutableMapOf<Int, Long>()
     private val ugoiraDir = AppUtil.appContext.cacheDir.resolve("ugoira")
     private var cachedUgoiraMetadata: UgoiraMetadata? = null
 
@@ -303,7 +303,7 @@ class PictureViewModel(
         } ?: return
         val cachedSize = cachedDownloadSize[index]
         updateState {
-            copy(bottomSheetState = BottomSheetState(index, url, cachedSize ?: 0f))
+            copy(bottomSheetState = BottomSheetState(index, url, cachedSize ?: 0))
         }
         if (cachedSize == null) {
             launchIO {
@@ -326,7 +326,7 @@ class PictureViewModel(
             val url = metadata.zipUrls.medium
             val cachedSize = cachedDownloadSize[0]
             updateState {
-                copy(bottomSheetState = BottomSheetState(0, url, cachedSize ?: 0f))
+                copy(bottomSheetState = BottomSheetState(0, url, cachedSize ?: 0))
             }
             if (cachedSize == null) {
                 launchIO {
@@ -340,17 +340,17 @@ class PictureViewModel(
         }
     }
 
-    private suspend fun calculateImageSize(url: String): Float {
+    private suspend fun calculateImageSize(url: String): Long {
         return try {
             val response = imageOkHttpClient.request {
                 method = HttpMethod.Head
                 url(url)
             }
-            val contentLength = response.contentLength()?.toFloat() ?: 0f
-            return contentLength / 1024 / 1024
+            val contentLength = response.contentLength() ?: 0
+            return contentLength
         } catch (e: Exception) {
             e.printStackTrace()
-            0f
+            0
         }
     }
 

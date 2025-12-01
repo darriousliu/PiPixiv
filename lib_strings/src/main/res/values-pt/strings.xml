@@ -25,7 +25,7 @@
     <string name="sign_up">Cadastrar</string>
     <string name="sign_in">Entrar</string>
     <string name="sign_with_token">Entrar com Token</string>
-    <string name="download_with_size">Baixar (%1$.2fMB)</string>
+    <string name="download_with_size">Baixar (%s)</string>
     <string name="followed">Seguindo</string>
     <string name="follow">Seguir</string>
     <string name="related_artworks">Obras relacionadas</string>
