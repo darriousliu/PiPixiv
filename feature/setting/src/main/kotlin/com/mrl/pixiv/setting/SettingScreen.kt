@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.NetworkWifi
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -52,6 +53,15 @@ import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import org.koin.compose.koinInject
+
+const val KEY_LANGUAGE = "language"
+const val KEY_NETWORK_SETTING = "network_setting"
+const val KEY_DEFAULT_OPEN_LINK = "default_open_link"
+const val KEY_DIVIDER_1 = "divider_1"
+const val KEY_PORTRAIT_SPAN_COUNT = "portrait_span_count"
+const val KEY_LANDSCAPE_SPAN_COUNT = "landscape_span_count"
+const val KEY_DIVIDER_2 = "divider_2"
+const val KEY_DOWNLOAD_SINGLE_FOLDER_BY_USER = "download_single_folder_by_user"
 
 @Composable
 fun SettingScreen(
@@ -89,7 +99,7 @@ fun SettingScreen(
             modifier = modifier.padding(it),
         ) {
             val itemModifier = Modifier.padding(horizontal = 8.dp)
-            item {
+            item(key = KEY_LANGUAGE) {
                 var expanded by remember { mutableStateOf(false) }
                 // 语言
                 ListItem(
@@ -148,8 +158,8 @@ fun SettingScreen(
                     }
                 )
             }
-
-            item {
+            item(key = KEY_NETWORK_SETTING) {
+                // 网络设置
                 ListItem(
                     headlineContent = {
                         Text(
@@ -174,9 +184,8 @@ fun SettingScreen(
                     }
                 )
             }
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                item {
+                item(KEY_DEFAULT_OPEN_LINK) {
                     ListItem(
                         headlineContent = {
                             Text(
@@ -219,8 +228,10 @@ fun SettingScreen(
                     )
                 }
             }
-
-            item {
+            item(key = KEY_DIVIDER_1) {
+                HorizontalDivider(modifier = itemModifier.padding(8.dp))
+            }
+            item(key = KEY_PORTRAIT_SPAN_COUNT) {
                 SpanCountSetting(
                     title = stringResource(RString.span_count_portrait),
                     currentSpanCount = userPreference.spanCountPortrait,
@@ -228,8 +239,7 @@ fun SettingScreen(
                     modifier = itemModifier
                 )
             }
-
-            item {
+            item(key = KEY_LANDSCAPE_SPAN_COUNT) {
                 SpanCountSetting(
                     title = stringResource(RString.span_count_landscape),
                     currentSpanCount = userPreference.spanCountLandscape,
@@ -237,8 +247,10 @@ fun SettingScreen(
                     modifier = itemModifier
                 )
             }
-
-            item {
+            item(key = KEY_DIVIDER_2) {
+                HorizontalDivider(modifier = itemModifier.padding(8.dp))
+            }
+            item(key = KEY_DOWNLOAD_SINGLE_FOLDER_BY_USER) {
                 ListItem(
                     headlineContent = {
                         Text(
