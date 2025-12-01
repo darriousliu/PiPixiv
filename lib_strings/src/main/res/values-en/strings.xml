@@ -104,4 +104,7 @@
     <string name="permission_rationale">Storage permission is required to migrate legacy data</string>
     <string name="download_single_folder_by_user_title">Separate folder</string>
     <string name="download_single_folder_by_user_desc">Create a separate folder for each artist to store their works</string>
+    <string name="span_count_portrait">Works columns (Portrait)</string>
+    <string name="span_count_landscape">Works columns (Landscape)</string>
+    <string name="span_count_adaptive">Adaptive</string>
 </resources>

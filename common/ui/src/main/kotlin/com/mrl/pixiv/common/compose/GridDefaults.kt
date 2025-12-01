@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.compose
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -8,12 +9,16 @@ import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 
 @Stable
 data class GridLayoutParams(
@@ -35,6 +40,9 @@ object RecommendGridDefaults {
     @Composable
     fun coverLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): StaggeredGridLayoutParams {
         val windowSizeClass = windowAdaptiveInfo.windowSizeClass
+        val orientation = LocalConfiguration.current.orientation
+        val spanCountPortrait by requireUserPreferenceFlow.collectAsStateWithLifecycle { spanCountPortrait }
+        val spanCountLandscape by requireUserPreferenceFlow.collectAsStateWithLifecycle { spanCountLandscape }
 
         val horizontalArrangement = when {
             windowSizeClass.isWidthAtLeastExpanded -> 9f.spaceBy
@@ -43,9 +51,16 @@ object RecommendGridDefaults {
         }
 
         return StaggeredGridLayoutParams(
-            gridCells = when {
-                windowSizeClass.isWidthCompact -> StaggeredGridCells.Fixed(2)
-                else -> StaggeredGridCells.Adaptive(minSize = 150.dp)
+            gridCells = when (orientation) {
+                Configuration.ORIENTATION_PORTRAIT -> when {
+                    spanCountPortrait < 0 -> StaggeredGridCells.Adaptive(minSize = 150.dp)
+                    else -> StaggeredGridCells.Fixed(spanCountPortrait)
+                }
+
+                else -> when {
+                    spanCountLandscape < 0 -> StaggeredGridCells.Adaptive(minSize = 150.dp)
+                    else -> StaggeredGridCells.Fixed(spanCountLandscape)
+                }
             },
             horizontalArrangement = horizontalArrangement,
             verticalArrangement = horizontalArrangement,
@@ -58,15 +73,26 @@ object IllustGridDefaults {
     @Composable
     fun relatedLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
         val windowSizeClass = windowAdaptiveInfo.windowSizeClass
+        val orientation = LocalConfiguration.current.orientation
+        val spanCountPortrait by requireUserPreferenceFlow.collectAsStateWithLifecycle { spanCountPortrait }
+        val spanCountLandscape by requireUserPreferenceFlow.collectAsStateWithLifecycle { spanCountLandscape }
+
         val horizontalArrangement = when {
             windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
             windowSizeClass.isWidthAtLeastMedium -> 5f.spaceBy
             else -> 5f.spaceBy
         }
         return GridLayoutParams(
-            gridCells = when {
-                windowSizeClass.isWidthCompact -> GridCells.Fixed(2)
-                else -> GridCells.Adaptive(minSize = 150.dp)
+            gridCells = when (orientation) {
+                Configuration.ORIENTATION_PORTRAIT -> when {
+                    spanCountPortrait < 0 -> GridCells.Adaptive(minSize = 150.dp)
+                    else -> GridCells.Fixed(spanCountPortrait)
+                }
+
+                else -> when {
+                    spanCountLandscape < 0 -> GridCells.Adaptive(minSize = 150.dp)
+                    else -> GridCells.Fixed(spanCountLandscape)
+                }
             },
             horizontalArrangement = horizontalArrangement,
             verticalArrangement = horizontalArrangement,

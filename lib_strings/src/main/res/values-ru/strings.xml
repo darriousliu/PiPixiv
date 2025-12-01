@@ -104,4 +104,7 @@
     <string name="permission_rationale">Для переноса старых данных требуется разрешение на доступ к хранилищу</string>
     <string name="download_single_folder_by_user_title">Отдельная папка</string>
     <string name="download_single_folder_by_user_desc">Создавать отдельную папку для каждого художника для хранения его работ</string>
+    <string name="span_count_portrait">Столбцы работ (портрет)</string>
+    <string name="span_count_landscape">Столбцы работ (альбом)</string>
+    <string name="span_count_adaptive">Адаптивный</string>
 </resources>

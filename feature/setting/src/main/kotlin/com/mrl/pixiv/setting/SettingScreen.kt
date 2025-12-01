@@ -20,6 +20,7 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.NetworkWifi
 import androidx.compose.material.icons.rounded.Translate
+import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,7 +33,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
@@ -65,7 +66,7 @@ fun SettingScreen(
             AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag() ?: labelDefault
         )
     }
-    val userPreference by SettingRepository.userPreferenceFlow.collectAsState()
+    val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -219,6 +220,24 @@ fun SettingScreen(
             }
 
             item {
+                SpanCountSetting(
+                    title = stringResource(RString.span_count_portrait),
+                    currentSpanCount = userPreference.spanCountPortrait,
+                    onSpanCountChange = SettingRepository::setSpanCountPortrait,
+                    modifier = itemModifier
+                )
+            }
+
+            item {
+                SpanCountSetting(
+                    title = stringResource(RString.span_count_landscape),
+                    currentSpanCount = userPreference.spanCountLandscape,
+                    onSpanCountChange = SettingRepository::setSpanCountLandscape,
+                    modifier = itemModifier
+                )
+            }
+
+            item {
                 ListItem(
                     headlineContent = {
                         Text(
@@ -260,4 +279,65 @@ fun SettingScreen(
             }
         }
     }
+}
+
+@Composable
+private fun SpanCountSetting(
+    title: String,
+    currentSpanCount: Int,
+    onSpanCountChange: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val options = listOf(
+        2 to "2",
+        3 to "3",
+        4 to "4",
+        -1 to stringResource(RString.span_count_adaptive),
+    )
+
+    val currentLabel = options.find { it.first == currentSpanCount }?.second
+        ?: options.find { it.first == -1 }?.second ?: ""
+
+    var expanded by remember { mutableStateOf(false) }
+
+    ListItem(
+        headlineContent = { Text(text = title) },
+        modifier = modifier,
+        leadingContent = { Icon(Icons.Rounded.ViewModule, contentDescription = null) },
+        trailingContent = {
+            DropDownSelector(
+                modifier = Modifier.throttleClick {
+                    expanded = !expanded
+                },
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                current = currentLabel,
+            ) {
+                options.forEach { (count, label) ->
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = label,
+                                    modifier = Modifier.padding(16.dp),
+                                )
+                                if (currentSpanCount == count) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Check,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                        },
+                        onClick = {
+                            onSpanCountChange(count)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    )
 }

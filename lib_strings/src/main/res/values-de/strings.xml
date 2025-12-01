@@ -104,4 +104,7 @@
     <string name="permission_rationale">Speicherberechtigung erforderlich, um alte Daten zu migrieren</string>
     <string name="download_single_folder_by_user_title">Separater Ordner</string>
     <string name="download_single_folder_by_user_desc">Einen separaten Ordner für jeden Künstler erstellen, um dessen Werke zu speichern</string>
+    <string name="span_count_portrait">Spaltenanzahl der Werke (Hochformat)</string>
+    <string name="span_count_landscape">Spaltenanzahl der Werke (Querformat)</string>
+    <string name="span_count_adaptive">Adaptiv</string>
 </resources>

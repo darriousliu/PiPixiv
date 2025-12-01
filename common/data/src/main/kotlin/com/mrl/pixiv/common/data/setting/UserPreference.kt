@@ -11,4 +11,6 @@ data class UserPreference(
     val imageHost: String = IMAGE_HOST,
     val hasShowBookmarkTip: Boolean = false,
     val downloadSubFolderByUser: Boolean = false,
+    val spanCountPortrait: Int = 2,
+    val spanCountLandscape: Int = -1,
 )

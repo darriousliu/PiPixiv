@@ -104,4 +104,7 @@
     <string name="permission_rationale">إذن التخزين مطلوب لنقل البيانات القديمة</string>
     <string name="download_single_folder_by_user_title">مجلد منفصل</string>
     <string name="download_single_folder_by_user_desc">إنشاء مجلد منفصل لكل فنان لتخزين أعماله</string>
+    <string name="span_count_portrait">أعمدة العرض (رأسي)</string>
+    <string name="span_count_landscape">أعمدة العرض (أفقي)</string>
+    <string name="span_count_adaptive">تكيفي</string>
 </resources>

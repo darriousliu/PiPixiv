@@ -104,4 +104,7 @@
     <string name="permission_rationale">旧データを移行するにはストレージ権限が必要です</string>
     <string name="download_single_folder_by_user_title">個別のフォルダー</string>
     <string name="download_single_folder_by_user_desc">各作者ごとに個別のフォルダーを作成して作品を保存します</string>
+    <string name="span_count_portrait">作品の列数 (縦)</string>
+    <string name="span_count_landscape">作品の列数 (横)</string>
+    <string name="span_count_adaptive">自動調整</string>
 </resources>

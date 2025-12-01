@@ -107,4 +107,7 @@
     <string name="permission_rationale">需要存储权限以迁移旧数据</string>
     <string name="download_single_folder_by_user_title">单独文件夹</string>
     <string name="download_single_folder_by_user_desc">为每个画师创建单独的文件夹存储其作品</string>
+    <string name="span_count_portrait">作品展示列数 (竖屏)</string>
+    <string name="span_count_landscape">作品展示列数 (横屏)</string>
+    <string name="span_count_adaptive">自适应</string>
 </resources>

@@ -104,4 +104,7 @@
     <string name="permission_rationale">पुराने डेटा को स्थानांतरित करने के लिए संग्रहण अनुमति की आवश्यकता है</string>
     <string name="download_single_folder_by_user_title">अलग फ़ोल्डर</string>
     <string name="download_single_folder_by_user_desc">प्रत्येक कलाकार के कार्यों को संग्रहीत करने के लिए एक अलग फ़ोल्डर बनाएं</string>
+    <string name="span_count_portrait">कृतियों के कॉलम (पोर्ट्रेट)</string>
+    <string name="span_count_landscape">कृतियों के कॉलम (लैंडस्केप)</string>
+    <string name="span_count_adaptive">अनुकूली (Adaptive)</string>
 </resources>

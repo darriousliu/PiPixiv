@@ -104,4 +104,7 @@
     <string name="permission_rationale">Permissão de armazenamento necessária para migrar dados antigos</string>
     <string name="download_single_folder_by_user_title">Pasta separada</string>
     <string name="download_single_folder_by_user_desc">Criar uma pasta separada para cada artista para armazenar suas obras</string>
+    <string name="span_count_portrait">Colunas de obras (Retrato)</string>
+    <string name="span_count_landscape">Colunas de obras (Paisagem)</string>
+    <string name="span_count_adaptive">Adaptável</string>
 </resources>

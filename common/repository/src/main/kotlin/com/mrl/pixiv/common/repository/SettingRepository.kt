@@ -1,13 +1,23 @@
 package com.mrl.pixiv.common.repository
 
 import android.os.Build
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.mmkv.MMKVUser
 import com.mrl.pixiv.common.mmkv.asMutableStateFlow
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 val requireUserPreferenceValue: UserPreference
     get() = SettingRepository.userPreferenceFlow.value
@@ -25,6 +35,21 @@ object SettingRepository : MMKVUser {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) SettingTheme.SYSTEM.toString() else SettingTheme.LIGHT.toString()
             }
         )
+
+    @Composable
+    fun <T> StateFlow<UserPreference>.collectAsStateWithLifecycle(
+        lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+        minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
+        context: CoroutineContext = EmptyCoroutineContext,
+        block: UserPreference.() -> T
+    ): State<T> {
+        return map { it.block() }.collectAsStateWithLifecycle(
+            userPreference.value.block(),
+            lifecycleOwner,
+            minActiveState,
+            context
+        )
+    }
 
     fun setSettingTheme(theme: SettingTheme) = userPreference.update {
         it.copy(theme = theme.toString())
@@ -44,6 +69,14 @@ object SettingRepository : MMKVUser {
 
     fun setDownloadSubFolderByUser(enable: Boolean) = userPreference.update {
         it.copy(downloadSubFolderByUser = enable)
+    }
+
+    fun setSpanCountPortrait(count: Int) = userPreference.update {
+        it.copy(spanCountPortrait = count)
+    }
+
+    fun setSpanCountLandscape(count: Int) = userPreference.update {
+        it.copy(spanCountLandscape = count)
     }
 
     fun updateSettings(block: (UserPreference) -> UserPreference) {
