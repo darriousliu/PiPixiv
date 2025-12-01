@@ -178,47 +178,6 @@ fun SettingScreen(
                 ListItem(
                     headlineContent = {
                         Text(
-                            text = stringResource(RString.download_single_folder_by_user_title),
-                        )
-                    },
-                    modifier = itemModifier
-                        .height(IntrinsicSize.Min)
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            SettingRepository.setDownloadSubFolderByUser(!userPreference.downloadSubFolderByUser)
-                        },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(RString.download_single_folder_by_user_desc),
-                        )
-                    },
-                    leadingContent = {
-                        Column(
-                            modifier = Modifier.fillMaxHeight(),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Icon(imageVector = Icons.Rounded.Folder, contentDescription = null)
-                        }
-                    },
-                    trailingContent = {
-                        Column(
-                            modifier = Modifier.fillMaxHeight(),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Switch(
-                                checked = userPreference.downloadSubFolderByUser,
-                                onCheckedChange = { SettingRepository.setDownloadSubFolderByUser(it) }
-                            )
-                        }
-                    }
-                )
-            }
-
-            item {
-                ListItem(
-                    headlineContent = {
-                        Text(
                             text = stringResource(RString.default_open),
                         )
                     },
@@ -256,6 +215,47 @@ fun SettingScreen(
                             Icon(imageVector = Icons.Rounded.AddLink, contentDescription = null)
                         }
                     },
+                )
+            }
+
+            item {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RString.download_single_folder_by_user_title),
+                        )
+                    },
+                    modifier = itemModifier
+                        .height(IntrinsicSize.Min)
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            SettingRepository.setDownloadSubFolderByUser(!userPreference.downloadSubFolderByUser)
+                        },
+                    supportingContent = {
+                        Text(
+                            text = stringResource(RString.download_single_folder_by_user_desc),
+                        )
+                    },
+                    leadingContent = {
+                        Column(
+                            modifier = Modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(imageVector = Icons.Rounded.Folder, contentDescription = null)
+                        }
+                    },
+                    trailingContent = {
+                        Column(
+                            modifier = Modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Switch(
+                                checked = userPreference.downloadSubFolderByUser,
+                                onCheckedChange = { SettingRepository.setDownloadSubFolderByUser(it) }
+                            )
+                        }
+                    }
                 )
             }
         }
