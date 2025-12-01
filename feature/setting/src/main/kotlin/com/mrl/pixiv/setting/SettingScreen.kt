@@ -202,10 +202,15 @@ fun SettingScreen(
                         }
                     },
                     trailingContent = {
-                        Switch(
-                            checked = userPreference.downloadSubFolderByUser,
-                            onCheckedChange = { SettingRepository.setDownloadSubFolderByUser(it) }
-                        )
+                        Column(
+                            modifier = Modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Switch(
+                                checked = userPreference.downloadSubFolderByUser,
+                                onCheckedChange = { SettingRepository.setDownloadSubFolderByUser(it) }
+                            )
+                        }
                     }
                 )
             }
