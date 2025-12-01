@@ -175,19 +175,19 @@ fun SettingScreen(
                 )
             }
 
-            item {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RString.default_open),
-                        )
-                    },
-                    modifier = Modifier
-                        .height(IntrinsicSize.Min)
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                item {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.default_open),
+                            )
+                        },
+                        modifier = Modifier
+                            .height(IntrinsicSize.Min)
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
                                 try {
                                     val intent = Intent().apply {
                                         action =
@@ -201,22 +201,23 @@ fun SettingScreen(
                                 } catch (_: Throwable) {
                                 }
                             }
-                        }
-                        .then(itemModifier),
-                    supportingContent = {
-                        Text(
-                            text = stringResource(RString.allow_open_link),
-                        )
-                    },
-                    leadingContent = {
-                        Column(
-                            modifier = Modifier.fillMaxHeight(),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Icon(imageVector = Icons.Rounded.AddLink, contentDescription = null)
-                        }
-                    },
-                )
+
+                            .then(itemModifier),
+                        supportingContent = {
+                            Text(
+                                text = stringResource(RString.allow_open_link),
+                            )
+                        },
+                        leadingContent = {
+                            Column(
+                                modifier = Modifier.fillMaxHeight(),
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(imageVector = Icons.Rounded.AddLink, contentDescription = null)
+                            }
+                        },
+                    )
+                }
             }
 
             item {
