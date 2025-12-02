@@ -118,4 +118,6 @@
     <string name="ai_generate">Generado por IA</string>
     <string name="past">Pasado</string>
     <string name="every_week_r18g">Semanal (Grotesco)</string>
+    <string name="r18_alert_message">Debes activar el interruptor R-18 en el sitio web de Pixiv &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;; de lo contrario, no funcionará</string>
+    <string name="tips">Consejo</string>
 </resources>

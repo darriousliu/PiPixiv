@@ -118,4 +118,6 @@
     <string name="ai_generate">KI-generiert</string>
     <string name="past">Vergangenheit</string>
     <string name="every_week_r18g">Wöchentlich (Grotesk)</string>
+    <string name="r18_alert_message">Du musst den R-18-Schalter auf der Pixiv-Website &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt; aktivieren, sonst funktioniert es nicht</string>
+    <string name="tips">Hinweis</string>
 </resources>

@@ -118,4 +118,6 @@
     <string name="ai_generate">توليد بالذكاء الاصطناعي</string>
     <string name="past">الماضي</string>
     <string name="every_week_r18g">أسبوعي (غريب/R-18G)</string>
+    <string name="r18_alert_message">تحتاج إلى تفعيل خيار R-18 على موقع Pixiv &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;، وإلا فلن يعمل</string>
+    <string name="tips">تلميح</string>
 </resources>

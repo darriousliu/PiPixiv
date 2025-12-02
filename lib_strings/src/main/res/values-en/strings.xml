@@ -118,4 +118,6 @@
     <string name="ai_generate">AI Generated</string>
     <string name="past">Past</string>
     <string name="every_week_r18g">Weekly (Grotesque)</string>
+    <string name="r18_alert_message">You need to enable the R-18 switch on the Pixiv website &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;, otherwise it will not work</string>
+    <string name="tips">Tips</string>
 </resources>

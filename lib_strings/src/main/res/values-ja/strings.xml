@@ -118,4 +118,6 @@
     <string name="ai_generate">AI生成</string>
     <string name="past">過去</string>
     <string name="every_week_r18g">ウィークリー(R-18G)</string>
+    <string name="r18_alert_message">PixivのWebサイト &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt; でR-18設定をオンにする必要があります。そうしないと無効です</string>
+    <string name="tips">ヒント</string>
 </resources>

@@ -119,4 +119,6 @@
     <string name="ai_generate">AI 생성</string>
     <string name="past">과거</string>
     <string name="every_week_r18g">주간 (R-18G)</string>
+    <string name="r18_alert_message">Pixiv 웹사이트 &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt; 에서 R-18 스위치를 켜야 합니다. 그렇지 않으면 작동하지 않습니다</string>
+    <string name="tips">팁</string>
 </resources>

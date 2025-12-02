@@ -118,4 +118,6 @@
     <string name="ai_generate">Создано ИИ</string>
     <string name="past">Прошлое</string>
     <string name="every_week_r18g">Еженедельно (R-18G)</string>
+    <string name="r18_alert_message">Вам необходимо включить переключатель R-18 на сайте Pixiv &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;, иначе это не сработает</string>
+    <string name="tips">Совет</string>
 </resources>

@@ -21,6 +21,8 @@ import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.NetworkWifi
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.ViewModule
+import androidx.compose.material.icons.rounded._18UpRating
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,6 +32,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -42,6 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.os.LocaleListCompat
@@ -61,6 +66,7 @@ const val KEY_PORTRAIT_SPAN_COUNT = "portrait_span_count"
 const val KEY_LANDSCAPE_SPAN_COUNT = "landscape_span_count"
 const val KEY_DIVIDER_2 = "divider_2"
 const val KEY_DOWNLOAD_SINGLE_FOLDER_BY_USER = "download_single_folder_by_user"
+const val KEY_R18_ENABLED = "r18_enabled"
 
 @Composable
 fun SettingScreen(
@@ -286,6 +292,65 @@ fun SettingScreen(
                                 onCheckedChange = { SettingRepository.setDownloadSubFolderByUser(it) }
                             )
                         }
+                    }
+                )
+            }
+            item(key = KEY_R18_ENABLED) {
+                var showWarningDialog by remember { mutableStateOf(false) }
+
+                if (showWarningDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showWarningDialog = false },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    SettingRepository.setIsR18Enabled(true)
+                                    showWarningDialog = false
+                                }
+                            ) {
+                                Text(text = stringResource(RString.confirm))
+                            }
+                        },
+                        title = { Text(text = stringResource(RString.tips)) },
+                        text = { Text(text = AnnotatedString.fromHtml(stringResource(RString.r18_alert_message))) },
+                        dismissButton = {
+                            TextButton(onClick = { showWarningDialog = false }) {
+                                Text(text = stringResource(RString.cancel))
+                            }
+                        }
+                    )
+                }
+
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RString.r18),
+                        )
+                    },
+                    modifier = itemModifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            if (!userPreference.isR18Enabled) {
+                                showWarningDialog = true
+                            } else {
+                                SettingRepository.setIsR18Enabled(false)
+                            }
+                        },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded._18UpRating, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = userPreference.isR18Enabled,
+                            onCheckedChange = {
+                                if (it) {
+                                    showWarningDialog = true
+                                } else {
+                                    SettingRepository.setIsR18Enabled(false)
+                                }
+                            }
+                        )
                     }
                 )
             }

@@ -122,4 +122,6 @@
     <string name="past">过去</string>
     <string name="every_week_r18g">每周(猎奇)</string>
     <string name="r18" translatable="false">R18</string>
+    <string name="r18_alert_message">需要在Pixiv网站&lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;中打开R18开关，否则无效</string>
+    <string name="tips">提示</string>
 </resources>

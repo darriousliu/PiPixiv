@@ -22,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -41,6 +40,9 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
+import com.mrl.pixiv.common.kts.HSpacer
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.viewmodel.asState
@@ -125,17 +127,28 @@ fun RankingScreen(
                 TopAppBar(
                     title = { Text(text = stringResource(RString.ranking)) },
                     actions = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = stringResource(RString.r18))
-                            Switch(
-                                checked = state.showR18,
-                                onCheckedChange = { viewModel.toggleR18() }
-                            )
+                        val r18Enabled by requireUserPreferenceFlow.collectAsStateWithLifecycle { isR18Enabled }
+                        LaunchedEffect(r18Enabled) {
+                            if (!r18Enabled && state.showR18) {
+                                viewModel.toggleR18()
+                            }
+                        }
+                        if (r18Enabled) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = stringResource(RString.r18))
+                                5.HSpacer
+                                Switch(
+                                    checked = state.showR18,
+                                    onCheckedChange = { viewModel.toggleR18() }
+                                )
+                            }
                         }
                     }
                 )
                 PrimaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage.coerceAtMost(state.availableModes.lastIndex.coerceAtLeast(0)),
+                    selectedTabIndex = pagerState.currentPage.coerceAtMost(
+                        state.availableModes.lastIndex.coerceAtLeast(0)
+                    ),
                     edgePadding = 0.dp
                 ) {
                     state.availableModes.forEachIndexed { index, mode ->
@@ -180,14 +193,7 @@ fun RankingScreen(
                 isRefreshing = isRefreshing,
                 onRefresh = onRefresh,
                 modifier = Modifier.fillMaxSize(),
-                state = pullRefreshState,
-                indicator = {
-                    PullToRefreshDefaults.LoadingIndicator(
-                        state = pullRefreshState,
-                        isRefreshing = isRefreshing,
-                        modifier = Modifier.align(Alignment.TopCenter),
-                    )
-                }
+                state = pullRefreshState
             ) {
                 val layoutParams = RecommendGridDefaults.coverLayoutParameters()
                 LazyVerticalStaggeredGrid(
