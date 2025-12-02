@@ -191,6 +191,7 @@ fun BlockSettingsScreen(
                         ) {
                             Text(
                                 text = it.tag.name,
+                                modifier = Modifier.weight(1f),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                             Switch(
