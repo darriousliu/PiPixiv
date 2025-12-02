@@ -14,10 +14,14 @@ import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.common.viewmodel.state
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.toLocalDateTime
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 
 @Stable
 data class RankingState(
@@ -45,7 +49,10 @@ class RankingViewModel : BaseMviViewModel<RankingState, ViewIntent>(
     fun getRankingFlow(mode: RankingMode): Flow<PagingData<Illust>> {
         return rankingList.getOrPut(mode) {
             val queryDate = if (mode == RankingMode.PAST) {
-                state.date ?: LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_DATE)
+                state.date ?: (Clock.System.now() - 1.days)
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+                    .format(LocalDate.Formats.ISO)
             } else {
                 null
             }
