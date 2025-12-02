@@ -107,4 +107,15 @@
     <string name="span_count_portrait">कृतियों के कॉलम (पोर्ट्रेट)</string>
     <string name="span_count_landscape">कृतियों के कॉलम (लैंडस्केप)</string>
     <string name="span_count_adaptive">अनुकूली (Adaptive)</string>
+    <string name="ranking">रैंकिंग</string>
+    <string name="every_day">दैनिक</string>
+    <string name="popular_male">पुरुषों में लोकप्रिय</string>
+    <string name="popular_female">महिलाओं में लोकप्रिय</string>
+    <string name="original">मौलिक</string>
+    <string name="rookie">नौसिखिया</string>
+    <string name="every_week">साप्ताहिक</string>
+    <string name="every_month">मासिक</string>
+    <string name="ai_generate">AI जनित</string>
+    <string name="past">पिछला</string>
+    <string name="every_week_r18g">साप्ताहिक (वीभत्स)</string>
 </resources>

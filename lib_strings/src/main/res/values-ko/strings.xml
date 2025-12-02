@@ -107,4 +107,16 @@
     <string name="span_count_portrait">작품 열 수 (세로)</string>
     <string name="span_count_landscape">작품 열 수 (가로)</string>
     <string name="span_count_adaptive">자동 조정</string>
+    <!-- values-ko -->
+    <string name="ranking">랭킹</string>
+    <string name="every_day">일일</string>
+    <string name="popular_male">남성 인기</string>
+    <string name="popular_female">여성 인기</string>
+    <string name="original">오리지널</string>
+    <string name="rookie">루키</string>
+    <string name="every_week">주간</string>
+    <string name="every_month">월간</string>
+    <string name="ai_generate">AI 생성</string>
+    <string name="past">과거</string>
+    <string name="every_week_r18g">주간 (R-18G)</string>
 </resources>

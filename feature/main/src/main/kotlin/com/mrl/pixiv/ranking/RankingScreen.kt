@@ -41,7 +41,6 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
-import com.mrl.pixiv.common.data.ranking.RankingMode
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.viewmodel.asState
@@ -72,21 +71,21 @@ fun RankingScreen(
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
-                             val date = Instant.ofEpochMilli(millis)
+                            val date = Instant.ofEpochMilli(millis)
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDate()
                                 .format(DateTimeFormatter.ISO_DATE)
-                             viewModel.dispatch(RankingAction.ChangeDate(date))
+                            viewModel.dispatch(RankingAction.ChangeDate(date))
                         }
                         showDatePicker = false
                     }
                 ) {
-                    Text(stringResource(RString.confirm))
+                    Text(text = stringResource(RString.confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text(stringResource(RString.cancel))
+                    Text(text = stringResource(RString.cancel))
                 }
             }
         ) {
@@ -98,7 +97,7 @@ fun RankingScreen(
         initialPage = 0,
         pageCount = { state.availableModes.size }
     )
-    
+
     // Sync external mode selection (if any) with pager
     LaunchedEffect(state.currentMode) {
         val index = state.availableModes.indexOf(state.currentMode)
@@ -106,16 +105,16 @@ fun RankingScreen(
             pagerState.scrollToPage(index)
         }
     }
-    
+
     // Sync pager scroll with mode selection
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collectLatest { page ->
-             if (page in state.availableModes.indices) {
-                 val mode = state.availableModes[page]
-                 if (state.currentMode != mode) {
-                     viewModel.dispatch(RankingAction.SelectMode(mode))
-                 }
-             }
+            if (page in state.availableModes.indices) {
+                val mode = state.availableModes[page]
+                if (state.currentMode != mode) {
+                    viewModel.dispatch(RankingAction.SelectMode(mode))
+                }
+            }
         }
     }
 
@@ -127,7 +126,7 @@ fun RankingScreen(
                     title = { Text(text = stringResource(RString.ranking)) },
                     actions = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("R18")
+                            Text(text = stringResource(RString.r18))
                             Switch(
                                 checked = state.showR18,
                                 onCheckedChange = { viewModel.dispatch(RankingAction.ToggleR18) }
@@ -152,9 +151,9 @@ fun RankingScreen(
                             },
                             text = {
                                 if (mode == RankingMode.PAST && state.date != null) {
-                                     Text(state.date)
+                                    Text(text = state.date)
                                 } else {
-                                     Text(mode.title)
+                                    Text(text = stringResource(mode.title))
                                 }
                             }
                         )
@@ -166,7 +165,9 @@ fun RankingScreen(
     ) { paddingValues ->
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.padding(paddingValues).fillMaxSize()
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
         ) { page ->
             val mode = state.availableModes.getOrNull(page) ?: return@HorizontalPager
             val rankingList = viewModel.getRankingFlow(mode).collectAsLazyPagingItems()
@@ -174,7 +175,7 @@ fun RankingScreen(
             val pullRefreshState = rememberPullToRefreshState()
             val onRefresh = rankingList::refresh
             val isRefreshing = rankingList.loadState.refresh is LoadState.Loading
-            
+
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
                 onRefresh = onRefresh,
@@ -188,8 +189,8 @@ fun RankingScreen(
                     )
                 }
             ) {
-                 val layoutParams = RecommendGridDefaults.coverLayoutParameters()
-                 LazyVerticalStaggeredGrid(
+                val layoutParams = RecommendGridDefaults.coverLayoutParameters()
+                LazyVerticalStaggeredGrid(
                     state = lazyStaggeredGridState,
                     contentPadding = PaddingValues(5.dp),
                     columns = layoutParams.gridCells,
@@ -197,10 +198,10 @@ fun RankingScreen(
                     horizontalArrangement = layoutParams.horizontalArrangement,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                     illustGrid(
-                         illusts = rankingList,
-                         navToPictureScreen = navigationManager::navigateToPictureScreen
-                     )
+                    illustGrid(
+                        illusts = rankingList,
+                        navToPictureScreen = navigationManager::navigateToPictureScreen
+                    )
                 }
             }
         }

@@ -107,4 +107,15 @@
     <string name="span_count_portrait">作品の列数 (縦)</string>
     <string name="span_count_landscape">作品の列数 (横)</string>
     <string name="span_count_adaptive">自動調整</string>
+    <string name="ranking">ランキング</string>
+    <string name="every_day">デイリー</string>
+    <string name="popular_male">男子に人気</string>
+    <string name="popular_female">女子に人気</string>
+    <string name="original">オリジナル</string>
+    <string name="rookie">ルーキー</string>
+    <string name="every_week">ウィークリー</string>
+    <string name="every_month">マンスリー</string>
+    <string name="ai_generate">AI生成</string>
+    <string name="past">過去</string>
+    <string name="every_week_r18g">ウィークリー(R-18G)</string>
 </resources>

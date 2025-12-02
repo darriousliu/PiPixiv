@@ -111,4 +111,15 @@
     <string name="span_count_landscape">作品展示列数 (横屏)</string>
     <string name="span_count_adaptive">自适应</string>
     <string name="ranking">排行</string>
+    <string name="every_day">每日</string>
+    <string name="popular_male">男性热门</string>
+    <string name="popular_female">女性热门</string>
+    <string name="original">原创</string>
+    <string name="rookie">新人</string>
+    <string name="every_week">每周</string>
+    <string name="every_month">每月</string>
+    <string name="ai_generate">AI生成</string>
+    <string name="past">过去</string>
+    <string name="every_week_r18g">每周(猎奇)</string>
+    <string name="r18" translatable="false">R18</string>
 </resources>

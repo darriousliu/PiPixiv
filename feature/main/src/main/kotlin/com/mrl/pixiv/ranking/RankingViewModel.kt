@@ -9,8 +9,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.Illust
-import com.mrl.pixiv.common.data.ranking.RankingMode
-import com.mrl.pixiv.common.data.ranking.RankingType
 import com.mrl.pixiv.common.repository.paging.IllustRankingPagingSource
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent

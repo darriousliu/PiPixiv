@@ -107,4 +107,15 @@
     <string name="span_count_portrait">Столбцы работ (портрет)</string>
     <string name="span_count_landscape">Столбцы работ (альбом)</string>
     <string name="span_count_adaptive">Адаптивный</string>
+    <string name="ranking">Рейтинг</string>
+    <string name="every_day">Ежедневно</string>
+    <string name="popular_male">Популярно у мужчин</string>
+    <string name="popular_female">Популярно у женщин</string>
+    <string name="original">Оригинал</string>
+    <string name="rookie">Новичок</string>
+    <string name="every_week">Еженедельно</string>
+    <string name="every_month">Ежемесячно</string>
+    <string name="ai_generate">Создано ИИ</string>
+    <string name="past">Прошлое</string>
+    <string name="every_week_r18g">Еженедельно (R-18G)</string>
 </resources>

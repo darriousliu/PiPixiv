@@ -107,4 +107,15 @@
     <string name="span_count_portrait">Colonnes d\'œuvres (Portrait)</string>
     <string name="span_count_landscape">Colonnes d\'œuvres (Paysage)</string>
     <string name="span_count_adaptive">Adaptatif</string>
+    <string name="ranking">Classement</string>
+    <string name="every_day">Quotidien</string>
+    <string name="popular_male">Populaire chez les hommes</string>
+    <string name="popular_female">Populaire chez les femmes</string>
+    <string name="original">Original</string>
+    <string name="rookie">Débutant</string>
+    <string name="every_week">Hebdomadaire</string>
+    <string name="every_month">Mensuel</string>
+    <string name="ai_generate">Généré par IA</string>
+    <string name="past">Passé</string>
+    <string name="every_week_r18g">Hebdomadaire (Grotesque)</string>
 </resources>

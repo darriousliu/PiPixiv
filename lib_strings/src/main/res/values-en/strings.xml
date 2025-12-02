@@ -107,4 +107,15 @@
     <string name="span_count_portrait">Works columns (Portrait)</string>
     <string name="span_count_landscape">Works columns (Landscape)</string>
     <string name="span_count_adaptive">Adaptive</string>
+    <string name="ranking">Ranking</string>
+    <string name="every_day">Daily</string>
+    <string name="popular_male">Popular with Men</string>
+    <string name="popular_female">Popular with Women</string>
+    <string name="original">Original</string>
+    <string name="rookie">Rookie</string>
+    <string name="every_week">Weekly</string>
+    <string name="every_month">Monthly</string>
+    <string name="ai_generate">AI Generated</string>
+    <string name="past">Past</string>
+    <string name="every_week_r18g">Weekly (Grotesque)</string>
 </resources>
