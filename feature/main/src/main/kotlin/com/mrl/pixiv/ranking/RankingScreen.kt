@@ -60,6 +60,7 @@ import kotlinx.datetime.toLocalDateTime
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
 
 @Composable
@@ -77,7 +78,7 @@ fun RankingScreen(
         val selectableDates = remember {
             object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                    return utcTimeMillis <= Clock.System.now().toEpochMilliseconds()
+                    return utcTimeMillis <= Clock.System.now().minus(1.days).toEpochMilliseconds()
                 }
 
                 override fun isSelectableYear(year: Int): Boolean {
