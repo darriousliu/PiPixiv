@@ -41,7 +41,7 @@ internal fun Project.configureKotlinAndroid(
         }
 
         defaultConfig {
-            minSdk = 24
+            minSdk = 26
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             proguardFiles.add(file("consumer-rules.pro"))
         }
@@ -51,7 +51,6 @@ internal fun Project.configureKotlinAndroid(
             // https://developer.android.com/studio/write/java11-minimal-support-table
             sourceCompatibility = JavaVersion.VERSION_21
             targetCompatibility = JavaVersion.VERSION_21
-            isCoreLibraryDesugaringEnabled = true
         }
     }
 
@@ -62,7 +61,6 @@ internal fun Project.configureKotlinAndroid(
     val androidx = extensions.getByType<VersionCatalogsExtension>().named("androidx")
 
     dependencies {
-        coreLibraryDesugaring(libs.findLibrary("desugar").get())
         implementation(androidx.findBundle("androidx").get())
         // Lifecycle
         implementation(androidx.findBundle("lifecycle").get())

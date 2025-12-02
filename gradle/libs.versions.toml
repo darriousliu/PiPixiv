@@ -17,13 +17,11 @@ benchmark-macro-junit4 = "1.4.1"
 kermit = "2.0.8"
 mmkv = "2.2.4"
 mmkv-kotlin = "1.3.1"
-desugar = "2.1.5"
 kotzilla = "1.4.0"
 gifkt = "0.3.0"
 
 [libraries]
 compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
 
 
 material = { module = "com.google.android.material:material", version.ref = "material" }
