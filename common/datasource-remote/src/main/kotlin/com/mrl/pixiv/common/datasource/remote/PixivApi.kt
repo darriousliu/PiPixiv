@@ -40,6 +40,19 @@ interface PixivApi {
         @QueryMap queryMap: Map<String, String>,
     ): IllustRecommendedResp
 
+    @GET("v1/illust/ranking")
+    suspend fun getIllustRanking(
+        @Query("mode") mode: String,
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("date") date: String? = null,
+        @Query("offset") offset: Int? = null,
+    ): IllustsWithNextUrl
+
+    @GET("v1/illust/ranking")
+    suspend fun loadMoreIllustRanking(
+        @QueryMap queryMap: Map<String, String>,
+    ): IllustsWithNextUrl
+
     @FormUrlEncoded
     @POST("v2/illust/bookmark/add")
     suspend fun postIllustBookmarkAdd(

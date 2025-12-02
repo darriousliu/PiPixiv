@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +58,47 @@ fun LazyGridScope.illustGrid(
                 navToPictureScreen(illusts.itemSnapshotList.items, index, prefix, enableTransition)
             },
             shouldShowTip = index == 0,
+        )
+    }
+}
+
+fun LazyStaggeredGridScope.illustGrid(
+    illusts: LazyPagingItems<Illust>,
+    navToPictureScreen: NavigateToHorizontalPictureScreen,
+    enableLoading: Boolean = false,
+) {
+    if (enableLoading && illusts.loadState.refresh is LoadState.Loading && illusts.itemCount == 0) {
+        item(key = KEY_LOADING, span = StaggeredGridItemSpan.FullLine) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularWavyProgressIndicator()
+            }
+        }
+    }
+    items(
+        illusts.itemCount,
+        key = { index -> illusts.itemKey { "${index}_${it.id}" }(index) }
+    ) { index ->
+        val illust = illusts[index] ?: return@items
+        val isBookmarked = illust.isBookmark
+        RectangleIllustItem(
+            illust = illust,
+            isBookmarked = isBookmarked,
+            onBookmarkClick = { restrict, tags, isEdit ->
+                if (isEdit || !isBookmarked) {
+                    BookmarkState.bookmarkIllust(illust.id, restrict, tags)
+                } else {
+                    BookmarkState.deleteBookmarkIllust(illust.id)
+                }
+            },
+            navToPictureScreen = { prefix, enableTransition ->
+                navToPictureScreen(illusts.itemSnapshotList.items, index, prefix, enableTransition)
+            },
+            enableTransition = true
         )
     }
 }

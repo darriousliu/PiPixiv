@@ -110,4 +110,5 @@
     <string name="span_count_portrait">作品展示列数 (竖屏)</string>
     <string name="span_count_landscape">作品展示列数 (横屏)</string>
     <string name="span_count_adaptive">自适应</string>
+    <string name="ranking">排行</string>
 </resources>

@@ -69,6 +69,7 @@ fun MainScreen(
                     HomeScreen()
                 }
                 entry<MainPage.Ranking> {
+                    RankingScreen()
                 }
                 entry<MainPage.Latest> {
                     LatestScreen()

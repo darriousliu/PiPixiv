@@ -71,6 +71,16 @@ object PixivRepository : KoinComponent {
     suspend fun loadMoreIllustRecommended(queryMap: Map<String, String>) =
         apiApi.loadMoreIllustRecommended(queryMap)
 
+    suspend fun getIllustRanking(
+        mode: String,
+        filter: Filter = Filter.ANDROID,
+        date: String? = null,
+        offset: Int? = null
+    ) = apiApi.getIllustRanking(mode, filter.value, date, offset)
+
+    suspend fun loadMoreIllustRanking(queryMap: Map<String, String>) =
+        apiApi.loadMoreIllustRanking(queryMap)
+
     suspend fun postIllustBookmarkAdd(
         illustId: Long,
         restrict: Restrict = Restrict.PUBLIC,
