@@ -25,7 +25,7 @@ class IllustRankingPagingSource(
             LoadResult.Page(
                 data = resp.illusts,
                 prevKey = params.key,
-                nextKey = resp.nextUrl
+                nextKey = resp.nextUrl?.takeIf { it.isNotBlank() }
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

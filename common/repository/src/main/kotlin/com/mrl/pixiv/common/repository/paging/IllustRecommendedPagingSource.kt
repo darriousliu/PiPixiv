@@ -22,7 +22,7 @@ class IllustRecommendedPagingSource : PagingSource<String, Illust>() {
             LoadResult.Page(
                 data = resp.illusts + resp.rankingIllusts,
                 prevKey = params.key,
-                nextKey = resp.nextURL
+                nextKey = resp.nextURL?.takeIf { it.isNotBlank() }
             )
         } catch (e: Exception) {
             LoadResult.Error(e)
