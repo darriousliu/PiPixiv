@@ -11,11 +11,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -48,12 +53,13 @@ import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.viewmodel.asState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format
+import kotlinx.datetime.atTime
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Composable
@@ -68,7 +74,24 @@ fun RankingScreen(
     var showDatePicker by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState()
+        val selectableDates = remember {
+            object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    return utcTimeMillis <= Clock.System.now().toEpochMilliseconds()
+                }
+
+                override fun isSelectableYear(year: Int): Boolean {
+                    return year <= Clock.System.now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault()).year
+                }
+            }
+        }
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = viewModel.getRankingDate(state.currentMode)
+                ?.atTime(0, 0)
+                ?.toInstant(TimeZone.UTC)?.toEpochMilliseconds(),
+            selectableDates = selectableDates
+        )
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
@@ -76,9 +99,8 @@ fun RankingScreen(
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             val date = Instant.fromEpochMilliseconds(millis)
-                                .toLocalDateTime(TimeZone.currentSystemDefault())
+                                .toLocalDateTime(TimeZone.UTC)
                                 .date
-                                .format(LocalDate.Formats.ISO)
                             viewModel.changeDate(date)
                         }
                         showDatePicker = false
@@ -147,30 +169,34 @@ fun RankingScreen(
                         }
                     }
                 )
-                PrimaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage.coerceAtMost(
-                        state.availableModes.lastIndex.coerceAtLeast(0)
-                    ),
-                    edgePadding = 0.dp
-                ) {
-                    state.availableModes.forEachIndexed { index, mode ->
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            onClick = {
-                                scope.launch {
-                                    pagerState.scrollToPage(index)
-                                }
-                                if (mode == RankingMode.PAST) {
-                                    showDatePicker = true
-                                }
-                            },
-                            text = {
-                                if (mode == RankingMode.PAST && state.date != null) {
-                                    Text(text = state.date)
-                                } else {
+                Row {
+                    PrimaryScrollableTabRow(
+                        selectedTabIndex = pagerState.currentPage.coerceAtMost(
+                            state.availableModes.lastIndex.coerceAtLeast(0)
+                        ),
+                        modifier = Modifier.weight(1f),
+                        edgePadding = 0.dp
+                    ) {
+                        state.availableModes.forEachIndexed { index, mode ->
+                            Tab(
+                                selected = pagerState.currentPage == index,
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.scrollToPage(index)
+                                    }
+                                },
+                                text = {
                                     Text(text = stringResource(mode.title))
                                 }
-                            }
+                            )
+                        }
+                    }
+                    IconButton(
+                        onClick = { showDatePicker = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.EditCalendar,
+                            contentDescription = null
                         )
                     }
                 }

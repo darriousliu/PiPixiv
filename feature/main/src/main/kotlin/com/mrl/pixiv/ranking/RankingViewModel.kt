@@ -26,7 +26,6 @@ import kotlin.time.Duration.Companion.days
 @Stable
 data class RankingState(
     val currentMode: RankingMode = RankingMode.DAY,
-    val date: String? = null,
     val showR18: Boolean = false
 ) {
     companion object {
@@ -42,20 +41,13 @@ data class RankingState(
 class RankingViewModel : BaseMviViewModel<RankingState, ViewIntent>(
     initialState = RankingState()
 ), KoinComponent {
-    // Stores LazyStaggeredGridState for each mode to preserve scroll position
-    val lazyStaggeredGridStates = mutableStateMapOf<RankingMode, LazyStaggeredGridState>()
-    val rankingList = mutableStateMapOf<RankingMode, Flow<PagingData<Illust>>>()
+    private val lazyStaggeredGridStates = mutableStateMapOf<RankingMode, LazyStaggeredGridState>()
+    private val rankingList = mutableStateMapOf<RankingMode, Flow<PagingData<Illust>>>()
+    private val rankingDate = mutableStateMapOf<RankingMode, LocalDate?>()
 
     fun getRankingFlow(mode: RankingMode): Flow<PagingData<Illust>> {
         return rankingList.getOrPut(mode) {
-            val queryDate = if (mode == RankingMode.PAST) {
-                state.date ?: (Clock.System.now() - 1.days)
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                    .date
-                    .format(LocalDate.Formats.ISO)
-            } else {
-                null
-            }
+            val queryDate = getRankingDate(mode)?.format(LocalDate.Formats.ISO)
             Pager(PagingConfig(pageSize = 20)) {
                 IllustRankingPagingSource(mode.value, queryDate)
             }.flow.cachedIn(viewModelScope)
@@ -68,6 +60,18 @@ class RankingViewModel : BaseMviViewModel<RankingState, ViewIntent>(
         }
     }
 
+    fun getRankingDate(mode: RankingMode): LocalDate? {
+        return rankingDate.getOrPut(mode) {
+            if (mode == RankingMode.PAST) {
+                (Clock.System.now() - 1.days)
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+            } else {
+                null
+            }
+        }
+    }
+
     override suspend fun handleIntent(intent: ViewIntent) {
 
     }
@@ -76,10 +80,11 @@ class RankingViewModel : BaseMviViewModel<RankingState, ViewIntent>(
         updateState { copy(currentMode = mode) }
     }
 
-    fun changeDate(date: String) {
-        updateState { copy(date = date) }
+    fun changeDate(date: LocalDate) {
+        val mode = state.currentMode
+        rankingDate[mode] = date
         // Clear PAST ranking flow so it gets recreated with new date
-        rankingList.remove(RankingMode.PAST)
+        rankingList.remove(mode)
     }
 
     fun toggleR18() {
