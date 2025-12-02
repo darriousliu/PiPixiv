@@ -18,4 +18,6 @@ dependencies {
     implementation(libs.bundles.coil3)
     // Navigation3
     implementation(compose.bundles.navigation3)
+    // Toast
+    implementation(libs.sonner)
 }

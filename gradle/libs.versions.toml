@@ -19,6 +19,7 @@ mmkv = "2.2.4"
 mmkv-kotlin = "1.3.1"
 kotzilla = "1.4.0"
 gifkt = "0.3.0"
+sonner = "0.4.0"
 
 [libraries]
 compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
@@ -62,6 +63,7 @@ mmkv = { module = "com.tencent:mmkv", version.ref = "mmkv" }
 mmkv-kotlin = { module = "com.ctrip.flight.mmkv:mmkv-kotlin", version.ref = "mmkv-kotlin" }
 kotzilla-sdk = { group = "io.kotzilla", name = "kotzilla-sdk", version.ref = "kotzilla" }
 gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
+sonner = { module = "io.github.brdominguez:compose-sonner", version.ref = "sonner" }
 
 [bundles]
 koin = ["koin", "koin-compose", "koin-annotations"]
