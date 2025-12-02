@@ -281,7 +281,12 @@ private fun LogScreen(
             // Add additional parameters for specific destinations
             when (currentDestination) {
                 is Destination.Main -> {
-                    put("current_main_page", navigationManager.currentMainPage.name)
+                    val screenName =
+                        navigationManager.currentMainPage::class.serializer().descriptor.serialName
+                            .split(".")
+                            .lastOrNull()
+                            .orEmpty()
+                    put("current_main_page", screenName)
                 }
 
                 is Destination.ProfileDetail -> {
@@ -317,13 +322,6 @@ private fun LogScreen(
                 Destination.Search, Destination.Setting, Destination.NetworkSetting,
                 Destination.History, Destination.BlockSettings, Destination.AppData -> Unit
             }
-        })
-    }
-    LaunchedEffect(navigationManager.currentMainPage) {
-        logEvent("screen_view", buildMap {
-            val screenName = navigationManager.currentMainPage.name
-            put("screen_name", screenName)
-            put("screen_class", screenName)
         })
     }
 }

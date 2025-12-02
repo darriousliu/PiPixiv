@@ -1,10 +1,9 @@
 package com.mrl.pixiv.common.router
 
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.repository.IllustCacheRepo
@@ -23,60 +22,68 @@ typealias NavigateToHorizontalPictureScreen = (
 class NavigationManager(
     vararg initialBackStack: Destination
 ) {
-    var currentMainPage by mutableStateOf(MainPage.HOME)
-        private set
-
     val backStack = mutableStateListOf(*initialBackStack)
+    val mainBackStack = mutableStateListOf<MainPage>(MainPage.Home)
 
-    val currentDestination: Destination
+    val currentDestination: NavKey
         get() = backStack.last()
 
-    fun switchMainPage(page: MainPage) {
-        if (currentMainPage != page) {
-            currentMainPage = page
-        }
-    }
+    val currentMainPage: MainPage
+        get() = mainBackStack.last()
 
-    fun addSingleTop(route: Destination): Boolean {
-        val currentIndex = backStack.indexOfFirst { it == route }
+    private fun <T : NavKey> SnapshotStateList<T>.addSingleTop(route: T): Boolean {
+        val currentIndex = indexOfFirst { it == route }
         return if (currentIndex != -1) {
-            backStack.add(backStack.removeAt(currentIndex))
+            add(removeAt(currentIndex))
         } else {
-            backStack.add(route)
+            add(route)
         }
     }
 
-    fun navigate(route: Destination): Boolean {
-        return backStack.add(route)
+    private fun <T : NavKey> SnapshotStateList<T>.navigate(route: T): Boolean {
+        return add(route)
     }
 
-    fun popBackStack() {
-        if (backStack.size > 1) {
-            backStack.removeAt(backStack.lastIndex)
+    private fun <T : NavKey> SnapshotStateList<T>.popBackStack() {
+        if (size > 1) {
+            removeAt(backStack.lastIndex)
         }
     }
 
-    fun popBackStack(route: Destination, inclusive: Boolean) {
-        if (backStack.size > 1) {
-            val index = backStack.indexOfLast { it == route }
+    private fun <T : NavKey> SnapshotStateList<T>.popBackStack(route: T, inclusive: Boolean) {
+        if (size > 1) {
+            val index = indexOfLast { it == route }
             if (index != -1) {
                 if (inclusive) {
-                    backStack.removeRange(index, backStack.size)
+                    removeRange(index, size)
                 } else {
-                    backStack.removeRange(index + 1, backStack.size)
+                    removeRange(index + 1, size)
                 }
             }
         }
     }
 
+    fun popBackStack() {
+        backStack.popBackStack()
+    }
+
+    fun navigate(destination: Destination) {
+        backStack.navigate(destination)
+    }
+
+    fun switchMainPage(page: MainPage) {
+        if (currentMainPage != page) {
+            mainBackStack.addSingleTop(page)
+        }
+    }
+
     fun loginToMainScreen() {
-        currentMainPage = MainPage.HOME
         backStack.clear()
         backStack.add(Destination.Main)
     }
 
     fun popBackToMainScreen() {
-        popBackStack(route = Destination.Main, inclusive = false)
+        backStack.popBackStack(route = Destination.Main, inclusive = false)
     }
 
     fun navigateToPictureScreen(
@@ -87,54 +94,58 @@ class NavigationManager(
     ) {
         measureTime {
             IllustCacheRepo[prefix] = illusts
-            navigate(Destination.Picture(index, prefix, enableTransition))
+            backStack.navigate(Destination.Picture(index, prefix, enableTransition))
         }.let {
             Logger.i("Navigation") { "navigateToPictureScreen cost: $it" }
         }
     }
 
     fun navigateToSearchResultScreen(searchWord: String) {
-        navigate(route = Destination.SearchResults(searchWord))
+        backStack.navigate(route = Destination.SearchResults(searchWord))
     }
 
     fun navigateToProfileDetailScreen(userId: Long) {
-        navigate(route = Destination.ProfileDetail(userId))
+        backStack.navigate(route = Destination.ProfileDetail(userId))
     }
 
     fun navigateToFollowingScreen(userId: Long) {
-        navigate(route = Destination.Following(userId))
+        backStack.navigate(route = Destination.Following(userId))
     }
 
     fun navigateToCollectionScreen(userId: Long) {
-        navigate(route = Destination.Collection(userId))
+        backStack.navigate(route = Destination.Collection(userId))
     }
 
     fun navigateToSearchScreen() {
-        addSingleTop(route = Destination.Search)
+        backStack.addSingleTop(route = Destination.Search)
     }
 
     fun navigateToHistoryScreen() {
-        navigate(route = Destination.History)
+        backStack.navigate(route = Destination.History)
     }
 
     fun navigateToSettingScreen() {
-        navigate(route = Destination.Setting)
+        backStack.navigate(route = Destination.Setting)
     }
 
     fun navigateToLoginOptionScreen() {
         backStack.clear()
-        addSingleTop(route = Destination.LoginOption)
+        backStack.addSingleTop(route = Destination.LoginOption)
     }
 
     fun navigateToUserIllustScreen(userId: Long) {
-        navigate(route = Destination.UserArtwork(userId))
+        backStack.navigate(route = Destination.UserArtwork(userId))
     }
 
     fun navigateToBlockSettings() {
-        navigate(route = Destination.BlockSettings)
+        backStack.navigate(route = Destination.BlockSettings)
     }
 
     fun navigateToAppDataScreen() {
-        navigate(route = Destination.AppData)
+        backStack.navigate(route = Destination.AppData)
+    }
+
+    fun navigateToNetworkSettingScreen() {
+        backStack.navigate(route = Destination.NetworkSetting)
     }
 }

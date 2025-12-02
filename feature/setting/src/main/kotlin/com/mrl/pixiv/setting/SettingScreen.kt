@@ -47,7 +47,6 @@ import androidx.core.net.toUri
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.SettingRepository
-import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.throttleClick
@@ -170,7 +169,7 @@ fun SettingScreen(
                         .throttleClick(
                             indication = ripple()
                         ) {
-                            navigationManager.navigate(route = Destination.NetworkSetting)
+                            navigationManager.navigateToNetworkSettingScreen()
                         }
                         .then(itemModifier),
                     leadingContent = {

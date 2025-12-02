@@ -3,6 +3,7 @@ package com.mrl.pixiv.common.router
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Equalizer
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Search
@@ -88,14 +89,15 @@ sealed class Destination : NavKey {
 }
 
 @Serializable
-enum class MainPage(
+sealed class MainPage(
     @Transient
     @StringRes
     val title: Int = 0,
     @Transient
     val icon: @Composable (() -> Unit) = {},
-) {
-    HOME(
+) : NavKey {
+    @Serializable
+    data object Home : MainPage(
         title = RString.home,
         icon = {
             Icon(
@@ -103,8 +105,21 @@ enum class MainPage(
                 contentDescription = null,
             )
         }
-    ),
-    LATEST(
+    )
+
+    @Serializable
+    data object Ranking : MainPage(
+        title = RString.ranking,
+        icon = {
+            Icon(
+                imageVector = Icons.Rounded.Equalizer,
+                contentDescription = null,
+            )
+        }
+    )
+
+    @Serializable
+    data object Latest : MainPage(
         title = RString.new_artworks,
         icon = {
             Icon(
@@ -112,8 +127,10 @@ enum class MainPage(
                 contentDescription = null,
             )
         }
-    ),
-    SEARCH(
+    )
+
+    @Serializable
+    data object Search : MainPage(
         title = RString.search,
         icon = {
             Icon(
@@ -121,8 +138,10 @@ enum class MainPage(
                 contentDescription = null,
             )
         }
-    ),
-    PROFILE(
+    )
+
+    @Serializable
+    data object Profile : MainPage(
         title = RString.my,
         icon = {
             Icon(
