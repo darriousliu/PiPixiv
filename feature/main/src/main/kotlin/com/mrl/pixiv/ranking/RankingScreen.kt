@@ -135,7 +135,7 @@ fun RankingScreen(
                     }
                 )
                 PrimaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
+                    selectedTabIndex = pagerState.currentPage.coerceAtMost(state.availableModes.lastIndex.coerceAtLeast(0)),
                     edgePadding = 0.dp
                 ) {
                     state.availableModes.forEachIndexed { index, mode ->
