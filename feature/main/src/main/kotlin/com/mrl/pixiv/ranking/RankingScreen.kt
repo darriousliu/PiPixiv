@@ -75,7 +75,7 @@ fun RankingScreen(
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDate()
                                 .format(DateTimeFormatter.ISO_DATE)
-                            viewModel.dispatch(RankingAction.ChangeDate(date))
+                            viewModel.changeDate(date)
                         }
                         showDatePicker = false
                     }
@@ -112,7 +112,7 @@ fun RankingScreen(
             if (page in state.availableModes.indices) {
                 val mode = state.availableModes[page]
                 if (state.currentMode != mode) {
-                    viewModel.dispatch(RankingAction.SelectMode(mode))
+                    viewModel.selectMode(mode)
                 }
             }
         }
@@ -129,7 +129,7 @@ fun RankingScreen(
                             Text(text = stringResource(RString.r18))
                             Switch(
                                 checked = state.showR18,
-                                onCheckedChange = { viewModel.dispatch(RankingAction.ToggleR18) }
+                                onCheckedChange = { viewModel.toggleR18() }
                             )
                         }
                     }
