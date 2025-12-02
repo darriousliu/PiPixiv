@@ -1,6 +1,10 @@
 package com.mrl.pixiv
 
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -10,8 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.ui.NavDisplay
 import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.logEvent
@@ -61,27 +63,22 @@ fun MainScreen(
         },
         layoutType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
     ) {
-        NavDisplay(
-            backStack = navigationManager.mainBackStack,
-            modifier = modifier.fillMaxSize(),
-            entryProvider = entryProvider {
-                entry<MainPage.Home> {
-                    HomeScreen()
-                }
-                entry<MainPage.Ranking> {
-                    RankingScreen()
-                }
-                entry<MainPage.Latest> {
-                    LatestScreen()
-                }
-                entry<MainPage.Search> {
-                    SearchPreviewScreen()
-                }
-                entry<MainPage.Profile> {
-                    ProfileScreen()
-                }
+        AnimatedContent(
+            targetState = page,
+            modifier = modifier,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(220, delayMillis = 90))
+                    .togetherWith(fadeOut(animationSpec = tween(90)))
             }
-        )
+        ) {
+            when (it) {
+                MainPage.Home -> HomeScreen()
+                MainPage.Ranking -> RankingScreen()
+                MainPage.Latest -> LatestScreen()
+                MainPage.Search -> SearchPreviewScreen()
+                MainPage.Profile -> ProfileScreen()
+            }
+        }
     }
     LaunchedEffect(navigationManager.currentMainPage) {
         logEvent("screen_view", buildMap {

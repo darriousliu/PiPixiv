@@ -95,7 +95,7 @@ sealed class MainPage(
     val title: Int = 0,
     @Transient
     val icon: @Composable (() -> Unit) = {},
-) : NavKey {
+) {
     @Serializable
     data object Home : MainPage(
         title = RString.home,

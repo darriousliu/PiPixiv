@@ -1,7 +1,10 @@
 package com.mrl.pixiv.common.router
 
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
@@ -23,13 +26,11 @@ class NavigationManager(
     vararg initialBackStack: Destination
 ) {
     val backStack = mutableStateListOf(*initialBackStack)
-    val mainBackStack = mutableStateListOf<MainPage>(MainPage.Home)
 
     val currentDestination: NavKey
         get() = backStack.last()
 
-    val currentMainPage: MainPage
-        get() = mainBackStack.last()
+    var currentMainPage by mutableStateOf<MainPage>(MainPage.Home)
 
     private fun <T : NavKey> SnapshotStateList<T>.addSingleTop(route: T): Boolean {
         val currentIndex = indexOfFirst { it == route }
@@ -73,7 +74,7 @@ class NavigationManager(
 
     fun switchMainPage(page: MainPage) {
         if (currentMainPage != page) {
-            mainBackStack.addSingleTop(page)
+            currentMainPage = page
         }
     }
 
