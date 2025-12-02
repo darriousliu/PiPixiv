@@ -26,7 +26,8 @@ val requireUserPreferenceFlow
     get() = SettingRepository.userPreferenceFlow
 
 object SettingRepository : MMKVUser {
-    private val userPreference by mmkvSerializable(UserPreference()).asMutableStateFlow()
+    private val defaultUserPreference = UserPreference()
+    private val userPreference by mmkvSerializable(defaultUserPreference).asMutableStateFlow()
     val userPreferenceFlow = userPreference.asStateFlow()
 
     val settingTheme
@@ -44,7 +45,7 @@ object SettingRepository : MMKVUser {
         block: UserPreference.() -> T
     ): State<T> {
         return map { it.block() }.collectAsStateWithLifecycle(
-            userPreference.value.block(),
+            defaultUserPreference.block(),
             lifecycleOwner,
             minActiveState,
             context
@@ -77,6 +78,10 @@ object SettingRepository : MMKVUser {
 
     fun setSpanCountLandscape(count: Int) = userPreference.update {
         it.copy(spanCountLandscape = count)
+    }
+
+    fun setIsR18Enabled(enable: Boolean) = userPreference.update {
+        it.copy(isR18Enabled = enable)
     }
 
     fun updateSettings(block: (UserPreference) -> UserPreference) {
