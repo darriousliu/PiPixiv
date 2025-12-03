@@ -1,6 +1,5 @@
 package com.mrl.pixiv.profile
 
-import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +20,7 @@ import androidx.compose.material.icons.rounded.ImportExport
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.Style
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -56,18 +56,12 @@ import com.mrl.pixiv.common.util.throttleClick
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
-private val options = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+private val options =
     mapOf(
         SettingTheme.SYSTEM to RString.theme_system,
         SettingTheme.LIGHT to RString.theme_light,
         SettingTheme.DARK to RString.theme_dark,
     )
-} else {
-    mapOf(
-        SettingTheme.LIGHT to RString.theme_light,
-        SettingTheme.DARK to RString.theme_dark,
-    )
-}
 
 private const val KEY_USER_INFO = "user_info"
 private const val KEY_DIVIDER = "divider"
@@ -194,6 +188,28 @@ fun ProfileScreen(
                         leadingContent = {
                             Icon(
                                 imageVector = Icons.Rounded.Bookmarks,
+                                contentDescription = null
+                            )
+                        },
+                    )
+                    // 收藏标签
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.bookmark_tags),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
+                                navigationManager.navigateToBookmarkedTagsScreen()
+                            }
+                            .then(itemModifier),
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Rounded.Style,
                                 contentDescription = null
                             )
                         },

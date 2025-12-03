@@ -32,6 +32,7 @@ import com.dokar.sonner.rememberToasterState
 import com.mrl.pixiv.MainScreen
 import com.mrl.pixiv.artwork.ArtworkScreen
 import com.mrl.pixiv.collection.CollectionScreen
+import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
@@ -180,6 +181,13 @@ fun Navigation3MainGraph(
                     ) {
                         val userId = it.userId
                         CollectionScreen(uid = userId)
+                    }
+
+                    // 收藏标签页
+                    entry<Destination.BookmarkedTags>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        BookmarkedTagsScreen()
                     }
 
                     entry<Destination.Following> {
@@ -353,6 +361,8 @@ private fun LogScreen(
                 is Destination.Collection -> {
                     put("user_id", currentDestination.userId.toString())
                 }
+
+                is Destination.BookmarkedTags -> Unit
 
                 is Destination.Following -> {
                     put("user_id", currentDestination.userId.toString())

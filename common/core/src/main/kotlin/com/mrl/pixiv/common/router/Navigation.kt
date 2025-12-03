@@ -72,6 +72,9 @@ sealed class Destination : NavKey {
     ) : Destination()
 
     @Serializable
+    data object BookmarkedTags : Destination()
+
+    @Serializable
     data class Following(
         val userId: Long,
     ) : Destination()

@@ -15,6 +15,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,7 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -53,8 +55,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -64,7 +64,6 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,7 +85,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
@@ -98,34 +96,35 @@ import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
+import com.mrl.pixiv.common.compose.LocalToaster
 import com.mrl.pixiv.common.compose.deepBlue
 import com.mrl.pixiv.common.compose.ui.BlockSurface
-import com.mrl.pixiv.common.compose.ui.bar.TextSnackbar
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Restrict
+import com.mrl.pixiv.common.data.Tag
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.AppUtil.getString
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
+import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.adaptiveFileSize
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
+import com.mrl.pixiv.common.util.copyToClipboard
 import com.mrl.pixiv.common.util.getScreenHeight
 import com.mrl.pixiv.common.util.throttleClick
-import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.picture.components.UgoiraPlayer
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -183,9 +182,6 @@ internal fun PictureScreen(
     pictureViewModel: PictureViewModel = koinViewModel { parametersOf(illust, null) },
     navigationManager: NavigationManager = koinInject(),
 ) {
-    val sideEffect by pictureViewModel.sideEffect.filterIsInstance<SideEffect.Error>()
-        .collectAsStateWithLifecycle(null)
-    val exception = sideEffect?.throwable
     val relatedIllusts = pictureViewModel.relatedIllusts.collectAsLazyPagingItems()
     val navToPictureScreen = navigationManager::navigateToPictureScreen
     val dispatch = pictureViewModel::dispatch
@@ -219,14 +215,13 @@ internal fun PictureScreen(
         relatedIllusts.itemCount / relatedSpanCount + 1
     }
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val sharingSuccess = stringResource(RString.sharing_success)
+    val toaster = LocalToaster.current
     val shareLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             // 处理分享结果
             if (result.resultCode == Activity.RESULT_OK) {
                 scope.launch {
-                    snackbarHostState.showSnackbar(sharingSuccess)
+                    toaster.show(RString.sharing_success)
                 }
             } else {
                 // 分享失败或取消
@@ -262,16 +257,6 @@ internal fun PictureScreen(
         rememberMultiplePermissionsState(permissions = listOf(READ_MEDIA_IMAGES))
     } else {
         rememberMultiplePermissionsState(permissions = listOf(READ_EXTERNAL_STORAGE))
-    }
-
-    LaunchedEffect(exception) {
-        if (exception != null) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    exception.message ?: getString(RString.unknown_error)
-                )
-            }
-        }
     }
 
     val prefix = LocalSharedKeyPrefix.current
@@ -326,13 +311,6 @@ internal fun PictureScreen(
                             modifier = Modifier.size(35.dp)
                         )
                     }
-                }
-            },
-            snackbarHost = {
-                SnackbarHost(snackbarHostState) {
-                    TextSnackbar(
-                        text = it.visuals.message,
-                    )
                 }
             },
         ) {
@@ -480,34 +458,14 @@ internal fun PictureScreen(
                             horizontalArrangement = 5f.spaceBy,
                             verticalArrangement = 5f.spaceBy,
                         ) {
-                            illust.tags?.forEach {
-                                Row(
-                                    modifier = Modifier
-                                        .background(
-                                            MaterialTheme.colorScheme.primaryContainer,
-                                            10f.round
-                                        )
-                                        .throttleClick {
-                                            navToSearchResultScreen(it.name)
-                                            dispatch(PictureAction.AddSearchHistory(it.name))
-                                        }
-                                        .padding(horizontal = 10.dp, vertical = 2.5.dp),
-                                    horizontalArrangement = 5f.spaceBy,
-                                ) {
-                                    Text(
-                                        text = "#" + it.name,
-                                        modifier = Modifier,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        style = TextStyle(fontSize = 13.sp, color = deepBlue),
-                                    )
-                                    Text(
-                                        text = it.translatedName,
-                                        modifier = Modifier,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = TextStyle(fontSize = 13.sp)
-                                    )
-                                }
+                            illust.tags?.forEach { tag ->
+                                TagItem(
+                                    tag = tag,
+                                    onClick = {
+                                        navToSearchResultScreen(tag.name)
+                                        dispatch(PictureAction.AddSearchHistory(tag.name))
+                                    }
+                                )
                             }
                         }
                     }
@@ -735,6 +693,80 @@ internal fun PictureScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TagItem(
+    tag: Tag,
+    onClick: () -> Unit,
+) {
+    var showCollectionDialog by rememberSaveable { mutableStateOf(false) }
+    Row(
+        modifier = Modifier
+            .background(
+                MaterialTheme.colorScheme.primaryContainer,
+                10f.round
+            )
+            .throttleClick(
+                onLongClick = {
+                    showCollectionDialog = true
+                },
+                onClick = onClick
+            )
+            .padding(horizontal = 10.dp, vertical = 2.5.dp),
+        horizontalArrangement = 5f.spaceBy,
+    ) {
+        Text(
+            text = "#" + tag.name,
+            modifier = Modifier,
+            color = MaterialTheme.colorScheme.primary,
+            style = TextStyle(fontSize = 13.sp, color = deepBlue),
+        )
+        Text(
+            text = tag.translatedName,
+            modifier = Modifier,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = TextStyle(fontSize = 13.sp)
+        )
+    }
+    if (showCollectionDialog) {
+        val indication = LocalIndication.current
+        val itemModifier = Modifier.padding(vertical = 8.dp)
+        AlertDialog(
+            onDismissRequest = { showCollectionDialog = false },
+            confirmButton = {},
+            title = {
+                Text(text = tag.name)
+            },
+            text = {
+                Column {
+                    Text(
+                        text = stringResource(RString.collection),
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = indication
+                            ) {
+                                BookmarkedTagRepository.addTag(tag)
+                                ToastUtil.safeShortToast(RString.bookmark_add_success)
+                                showCollectionDialog = false
+                            }
+                            .then(itemModifier)
+                    )
+                    Text(
+                        text = stringResource(RString.copy_to_clipboard),
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = indication
+                            ) {
+                                copyToClipboard(tag.name)
+                            }
+                            .then(itemModifier)
+                    )
+                }
+            }
+        )
     }
 }
 

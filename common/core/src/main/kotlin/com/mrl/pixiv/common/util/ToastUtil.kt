@@ -9,6 +9,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import kotlin.time.Duration
 
 object ToastUtil : CoroutineScope by MainScope() {
@@ -16,12 +17,14 @@ object ToastUtil : CoroutineScope by MainScope() {
     val toastFlow: Flow<Toast> = _toastFlow.receiveAsFlow()
     fun safeShortToast(@StringRes strId: Int, vararg params: Any) {
         val text = AppUtil.appContext.getString(strId, *params)
-        _toastFlow.trySend(
-            Toast(
-                message = text,
-                duration = ToasterDefaults.DurationShort,
+        launch {
+            _toastFlow.send(
+                Toast(
+                    message = text,
+                    duration = ToasterDefaults.DurationShort,
+                )
             )
-        )
+        }
     }
 
     fun safeShortToast(
@@ -31,14 +34,16 @@ object ToastUtil : CoroutineScope by MainScope() {
         type: ToastType = ToastType.Normal,
         duration: Duration = ToasterDefaults.DurationDefault,
     ) {
-        _toastFlow.trySend(
-            Toast(
-                message = message,
-                icon = icon,
-                action = action,
-                type = type,
-                duration = duration,
+        launch {
+            _toastFlow.trySend(
+                Toast(
+                    message = message,
+                    icon = icon,
+                    action = action,
+                    type = type,
+                    duration = duration,
+                )
             )
-        )
+        }
     }
 }

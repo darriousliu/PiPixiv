@@ -7,7 +7,7 @@
     <string name="bookmark_add_success">收藏成功</string>
     <string name="bookmark_delete_success">取消收藏成功</string>
     <string name="bookmark_delete_failed">取消收藏失败</string>
-    <string name="bookmark_tags">收藏的标签</string>
+    <string name="bookmark_tags">收藏标签</string>
     <string name="word_public">公开</string>
     <string name="word_private">私人</string>
     <string name="add_tags">添加标签</string>

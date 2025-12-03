@@ -117,6 +117,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.Collection(userId))
     }
 
+    fun navigateToBookmarkedTagsScreen() {
+        backStack.navigate(route = Destination.BookmarkedTags)
+    }
+
     fun navigateToSearchScreen() {
         backStack.addSingleTop(route = Destination.Search)
     }

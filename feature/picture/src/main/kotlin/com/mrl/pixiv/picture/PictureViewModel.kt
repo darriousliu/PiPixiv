@@ -30,11 +30,11 @@ import com.mrl.pixiv.common.repository.paging.RelatedIllustPaging
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.util.AppUtil
-import com.mrl.pixiv.common.util.AppUtil.getString
 import com.mrl.pixiv.common.util.PictureType
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.TAG
+import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.createDownloadOutputStream
 import com.mrl.pixiv.common.util.isImageExists
 import com.mrl.pixiv.common.util.saveToAlbum
@@ -267,7 +267,7 @@ class PictureViewModel(
                 result.image?.toBitmap()?.saveToAlbum("${illustId}_$index", mimeType, subFolder)
             with(AppUtil.appContext) {
                 closeBottomSheet()
-                handleError(Exception(getString(if (success == true) RString.download_success else RString.download_failed)))
+                ToastUtil.safeShortToast(if (success == true) RString.download_success else RString.download_failed)
             }
             closeBottomSheet()
             showLoading(false)
@@ -431,10 +431,10 @@ class PictureViewModel(
                     }
                     encoder.close()
                 } catch (_: Exception) {
-                    handleError(Exception(getString(RString.download_failed)))
+                    ToastUtil.safeShortToast(RString.download_failed)
                 }
             }
-            handleError(Exception(getString(RString.download_success)))
+            ToastUtil.safeShortToast(RString.download_success)
             closeBottomSheet()
             showLoading(false)
         }
