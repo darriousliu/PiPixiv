@@ -32,7 +32,7 @@ object ToastUtil : CoroutineScope by MainScope() {
         icon: Any? = null,
         action: Any? = null,
         type: ToastType = ToastType.Normal,
-        duration: Duration = ToasterDefaults.DurationDefault,
+        duration: Duration = ToasterDefaults.DurationShort,
     ) {
         launch {
             _toastFlow.trySend(
