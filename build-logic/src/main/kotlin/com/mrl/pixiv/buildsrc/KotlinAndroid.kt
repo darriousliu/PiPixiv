@@ -36,10 +36,12 @@ internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
-        compileSdk = 36
+        compileSdk {
+            version = release(36)
+        }
 
         defaultConfig {
-            minSdk = 23
+            minSdk = 26
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             proguardFiles.add(file("consumer-rules.pro"))
         }
@@ -49,16 +51,27 @@ internal fun Project.configureKotlinAndroid(
             // https://developer.android.com/studio/write/java11-minimal-support-table
             sourceCompatibility = JavaVersion.VERSION_21
             targetCompatibility = JavaVersion.VERSION_21
-            isCoreLibraryDesugaringEnabled = true
         }
     }
 
     configureKotlin()
 
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+    val kotlinx = extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
+    val androidx = extensions.getByType<VersionCatalogsExtension>().named("androidx")
 
     dependencies {
-        coreLibraryDesugaring(libs.findLibrary("desugar").get())
+        implementation(androidx.findBundle("androidx").get())
+        // Lifecycle
+        implementation(androidx.findBundle("lifecycle").get())
+        // Coroutines
+        implementation(platform(kotlinx.findLibrary("coroutines-bom").get()))
+        implementation(kotlinx.findBundle("coroutines").get())
+        // Koin
+        implementation(libs.findBundle("koin").get())
+        ksp(libs.findLibrary("koin-ksp-compiler").get())
+        // Logger
+        implementation(libs.findLibrary("kermit").get())
     }
 }
 

@@ -25,7 +25,7 @@
     <string name="sign_in">로그인</string>
     <string name="sign_up">회원가입</string>
     <string name="sign_with_token">토큰으로 로그인</string>
-    <string name="download_with_size">다운로드 (%1$.2fMB)</string>
+    <string name="download_with_size">다운로드 (%s)</string>
     <string name="followed">팔로우 중</string>
     <string name="follow">팔로우</string>
     <string name="related_artworks">관련 작품</string>
@@ -89,4 +89,45 @@
     <string name="report_user">사용자 신고</string>
     <string name="user_blocked">사용자 차단됨</string>
     <string name="cancel_user_blocked">사용자 차단 해제</string>
+    <string name="app_data">앱 데이터</string>
+    <string name="clear_cache">캐시 삭제</string>
+    <string name="cache_cleared">%1$s 공간 확보됨</string>
+    <string name="migrate_data_title">이전 데이터 감지됨</string>
+    <string name="migrate_data_desc">이전 디렉터리에서 %1$d개의 이미지가 감지되었습니다. 새 디렉터리로 이동하는 것을 권장합니다</string>
+    <string name="migrate_confirm_title">마이그레이션 확인?</string>
+    <string name="migrate_confirm_desc">DCIM/PiPixiv에서 Pictures/PiPixiv로 이동합니다. 완료 후 원본 파일은 삭제됩니다.</string>
+    <string name="migrating">이동 중… (%1$d/%2$d)</string>
+    <string name="migration_success">이동 성공</string>
+    <string name="migration_failed">이동 실패</string>
+    <string name="migration_manually_delete">마이그레이션이 완료되었습니다. 일부 오래된 파일을 수동으로 삭제해야 합니다.</string>
+    <string name="cancel">취소</string>
+    <string name="confirm">확인</string>
+    <string name="permission_rationale">이전 데이터를 이동하려면 저장소 권한이 필요합니다</string>
+    <string name="download_single_folder_by_user_title">개별 폴더</string>
+    <string name="download_single_folder_by_user_desc">작가별로 개별 폴더를 생성하여 작품을 저장합니다</string>
+    <string name="span_count_portrait">작품 열 수 (세로)</string>
+    <string name="span_count_landscape">작품 열 수 (가로)</string>
+    <string name="span_count_adaptive">자동 조정</string>
+    <!-- values-ko -->
+    <string name="ranking">랭킹</string>
+    <string name="every_day">일일</string>
+    <string name="popular_male">남성 인기</string>
+    <string name="popular_female">여성 인기</string>
+    <string name="original">오리지널</string>
+    <string name="rookie">루키</string>
+    <string name="every_week">주간</string>
+    <string name="every_month">월간</string>
+    <string name="ai_generate">AI 생성</string>
+    <string name="past">과거</string>
+    <string name="every_week_r18g">주간 (R-18G)</string>
+    <string name="r18_alert_message">Pixiv 웹사이트 &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt; 에서 R-18 스위치를 켜야 합니다. 그렇지 않으면 작동하지 않습니다</string>
+    <string name="tips">팁</string>
+    <string name="download_manager">다운로드 관리자</string>
+    <string name="download_add_to_queue">대기열에 추가</string>
+    <string name="status_all">전체</string>
+    <string name="status_completed">완료</string>
+    <string name="status_running">진행 중</string>
+    <string name="status_failed">실패</string>
+    <string name="retry">재시도</string>
+    <string name="delete">삭제</string>
 </resources>

@@ -7,7 +7,7 @@
     <string name="bookmark_add_success">收藏成功</string>
     <string name="bookmark_delete_success">取消收藏成功</string>
     <string name="bookmark_delete_failed">取消收藏失败</string>
-    <string name="bookmark_tags">收藏的标签</string>
+    <string name="bookmark_tags">收藏标签</string>
     <string name="word_public">公开</string>
     <string name="word_private">私人</string>
     <string name="add_tags">添加标签</string>
@@ -27,7 +27,7 @@
     <string name="sign_in">登录</string>
     <string name="sign_up">注册</string>
     <string name="sign_with_token">使用Token登陆</string>
-    <string name="download_with_size">下载 (%1$.2fMB)</string>
+    <string name="download_with_size">下载 (%s)</string>
     <string name="followed">已关注</string>
     <string name="follow">关注</string>
     <string name="related_artworks">相关作品</string>
@@ -92,4 +92,45 @@
     <string name="report_user">举报用户</string>
     <string name="user_blocked">用户已被屏蔽</string>
     <string name="cancel_user_blocked">取消屏蔽用户</string>
+    <string name="app_data">应用数据</string>
+    <string name="clear_cache">清除缓存</string>
+    <string name="cache_cleared">已清除%1$s空间</string>
+    <string name="migrate_data_title">发现旧版数据</string>
+    <string name="migrate_data_desc">旧目录检测到 %1$d 张图片，建议迁移至新目录</string>
+    <string name="migrate_confirm_title">确认迁移？</string>
+    <string name="migrate_confirm_desc">将从 DCIM/PiPixiv 迁移至 Pictures/PiPixiv。迁移完成后原文件将被删除。</string>
+    <string name="migrating">正在迁移… (%1$d/%2$d)</string>
+    <string name="migration_success">迁移成功</string>
+    <string name="migration_failed">迁移失败</string>
+    <string name="migration_manually_delete">迁移完成，部分旧文件需手动删除。</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="permission_rationale">需要存储权限以迁移旧数据</string>
+    <string name="download_single_folder_by_user_title">单独文件夹</string>
+    <string name="download_single_folder_by_user_desc">为每个画师创建单独的文件夹存储其作品</string>
+    <string name="span_count_portrait">作品展示列数 (竖屏)</string>
+    <string name="span_count_landscape">作品展示列数 (横屏)</string>
+    <string name="span_count_adaptive">自适应</string>
+    <string name="ranking">排行</string>
+    <string name="every_day">每日</string>
+    <string name="popular_male">男性热门</string>
+    <string name="popular_female">女性热门</string>
+    <string name="original">原创</string>
+    <string name="rookie">新人</string>
+    <string name="every_week">每周</string>
+    <string name="every_month">每月</string>
+    <string name="ai_generate">AI生成</string>
+    <string name="past">过去</string>
+    <string name="every_week_r18g">每周(猎奇)</string>
+    <string name="r18" translatable="false">R18</string>
+    <string name="r18_alert_message">需要在Pixiv网站&lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;中打开R18开关，否则无效</string>
+    <string name="tips">提示</string>
+    <string name="download_manager">下载管理</string>
+    <string name="download_add_to_queue">添加到下载队列</string>
+    <string name="status_all">全部</string>
+    <string name="status_completed">已完成</string>
+    <string name="status_running">进行中</string>
+    <string name="status_failed">失败</string>
+    <string name="retry">重试</string>
+    <string name="delete">删除</string>
 </resources>

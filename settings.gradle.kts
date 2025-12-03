@@ -52,7 +52,13 @@ dependencyResolutionManagement {
 }
 rootProject.name = "PiPixiv"
 include(":app")
-include(":lib_common")
-include(":lib_feature")
 include(":lib_strings")
 include(":baselineprofile")
+
+file("./common").listFiles()?.filter { it.isDirectory }?.forEach {
+    include(":common:${it.name}")
+}
+
+file("./feature").listFiles()?.filter { it.isDirectory }?.forEach {
+    include(":feature:${it.name}")
+}

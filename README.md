@@ -22,7 +22,7 @@
 [![GitHub downloads](https://img.shields.io/github/downloads/master-lzh/PiPixiv/total?label=下载量&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/master-lzh/PiPixiv/releases)
 [![F-Droid Version](https://img.shields.io/f-droid/v/com.mrl.pixiv)](https://f-droid.org/packages/com.mrl.pixiv/)
 
-### 支持 **[Android 6.0]()** 或更高版本
+### 支持 **[Android 8.0]()** 或更高版本
 
 ## 功能
 
@@ -31,27 +31,19 @@
 * 使用 Pixiv 账号登录。
 * 首页推荐插图。
 * 搜索插图，按照人气、最新等排序。
+* 查看排行榜（日榜、周榜、月榜等）。
 * 收藏插图/关注作者。
+* 查看浏览历史。
 * 查看插图详情和推荐插图。
-* 长按图片下载原始插图。
+* 长按图片下载原始插图或GIF。
+* 应用设置（语言、网络、功能开关等）。
+* 深度链接支持。
+* 屏蔽作品和用户。
 
 ### 待办事项
 
 * **欢迎提出Feature和PR**
 * 更多...
-
-### v1.1.0
-
-- [x] 重构网络层，将OkHttp换成Ktor
-- [x] 重构datastore为MMKV
-- [x] 将一些全局状态重构成单例模式，简化代码，便于依赖注入
-- [x] 适配新的导航
-- [x] 设置页面
-- [x] 收藏页面
-- [x] 关注页面
-- [x] 历史页面
-- [x] 英文翻译
-- [x] 深度链接支持（从 https://www.pixiv.net/illust/xxxxxx 打开）
 
 </div>
 

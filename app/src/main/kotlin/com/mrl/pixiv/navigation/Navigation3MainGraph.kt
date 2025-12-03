@@ -8,6 +8,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
@@ -15,22 +17,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.dokar.sonner.LocalToastContentColor
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.ToasterState
+import com.dokar.sonner.rememberToasterState
 import com.mrl.pixiv.MainScreen
 import com.mrl.pixiv.artwork.ArtworkScreen
 import com.mrl.pixiv.collection.CollectionScreen
+import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
+import com.mrl.pixiv.common.compose.LocalToaster
 import com.mrl.pixiv.common.repository.IllustCacheRepo
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.DestinationsDeepLink
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.toast.ToastMessage
+import com.mrl.pixiv.common.util.ToastUtil
+import com.mrl.pixiv.common.util.logEvent
+import com.mrl.pixiv.common.util.result.LocalResultEventBus
+import com.mrl.pixiv.common.util.result.ResultEventBus
 import com.mrl.pixiv.follow.FollowingScreen
 import com.mrl.pixiv.history.HistoryScreen
 import com.mrl.pixiv.login.LoginOptionScreen
@@ -42,10 +57,14 @@ import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.SettingScreen
+import com.mrl.pixiv.setting.appdata.AppDataScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
+import com.mrl.pixiv.setting.download.DownloadScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import com.mrl.pixiv.splash.SplashViewModel
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.serializer
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -59,12 +78,18 @@ fun Navigation3MainGraph(
     navigationManager: NavigationManager = koinInject { parametersOf(arrayOf(startDestination)) }
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<Any>()
+    val toastState = rememberToasterState()
+    val resultBus = remember { ResultEventBus() }
 
     HandleDeeplink(navigationManager)
+    LogScreen(navigationManager)
     SharedTransitionLayout {
         CompositionLocalProvider(
-            LocalSharedTransitionScope provides this
+            LocalSharedTransitionScope provides this,
+            LocalToaster provides toastState,
+            LocalResultEventBus provides resultBus,
         ) {
+            ToastMessage(toastState = toastState)
             NavDisplay(
                 backStack = navigationManager.backStack,
                 modifier = modifier,
@@ -163,6 +188,13 @@ fun Navigation3MainGraph(
                         CollectionScreen(uid = userId)
                     }
 
+                    // 收藏标签页
+                    entry<Destination.BookmarkedTags>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        BookmarkedTagsScreen()
+                    }
+
                     entry<Destination.Following> {
                         val uid = it.userId
                         FollowingScreen(uid = uid)
@@ -194,16 +226,15 @@ fun Navigation3MainGraph(
                                     ) + fadeOut(DefaultFloatAnimationSpec)
                                 }
                     ) {
-                        val params = it
-                        val illusts = remember { IllustCacheRepo[params.prefix] }
+                        val illusts = remember { IllustCacheRepo[it.prefix] }
                         CompositionLocalProvider(
-                            LocalSharedKeyPrefix provides params.prefix
+                            LocalSharedKeyPrefix provides it.prefix
                         ) {
                             HorizontalSwipePictureScreen(
                                 illusts = illusts.toImmutableList(),
-                                index = params.index,
-                                prefix = params.prefix,
-                                enableTransition = params.enableTransition,
+                                index = it.index,
+                                prefix = it.prefix,
+                                enableTransition = it.enableTransition,
                             )
                         }
                     }
@@ -216,10 +247,46 @@ fun Navigation3MainGraph(
                     entry<Destination.BlockSettings> {
                         BlockSettingsScreen()
                     }
+                    entry<Destination.AppData> {
+                        AppDataScreen()
+                    }
+                    entry<Destination.Download> {
+                        DownloadScreen()
+                    }
                 }
             )
         }
     }
+}
+
+@Composable
+private fun ToastMessage(toastState: ToasterState) {
+    LaunchedEffect(Unit) {
+        ToastUtil.toastFlow.collect {
+            toastState.show(it)
+        }
+    }
+    Toaster(
+        state = toastState,
+        darkTheme = isSystemInDarkTheme(),
+        richColors = true,
+        alignment = Alignment.TopCenter,
+        showCloseButton = true,
+        messageSlot = {
+            val contentColor = LocalToastContentColor.current
+            when (val message = it.message) {
+                is String -> BasicText(text = message, color = { contentColor })
+                is Int -> BasicText(text = stringResource(message), color = { contentColor })
+                is ToastMessage.Resource -> BasicText(
+                    text = stringResource(message.resId, *message.args),
+                    color = { contentColor }
+                )
+
+                is ToastMessage.Compose -> message.content()
+                else -> BasicText(text = it.message.toString(), color = { contentColor })
+            }
+        }
+    )
 }
 
 @Composable
@@ -250,5 +317,73 @@ private fun HandleDeeplink(
                 }
             }
         }
+    }
+}
+
+@OptIn(InternalSerializationApi::class)
+@Composable
+private fun LogScreen(
+    navigationManager: NavigationManager,
+) {
+    LaunchedEffect(navigationManager.currentDestination) {
+        // Get current destination
+        val currentDestination = navigationManager.currentDestination
+
+        // Log screen view event
+        logEvent("screen_view", buildMap {
+            val screenName = currentDestination::class.serializer().descriptor.serialName
+                .split(".")
+                .lastOrNull()
+                .orEmpty()
+            put("screen_name", screenName)
+            put("screen_class", screenName)
+
+            // Add additional parameters for specific destinations
+            when (currentDestination) {
+                is Destination.Main -> {
+                    val screenName =
+                        navigationManager.currentMainPage::class.serializer().descriptor.serialName
+                            .split(".")
+                            .lastOrNull()
+                            .orEmpty()
+                    put("current_main_page", screenName)
+                }
+
+                is Destination.ProfileDetail -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.PictureDeeplink -> {
+                    put("illust_id", currentDestination.illustId.toString())
+                }
+
+                is Destination.SearchResults -> {
+                    put("search_words", currentDestination.searchWords)
+                }
+
+                is Destination.Picture -> {
+                    put("index", currentDestination.index.toString())
+                    put("prefix", currentDestination.prefix)
+                }
+
+                is Destination.Collection -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.BookmarkedTags -> Unit
+
+                is Destination.Following -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.UserArtwork -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.Login, Destination.LoginOption, Destination.OAuthLogin,
+                Destination.Search, Destination.Setting, Destination.NetworkSetting,
+                Destination.History, Destination.BlockSettings, Destination.AppData, Destination.Download -> Unit
+            }
+        })
     }
 }

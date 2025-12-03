@@ -25,7 +25,7 @@
     <string name="sign_up">Cadastrar</string>
     <string name="sign_in">Entrar</string>
     <string name="sign_with_token">Entrar com Token</string>
-    <string name="download_with_size">Baixar (%1$.2fMB)</string>
+    <string name="download_with_size">Baixar (%s)</string>
     <string name="followed">Seguindo</string>
     <string name="follow">Seguir</string>
     <string name="related_artworks">Obras relacionadas</string>
@@ -89,4 +89,45 @@
     <string name="report_user">Denunciar usuário</string>
     <string name="user_blocked">Usuário bloqueado</string>
     <string name="cancel_user_blocked">Desbloquear usuário</string>
+    <string name="app_data">Dados do aplicativo</string>
+    <string name="clear_cache">Limpar cache</string>
+    <string name="cache_cleared">%1$s de espaço liberado</string>
+    <string name="migrate_data_title">Dados antigos detectados</string>
+    <string name="migrate_data_desc">%1$d imagens detectadas no diretório antigo. Recomenda-se migrar para o novo diretório</string>
+    <string name="migrate_confirm_title">Confirmar migração?</string>
+    <string name="migrate_confirm_desc">Será movido de DCIM/PiPixiv para Pictures/PiPixiv. Os arquivos originais serão excluídos após a conclusão.</string>
+    <string name="migrating">Migrando… (%1$d/%2$d)</string>
+    <string name="migration_success">Migração concluída</string>
+    <string name="migration_failed">Falha na migração</string>
+    <string name="migration_manually_delete">A migração foi concluída, alguns arquivos antigos precisam ser excluídos manualmente.</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="permission_rationale">Permissão de armazenamento necessária para migrar dados antigos</string>
+    <string name="download_single_folder_by_user_title">Pasta separada</string>
+    <string name="download_single_folder_by_user_desc">Criar uma pasta separada para cada artista para armazenar suas obras</string>
+    <string name="span_count_portrait">Colunas de obras (Retrato)</string>
+    <string name="span_count_landscape">Colunas de obras (Paisagem)</string>
+    <string name="span_count_adaptive">Adaptável</string>
+    <!-- values-pt -->
+    <string name="ranking">Ranking</string>
+    <string name="every_day">Diário</string>
+    <string name="popular_male">Popular entre homens</string>
+    <string name="popular_female">Popular entre mulheres</string>
+    <string name="original">Original</string>
+    <string name="rookie">Novato</string>
+    <string name="every_week">Semanal</string>
+    <string name="every_month">Mensal</string>
+    <string name="ai_generate">Gerado por IA</string>
+    <string name="past">Passado</string>
+    <string name="every_week_r18g">Semanal (Grotesco)</string>
+    <string name="r18_alert_message">Você precisa ativar a opção R-18 no site do Pixiv em &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;, caso contrário, não funcionará</string>
+    <string name="tips">Dica</string>
+    <string name="download_manager">Gerenciador de downloads</string>
+    <string name="download_add_to_queue">Adicionar à fila</string>
+    <string name="status_all">Todos</string>
+    <string name="status_completed">Concluído</string>
+    <string name="status_running">Em andamento</string>
+    <string name="status_failed">Falha</string>
+    <string name="retry">Tentar novamente</string>
+    <string name="delete">Excluir</string>
 </resources>

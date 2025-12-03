@@ -18,6 +18,9 @@ package com.mrl.pixiv.buildsrc
 
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -37,6 +40,18 @@ fun Project.configureAndroidCompose(
         compilerOptions {
             freeCompilerArgs.addAll(buildComposeMetricsParameters())
         }
+    }
+
+    val compose = extensions.getByType<VersionCatalogsExtension>().named("compose")
+    val kotlinx = extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
+    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+    dependencies {
+        implementation(platform(compose.findLibrary("bom").get()))
+        implementation(compose.findBundle("baselibs").get())
+        // KotlinX Collections Immutable
+        implementation(kotlinx.findLibrary("collections-immutable").get())
+        // Toast
+        implementation(libs.findLibrary("sonner").get())
     }
 }
 

@@ -19,3 +19,6 @@ local.properties
 /app/default
 /app/foss
 *.base64.txt
+GEMINI.md
+CLAUDE.md
+AGENTS.md
