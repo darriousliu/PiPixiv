@@ -9,8 +9,8 @@ import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.repository.paging.SearchIllustPagingSource
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
-import com.mrl.pixiv.common.viewmodel.state
 import com.mrl.pixiv.search.SearchState.SearchFilter
+import kotlinx.coroutines.flow.flatMapLatest
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 
@@ -33,19 +33,23 @@ class SearchResultViewModel(
 ) : BaseMviViewModel<SearchResultState, SearchResultAction>(
     initialState = SearchResultState().copy(searchWords = searchWords),
 ), KoinComponent {
-    val searchResults = Pager(config = PagingConfig(pageSize = 20)) {
-        SearchIllustPagingSource(
-            SearchIllustQuery(
-                word = searchWords,
-                searchTarget = state.searchFilter.searchTarget,
-                sort = state.searchFilter.sort,
-                searchAiType = state.searchFilter.searchAiType,
+    val searchResults = uiState.flatMapLatest { state ->
+        val words = state.searchWords
+        val filter = state.searchFilter
+        Pager(config = PagingConfig(pageSize = 20)) {
+            SearchIllustPagingSource(
+                SearchIllustQuery(
+                    word = words,
+                    searchTarget = filter.searchTarget,
+                    sort = filter.sort,
+                    searchAiType = filter.searchAiType,
+                )
             )
-        )
-    }.flow.cachedIn(viewModelScope)
+        }.flow.cachedIn(viewModelScope)
+    }
 
     override suspend fun handleIntent(intent: SearchResultAction) {
-        when(intent) {
+        when (intent) {
             is SearchResultAction.UpdateFilter ->
                 updateState { copy(searchFilter = intent.searchFilter) }
         }

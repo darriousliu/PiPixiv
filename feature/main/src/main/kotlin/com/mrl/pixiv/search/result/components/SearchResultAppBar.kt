@@ -27,7 +27,8 @@ internal fun SearchResultAppBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .throttleClick { popBack() },
-                text = searchWords
+                text = searchWords,
+                maxLines = 1
             )
         },
         navigationIcon = {

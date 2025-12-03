@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +30,6 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.search.result.components.FilterBottomSheet
 import com.mrl.pixiv.search.result.components.SearchResultAppBar
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -46,8 +44,7 @@ fun SearchResultsScreen(
     val state = viewModel.asState()
     val searchResults = viewModel.searchResults.collectAsLazyPagingItems()
     var showBottomSheet by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    val bottomSheetState = rememberModalBottomSheetState()
+    val bottomSheetState = rememberModalBottomSheetState(true)
     val layoutParams = IllustGridDefaults.relatedLayoutParameters()
     val pullRefreshState = rememberPullToRefreshState()
     val isRefreshing = searchResults.loadState.refresh is LoadState.Loading
@@ -59,7 +56,6 @@ fun SearchResultsScreen(
                 popBack = navigationManager::popBackStack,
                 showBottomSheet = {
                     showBottomSheet = true
-                    scope.launch { bottomSheetState.show() }
                 }
             )
         },
@@ -101,14 +97,8 @@ fun SearchResultsScreen(
             FilterBottomSheet(
                 bottomSheetState = bottomSheetState,
                 searchFilter = state.searchFilter,
-                onRefresh = {
-                    searchResults.refresh()
-                    showBottomSheet = false
-                    scope.launch { bottomSheetState.hide() }
-                },
                 onDismissRequest = {
                     showBottomSheet = false
-                    scope.launch { bottomSheetState.hide() }
                 },
                 onUpdateFilter = {
                     viewModel.dispatch(SearchResultAction.UpdateFilter(it))
