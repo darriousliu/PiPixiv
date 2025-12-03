@@ -99,6 +99,7 @@
     <string name="migrating">Migration en cours… (%1$d/%2$d)</string>
     <string name="migration_success">Migration réussie</string>
     <string name="migration_failed">Échec de la migration</string>
+    <string name="migration_manually_delete">La migration est terminée, certains anciens fichiers doivent être supprimés manuellement.</string>
     <string name="cancel">Annuler</string>
     <string name="confirm">Confirmer</string>
     <string name="permission_rationale">Autorisation de stockage requise pour migrer les anciennes données</string>

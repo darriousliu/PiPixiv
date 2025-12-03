@@ -21,10 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.compose.LocalToaster
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
-import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.activityKoinViewModel
 import com.mrl.pixiv.setting.SettingAction
 import com.mrl.pixiv.setting.SettingViewModel
@@ -38,6 +38,7 @@ fun NetworkSettingScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val userPreference by requireUserPreferenceFlow.collectAsStateWithLifecycle()
+    val toaster = LocalToaster.current
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -87,7 +88,7 @@ fun NetworkSettingScreen(
                 currentSelected = userPreference.imageHost,
                 savePictureSourceHost = {
                     viewModel.dispatch(SettingAction.SavePictureSourceHost(it))
-                    ToastUtil.safeShortToast(RString.restart_app_to_take_effect)
+                    toaster.show(RString.restart_app_to_take_effect)
                 }
             )
         }

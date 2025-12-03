@@ -1,35 +1,44 @@
 package com.mrl.pixiv.common.util
 
-import android.widget.Toast
 import androidx.annotation.StringRes
-import com.mrl.pixiv.common.coroutine.launchCatch
+import com.dokar.sonner.Toast
+import com.dokar.sonner.ToastType
+import com.dokar.sonner.ToasterDefaults
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlin.time.Duration
 
 object ToastUtil : CoroutineScope by MainScope() {
+    private val _toastFlow = Channel<Toast>()
+    val toastFlow: Flow<Toast> = _toastFlow.receiveAsFlow()
     fun safeShortToast(@StringRes strId: Int, vararg params: Any) {
-        launchCatch {
-            val text = AppUtil.appContext.getString(strId, *params)
-            Toast.makeText(AppUtil.appContext, text, Toast.LENGTH_SHORT).show()
-        }
+        val text = AppUtil.appContext.getString(strId, *params)
+        _toastFlow.trySend(
+            Toast(
+                message = text,
+                duration = ToasterDefaults.DurationShort,
+            )
+        )
     }
 
-    fun safeLongToast(@StringRes strId: Int, vararg params: Any) {
-        launchCatch {
-            val text = AppUtil.appContext.getString(strId, *params)
-            Toast.makeText(AppUtil.appContext, text, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    fun safeShortToast(text: String) {
-        launchCatch {
-            Toast.makeText(AppUtil.appContext, text, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun safeLongToast(text: String) {
-        launchCatch {
-            Toast.makeText(AppUtil.appContext, text, Toast.LENGTH_LONG).show()
-        }
+    fun safeShortToast(
+        message: Any,
+        icon: Any? = null,
+        action: Any? = null,
+        type: ToastType = ToastType.Normal,
+        duration: Duration = ToasterDefaults.DurationDefault,
+    ) {
+        _toastFlow.trySend(
+            Toast(
+                message = message,
+                icon = icon,
+                action = action,
+                type = type,
+                duration = duration,
+            )
+        )
     }
 }

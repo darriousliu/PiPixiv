@@ -102,6 +102,7 @@
     <string name="migrating">正在迁移… (%1$d/%2$d)</string>
     <string name="migration_success">迁移成功</string>
     <string name="migration_failed">迁移失败</string>
+    <string name="migration_manually_delete">迁移完成，部分旧文件需手动删除。</string>
     <string name="cancel">取消</string>
     <string name="confirm">确认</string>
     <string name="permission_rationale">需要存储权限以迁移旧数据</string>

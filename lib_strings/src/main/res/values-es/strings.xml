@@ -99,6 +99,7 @@
     <string name="migrating">Migrando… (%1$d/%2$d)</string>
     <string name="migration_success">Migración exitosa</string>
     <string name="migration_failed">Error en la migración</string>
+    <string name="migration_manually_delete">La migración está completa, algunos archivos antiguos deben eliminarse manualmente.</string>
     <string name="cancel">Cancelar</string>
     <string name="confirm">Confirmar</string>
     <string name="permission_rationale">Se necesita permiso de almacenamiento para migrar datos antiguos</string>

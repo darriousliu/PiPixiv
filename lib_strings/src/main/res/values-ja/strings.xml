@@ -99,6 +99,7 @@
     <string name="migrating">移行中… (%1$d/%2$d)</string>
     <string name="migration_success">移行完了</string>
     <string name="migration_failed">移行失敗</string>
+    <string name="migration_manually_delete">移行は完了しました。一部の古いファイルは手動で削除する必要があります。</string>
     <string name="cancel">キャンセル</string>
     <string name="confirm">確認</string>
     <string name="permission_rationale">旧データを移行するにはストレージ権限が必要です</string>

@@ -184,7 +184,7 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
             } else {
                 if (pendingDeleteUris.isNotEmpty() && Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
                     // Android 10 等无法自动删除的情况
-                    ToastUtil.safeShortToast("迁移完成。部分旧文件需手动删除。")
+                    ToastUtil.safeShortToast(RString.migration_manually_delete)
                 } else {
                     ToastUtil.safeShortToast(RString.migration_failed)
                 }

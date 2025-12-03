@@ -99,6 +99,7 @@
     <string name="migrating">이동 중… (%1$d/%2$d)</string>
     <string name="migration_success">이동 성공</string>
     <string name="migration_failed">이동 실패</string>
+    <string name="migration_manually_delete">마이그레이션이 완료되었습니다. 일부 오래된 파일을 수동으로 삭제해야 합니다.</string>
     <string name="cancel">취소</string>
     <string name="confirm">확인</string>
     <string name="permission_rationale">이전 데이터를 이동하려면 저장소 권한이 필요합니다</string>

@@ -99,6 +99,7 @@
     <string name="migrating">جارٍ النقل… (%1$d/%2$d)</string>
     <string name="migration_success">تم النقل بنجاح</string>
     <string name="migration_failed">فشل النقل</string>
+    <string name="migration_manually_delete">اكتملت عملية الترحيل، ويجب حذف بعض الملفات القديمة</string>
     <string name="cancel">إلغاء</string>
     <string name="confirm">تأكيد</string>
     <string name="permission_rationale">إذن التخزين مطلوب لنقل البيانات القديمة</string>

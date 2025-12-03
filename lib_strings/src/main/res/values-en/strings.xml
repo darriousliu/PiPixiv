@@ -99,6 +99,7 @@
     <string name="migrating">Migrating… (%1$d/%2$d)</string>
     <string name="migration_success">Migration successful</string>
     <string name="migration_failed">Migration failed</string>
+    <string name="migration_manually_delete">The migration is complete, some old files need to be deleted manually.</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="permission_rationale">Storage permission is required to migrate legacy data</string>
