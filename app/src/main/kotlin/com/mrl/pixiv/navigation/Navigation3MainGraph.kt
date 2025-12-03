@@ -44,6 +44,8 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.toast.ToastMessage
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.logEvent
+import com.mrl.pixiv.common.util.result.LocalResultEventBus
+import com.mrl.pixiv.common.util.result.ResultEventBus
 import com.mrl.pixiv.follow.FollowingScreen
 import com.mrl.pixiv.history.HistoryScreen
 import com.mrl.pixiv.login.LoginOptionScreen
@@ -76,13 +78,15 @@ fun Navigation3MainGraph(
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<Any>()
     val toastState = rememberToasterState()
+    val resultBus = remember { ResultEventBus() }
 
     HandleDeeplink(navigationManager)
     LogScreen(navigationManager)
     SharedTransitionLayout {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,
-            LocalToaster provides toastState
+            LocalToaster provides toastState,
+            LocalResultEventBus provides resultBus,
         ) {
             ToastMessage(toastState = toastState)
             NavDisplay(
