@@ -121,4 +121,12 @@
     <string name="every_week_r18g">أسبوعي (غريب/R-18G)</string>
     <string name="r18_alert_message">تحتاج إلى تفعيل خيار R-18 على موقع Pixiv &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;، وإلا فلن يعمل</string>
     <string name="tips">تلميح</string>
+    <string name="download_manager">مدير التنزيلات</string>
+    <string name="download_add_to_queue">إضافة إلى قائمة الانتظار</string>
+    <string name="status_all">الكل</string>
+    <string name="status_completed">مكتمل</string>
+    <string name="status_running">قيد التشغيل</string>
+    <string name="status_failed">فشل</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="delete">حذف</string>
 </resources>

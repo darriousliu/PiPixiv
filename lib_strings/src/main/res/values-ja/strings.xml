@@ -121,4 +121,12 @@
     <string name="every_week_r18g">ウィークリー(R-18G)</string>
     <string name="r18_alert_message">PixivのWebサイト &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt; でR-18設定をオンにする必要があります。そうしないと無効です</string>
     <string name="tips">ヒント</string>
+    <string name="download_manager">ダウンロードマネージャー</string>
+    <string name="download_add_to_queue">キューに追加</string>
+    <string name="status_all">すべて</string>
+    <string name="status_completed">完了</string>
+    <string name="status_running">進行中</string>
+    <string name="status_failed">失敗</string>
+    <string name="retry">再試行</string>
+    <string name="delete">削除</string>
 </resources>

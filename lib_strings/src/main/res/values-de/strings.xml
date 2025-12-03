@@ -121,4 +121,12 @@
     <string name="every_week_r18g">Wöchentlich (Grotesk)</string>
     <string name="r18_alert_message">Du musst den R-18-Schalter auf der Pixiv-Website &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt; aktivieren, sonst funktioniert es nicht</string>
     <string name="tips">Hinweis</string>
+    <string name="download_manager">Download-Manager</string>
+    <string name="download_add_to_queue">Zur Warteschlange hinzufügen</string>
+    <string name="status_all">Alle</string>
+    <string name="status_completed">Abgeschlossen</string>
+    <string name="status_running">Läuft</string>
+    <string name="status_failed">Fehlgeschlagen</string>
+    <string name="retry">Wiederholen</string>
+    <string name="delete">Löschen</string>
 </resources>

@@ -125,4 +125,12 @@
     <string name="r18" translatable="false">R18</string>
     <string name="r18_alert_message">需要在Pixiv网站&lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;中打开R18开关，否则无效</string>
     <string name="tips">提示</string>
+    <string name="download_manager">下载管理</string>
+    <string name="download_add_to_queue">添加到下载队列</string>
+    <string name="status_all">全部</string>
+    <string name="status_completed">已完成</string>
+    <string name="status_running">进行中</string>
+    <string name="status_failed">失败</string>
+    <string name="retry">重试</string>
+    <string name="delete">删除</string>
 </resources>

@@ -11,7 +11,7 @@ android {
 dependencies {
     implementation(project(":common:data"))
     implementation(project(":common:network"))
-    implementation(project(":common:datasource-local"))
+    api(project(":common:datasource-local"))
     implementation(project(":common:datasource-remote"))
     implementation(project(":common:core"))
 
@@ -21,4 +21,10 @@ dependencies {
     implementation(kotlinx.bundles.serialization)
     // Ktor
     implementation(kotlinx.bundles.ktor)
+
+    // WorkManager
+    implementation(androidx.bundles.workmanager)
+    // Coil
+    implementation(platform(libs.coil3.bom))
+    implementation(libs.bundles.coil3)
 }

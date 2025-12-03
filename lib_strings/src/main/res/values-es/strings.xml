@@ -121,4 +121,12 @@
     <string name="every_week_r18g">Semanal (Grotesco)</string>
     <string name="r18_alert_message">Debes activar el interruptor R-18 en el sitio web de Pixiv &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;; de lo contrario, no funcionará</string>
     <string name="tips">Consejo</string>
+    <string name="download_manager">Gestor de descargas</string>
+    <string name="download_add_to_queue">Añadir a la cola</string>
+    <string name="status_all">Todos</string>
+    <string name="status_completed">Completado</string>
+    <string name="status_running">En curso</string>
+    <string name="status_failed">Fallido</string>
+    <string name="retry">Reintentar</string>
+    <string name="delete">Eliminar</string>
 </resources>

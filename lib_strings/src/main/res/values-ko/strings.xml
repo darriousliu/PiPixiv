@@ -122,4 +122,12 @@
     <string name="every_week_r18g">주간 (R-18G)</string>
     <string name="r18_alert_message">Pixiv 웹사이트 &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt; 에서 R-18 스위치를 켜야 합니다. 그렇지 않으면 작동하지 않습니다</string>
     <string name="tips">팁</string>
+    <string name="download_manager">다운로드 관리자</string>
+    <string name="download_add_to_queue">대기열에 추가</string>
+    <string name="status_all">전체</string>
+    <string name="status_completed">완료</string>
+    <string name="status_running">진행 중</string>
+    <string name="status_failed">실패</string>
+    <string name="retry">재시도</string>
+    <string name="delete">삭제</string>
 </resources>

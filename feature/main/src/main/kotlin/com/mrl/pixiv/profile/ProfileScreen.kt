@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.ImportExport
 import androidx.compose.material.icons.rounded.Palette
@@ -235,6 +236,27 @@ fun ProfileScreen(
                                 contentDescription = null
                             )
                         }
+                    )
+                    // 下载管理
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = stringResource(RString.download_manager),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        modifier = Modifier
+                            .throttleClick(
+                                indication = ripple()
+                            ) {
+                                navigationManager.navigateToDownloadScreen()
+                            }.then(itemModifier),
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Rounded.Download,
+                                contentDescription = null
+                            )
+                        },
                     )
                     // 应用数据
                     ListItem(

@@ -89,6 +89,9 @@ sealed class Destination : NavKey {
 
     @Serializable
     data object AppData : Destination()
+
+    @Serializable
+    data object Download : Destination()
 }
 
 @Serializable

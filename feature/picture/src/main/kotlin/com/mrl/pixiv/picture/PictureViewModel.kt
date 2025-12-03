@@ -12,11 +12,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import coil3.SingletonImageLoader
-import coil3.annotation.InternalCoilApi
-import coil3.request.ImageRequest
-import coil3.toBitmap
-import coil3.util.MimeTypeMap
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
@@ -24,6 +19,7 @@ import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.DownloadManager
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.paging.RelatedIllustPaging
@@ -37,7 +33,6 @@ import com.mrl.pixiv.common.util.TAG
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.createDownloadOutputStream
 import com.mrl.pixiv.common.util.isImageExists
-import com.mrl.pixiv.common.util.saveToAlbum
 import com.mrl.pixiv.common.util.toBitmap
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -56,7 +51,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.io.asSink
 import kotlinx.io.buffered
 import org.koin.android.annotation.KoinViewModel
@@ -67,7 +61,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipFile
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 @Stable
 data class PictureState(
@@ -115,6 +108,7 @@ class PictureViewModel(
     initialState = PictureState(illust = illust),
 ), KoinComponent {
     private val imageOkHttpClient: HttpClient by inject(named<ImageClient>())
+    private val downloadManager: DownloadManager by inject()
     val relatedIllusts = Pager(PagingConfig(pageSize = 20)) {
         RelatedIllustPaging(illust?.id ?: illustId!!)
     }.flow.cachedIn(viewModelScope)
@@ -237,40 +231,35 @@ class PictureViewModel(
         SearchRepository.addSearchHistory(keyword)
     }
 
-    @OptIn(InternalCoilApi::class)
     fun downloadIllust(
         illustId: Long,
         index: Int,
         originalUrl: String,
     ) {
         launchIO {
-            showLoading(true)
-            // 使用coil下载图片
-            val imageLoader = SingletonImageLoader.get(AppUtil.appContext)
-            val request = ImageRequest.Builder(AppUtil.appContext)
-                .data(originalUrl)
-                .build()
-            val result = withTimeoutOrNull(10.seconds) {
-                imageLoader.execute(request)
-            }
-            result ?: run {
-                closeBottomSheet()
-                return@launchIO
-            }
-            val mimeType = MimeTypeMap.getMimeTypeFromUrl(originalUrl)
+            val illust = state.illust
+            val title = illust?.title ?: "Unknown"
+            val artist = illust?.user?.name ?: "Unknown"
+            val thumbnailUrl = illust?.imageUrls?.medium ?: ""
+
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
-                state.illust?.user?.id?.toString()
+                illust?.user?.id?.toString()
             } else {
                 null
             }
-            val success =
-                result.image?.toBitmap()?.saveToAlbum("${illustId}_$index", mimeType, subFolder)
-            with(AppUtil.appContext) {
-                closeBottomSheet()
-                ToastUtil.safeShortToast(if (success == true) RString.download_success else RString.download_failed)
-            }
+
+            downloadManager.enqueueDownload(
+                illustId = illustId,
+                index = index,
+                title = title,
+                artist = artist,
+                thumbnailUrl = thumbnailUrl,
+                originalUrl = originalUrl,
+                subFolder = subFolder
+            )
+
             closeBottomSheet()
-            showLoading(false)
+            ToastUtil.safeShortToast(RString.download_add_to_queue)
         }
     }
 

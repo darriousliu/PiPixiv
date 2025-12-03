@@ -59,6 +59,7 @@ import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
+import com.mrl.pixiv.setting.download.DownloadScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import com.mrl.pixiv.splash.SplashViewModel
 import kotlinx.collections.immutable.toImmutableList
@@ -249,6 +250,9 @@ fun Navigation3MainGraph(
                     entry<Destination.AppData> {
                         AppDataScreen()
                     }
+                    entry<Destination.Download> {
+                        DownloadScreen()
+                    }
                 }
             )
         }
@@ -266,7 +270,7 @@ private fun ToastMessage(toastState: ToasterState) {
         state = toastState,
         darkTheme = isSystemInDarkTheme(),
         richColors = true,
-        alignment = Alignment.BottomCenter,
+        alignment = Alignment.TopCenter,
         showCloseButton = true,
         messageSlot = {
             val contentColor = LocalToastContentColor.current
@@ -378,7 +382,7 @@ private fun LogScreen(
 
                 is Destination.Login, Destination.LoginOption, Destination.OAuthLogin,
                 Destination.Search, Destination.Setting, Destination.NetworkSetting,
-                Destination.History, Destination.BlockSettings, Destination.AppData -> Unit
+                Destination.History, Destination.BlockSettings, Destination.AppData, Destination.Download -> Unit
             }
         })
     }

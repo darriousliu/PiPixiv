@@ -121,4 +121,12 @@
     <string name="every_week_r18g">साप्ताहिक (वीभत्स)</string>
     <string name="r18_alert_message">आपको Pixiv वेबसाइट &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt; में R-18 स्विच चालू करना होगा, अन्यथा यह काम नहीं करेगा</string>
     <string name="tips">सुझाव</string>
+    <string name="download_manager">डाउनलोड प्रबंधक</string>
+    <string name="download_add_to_queue">कतार में जोड़ें</string>
+    <string name="status_all">सभी</string>
+    <string name="status_completed">पूर्ण</string>
+    <string name="status_running">चल रहा है</string>
+    <string name="status_failed">विफल</string>
+    <string name="retry">पुनः प्रयास करें</string>
+    <string name="delete">हटाएं</string>
 </resources>

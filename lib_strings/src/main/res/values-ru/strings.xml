@@ -121,4 +121,12 @@
     <string name="every_week_r18g">Еженедельно (R-18G)</string>
     <string name="r18_alert_message">Вам необходимо включить переключатель R-18 на сайте Pixiv &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;, иначе это не сработает</string>
     <string name="tips">Совет</string>
+    <string name="download_manager">Менеджер загрузок</string>
+    <string name="download_add_to_queue">Добавить в очередь</string>
+    <string name="status_all">Все</string>
+    <string name="status_completed">Завершено</string>
+    <string name="status_running">В процессе</string>
+    <string name="status_failed">Ошибка</string>
+    <string name="retry">Повторить</string>
+    <string name="delete">Удалить</string>
 </resources>

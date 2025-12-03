@@ -12,4 +12,6 @@ dependencies {
     implementation(project(":common:ui"))
     implementation(project(":common:core"))
 
+    implementation(platform(libs.coil3.bom))
+    implementation(libs.bundles.coil3)
 }

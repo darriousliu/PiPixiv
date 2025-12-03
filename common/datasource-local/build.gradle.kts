@@ -13,4 +13,12 @@ dependencies {
 
     // Serialization
     implementation(kotlinx.bundles.serialization)
+    // Room
+    implementation(androidx.room.runtime)
+    ksp(androidx.room.compiler)
+    // WorkManager
+    implementation(androidx.bundles.workmanager)
+    // Koin
+    implementation(libs.bundles.koin)
+    ksp(libs.koin.ksp.compiler)
 }

@@ -153,4 +153,8 @@ class NavigationManager(
     fun navigateToNetworkSettingScreen() {
         backStack.navigate(route = Destination.NetworkSetting)
     }
+
+    fun navigateToDownloadScreen() {
+        backStack.navigate(route = Destination.Download)
+    }
 }

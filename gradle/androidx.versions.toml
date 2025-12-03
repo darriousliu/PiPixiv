@@ -13,6 +13,7 @@ datastore = "1.2.0"
 paging = "3.3.6"
 work = "2.11.0"
 window = "1.5.1"
+room = "2.8.4"
 
 [libraries]
 android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -40,6 +41,9 @@ paging = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
 paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 
 window = { module = "androidx.window:window", version.ref = "window" }
+
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
