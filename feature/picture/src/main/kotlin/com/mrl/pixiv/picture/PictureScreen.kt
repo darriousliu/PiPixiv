@@ -745,6 +745,7 @@ private fun TagItem(
                     Text(
                         text = stringResource(RString.collection),
                         modifier = Modifier
+                            .fillMaxWidth()
                             .throttleClick(
                                 indication = indication
                             ) {
@@ -757,10 +758,12 @@ private fun TagItem(
                     Text(
                         text = stringResource(RString.copy_to_clipboard),
                         modifier = Modifier
+                            .fillMaxWidth()
                             .throttleClick(
                                 indication = indication
                             ) {
                                 copyToClipboard(tag.name)
+                                showCollectionDialog = false
                             }
                             .then(itemModifier)
                     )
