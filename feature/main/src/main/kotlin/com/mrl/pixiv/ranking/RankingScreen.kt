@@ -52,6 +52,8 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.viewmodel.asState
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
@@ -153,10 +155,13 @@ fun RankingScreen(
                     title = { Text(text = stringResource(RString.ranking)) },
                     actions = {
                         val r18Enabled by requireUserPreferenceFlow.collectAsStateWithLifecycle { isR18Enabled }
-                        LaunchedEffect(r18Enabled) {
-                            if (!r18Enabled && state.showR18) {
-                                viewModel.toggleR18()
-                            }
+                        LaunchedEffect(Unit) {
+                            requireUserPreferenceFlow.map { it.isR18Enabled }.distinctUntilChanged()
+                                .collect { r18Enabled ->
+                                    if (!r18Enabled && state.showR18) {
+                                        viewModel.toggleR18()
+                                    }
+                                }
                         }
                         if (r18Enabled) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -166,6 +171,7 @@ fun RankingScreen(
                                     checked = state.showR18,
                                     onCheckedChange = { viewModel.toggleR18() }
                                 )
+                                8.HSpacer
                             }
                         }
                     }
