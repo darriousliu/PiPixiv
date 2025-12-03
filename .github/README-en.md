@@ -30,28 +30,19 @@ by [Jetpack Compose](https://developer.android.com/develop/ui/compose)
 * Log in using a Pixiv account.
 * Homepage recommended illustrations.
 * Search illustrations and sort by popularity, latest, etc.
+* View rankings (Daily, Weekly, Monthly, etc.).
 * Bookmark illustrations/Follow artists.
+* View browsing history.
 * View illustration details and recommended illustrations.
-* Long press on an image to download the original illustration.
+* Long press on an image to download the original illustration or GIF.
+* App settings (Language, Network, Feature Switch, etc.).
+* Deep link support.
+* Block illustrations and users.
 
 ### To-do List
 
 * **Features and PRs are welcome**
 * More...
-
-### v1.1.0
-
-- [x] Refactor the network layer, replacing OkHttp with Ktor
-- [x] Refactor datastore to MMKV
-- [x] Refactor some global states into a singleton pattern for code simplification and easier
-  dependency injection
-- [x] Adapt new navigation
-- [x] Settings page
-- [x] Favourites page
-- [x] Followed page
-- [x] History page
-- [x] Translation
-- [x] Deep link support (open from https://www.pixiv.net/illust/xxxxxx)
 
 </div>
 
