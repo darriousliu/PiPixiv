@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.throttleClick
@@ -67,7 +68,8 @@ internal fun SearchResultAppBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .throttleClick { popBack() },
-                maxLines = 1
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         },
         navigationIcon = {
