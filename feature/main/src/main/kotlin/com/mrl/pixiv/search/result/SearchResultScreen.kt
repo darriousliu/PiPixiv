@@ -53,6 +53,10 @@ fun SearchResultsScreen(
         topBar = {
             SearchResultAppBar(
                 searchWords = state.searchWords,
+                bookmarkNumRange = state.bookmarkNumRange,
+                searchDateRange = state.searchDateRange,
+                onBookmarkNumRangeChanged = { viewModel.dispatch(SearchResultAction.UpdateBookmarkNumRange(it)) },
+                onSearchDateRangeChanged = { viewModel.dispatch(SearchResultAction.UpdateSearchDateRange(it)) },
                 popBack = navigationManager::popBackStack,
                 showBottomSheet = {
                     showBottomSheet = true
@@ -107,4 +111,3 @@ fun SearchResultsScreen(
         }
     }
 }
-
