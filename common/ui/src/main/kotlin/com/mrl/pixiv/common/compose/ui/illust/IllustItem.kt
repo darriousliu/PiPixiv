@@ -135,9 +135,6 @@ fun SquareIllustItem(
                     boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
 //                    renderInOverlayDuringTransition = false
                 )
-                .conditionally(isIllustBlocked || isUserBlocked) {
-                    blur(50.dp, BlurredEdgeTreatment(shape))
-                }
                 .shadow(elevation, shape)
                 .background(MaterialTheme.colorScheme.background)
                 .throttleClick { onClick() }
@@ -150,7 +147,10 @@ fun SquareIllustItem(
                         rememberSharedContentState(key = "${prefix}-$imageKey"),
                         animatedVisibilityScope = LocalNavAnimatedContentScope.current,
                         placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
-                    ),
+                    )
+                    .conditionally(isIllustBlocked || isUserBlocked) {
+                        blur(50.dp, BlurredEdgeTreatment(shape))
+                    },
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(illust.imageUrls.squareMedium)
                     .crossfade(1.seconds.inWholeMilliseconds.toInt())
@@ -180,38 +180,40 @@ fun SquareIllustItem(
                     )
                 }
             }
-            Box(
-                modifier = Modifier.align(Alignment.BottomEnd)
-            ) {
-                IconButton(
-                    onClick = throttleClick {
-                        onBookmarkClick(Restrict.PUBLIC, null, false)
-                    },
-                    onLongClick = { showBottomSheet = true },
+            if (!isUserBlocked && !isIllustBlocked) {
+                Box(
+                    modifier = Modifier.align(Alignment.BottomEnd)
                 ) {
-                    Icon(
-                        imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = "",
-                        modifier = Modifier.size(24.dp),
-                        tint = FavoriteDualColor(isBookmarked)
-                    )
-                }
-                if (showPopupTip) {
-                    LaunchedEffect(Unit) {
-                        SettingRepository.setHasShowBookmarkTip(true)
-                        delay(3000)
-                        showPopupTip = false
-                    }
-                    Popup(
-                        alignment = Alignment.TopCenter,
-                        offset = IntOffset(x = 0, y = -100)
+                    IconButton(
+                        onClick = throttleClick {
+                            onBookmarkClick(Restrict.PUBLIC, null, false)
+                        },
+                        onLongClick = { showBottomSheet = true },
                     ) {
-                        Text(
-                            text = stringResource(RString.long_click_to_edit_favorite),
-                            modifier = Modifier
-                                .background(lightBlue, MaterialTheme.shapes.small)
-                                .padding(8.dp)
+                        Icon(
+                            imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                            contentDescription = "",
+                            modifier = Modifier.size(24.dp),
+                            tint = FavoriteDualColor(isBookmarked)
                         )
+                    }
+                    if (showPopupTip) {
+                        LaunchedEffect(Unit) {
+                            SettingRepository.setHasShowBookmarkTip(true)
+                            delay(3000)
+                            showPopupTip = false
+                        }
+                        Popup(
+                            alignment = Alignment.TopCenter,
+                            offset = IntOffset(x = 0, y = -100)
+                        ) {
+                            Text(
+                                text = stringResource(RString.long_click_to_edit_favorite),
+                                modifier = Modifier
+                                    .background(lightBlue, MaterialTheme.shapes.small)
+                                    .padding(8.dp)
+                            )
+                        }
                     }
                 }
             }
