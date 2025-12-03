@@ -27,4 +27,6 @@ dependencies {
     // Coil
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)
+    // GIF encoder
+    implementation(libs.gifkt)
 }

@@ -15,8 +15,6 @@ dependencies {
 
     // Paging
     implementation(androidx.bundles.paging)
-    // GIF encoder
-    implementation(libs.gifkt)
     // Permission
     implementation(compose.bundles.accompanist)
     // Navigation3

@@ -6,7 +6,6 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -26,18 +25,14 @@ import com.mrl.pixiv.common.repository.paging.RelatedIllustPaging
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.util.AppUtil
-import com.mrl.pixiv.common.util.PictureType
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.TAG
 import com.mrl.pixiv.common.util.ToastUtil
-import com.mrl.pixiv.common.util.createDownloadOutputStream
-import com.mrl.pixiv.common.util.isImageExists
 import com.mrl.pixiv.common.util.toBitmap
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.common.viewmodel.state
-import com.shakster.gifkt.GifEncoder
 import io.ktor.client.HttpClient
 import io.ktor.client.request.request
 import io.ktor.client.request.url
@@ -51,8 +46,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.io.asSink
-import kotlinx.io.buffered
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -60,7 +53,6 @@ import org.koin.core.qualifier.named
 import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipFile
-import kotlin.time.Duration.Companion.milliseconds
 
 @Stable
 data class PictureState(
@@ -394,38 +386,36 @@ class PictureViewModel(
     fun downloadUgoiraAsGIF() {
         launchIO {
             showLoading(true)
-            // 判断是已经下载过zip
-            val illustId = state.illust?.id
+            val illustId = state.illust?.id ?: return@launchIO
+            val title = state.illust?.title ?: "Unknown"
+            val artist = state.illust?.user?.name ?: "Unknown"
+            val thumbnailUrl = state.illust?.imageUrls?.squareMedium ?: ""
+
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
                 state.illust?.user?.id?.toString()
             } else {
                 null
             }
-            if (illustId == null ||
-                isImageExists(illustId.toString(), PictureType.GIF, subFolder)
-            ) {
-                closeBottomSheet()
-                showLoading(false)
-                return@launchIO
-            }
 
-            if (state.ugoiraImages.isNotEmpty()) {
-                try {
-                    val outputStream =
-                        createDownloadOutputStream(illustId.toString(), PictureType.GIF, subFolder)
-                    val sink = outputStream?.asSink()?.buffered() ?: return@launchIO
-                    val encoder = GifEncoder(sink)
-                    state.ugoiraImages.forEach {
-                        encoder.writeFrame(it.first.asAndroidBitmap(), it.second.milliseconds)
-                    }
-                    encoder.close()
-                } catch (_: Exception) {
-                    ToastUtil.safeShortToast(RString.download_failed)
+            val metadata = cachedUgoiraMetadata
+                ?: PixivRepository.getUgoiraMetadata(illustId).ugoiraMetadata.also {
+                    cachedUgoiraMetadata = it
                 }
-            }
-            ToastUtil.safeShortToast(RString.download_success)
+            val zipUrl = metadata.zipUrls.medium
+
+            downloadManager.enqueueDownload(
+                illustId = illustId,
+                index = 0,
+                title = title,
+                artist = artist,
+                thumbnailUrl = thumbnailUrl,
+                originalUrl = zipUrl,
+                subFolder = subFolder
+            )
+
             closeBottomSheet()
             showLoading(false)
+            ToastUtil.safeShortToast(RString.download_add_to_queue)
         }
     }
 
