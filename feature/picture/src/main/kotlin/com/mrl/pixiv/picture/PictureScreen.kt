@@ -252,7 +252,7 @@ internal fun PictureScreen(
     val isUserBlocked = BlockingRepository.collectUserBlockAsState(userId = illust.user.id)
     val isAnyBlocked = isIllustBlocked || isUserBlocked
     val placeholder = rememberVectorPainter(Icons.Rounded.Refresh)
-    val bottomSheetState = rememberModalBottomSheetState()
+    val bottomSheetState = rememberModalBottomSheetState(true)
     val readMediaImagePermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         rememberMultiplePermissionsState(permissions = listOf(READ_MEDIA_IMAGES))
     } else {

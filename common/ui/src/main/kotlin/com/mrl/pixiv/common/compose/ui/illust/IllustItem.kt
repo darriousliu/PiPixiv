@@ -220,7 +220,7 @@ fun SquareIllustItem(
         }
     }
     if (showBottomSheet) {
-        val bottomSheetState = rememberModalBottomSheetState()
+        val bottomSheetState = rememberModalBottomSheetState(true)
         BottomBookmarkSheet(
             hideBottomSheet = { showBottomSheet = false },
             illust = illust,
@@ -360,7 +360,7 @@ fun RectangleIllustItem(
         }
     }
     if (showBottomSheet) {
-        val bottomSheetState = rememberModalBottomSheetState()
+        val bottomSheetState = rememberModalBottomSheetState(true)
         BottomBookmarkSheet(
             hideBottomSheet = { showBottomSheet = false },
             illust = illust,
