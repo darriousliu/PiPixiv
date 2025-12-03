@@ -19,11 +19,11 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
@@ -161,7 +161,7 @@ fun DownloadItem(
                 if (item.status == DownloadStatus.RUNNING.value ||
                     item.status == DownloadStatus.PENDING.value
                 ) {
-                    CircularWavyProgressIndicator(
+                    LinearWavyProgressIndicator(
                         progress = { item.progress },
                         modifier = Modifier.fillMaxWidth()
                     )
