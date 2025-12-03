@@ -19,8 +19,8 @@ android {
 
     defaultConfig {
         applicationId = "com.mrl.pixiv"
-        versionCode = 10201
-        versionName = "1.2.1"
+        versionCode = 10300
+        versionName = "1.3.0"
 
         vectorDrawables {
             useSupportLibrary = true

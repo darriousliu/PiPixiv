@@ -21,7 +21,7 @@ by [Jetpack Compose](https://developer.android.com/develop/ui/compose)
 [![GitHub downloads](https://img.shields.io/github/downloads/master-lzh/PiPixiv/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/master-lzh/PiPixiv/releases)
 [![F-Droid Version](https://img.shields.io/f-droid/v/com.mrl.pixiv)](https://f-droid.org/packages/com.mrl.pixiv/)
 
-### Supports **[Android 6.0]()** or higher
+### Supports **[Android 8.0]()** or higher
 
 ## Features
 
