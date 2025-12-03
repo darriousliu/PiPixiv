@@ -101,6 +101,10 @@ class NavigationManager(
         }
     }
 
+    fun navigateToSinglePictureScreen(illustId: Long) {
+        backStack.navigate(Destination.PictureDeeplink(illustId))
+    }
+
     fun navigateToSearchResultScreen(searchWord: String) {
         backStack.navigate(route = Destination.SearchResults(searchWord))
     }

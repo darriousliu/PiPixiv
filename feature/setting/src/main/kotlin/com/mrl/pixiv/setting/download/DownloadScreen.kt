@@ -44,6 +44,7 @@ import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
@@ -111,7 +112,11 @@ fun DownloadScreen(
                         item = item,
                         onRetry = { viewModel.retryDownload(item) },
                         onDelete = { viewModel.deleteDownload(item) },
-                        modifier = Modifier.animateItem()
+                        modifier = Modifier
+                            .animateItem()
+                            .throttleClick {
+                                navigationManager.navigateToSinglePictureScreen(item.illustId)
+                            }
                     )
                 }
             }
