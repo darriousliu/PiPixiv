@@ -45,7 +45,7 @@ class DownloadWorker(
         downloadDao.update(entity)
 
         return try {
-            val result = withTimeoutOrNull(60.seconds) {
+            val result = withTimeoutOrNull(120.seconds) {
                 val response = imageHttpClient.get(url) {
                     onDownload { bytesSentTotal, contentLength ->
                         if (contentLength != null && contentLength > 0) {

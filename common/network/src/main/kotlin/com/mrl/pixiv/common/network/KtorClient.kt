@@ -29,7 +29,7 @@ internal fun <T : HttpClientEngineConfig> httpClient(
         install(HttpCache)
 
         install(HttpTimeout) {
-            requestTimeoutMillis = 10000
+            requestTimeoutMillis = 20000
             connectTimeoutMillis = 10000
             socketTimeoutMillis = 10000
         }
@@ -70,7 +70,7 @@ internal fun <T : HttpClientEngineConfig> imageHttpClient(
     engine { config() }
 
     install(HttpTimeout) {
-        requestTimeoutMillis = 10000
+        requestTimeoutMillis = 20000
         connectTimeoutMillis = 10000
         socketTimeoutMillis = 10000
     }
