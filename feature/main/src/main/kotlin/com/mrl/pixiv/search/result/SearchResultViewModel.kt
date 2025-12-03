@@ -64,8 +64,8 @@ class SearchResultViewModel(
                     searchAiType = filter.searchAiType,
                 )
             )
-        }.flow.cachedIn(viewModelScope)
-    }
+        }.flow
+    }.cachedIn(viewModelScope)
 
     override suspend fun handleIntent(intent: SearchResultAction) {
         when (intent) {
