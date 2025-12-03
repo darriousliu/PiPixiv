@@ -240,7 +240,7 @@ class PictureViewModel(
             val illust = state.illust
             val title = illust?.title ?: "Unknown"
             val artist = illust?.user?.name ?: "Unknown"
-            val thumbnailUrl = illust?.imageUrls?.medium ?: ""
+            val thumbnailUrl = illust?.imageUrls?.squareMedium ?: ""
 
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
                 illust?.user?.id?.toString()
