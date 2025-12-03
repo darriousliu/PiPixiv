@@ -22,7 +22,13 @@ enum class PictureType(
     PNG(".png", "image/png", Bitmap.CompressFormat.PNG),
     JPG(".jpg", "image/jpeg", Bitmap.CompressFormat.JPEG),
     JPEG(".jpeg", "image/jpeg", Bitmap.CompressFormat.JPEG),
-    GIF(".gif", "image/gif", null)
+    GIF(".gif", "image/gif", null);
+
+    companion object {
+        fun fromMimeType(mimeType: String?): PictureType? {
+            return entries.find { it.mimeType == mimeType?.lowercase() }
+        }
+    }
 }
 
 fun isImageExists(fileName: String, type: PictureType, subFolder: String? = null): Boolean {
@@ -41,7 +47,7 @@ fun isImageExists(fileName: String, type: PictureType, subFolder: String? = null
             selectionArgs,
             null
         )?.use { it.count > 0 } == true
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 }
@@ -117,4 +123,8 @@ private fun createContentValues(
         put(MediaStore.MediaColumns.MIME_TYPE, type.mimeType)
         put(MediaStore.MediaColumns.RELATIVE_PATH, downloadDir)
     }
+}
+
+fun generateFileName(illustId: Long, index: Int): String {
+    return "${illustId}_$index"
 }

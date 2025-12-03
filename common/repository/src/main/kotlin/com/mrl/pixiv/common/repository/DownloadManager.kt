@@ -7,10 +7,15 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import coil3.annotation.InternalCoilApi
+import coil3.util.MimeTypeMap
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.repository.worker.DownloadWorker
+import com.mrl.pixiv.common.util.PictureType
+import com.mrl.pixiv.common.util.generateFileName
+import com.mrl.pixiv.common.util.isImageExists
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
 
@@ -24,6 +29,7 @@ class DownloadManager(
     fun getDownloadsByStatus(status: Int): Flow<List<DownloadEntity>> =
         downloadDao.getDownloadsByStatus(status)
 
+    @OptIn(InternalCoilApi::class)
     suspend fun enqueueDownload(
         illustId: Long,
         index: Int,
@@ -35,8 +41,15 @@ class DownloadManager(
     ) {
         val existing = downloadDao.getDownload(illustId, index)
         if (existing != null && existing.status == DownloadStatus.SUCCESS.value) {
-            return
+            // 双重检查，查看本地文件是否存在
+            val fileName = generateFileName(illustId, index)
+            val mimeType = MimeTypeMap.getMimeTypeFromUrl(originalUrl)
+            val type = PictureType.fromMimeType(mimeType)
+            if (type != null && isImageExists(fileName, type, subFolder)) {
+                return
+            }
         }
+
 
         val entity = existing?.copy(
             status = DownloadStatus.PENDING.value,

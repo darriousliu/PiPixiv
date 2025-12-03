@@ -3,11 +3,13 @@ package com.mrl.pixiv.common.repository.worker
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import co.touchlab.kermit.Logger
 import coil3.annotation.InternalCoilApi
 import coil3.util.MimeTypeMap
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
+import com.mrl.pixiv.common.util.generateFileName
 import com.mrl.pixiv.common.util.saveToAlbum
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onDownload
@@ -44,18 +46,14 @@ class DownloadWorker(
 
         return try {
             val result = withTimeoutOrNull(60.seconds) {
-                var lastUpdate = 0L
                 val response = imageHttpClient.get(url) {
                     onDownload { bytesSentTotal, contentLength ->
                         if (contentLength != null && contentLength > 0) {
-                            val now = System.currentTimeMillis()
-                            if (now - lastUpdate > 500) {
-                                lastUpdate = now
-                                val progress = bytesSentTotal.toFloat() / contentLength.toFloat()
-                                if (progress != entity.progress) {
-                                    entity = entity.copy(progress = progress)
-                                    downloadDao.update(entity)
-                                }
+                            val progress = bytesSentTotal.toFloat() / contentLength.toFloat()
+                            Logger.d("DownloadWorker") { "Downloading $bytesSentTotal/$contentLength: $progress" }
+                            if (progress != entity.progress) {
+                                entity = entity.copy(progress = progress)
+                                downloadDao.update(entity)
                             }
                         }
                     }
@@ -79,7 +77,7 @@ class DownloadWorker(
 
             val (bytes, mimeType) = result
 
-            val success = saveToAlbum(bytes, "${illustId}_$index", mimeType, subFolder)
+            val success = saveToAlbum(bytes, generateFileName(illustId, index), mimeType, subFolder)
 
             if (success) {
                 entity = entity.copy(
