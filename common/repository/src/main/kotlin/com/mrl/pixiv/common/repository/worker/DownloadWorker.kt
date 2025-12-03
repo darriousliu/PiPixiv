@@ -3,16 +3,18 @@ package com.mrl.pixiv.common.repository.worker
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import coil3.SingletonImageLoader
 import coil3.annotation.InternalCoilApi
-import coil3.request.ImageRequest
-import coil3.toBitmap
 import coil3.util.MimeTypeMap
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.util.saveToAlbum
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.onDownload
+import io.ktor.client.request.get
+import io.ktor.client.statement.readRawBytes
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -41,24 +43,45 @@ class DownloadWorker(
         downloadDao.update(entity)
 
         return try {
-            val imageLoader = SingletonImageLoader.get(applicationContext)
-            val request = ImageRequest.Builder(applicationContext)
-                .data(url)
-                .build()
-
             val result = withTimeoutOrNull(60.seconds) {
-                imageLoader.execute(request)
+                var lastUpdate = 0L
+                val response = imageHttpClient.get(url) {
+                    onDownload { bytesSentTotal, contentLength ->
+                        if (contentLength != null && contentLength > 0) {
+                            val now = System.currentTimeMillis()
+                            if (now - lastUpdate > 500) {
+                                lastUpdate = now
+                                val progress = bytesSentTotal.toFloat() / contentLength.toFloat()
+                                if (progress != entity.progress) {
+                                    entity = entity.copy(progress = progress)
+                                    downloadDao.update(entity)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!response.status.isSuccess()) {
+                    throw Exception("Request failed: ${response.status}")
+                }
+
+                val bytes = response.readRawBytes()
+                var mimeType = response.contentType()?.withoutParameters()?.toString()
+
+                if (mimeType == null) {
+                    mimeType = MimeTypeMap.getMimeTypeFromUrl(url)
+                }
+
+                Pair(bytes, mimeType)
             }
 
             result ?: throw Exception("Timeout")
 
-            if (result.image == null) throw Exception("Image is null")
+            val (bytes, mimeType) = result
 
-            val mimeType = MimeTypeMap.getMimeTypeFromUrl(url)
-            val success =
-                result.image?.toBitmap()?.saveToAlbum("${illustId}_$index", mimeType, subFolder)
+            val success = saveToAlbum(bytes, "${illustId}_$index", mimeType, subFolder)
 
-            if (success == true) {
+            if (success) {
                 entity = entity.copy(
                     status = DownloadStatus.SUCCESS.value,
                     progress = 1f

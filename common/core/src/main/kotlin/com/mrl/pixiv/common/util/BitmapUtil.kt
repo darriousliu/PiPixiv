@@ -46,7 +46,8 @@ fun isImageExists(fileName: String, type: PictureType, subFolder: String? = null
     }
 }
 
-suspend fun Bitmap.saveToAlbum(
+suspend fun saveToAlbum(
+    bytes: ByteArray,
     fileName: String,
     mimeType: String?,
     subFolder: String? = null,
@@ -54,9 +55,9 @@ suspend fun Bitmap.saveToAlbum(
     val type = when (mimeType?.lowercase()) {
         PictureType.PNG.mimeType -> PictureType.PNG
         PictureType.JPG.mimeType, PictureType.JPEG.mimeType -> PictureType.JPG
+        PictureType.GIF.mimeType -> PictureType.GIF
         else -> return@withContext false
     }
-    val compressFormat = type.compressFormat ?: return@withContext false
 
     if (isImageExists(fileName, type, subFolder)) {
         return@withContext true
@@ -72,8 +73,9 @@ suspend fun Bitmap.saveToAlbum(
         )
         uri?.let {
             context.contentResolver.openOutputStream(it)?.use { out ->
-                compress(compressFormat, 100, out)
+                out.write(bytes)
             }
+            true
         } ?: false
     } catch (e: Exception) {
         e.printStackTrace()
