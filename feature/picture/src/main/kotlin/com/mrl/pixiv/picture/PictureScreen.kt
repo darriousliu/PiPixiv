@@ -346,8 +346,12 @@ internal fun PictureScreen(
                         if (illust.type == Type.Ugoira) {
                             item(key = KEY_UGOIRA) {
                                 UgoiraPlayer(
+                                    initialImage = illust.imageUrls.medium,
                                     images = state.ugoiraImages,
-                                    placeholder = placeholder,
+                                    loading = state.ugoiraLoading,
+                                    loadingUgoira = {
+                                        dispatch(PictureAction.DownloadUgoira(illust.id))
+                                    },
                                     downloadUgoira = {
                                         pictureViewModel.getUgoiraInfo()
                                     }

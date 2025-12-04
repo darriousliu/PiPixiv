@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -25,21 +26,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.mrl.pixiv.common.util.throttleClick
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun UgoiraPlayer(
+    initialImage: String,
     images: ImmutableList<Pair<ImageBitmap, Long>>,
-    placeholder: VectorPainter,
+    loading: Boolean,
+    loadingUgoira: () -> Unit,
     downloadUgoira: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (images.isNotEmpty()) {
-        var playUgoira by remember { mutableStateOf(false) }
+        var playUgoira by remember { mutableStateOf(true) }
         if (playUgoira) {
             val infiniteTransition = rememberInfiniteTransition(label = "ugoiraPlayerTransition")
             val currentIndex by infiniteTransition.animateValue(
@@ -101,13 +104,34 @@ fun UgoiraPlayer(
             }
         }
     } else {
-        Image(
-            painter = placeholder,
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
-            modifier = modifier
-                .fillMaxWidth(),
-        )
+        Box(modifier = modifier.fillMaxWidth()) {
+            AsyncImage(
+                model = initialImage,
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.FillWidth
+            )
+            if (loading) {
+                CircularWavyProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                IconButton(
+                    onClick = loadingUgoira,
+                    shapes = IconButtonDefaults.shapes(),
+                    modifier = Modifier.align(Alignment.Center),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.PlayCircle,
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .shadow(4.dp, shape = CircleShape),
+                    )
+                }
+            }
+        }
     }
 }
 

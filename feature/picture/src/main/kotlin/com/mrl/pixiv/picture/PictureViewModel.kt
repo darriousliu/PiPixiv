@@ -61,6 +61,7 @@ data class PictureState(
     val ugoiraImages: ImmutableList<Pair<ImageBitmap, Long>> = persistentListOf(),
     val bottomSheetState: BottomSheetState? = null,
     val loading: Boolean = false,
+    val ugoiraLoading: Boolean = false,
 )
 
 @Stable
@@ -132,9 +133,6 @@ class PictureViewModel(
         when {
             illust != null -> {
                 dispatch(PictureAction.GetUserIllustsIntent(illust.user.id))
-                if (illust.type == Type.Ugoira) {
-                    dispatch(PictureAction.DownloadUgoira(illust.id))
-                }
             }
 
             illustId != null -> {
@@ -145,6 +143,7 @@ class PictureViewModel(
 
     private fun downloadUgoira(illustId: Long) {
         launchIO {
+            updateState { copy(ugoiraLoading = true) }
             val resp = PixivRepository.getUgoiraMetadata(illustId)
             cachedUgoiraMetadata = resp.ugoiraMetadata
             if (!ugoiraDir.exists()) ugoiraDir.mkdirs()
@@ -156,7 +155,7 @@ class PictureViewModel(
                     }
                 Log.e(TAG, "downloadUgoira: $imageFiles")
                 updateState {
-                    copy(ugoiraImages = imageFiles.toImmutableList())
+                    copy(ugoiraImages = imageFiles.toImmutableList(), ugoiraLoading = false)
                 }
             } else {
                 val zipUrl = resp.ugoiraMetadata.zipUrls.medium
@@ -177,7 +176,7 @@ class PictureViewModel(
                         }
                     Log.e(TAG, "downloadUgoira: $imageFiles")
                     updateState {
-                        copy(ugoiraImages = imageFiles.toImmutableList())
+                        copy(ugoiraImages = imageFiles.toImmutableList(), ugoiraLoading = false)
                     }
                 }
             }
