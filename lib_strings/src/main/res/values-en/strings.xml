@@ -129,4 +129,12 @@
     <string name="status_failed">Failed</string>
     <string name="retry">Retry</string>
     <string name="delete">Delete</string>
+    <string name="file_name_format_title">Save format</string>
+    <string name="legend_template">Template</string>
+    <string name="legend_meaning">Meaning</string>
+    <string name="legend_illust_id">Illust ID</string>
+    <string name="legend_title">Title</string>
+    <string name="legend_user_id">Artist ID</string>
+    <string name="legend_user_name">Artist Name</string>
+    <string name="legend_index">Index</string>
 </resources>

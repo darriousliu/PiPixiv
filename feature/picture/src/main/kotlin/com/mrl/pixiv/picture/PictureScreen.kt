@@ -58,7 +58,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -78,6 +77,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -189,14 +189,13 @@ internal fun PictureScreen(
     val popBackToHomeScreen = navigationManager::popBackToMainScreen
     val navToUserDetailScreen = navigationManager::navigateToProfileDetailScreen
     val state = pictureViewModel.asState()
-    val currentWindowAdaptiveInfo = currentWindowAdaptiveInfo()
     val relatedLayoutParams = IllustGridDefaults.relatedLayoutParameters()
     val userLayoutParams = IllustGridDefaults.userLayoutParameters()
     val density = LocalDensity.current
     val userSpanCount = with(userLayoutParams.gridCells) {
         with(density) {
             density.calculateCrossAxisCellSizes(
-                currentWindowAdaptiveInfo.windowSizeClass.minWidthDp.dp.roundToPx(),
+                LocalWindowInfo.current.containerDpSize.width.roundToPx(),
                 relatedLayoutParams.horizontalArrangement.spacing.roundToPx(),
             ).size
         }
@@ -204,7 +203,7 @@ internal fun PictureScreen(
     val relatedSpanCount = with(relatedLayoutParams.gridCells) {
         with(density) {
             density.calculateCrossAxisCellSizes(
-                currentWindowAdaptiveInfo.windowSizeClass.minWidthDp.dp.roundToPx(),
+                LocalWindowInfo.current.containerDpSize.width.roundToPx(),
                 relatedLayoutParams.horizontalArrangement.spacing.roundToPx()
             ).size
         }
@@ -252,12 +251,6 @@ internal fun PictureScreen(
     val isUserBlocked = BlockingRepository.collectUserBlockAsState(userId = illust.user.id)
     val isAnyBlocked = isIllustBlocked || isUserBlocked
     val placeholder = rememberVectorPainter(Icons.Rounded.Refresh)
-    val bottomSheetState = rememberModalBottomSheetState(true)
-    val readMediaImagePermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        rememberMultiplePermissionsState(permissions = listOf(READ_MEDIA_IMAGES))
-    } else {
-        rememberMultiplePermissionsState(permissions = listOf(READ_EXTERNAL_STORAGE))
-    }
 
     val prefix = LocalSharedKeyPrefix.current
     val sharedTransitionScope = LocalSharedTransitionScope.current
@@ -353,10 +346,18 @@ internal fun PictureScreen(
                         if (illust.type == Type.Ugoira) {
                             item(key = KEY_UGOIRA) {
                                 UgoiraPlayer(
-                                    images = state.ugoiraImages,
-                                    placeholder = placeholder,
+                                    initialImage = illust.imageUrls.medium,
+                                    images = state.ugoiraState.ugoiraImages,
+                                    loading = state.ugoiraState.loading,
+                                    playUgoira = state.ugoiraState.isPlaying,
+                                    loadingUgoira = {
+                                        dispatch(PictureAction.DownloadUgoira(illust.id))
+                                    },
                                     downloadUgoira = {
                                         pictureViewModel.getUgoiraInfo()
+                                    },
+                                    onToggleUgoira = {
+                                        pictureViewModel.toggleUgoiraPlayState()
                                     }
                                 )
                             }
@@ -541,7 +542,7 @@ internal fun PictureScreen(
                         )
                     }
                     items(
-                        relatedRowCount,
+                        count = relatedRowCount,
                         key = { index -> "${illust.id}_related_${index}" },
                         contentType = { "related_illusts" }
                     ) { rowIndex ->
@@ -558,7 +559,7 @@ internal fun PictureScreen(
                         if (illustsPair.isEmpty()) return@items
                         // 相关作品
                         Row(
-                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 5.dp),
+                            modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 5.dp),
                             horizontalArrangement = relatedLayoutParams.horizontalArrangement
                         ) {
                             illustsPair.forEach { (illust, isBookmarked, index) ->
@@ -614,72 +615,32 @@ internal fun PictureScreen(
                 }
             }
             if (state.bottomSheetState != null) {
-                ModalBottomSheet(
+                BottomMenu(
                     onDismissRequest = {
                         pictureViewModel.closeBottomSheet()
                     },
-                    modifier = Modifier.heightIn(getScreenHeight() / 2),
-                    sheetState = bottomSheetState,
-                    containerColor = MaterialTheme.colorScheme.background,
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .throttleClick {
-                                    // 下载原始图片
-                                    if (illust.type == Type.Ugoira) {
-                                        pictureViewModel.downloadUgoiraAsGIF()
-                                    } else {
-                                        pictureViewModel.downloadIllust(
-                                            illust.id,
-                                            state.bottomSheetState.index,
-                                            state.bottomSheetState.downloadUrl
-                                        )
-                                    }
-                                }
-                                .padding(vertical = 10.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Download,
-                                contentDescription = null
-                            )
-                            Text(
-                                text = stringResource(
-                                    RString.download_with_size,
-                                    state.bottomSheetState.downloadSize.adaptiveFileSize()
-                                ),
-                                modifier = Modifier.padding(start = 10.dp)
+                    downloadSize = state.bottomSheetState.downloadSize.adaptiveFileSize(),
+                    onDownload = {
+                        // 下载原始图片
+                        if (illust.type == Type.Ugoira) {
+                            pictureViewModel.downloadUgoiraAsGIF()
+                        } else {
+                            pictureViewModel.downloadIllust(
+                                illust.id,
+                                state.bottomSheetState.index,
+                                state.bottomSheetState.downloadUrl
                             )
                         }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .throttleClick {
-                                    readMediaImagePermission.launchMultiplePermissionRequest()
-                                    if (readMediaImagePermission.allPermissionsGranted) {
-                                        pictureViewModel.shareImage(
-                                            state.bottomSheetState.index,
-                                            state.bottomSheetState.downloadUrl,
-                                            illust,
-                                            shareLauncher
-                                        )
-                                    }
-                                }
-                                .padding(vertical = 10.dp)
-                        ) {
-                            Icon(imageVector = Icons.Rounded.Share, contentDescription = null)
-                            Text(
-                                text = stringResource(RString.share),
-                                modifier = Modifier.padding(start = 10.dp)
-                            )
-                        }
+                    },
+                    onShare = {
+                        pictureViewModel.shareImage(
+                            state.bottomSheetState.index,
+                            state.bottomSheetState.downloadUrl,
+                            illust,
+                            shareLauncher
+                        )
                     }
-                }
+                )
             }
             if (state.loading) {
                 Box(
@@ -691,6 +652,68 @@ internal fun PictureScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomMenu(
+    onDismissRequest: () -> Unit,
+    downloadSize: String,
+    modifier: Modifier = Modifier,
+    onDownload: () -> Unit = {},
+    onShare: () -> Unit = {}
+) {
+    val bottomSheetState = rememberModalBottomSheetState(true)
+    val readMediaImagePermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberMultiplePermissionsState(permissions = listOf(READ_MEDIA_IMAGES))
+    } else {
+        rememberMultiplePermissionsState(permissions = listOf(READ_EXTERNAL_STORAGE))
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        modifier = modifier.heightIn(getScreenHeight() / 2),
+        sheetState = bottomSheetState,
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .throttleClick(onClick = onDownload)
+                    .padding(vertical = 10.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Download,
+                    contentDescription = null
+                )
+                Text(
+                    text = stringResource(RString.download_with_size, downloadSize),
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .throttleClick {
+                        readMediaImagePermission.launchMultiplePermissionRequest()
+                        if (readMediaImagePermission.allPermissionsGranted) {
+                            onShare()
+                        }
+                    }
+                    .padding(vertical = 10.dp)
+            ) {
+                Icon(imageVector = Icons.Rounded.Share, contentDescription = null)
+                Text(
+                    text = stringResource(RString.share),
+                    modifier = Modifier.padding(start = 10.dp)
+                )
             }
         }
     }

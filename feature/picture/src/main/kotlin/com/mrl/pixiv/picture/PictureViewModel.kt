@@ -58,9 +58,9 @@ import java.util.zip.ZipFile
 data class PictureState(
     val illust: Illust? = null,
     val userIllusts: ImmutableList<Illust> = persistentListOf(),
-    val ugoiraImages: ImmutableList<Pair<ImageBitmap, Long>> = persistentListOf(),
     val bottomSheetState: BottomSheetState? = null,
     val loading: Boolean = false,
+    val ugoiraState: UgoiraState = UgoiraState(),
 )
 
 @Stable
@@ -68,6 +68,13 @@ data class BottomSheetState(
     val index: Int = 0,
     val downloadUrl: String = "",
     val downloadSize: Long = 0L,
+)
+
+@Stable
+data class UgoiraState(
+    val ugoiraImages: ImmutableList<Pair<ImageBitmap, Long>> = persistentListOf(),
+    val loading: Boolean = false,
+    val isPlaying: Boolean = false,
 )
 
 sealed class PictureAction : ViewIntent {
@@ -132,9 +139,6 @@ class PictureViewModel(
         when {
             illust != null -> {
                 dispatch(PictureAction.GetUserIllustsIntent(illust.user.id))
-                if (illust.type == Type.Ugoira) {
-                    dispatch(PictureAction.DownloadUgoira(illust.id))
-                }
             }
 
             illustId != null -> {
@@ -145,6 +149,7 @@ class PictureViewModel(
 
     private fun downloadUgoira(illustId: Long) {
         launchIO {
+            updateState { copy(ugoiraState = ugoiraState.copy(loading = true)) }
             val resp = PixivRepository.getUgoiraMetadata(illustId)
             cachedUgoiraMetadata = resp.ugoiraMetadata
             if (!ugoiraDir.exists()) ugoiraDir.mkdirs()
@@ -156,7 +161,13 @@ class PictureViewModel(
                     }
                 Log.e(TAG, "downloadUgoira: $imageFiles")
                 updateState {
-                    copy(ugoiraImages = imageFiles.toImmutableList())
+                    copy(
+                        ugoiraState = ugoiraState.copy(
+                            ugoiraImages = imageFiles.toImmutableList(),
+                            loading = false,
+                            isPlaying = true
+                        )
+                    )
                 }
             } else {
                 val zipUrl = resp.ugoiraMetadata.zipUrls.medium
@@ -177,7 +188,13 @@ class PictureViewModel(
                         }
                     Log.e(TAG, "downloadUgoira: $imageFiles")
                     updateState {
-                        copy(ugoiraImages = imageFiles.toImmutableList())
+                        copy(
+                            ugoiraState = ugoiraState.copy(
+                                ugoiraImages = imageFiles.toImmutableList(),
+                                loading = false,
+                                isPlaying = true
+                            )
+                        )
                     }
                 }
             }
@@ -229,13 +246,14 @@ class PictureViewModel(
         originalUrl: String,
     ) {
         launchIO {
-            val illust = state.illust
-            val title = illust?.title ?: "Unknown"
-            val artist = illust?.user?.name ?: "Unknown"
-            val thumbnailUrl = illust?.imageUrls?.squareMedium ?: ""
+            val illust = state.illust ?: return@launchIO
+            val title = illust.title
+            val userId = illust.user.id
+            val userName = illust.user.name
+            val thumbnailUrl = illust.imageUrls.squareMedium
 
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
-                illust?.user?.id?.toString()
+                illust.user.id.toString()
             } else {
                 null
             }
@@ -244,7 +262,8 @@ class PictureViewModel(
                 illustId = illustId,
                 index = index,
                 title = title,
-                artist = artist,
+                userId = userId,
+                userName = userName,
                 thumbnailUrl = thumbnailUrl,
                 originalUrl = originalUrl,
                 subFolder = subFolder
@@ -386,10 +405,12 @@ class PictureViewModel(
     fun downloadUgoiraAsGIF() {
         launchIO {
             showLoading(true)
-            val illustId = state.illust?.id ?: return@launchIO
-            val title = state.illust?.title ?: "Unknown"
-            val artist = state.illust?.user?.name ?: "Unknown"
-            val thumbnailUrl = state.illust?.imageUrls?.squareMedium ?: ""
+            val illust = state.illust ?: return@launchIO
+            val illustId = illust.id
+            val title = illust.title
+            val userId = illust.user.id
+            val userName = illust.user.name
+            val thumbnailUrl = illust.imageUrls.squareMedium
 
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
                 state.illust?.user?.id?.toString()
@@ -407,7 +428,8 @@ class PictureViewModel(
                 illustId = illustId,
                 index = 0,
                 title = title,
-                artist = artist,
+                userId = userId,
+                userName = userName,
                 thumbnailUrl = thumbnailUrl,
                 originalUrl = zipUrl,
                 subFolder = subFolder
@@ -416,6 +438,16 @@ class PictureViewModel(
             closeBottomSheet()
             showLoading(false)
             ToastUtil.safeShortToast(RString.download_add_to_queue)
+        }
+    }
+
+    fun toggleUgoiraPlayState() {
+        updateState {
+            copy(
+                ugoiraState = ugoiraState.copy(
+                    isPlaying = !ugoiraState.isPlaying
+                )
+            )
         }
     }
 

@@ -54,7 +54,6 @@ import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.adaptiveFileSize
 import com.mrl.pixiv.common.util.calculateSize
-import com.mrl.pixiv.common.util.deleteFiles
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.asState
 import kotlinx.coroutines.Dispatchers
@@ -188,7 +187,7 @@ fun AppDataScreen(
                     scope.launch(Dispatchers.IO) {
                         val dirSize = context.cacheDir.calculateSize().adaptiveFileSize()
                         context.cacheDir.listFiles()?.forEach {
-                            deleteFiles(it)
+                            it.deleteRecursively()
                         }
                         ToastUtil.safeShortToast(RString.cache_cleared, dirSize)
                     }

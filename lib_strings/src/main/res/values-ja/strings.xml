@@ -129,4 +129,12 @@
     <string name="status_failed">失敗</string>
     <string name="retry">再試行</string>
     <string name="delete">削除</string>
+    <string name="file_name_format_title">保存形式</string>
+    <string name="legend_template">テンプレート</string>
+    <string name="legend_meaning">意味</string>
+    <string name="legend_illust_id">イラストID</string>
+    <string name="legend_title">タイトル</string>
+    <string name="legend_user_id">ユーザーID</string>
+    <string name="legend_user_name">ユーザー名</string>
+    <string name="legend_index">ページ番号</string>
 </resources>

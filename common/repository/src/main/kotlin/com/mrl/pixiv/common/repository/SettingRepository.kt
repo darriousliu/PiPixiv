@@ -1,6 +1,5 @@
 package com.mrl.pixiv.common.repository
 
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.lifecycle.Lifecycle
@@ -33,7 +32,7 @@ object SettingRepository : MMKVUser {
     val settingTheme
         get() = enumValueOf<SettingTheme>(
             userPreferenceFlow.value.theme.ifEmpty {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) SettingTheme.SYSTEM.toString() else SettingTheme.LIGHT.toString()
+                SettingTheme.SYSTEM.toString()
             }
         )
 
@@ -82,6 +81,10 @@ object SettingRepository : MMKVUser {
 
     fun setIsR18Enabled(enable: Boolean) = userPreference.update {
         it.copy(isR18Enabled = enable)
+    }
+
+    fun setFileNameFormat(format: String) = userPreference.update {
+        it.copy(fileNameFormat = format)
     }
 
     fun updateSettings(block: (UserPreference) -> UserPreference) {

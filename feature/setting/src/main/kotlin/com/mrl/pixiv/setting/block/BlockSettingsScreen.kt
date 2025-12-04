@@ -95,8 +95,8 @@ fun BlockSettingsScreen(
         val layoutParams = BlockingGridDefaults.blockingLayoutParameters()
         val userEmpty = state.allMutedUsers.isEmpty()
         val tagEmpty = state.allMutedTags.isEmpty()
-        val allEmpty = userEmpty && tagEmpty
-        if (allEmpty) {
+
+        if (state.loading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,

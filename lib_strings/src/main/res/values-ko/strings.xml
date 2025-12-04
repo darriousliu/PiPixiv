@@ -130,4 +130,12 @@
     <string name="status_failed">실패</string>
     <string name="retry">재시도</string>
     <string name="delete">삭제</string>
+    <string name="file_name_format_title">저장 형식</string>
+    <string name="legend_template">템플릿</string>
+    <string name="legend_meaning">의미</string>
+    <string name="legend_illust_id">일러스트 ID</string>
+    <string name="legend_title">제목</string>
+    <string name="legend_user_id">작가 ID</string>
+    <string name="legend_user_name">작가명</string>
+    <string name="legend_index">페이지 번호</string>
 </resources>

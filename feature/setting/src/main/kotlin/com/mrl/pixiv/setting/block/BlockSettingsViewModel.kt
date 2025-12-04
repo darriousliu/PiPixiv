@@ -17,6 +17,7 @@ data class BlockSettingsState(
     val allMutedUsers: List<MutedUser> = emptyList(),
     val toEditBlockTag: List<String> = emptyList(),
     val toEditBlockUser: List<Long> = emptyList(),
+    val loading: Boolean = false,
 )
 
 @KoinViewModel
@@ -29,12 +30,14 @@ class BlockSettingsViewModel : BaseMviViewModel<BlockSettingsState, ViewIntent>(
 
     fun loadMuteList() {
         launchIO {
+            updateState { copy(loading = true) }
             val resp = PixivRepository.getMuteList()
             BlockingRepository.blockUserList(resp.mutedUsers.map { it.user.id })
             updateState {
                 copy(
                     allMutedTags = resp.mutedTags,
                     allMutedUsers = resp.mutedUsers,
+                    loading = false,
                 )
             }
         }

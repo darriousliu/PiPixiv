@@ -34,7 +34,7 @@ by [Jetpack Compose](https://developer.android.com/develop/ui/compose)
 * Bookmark illustrations/Follow artists.
 * View browsing history.
 * View illustration details and recommended illustrations.
-* Long press on an image to download the original illustration or GIF.
+* Long press on an image to download the original illustration or GIF, rename the download file.
 * App settings (Language, Network, Feature Switch, etc.).
 * Deep link support.
 * Block illustrations and users.

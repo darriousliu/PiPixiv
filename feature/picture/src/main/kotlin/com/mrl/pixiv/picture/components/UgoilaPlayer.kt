@@ -12,34 +12,35 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.mrl.pixiv.common.util.throttleClick
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun UgoiraPlayer(
+    initialImage: String,
     images: ImmutableList<Pair<ImageBitmap, Long>>,
-    placeholder: VectorPainter,
+    loading: Boolean,
+    playUgoira: Boolean,
+    loadingUgoira: () -> Unit,
     downloadUgoira: () -> Unit,
+    onToggleUgoira: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (images.isNotEmpty()) {
-        var playUgoira by remember { mutableStateOf(false) }
         if (playUgoira) {
             val infiniteTransition = rememberInfiniteTransition(label = "ugoiraPlayerTransition")
             val currentIndex by infiniteTransition.animateValue(
@@ -49,7 +50,7 @@ fun UgoiraPlayer(
                 animationSpec = infiniteRepeatable(
                     animation = keyframes {
                         durationMillis = images.sumOf { it.second }.toInt()
-                        images.forEachIndexed { index, pair ->
+                        images.forEachIndexed { index, _ ->
                             if (index == 0) {
                                 0 at 0
                             } else {
@@ -69,7 +70,7 @@ fun UgoiraPlayer(
                     .throttleClick(
                         onLongClick = downloadUgoira
                     ) {
-                        playUgoira = false
+                        onToggleUgoira()
                     },
             )
         } else {
@@ -85,7 +86,7 @@ fun UgoiraPlayer(
                         ),
                 )
                 IconButton(
-                    onClick = { playUgoira = true },
+                    onClick = onToggleUgoira,
                     shapes = IconButtonDefaults.shapes(),
                     modifier = Modifier.align(Alignment.Center),
                 ) {
@@ -101,13 +102,38 @@ fun UgoiraPlayer(
             }
         }
     } else {
-        Image(
-            painter = placeholder,
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth,
+        Box(
             modifier = modifier
-                .fillMaxWidth(),
-        )
+                .fillMaxWidth()
+                .throttleClick(onLongClick = downloadUgoira)
+        ) {
+            AsyncImage(
+                model = initialImage,
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.FillWidth
+            )
+            if (loading) {
+                CircularWavyProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                IconButton(
+                    onClick = loadingUgoira,
+                    shapes = IconButtonDefaults.shapes(),
+                    modifier = Modifier.align(Alignment.Center),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.PlayCircle,
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .shadow(4.dp, shape = CircleShape),
+                    )
+                }
+            }
+        }
     }
 }
 

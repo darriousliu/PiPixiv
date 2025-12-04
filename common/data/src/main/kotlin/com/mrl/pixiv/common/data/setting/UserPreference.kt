@@ -13,4 +13,15 @@ data class UserPreference(
     val downloadSubFolderByUser: Boolean = false,
     val spanCountPortrait: Int = 2,
     val spanCountLandscape: Int = -1,
-)
+    val fileNameFormat: String = DEFAULT_FILE_NAME_FORMAT,
+) {
+    companion object {
+        const val TEMPLATE_ILLUST_ID = "{illust_id}"
+        const val TEMPLATE_TITLE = "{title}"
+        const val TEMPLATE_USER_ID = "{user_id}"
+        const val TEMPLATE_USER_NAME = "{user_name}"
+        const val TEMPLATE_INDEX = "{index}"
+
+        const val DEFAULT_FILE_NAME_FORMAT = "{illust_id}_p{index}"
+    }
+}

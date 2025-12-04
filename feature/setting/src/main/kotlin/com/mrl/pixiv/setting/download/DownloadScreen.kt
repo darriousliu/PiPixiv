@@ -153,7 +153,7 @@ fun DownloadItem(
                     maxLines = 1
                 )
                 Text(
-                    text = item.artist,
+                    text = item.userName,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1
                 )

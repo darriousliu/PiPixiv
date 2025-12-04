@@ -124,7 +124,3 @@ private fun createContentValues(
         put(MediaStore.MediaColumns.RELATIVE_PATH, downloadDir)
     }
 }
-
-fun generateFileName(illustId: Long, index: Int): String {
-    return "${illustId}_$index"
-}

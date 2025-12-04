@@ -129,4 +129,12 @@
     <string name="status_failed">विफल</string>
     <string name="retry">पुनः प्रयास करें</string>
     <string name="delete">हटाएं</string>
+    <string name="file_name_format_title">सेव फॉर्मेट</string>
+    <string name="legend_template">टेम्पलेट</string>
+    <string name="legend_meaning">अर्थ</string>
+    <string name="legend_illust_id">चित्र ID</string>
+    <string name="legend_title">शीर्षक</string>
+    <string name="legend_user_id">कलाकार ID</string>
+    <string name="legend_user_name">कलाकार का नाम</string>
+    <string name="legend_index">पेज नंबर</string>
 </resources>

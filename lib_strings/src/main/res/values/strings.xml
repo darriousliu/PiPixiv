@@ -133,4 +133,12 @@
     <string name="status_failed">失败</string>
     <string name="retry">重试</string>
     <string name="delete">删除</string>
+    <string name="file_name_format_title">保存格式</string>
+    <string name="legend_template">模板</string>
+    <string name="legend_meaning">含义</string>
+    <string name="legend_illust_id">插画 ID</string>
+    <string name="legend_title">标题</string>
+    <string name="legend_user_id">画师 ID</string>
+    <string name="legend_user_name">画师名</string>
+    <string name="legend_index">第几张</string>
 </resources>
