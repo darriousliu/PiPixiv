@@ -14,6 +14,7 @@ import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.OLD_DOWNLOAD_DIR
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ToastUtil
+import com.mrl.pixiv.common.util.listFilesRecursively
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -36,6 +37,8 @@ data class RequestPermissionEffect(val intentSender: IntentSender) : SideEffect
 class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
     initialState = AppDataState(),
 ) {
+    private val regex = Regex("""^(\d+)_(\d+)(\..+)?$""")
+
     init {
         checkOldData()
     }
@@ -50,12 +53,20 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
                 "PiPixiv"
             )
+            val newDir = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "PiPixiv"
+            )
+
+            var count = 0
             if (oldDir.exists() && oldDir.isDirectory) {
-                val count = oldDir.list()?.size ?: 0
-                updateState { copy(oldImageCount = count) }
-            } else {
-                updateState { copy(oldImageCount = 0) }
+                count += oldDir.list()?.size ?: 0
             }
+
+            count += newDir.listFilesRecursively()
+                .filter { it.isFile && regex.matches(it.name) }.size
+
+            updateState { copy(oldImageCount = count) }
         }
     }
 
@@ -77,41 +88,123 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
                 "PiPixiv"
             )
 
-            if (!oldDir.exists()) {
-                updateState { copy(isMigrating = false) }
-                return@launchIO
-            }
-
             if (!newDir.exists()) {
                 newDir.mkdirs()
             }
 
-            val files = oldDir.listFiles() ?: emptyArray()
+            val oldFiles =
+                if (oldDir.exists()) oldDir.listFiles()?.filter { it.isFile } ?: emptyList()
+                else emptyList()
+            val newFilesToRename = mutableListOf<File>()
 
-            val total = files.size
+            if (newDir.exists()) {
+                newFilesToRename.addAll(
+                    newDir.listFilesRecursively().filter { it.isFile && regex.matches(it.name) })
+            }
+
+            val total = oldFiles.size + newFilesToRename.size
+
+            if (total == 0) {
+                updateState {
+                    copy(
+                        isMigrating = false,
+                        oldImageCount = 0
+                    )
+                }
+                ToastUtil.safeShortToast(RString.migration_success)
+                return@launchIO
+            }
+
             var successCount = 0
+            var processedCount = 0
             val context = AppUtil.appContext
             val resolver = context.contentResolver
 
             // 收集需要请求权限删除的文件的 Uri (针对 Android 11+)
             val pendingDeleteUris = mutableListOf<Uri>()
 
-            val regex = Regex("""^(\d+)_(\d+)(\..+)?$""")
-
-            files.forEachIndexed { index, file ->
-                if (file.isFile) {
-                    var destName = file.name
-                    val match = regex.find(destName)
-                    if (match != null) {
-                        val (id, idx, ext) = match.destructured
-                        destName = "${id}_p${idx}${ext}"
+            // 1. Migrate Old Files
+            oldFiles.forEach { file ->
+                var destName = file.name
+                val match = regex.find(destName)
+                if (match != null) {
+                    val (id, idx, ext) = match.destructured
+                    destName = "${id}_p${idx}${ext}"
+                }
+                val destFile = File(newDir, destName)
+                try {
+                    if (!destFile.exists() || destFile.length() != file.length()) {
+                        file.copyTo(destFile, overwrite = true)
+                        MediaScannerConnection.scanFile(
+                            context,
+                            arrayOf(destFile.absolutePath),
+                            null,
+                            null
+                        )
                     }
-                    val destFile = File(newDir, destName)
-                    try {
-                        // 1. 尝试复制 (如果目标已存在且大小相同则跳过，提高重试效率)
+
+                    var deleteSuccess = file.delete()
+
+                    if (!deleteSuccess && file.exists()) {
+                        val uri = getMediaUri(resolver, file, OLD_DOWNLOAD_DIR)
+                        if (uri != null) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                pendingDeleteUris.add(uri)
+                            } else {
+                                try {
+                                    val rows = resolver.delete(uri, null, null)
+                                    if (rows > 0) deleteSuccess = true
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    }
+
+                    if (deleteSuccess ||
+                        (getMediaUri(resolver, file, OLD_DOWNLOAD_DIR)?.let {
+                            pendingDeleteUris.contains(it)
+                        } == true)
+                    ) {
+                        successCount++
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                processedCount++
+                updateState {
+                    copy(
+                        progress = processedCount / total.toFloat(),
+                        migratedCount = processedCount
+                    )
+                }
+            }
+
+            // 2. Rename New Files
+            newFilesToRename.forEach { file ->
+                var destName = file.name
+                val match = regex.find(destName)
+                if (match != null) {
+                    val (id, idx, ext) = match.destructured
+                    destName = "${id}_p${idx}${ext}"
+                }
+                val destFile = File(file.parentFile, destName)
+
+                try {
+                    var renamed = false
+                    if (file.renameTo(destFile)) {
+                        MediaScannerConnection.scanFile(
+                            context,
+                            arrayOf(destFile.absolutePath, file.absolutePath),
+                            null,
+                            null
+                        )
+                        renamed = true
+                    } else {
+                        // Fallback: Copy and Delete
                         if (!destFile.exists() || destFile.length() != file.length()) {
                             file.copyTo(destFile, overwrite = true)
-                            // 扫描新文件使其在相册可见
                             MediaScannerConnection.scanFile(
                                 context,
                                 arrayOf(destFile.absolutePath),
@@ -119,45 +212,40 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
                                 null
                             )
                         }
-
-                        // 2. 尝试删除源文件
-                        // 优先尝试 File API 删除
                         var deleteSuccess = file.delete()
-
-                        // 3. 如果 File API 删除失败且文件仍存在，尝试查找 Uri 准备后续处理
                         if (!deleteSuccess && file.exists()) {
-                            val uri = getMediaUri(resolver, file)
+                            val uri = getMediaUri(resolver, file, getRelativePath(file))
                             if (uri != null) {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                    // Android 11+ 收集起来批量处理
                                     pendingDeleteUris.add(uri)
                                 } else {
-                                    // Android 10 及以下无法批量申请删除权限，尝试单个删除（可能会失败）
                                     try {
                                         val rows = resolver.delete(uri, null, null)
                                         if (rows > 0) deleteSuccess = true
                                     } catch (e: Exception) {
-                                        // 忽略异常，Android 10 上避免连续弹窗，最后统一提示用户手动删除
                                         e.printStackTrace()
                                     }
                                 }
                             }
                         }
-
                         if (deleteSuccess ||
-                            pendingDeleteUris.contains(getMediaUri(resolver, file))
+                            (getMediaUri(resolver, file, getRelativePath(file))?.let {
+                                pendingDeleteUris.contains(it)
+                            } == true)
                         ) {
-                            // 即使放入待删除列表，也算作迁移步骤完成（等待最后确认）
-                            successCount++
+                            renamed = true
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
+                    if (renamed) successCount++
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
+
+                processedCount++
                 updateState {
                     copy(
-                        progress = (index + 1) / total.toFloat(),
-                        migratedCount = index + 1
+                        progress = processedCount / total.toFloat(),
+                        migratedCount = processedCount
                     )
                 }
             }
@@ -174,38 +262,29 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
             }
 
             // 如果旧文件夹为空，删除它
-            if (oldDir.listFiles()?.isEmpty() == true) {
+            if (oldDir.exists() && oldDir.listFiles()?.isEmpty() == true) {
                 oldDir.delete()
             }
 
-            // 重新检查剩余文件数量
-            val remainingCount = oldDir.listFiles()?.size ?: 0
+            checkOldData()
 
             updateState {
-                copy(
-                    isMigrating = false,
-                    oldImageCount = remainingCount
-                )
+                copy(isMigrating = false)
             }
 
-            if (remainingCount == 0) {
+            if (pendingDeleteUris.isEmpty()) {
                 ToastUtil.safeShortToast(RString.migration_success)
             } else {
-                if (pendingDeleteUris.isNotEmpty() && Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                    // Android 10 等无法自动删除的情况
-                    ToastUtil.safeShortToast(RString.migration_manually_delete)
-                } else {
-                    ToastUtil.safeShortToast(RString.migration_failed)
-                }
+                ToastUtil.safeShortToast(RString.migration_manually_delete)
             }
         }
     }
 
-    private fun getMediaUri(resolver: ContentResolver, file: File): Uri? {
+    private fun getMediaUri(resolver: ContentResolver, file: File, relativePath: String): Uri? {
         val projection = arrayOf(MediaStore.Images.Media._ID)
         val selection =
             "${MediaStore.Images.Media.DISPLAY_NAME} = ? AND ${MediaStore.Images.Media.RELATIVE_PATH} = ?"
-        val selectionArgs = arrayOf(file.name, OLD_DOWNLOAD_DIR)
+        val selectionArgs = arrayOf(file.name, relativePath)
 
         try {
             resolver.query(
@@ -230,5 +309,18 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
             e.printStackTrace()
         }
         return null
+    }
+
+    private fun getRelativePath(file: File): String {
+        val root = Environment.getExternalStorageDirectory().absolutePath
+        val parent = file.parentFile?.absolutePath ?: return ""
+        return if (parent.startsWith(root)) {
+            var rel = parent.substring(root.length)
+            if (rel.startsWith("/")) rel = rel.substring(1)
+            if (!rel.endsWith("/")) rel += "/"
+            rel
+        } else {
+            ""
+        }
     }
 }
