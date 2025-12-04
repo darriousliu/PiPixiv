@@ -11,8 +11,8 @@ import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.repository.util.generateFileName
 import com.mrl.pixiv.common.util.PictureType
-import com.mrl.pixiv.common.util.generateFileName
 import com.mrl.pixiv.common.util.saveToAlbum
 import com.mrl.pixiv.common.util.toBitmap
 import com.shakster.gifkt.GifEncoder
@@ -81,20 +81,20 @@ class DownloadWorker(
     ): Result {
         val zipBytes = downloadBytes(url, entity)
         val metadata = PixivRepository.getUgoiraMetadata(illustId).ugoiraMetadata
-        
+
         val zipFile = File(applicationContext.cacheDir, "temp_${illustId}.zip")
         zipFile.writeBytes(zipBytes)
-        
+
         val zip = ZipFile(zipFile)
         val unzipDir = File(applicationContext.cacheDir, "temp_${illustId}_unzip")
         unzipDir.mkdirs()
-        
+
         val bitmaps = metadata.frames.mapNotNull { frame ->
             val entry = zip.getEntry(frame.file)
             if (entry != null) {
                 val file = File(unzipDir, frame.file)
                 if (!file.exists()) {
-                     zip.getInputStream(entry).use { input ->
+                    zip.getInputStream(entry).use { input ->
                         FileOutputStream(file).use { output ->
                             input.copyTo(output)
                         }
@@ -107,11 +107,11 @@ class DownloadWorker(
         }
         zip.close()
         zipFile.delete()
-        
+
         val gifFile = File(applicationContext.cacheDir, "temp_${illustId}.gif")
         val sink = gifFile.outputStream().asSink().buffered()
         val encoder = GifEncoder(sink)
-        
+
         bitmaps.forEach { (bitmap, delay) ->
             if (bitmap != null) {
                 encoder.writeFrame(bitmap, delay.milliseconds)
@@ -119,13 +119,15 @@ class DownloadWorker(
         }
         encoder.close()
         unzipDir.deleteRecursively()
-        
+
         val gifBytes = gifFile.readBytes()
         gifFile.delete()
-        
-        val success = saveToAlbum(gifBytes, generateFileName(illustId, entity.index), PictureType.GIF.mimeType, subFolder)
-        
-         if (success) {
+
+        val fileName =
+            generateFileName(illustId, entity.title, entity.userId, entity.userName, entity.index)
+        val success = saveToAlbum(gifBytes, fileName, PictureType.GIF.mimeType, subFolder)
+
+        if (success) {
             val successEntity = entity.copy(
                 status = DownloadStatus.SUCCESS.value,
                 progress = 1f
@@ -133,7 +135,7 @@ class DownloadWorker(
             downloadDao.update(successEntity)
             return Result.success()
         } else {
-             throw Exception("Save GIF failed")
+            throw Exception("Save GIF failed")
         }
     }
 
@@ -143,9 +145,11 @@ class DownloadWorker(
         illustId: Long,
         subFolder: String?
     ): Result {
-         val (bytes, mimeType) = downloadBytesWithMime(url, entity)
-         val success = saveToAlbum(bytes, generateFileName(illustId, entity.index), mimeType, subFolder)
-          if (success) {
+        val (bytes, mimeType) = downloadBytesWithMime(url, entity)
+        val fileName =
+            generateFileName(illustId, entity.title, entity.userId, entity.userName, entity.index)
+        val success = saveToAlbum(bytes, fileName, mimeType, subFolder)
+        if (success) {
             val successEntity = entity.copy(
                 status = DownloadStatus.SUCCESS.value,
                 progress = 1f
@@ -161,34 +165,37 @@ class DownloadWorker(
         return downloadBytesWithMime(url, entity).first
     }
 
-    private suspend fun downloadBytesWithMime(url: String, entity: DownloadEntity): Pair<ByteArray, String> {
+    private suspend fun downloadBytesWithMime(
+        url: String,
+        entity: DownloadEntity
+    ): Pair<ByteArray, String> {
         var currentEntity = entity
         val result = withTimeoutOrNull(60.seconds) {
-                val response = imageHttpClient.get(url) {
-                    onDownload { bytesSentTotal, contentLength ->
-                        if (contentLength != null && contentLength > 0) {
-                            val progress = bytesSentTotal.toFloat() / contentLength.toFloat()
-                            Logger.d("DownloadWorker") { "Downloading $bytesSentTotal/$contentLength: $progress" }
-                            if (progress != currentEntity.progress) {
-                                currentEntity = currentEntity.copy(progress = progress)
-                                downloadDao.update(currentEntity)
-                            }
+            val response = imageHttpClient.get(url) {
+                onDownload { bytesSentTotal, contentLength ->
+                    if (contentLength != null && contentLength > 0) {
+                        val progress = bytesSentTotal.toFloat() / contentLength.toFloat()
+                        Logger.d("DownloadWorker") { "Downloading $bytesSentTotal/$contentLength: $progress" }
+                        if (progress != currentEntity.progress) {
+                            currentEntity = currentEntity.copy(progress = progress)
+                            downloadDao.update(currentEntity)
                         }
                     }
                 }
+            }
 
-                if (!response.status.isSuccess()) {
-                    throw Exception("Request failed: ${response.status}")
-                }
+            if (!response.status.isSuccess()) {
+                throw Exception("Request failed: ${response.status}")
+            }
 
-                val bytes = response.readRawBytes()
-                var mimeType = response.contentType()?.withoutParameters()?.toString()
+            val bytes = response.readRawBytes()
+            var mimeType = response.contentType()?.withoutParameters()?.toString()
 
-                if (mimeType == null) {
-                    mimeType = MimeTypeMap.getMimeTypeFromUrl(url) ?: "application/octet-stream"
-                }
+            if (mimeType == null) {
+                mimeType = MimeTypeMap.getMimeTypeFromUrl(url) ?: "application/octet-stream"
+            }
 
-                Pair(bytes, mimeType)
+            Pair(bytes, mimeType)
         }
         return result ?: throw Exception("Timeout")
     }

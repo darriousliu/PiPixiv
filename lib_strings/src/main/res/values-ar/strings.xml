@@ -129,4 +129,12 @@
     <string name="status_failed">فشل</string>
     <string name="retry">إعادة المحاولة</string>
     <string name="delete">حذف</string>
+    <string name="file_name_format_title">تنسيق الحفظ</string>
+    <string name="legend_template">القالب</string>
+    <string name="legend_meaning">المعنى</string>
+    <string name="legend_illust_id">معرف الرسم</string>
+    <string name="legend_title">العنوان</string>
+    <string name="legend_user_id">معرف الفنان</string>
+    <string name="legend_user_name">اسم الفنان</string>
+    <string name="legend_index">رقم الصفحة</string>
 </resources>

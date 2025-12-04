@@ -129,4 +129,12 @@
     <string name="status_failed">Échec</string>
     <string name="retry">Réessayer</string>
     <string name="delete">Supprimer</string>
+    <string name="file_name_format_title">Format d\'enregistrement</string>
+    <string name="legend_template">Modèle</string>
+    <string name="legend_meaning">Signification</string>
+    <string name="legend_illust_id">ID de l\'illustration</string>
+    <string name="legend_title">Titre</string>
+    <string name="legend_user_id">ID de l\'artiste</string>
+    <string name="legend_user_name">Nom de l\'artiste</string>
+    <string name="legend_index">Index</string>
 </resources>

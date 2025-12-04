@@ -246,13 +246,14 @@ class PictureViewModel(
         originalUrl: String,
     ) {
         launchIO {
-            val illust = state.illust
-            val title = illust?.title ?: "Unknown"
-            val artist = illust?.user?.name ?: "Unknown"
-            val thumbnailUrl = illust?.imageUrls?.squareMedium ?: ""
+            val illust = state.illust ?: return@launchIO
+            val title = illust.title
+            val userId = illust.user.id
+            val userName = illust.user.name
+            val thumbnailUrl = illust.imageUrls.squareMedium
 
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
-                illust?.user?.id?.toString()
+                illust.user.id.toString()
             } else {
                 null
             }
@@ -261,7 +262,8 @@ class PictureViewModel(
                 illustId = illustId,
                 index = index,
                 title = title,
-                artist = artist,
+                userId = userId,
+                userName = userName,
                 thumbnailUrl = thumbnailUrl,
                 originalUrl = originalUrl,
                 subFolder = subFolder
@@ -403,10 +405,12 @@ class PictureViewModel(
     fun downloadUgoiraAsGIF() {
         launchIO {
             showLoading(true)
-            val illustId = state.illust?.id ?: return@launchIO
-            val title = state.illust?.title ?: "Unknown"
-            val artist = state.illust?.user?.name ?: "Unknown"
-            val thumbnailUrl = state.illust?.imageUrls?.squareMedium ?: ""
+            val illust = state.illust ?: return@launchIO
+            val illustId = illust.id
+            val title = illust.title
+            val userId = illust.user.id
+            val userName = illust.user.name
+            val thumbnailUrl = illust.imageUrls.squareMedium
 
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
                 state.illust?.user?.id?.toString()
@@ -424,7 +428,8 @@ class PictureViewModel(
                 illustId = illustId,
                 index = 0,
                 title = title,
-                artist = artist,
+                userId = userId,
+                userName = userName,
                 thumbnailUrl = thumbnailUrl,
                 originalUrl = zipUrl,
                 subFolder = subFolder

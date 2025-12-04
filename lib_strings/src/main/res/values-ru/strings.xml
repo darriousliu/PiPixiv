@@ -129,4 +129,12 @@
     <string name="status_failed">Ошибка</string>
     <string name="retry">Повторить</string>
     <string name="delete">Удалить</string>
+    <string name="file_name_format_title">Формат сохранения</string>
+    <string name="legend_template">Шаблон</string>
+    <string name="legend_meaning">Значение</string>
+    <string name="legend_illust_id">ID иллюстрации</string>
+    <string name="legend_title">Название</string>
+    <string name="legend_user_id">ID автора</string>
+    <string name="legend_user_name">Имя автора</string>
+    <string name="legend_index">Индекс страницы</string>
 </resources>

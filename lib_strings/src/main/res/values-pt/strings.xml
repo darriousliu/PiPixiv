@@ -130,4 +130,12 @@
     <string name="status_failed">Falha</string>
     <string name="retry">Tentar novamente</string>
     <string name="delete">Excluir</string>
+    <string name="file_name_format_title">Formato de salvamento</string>
+    <string name="legend_template">Modelo</string>
+    <string name="legend_meaning">Significado</string>
+    <string name="legend_illust_id">ID da ilustração</string>
+    <string name="legend_title">Título</string>
+    <string name="legend_user_id">ID do artista</string>
+    <string name="legend_user_name">Nome do artista</string>
+    <string name="legend_index">Índice</string>
 </resources>

@@ -56,6 +56,7 @@ import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
+import com.mrl.pixiv.setting.FileNameFormatScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
@@ -171,6 +172,13 @@ fun Navigation3MainGraph(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
                         NetworkSettingScreen()
+                    }
+                    
+                    // 保存格式设置
+                    entry<Destination.FileNameFormat>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        FileNameFormatScreen()
                     }
 
                     // 历史记录
@@ -382,7 +390,7 @@ private fun LogScreen(
 
                 is Destination.Login, Destination.LoginOption, Destination.OAuthLogin,
                 Destination.Search, Destination.Setting, Destination.NetworkSetting,
-                Destination.History, Destination.BlockSettings, Destination.AppData, Destination.Download -> Unit
+                Destination.History, Destination.BlockSettings, Destination.AppData, Destination.Download, Destination.FileNameFormat -> Unit
             }
         })
     }

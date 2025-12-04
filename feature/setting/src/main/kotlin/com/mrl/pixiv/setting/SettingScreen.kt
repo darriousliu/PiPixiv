@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.AddLink
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.NetworkWifi
+import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material.icons.rounded._18UpRating
@@ -66,6 +67,7 @@ const val KEY_PORTRAIT_SPAN_COUNT = "portrait_span_count"
 const val KEY_LANDSCAPE_SPAN_COUNT = "landscape_span_count"
 const val KEY_DIVIDER_2 = "divider_2"
 const val KEY_DOWNLOAD_SINGLE_FOLDER_BY_USER = "download_single_folder_by_user"
+const val KEY_FILE_NAME_FORMAT = "file_name_format"
 const val KEY_R18_ENABLED = "r18_enabled"
 
 @Composable
@@ -101,9 +103,10 @@ fun SettingScreen(
         },
     ) {
         LazyColumn(
-            modifier = modifier.padding(it),
+            modifier = modifier
+                .padding(it)
+                .padding(horizontal = 8.dp),
         ) {
-            val itemModifier = Modifier.padding(horizontal = 8.dp)
             item(key = KEY_LANGUAGE) {
                 var expanded by remember { mutableStateOf(false) }
                 // 语言
@@ -122,7 +125,6 @@ fun SettingScreen(
                             text = stringResource(RString.app_language),
                         )
                     },
-                    modifier = itemModifier,
                     leadingContent = {
                         Icon(Icons.Rounded.Translate, contentDescription = null)
                     },
@@ -176,8 +178,7 @@ fun SettingScreen(
                             indication = ripple()
                         ) {
                             navigationManager.navigateToNetworkSettingScreen()
-                        }
-                        .then(itemModifier),
+                        },
                     leadingContent = {
                         Icon(imageVector = Icons.Rounded.NetworkWifi, contentDescription = null)
                     },
@@ -214,9 +215,7 @@ fun SettingScreen(
                                     context.startActivity(intent)
                                 } catch (_: Throwable) {
                                 }
-                            }
-
-                            .then(itemModifier),
+                            },
                         supportingContent = {
                             Text(
                                 text = stringResource(RString.allow_open_link),
@@ -234,14 +233,13 @@ fun SettingScreen(
                 }
             }
             item(key = KEY_DIVIDER_1) {
-                HorizontalDivider(modifier = itemModifier.padding(8.dp))
+                HorizontalDivider(modifier = Modifier.padding(8.dp))
             }
             item(key = KEY_PORTRAIT_SPAN_COUNT) {
                 SpanCountSetting(
                     title = stringResource(RString.span_count_portrait),
                     currentSpanCount = userPreference.spanCountPortrait,
                     onSpanCountChange = SettingRepository::setSpanCountPortrait,
-                    modifier = itemModifier
                 )
             }
             item(key = KEY_LANDSCAPE_SPAN_COUNT) {
@@ -249,11 +247,10 @@ fun SettingScreen(
                     title = stringResource(RString.span_count_landscape),
                     currentSpanCount = userPreference.spanCountLandscape,
                     onSpanCountChange = SettingRepository::setSpanCountLandscape,
-                    modifier = itemModifier
                 )
             }
             item(key = KEY_DIVIDER_2) {
-                HorizontalDivider(modifier = itemModifier.padding(8.dp))
+                HorizontalDivider(modifier = Modifier.padding(8.dp))
             }
             item(key = KEY_DOWNLOAD_SINGLE_FOLDER_BY_USER) {
                 ListItem(
@@ -262,7 +259,7 @@ fun SettingScreen(
                             text = stringResource(RString.download_single_folder_by_user_title),
                         )
                     },
-                    modifier = itemModifier
+                    modifier = Modifier
                         .height(IntrinsicSize.Min)
                         .throttleClick(
                             indication = ripple()
@@ -292,6 +289,30 @@ fun SettingScreen(
                                 onCheckedChange = { SettingRepository.setDownloadSubFolderByUser(it) }
                             )
                         }
+                    }
+                )
+            }
+            item(key = KEY_FILE_NAME_FORMAT) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RString.file_name_format_title),
+                        )
+                    },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            navigationManager.navigateToFileNameFormatScreen()
+                        },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.Save, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
+                            contentDescription = null
+                        )
                     }
                 )
             }
@@ -327,7 +348,7 @@ fun SettingScreen(
                             text = stringResource(RString.r18),
                         )
                     },
-                    modifier = itemModifier
+                    modifier = Modifier
                         .throttleClick(
                             indication = ripple()
                         ) {
