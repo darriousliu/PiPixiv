@@ -50,7 +50,7 @@ fun UgoiraPlayer(
                 animationSpec = infiniteRepeatable(
                     animation = keyframes {
                         durationMillis = images.sumOf { it.second }.toInt()
-                        images.forEachIndexed { index, pair ->
+                        images.forEachIndexed { index, _ ->
                             if (index == 0) {
                                 0 at 0
                             } else {
@@ -102,7 +102,11 @@ fun UgoiraPlayer(
             }
         }
     } else {
-        Box(modifier = modifier.fillMaxWidth()) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .throttleClick(onLongClick = downloadUgoira)
+        ) {
             AsyncImage(
                 model = initialImage,
                 contentDescription = null,
