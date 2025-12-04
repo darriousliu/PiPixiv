@@ -347,13 +347,17 @@ internal fun PictureScreen(
                             item(key = KEY_UGOIRA) {
                                 UgoiraPlayer(
                                     initialImage = illust.imageUrls.medium,
-                                    images = state.ugoiraImages,
-                                    loading = state.ugoiraLoading,
+                                    images = state.ugoiraState.ugoiraImages,
+                                    loading = state.ugoiraState.loading,
+                                    playUgoira = state.ugoiraState.isPlaying,
                                     loadingUgoira = {
                                         dispatch(PictureAction.DownloadUgoira(illust.id))
                                     },
                                     downloadUgoira = {
                                         pictureViewModel.getUgoiraInfo()
+                                    },
+                                    onToggleUgoira = {
+                                        pictureViewModel.toggleUgoiraPlayState()
                                     }
                                 )
                             }

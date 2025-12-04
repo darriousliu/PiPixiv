@@ -18,9 +18,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -37,12 +34,13 @@ fun UgoiraPlayer(
     initialImage: String,
     images: ImmutableList<Pair<ImageBitmap, Long>>,
     loading: Boolean,
+    playUgoira: Boolean,
     loadingUgoira: () -> Unit,
     downloadUgoira: () -> Unit,
+    onToggleUgoira: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (images.isNotEmpty()) {
-        var playUgoira by remember { mutableStateOf(true) }
         if (playUgoira) {
             val infiniteTransition = rememberInfiniteTransition(label = "ugoiraPlayerTransition")
             val currentIndex by infiniteTransition.animateValue(
@@ -72,7 +70,7 @@ fun UgoiraPlayer(
                     .throttleClick(
                         onLongClick = downloadUgoira
                     ) {
-                        playUgoira = false
+                        onToggleUgoira()
                     },
             )
         } else {
@@ -88,7 +86,7 @@ fun UgoiraPlayer(
                         ),
                 )
                 IconButton(
-                    onClick = { playUgoira = true },
+                    onClick = onToggleUgoira,
                     shapes = IconButtonDefaults.shapes(),
                     modifier = Modifier.align(Alignment.Center),
                 ) {

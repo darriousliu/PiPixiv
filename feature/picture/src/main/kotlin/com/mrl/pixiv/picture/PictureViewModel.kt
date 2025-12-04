@@ -58,10 +58,9 @@ import java.util.zip.ZipFile
 data class PictureState(
     val illust: Illust? = null,
     val userIllusts: ImmutableList<Illust> = persistentListOf(),
-    val ugoiraImages: ImmutableList<Pair<ImageBitmap, Long>> = persistentListOf(),
     val bottomSheetState: BottomSheetState? = null,
     val loading: Boolean = false,
-    val ugoiraLoading: Boolean = false,
+    val ugoiraState: UgoiraState = UgoiraState(),
 )
 
 @Stable
@@ -69,6 +68,13 @@ data class BottomSheetState(
     val index: Int = 0,
     val downloadUrl: String = "",
     val downloadSize: Long = 0L,
+)
+
+@Stable
+data class UgoiraState(
+    val ugoiraImages: ImmutableList<Pair<ImageBitmap, Long>> = persistentListOf(),
+    val loading: Boolean = false,
+    val isPlaying: Boolean = false,
 )
 
 sealed class PictureAction : ViewIntent {
@@ -143,7 +149,7 @@ class PictureViewModel(
 
     private fun downloadUgoira(illustId: Long) {
         launchIO {
-            updateState { copy(ugoiraLoading = true) }
+            updateState { copy(ugoiraState = ugoiraState.copy(loading = true)) }
             val resp = PixivRepository.getUgoiraMetadata(illustId)
             cachedUgoiraMetadata = resp.ugoiraMetadata
             if (!ugoiraDir.exists()) ugoiraDir.mkdirs()
@@ -155,7 +161,13 @@ class PictureViewModel(
                     }
                 Log.e(TAG, "downloadUgoira: $imageFiles")
                 updateState {
-                    copy(ugoiraImages = imageFiles.toImmutableList(), ugoiraLoading = false)
+                    copy(
+                        ugoiraState = ugoiraState.copy(
+                            ugoiraImages = imageFiles.toImmutableList(),
+                            loading = false,
+                            isPlaying = true
+                        )
+                    )
                 }
             } else {
                 val zipUrl = resp.ugoiraMetadata.zipUrls.medium
@@ -176,7 +188,13 @@ class PictureViewModel(
                         }
                     Log.e(TAG, "downloadUgoira: $imageFiles")
                     updateState {
-                        copy(ugoiraImages = imageFiles.toImmutableList(), ugoiraLoading = false)
+                        copy(
+                            ugoiraState = ugoiraState.copy(
+                                ugoiraImages = imageFiles.toImmutableList(),
+                                loading = false,
+                                isPlaying = true
+                            )
+                        )
                     }
                 }
             }
@@ -415,6 +433,16 @@ class PictureViewModel(
             closeBottomSheet()
             showLoading(false)
             ToastUtil.safeShortToast(RString.download_add_to_queue)
+        }
+    }
+
+    fun toggleUgoiraPlayState() {
+        updateState {
+            copy(
+                ugoiraState = ugoiraState.copy(
+                    isPlaying = !ugoiraState.isPlaying
+                )
+            )
         }
     }
 
