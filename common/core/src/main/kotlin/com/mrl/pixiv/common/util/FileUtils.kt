@@ -75,3 +75,18 @@ fun Long.adaptiveFileSize(): String {
         else -> "%.2f GB".format(toFloat() / GB)
     }
 }
+
+fun File.listFilesRecursively(): List<File> {
+    val result = mutableListOf<File>()
+    if (isDirectory) {
+        val children = listFiles()
+        if (children != null) {
+            for (child in children) {
+                result.addAll(child.listFilesRecursively())
+            }
+        }
+    } else {
+        result.add(this)
+    }
+    return result
+}

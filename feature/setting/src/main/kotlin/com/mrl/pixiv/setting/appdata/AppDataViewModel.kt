@@ -87,6 +87,7 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
             }
 
             val files = oldDir.listFiles() ?: emptyArray()
+
             val total = files.size
             var successCount = 0
             val context = AppUtil.appContext
@@ -95,9 +96,17 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
             // 收集需要请求权限删除的文件的 Uri (针对 Android 11+)
             val pendingDeleteUris = mutableListOf<Uri>()
 
+            val regex = Regex("""^(\d+)_(\d+)(\..+)?$""")
+
             files.forEachIndexed { index, file ->
                 if (file.isFile) {
-                    val destFile = File(newDir, file.name)
+                    var destName = file.name
+                    val match = regex.find(destName)
+                    if (match != null) {
+                        val (id, idx, ext) = match.destructured
+                        destName = "${id}_p${idx}${ext}"
+                    }
+                    val destFile = File(newDir, destName)
                     try {
                         // 1. 尝试复制 (如果目标已存在且大小相同则跳过，提高重试效率)
                         if (!destFile.exists() || destFile.length() != file.length()) {
