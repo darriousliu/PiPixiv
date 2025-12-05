@@ -5,15 +5,20 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.logEvent
@@ -34,6 +39,7 @@ fun MainScreen(
 ) {
     val navigationManager = koinInject<NavigationManager>()
     val page = navigationManager.currentMainPage
+    val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
     val screens = remember {
         listOf(
             MainPage.Home,
@@ -54,7 +60,17 @@ fun MainScreen(
                             navigationManager.switchMainPage(screen)
                         }
                     },
-                    icon = screen.icon,
+                    icon = {
+                        if (screen == MainPage.Profile && hasNewVersion) {
+                            BadgedBox(
+                                badge = { Badge() }
+                            ) {
+                                screen.icon()
+                            }
+                        } else {
+                            screen.icon()
+                        }
+                    },
                     label = {
                         Text(text = stringResource(screen.title))
                     }

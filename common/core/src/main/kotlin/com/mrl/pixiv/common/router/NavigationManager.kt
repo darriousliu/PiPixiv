@@ -165,4 +165,8 @@ class NavigationManager(
     fun navigateToDownloadScreen() {
         backStack.navigate(route = Destination.Download)
     }
+
+    fun navigateToAboutScreen() {
+        backStack.navigate(route = Destination.About)
+    }
 }

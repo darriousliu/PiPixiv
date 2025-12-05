@@ -53,6 +53,7 @@ import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
+import com.mrl.pixiv.profile.AboutScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
@@ -261,6 +262,9 @@ fun Navigation3MainGraph(
                     entry<Destination.Download> {
                         DownloadScreen()
                     }
+                    entry<Destination.About> {
+                        AboutScreen()
+                    }
                 }
             )
         }
@@ -390,7 +394,7 @@ private fun LogScreen(
 
                 is Destination.Login, Destination.LoginOption, Destination.OAuthLogin,
                 Destination.Search, Destination.Setting, Destination.NetworkSetting,
-                Destination.History, Destination.BlockSettings, Destination.AppData, Destination.Download, Destination.FileNameFormat -> Unit
+                Destination.History, Destination.BlockSettings, Destination.AppData, Destination.Download, Destination.FileNameFormat, Destination.About -> Unit
             }
         })
     }
