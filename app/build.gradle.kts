@@ -79,7 +79,9 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
     }
-
+    buildFeatures {
+        buildConfig = true
+    }
 
     packaging {
         resources {

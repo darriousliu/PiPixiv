@@ -6,11 +6,23 @@ import androidx.annotation.StringRes
 
 object AppUtil {
     lateinit var appContext: Context
+        private set
     lateinit var application: Application
+        private set
 
-    fun init(application: Application) {
+    lateinit var versionName: String
+        private set
+    var versionCode: Int = 0
+        private set
+
+    lateinit var flavor: String
+
+    fun init(application: Application, versionName: String, versionCode: Int, flavor: String) {
         appContext = application
         this.application = application
+        this.versionName = versionName
+        this.versionCode = versionCode
+        this.flavor = flavor
     }
 
     @Suppress("UNCHECKED_CAST")

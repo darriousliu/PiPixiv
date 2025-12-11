@@ -53,12 +53,12 @@ import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
-import com.mrl.pixiv.profile.AboutScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.FileNameFormatScreen
 import com.mrl.pixiv.setting.SettingScreen
+import com.mrl.pixiv.setting.about.AboutScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
 import com.mrl.pixiv.setting.download.DownloadScreen

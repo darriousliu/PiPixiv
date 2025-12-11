@@ -39,7 +39,7 @@ class App : Application() {
         instance = this
         MMKV.initialize(this)
         initializeFirebase()
-        AppUtil.init(this)
+        AppUtil.init(this, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.FLAVOR)
         startKoin {
             androidLogger()
             androidContext(this@App)

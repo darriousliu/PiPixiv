@@ -20,4 +20,7 @@ object Constants {
         STATIC_IMAGE_HOST to "210.140.92.143",
         "doh" to "doh.dns.sb",
     )
+    const val GITHUB_URL = "https://github.com/darriousliu/PiPixiv"
+    const val GITHUB_ISSUE_URL = "$GITHUB_URL/issues"
+    const val GITHUB_UPDATE_API = "https://api.github.com/repos/darriousliu/PiPixiv/releases/latest"
 }

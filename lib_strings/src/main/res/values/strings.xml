@@ -145,7 +145,10 @@
     <string name="check_update">检查更新</string>
     <string name="project_url">项目地址</string>
     <string name="feedback">反馈</string>
+    <string name="feedback_content">欢迎反馈问题和共同开发</string>
     <string name="share_app">分享应用</string>
+    <string name="recommend_this_app">推荐这个app</string>
     <string name="new_version_available">有新版本</string>
     <string name="current_version">当前版本</string>
+    <string name="download">下载</string>
 </resources>

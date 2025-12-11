@@ -1,13 +1,18 @@
-package com.mrl.pixiv.profile
+package com.mrl.pixiv.setting.about
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -15,18 +20,27 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.data.Constants
+import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.repository.VersionManager
+import com.mrl.pixiv.common.repository.VersionManager.getCurrentFlavorAsset
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
@@ -42,6 +56,14 @@ fun AboutScreen(
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
+    val latestVersionInfo by VersionManager.latestVersionInfo.collectAsStateWithLifecycle()
+    var showUpdateDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        VersionManager.latestVersionInfo.collect {
+
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -100,8 +122,11 @@ fun AboutScreen(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
-                            uriHandler.openUri("https://github.com/Mrl98/PiPixiv")
-                        }
+                            uriHandler.openUri(Constants.GITHUB_URL)
+                        },
+                    supportingContent = {
+                        Text(text = Constants.GITHUB_URL)
+                    }
                 )
 
                 // Feedback
@@ -110,8 +135,11 @@ fun AboutScreen(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
-                            uriHandler.openUri("https://github.com/Mrl98/PiPixiv/issues")
-                        }
+                            uriHandler.openUri(Constants.GITHUB_ISSUE_URL)
+                        },
+                    supportingContent = {
+                        Text(text = stringResource(RString.feedback_content))
+                    }
                 )
 
                 // Share App
@@ -120,9 +148,13 @@ fun AboutScreen(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
-                            val intent = ShareUtil.createShareIntent("Check out this app: https://github.com/Mrl98/PiPixiv")
+                            val intent =
+                                ShareUtil.createShareIntent("Check out this app: ${Constants.GITHUB_URL}")
                             context.startActivity(intent)
-                        }
+                        },
+                    supportingContent = {
+                        Text(text = stringResource(RString.recommend_this_app))
+                    }
                 )
 
                 // Check Update
@@ -132,17 +164,62 @@ fun AboutScreen(
                         if (hasNewVersion) {
                             Text(
                                 text = stringResource(RString.new_version_available),
-                                color = MaterialTheme.colorScheme.primary
+                                modifier = Modifier
+                                    .background(Color.Red, 8.round)
+                                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                                color = Color.White
                             )
                         }
                     },
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
-                            VersionManager.checkUpdate()
+                            showUpdateDialog = true
                         }
                 )
             }
         }
+    }
+
+    if (showUpdateDialog && latestVersionInfo != null) {
+        val latestVersionInfo = latestVersionInfo!!
+        val asset = latestVersionInfo.getCurrentFlavorAsset()
+        AlertDialog(
+            onDismissRequest = { showUpdateDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = click@{
+                        val url = asset?.downloadUrl
+                            ?: run {
+                                VersionManager.checkUpdate()
+                                return@click
+                            }
+                        uriHandler.openUri(url)
+                    }
+                ) {
+                    Text(text = stringResource(RString.download))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showUpdateDialog = false
+                    }
+                ) {
+                    Text(text = stringResource(RString.cancel))
+                }
+            },
+            title = {
+                Text(text = asset?.name.orEmpty())
+            },
+            text = {
+                Text(
+                    text = latestVersionInfo.body.orEmpty(),
+                    modifier = Modifier
+                        .heightIn(max = 400.dp)
+                        .verticalScroll(rememberScrollState())
+                )
+            }
+        )
     }
 }
