@@ -73,6 +73,8 @@ internal fun Project.configureKotlinAndroid(
         // Logger
         implementation(libs.findLibrary("kermit").get())
     }
+
+    configureSortKoinKspGeneration()
 }
 
 /**

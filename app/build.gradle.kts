@@ -1,5 +1,4 @@
 import com.android.build.gradle.internal.api.ApkVariantOutputImpl
-import com.mrl.pixiv.buildsrc.configureSortKoinKspGeneration
 
 plugins {
     id("pixiv.android.application")
@@ -121,5 +120,3 @@ dependencies {
     implementation(libs.mmkv)
     implementation(libs.mmkv.kotlin)
 }
-
-configureSortKoinKspGeneration()

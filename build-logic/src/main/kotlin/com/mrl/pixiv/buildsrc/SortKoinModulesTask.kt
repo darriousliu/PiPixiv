@@ -4,6 +4,7 @@ import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -14,35 +15,38 @@ import org.gradle.work.DisableCachingByDefault
 
 fun Project.configureSortKoinKspGeneration() {
     val taskBlock: (variant: String) -> Unit = { variant ->
+        val cap = variant.uppercaseFirstChar()
+
         val kspOutputDirPath = layout.buildDirectory.dir(
             "generated/ksp/$variant/kotlin/org/koin/ksp/generated"
         )
 
-        // 1️⃣ 注册任务
-        tasks.register<SortKoinModulesTask>("sort${variant.uppercaseFirstChar()}KoinModules") {
+        val sortTask = tasks.register<SortKoinModulesTask>("sort${cap}KoinModules") {
             group = "koin"
             description = "Sort Koin KSP generated modules for variant: $variant"
             kspOutputDir.set(kspOutputDirPath)
 
-            // 2️⃣ ⭐ 关键：使用 onlyIf 谓词决定是否执行
             onlyIf {
                 val dir = kspOutputDir.orNull?.asFile
-                val shouldRun = dir != null && dir.exists()
-
-                if (!shouldRun) {
-                    logger.quiet("⏭️  Task '${this.name}' 被跳过（KSP 输出目录不存在）")
-                }
-                shouldRun
+                dir != null && dir.exists()
             }
         }
 
-        // 3️⃣ 延迟绑定任务依赖
-        tasks.whenTaskAdded {
-            if (name == "ksp${variant.uppercaseFirstChar()}Kotlin") {
-                finalizedBy("sort${variant.uppercaseFirstChar()}KoinModules")
-                logger.quiet("✅ 已链接: $name → sort${variant.uppercaseFirstChar()}KoinModules")
-            }
+        val kspTaskName = "ksp${cap}Kotlin"
+        val compileTaskName = "compile${cap}Kotlin"
+
+        // 关键：平铺式建立依赖，不要嵌套 configure
+        // sort <- ksp
+        sortTask.configure {
+            dependsOn(tasks.named(kspTaskName))
         }
+
+        // compile <- sort
+        tasks.named(compileTaskName).configure {
+            dependsOn(sortTask)
+        }
+
+        logger.quiet("✅ 已链接: $kspTaskName → ${sortTask.name} → $compileTaskName")
     }
 
     if (plugins.hasPlugin("com.android.application")) {
@@ -85,7 +89,7 @@ abstract class SortKoinModulesTask : DefaultTask() {
         // 2️⃣ 查找 .kt 文件
         val moduleFiles = outputDir.listFiles { file ->
             file.isFile && file.name.endsWith(".kt")
-        } ?: run {
+        }?.sortedBy { it.name } ?: run {
             logger.quiet("  ⚠️ 目录为空或不可读")
             return
         }
@@ -117,13 +121,13 @@ abstract class SortKoinModulesTask : DefaultTask() {
 /**
  * ⭐ 排序核心逻辑
  */
-private fun sortKoinModuleContent(content: String): String {
+private fun Task.sortKoinModuleContent(content: String): String {
     val moduleRegex = Regex(
         pattern = """module\s*\{([\s\S]*?)\n\s*\}""",
         options = setOf(RegexOption.MULTILINE)
     )
 
-    return moduleRegex.replace(content) { matchResult ->
+    var result = moduleRegex.replace(content) { matchResult ->
         val blockContent = matchResult.groupValues[1]
         val lines = blockContent.split("\n")
             .map { it.trim() }
@@ -134,5 +138,53 @@ private fun sortKoinModuleContent(content: String): String {
         """module {
     $rebuiltContent
 }"""
+    }
+    // 2️⃣ 排序 @ExternalDefinition 函数定义
+    result = sortDefinitionsByExternalDefinition(result)
+
+    return result
+}
+
+/**
+ * ⭐ 对 @ExternalDefinition 函数定义按照 ExternalDefinition 值进行排序
+ */
+private fun Task.sortDefinitionsByExternalDefinition(content0: String): String {
+    // 1) 统一换行，避免 CRLF/LF 导致的边界不一致
+    val content = content0.replace("\r\n", "\n").replace("\r", "\n")
+
+    // 2) 抽离固定 footer 注释，避免被上一个 block 吞掉
+    val footerRegex = Regex("""(?s)\n\s*//DefaultModule generation is disabled\..*""")
+    val footerMatch = footerRegex.find(content)
+    val footer = footerMatch?.value.orEmpty()
+    val contentNoFooter = footerMatch?.let { content.removeRange(it.range) } ?: content
+
+    // 3) 仅匹配“行首”的 ExternalDefinition block，block 结束于下一个 ExternalDefinition（行首）或 EOF
+    val defRegex = Regex(
+        pattern = """(?ms)^\s*@ExternalDefinition\([^)]*\)\s*public fun Module\..*?(?=^\s*@ExternalDefinition|\Z)"""
+    )
+
+    val matches = defRegex.findAll(contentNoFooter).toList()
+    if (matches.isEmpty()) return content
+
+    val header = contentNoFooter.substring(0, matches.first().range.first)
+    val tail = contentNoFooter.substring(matches.last().range.last + 1)
+
+    val sortedBlocks = matches
+        .map { it.value }
+        .sorted()
+
+    return buildString {
+        append(header)
+        sortedBlocks.forEach { b ->
+            append(b.trimEnd())
+            append("\n")
+        }
+        append(tail)
+        if (footer.isNotBlank()) {
+            if (!endsWith("\n")) append("\n")
+            append(footer.trimStart('\n'))
+        }
+    }.also { rebuiltContent ->
+        logger.quiet("before:\n$content\n\nafter:\n$rebuiltContent")
     }
 }
