@@ -85,7 +85,7 @@ jobs:
           echo "$delimiter" >> $GITHUB_OUTPUT
 
       - name: Upload Release Build to Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: release-apks
           path: ${{ steps.releaseApks.outputs.release_apks }}
