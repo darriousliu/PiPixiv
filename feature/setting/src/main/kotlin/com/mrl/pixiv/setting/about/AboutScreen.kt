@@ -156,7 +156,7 @@ fun AboutScreen(
                                 ShareUtil.createShareIntent(
                                     AppUtil.getString(
                                         RString.recommend_content,
-                                        Constants.GITHUB_URL
+                                        Constants.GITHUB_RELEASE_URL
                                     )
                                 )
                             context.startActivity(intent)
