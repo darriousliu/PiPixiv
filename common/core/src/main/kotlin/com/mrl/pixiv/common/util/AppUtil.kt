@@ -30,7 +30,7 @@ object AppUtil {
         return appContext.getSystemService(serviceName) as? T
     }
 
-    fun getString(@StringRes resId: Int): String {
-        return appContext.getString(resId)
+    fun getString(@StringRes resId: Int, vararg args: Any): String {
+        return appContext.getString(resId, *args)
     }
 }

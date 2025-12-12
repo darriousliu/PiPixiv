@@ -137,4 +137,15 @@
     <string name="legend_user_id">ID автора</string>
     <string name="legend_user_name">Имя автора</string>
     <string name="legend_index">Индекс страницы</string>
+    <string name="about">О программе</string>
+    <string name="check_update">Проверить обновление</string>
+    <string name="project_url">URL проекта</string>
+    <string name="feedback">Обратная связь</string>
+    <string name="feedback_content">Приветствуем отзывы об ошибках и совместную разработку</string>
+    <string name="share_app">Поделиться приложением</string>
+    <string name="recommend_this_app">Рекомендовать это приложение</string>
+    <string name="recommend_content">Клиент Pixiv третьей стороны\n%s</string>
+    <string name="new_version_available">Доступна новая версия</string>
+    <string name="current_version">Текущая версия: %s</string>
+    <string name="download">Загрузить</string>
 </resources>

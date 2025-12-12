@@ -1,6 +1,6 @@
 package com.mrl.pixiv.setting.about
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,11 +8,12 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,17 +32,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.data.Constants
-import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.repository.VersionManager.getCurrentFlavorAsset
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.util.AppUtil
+import com.mrl.pixiv.common.util.CmnRDrawable
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.throttleClick
@@ -95,11 +98,12 @@ fun AboutScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Info, // Placeholder for App Icon
+                Image(
+                    painter = painterResource(id = CmnRDrawable.ic_launcher),
                     contentDescription = null,
-                    modifier = Modifier.size(100.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape),
                 )
                 Text(
                     text = stringResource(RString.app_name),
@@ -107,7 +111,7 @@ fun AboutScreen(
                     modifier = Modifier.padding(top = 16.dp)
                 )
                 Text(
-                    text = "${stringResource(RString.current_version)}: 1.0.0", // Placeholder version
+                    text = stringResource(RString.current_version, AppUtil.versionName),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -149,7 +153,12 @@ fun AboutScreen(
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
                             val intent =
-                                ShareUtil.createShareIntent("Check out this app: ${Constants.GITHUB_URL}")
+                                ShareUtil.createShareIntent(
+                                    AppUtil.getString(
+                                        RString.recommend_content,
+                                        Constants.GITHUB_URL
+                                    )
+                                )
                             context.startActivity(intent)
                         },
                     supportingContent = {
@@ -162,13 +171,12 @@ fun AboutScreen(
                     headlineContent = { Text(text = stringResource(RString.check_update)) },
                     trailingContent = {
                         if (hasNewVersion) {
-                            Text(
-                                text = stringResource(RString.new_version_available),
-                                modifier = Modifier
-                                    .background(Color.Red, 8.round)
-                                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                                color = Color.White
-                            )
+                            Badge {
+                                Text(
+                                    text = stringResource(RString.new_version_available),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                )
+                            }
                         }
                     },
                     modifier = Modifier

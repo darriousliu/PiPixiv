@@ -108,7 +108,6 @@
     <string name="span_count_portrait">Colunas de obras (Retrato)</string>
     <string name="span_count_landscape">Colunas de obras (Paisagem)</string>
     <string name="span_count_adaptive">Adaptável</string>
-    <!-- values-pt -->
     <string name="ranking">Ranking</string>
     <string name="every_day">Diário</string>
     <string name="popular_male">Popular entre homens</string>
@@ -138,4 +137,15 @@
     <string name="legend_user_id">ID do artista</string>
     <string name="legend_user_name">Nome do artista</string>
     <string name="legend_index">Índice</string>
+    <string name="about">Sobre</string>
+    <string name="check_update">Verificar atualização</string>
+    <string name="project_url">URL do projeto</string>
+    <string name="feedback">Feedback</string>
+    <string name="feedback_content">Bem-vindo para comentários de problemas e co-desenvolvimento</string>
+    <string name="share_app">Compartilhar aplicativo</string>
+    <string name="recommend_this_app">Recomende este aplicativo</string>
+    <string name="recommend_content">Cliente Pixiv de terceiros\n%s</string>
+    <string name="new_version_available">Nova versão disponível</string>
+    <string name="current_version">Versão atual: %s</string>
+    <string name="download">Baixar</string>
 </resources>

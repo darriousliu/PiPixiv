@@ -137,4 +137,15 @@
     <string name="legend_user_id">ID de l\'artiste</string>
     <string name="legend_user_name">Nom de l\'artiste</string>
     <string name="legend_index">Index</string>
+    <string name="about">À propos</string>
+    <string name="check_update">Vérifier les mises à jour</string>
+    <string name="project_url">URL du projet</string>
+    <string name="feedback">Retour d\'information</string>
+    <string name="feedback_content">Bienvenue pour signaler les problèmes et co-développer</string>
+    <string name="share_app">Partager l\'application</string>
+    <string name="recommend_this_app">Recommander cette application</string>
+    <string name="recommend_content">Client Pixiv tiers\n%s</string>
+    <string name="new_version_available">Nouvelle version disponible</string>
+    <string name="current_version">Version actuelle : %s</string>
+    <string name="download">Télécharger</string>
 </resources>

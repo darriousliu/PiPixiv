@@ -148,7 +148,8 @@
     <string name="feedback_content">欢迎反馈问题和共同开发</string>
     <string name="share_app">分享应用</string>
     <string name="recommend_this_app">推荐这个app</string>
+    <string name="recommend_content">第三方Pixiv客户端\n%s</string>
     <string name="new_version_available">有新版本</string>
-    <string name="current_version">当前版本</string>
+    <string name="current_version">当前版本：%s</string>
     <string name="download">下载</string>
 </resources>

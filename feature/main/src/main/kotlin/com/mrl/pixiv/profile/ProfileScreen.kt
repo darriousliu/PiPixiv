@@ -361,7 +361,10 @@ fun ProfileScreen(
                     trailingContent = {
                         if (hasNewVersion) {
                             Badge {
-                                Text(text = "New")
+                                Text(
+                                    text = stringResource(RString.new_version_available),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                )
                             }
                         }
                     }

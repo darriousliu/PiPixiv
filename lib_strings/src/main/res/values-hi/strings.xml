@@ -137,4 +137,15 @@
     <string name="legend_user_id">कलाकार ID</string>
     <string name="legend_user_name">कलाकार का नाम</string>
     <string name="legend_index">पेज नंबर</string>
+    <string name="about">परिचय</string>
+    <string name="check_update">अपडेट जांचें</string>
+    <string name="project_url">प्रोजेक्ट URL</string>
+    <string name="feedback">प्रतिक्रिया</string>
+    <string name="feedback_content">समस्या प्रतिक्रिया और सह-विकास के लिए स्वागत है</string>
+    <string name="share_app">ऐप साझा करें</string>
+    <string name="recommend_this_app">इस ऐप की सिफारिश करें</string>
+    <string name="recommend_content">तृतीय-पक्ष Pixiv क्लाइंट\n%s</string>
+    <string name="new_version_available">नया संस्करण उपलब्ध है</string>
+    <string name="current_version">वर्तमान संस्करण: %s</string>
+    <string name="download">डाउनलोड करें</string>
 </resources>
