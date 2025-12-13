@@ -192,6 +192,7 @@ fun AboutScreen(
                         val url = asset?.downloadUrl
                             ?: run {
                                 VersionManager.checkUpdate()
+                                uriHandler.openUri(Constants.GITHUB_RELEASE_URL)
                                 return@click
                             }
                         uriHandler.openUri(url)
