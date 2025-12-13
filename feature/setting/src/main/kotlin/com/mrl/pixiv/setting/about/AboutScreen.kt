@@ -25,7 +25,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,12 +60,6 @@ fun AboutScreen(
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
     val latestVersionInfo by VersionManager.latestVersionInfo.collectAsStateWithLifecycle()
     var showUpdateDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        VersionManager.latestVersionInfo.collect {
-
-        }
-    }
 
     Scaffold(
         modifier = modifier,
@@ -182,6 +175,7 @@ fun AboutScreen(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
+                            VersionManager.checkUpdate()
                             showUpdateDialog = true
                         }
                 )

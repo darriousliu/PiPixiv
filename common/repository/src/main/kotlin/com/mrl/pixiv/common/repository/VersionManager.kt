@@ -4,6 +4,8 @@ import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.serialize.JSON
 import com.mrl.pixiv.common.util.AppUtil
+import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.ToastUtil
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -64,6 +66,7 @@ object VersionManager {
                 } else {
                     _hasNewVersion.value = false
                     _latestVersionInfo.value = null
+                    ToastUtil.safeShortToast(RString.already_updated)
                 }
             } catch (e: Exception) {
                 Logger.e("VersionManager", e) { "Failed to check update" }

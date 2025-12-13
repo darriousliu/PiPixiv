@@ -139,6 +139,7 @@
     <string name="legend_index">رقم الصفحة</string>
     <string name="about">حول</string>
     <string name="check_update">التحقق من التحديثات</string>
+    <string name="already_updated">بالفعل أحدث إصدار</string>
     <string name="project_url">عنوان المشروع</string>
     <string name="feedback">ملاحظات</string>
     <string name="feedback_content">نرحب بملاحظاتك ومساهمتك في التطوير</string>

@@ -139,6 +139,7 @@
     <string name="legend_index">페이지 번호</string>
     <string name="about">정보</string>
     <string name="check_update">업데이트 확인</string>
+    <string name="already_updated">이미 최신 버전임</string>
     <string name="project_url">프로젝트 URL</string>
     <string name="feedback">피드백</string>
     <string name="feedback_content">문제 피드백 및 공동 개발을 환영합니다</string>

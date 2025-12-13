@@ -139,6 +139,7 @@
     <string name="legend_index">Индекс страницы</string>
     <string name="about">О программе</string>
     <string name="check_update">Проверить обновление</string>
+    <string name="already_updated">Уже появилась последняя версия</string>
     <string name="project_url">URL проекта</string>
     <string name="feedback">Обратная связь</string>
     <string name="feedback_content">Приветствуем отзывы об ошибках и совместную разработку</string>

@@ -143,6 +143,7 @@
     <string name="legend_index">第几张</string>
     <string name="about">关于</string>
     <string name="check_update">检查更新</string>
+    <string name="already_updated">已经是最新版本</string>
     <string name="project_url">项目地址</string>
     <string name="feedback">反馈</string>
     <string name="feedback_content">欢迎反馈问题和共同开发</string>

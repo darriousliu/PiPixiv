@@ -139,6 +139,7 @@
     <string name="legend_index">Índice</string>
     <string name="about">Sobre</string>
     <string name="check_update">Verificar atualização</string>
+    <string name="already_updated">Já é a versão mais recente</string>
     <string name="project_url">URL do projeto</string>
     <string name="feedback">Feedback</string>
     <string name="feedback_content">Bem-vindo para comentários de problemas e co-desenvolvimento</string>

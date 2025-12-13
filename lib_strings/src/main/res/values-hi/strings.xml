@@ -139,6 +139,7 @@
     <string name="legend_index">पेज नंबर</string>
     <string name="about">परिचय</string>
     <string name="check_update">अपडेट जांचें</string>
+    <string name="already_updated">पहले से ही नवीनतम संस्करण</string>
     <string name="project_url">प्रोजेक्ट URL</string>
     <string name="feedback">प्रतिक्रिया</string>
     <string name="feedback_content">समस्या प्रतिक्रिया और सह-विकास के लिए स्वागत है</string>
