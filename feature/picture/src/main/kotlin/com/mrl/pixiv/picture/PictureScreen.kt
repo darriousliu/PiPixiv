@@ -521,8 +521,11 @@ internal fun PictureScreen(
                                                 enableTransition
                                             )
                                         },
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier.weight(1f / userSpanCount),
                                     )
+                                }
+                                if (illusts.size < userSpanCount) {
+                                    Spacer(modifier = Modifier.weight((userSpanCount - illusts.size) / userSpanCount.toFloat()))
                                 }
                             }
                         }
