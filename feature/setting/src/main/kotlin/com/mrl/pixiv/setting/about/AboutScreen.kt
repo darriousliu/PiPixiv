@@ -27,7 +27,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +59,7 @@ fun AboutScreen(
     val context = LocalContext.current
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
     val latestVersionInfo by VersionManager.latestVersionInfo.collectAsStateWithLifecycle()
-    var showUpdateDialog by remember { mutableStateOf(false) }
+    var showUpdateDialog by retain { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
@@ -80,14 +80,14 @@ fun AboutScreen(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // App Icon and Version
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -110,9 +110,7 @@ fun AboutScreen(
                 )
             }
 
-            Column(
-                modifier = Modifier.weight(2f)
-            ) {
+            Column {
                 // Project URL
                 ListItem(
                     headlineContent = { Text(text = stringResource(RString.project_url)) },
