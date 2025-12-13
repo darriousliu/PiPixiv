@@ -8,6 +8,8 @@ import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.util.filterNormal
 import com.mrl.pixiv.common.repository.util.queryParams
 
 class SearchIllustPagingSource(
@@ -25,6 +27,11 @@ class SearchIllustPagingSource(
                 PixivRepository.searchIllustNext(params.key!!.toMap())
             }
             val query = resp.nextUrl?.queryParams
+            val illusts = if (requireUserPreferenceValue.isR18Enabled) {
+                resp.illusts.distinctBy { it.id }
+            } else {
+                resp.illusts.distinctBy { it.id }.filterNormal()
+            }
             if (query != null) {
                 val nextKey = SearchIllustQuery(
                     word = query["word"] ?: "",
@@ -39,13 +46,13 @@ class SearchIllustPagingSource(
                     offset = query["offset"]?.toInt() ?: 0,
                 )
                 LoadResult.Page(
-                    data = resp.illusts.distinctBy { it.id },
+                    data = illusts,
                     prevKey = params.key,
                     nextKey = nextKey
                 )
             } else {
                 LoadResult.Page(
-                    data = resp.illusts.distinctBy { it.id },
+                    data = illusts,
                     prevKey = params.key,
                     nextKey = null
                 )

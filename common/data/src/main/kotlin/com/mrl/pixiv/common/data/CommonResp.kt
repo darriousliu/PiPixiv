@@ -28,6 +28,35 @@ data class ImageUrls(
     val original: String = ""
 )
 
+/**
+ * 表示插画、漫画或动图作品的类。
+ *
+ * @property id 作品的唯一标识符。
+ * @property title 作品的标题。
+ * @property type 作品的类型，可以是插画、漫画或动图。
+ * @property imageUrls 作品关联的多分辨率图像URL。
+ * @property caption 作品的描述或说明文字，默认为空字符串。
+ * @property restrict 作品的访问限制级别，0表示公开。
+ * @property user 发布作品的用户信息。
+ * @property tags 关联的标签列表，可选属性。
+ * @property tools 使用的创作工具列表，可选属性。
+ * @property createDate 作品的创建日期，格式为ISO 8601，默认为空字符串。
+ * @property pageCount 作品的页数，通常用于漫画或多页面的插画。
+ * @property width 作品的宽度（像素）。
+ * @property height 作品的高度（像素）。
+ * @property sanityLevel 作品的内容敏感度分级，通常用于内容筛选，越高越令人不适。
+ * @property xRestrict 作品的额外访问限制级别，0-普通，1-R18，2-R18G。
+ * @property series 作品所属系列的元数据，可选属性。
+ * @property metaSinglePage 单页作品的元数据，包含原始图像URL。
+ * @property metaPages 多页作品的元数据列表，可选属性。
+ * @property totalView 作品的总查看次数。
+ * @property totalBookmarks 作品的总收藏次数。
+ * @property isBookmarked 当前用户是否已收藏该作品。
+ * @property visible 作品是否可见，可选属性。
+ * @property isMuted 当前用户是否屏蔽该作品，可选属性。
+ * @property illustAIType 作品是否为AI生成的标识。
+ * @property illustBookStyle 作品的书籍风格标识，默认为0。
+ */
 @Serializable
 @Immutable
 data class Illust(
@@ -57,7 +86,7 @@ data class Illust(
     val sanityLevel: Int = 0,
 
     @SerialName("x_restrict")
-    val xRestrict: Int = 0,
+    val xRestrict: XRestrict = XRestrict.Normal,
 
     @Transient
     val series: JsonElement? = null,
@@ -159,7 +188,7 @@ data class Novel(
     val restrict: Long,
 
     @SerialName("x_restrict")
-    val xRestrict: Long,
+    val xRestrict: XRestrict,
 
     @SerialName("is_original")
     val isOriginal: Boolean,
@@ -227,4 +256,14 @@ enum class IllustAiType(val value: Int) {
 
     @SerialName("2")
     AiGeneratedWorks(2)
+}
+
+@JvmInline
+@Serializable
+value class XRestrict(val value: Int) {
+    companion object {
+        val Normal = XRestrict(0)
+        val R18 = XRestrict(1)
+        val R18G = XRestrict(2)
+    }
 }
