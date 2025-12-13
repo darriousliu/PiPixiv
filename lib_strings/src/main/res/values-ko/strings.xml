@@ -108,7 +108,6 @@
     <string name="span_count_portrait">작품 열 수 (세로)</string>
     <string name="span_count_landscape">작품 열 수 (가로)</string>
     <string name="span_count_adaptive">자동 조정</string>
-    <!-- values-ko -->
     <string name="ranking">랭킹</string>
     <string name="every_day">일일</string>
     <string name="popular_male">남성 인기</string>
@@ -138,4 +137,16 @@
     <string name="legend_user_id">작가 ID</string>
     <string name="legend_user_name">작가명</string>
     <string name="legend_index">페이지 번호</string>
+    <string name="about">정보</string>
+    <string name="check_update">업데이트 확인</string>
+    <string name="already_updated">이미 최신 버전임</string>
+    <string name="project_url">프로젝트 URL</string>
+    <string name="feedback">피드백</string>
+    <string name="feedback_content">문제 피드백 및 공동 개발을 환영합니다</string>
+    <string name="share_app">앱 공유</string>
+    <string name="recommend_this_app">이 앱 추천</string>
+    <string name="recommend_content">타사 Pixiv 클라이언트\n%s</string>
+    <string name="new_version_available">새 버전 사용 가능</string>
+    <string name="current_version">현재 버전: %s</string>
+    <string name="download">다운로드</string>
 </resources>
