@@ -23,5 +23,5 @@ object Constants {
     const val GITHUB_URL = "https://github.com/darriousliu/PiPixiv"
     const val GITHUB_ISSUE_URL = "$GITHUB_URL/issues"
     const val GITHUB_RELEASE_URL = "$GITHUB_URL/releases"
-    const val GITHUB_UPDATE_API = "https://api.github.com/repos/darriousliu/PiPixiv/releases/latest"
+    const val GITHUB_UPDATE_API = "https://pipixiv-update.kiritowdnmd.workers.dev/pipixiv/latest"
 }
