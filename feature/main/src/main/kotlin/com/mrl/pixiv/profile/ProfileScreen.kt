@@ -90,7 +90,6 @@ fun ProfileScreen(
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
     LifecycleResumeEffect(Unit) {
         viewModel.dispatch(ProfileAction.GetUserInfo)
-        VersionManager.checkUpdate()
         onPauseOrDispose {}
     }
     Scaffold(

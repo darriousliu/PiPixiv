@@ -53,7 +53,7 @@ object VersionManager {
     private val _latestVersionInfo = MutableStateFlow<GitHubRelease?>(null)
     val latestVersionInfo: StateFlow<GitHubRelease?> = _latestVersionInfo
 
-    fun checkUpdate() {
+    fun checkUpdate(showToast: Boolean = false) {
         scope.launch {
             try {
                 val release = client.get(Constants.GITHUB_UPDATE_API).body<GitHubRelease>()
@@ -66,7 +66,9 @@ object VersionManager {
                 } else {
                     _hasNewVersion.value = false
                     _latestVersionInfo.value = null
-                    ToastUtil.safeShortToast(RString.already_updated)
+                    if (showToast) {
+                        ToastUtil.safeShortToast(RString.already_updated)
+                    }
                 }
             } catch (e: Exception) {
                 Logger.e("VersionManager", e) { "Failed to check update" }

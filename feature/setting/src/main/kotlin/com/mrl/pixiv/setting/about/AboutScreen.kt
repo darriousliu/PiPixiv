@@ -175,7 +175,7 @@ fun AboutScreen(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
-                            VersionManager.checkUpdate()
+                            VersionManager.checkUpdate(true)
                             showUpdateDialog = true
                         }
                 )
