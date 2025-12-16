@@ -28,13 +28,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.compose.LocalToaster
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
+import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.search.SearchState.SearchFilter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun FilterBottomSheet(
@@ -46,6 +51,8 @@ internal fun FilterBottomSheet(
 ) {
     var innerSearchFilter by remember { mutableStateOf(searchFilter) }
     val scope = rememberCoroutineScope()
+    val toaster = LocalToaster.current
+    val isPremium by requireUserInfoFlow.map { it.profile.isPremium }.collectAsStateWithLifecycle(false)
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
@@ -111,6 +118,9 @@ internal fun FilterBottomSheet(
                     selected = innerSearchFilter.sort == key,
                     onClick = {
                         innerSearchFilter = innerSearchFilter.copy(sort = key)
+                        if (!isPremium && key == SearchSort.POPULAR_DESC) {
+                            toaster.show(RString.premium_required, duration = 2.seconds)
+                        }
                     }
                 )
             }

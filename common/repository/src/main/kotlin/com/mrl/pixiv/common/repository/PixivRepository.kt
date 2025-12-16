@@ -212,4 +212,13 @@ object PixivRepository : KoinComponent {
 
     suspend fun addIllustBrowsingHistory(illustIds: List<Long>) =
         apiApi.addIllustBrowsingHistory(illustIds)
+
+    suspend fun searchPopularPreviewIllust(query: SearchIllustQuery) =
+        apiApi.searchPopularPreviewIllust(
+            query.filter.value,
+            query.includeTranslatedTagResults,
+            query.mergePlainKeywordResults,
+            query.word,
+            query.searchTarget.value,
+        )
 }

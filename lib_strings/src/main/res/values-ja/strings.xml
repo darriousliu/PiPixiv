@@ -90,7 +90,7 @@
     <string name="user_blocked">ユーザーはブロックされています</string>
     <string name="cancel_user_blocked">ユーザーのブロックを解除</string>
     <string name="app_data">アプリデータ</string>
-    <string name="clear_cache">キャッシュを削除</string>
+    <string name="clear_cache">キャッシュを削除 (%1$s)</string>
     <string name="cache_cleared">%1$s の空き容量を確保しました</string>
     <string name="migrate_data_title">旧データが見つかりました</string>
     <string name="migrate_data_desc">古いフォルダに %1$d 枚の画像があります。新しいフォルダへの移行を推奨します</string>
@@ -149,4 +149,5 @@
     <string name="new_version_available">新しいバージョンが利用可能です</string>
     <string name="current_version">現在のバージョン: %s</string>
     <string name="download">ダウンロード</string>
+    <string name="premium_required">Pixiv Premiumが必要です</string>
 </resources>

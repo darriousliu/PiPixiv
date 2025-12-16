@@ -38,6 +38,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,6 +73,8 @@ fun AppDataScreen(
     val state = viewModel.asState()
 
     var showMigrationConfirmDialog by remember { mutableStateOf(false) }
+    var trigger by remember { mutableIntStateOf(0) }
+    val cacheDirSize = remember(trigger) { context.cacheDir.calculateSize().adaptiveFileSize() }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -181,7 +184,7 @@ fun AppDataScreen(
 
             ListItem(
                 headlineContent = {
-                    Text(text = stringResource(RString.clear_cache))
+                    Text(text = stringResource(RString.clear_cache, cacheDirSize))
                 },
                 modifier = Modifier.clickable {
                     scope.launch(Dispatchers.IO) {
@@ -190,6 +193,7 @@ fun AppDataScreen(
                             it.deleteRecursively()
                         }
                         ToastUtil.safeShortToast(RString.cache_cleared, dirSize)
+                        trigger++
                     }
                 },
                 leadingContent = {

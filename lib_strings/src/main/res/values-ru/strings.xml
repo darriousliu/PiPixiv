@@ -90,7 +90,7 @@
     <string name="user_blocked">Пользователь заблокирован</string>
     <string name="cancel_user_blocked">Разблокировать пользователя</string>
     <string name="app_data">Данные приложения</string>
-    <string name="clear_cache">Очистить кэш</string>
+    <string name="clear_cache">Очистить кэш (%1$s)</string>
     <string name="cache_cleared">Освобождено %1$s места</string>
     <string name="migrate_data_title">Найдены старые данные</string>
     <string name="migrate_data_desc">В старой папке обнаружено изображений: %1$d. Рекомендуется перенос в новую папку</string>
@@ -149,4 +149,5 @@
     <string name="new_version_available">Доступна новая версия</string>
     <string name="current_version">Текущая версия: %s</string>
     <string name="download">Загрузить</string>
+    <string name="premium_required">Требуется Pixiv Premium</string>
 </resources>

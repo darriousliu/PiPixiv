@@ -233,4 +233,13 @@ interface PixivApi {
     suspend fun addIllustBrowsingHistory(
         @Field("illust_ids[]") illustId: List<Long>,
     ): EmptyResp
+
+    @GET("v1/search/popular-preview/illust")
+    suspend fun searchPopularPreviewIllust(
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("include_translated_tag_results") includeTranslatedTagResults: Boolean = true,
+        @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
+        @Query("word") word: String,
+        @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
+    ): SearchIllustResp
 }

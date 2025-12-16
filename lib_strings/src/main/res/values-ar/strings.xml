@@ -90,7 +90,7 @@
     <string name="user_blocked">تم حظر المستخدم</string>
     <string name="cancel_user_blocked">إلغاء حظر المستخدم</string>
     <string name="app_data">بيانات التطبيق</string>
-    <string name="clear_cache">مسح ذاكرة التخزين المؤقت</string>
+    <string name="clear_cache">مسح ذاكرة التخزين المؤقت (%1$s)</string>
     <string name="cache_cleared">تم إخلاء %1$s من المساحة</string>
     <string name="migrate_data_title">تم اكتشاف بيانات قديمة</string>
     <string name="migrate_data_desc">تم اكتشاف %1$d صورة في الدليل القديم، يوصى بنقلها إلى الدليل الجديد</string>
@@ -149,4 +149,5 @@
     <string name="new_version_available">نسخة جديدة متاحة</string>
     <string name="current_version">الإصدار الحالي: %s</string>
     <string name="download">تحميل</string>
+    <string name="premium_required">Pixiv Premium مطلوب</string>
 </resources>

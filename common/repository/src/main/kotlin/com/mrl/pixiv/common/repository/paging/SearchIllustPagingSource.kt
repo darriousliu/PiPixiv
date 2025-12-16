@@ -14,6 +14,7 @@ import com.mrl.pixiv.common.repository.util.queryParams
 
 class SearchIllustPagingSource(
     private val query: SearchIllustQuery,
+    private val isPremium: Boolean,
 ) : PagingSource<SearchIllustQuery, Illust>() {
     override fun getRefreshKey(state: PagingState<SearchIllustQuery, Illust>): SearchIllustQuery? {
         return null
@@ -22,7 +23,11 @@ class SearchIllustPagingSource(
     override suspend fun load(params: LoadParams<SearchIllustQuery>): LoadResult<SearchIllustQuery, Illust> {
         return try {
             val resp = if (params.key == null) {
-                PixivRepository.searchIllust(query)
+                if (query.sort == SearchSort.POPULAR_DESC && !isPremium) {
+                    PixivRepository.searchPopularPreviewIllust(query)
+                } else {
+                    PixivRepository.searchIllust(query)
+                }
             } else {
                 PixivRepository.searchIllustNext(params.key!!.toMap())
             }

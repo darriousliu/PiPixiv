@@ -7,10 +7,14 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.repository.paging.SearchIllustPagingSource
+import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.search.SearchState.SearchFilter
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateRange
 import kotlinx.datetime.format
@@ -46,7 +50,12 @@ class SearchResultViewModel(
 ) : BaseMviViewModel<SearchResultState, SearchResultAction>(
     initialState = SearchResultState(searchWords = searchWords),
 ), KoinComponent {
-    val searchResults = uiState.flatMapLatest { state ->
+    val searchResults = combine(
+        uiState,
+        requireUserInfoFlow.map { it.profile.isPremium }.distinctUntilChanged()
+    ) { state, isPremium ->
+        state to isPremium
+    }.flatMapLatest { (state, isPremium) ->
         val words = state.searchWords
         val filter = state.searchFilter
         val startDate = state.searchDateRange?.start
@@ -62,7 +71,8 @@ class SearchResultViewModel(
                     startDate = startDate?.format(LocalDate.Formats.ISO),
                     endDate = endDate?.format(LocalDate.Formats.ISO),
                     searchAiType = filter.searchAiType,
-                )
+                ),
+                isPremium = isPremium
             )
         }.flow
     }.cachedIn(viewModelScope)
