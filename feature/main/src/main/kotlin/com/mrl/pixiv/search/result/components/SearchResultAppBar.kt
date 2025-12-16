@@ -35,14 +35,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.compose.LocalToaster
+import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.throttleClick
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDateRange
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +64,9 @@ internal fun SearchResultAppBar(
 ) {
     var showBookmarkMenu by remember { mutableStateOf(false) }
     var showDateRangePicker by remember { mutableStateOf(false) }
+    val toaster = LocalToaster.current
+    val isPremium by requireUserInfoFlow.map { it.profile.isPremium }
+        .collectAsStateWithLifecycle(false)
 
     TopAppBar(
         modifier = modifier,
@@ -97,7 +105,12 @@ internal fun SearchResultAppBar(
             }
             // Bookmark Range
             IconButton(
-                onClick = { showBookmarkMenu = true },
+                onClick = {
+                    showBookmarkMenu = true
+                    if (!isPremium) {
+                        toaster.show(RString.premium_required, duration = 2.seconds)
+                    }
+                },
                 shapes = IconButtonDefaults.shapes(),
             ) {
                 Icon(

@@ -149,4 +149,5 @@
     <string name="new_version_available">नया संस्करण उपलब्ध है</string>
     <string name="current_version">वर्तमान संस्करण: %s</string>
     <string name="download">डाउनलोड करें</string>
+    <string name="premium_required">Pixiv Premium आवश्यक है</string>
 </resources>

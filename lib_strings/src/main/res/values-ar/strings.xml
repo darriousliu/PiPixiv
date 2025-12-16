@@ -149,4 +149,5 @@
     <string name="new_version_available">نسخة جديدة متاحة</string>
     <string name="current_version">الإصدار الحالي: %s</string>
     <string name="download">تحميل</string>
+    <string name="premium_required">Pixiv Premium مطلوب</string>
 </resources>

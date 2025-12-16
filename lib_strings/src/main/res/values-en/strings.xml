@@ -149,4 +149,5 @@
     <string name="new_version_available">New version available</string>
     <string name="current_version">Current version: %s</string>
     <string name="download">Download</string>
+    <string name="premium_required">Pixiv Premium Required</string>
 </resources>

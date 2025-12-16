@@ -149,4 +149,5 @@
     <string name="new_version_available">Nueva versión disponible</string>
     <string name="current_version">Versión actual: %s</string>
     <string name="download">Descargar</string>
+    <string name="premium_required">Se requiere Pixiv Premium</string>
 </resources>

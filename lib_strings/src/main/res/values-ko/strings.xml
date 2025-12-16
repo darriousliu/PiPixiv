@@ -149,4 +149,5 @@
     <string name="new_version_available">새 버전 사용 가능</string>
     <string name="current_version">현재 버전: %s</string>
     <string name="download">다운로드</string>
+    <string name="premium_required">Pixiv Premium 필요</string>
 </resources>

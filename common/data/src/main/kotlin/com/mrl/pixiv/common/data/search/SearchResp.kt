@@ -16,7 +16,7 @@ data class SearchIllustResp(
     val searchSpanLimit: Long,
 
     @SerialName("show_ai")
-    val showAi: Boolean
+    val showAi: Boolean = true
 )
 
 @Serializable
