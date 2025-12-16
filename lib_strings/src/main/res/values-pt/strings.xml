@@ -90,7 +90,7 @@
     <string name="user_blocked">Usuário bloqueado</string>
     <string name="cancel_user_blocked">Desbloquear usuário</string>
     <string name="app_data">Dados do aplicativo</string>
-    <string name="clear_cache">Limpar cache</string>
+    <string name="clear_cache">Limpar cache (%1$s)</string>
     <string name="cache_cleared">%1$s de espaço liberado</string>
     <string name="migrate_data_title">Dados antigos detectados</string>
     <string name="migrate_data_desc">%1$d imagens detectadas no diretório antigo. Recomenda-se migrar para o novo diretório</string>

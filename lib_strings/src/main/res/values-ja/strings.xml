@@ -90,7 +90,7 @@
     <string name="user_blocked">ユーザーはブロックされています</string>
     <string name="cancel_user_blocked">ユーザーのブロックを解除</string>
     <string name="app_data">アプリデータ</string>
-    <string name="clear_cache">キャッシュを削除</string>
+    <string name="clear_cache">キャッシュを削除 (%1$s)</string>
     <string name="cache_cleared">%1$s の空き容量を確保しました</string>
     <string name="migrate_data_title">旧データが見つかりました</string>
     <string name="migrate_data_desc">古いフォルダに %1$d 枚の画像があります。新しいフォルダへの移行を推奨します</string>

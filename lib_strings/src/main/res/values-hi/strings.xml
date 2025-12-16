@@ -90,7 +90,7 @@
     <string name="user_blocked">उपयोगकर्ता ब्लॉक किया गया</string>
     <string name="cancel_user_blocked">उपयोगकर्ता को अनब्लॉक करें</string>
     <string name="app_data">ऐप्लिकेशन डेटा</string>
-    <string name="clear_cache">कैश साफ़ करें</string>
+    <string name="clear_cache">कैश साफ़ करें (%1$s)</string>
     <string name="cache_cleared">%1$s जगह खाली की गई</string>
     <string name="migrate_data_title">पुराना डेटा मिला</string>
     <string name="migrate_data_desc">पुरानी निर्देशिका में %1$d चित्र मिले, नई निर्देशिका में स्थानांतरित करने का सुझाव दिया जाता है</string>

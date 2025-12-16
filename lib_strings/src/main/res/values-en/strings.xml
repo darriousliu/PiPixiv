@@ -90,7 +90,7 @@
     <string name="user_blocked">User Blocked</string>
     <string name="cancel_user_blocked">Unblock User</string>
     <string name="app_data">App data</string>
-    <string name="clear_cache">Clear cache</string>
+    <string name="clear_cache">Clear cache (%1$s)</string>
     <string name="cache_cleared">Cleared %1$s space</string>
     <string name="migrate_data_title">Legacy data detected</string>
     <string name="migrate_data_desc">Detected %1$d images in old directory. Migration to new directory is recommended</string>

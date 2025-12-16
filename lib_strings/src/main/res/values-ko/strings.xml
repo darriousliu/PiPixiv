@@ -90,7 +90,7 @@
     <string name="user_blocked">사용자 차단됨</string>
     <string name="cancel_user_blocked">사용자 차단 해제</string>
     <string name="app_data">앱 데이터</string>
-    <string name="clear_cache">캐시 삭제</string>
+    <string name="clear_cache">캐시 삭제 (%1$s)</string>
     <string name="cache_cleared">%1$s 공간 확보됨</string>
     <string name="migrate_data_title">이전 데이터 감지됨</string>
     <string name="migrate_data_desc">이전 디렉터리에서 %1$d개의 이미지가 감지되었습니다. 새 디렉터리로 이동하는 것을 권장합니다</string>
