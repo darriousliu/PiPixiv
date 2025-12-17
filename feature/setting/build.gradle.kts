@@ -1,5 +1,6 @@
 plugins {
     id("pixiv.android.library.compose")
+    alias(kotlinx.plugins.serialization)
 }
 
 android {
@@ -14,4 +15,8 @@ dependencies {
 
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)
+    
+    implementation(kotlinx.serialization.json)
+    implementation(kotlinx.datetime)
+    implementation(libs.okio)
 }

@@ -9,7 +9,16 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.IntRange
+import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
+import com.mrl.pixiv.common.data.Tag
+import com.mrl.pixiv.common.data.search.Search
+import com.mrl.pixiv.common.data.setting.UserPreference
+import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BookmarkedTagRepository
+import com.mrl.pixiv.common.repository.SearchRepository
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.toast.ToastMessage
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.OLD_DOWNLOAD_DIR
 import com.mrl.pixiv.common.util.RString
@@ -20,8 +29,27 @@ import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import okio.FileSystem
+import okio.Path.Companion.toOkioPath
+import okio.buffer
+import okio.sink
+import okio.source
 import org.koin.android.annotation.KoinViewModel
 import java.io.File
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
+
+@Serializable
+data class AppExportData(
+    val userPreference: UserPreference,
+    val searchHistory: Search,
+    val blockIllusts: Set<String>,
+    val blockUsers: Set<String>,
+    val bookmarkedTags: List<Tag>
+)
 
 data class AppDataState(
     val oldImageCount: Int = 0,
@@ -29,9 +57,16 @@ data class AppDataState(
     val progress: Float = 0f,
     @IntRange(from = 0)
     val migratedCount: Int = 0,
+    val isLoading: Boolean = false,
+    @StringRes
+    val loadingMessage: Int? = null
 )
 
 data class RequestPermissionEffect(val intentSender: IntentSender) : SideEffect
+
+private const val jsonDataFile = "data.json"
+
+private const val databaseName = "pixiv_db"
 
 @KoinViewModel
 class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
@@ -67,6 +102,127 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
                 .filter { it.isFile && regex.matches(it.name) }.size
 
             updateState { copy(oldImageCount = count) }
+        }
+    }
+
+    fun exportData(uri: Uri) {
+        launchIO {
+            updateState { copy(isLoading = true, loadingMessage = RString.exporting) }
+            try {
+                val data = AppExportData(
+                    userPreference = SettingRepository.userPreferenceFlow.value,
+                    searchHistory = SearchRepository.searchHistoryFlow.value,
+                    blockIllusts = BlockingRepository.blockIllustsFlow.value ?: emptySet(),
+                    blockUsers = BlockingRepository.blockUsersFlow.value ?: emptySet(),
+                    bookmarkedTags = BookmarkedTagRepository.bookmarkedTags.value
+                )
+                val jsonString = Json.encodeToString(data)
+
+                val context = AppUtil.appContext
+                context.contentResolver.openOutputStream(uri)?.use { os ->
+                    ZipOutputStream(os).use { zipOs ->
+                        // 将 ZipOutputStream 包装为 Okio BufferedSink，方便写入
+                        val sink = zipOs.sink().buffer()
+
+                        // --- 写入 JSON ---
+                        zipOs.putNextEntry(ZipEntry(jsonDataFile))
+                        sink.writeUtf8(jsonString)
+                        sink.flush() // 确保数据写入到底层 zip 流，但不要 close sink
+                        zipOs.closeEntry()
+
+
+                        // --- 写入数据库文件 ---
+                        val dbName = databaseName
+                        // 获取 Android 数据库路径并转换为 Okio Path
+                        val dbFile = context.getDatabasePath(dbName).toOkioPath()
+                        val parent = dbFile.parent ?: return@use
+
+                        // 查找相关文件 (.db, .db-shm, .db-wal)
+                        val dbFiles = listOf(
+                            dbFile,
+                            parent / "$dbName-shm",
+                            parent / "$dbName-wal"
+                        )
+
+                        dbFiles.forEach { path ->
+                            if (FileSystem.SYSTEM.exists(path)) {
+                                zipOs.putNextEntry(ZipEntry(path.name))
+
+                                // 使用 Okio Source 读取文件并直接传输到 Zip Sink
+                                FileSystem.SYSTEM.source(path).use { fileSource ->
+                                    sink.writeAll(fileSource)
+                                }
+                                sink.flush()
+                                zipOs.closeEntry()
+                            }
+                        }
+                    }
+                }
+                ToastUtil.safeShortToast(RString.export_success)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ToastUtil.safeShortToast(
+                    ToastMessage.Resource(
+                        RString.export_failed,
+                        arrayOf(e.message.orEmpty())
+                    )
+                )
+            } finally {
+                updateState { copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun importData(uri: Uri) {
+        launchIO {
+            updateState { copy(isLoading = true, loadingMessage = RString.importing) }
+            try {
+                val context = AppUtil.appContext
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    ZipInputStream(inputStream).use { zis ->
+                        // 将 ZipInputStream 包装为 Okio BufferedSource
+                        // 注意：这里我们不直接 close 这个 source，因为它会关闭底层的 zis
+                        val zipSource = zis.source().buffer()
+                        var entry = zis.nextEntry
+                        while (entry != null) {
+                            if (entry.name == jsonDataFile) {
+
+                                val jsonString = zipSource.readUtf8()
+
+                                val data = Json.decodeFromString<AppExportData>(jsonString)
+                                SettingRepository.restore(data.userPreference)
+                                SearchRepository.restore(data.searchHistory)
+                                BlockingRepository.restore(data.blockIllusts, data.blockUsers)
+                                BookmarkedTagRepository.restore(data.bookmarkedTags)
+                            } else if (entry.name.startsWith(databaseName)) {
+                                // --- 写入数据库文件 ---
+                                val dbFile = context.getDatabasePath(entry.name).toOkioPath()
+                                // 确保父文件夹存在
+                                dbFile.parent?.let { FileSystem.SYSTEM.createDirectories(it) }                                // 写入文件
+                                // 写入文件
+                                FileSystem.SYSTEM.sink(dbFile).buffer().use { fileSink ->
+                                    // writeAll 会从当前 zip entry 读取直到结束
+                                    fileSink.writeAll(zipSource)
+                                    fileSink.flush()
+                                }
+                            }
+                            zis.closeEntry()
+                            entry = zis.nextEntry
+                        }
+                    }
+                }
+                ToastUtil.safeShortToast(RString.import_success)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ToastUtil.safeShortToast(
+                    ToastMessage.Resource(
+                        RString.import_failed,
+                        arrayOf(e.message.orEmpty())
+                    )
+                )
+            } finally {
+                updateState { copy(isLoading = false) }
+            }
         }
     }
 

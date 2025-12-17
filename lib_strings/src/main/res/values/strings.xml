@@ -154,4 +154,12 @@
     <string name="current_version">当前版本：%s</string>
     <string name="download">下载</string>
     <string name="premium_required">需要Pixiv Premium</string>
+    <string name="export_data">导出数据</string>
+    <string name="import_data">导入数据</string>
+    <string name="exporting">正在导出…</string>
+    <string name="importing">正在导入…</string>
+    <string name="export_success">导出成功</string>
+    <string name="export_failed">导出失败: %1$s</string>
+    <string name="import_success">导入成功</string>
+    <string name="import_failed">导入失败: %1$s</string>
 </resources>

@@ -21,6 +21,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -59,8 +61,13 @@ import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.asState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.toLocalDateTime
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import kotlin.time.Clock
 
 @Composable
 fun AppDataScreen(
@@ -94,6 +101,18 @@ fun AppDataScreen(
         } else {
             ToastUtil.safeShortToast(RString.permission_rationale)
         }
+    }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/zip")
+    ) { uri ->
+        uri?.let { viewModel.exportData(it) }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.importData(it) }
     }
 
     LaunchedEffect(Unit) {
@@ -184,6 +203,40 @@ fun AppDataScreen(
 
             ListItem(
                 headlineContent = {
+                    Text(text = stringResource(RString.export_data))
+                },
+                modifier = Modifier.clickable {
+                    val fileName = "pixiv_data_backup_${
+                        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                            .format(LocalDateTime.Formats.ISO)
+                    }.zip"
+                    exportLauncher.launch(fileName)
+                },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Rounded.Upload,
+                        contentDescription = null
+                    )
+                }
+            )
+
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(RString.import_data))
+                },
+                modifier = Modifier.clickable {
+                    importLauncher.launch(arrayOf("application/zip"))
+                },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Rounded.Download,
+                        contentDescription = null
+                    )
+                }
+            )
+
+            ListItem(
+                headlineContent = {
                     Text(text = stringResource(RString.clear_cache, cacheDirSize))
                 },
                 modifier = Modifier.clickable {
@@ -257,6 +310,33 @@ fun AppDataScreen(
                     )
                     LinearWavyProgressIndicator(
                         progress = { state.progress },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
+    }
+
+    if (state.isLoading) {
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+        ) {
+            Card(
+                shape = MaterialTheme.shapes.medium,
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (state.loadingMessage != null) {
+                        Text(
+                            text = stringResource(state.loadingMessage),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    LinearWavyProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

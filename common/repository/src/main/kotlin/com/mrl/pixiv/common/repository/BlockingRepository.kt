@@ -39,6 +39,11 @@ object BlockingRepository : MMKVUser {
         blockUsers.value = blockUsers.value?.minus(userIds.map { it.toString() }.toSet())
     }
 
+    fun restore(illusts: Set<String>, users: Set<String>) {
+        blockIllusts.value = illusts
+        blockUsers.value = users
+    }
+
     @Composable
     fun collectIllustBlockAsState(illustId: Long): Boolean {
         val blockingIllusts by blockIllustsFlow.collectAsStateWithLifecycle()

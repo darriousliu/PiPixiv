@@ -27,4 +27,8 @@ object BookmarkedTagRepository : MMKVUser {
     fun isBookmarked(tag: Tag): Boolean {
         return bookmarkedTagsDelegate.value.any { it.name == tag.name }
     }
+
+    fun restore(tags: List<Tag>) {
+        bookmarkedTagsDelegate.value = tags
+    }
 }
