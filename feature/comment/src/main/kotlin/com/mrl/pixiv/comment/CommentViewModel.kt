@@ -11,6 +11,7 @@ import com.mrl.pixiv.common.data.comment.Emoji
 import com.mrl.pixiv.common.data.comment.Stamp
 import com.mrl.pixiv.common.repository.CommentRepository
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.repository.paging.CommentPagingSource
 import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ToastUtil

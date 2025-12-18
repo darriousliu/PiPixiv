@@ -1,4 +1,4 @@
-package com.mrl.pixiv.comment.report
+package com.mrl.pixiv.report
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

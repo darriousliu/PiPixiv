@@ -1,4 +1,4 @@
-package com.mrl.pixiv.comment.report
+package com.mrl.pixiv.report
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Stable
@@ -45,14 +45,14 @@ class ReportCommentViewModel(
                 ReportType.NOVEL_COMMENT -> PixivRepository.getNovelCommentReportTopicList()
             }
             updateState {
-                copy(topicList = resp.topicList.toPersistentList())
+                ReportCommentState(topicList = resp.topicList.toPersistentList())
             }
         }
     }
 
     fun selectTopic(topicId: Int) {
         updateState {
-            copy(selectedTopicId = topicId)
+            ReportCommentState(selectedTopicId = topicId)
         }
     }
 

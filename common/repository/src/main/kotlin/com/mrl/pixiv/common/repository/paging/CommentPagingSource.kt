@@ -1,4 +1,4 @@
-package com.mrl.pixiv.comment
+package com.mrl.pixiv.common.repository.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
