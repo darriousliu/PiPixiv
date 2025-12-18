@@ -43,6 +43,7 @@ fun CommentItem(
     onNavToUserProfile: () -> Unit,
     onDeleteComment: () -> Unit,
     modifier: Modifier = Modifier,
+    onViewReplies: (() -> Unit)? = null,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -142,6 +143,16 @@ fun CommentItem(
                 Text(
                     text = comment.comment,
                     style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            if (comment.hasReplies && onViewReplies != null) {
+                Text(
+                    text = "查看回复",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .throttleClick { onViewReplies() }
                 )
             }
             8.VSpacer

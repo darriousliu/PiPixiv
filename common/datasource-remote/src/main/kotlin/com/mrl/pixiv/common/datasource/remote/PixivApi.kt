@@ -259,6 +259,17 @@ interface PixivApi {
         @QueryMap queryMap: Map<String, String>,
     ): IllustCommentsResp
 
+    @GET("v2/illust/comment/replies")
+    suspend fun getIllustCommentReplies(
+        @Query("comment_id") commentId: Long,
+        @Query("offset") offset: Int? = null,
+    ): IllustCommentsResp
+
+    @GET("v2/illust/comment/replies")
+    suspend fun loadMoreIllustCommentReplies(
+        @QueryMap queryMap: Map<String, String>,
+    ): IllustCommentsResp
+
     @GET("v1/stamps")
     suspend fun getStamps(): StampsResp
 
@@ -271,6 +282,7 @@ interface PixivApi {
         @Field("illust_id") illustId: Long,
         @Field("comment") comment: String,
         @Field("stamp_id") stampId: Int? = null,
+        @Field("parent_comment_id") parentCommentId: Long? = null,
     ): CommentAddResp
 
     @FormUrlEncoded
@@ -285,6 +297,7 @@ interface PixivApi {
         @Field("novel_id") novelId: Long,
         @Field("comment") comment: String,
         @Field("stamp_id") stampId: Int? = null,
+        @Field("parent_comment_id") parentCommentId: Long? = null,
     ): CommentAddResp
 
     @FormUrlEncoded

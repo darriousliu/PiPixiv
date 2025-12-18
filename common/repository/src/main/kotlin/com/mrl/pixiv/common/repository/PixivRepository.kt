@@ -228,17 +228,31 @@ object PixivRepository : KoinComponent {
     suspend fun loadMoreIllustComments(queryMap: Map<String, String>) =
         apiApi.loadMoreIllustComments(queryMap)
 
+    suspend fun getIllustCommentReplies(commentId: Long, offset: Int? = null) =
+        apiApi.getIllustCommentReplies(commentId, offset)
+
+    suspend fun loadMoreIllustCommentReplies(queryMap: Map<String, String>) =
+        apiApi.loadMoreIllustCommentReplies(queryMap)
+
     suspend fun getEmojis() = apiApi.getEmojis()
 
     suspend fun getStamps() = apiApi.getStamps()
 
-    suspend fun addIllustComment(illustId: Long, comment: String, stampId: Int? = null) =
-        apiApi.addIllustComment(illustId, comment, stampId)
+    suspend fun addIllustComment(
+        illustId: Long,
+        comment: String,
+        stampId: Int? = null,
+        parentCommentId: Long? = null
+    ) = apiApi.addIllustComment(illustId, comment, stampId, parentCommentId)
 
     suspend fun deleteIllustComment(commentId: Long) = apiApi.deleteIllustComment(commentId)
 
-    suspend fun addNovelComment(novelId: Long, comment: String, stampId: Int? = null) =
-        apiApi.addNovelComment(novelId, comment, stampId)
+    suspend fun addNovelComment(
+        novelId: Long,
+        comment: String,
+        stampId: Int? = null,
+        parentCommentId: Long? = null
+    ) = apiApi.addNovelComment(novelId, comment, stampId, parentCommentId)
 
     suspend fun deleteNovelComment(commentId: Long) = apiApi.deleteNovelComment(commentId)
 

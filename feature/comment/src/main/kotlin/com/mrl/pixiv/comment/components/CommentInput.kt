@@ -32,6 +32,7 @@ import androidx.compose.foundation.text.input.maxLength
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -71,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.mrl.pixiv.comment.MAX_COMMENT_LENGTH
 import com.mrl.pixiv.common.compose.ui.image.LoadingImage
+import com.mrl.pixiv.common.data.comment.Comment
 import com.mrl.pixiv.common.data.comment.Emoji
 import com.mrl.pixiv.common.data.comment.Stamp
 import com.mrl.pixiv.common.kts.round
@@ -93,7 +95,9 @@ fun CommentInput(
     onInsertEmoji: (Emoji) -> Unit,
     onSendStamp: (Stamp) -> Unit,
     onSendText: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    replyTarget: Comment? = null,
+    onClearReplyTarget: () -> Unit = {}
 ) {
     val outputTransformation = remember(emojis) {
         OutputTransformation {
@@ -135,6 +139,35 @@ fun CommentInput(
     ) {
         Column(modifier = modifier.windowInsetsPadding(BottomAppBarDefaults.windowInsets)) {
             HorizontalDivider()
+            if (replyTarget != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(
+                            RString.reply
+                        ) + ": " + replyTarget.user.name,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    IconButton(
+                        modifier = Modifier.size(24.dp),
+                        onClick = onClearReplyTarget
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null
+                        )
+                    }
+                }
+                HorizontalDivider()
+            }
             CompositionLocalProvider(LocalTextSelectionColors provides colors.textSelectionColors) {
                 val interactionSource = remember { MutableInteractionSource() }
                 val textStyle = LocalTextStyle.current
