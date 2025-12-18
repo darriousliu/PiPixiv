@@ -2,9 +2,9 @@ package com.mrl.pixiv.profile.detail.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,7 +31,6 @@ import com.mrl.pixiv.common.util.throttleClick
 private const val SPAN_COUNT = 3
 private const val MAX_SHOW_ILLUST_COUNT = 6
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun IllustWidget(
     title: String,
@@ -83,6 +82,8 @@ fun IllustWidget(
             maxItemsInEachRow = SPAN_COUNT,
         ) {
             val takenIllusts = illusts.take(MAX_SHOW_ILLUST_COUNT)
+            val remainder = takenIllusts.size % SPAN_COUNT
+            val spacerCount = if (remainder == 0) 0 else SPAN_COUNT - remainder
             takenIllusts.forEachIndexed { index, illust ->
                 val isBookmarked = illust.isBookmark
                 SquareIllustItem(
@@ -100,6 +101,9 @@ fun IllustWidget(
                     },
                     modifier = Modifier.weight(1f)
                 )
+            }
+            if (spacerCount > 0) {
+                Spacer(modifier = Modifier.weight(spacerCount.toFloat()))
             }
         }
     }
