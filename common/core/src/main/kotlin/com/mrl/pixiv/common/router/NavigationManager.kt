@@ -169,4 +169,12 @@ class NavigationManager(
     fun navigateToAboutScreen() {
         backStack.navigate(route = Destination.About)
     }
+
+    fun navigateToCommentScreen(id: Long, type: CommentType) {
+        backStack.navigate(route = Destination.Comment(id, type))
+    }
+
+    fun navigateToReportCommentScreen(commentId: Long, type: ReportType) {
+        backStack.navigate(route = Destination.Report(commentId, type))
+    }
 }

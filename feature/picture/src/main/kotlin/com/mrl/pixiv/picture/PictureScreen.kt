@@ -17,6 +17,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -32,6 +33,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Favorite
@@ -105,6 +107,7 @@ import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Tag
 import com.mrl.pixiv.common.data.Type
+import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepository
@@ -113,6 +116,7 @@ import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
+import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ShareUtil
@@ -169,6 +173,7 @@ private const val KEY_ILLUST_TAGS = "illust_tags"
 private const val KEY_ILLUST_DIVIDER_1 = "illust_divider_1"
 private const val KEY_ILLUST_AUTHOR = "illust_author"
 private const val KEY_ILLUST_AUTHOR_OTHER_WORKS = "illust_author_other_works"
+private const val KEY_VIEW_COMMENTS = "view_comments"
 private const val KEY_ILLUST_RELATED_TITLE = "illust_related_title"
 private const val KEY_SPACER = "spacer"
 
@@ -528,6 +533,31 @@ internal fun PictureScreen(
                                     Spacer(modifier = Modifier.weight((userSpanCount - illusts.size) / userSpanCount.toFloat()))
                                 }
                             }
+                        }
+                    }
+                    item(key = KEY_VIEW_COMMENTS) {
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 20.dp)
+                                .fillMaxWidth()
+                                .throttleClick(indication = ripple()) {
+                                    navigationManager.navigateToCommentScreen(
+                                        illust.id,
+                                        CommentType.ILLUST
+                                    )
+                                },
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Comment,
+                                contentDescription = stringResource(RString.view_comments)
+                            )
+                            5.HSpacer
+                            Text(
+                                text = stringResource(RString.view_comments),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
                     }
                     item(key = KEY_ILLUST_RELATED_TITLE) {

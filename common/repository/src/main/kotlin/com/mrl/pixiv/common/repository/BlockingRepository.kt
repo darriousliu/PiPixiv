@@ -15,6 +15,9 @@ object BlockingRepository : MMKVUser {
     private val blockUsers by mmkvStringSet(emptySet()).asMutableStateFlow()
     val blockUsersFlow = blockUsers.asStateFlow()
 
+    private val blockComments by mmkvStringSet(emptySet()).asMutableStateFlow()
+    val blockCommentsFlow = blockComments.asStateFlow()
+
     fun blockIllust(illustId: Long) {
         blockIllusts.value = (blockIllusts.value ?: emptySet()) + illustId.toString()
     }
@@ -39,6 +42,14 @@ object BlockingRepository : MMKVUser {
         blockUsers.value = blockUsers.value?.minus(userIds.map { it.toString() }.toSet())
     }
 
+    fun blockComment(commentId: Long) {
+        blockComments.value = (blockComments.value ?: emptySet()) + commentId.toString()
+    }
+
+    fun removeBlockComment(commentId: Long) {
+        blockComments.value = blockComments.value?.minus(commentId.toString())
+    }
+
     fun restore(illusts: Set<String>, users: Set<String>) {
         blockIllusts.value = illusts
         blockUsers.value = users
@@ -56,4 +67,9 @@ object BlockingRepository : MMKVUser {
         return blockingUsers?.contains(userId.toString()) ?: false
     }
 
+    @Composable
+    fun collectCommentBlockAsState(commentId: Long): Boolean {
+        val blockingComments by blockCommentsFlow.collectAsStateWithLifecycle()
+        return blockingComments?.contains(commentId.toString()) ?: false
+    }
 }

@@ -1,7 +1,9 @@
 package com.mrl.pixiv.common.compose.ui.image
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,8 +32,10 @@ fun LoadingImage(
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Fit,
-    errorContent: @Composable () -> Unit = {},
-    loadingContent: @Composable () -> Unit = {}
+    errorContent: @Composable BoxScope.() -> Unit = {},
+    loadingContent: @Composable BoxScope.() -> Unit = {
+        CircularWavyProgressIndicator(modifier = Modifier.matchParentSize())
+    }
 ) {
     var imageLoadState by remember { mutableStateOf(ImageLoadState.LOADING) }
     Box(modifier = modifier) {

@@ -33,6 +33,8 @@ import com.mrl.pixiv.MainScreen
 import com.mrl.pixiv.artwork.ArtworkScreen
 import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
+import com.mrl.pixiv.comment.CommentScreen
+import com.mrl.pixiv.comment.report.ReportScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
@@ -174,7 +176,7 @@ fun Navigation3MainGraph(
                     ) {
                         NetworkSettingScreen()
                     }
-                    
+
                     // 保存格式设置
                     entry<Destination.FileNameFormat>(
                         metadata = ListDetailSceneStrategy.detailPane()
@@ -264,6 +266,18 @@ fun Navigation3MainGraph(
                     }
                     entry<Destination.About> {
                         AboutScreen()
+                    }
+                    entry<Destination.Comment> {
+                        CommentScreen(
+                            id = it.id,
+                            type = it.type,
+                        )
+                    }
+                    entry<Destination.Report> {
+                        ReportScreen(
+                            id = it.id,
+                            type = it.type,
+                        )
                     }
                 }
             )

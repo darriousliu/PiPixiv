@@ -98,6 +98,12 @@ sealed class Destination : NavKey {
 
     @Serializable
     data object About : Destination()
+
+    @Serializable
+    data class Comment(val id: Long, val type: CommentType) : Destination()
+
+    @Serializable
+    data class Report(val id: Long, val type: ReportType) : Destination()
 }
 
 @Serializable
@@ -162,4 +168,19 @@ sealed class MainPage(
             )
         }
     )
+}
+
+@Serializable
+enum class CommentType {
+    ILLUST,
+    NOVEL,
+}
+
+@Serializable
+enum class ReportType {
+    USER,
+    ILLUST,
+    NOVEL,
+    ILLUST_COMMENT,
+    NOVEL_COMMENT,
 }

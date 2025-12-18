@@ -162,4 +162,25 @@
     <string name="export_failed">导出失败: %1$s</string>
     <string name="import_success">导入成功</string>
     <string name="import_failed">导入失败: %1$s</string>
+    <string name="view_comments">查看评论</string>
+    <string name="no_comments">暂无评论</string>
+    <string name="add_comment">添加评论</string>
+    <string name="reply">回复</string>
+    <string name="block_comment">屏蔽评论</string>
+    <string name="report_comment">举报评论</string>
+    <string name="comment_emoji">绘文字</string>
+    <string name="comment_stamp">表情贴图</string>
+    <string name="comment_success">发表评论成功</string>
+    <string name="comment_failed">发表评论失败</string>
+    <string name="delete_comment_success">评论删除成功</string>
+    <string name="delete_comment_failed">评论删除失败</string>
+    <string name="confirm_to_delete_comment">确认删除该评论？</string>
+    <string name="report">举报</string>
+    <string name="report_reason">举报原因</string>
+    <string name="please_select">请选择</string>
+    <string name="report_detail">报告详情</string>
+    <string name="report_detail_hint">详细理由</string>
+    <string name="send">发送</string>
+    <string name="report_success">举报成功</string>
+    <string name="report_failed">举报失败</string>
 </resources>
