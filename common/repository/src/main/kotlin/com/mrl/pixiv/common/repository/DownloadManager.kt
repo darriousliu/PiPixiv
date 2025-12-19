@@ -5,6 +5,7 @@ import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import coil3.annotation.InternalCoilApi
@@ -15,15 +16,24 @@ import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.repository.util.generateFileName
 import com.mrl.pixiv.common.repository.worker.DownloadWorker
 import com.mrl.pixiv.common.util.PictureType
+import com.mrl.pixiv.common.util.getDownloadPath
 import com.mrl.pixiv.common.util.isImageExists
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import kotlin.time.Clock
 
 @Single
 class DownloadManager(
     private val context: Context,
     private val downloadDao: DownloadDao,
 ) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     fun getAllDownloads(): Flow<List<DownloadEntity>> = downloadDao.getAllDownloads()
 
     fun getDownloadsByStatus(status: Int): Flow<List<DownloadEntity>> =
@@ -39,6 +49,7 @@ class DownloadManager(
         thumbnailUrl: String,
         originalUrl: String,
         subFolder: String? = null,
+        downloadManagerListener: DownloadManagerListener? = null
     ) {
         val existing = downloadDao.getDownload(illustId, index)
         if (existing != null && existing.status == DownloadStatus.SUCCESS.value) {
@@ -47,6 +58,14 @@ class DownloadManager(
             val mimeType = MimeTypeMap.getMimeTypeFromUrl(originalUrl)
             val type = PictureType.fromMimeType(mimeType)
             if (type != null && isImageExists(fileName, type, subFolder)) {
+                val updated = if (existing.filePath.isEmpty() || existing.fileUri.isEmpty()) {
+                    val (fileUri, filePath) = getDownloadPath(fileName, type, subFolder)
+                    existing.copy(filePath = filePath, fileUri = fileUri)
+                } else {
+                    existing
+                }
+                downloadDao.update(updated)
+                downloadManagerListener?.onDownloadCompleted(updated)
                 return
             }
         }
@@ -55,7 +74,7 @@ class DownloadManager(
         val entity = existing?.copy(
             status = DownloadStatus.PENDING.value,
             progress = 0f,
-            createTime = System.currentTimeMillis()
+            createTime = Clock.System.now().toEpochMilliseconds()
         ) ?: DownloadEntity(
             illustId = illustId,
             index = index,
@@ -68,7 +87,8 @@ class DownloadManager(
             status = DownloadStatus.PENDING.value,
             progress = 0f,
             filePath = "",
-            createTime = System.currentTimeMillis()
+            fileUri = "",
+            createTime = Clock.System.now().toEpochMilliseconds()
         )
         downloadDao.insert(entity)
 
@@ -95,6 +115,29 @@ class DownloadManager(
             ExistingWorkPolicy.REPLACE,
             request
         )
+
+        if (downloadManagerListener != null) {
+            scope.launch {
+                workManager.getWorkInfoByIdFlow(request.id).collect { workInfo ->
+                    val state = workInfo?.state
+                    when (state) {
+                        WorkInfo.State.SUCCEEDED -> {
+                            val newEntity = downloadDao.getDownload(entity.illustId, entity.index)
+                            downloadManagerListener.onDownloadCompleted(newEntity)
+                        }
+
+                        WorkInfo.State.FAILED -> {
+                            downloadManagerListener.onDownloadCompleted(null)
+                        }
+
+                        else -> Unit
+                    }
+                    if (state != null && state.isFinished) {
+                        this.cancel()
+                    }
+                }
+            }
+        }
     }
 
     suspend fun deleteDownload(entity: DownloadEntity) {
@@ -119,5 +162,9 @@ class DownloadManager(
             entity.originalUrl,
             entity.subFolder
         )
+    }
+
+    fun interface DownloadManagerListener {
+        fun onDownloadCompleted(entity: DownloadEntity?)
     }
 }

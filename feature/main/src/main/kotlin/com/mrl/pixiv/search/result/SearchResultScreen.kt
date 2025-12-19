@@ -17,7 +17,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +43,7 @@ fun SearchResultsScreen(
 ) {
     val state = viewModel.asState()
     val searchResults = viewModel.searchResults.collectAsLazyPagingItems()
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(true)
     val layoutParams = IllustGridDefaults.relatedLayoutParameters()
     val pullRefreshState = rememberPullToRefreshState()

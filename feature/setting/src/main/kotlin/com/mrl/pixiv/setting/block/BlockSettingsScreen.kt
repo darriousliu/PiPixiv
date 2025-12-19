@@ -1,5 +1,6 @@
 package com.mrl.pixiv.setting.block
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -35,11 +37,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.BlockingGridDefaults
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
+import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.viewmodel.asState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+
+private const val KEY_TITLE_BLOCK_COMMENTS_ENTRY = "title_block_comments_entry"
 
 private const val KEY_TITLE_MUTE_USERS = "title_mute_users"
 private const val KEY_TITLE_MUTE_TAGS = "title_mute_tags"
@@ -119,6 +124,28 @@ fun BlockSettingsScreen(
                     bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 ),
             ) {
+                item(
+                    key = KEY_TITLE_BLOCK_COMMENTS_ENTRY,
+                    span = { GridItemSpan(maxLineSpan) }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { navigationManager.navigate(Destination.BlockComments) }
+                            .padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(RString.block_comments),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                            contentDescription = null
+                        )
+                    }
+                }
                 if (!userEmpty) {
                     item(
                         key = KEY_TITLE_MUTE_USERS,

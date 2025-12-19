@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home">الرئيسية</string>
     <string name="search">بحث</string>
@@ -15,15 +14,17 @@
     <string name="edit_favorite">تعديل المفضلة</string>
     <string name="save">حفظ</string>
     <string name="long_click_to_edit_favorite">اضغط لفترة طويلة لتعديل المفضلة</string>
+    
     <string name="all">الكل</string>
     <string name="uncategorized">غير مصنف</string>
     <string name="search_by_title_author">البحث بالعنوان أو اسم الفنان</string>
+    
+    <string name="refresh_token_success">تم تحديث الرمز بنجاح</string>
     <string name="unknown_error">خطأ غير معروف</string>
     <string name="revoke">إلغاء</string>
     <string name="revoke_cancel_like">التراجع عن إلغاء الإعجاب</string>
-    <string name="refresh_token_success">تم تحديث الرمز بنجاح</string>
-    <string name="sign_up">التسجيل</string>
     <string name="sign_in">تسجيل الدخول</string>
+    <string name="sign_up">التسجيل</string>
     <string name="sign_with_token">تسجيل الدخول بالرمز</string>
     <string name="download_with_size">تنزيل (%s)</string>
     <string name="followed">متابَع</string>
@@ -70,6 +71,7 @@
     <string name="self_defined_source">مصدر صورة مخصص</string>
     <string name="default_open">فتح الرابط الافتراضي</string>
     <string name="allow_open_link">السماح للتطبيق بفتح الرابط المقابل</string>
+    
     <string name="network_error">خطأ في الشبكة، يرجى التحقق من الاتصال</string>
     <string name="sign_out">تسجيل الخروج</string>
     <string name="copy_to_clipboard">نسخ إلى الحافظة</string>
@@ -82,6 +84,7 @@
     <string name="block_settings">إعدادات الحظر</string>
     <string name="block_user">حظر المستخدم</string>
     <string name="block_tags">حظر العلامات</string>
+    <string name="block_comments">التعليقات المحظورة</string>
     <string name="hide_illust">إخفاء هذا العمل</string>
     <string name="illust_hidden">تم إخفاء هذا العمل</string>
     <string name="show_illust">إظهار هذا العمل</string>
@@ -119,6 +122,7 @@
     <string name="ai_generate">توليد بالذكاء الاصطناعي</string>
     <string name="past">الماضي</string>
     <string name="every_week_r18g">أسبوعي (غريب/R-18G)</string>
+    
     <string name="r18_alert_message">تحتاج إلى تفعيل خيار R-18 على موقع Pixiv &lt;a href=&quot;https://www.pixiv.net/settings/viewing&quot;&gt;https://www.pixiv.net/settings/viewing&lt;/a&gt;، وإلا فلن يعمل</string>
     <string name="tips">تلميح</string>
     <string name="download_manager">مدير التنزيلات</string>
@@ -150,4 +154,36 @@
     <string name="current_version">الإصدار الحالي: %s</string>
     <string name="download">تحميل</string>
     <string name="premium_required">Pixiv Premium مطلوب</string>
+    <string name="export_data">تصدير البيانات</string>
+    <string name="import_data">استيراد البيانات</string>
+    <string name="exporting">جاري التصدير…</string>
+    <string name="importing">جاري الاستيراد…</string>
+    <string name="export_success">تم التصدير بنجاح</string>
+    <string name="export_failed">فشل التصدير: %1$s</string>
+    <string name="import_success">تم الاستيراد بنجاح</string>
+    <string name="import_failed">فشل الاستيراد: %1$s</string>
+    <string name="view_comments">عرض التعليقات</string>
+    <string name="view_replies">عرض الردود</string>
+    <string name="view_comments_count">عرض التعليقات (%d)</string>
+    <string name="no_comments">لا توجد تعليقات بعد</string>
+    <string name="add_comment">إضافة تعليق</string>
+    <string name="reply">رد</string>
+    <string name="block_comment">حظر التعليق</string>
+    <string name="unblock_comment">إلغاء حظر التعليق</string>
+    <string name="report_comment">الإبلاغ عن التعليق</string>
+    <string name="comment_emoji">إيموجي</string>
+    <string name="comment_stamp">ملصق</string>
+    <string name="comment_success">تم نشر التعليق بنجاح</string>
+    <string name="comment_failed">فشل نشر التعليق</string>
+    <string name="delete_comment_success">تم حذف التعليق بنجاح</string>
+    <string name="delete_comment_failed">فشل حذف التعليق</string>
+    <string name="confirm_to_delete_comment">هل أنت متأكد من حذف هذا التعليق؟</string>
+    <string name="report">إبلاغ</string>
+    <string name="report_reason">سبب الإبلاغ</string>
+    <string name="please_select">يرجى الاختيار</string>
+    <string name="report_detail">تفاصيل البلاغ</string>
+    <string name="report_detail_hint">السبب بالتفصيل</string>
+    <string name="send">إرسال</string>
+    <string name="report_success">تم الإبلاغ بنجاح</string>
+    <string name="report_failed">فشل الإبلاغ</string>
 </resources>

@@ -111,6 +111,9 @@ data class Illust(
     @SerialName("is_muted")
     val isMuted: Boolean? = null,
 
+    @SerialName("total_comments")
+    val totalComments: Int? = null,
+
     @SerialName("illust_ai_type")
     val illustAIType: IllustAiType = IllustAiType.Undefined,
 
@@ -222,7 +225,7 @@ data class Novel(
     val visible: Boolean,
 
     @SerialName("total_comments")
-    val totalComments: Long,
+    val totalComments: Int? = null,
 
     @SerialName("is_muted")
     val isMuted: Boolean,

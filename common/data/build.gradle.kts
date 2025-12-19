@@ -10,4 +10,5 @@ android {
 dependencies {
     // Serialization
     implementation(kotlinx.bundles.serialization)
+    implementation(kotlinx.datetime)
 }

@@ -23,7 +23,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,11 +39,11 @@ import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.viewmodel.asState
-import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
-import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -61,7 +61,7 @@ fun CollectionPage(
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
     val pullRefreshState = rememberPullToRefreshState()
     val state = viewModel.asState()
-    var showFilterDialog by remember { mutableStateOf(false) }
+    var showFilterDialog by rememberSaveable { mutableStateOf(false) }
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
     val isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading
 

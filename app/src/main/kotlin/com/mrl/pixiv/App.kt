@@ -6,6 +6,7 @@ import coil3.PlatformContext
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
 import com.mrl.pixiv.common.data.setting.setAppCompatDelegateThemeMode
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.util.AppUtil
@@ -48,6 +49,7 @@ class App : Application() {
             modules(allModule)
         }
         migrateDataStoreToMMKV()
+        migrateBlockingToNewFile()
         setAppCompatDelegateThemeMode(SettingRepository.settingTheme)
         VersionManager.checkUpdate()
     }
@@ -84,6 +86,10 @@ class App : Application() {
             }
             awaitAll(search, userPreference, userInfo)
         }
+    }
+
+    private fun migrateBlockingToNewFile() {
+        BlockingRepositoryV2.migrate()
     }
 }
 

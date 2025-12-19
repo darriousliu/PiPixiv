@@ -3,10 +3,15 @@ package com.mrl.pixiv.common.datasource.remote
 import com.mrl.pixiv.common.data.EmptyResp
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Restrict
+import com.mrl.pixiv.common.data.comment.CommentAddResp
+import com.mrl.pixiv.common.data.comment.EmojiResp
+import com.mrl.pixiv.common.data.comment.IllustCommentsResp
+import com.mrl.pixiv.common.data.comment.StampsResp
 import com.mrl.pixiv.common.data.illust.IllustBookmarkDetailResp
 import com.mrl.pixiv.common.data.illust.IllustDetailResp
 import com.mrl.pixiv.common.data.illust.IllustRecommendedResp
 import com.mrl.pixiv.common.data.mute.MutedResp
+import com.mrl.pixiv.common.data.report.ReportTopicListResp
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchAutoCompleteResp
 import com.mrl.pixiv.common.data.search.SearchIllustResp
@@ -242,4 +247,117 @@ interface PixivApi {
         @Query("word") word: String,
         @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
     ): SearchIllustResp
+
+    @GET("v3/illust/comments")
+    suspend fun getIllustComments(
+        @Query("illust_id") illustId: Long,
+        @Query("offset") offset: Int? = null,
+    ): IllustCommentsResp
+
+    @GET("v3/illust/comments")
+    suspend fun loadMoreIllustComments(
+        @QueryMap queryMap: Map<String, String>,
+    ): IllustCommentsResp
+
+    @GET("v2/illust/comment/replies")
+    suspend fun getIllustCommentReplies(
+        @Query("comment_id") commentId: Long,
+        @Query("offset") offset: Int? = null,
+    ): IllustCommentsResp
+
+    @GET("v2/illust/comment/replies")
+    suspend fun loadMoreIllustCommentReplies(
+        @QueryMap queryMap: Map<String, String>,
+    ): IllustCommentsResp
+
+    @GET("v1/stamps")
+    suspend fun getStamps(): StampsResp
+
+    @GET("v1/emoji")
+    suspend fun getEmojis(): EmojiResp
+
+    @FormUrlEncoded
+    @POST("v1/illust/comment/add")
+    suspend fun addIllustComment(
+        @Field("illust_id") illustId: Long,
+        @Field("comment") comment: String,
+        @Field("stamp_id") stampId: Int? = null,
+        @Field("parent_comment_id") parentCommentId: Long? = null,
+    ): CommentAddResp
+
+    @FormUrlEncoded
+    @POST("v1/illust/comment/delete")
+    suspend fun deleteIllustComment(
+        @Field("comment_id") commentId: Long,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v1/novel/comment/add")
+    suspend fun addNovelComment(
+        @Field("novel_id") novelId: Long,
+        @Field("comment") comment: String,
+        @Field("stamp_id") stampId: Int? = null,
+        @Field("parent_comment_id") parentCommentId: Long? = null,
+    ): CommentAddResp
+
+    @FormUrlEncoded
+    @POST("v1/novel/comment/delete")
+    suspend fun deleteNovelComment(
+        @Field("comment_id") commentId: Long,
+    ): EmptyResp
+
+    @GET("v1/user/report/topic-list")
+    suspend fun getUserReportTopicList(): ReportTopicListResp
+
+    @GET("v1/illust/report/topic-list")
+    suspend fun getIllustReportTopicList(): ReportTopicListResp
+
+    @GET("v1/novel/report/topic-list")
+    suspend fun getNovelReportTopicList(): ReportTopicListResp
+
+    @GET("v1/illust/comment/report/topic-list")
+    suspend fun getIllustCommentReportTopicList(): ReportTopicListResp
+
+    @GET("v1/novel/comment/report/topic-list")
+    suspend fun getNovelCommentReportTopicList(): ReportTopicListResp
+
+    @FormUrlEncoded
+    @POST("v2/user/report")
+    suspend fun reportUser(
+        @Field("user_id") userId: Long,
+        @Field("topic_id") topicId: Int,
+        @Field("description") description: String,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v2/illust/report")
+    suspend fun reportIllust(
+        @Field("illust_id") illustId: Long,
+        @Field("topic_id") topicId: Int,
+        @Field("description") description: String,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v2/novel/report")
+    suspend fun reportNovel(
+        @Field("novel_id") novelId: Long,
+        @Field("topic_id") topicId: Int,
+        @Field("description") description: String,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v1/illust/comment/report")
+    suspend fun reportIllustComment(
+        @Field("comment_id") commentId: Long,
+        @Field("topic_id") topicId: Int,
+        @Field("description") description: String,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v1/novel/comment/report")
+    suspend fun reportNovelComment(
+        @Field("comment_id") commentId: Long,
+        @Field("topic_id") topicId: Int,
+        @Field("description") description: String,
+    ): EmptyResp
 }

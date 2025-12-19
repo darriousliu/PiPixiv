@@ -6,7 +6,7 @@ import kotlinx.serialization.serializer
 
 interface MMKVOwner {
     val id: String
-    val kv: MMKV_KMP
+    val kv: MMKV_KMP get() = mmkvWithID(id)
 }
 
 /**

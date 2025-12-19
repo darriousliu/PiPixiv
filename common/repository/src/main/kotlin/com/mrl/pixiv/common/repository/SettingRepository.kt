@@ -94,4 +94,8 @@ object SettingRepository : MMKVUser {
     fun clear() {
         userPreference.value = UserPreference()
     }
+
+    fun restore(preference: UserPreference) {
+        userPreference.value = preference
+    }
 }

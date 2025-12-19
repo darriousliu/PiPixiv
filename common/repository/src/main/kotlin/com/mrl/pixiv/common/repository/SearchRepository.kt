@@ -58,4 +58,8 @@ object SearchRepository : MMKVUser {
             )
         }
     }
+
+    fun restore(search: Search) {
+        searchHistory.value = search
+    }
 }

@@ -65,7 +65,7 @@ class DownloadWorker(
             e.printStackTrace()
             entity = entity.copy(status = DownloadStatus.FAILED.value)
             downloadDao.update(entity)
-            if (runAttemptCount < 3) {
+            if (runAttemptCount < 1) {
                 Result.retry()
             } else {
                 Result.failure()
@@ -125,12 +125,15 @@ class DownloadWorker(
 
         val fileName =
             generateFileName(illustId, entity.title, entity.userId, entity.userName, entity.index)
-        val success = saveToAlbum(gifBytes, fileName, PictureType.GIF.mimeType, subFolder)
+        val gifPair = saveToAlbum(gifBytes, fileName, PictureType.GIF.mimeType, subFolder)
 
-        if (success) {
+        if (gifPair != null) {
+            val (fileUri, filePath) = gifPair
             val successEntity = entity.copy(
                 status = DownloadStatus.SUCCESS.value,
-                progress = 1f
+                progress = 1f,
+                filePath = filePath,
+                fileUri = fileUri
             )
             downloadDao.update(successEntity)
             return Result.success()
@@ -148,11 +151,14 @@ class DownloadWorker(
         val (bytes, mimeType) = downloadBytesWithMime(url, entity)
         val fileName =
             generateFileName(illustId, entity.title, entity.userId, entity.userName, entity.index)
-        val success = saveToAlbum(bytes, fileName, mimeType, subFolder)
-        if (success) {
+        val imagePair = saveToAlbum(bytes, fileName, mimeType, subFolder)
+        if (imagePair != null) {
+            val (fileUri, filePath) = imagePair
             val successEntity = entity.copy(
                 status = DownloadStatus.SUCCESS.value,
-                progress = 1f
+                progress = 1f,
+                filePath = filePath,
+                fileUri = fileUri
             )
             downloadDao.update(successEntity)
             return Result.success()

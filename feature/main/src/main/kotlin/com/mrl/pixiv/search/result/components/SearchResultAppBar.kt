@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -62,8 +63,8 @@ internal fun SearchResultAppBar(
     showBottomSheet: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showBookmarkMenu by remember { mutableStateOf(false) }
-    var showDateRangePicker by remember { mutableStateOf(false) }
+    var showBookmarkMenu by rememberSaveable { mutableStateOf(false) }
+    var showDateRangePicker by rememberSaveable { mutableStateOf(false) }
     val toaster = LocalToaster.current
     val isPremium by requireUserInfoFlow.map { it.profile.isPremium }
         .collectAsStateWithLifecycle(false)

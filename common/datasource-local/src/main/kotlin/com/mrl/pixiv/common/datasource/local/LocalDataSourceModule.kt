@@ -11,8 +11,8 @@ fun provideDatabase(context: Context): PixivDatabase {
         context,
         PixivDatabase::class.java,
         "pixiv_db"
-    ).addMigrations(PixivDatabase.MIGRATION_1_2)
-     .build()
+    ).addMigrations(PixivDatabase.MIGRATION_1_2, PixivDatabase.MIGRATION_2_3)
+        .build()
 }
 
 @Single

@@ -16,8 +16,9 @@ import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
+import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
-import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.DownloadManager
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
@@ -374,18 +375,38 @@ class PictureViewModel(
     ) {
         launchIO {
             showLoading(true)
-            ShareUtil.createShareImage(index, downloadUrl, illust, shareLauncher)
-            showLoading(false)
             closeBottomSheet()
+            val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
+                illust.user.id.toString()
+            } else {
+                null
+            }
+            downloadManager.enqueueDownload(
+                illustId = illust.id,
+                index = index,
+                title = illust.title,
+                userId = illust.user.id,
+                userName = illust.user.name,
+                thumbnailUrl = illust.imageUrls.squareMedium,
+                originalUrl = downloadUrl,
+                subFolder = subFolder,
+            ) { entity ->
+                if (entity != null && entity.status == DownloadStatus.SUCCESS.value) {
+                    ShareUtil.createShareImage(entity.fileUri, shareLauncher)
+                } else {
+                    ToastUtil.safeShortToast(RString.download_failed)
+                }
+                showLoading(false)
+            }
         }
     }
 
     fun blockIllust() {
-        BlockingRepository.blockIllust(state.illust?.id ?: return)
+        BlockingRepositoryV2.blockIllust(state.illust?.id ?: return)
     }
 
     fun removeBlockIllust() {
-        BlockingRepository.removeBlockIllust(state.illust?.id ?: return)
+        BlockingRepositoryV2.removeBlockIllust(state.illust?.id ?: return)
     }
 
     fun addHistory() {
@@ -399,7 +420,7 @@ class PictureViewModel(
         launchIO {
             PixivRepository.postMuteSetting(deleteUserIds = listOf(userId))
         }
-        BlockingRepository.removeBlockUser(userId)
+        BlockingRepositoryV2.removeBlockUser(userId)
     }
 
     fun downloadUgoiraAsGIF() {

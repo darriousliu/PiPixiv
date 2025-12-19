@@ -25,7 +25,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +55,7 @@ fun CollectionScreen(
     val state = viewModel.asState()
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
     val dispatch = viewModel::dispatch
-    var showFilterDialog by remember { mutableStateOf(false) }
+    var showFilterDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,

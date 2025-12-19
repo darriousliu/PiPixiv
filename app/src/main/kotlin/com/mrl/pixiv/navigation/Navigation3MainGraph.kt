@@ -33,6 +33,8 @@ import com.mrl.pixiv.MainScreen
 import com.mrl.pixiv.artwork.ArtworkScreen
 import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
+import com.mrl.pixiv.comment.BlockCommentsScreen
+import com.mrl.pixiv.comment.CommentScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
@@ -54,6 +56,7 @@ import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
+import com.mrl.pixiv.report.ReportScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.FileNameFormatScreen
@@ -174,7 +177,7 @@ fun Navigation3MainGraph(
                     ) {
                         NetworkSettingScreen()
                     }
-                    
+
                     // 保存格式设置
                     entry<Destination.FileNameFormat>(
                         metadata = ListDetailSceneStrategy.detailPane()
@@ -256,6 +259,9 @@ fun Navigation3MainGraph(
                     entry<Destination.BlockSettings> {
                         BlockSettingsScreen()
                     }
+                    entry<Destination.BlockComments> {
+                        BlockCommentsScreen()
+                    }
                     entry<Destination.AppData> {
                         AppDataScreen()
                     }
@@ -264,6 +270,18 @@ fun Navigation3MainGraph(
                     }
                     entry<Destination.About> {
                         AboutScreen()
+                    }
+                    entry<Destination.Comment> {
+                        CommentScreen(
+                            id = it.id,
+                            type = it.type,
+                        )
+                    }
+                    entry<Destination.Report> {
+                        ReportScreen(
+                            id = it.id,
+                            type = it.type,
+                        )
                     }
                 }
             )
