@@ -63,7 +63,11 @@ jobs:
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_PACKAGE_TOKEN: ${{ secrets.GH_PACKAGE_TOKEN }}
-        run: ./gradlew assembleFossRelease -PapplyFirebasePlugins=false --stacktrace
+        run: |
+          ./gradlew assembleRelease -PapplyFirebasePlugins=false --stacktrace
+          mkdir -p app/build/outputs/apk/foss
+          mv app/build/outputs/apk/release app/build/outputs/apk/foss/
+
       - name: Build Default Release apk
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
@@ -71,7 +75,10 @@ jobs:
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_PACKAGE_TOKEN: ${{ secrets.GH_PACKAGE_TOKEN }}
-        run: ./gradlew assembleDefaultRelease -PapplyFirebasePlugins=true --stacktrace
+        run: |
+          ./gradlew assembleRelease -PapplyFirebasePlugins=true --stacktrace
+          mkdir -p app/build/outputs/apk/default
+          mv app/build/outputs/apk/release app/build/outputs/apk/default/
 
       - name: Get release file apk path
         id: releaseApks
@@ -111,4 +118,3 @@ jobs:
           prerelease: false
           files: |
             ${{ steps.releaseApks.outputs.release_apks }}
-
