@@ -374,9 +374,25 @@ class PictureViewModel(
     ) {
         launchIO {
             showLoading(true)
-            ShareUtil.createShareImage(index, downloadUrl, illust, shareLauncher)
-            showLoading(false)
-            closeBottomSheet()
+            val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
+                illust.user.id.toString()
+            } else {
+                null
+            }
+            downloadManager.enqueueDownload(
+                illustId = illust.id,
+                index = index,
+                title = illust.title,
+                userId = illust.user.id,
+                userName = illust.user.name,
+                thumbnailUrl = illust.imageUrls.squareMedium,
+                originalUrl = downloadUrl,
+                subFolder = subFolder,
+            ) { entity ->
+                ShareUtil.createShareImage(entity.filePath, shareLauncher)
+                showLoading(false)
+                closeBottomSheet()
+            }
         }
     }
 

@@ -7,7 +7,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 
-@Database(entities = [DownloadEntity::class], version = 2, exportSchema = false)
+@Database(entities = [DownloadEntity::class], version = 3, exportSchema = false)
 abstract class PixivDatabase : RoomDatabase() {
     abstract fun downloadDao(): DownloadDao
 
@@ -16,6 +16,11 @@ abstract class PixivDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE download ADD COLUMN userId INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE download RENAME COLUMN artist TO userName")
+            }
+        }
+        val MIGRATION_2_3 = object : Migration(2,3){
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE download ADD COLUMN fileUri TEXT NOT NULL DEFAULT ''")
             }
         }
     }

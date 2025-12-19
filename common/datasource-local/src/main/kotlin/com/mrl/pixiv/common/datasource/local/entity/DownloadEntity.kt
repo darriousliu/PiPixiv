@@ -17,6 +17,7 @@ data class DownloadEntity(
     val status: Int, // 0: Pending, 1: Running, 2: Success, 3: Failed
     val progress: Float,
     val filePath: String,
+    val fileUri: String,
     val createTime: Long,
 )
 
