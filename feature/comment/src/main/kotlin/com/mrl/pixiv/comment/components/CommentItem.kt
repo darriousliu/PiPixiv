@@ -3,8 +3,11 @@ package com.mrl.pixiv.comment.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.AlertDialog
@@ -18,18 +21,27 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.ui.image.LoadingImage
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.comment.Comment
+import com.mrl.pixiv.common.data.comment.Emoji
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.CommentRepository
 import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.throttleClick
@@ -49,6 +61,7 @@ fun CommentItem(
 ) {
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
+    val emojis by CommentRepository.emojiCacheFlow.collectAsStateWithLifecycle()
 
     Row(modifier = modifier) {
         UserAvatar(
@@ -153,9 +166,33 @@ fun CommentItem(
                     modifier = Modifier.size(100.dp)
                 )
             } else {
+                val emojiMap = remember(emojis) {
+                    emojis?.emojiDefinitions?.associateBy { it.slug } ?: emptyMap()
+                }
+                val annotatedString = remember(comment.comment, emojiMap) {
+                    parseComment(comment.comment, emojiMap)
+                }
+                val inlineContent = remember(emojiMap) {
+                    emojiMap.mapValues { (_, emoji) ->
+                        InlineTextContent(
+                            Placeholder(
+                                width = 1.em,
+                                height = 1.em,
+                                placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                            )
+                        ) {
+                            LoadingImage(
+                                model = emoji.imageUrlMedium,
+                                contentDescription = emoji.slug,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
                 Text(
-                    text = comment.comment,
+                    text = annotatedString,
                     style = MaterialTheme.typography.bodyMedium,
+                    inlineContent = inlineContent
                 )
             }
             if (!isBlockScreen && comment.hasReplies && onViewReplies != null) {
@@ -200,5 +237,23 @@ fun CommentItem(
                 Text(text = stringResource(RString.confirm_to_delete_comment))
             }
         )
+    }
+}
+
+private fun parseComment(comment: String, emojiMap: Map<String, Emoji>): AnnotatedString {
+    return buildAnnotatedString {
+        var lastIndex = 0
+        val regex = "\\(([^)]+)\\)".toRegex()
+        regex.findAll(comment).forEach { matchResult ->
+            val (slug) = matchResult.destructured
+            if (emojiMap.containsKey(slug)) {
+                append(comment.substring(lastIndex, matchResult.range.first))
+                appendInlineContent(slug, "($slug)")
+                lastIndex = matchResult.range.last + 1
+            }
+        }
+        if (lastIndex < comment.length) {
+            append(comment.substring(lastIndex))
+        }
     }
 }
