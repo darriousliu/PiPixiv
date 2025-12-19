@@ -44,6 +44,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,7 +80,7 @@ fun AppDataScreen(
     val scope = rememberCoroutineScope()
     val state = viewModel.asState()
 
-    var showMigrationConfirmDialog by remember { mutableStateOf(false) }
+    var showMigrationConfirmDialog by rememberSaveable { mutableStateOf(false) }
     var trigger by remember { mutableIntStateOf(0) }
     val cacheDirSize = remember(trigger) { context.cacheDir.calculateSize().adaptiveFileSize() }
 

@@ -39,7 +39,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -322,7 +322,7 @@ private fun ProfileDetailAppBar(
     val backgroundUrl = userInfo.profile.backgroundImageURL.ifEmpty {
         userInfo.user.profileImageUrls.medium
     }
-    var showMenu by remember { mutableStateOf(false) }
+    var showMenu by rememberSaveable { mutableStateOf(false) }
 
     if (backgroundUrl.isNotEmpty()) {
         AsyncImage(

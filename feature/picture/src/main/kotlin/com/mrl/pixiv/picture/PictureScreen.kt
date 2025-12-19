@@ -915,7 +915,7 @@ private fun PictureTopBar(
     onRemoveBlock: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showBottomMenu by remember { mutableStateOf(false) }
+    var showBottomMenu by rememberSaveable { mutableStateOf(false) }
     TopAppBar(
         title = {},
         modifier = modifier,

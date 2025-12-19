@@ -108,8 +108,8 @@ fun SquareIllustItem(
     shape: Shape = MaterialTheme.shapes.medium,
     enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var showPopupTip by remember { mutableStateOf(false) }
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var showPopupTip by rememberSaveable { mutableStateOf(false) }
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     val isIllustBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
     val isUserBlocked = BlockingRepository.collectUserBlockAsState(illust.user.id)
@@ -247,7 +247,7 @@ fun RectangleIllustItem(
     val isIllustBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
     val isUserBlocked = BlockingRepository.collectUserBlockAsState(illust.user.id)
     val enableTransition = enableTransition && !isIllustBlocked && !isUserBlocked
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val onBookmarkLongClick = {
         showBottomSheet = true
     }

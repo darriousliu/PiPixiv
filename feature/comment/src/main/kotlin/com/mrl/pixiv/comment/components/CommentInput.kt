@@ -52,6 +52,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -171,7 +172,7 @@ fun CommentInput(
 
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     val scrollState = rememberScrollState()
-    var showEmojiPicker by remember { mutableStateOf(false) }
+    var showEmojiPicker by rememberSaveable { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val imeVisibility = WindowInsets.isImeVisible
     val colors = TextFieldDefaults.colors()
