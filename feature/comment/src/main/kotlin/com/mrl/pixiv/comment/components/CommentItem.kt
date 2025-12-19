@@ -197,7 +197,7 @@ fun CommentItem(
             }
             if (!isBlockScreen && comment.hasReplies && onViewReplies != null) {
                 Text(
-                    text = "查看回复",
+                    text = stringResource(RString.view_replies),
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier
