@@ -245,13 +245,18 @@ fun CommentScreen(
                     replies = replies,
                     listState = repliesListState,
                     navigationManager = navigationManager,
-                    viewModel = viewModel,
                     onReply = { comment, index ->
                         viewModel.setSubCommentReplyTarget(comment)
                         showInputSheet = true
                         scope.launch {
                             repliesListState.animateScrollToItem(index)
                         }
+                    },
+                    onCancelReply = {
+                        viewModel.setSubCommentReplyTarget(null)
+                    },
+                    onDeleteComment = { id ->
+                        viewModel.deleteComment(id)
                     },
                     modifier = Modifier.weight(1f)
                 )
@@ -309,8 +314,9 @@ private fun RepliesContent(
     replies: LazyPagingItems<Comment>,
     listState: androidx.compose.foundation.lazy.LazyListState,
     navigationManager: NavigationManager,
-    viewModel: CommentViewModel,
     onReply: (Comment, Int) -> Unit,
+    onCancelReply: () -> Unit,
+    onDeleteComment: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -321,7 +327,7 @@ private fun RepliesContent(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        viewModel.setSubCommentReplyTarget(null)
+                        onCancelReply()
                     }
                 )
             }
@@ -345,7 +351,7 @@ private fun RepliesContent(
                     navigationManager.navigateToProfileDetailScreen(parentComment.user.id)
                 },
                 onDeleteComment = {
-                    viewModel.deleteComment(parentComment.id)
+                    onDeleteComment(parentComment.id)
                 },
                 onViewReplies = null,
                 modifier = Modifier.fillMaxWidth(),
@@ -382,7 +388,7 @@ private fun RepliesContent(
                         navigationManager.navigateToProfileDetailScreen(comment.user.id)
                     },
                     onDeleteComment = {
-                        viewModel.deleteComment(comment.id)
+                        onDeleteComment(comment.id)
                     },
                     onViewReplies = null,
                     modifier = Modifier.fillMaxWidth(),
