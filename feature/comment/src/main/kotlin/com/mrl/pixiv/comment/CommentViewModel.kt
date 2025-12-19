@@ -58,12 +58,12 @@ class CommentViewModel(
     }.flow.cachedIn(viewModelScope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val replies = uiState.map { it.expandedComment }
+    val replies = uiState.map { it.expandedComment?.id }
         .distinctUntilChanged()
-        .flatMapLatest { comment ->
-            if (comment == null) flowOf(PagingData.empty())
+        .flatMapLatest { commentId ->
+            if (commentId == null) flowOf(PagingData.empty())
             else Pager(PagingConfig(pageSize = 30)) {
-                CommentRepliesPagingSource(comment.id)
+                CommentRepliesPagingSource(commentId)
             }.flow.cachedIn(viewModelScope)
         }
 
