@@ -61,7 +61,7 @@ object BlockingRepositoryV2 : MMKVOwner {
             users = BlockingRepository.blockUsersFlow.value.orEmpty(),
             comments = emptyList()
         )
-//        BlockingRepository.restore(emptySet(), emptySet())
+        BlockingRepository.restore(emptySet(), emptySet())
     }
 
     fun restore(illusts: Set<String>, users: Set<String>, comments: List<Comment>) {

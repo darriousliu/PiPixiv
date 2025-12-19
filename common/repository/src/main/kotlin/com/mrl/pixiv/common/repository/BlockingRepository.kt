@@ -12,4 +12,9 @@ object BlockingRepository : MMKVUser {
 
     private val blockUsers by mmkvStringSet(emptySet()).asMutableStateFlow()
     val blockUsersFlow = blockUsers.asStateFlow()
+
+    fun restore(illusts: Set<String>, users: Set<String>) {
+        blockIllusts.value = illusts
+        blockUsers.value = users
+    }
 }
