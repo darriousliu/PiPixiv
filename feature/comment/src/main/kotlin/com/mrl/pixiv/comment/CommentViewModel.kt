@@ -34,6 +34,7 @@ internal const val MAX_COMMENT_LENGTH = 140
 data class CommentState(
     val isSending: Boolean = false,
     val replyTarget: Comment? = null,
+    val subCommentReplyTarget: Comment? = null,
     val expandedComment: Comment? = null
 )
 
@@ -50,6 +51,7 @@ class CommentViewModel(
     initialState = CommentState()
 ) {
     val currentInput = TextFieldState()
+    val subCommentInput = TextFieldState()
 
     val commentList = Pager(PagingConfig(pageSize = 30)) {
         CommentPagingSource(id)
@@ -75,9 +77,10 @@ class CommentViewModel(
     override suspend fun handleIntent(intent: ViewIntent) {
     }
 
-    fun insertEmoji(emoji: Emoji) {
+    fun insertEmoji(emoji: Emoji, isSubComment: Boolean = false) {
         val slug = "(${emoji.slug})"
-        currentInput.edit {
+        val input = if (isSubComment) subCommentInput else currentInput
+        input.edit {
             if (length - (selection.end - selection.start) + slug.length > MAX_COMMENT_LENGTH) return@edit
             replace(selection.start, selection.end, slug)
         }
@@ -87,20 +90,34 @@ class CommentViewModel(
         updateState { copy(replyTarget = comment) }
     }
 
-    fun setExpandedComment(comment: Comment?) {
-        updateState { copy(expandedComment = comment) }
+    fun setSubCommentReplyTarget(comment: Comment?) {
+        updateState { copy(subCommentReplyTarget = comment) }
     }
 
-    fun sendText() {
+    fun setExpandedComment(comment: Comment?) {
+        if (comment == null) {
+            subCommentInput.clearText()
+            updateState { copy(expandedComment = null, subCommentReplyTarget = null) }
+        } else {
+            updateState { copy(expandedComment = comment) }
+        }
+    }
+
+    fun sendText(isSubComment: Boolean = false) {
         launchIO(
             onError = {
                 ToastUtil.safeShortToast(RString.comment_failed)
             }
         ) {
-            val text = currentInput.text.toString()
+            val input = if (isSubComment) subCommentInput else currentInput
+            val text = input.text.toString()
             if (text.isBlank() || text.length > MAX_COMMENT_LENGTH) return@launchIO
             updateState { copy(isSending = true) }
-            val parentId = uiState.value.replyTarget?.id
+            val parentId = if (isSubComment) {
+                uiState.value.subCommentReplyTarget?.id ?: uiState.value.expandedComment?.id
+            } else {
+                uiState.value.replyTarget?.id
+            }
             val resp = when (type) {
                 CommentType.ILLUST -> PixivRepository.addIllustComment(
                     id,
@@ -114,20 +131,30 @@ class CommentViewModel(
                     parentCommentId = parentId
                 )
             }
-            currentInput.clearText()
-            updateState { copy(isSending = false, replyTarget = null) }
+            input.clearText()
+            updateState {
+                copy(
+                    isSending = false,
+                    replyTarget = if (isSubComment) replyTarget else null,
+                    subCommentReplyTarget = if (isSubComment) null else subCommentReplyTarget
+                )
+            }
             sendEffect(CommentSideEffect.CommentAdded(resp.comment.id, parentId))
         }
     }
 
-    fun sendStamp(stamp: Stamp) {
+    fun sendStamp(stamp: Stamp, isSubComment: Boolean = false) {
         launchIO(
             onError = {
                 ToastUtil.safeShortToast(RString.comment_failed)
             }
         ) {
             updateState { copy(isSending = true) }
-            val parentId = uiState.value.replyTarget?.id
+            val parentId = if (isSubComment) {
+                uiState.value.subCommentReplyTarget?.id ?: uiState.value.expandedComment?.id
+            } else {
+                uiState.value.replyTarget?.id
+            }
             val resp = when (type) {
                 CommentType.ILLUST -> PixivRepository.addIllustComment(
                     id,
@@ -143,8 +170,15 @@ class CommentViewModel(
                     parentCommentId = parentId
                 )
             }
-            currentInput.clearText()
-            updateState { copy(isSending = false, replyTarget = null) }
+            val input = if (isSubComment) subCommentInput else currentInput
+            input.clearText()
+            updateState {
+                copy(
+                    isSending = false,
+                    replyTarget = if (isSubComment) replyTarget else null,
+                    subCommentReplyTarget = if (isSubComment) null else subCommentReplyTarget
+                )
+            }
             sendEffect(CommentSideEffect.CommentAdded(resp.comment.id, parentId))
         }
     }

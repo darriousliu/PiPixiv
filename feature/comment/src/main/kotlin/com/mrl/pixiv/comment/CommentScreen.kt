@@ -55,6 +55,7 @@ import com.mrl.pixiv.common.router.ReportType
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.common.viewmodel.state
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -91,11 +92,8 @@ fun CommentScreen(
                         comments.refresh()
                         scrollToTopAfterRefresh = true
                         hasStartedLoading = false
-                    } else {
-                        if (state.expandedComment != null) {
-                            replies.refresh()
-                        }
-                        comments.refresh()
+                    } else if (viewModel.state.expandedComment != null) {
+                        replies.refresh()
                     }
                     showInputSheet = false
                     ToastUtil.safeShortToast(RString.comment_success)
@@ -103,7 +101,7 @@ fun CommentScreen(
 
                 is CommentSideEffect.CommentDeleted -> {
                     comments.refresh()
-                    if (state.expandedComment != null) {
+                    if (viewModel.state.expandedComment != null) {
                         replies.refresh()
                     }
                     ToastUtil.safeShortToast(RString.delete_comment_success)
@@ -153,13 +151,13 @@ fun CommentScreen(
                 isSending = isSending,
                 emojis = emojis?.emojiDefinitions.orEmpty().toPersistentList(),
                 stamps = stamps?.stamps.orEmpty().toPersistentList(),
-                onInsertEmoji = viewModel::insertEmoji,
+                onInsertEmoji = { viewModel.insertEmoji(it, isSubComment = false) },
                 onSendStamp = {
-                    viewModel.sendStamp(it)
+                    viewModel.sendStamp(it, isSubComment = false)
                     focusManager.clearFocus()
                 },
                 onSendText = {
-                    viewModel.sendText()
+                    viewModel.sendText(isSubComment = false)
                     focusManager.clearFocus()
                 },
                 replyTarget = state.replyTarget,
@@ -249,7 +247,8 @@ fun CommentScreen(
                     navigationManager = navigationManager,
                     viewModel = viewModel,
                     onReply = { comment, index ->
-                        viewModel.setReplyTarget(comment)
+                        viewModel.setSubCommentReplyTarget(comment)
+                        showInputSheet = true
                         scope.launch {
                             repliesListState.animateScrollToItem(index)
                         }
@@ -280,21 +279,21 @@ fun CommentScreen(
             }
 
             CommentInput(
-                state = viewModel.currentInput,
+                state = viewModel.subCommentInput,
                 isSending = isSending,
                 emojis = emojis?.emojiDefinitions.orEmpty().toPersistentList(),
                 stamps = stamps?.stamps.orEmpty().toPersistentList(),
-                onInsertEmoji = viewModel::insertEmoji,
+                onInsertEmoji = { viewModel.insertEmoji(it, isSubComment = true) },
                 onSendStamp = {
-                    viewModel.sendStamp(it)
+                    viewModel.sendStamp(it, isSubComment = true)
                     focusManager.clearFocus()
                 },
                 onSendText = {
-                    viewModel.sendText()
+                    viewModel.sendText(isSubComment = true)
                     focusManager.clearFocus()
                 },
-                replyTarget = state.replyTarget,
-                onClearReplyTarget = { viewModel.setReplyTarget(null) },
+                replyTarget = state.subCommentReplyTarget,
+                onClearReplyTarget = { viewModel.setSubCommentReplyTarget(null) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding(),
@@ -322,7 +321,7 @@ private fun RepliesContent(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        viewModel.setReplyTarget(null)
+                        viewModel.setSubCommentReplyTarget(null)
                     }
                 )
             }
@@ -331,7 +330,7 @@ private fun RepliesContent(
             CommentItem(
                 comment = parentComment,
                 onReplyComment = {
-                    viewModel.setReplyTarget(parentComment)
+                    onReply(parentComment, 0)
                 },
                 onBlockComment = {
                     BlockingRepository.blockComment(parentComment.id)
@@ -349,9 +348,7 @@ private fun RepliesContent(
                     viewModel.deleteComment(parentComment.id)
                 },
                 onViewReplies = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp),
+                modifier = Modifier.fillMaxWidth(),
             )
             HorizontalDivider()
         }
