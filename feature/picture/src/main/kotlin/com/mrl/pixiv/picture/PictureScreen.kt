@@ -555,7 +555,10 @@ internal fun PictureScreen(
                             )
                             5.HSpacer
                             Text(
-                                text = stringResource(RString.view_comments),
+                                text = stringResource(
+                                    RString.view_comments_count,
+                                    illust.totalComments
+                                ),
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }

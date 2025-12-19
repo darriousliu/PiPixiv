@@ -163,6 +163,7 @@
     <string name="import_success">导入成功</string>
     <string name="import_failed">导入失败: %1$s</string>
     <string name="view_comments">查看评论</string>
+    <string name="view_comments_count">查看评论(%d)</string>
     <string name="no_comments">暂无评论</string>
     <string name="add_comment">添加评论</string>
     <string name="reply">回复</string>

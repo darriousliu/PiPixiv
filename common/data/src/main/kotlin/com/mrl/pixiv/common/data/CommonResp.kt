@@ -111,6 +111,9 @@ data class Illust(
     @SerialName("is_muted")
     val isMuted: Boolean? = null,
 
+    @SerialName("total_comments")
+    val totalComments: Int,
+
     @SerialName("illust_ai_type")
     val illustAIType: IllustAiType = IllustAiType.Undefined,
 
