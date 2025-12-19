@@ -1,8 +1,8 @@
 package com.mrl.pixiv.comment
 
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -27,8 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -39,6 +42,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.mrl.pixiv.comment.components.CommentInput
+import com.mrl.pixiv.comment.components.CommentInputPlaceholder
 import com.mrl.pixiv.comment.components.CommentItem
 import com.mrl.pixiv.common.data.comment.Comment
 import com.mrl.pixiv.common.kts.VSpacer
@@ -77,6 +81,7 @@ fun CommentScreen(
 
     var scrollToTopAfterRefresh by remember { mutableStateOf(false) }
     var hasStartedLoading by remember { mutableStateOf(false) }
+    var showInputSheet by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { effect ->
@@ -92,8 +97,10 @@ fun CommentScreen(
                         }
                         comments.refresh()
                     }
+                    showInputSheet = false
                     ToastUtil.safeShortToast(RString.comment_success)
                 }
+
                 is CommentSideEffect.CommentDeleted -> {
                     comments.refresh()
                     if (state.expandedComment != null) {
@@ -233,51 +240,66 @@ fun CommentScreen(
         ModalBottomSheet(
             onDismissRequest = { viewModel.setExpandedComment(null) },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(modifier = Modifier.fillMaxHeight(2 / 3f)) {
+                RepliesContent(
+                    parentComment = state.expandedComment,
+                    replies = replies,
+                    listState = repliesListState,
+                    navigationManager = navigationManager,
+                    viewModel = viewModel,
+                    onReply = { comment, index ->
+                        viewModel.setReplyTarget(comment)
+                        scope.launch {
+                            repliesListState.animateScrollToItem(index)
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+                CommentInputPlaceholder(
+                    onClick = { showInputSheet = true },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+
+    if (showInputSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showInputSheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            shape = RectangleShape,
+            dragHandle = null
         ) {
             val focusManager = LocalFocusManager.current
             val isSending = state.isSending
-            Scaffold(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .imePadding(),
-                bottomBar = {
-                    CommentInput(
-                        state = viewModel.currentInput,
-                        isSending = isSending,
-                        emojis = emojis?.emojiDefinitions.orEmpty().toPersistentList(),
-                        stamps = stamps?.stamps.orEmpty().toPersistentList(),
-                        onInsertEmoji = viewModel::insertEmoji,
-                        onSendStamp = {
-                            viewModel.sendStamp(it)
-                            focusManager.clearFocus()
-                        },
-                        onSendText = {
-                            viewModel.sendText()
-                            focusManager.clearFocus()
-                        },
-                        replyTarget = state.replyTarget,
-                        onClearReplyTarget = { viewModel.setReplyTarget(null) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            ) { padding ->
-                Box(modifier = Modifier.padding(padding)) {
-                    RepliesContent(
-                        parentComment = state.expandedComment,
-                        replies = replies,
-                        listState = repliesListState,
-                        navigationManager = navigationManager,
-                        viewModel = viewModel,
-                        onReply = { comment, index ->
-                            viewModel.setReplyTarget(comment)
-                            scope.launch {
-                                repliesListState.animateScrollToItem(index)
-                            }
-                        }
-                    )
-                }
+            val focusRequester = remember { FocusRequester() }
+
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus()
             }
+
+            CommentInput(
+                state = viewModel.currentInput,
+                isSending = isSending,
+                emojis = emojis?.emojiDefinitions.orEmpty().toPersistentList(),
+                stamps = stamps?.stamps.orEmpty().toPersistentList(),
+                onInsertEmoji = viewModel::insertEmoji,
+                onSendStamp = {
+                    viewModel.sendStamp(it)
+                    focusManager.clearFocus()
+                },
+                onSendText = {
+                    viewModel.sendText()
+                    focusManager.clearFocus()
+                },
+                replyTarget = state.replyTarget,
+                onClearReplyTarget = { viewModel.setReplyTarget(null) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding(),
+                focusRequester = focusRequester
+            )
         }
     }
 }
@@ -289,12 +311,13 @@ private fun RepliesContent(
     listState: androidx.compose.foundation.lazy.LazyListState,
     navigationManager: NavigationManager,
     viewModel: CommentViewModel,
-    onReply: (Comment, Int) -> Unit
+    onReply: (Comment, Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
         state = listState,
         contentPadding = 8.hPadding,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -304,7 +327,7 @@ private fun RepliesContent(
                 )
             }
     ) {
-        item {
+        item(key = parentComment.id) {
             CommentItem(
                 comment = parentComment,
                 onReplyComment = {
@@ -326,7 +349,9 @@ private fun RepliesContent(
                     viewModel.deleteComment(parentComment.id)
                 },
                 onViewReplies = null,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
             )
             HorizontalDivider()
         }

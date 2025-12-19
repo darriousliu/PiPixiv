@@ -49,7 +49,7 @@ class CommentViewModel(
 ) : BaseMviViewModel<CommentState, ViewIntent>(
     initialState = CommentState()
 ) {
-    val currentInput: TextFieldState = TextFieldState()
+    val currentInput = TextFieldState()
 
     val commentList = Pager(PagingConfig(pageSize = 30)) {
         CommentPagingSource(id)

@@ -56,6 +56,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.key.Key
@@ -87,6 +89,52 @@ private val EMOJI_REGEX = Regex("\\([a-zA-Z0-9_]+\\)")
 private const val REPLACEMENT_STRING = "\u3000"
 
 @Composable
+fun CommentInputPlaceholder(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = BottomAppBarDefaults.containerColor,
+        tonalElevation = BottomAppBarDefaults.ContainerElevation,
+        modifier = modifier.clickable(onClick = onClick)
+    ) {
+        Column {
+            HorizontalDivider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = 8.spaceBy,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(RString.add_comment),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            MaterialTheme.shapes.small
+                        )
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                )
+                Icon(
+                    imageVector = Icons.Default.EmojiEmotions,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun CommentInput(
     state: TextFieldState,
     isSending: Boolean,
@@ -97,7 +145,8 @@ fun CommentInput(
     onSendText: () -> Unit,
     modifier: Modifier = Modifier,
     replyTarget: Comment? = null,
-    onClearReplyTarget: () -> Unit = {}
+    onClearReplyTarget: () -> Unit = {},
+    focusRequester: FocusRequester? = null
 ) {
     val outputTransformation = remember(emojis) {
         OutputTransformation {
@@ -138,8 +187,8 @@ fun CommentInput(
         tonalElevation = BottomAppBarDefaults.ContainerElevation,
     ) {
         Column(modifier = modifier.windowInsetsPadding(BottomAppBarDefaults.windowInsets)) {
-            HorizontalDivider()
             if (replyTarget != null) {
+                HorizontalDivider()
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -180,6 +229,9 @@ fun CommentInput(
                     state = state,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .conditionally(focusRequester != null) {
+                            focusRequester(focusRequester!!)
+                        }
                         .onKeyEvent { event ->
                             if (event.key == Key.Backspace) {
                                 val selection = state.selection
