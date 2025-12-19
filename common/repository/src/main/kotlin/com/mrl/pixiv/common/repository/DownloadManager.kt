@@ -119,9 +119,17 @@ class DownloadManager(
             scope.launch {
                 workManager.getWorkInfoByIdFlow(request.id).collect { workInfo ->
                     val state = workInfo?.state
-                    if (state == WorkInfo.State.SUCCEEDED) {
-                        val newEntity = downloadDao.getDownload(entity.illustId, entity.index)
-                        downloadManagerListener.onDownloadCompleted(newEntity ?: entity)
+                    when (state) {
+                        WorkInfo.State.SUCCEEDED -> {
+                            val newEntity = downloadDao.getDownload(entity.illustId, entity.index)
+                            downloadManagerListener.onDownloadCompleted(newEntity)
+                        }
+
+                        WorkInfo.State.FAILED -> {
+                            downloadManagerListener.onDownloadCompleted(null)
+                        }
+
+                        else -> Unit
                     }
                     if (state != null && state.isFinished) {
                         this.cancel()
@@ -156,6 +164,6 @@ class DownloadManager(
     }
 
     fun interface DownloadManagerListener {
-        fun onDownloadCompleted(entity: DownloadEntity)
+        fun onDownloadCompleted(entity: DownloadEntity?)
     }
 }

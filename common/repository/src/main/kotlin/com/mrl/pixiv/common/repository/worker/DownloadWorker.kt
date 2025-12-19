@@ -65,7 +65,7 @@ class DownloadWorker(
             e.printStackTrace()
             entity = entity.copy(status = DownloadStatus.FAILED.value)
             downloadDao.update(entity)
-            if (runAttemptCount < 3) {
+            if (runAttemptCount < 1) {
                 Result.retry()
             } else {
                 Result.failure()

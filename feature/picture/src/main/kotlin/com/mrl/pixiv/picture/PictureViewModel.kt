@@ -375,6 +375,7 @@ class PictureViewModel(
     ) {
         launchIO {
             showLoading(true)
+            closeBottomSheet()
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
                 illust.user.id.toString()
             } else {
@@ -390,11 +391,12 @@ class PictureViewModel(
                 originalUrl = downloadUrl,
                 subFolder = subFolder,
             ) { entity ->
-                if (entity.status == DownloadStatus.SUCCESS.value) {
+                if (entity != null && entity.status == DownloadStatus.SUCCESS.value) {
                     ShareUtil.createShareImage(entity.fileUri, shareLauncher)
-                    showLoading(false)
-                    closeBottomSheet()
+                } else {
+                    ToastUtil.safeShortToast(RString.download_failed)
                 }
+                showLoading(false)
             }
         }
     }
