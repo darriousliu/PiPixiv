@@ -5,14 +5,16 @@ import android.content.Context
 import coil3.PlatformContext
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
+import com.mrl.pixiv.common.analytics.FLAVOR
+import com.mrl.pixiv.common.analytics.initKotzilla
+import com.mrl.pixiv.common.analytics.initializeFirebase
 import com.mrl.pixiv.common.data.setting.setAppCompatDelegateThemeMode
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.deleteFiles
-import com.mrl.pixiv.common.util.initKotzilla
-import com.mrl.pixiv.common.util.initializeFirebase
+import com.mrl.pixiv.common.util.isDebug
 import com.mrl.pixiv.common.util.isExist
 import com.mrl.pixiv.di.allModule
 import com.tencent.mmkv.MMKV
@@ -40,12 +42,12 @@ class App : Application() {
         super.onCreate()
         instance = this
         MMKV.initialize(this)
-        initializeFirebase()
-        AppUtil.init(this, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.FLAVOR)
+        initializeFirebase(isDebug)
+        AppUtil.init(this, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, FLAVOR)
         startKoin {
             androidLogger()
             androidContext(this@App)
-            initKotzilla()
+            initKotzilla(isDebug)
             modules(allModule)
         }
         migrateDataStoreToMMKV()

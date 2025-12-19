@@ -35,6 +35,7 @@ import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
 import com.mrl.pixiv.comment.BlockCommentsScreen
 import com.mrl.pixiv.comment.CommentScreen
+import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
@@ -45,7 +46,6 @@ import com.mrl.pixiv.common.router.DestinationsDeepLink
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.toast.ToastMessage
 import com.mrl.pixiv.common.util.ToastUtil
-import com.mrl.pixiv.common.util.logEvent
 import com.mrl.pixiv.common.util.result.LocalResultEventBus
 import com.mrl.pixiv.common.util.result.ResultEventBus
 import com.mrl.pixiv.follow.FollowingScreen

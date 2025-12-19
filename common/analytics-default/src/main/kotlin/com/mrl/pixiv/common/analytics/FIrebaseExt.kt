@@ -1,4 +1,4 @@
-package com.mrl.pixiv.common.util
+package com.mrl.pixiv.common.analytics
 
 import android.app.Application
 import com.google.firebase.Firebase
@@ -13,7 +13,7 @@ private val firebaseAnalytics
 private val firebaseCrashlytics
     get() = Firebase.crashlytics
 
-fun Application.initializeFirebase() {
+fun Application.initializeFirebase(isDebug: Boolean) {
     Firebase.initialize(this)
     Firebase.crashlytics.isCrashlyticsCollectionEnabled = !isDebug
 }

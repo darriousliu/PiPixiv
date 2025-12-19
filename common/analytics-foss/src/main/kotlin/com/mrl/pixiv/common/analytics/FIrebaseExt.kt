@@ -1,8 +1,8 @@
-package com.mrl.pixiv.common.util
+package com.mrl.pixiv.common.analytics
 
 import android.app.Application
 
-fun Application.initializeFirebase() {
+fun Application.initializeFirebase(isDebug: Boolean) {
 
 }
 

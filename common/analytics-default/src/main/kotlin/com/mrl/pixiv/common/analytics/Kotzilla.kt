@@ -1,9 +1,9 @@
-package com.mrl.pixiv.common.util
+package com.mrl.pixiv.common.analytics
 
 import io.kotzilla.sdk.analytics.koin.analytics
 import org.koin.core.KoinApplication
 
-fun KoinApplication.initKotzilla() {
+fun KoinApplication.initKotzilla(isDebug: Boolean) {
     if (!isDebug) {
         analytics()
     }

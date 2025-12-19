@@ -14,6 +14,11 @@ android {
 
 dependencies {
     api(project(":lib_strings"))
+    if (project.findProperty("applyFirebasePlugins") == "true") {
+        api(project(":common:analytics-default"))
+    } else {
+        api(project(":common:analytics-foss"))
+    }
     implementation(project(":common:data"))
 
     implementation(libs.material)
@@ -27,12 +32,7 @@ dependencies {
     // Coil3
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)
-    // Firebase
-    defaultImplementation(platform(libs.firebase.bom))
-    defaultImplementation(libs.bundles.firebase)
     // MMKV
     implementation(libs.mmkv)
     implementation(libs.mmkv.kotlin)
-    // Kotzilla
-    defaultImplementation(libs.kotzilla.sdk)
 }

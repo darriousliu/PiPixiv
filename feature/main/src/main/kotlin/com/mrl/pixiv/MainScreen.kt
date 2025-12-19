@@ -18,10 +18,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.logEvent
 import com.mrl.pixiv.home.HomeScreen
 import com.mrl.pixiv.latest.LatestScreen
 import com.mrl.pixiv.profile.ProfileScreen

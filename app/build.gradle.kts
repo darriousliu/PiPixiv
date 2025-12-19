@@ -48,17 +48,6 @@ android {
         }
     }
 
-    flavorDimensions += "version"
-    productFlavors {
-        create("default") {
-            isDefault = true
-            dimension = flavorDimensionList[0]
-        }
-        create("foss") {
-            dimension = flavorDimensionList[0]
-        }
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -90,6 +79,11 @@ android {
     }
     applicationVariants.configureEach {
         outputs.configureEach {
+            val name = if (project.findProperty("applyFirebasePlugins") == "true") {
+                "default"
+            } else {
+                "foss"
+            }
             (this as? ApkVariantOutputImpl)?.outputFileName =
                 "${rootProject.name}-v${defaultConfig.versionName}-$name.apk"
         }
