@@ -555,10 +555,14 @@ internal fun PictureScreen(
                             )
                             5.HSpacer
                             Text(
-                                text = stringResource(
-                                    RString.view_comments_count,
-                                    illust.totalComments
-                                ),
+                                text = if (illust.totalComments != null) {
+                                    stringResource(
+                                        RString.view_comments_count,
+                                        illust.totalComments!!
+                                    )
+                                } else {
+                                    stringResource(RString.view_comments)
+                                },
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
