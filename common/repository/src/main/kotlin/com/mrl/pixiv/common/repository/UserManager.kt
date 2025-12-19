@@ -5,6 +5,7 @@ import androidx.lifecycle.lifecycleScope
 import com.mrl.pixiv.common.coroutine.ProcessLifecycleScope
 import com.mrl.pixiv.common.coroutine.launchCatch
 import com.mrl.pixiv.common.coroutine.withIOContext
+import com.mrl.pixiv.common.data.User
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.mmkv.MMKVUser
 import com.mrl.pixiv.common.mmkv.asMutableStateFlow
@@ -22,6 +23,9 @@ val requireUserInfoFlow
 
 val Long.isSelf: Boolean
     get() = requireUserInfoValue.user.id == this
+
+val User.isSelf: Boolean
+    get() = requireUserInfoValue.user.id == id
 
 object UserManager : MMKVUser {
     private val userInfo by mmkvSerializable(UserDetailResp()).asMutableStateFlow()

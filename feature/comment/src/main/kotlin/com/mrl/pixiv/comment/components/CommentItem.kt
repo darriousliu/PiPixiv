@@ -68,7 +68,7 @@ fun CommentItem(
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 1
                 )
-                if (comment.user.id.isSelf) {
+                if (comment.user.isSelf) {
                     Text(
                         text = stringResource(RString.delete),
                         modifier = Modifier
@@ -90,45 +90,47 @@ fun CommentItem(
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Box {
-                    Icon(
-                        imageVector = Icons.Default.MoreHoriz,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .throttleClick(indication = ripple(radius = 16.dp)) {
-                                showMenu = true
-                            }
-                            .padding(4.dp)
-                            .size(24.dp)
-                    )
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(RString.block_comment)
-                                )
-                            },
-                            onClick = {
-                                onBlockComment()
-                                showMenu = false
-                            }
+                if (!comment.user.isSelf) {
+                    Box {
+                        Icon(
+                            imageVector = Icons.Default.MoreHoriz,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .throttleClick(indication = ripple(radius = 16.dp)) {
+                                    showMenu = true
+                                }
+                                .padding(4.dp)
+                                .size(24.dp)
                         )
-                        // 根据官方APP逻辑，纯stamp评论无法举报
-                        if (comment.stamp == null) {
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
                             DropdownMenuItem(
                                 text = {
                                     Text(
-                                        text = stringResource(RString.report_comment)
+                                        text = stringResource(RString.block_comment)
                                     )
                                 },
                                 onClick = {
-                                    onReportComment()
+                                    onBlockComment()
                                     showMenu = false
                                 }
                             )
+                            // 根据官方APP逻辑，纯stamp评论无法举报
+                            if (comment.stamp == null) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = stringResource(RString.report_comment)
+                                        )
+                                    },
+                                    onClick = {
+                                        onReportComment()
+                                        showMenu = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
