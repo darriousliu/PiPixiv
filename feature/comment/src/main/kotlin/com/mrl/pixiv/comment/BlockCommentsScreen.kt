@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.comment.components.CommentItem
 import com.mrl.pixiv.common.kts.VSpacer
+import com.mrl.pixiv.common.kts.hPadding
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
@@ -55,10 +56,11 @@ fun BlockCommentsScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
+            contentPadding = 8.hPadding,
         ) {
             itemsIndexed(
                 items = blockedComments,
-                key = { index, item -> item.id }
+                key = { _, item -> item.id }
             ) { index, comment ->
                 CommentItem(
                     comment = comment,
