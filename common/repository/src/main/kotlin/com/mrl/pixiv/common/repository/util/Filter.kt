@@ -9,6 +9,9 @@ import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 
 inline fun List<Illust>.filterNormal() = filter { it.xRestrict == XRestrict.Normal }
 
-inline fun List<Comment>.filterBlocked() = filter { comment ->
-    BlockingRepositoryV2.blockCommentsFlow.value.all { it.id != comment.id }
+inline fun List<Comment>.filterBlocked(): List<Comment> {
+    val blockComments = BlockingRepositoryV2.blockCommentsFlow.value
+    return filter { comment ->
+        blockComments.all { it.id != comment.id }
+    }
 }
