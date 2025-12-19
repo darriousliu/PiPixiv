@@ -62,7 +62,7 @@ class CommentViewModel(
         .distinctUntilChanged()
         .flatMapLatest { commentId ->
             if (commentId == null) flowOf(PagingData.empty())
-            else Pager(PagingConfig(pageSize = 30)) {
+            else Pager(PagingConfig(pageSize = 5)) {
                 CommentRepliesPagingSource(commentId)
             }.flow.cachedIn(viewModelScope)
         }
