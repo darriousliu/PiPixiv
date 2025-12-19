@@ -82,6 +82,7 @@
     <string name="block_settings">Настройки блокировки</string>
     <string name="block_user">Заблокировать пользователя</string>
     <string name="block_tags">Заблокировать теги</string>
+    <string name="block_comments">Заблокированные комментарии</string>
     <string name="hide_illust">Скрыть эту работу</string>
     <string name="illust_hidden">Эта работа скрыта</string>
     <string name="show_illust">Показать эту работу</string>

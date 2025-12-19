@@ -82,6 +82,7 @@
     <string name="block_settings">차단 설정</string>
     <string name="block_user">사용자 차단</string>
     <string name="block_tags">태그 차단</string>
+    <string name="block_comments">차단된 댓글</string>
     <string name="hide_illust">이 작품 숨기기</string>
     <string name="illust_hidden">이 작품은 숨겨졌습니다</string>
     <string name="show_illust">이 작품 표시</string>

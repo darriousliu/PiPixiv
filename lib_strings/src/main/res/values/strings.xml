@@ -85,6 +85,7 @@
     <string name="block_settings">屏蔽设定</string>
     <string name="block_user">屏蔽用户</string>
     <string name="block_tags">屏蔽标签</string>
+    <string name="block_comments">屏蔽的评论</string>
     <string name="hide_illust">隐藏该作品</string>
     <string name="illust_hidden">该作品已隐藏</string>
     <string name="show_illust">显示该作品</string>
@@ -168,6 +169,7 @@
     <string name="add_comment">添加评论</string>
     <string name="reply">回复</string>
     <string name="block_comment">屏蔽评论</string>
+    <string name="unblock_comment">解除屏蔽</string>
     <string name="report_comment">举报评论</string>
     <string name="comment_emoji">绘文字</string>
     <string name="comment_stamp">表情贴图</string>

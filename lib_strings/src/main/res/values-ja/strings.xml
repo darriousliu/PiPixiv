@@ -82,6 +82,7 @@
     <string name="block_settings">ブロック設定</string>
     <string name="block_user">ユーザーをブロック</string>
     <string name="block_tags">タグをブロック</string>
+    <string name="block_comments">ブロックされたコメント</string>
     <string name="hide_illust">この作品を非表示</string>
     <string name="illust_hidden">この作品は非表示になっています</string>
     <string name="show_illust">作品を表示</string>

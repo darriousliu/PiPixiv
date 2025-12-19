@@ -82,6 +82,7 @@
     <string name="block_settings">Configuración de bloqueo</string>
     <string name="block_user">Bloquear usuario</string>
     <string name="block_tags">Bloquear etiquetas</string>
+    <string name="block_comments">Comentarios bloqueados</string>
     <string name="hide_illust">Ocultar esta obra</string>
     <string name="illust_hidden">Esta obra está oculta</string>
     <string name="show_illust">Mostrar esta obra</string>

@@ -82,6 +82,7 @@
     <string name="block_settings">Block Settings</string>
     <string name="block_user">Block User</string>
     <string name="block_tags">Block Tags</string>
+    <string name="block_comments">Blocked comments</string>
     <string name="hide_illust">Hide this artwork</string>
     <string name="illust_hidden">This artwork is hidden</string>
     <string name="show_illust">Show this artwork</string>

@@ -82,6 +82,7 @@
     <string name="block_settings">إعدادات الحظر</string>
     <string name="block_user">حظر المستخدم</string>
     <string name="block_tags">حظر العلامات</string>
+    <string name="block_comments">التعليقات المحظورة</string>
     <string name="hide_illust">إخفاء هذا العمل</string>
     <string name="illust_hidden">تم إخفاء هذا العمل</string>
     <string name="show_illust">إظهار هذا العمل</string>
