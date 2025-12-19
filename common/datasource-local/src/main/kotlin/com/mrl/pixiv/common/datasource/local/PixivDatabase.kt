@@ -11,6 +11,12 @@ import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 abstract class PixivDatabase : RoomDatabase() {
     abstract fun downloadDao(): DownloadDao
 
+    fun closeDatabase() {
+        if (isOpen) {
+            close()
+        }
+    }
+
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -18,7 +24,7 @@ abstract class PixivDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE download RENAME COLUMN artist TO userName")
             }
         }
-        val MIGRATION_2_3 = object : Migration(2,3){
+        val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE download ADD COLUMN fileUri TEXT NOT NULL DEFAULT ''")
             }

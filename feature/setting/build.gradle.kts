@@ -19,4 +19,5 @@ dependencies {
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.datetime)
     implementation(libs.okio)
+    implementation(androidx.room.runtime)
 }

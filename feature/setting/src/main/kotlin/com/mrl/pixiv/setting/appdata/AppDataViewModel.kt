@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.mrl.pixiv.common.data.Tag
 import com.mrl.pixiv.common.data.search.Search
 import com.mrl.pixiv.common.data.setting.UserPreference
+import com.mrl.pixiv.common.datasource.local.PixivDatabase
 import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.SearchRepository
@@ -69,7 +70,9 @@ private const val jsonDataFile = "data.json"
 private const val databaseName = "pixiv_db"
 
 @KoinViewModel
-class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
+class AppDataViewModel(
+    private val database: PixivDatabase,
+) : BaseMviViewModel<AppDataState, ViewIntent>(
     initialState = AppDataState(),
 ) {
     private val regex = Regex("""^(\d+)_(\d+)(\..+)?$""")
@@ -178,6 +181,10 @@ class AppDataViewModel : BaseMviViewModel<AppDataState, ViewIntent>(
             updateState { copy(isLoading = true, loadingMessage = RString.importing) }
             try {
                 val context = AppUtil.appContext
+
+                // 关闭数据库连接，避免写入冲突
+                database.closeDatabase()
+
                 context.contentResolver.openInputStream(uri)?.use { inputStream ->
                     ZipInputStream(inputStream).use { zis ->
                         // 将 ZipInputStream 包装为 Okio BufferedSource
