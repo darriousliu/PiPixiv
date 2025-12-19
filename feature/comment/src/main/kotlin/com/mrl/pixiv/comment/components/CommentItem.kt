@@ -43,7 +43,9 @@ fun CommentItem(
     onNavToUserProfile: () -> Unit,
     onDeleteComment: () -> Unit,
     modifier: Modifier = Modifier,
+    isBlockScreen: Boolean = false,
     onViewReplies: (() -> Unit)? = null,
+    onRemoveBlock: () -> Unit = {}
 ) {
     var showMenu by rememberSaveable { mutableStateOf(false) }
     var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
@@ -80,16 +82,18 @@ fun CommentItem(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-                Text(
-                    text = stringResource(RString.reply),
-                    modifier = Modifier
-                        .throttleClick(indication = ripple()) {
-                            onReplyComment()
-                        }
-                        .padding(4.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                if (!isBlockScreen) {
+                    Text(
+                        text = stringResource(RString.reply),
+                        modifier = Modifier
+                            .throttleClick(indication = ripple()) {
+                                onReplyComment()
+                            }
+                            .padding(4.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
                 if (!comment.user.isSelf) {
                     Box {
                         Icon(
@@ -106,30 +110,37 @@ fun CommentItem(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false }
                         ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = stringResource(RString.block_comment)
-                                    )
-                                },
-                                onClick = {
-                                    onBlockComment()
-                                    showMenu = false
-                                }
-                            )
-                            // 根据官方APP逻辑，纯stamp评论无法举报
-                            if (comment.stamp == null) {
+                            if (isBlockScreen) {
                                 DropdownMenuItem(
                                     text = {
-                                        Text(
-                                            text = stringResource(RString.report_comment)
-                                        )
+                                        Text(text = stringResource(RString.unblock_comment))
                                     },
                                     onClick = {
-                                        onReportComment()
+                                        onRemoveBlock()
+                                    }
+                                )
+                            } else {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(text = stringResource(RString.block_comment))
+                                    },
+                                    onClick = {
+                                        onBlockComment()
                                         showMenu = false
                                     }
                                 )
+                                // 根据官方APP逻辑，纯stamp评论无法举报
+                                if (comment.stamp == null) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(text = stringResource(RString.report_comment))
+                                        },
+                                        onClick = {
+                                            onReportComment()
+                                            showMenu = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -147,7 +158,7 @@ fun CommentItem(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            if (comment.hasReplies && onViewReplies != null) {
+            if (!isBlockScreen && comment.hasReplies && onViewReplies != null) {
                 Text(
                     text = "查看回复",
                     color = MaterialTheme.colorScheme.primary,

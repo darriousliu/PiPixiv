@@ -33,6 +33,7 @@ import com.mrl.pixiv.MainScreen
 import com.mrl.pixiv.artwork.ArtworkScreen
 import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
+import com.mrl.pixiv.comment.BlockCommentsScreen
 import com.mrl.pixiv.comment.CommentScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
@@ -257,6 +258,9 @@ fun Navigation3MainGraph(
                     }
                     entry<Destination.BlockSettings> {
                         BlockSettingsScreen()
+                    }
+                    entry<Destination.BlockComments> {
+                        BlockCommentsScreen()
                     }
                     entry<Destination.AppData> {
                         AppDataScreen()

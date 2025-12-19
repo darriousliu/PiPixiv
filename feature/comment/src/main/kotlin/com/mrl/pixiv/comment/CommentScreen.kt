@@ -47,7 +47,7 @@ import com.mrl.pixiv.comment.components.CommentItem
 import com.mrl.pixiv.common.data.comment.Comment
 import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.hPadding
-import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.CommentRepository
 import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.router.NavigationManager
@@ -191,7 +191,7 @@ fun CommentScreen(
                     key = comments.itemKey { it.id }
                 ) { index ->
                     val comment = comments[index] ?: return@items
-                    val isBlocked = BlockingRepository.collectCommentBlockAsState(comment.id)
+                    val isBlocked = BlockingRepositoryV2.collectCommentBlockAsState(comment.id)
                     if (isBlocked) return@items
                     Column(
                         modifier = Modifier
@@ -207,7 +207,7 @@ fun CommentScreen(
                                 }
                             },
                             onBlockComment = {
-                                BlockingRepository.blockComment(comment.id)
+                                BlockingRepositoryV2.blockComment(comment)
                             },
                             onReportComment = {
                                 navigationManager.navigateToReportCommentScreen(
@@ -343,7 +343,7 @@ private fun RepliesContent(
                     onReply(parentComment, 0)
                 },
                 onBlockComment = {
-                    BlockingRepository.blockComment(parentComment.id)
+                    BlockingRepositoryV2.blockComment(parentComment)
                 },
                 onReportComment = {
                     navigationManager.navigateToReportCommentScreen(
@@ -380,7 +380,7 @@ private fun RepliesContent(
                         onReply(comment, index + 1)
                     },
                     onBlockComment = {
-                        BlockingRepository.blockComment(comment.id)
+                        BlockingRepositoryV2.blockComment(comment)
                     },
                     onReportComment = {
                         navigationManager.navigateToReportCommentScreen(
