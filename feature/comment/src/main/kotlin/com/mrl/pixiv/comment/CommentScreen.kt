@@ -191,6 +191,8 @@ fun CommentScreen(
                     key = comments.itemKey { it.id }
                 ) { index ->
                     val comment = comments[index] ?: return@items
+                    val isBlocked = BlockingRepository.collectCommentBlockAsState(comment.id)
+                    if (isBlocked) return@items
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -222,7 +224,9 @@ fun CommentScreen(
                             onViewReplies = {
                                 viewModel.setExpandedComment(comment)
                             },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .animateItem()
+                                .fillMaxWidth(),
                         )
                         if (index != comments.itemCount - 1) {
                             8.VSpacer

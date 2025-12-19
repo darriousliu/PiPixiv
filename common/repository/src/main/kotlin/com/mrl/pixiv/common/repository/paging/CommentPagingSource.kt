@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.mrl.pixiv.common.data.comment.Comment
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.repository.util.filterBlocked
 import com.mrl.pixiv.common.repository.util.queryParams
 
 class CommentPagingSource(
@@ -17,7 +18,7 @@ class CommentPagingSource(
                 PixivRepository.loadMoreIllustComments(params.key!!.queryParams)
             }
             LoadResult.Page(
-                data = resp.comments,
+                data = resp.comments.filterBlocked(),
                 prevKey = params.key,
                 nextKey = resp.nextUrl?.takeIf { it.isNotBlank() }
             )
