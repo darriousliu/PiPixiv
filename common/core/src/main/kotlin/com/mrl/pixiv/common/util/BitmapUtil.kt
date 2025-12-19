@@ -122,7 +122,10 @@ suspend fun saveToAlbum(
     val context = AppUtil.appContext
     val contentValues = createContentValues(fileName, type, subFolder)
     val downloadDir = if (subFolder != null) "$DOWNLOAD_DIR$subFolder/" else DOWNLOAD_DIR
-    val filePath = "$downloadDir$fileName${type.extension}"
+    val filePath = File(
+        Environment.getExternalStoragePublicDirectory(""),
+        "$downloadDir$fileName${type.extension}"
+    ).absolutePath
 
     try {
         val uri = context.contentResolver.insert(

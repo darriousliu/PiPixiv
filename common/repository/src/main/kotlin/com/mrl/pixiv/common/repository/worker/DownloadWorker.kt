@@ -128,11 +128,12 @@ class DownloadWorker(
         val gifPair = saveToAlbum(gifBytes, fileName, PictureType.GIF.mimeType, subFolder)
 
         if (gifPair != null) {
+            val (fileUri, filePath) = gifPair
             val successEntity = entity.copy(
                 status = DownloadStatus.SUCCESS.value,
                 progress = 1f,
-                filePath = gifPair.first,
-                fileUri = gifPair.second
+                filePath = filePath,
+                fileUri = fileUri
             )
             downloadDao.update(successEntity)
             return Result.success()
@@ -152,11 +153,12 @@ class DownloadWorker(
             generateFileName(illustId, entity.title, entity.userId, entity.userName, entity.index)
         val imagePair = saveToAlbum(bytes, fileName, mimeType, subFolder)
         if (imagePair != null) {
+            val (fileUri, filePath) = imagePair
             val successEntity = entity.copy(
                 status = DownloadStatus.SUCCESS.value,
                 progress = 1f,
-                filePath = imagePair.first,
-                fileUri = imagePair.second
+                filePath = filePath,
+                fileUri = fileUri
             )
             downloadDao.update(successEntity)
             return Result.success()
