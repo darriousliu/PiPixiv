@@ -15,6 +15,7 @@ import com.mrl.pixiv.common.data.Tag
 import com.mrl.pixiv.common.data.search.Search
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.datasource.local.PixivDatabase
+import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.SearchRepository
@@ -29,11 +30,10 @@ import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import okio.FileSystem
-import okio.Path.Companion.toOkioPath
 import okio.buffer
 import okio.sink
 import okio.source
@@ -49,7 +49,8 @@ data class AppExportData(
     val searchHistory: Search,
     val blockIllusts: Set<String>,
     val blockUsers: Set<String>,
-    val bookmarkedTags: List<Tag>
+    val bookmarkedTags: List<Tag>,
+    val downloads: List<DownloadEntity> = emptyList()
 )
 
 data class AppDataState(
@@ -66,8 +67,6 @@ data class AppDataState(
 data class RequestPermissionEffect(val intentSender: IntentSender) : SideEffect
 
 private const val jsonDataFile = "data.json"
-
-private const val databaseName = "pixiv_db"
 
 @KoinViewModel
 class AppDataViewModel(
@@ -112,14 +111,21 @@ class AppDataViewModel(
         launchIO {
             updateState { copy(isLoading = true, loadingMessage = RString.exporting) }
             try {
+                val downloads = database.downloadDao().getAllDownloads().first()
+
                 val data = AppExportData(
                     userPreference = SettingRepository.userPreferenceFlow.value,
                     searchHistory = SearchRepository.searchHistoryFlow.value,
                     blockIllusts = BlockingRepository.blockIllustsFlow.value ?: emptySet(),
                     blockUsers = BlockingRepository.blockUsersFlow.value ?: emptySet(),
-                    bookmarkedTags = BookmarkedTagRepository.bookmarkedTags.value
+                    bookmarkedTags = BookmarkedTagRepository.bookmarkedTags.value,
+                    downloads = downloads
                 )
-                val jsonString = Json.encodeToString(data)
+                val json = Json {
+                    ignoreUnknownKeys = true
+                    encodeDefaults = true
+                }
+                val jsonString = json.encodeToString(AppExportData.serializer(), data)
 
                 val context = AppUtil.appContext
                 context.contentResolver.openOutputStream(uri)?.use { os ->
@@ -132,33 +138,6 @@ class AppDataViewModel(
                         sink.writeUtf8(jsonString)
                         sink.flush() // 确保数据写入到底层 zip 流，但不要 close sink
                         zipOs.closeEntry()
-
-
-                        // --- 写入数据库文件 ---
-                        val dbName = databaseName
-                        // 获取 Android 数据库路径并转换为 Okio Path
-                        val dbFile = context.getDatabasePath(dbName).toOkioPath()
-                        val parent = dbFile.parent ?: return@use
-
-                        // 查找相关文件 (.db, .db-shm, .db-wal)
-                        val dbFiles = listOf(
-                            dbFile,
-                            parent / "$dbName-shm",
-                            parent / "$dbName-wal"
-                        )
-
-                        dbFiles.forEach { path ->
-                            if (FileSystem.SYSTEM.exists(path)) {
-                                zipOs.putNextEntry(ZipEntry(path.name))
-
-                                // 使用 Okio Source 读取文件并直接传输到 Zip Sink
-                                FileSystem.SYSTEM.source(path).use { fileSource ->
-                                    sink.writeAll(fileSource)
-                                }
-                                sink.flush()
-                                zipOs.closeEntry()
-                            }
-                        }
                     }
                 }
                 ToastUtil.safeShortToast(RString.export_success)
@@ -181,10 +160,6 @@ class AppDataViewModel(
             updateState { copy(isLoading = true, loadingMessage = RString.importing) }
             try {
                 val context = AppUtil.appContext
-
-                // 关闭数据库连接，避免写入冲突
-                database.closeDatabase()
-
                 context.contentResolver.openInputStream(uri)?.use { inputStream ->
                     ZipInputStream(inputStream).use { zis ->
                         // 将 ZipInputStream 包装为 Okio BufferedSource
@@ -196,21 +171,15 @@ class AppDataViewModel(
 
                                 val jsonString = zipSource.readUtf8()
 
-                                val data = Json.decodeFromString<AppExportData>(jsonString)
+                                val json = Json { ignoreUnknownKeys = true }
+                                val data = json.decodeFromString<AppExportData>(jsonString)
                                 SettingRepository.restore(data.userPreference)
                                 SearchRepository.restore(data.searchHistory)
                                 BlockingRepository.restore(data.blockIllusts, data.blockUsers)
                                 BookmarkedTagRepository.restore(data.bookmarkedTags)
-                            } else if (entry.name.startsWith(databaseName)) {
-                                // --- 写入数据库文件 ---
-                                val dbFile = context.getDatabasePath(entry.name).toOkioPath()
-                                // 确保父文件夹存在
-                                dbFile.parent?.let { FileSystem.SYSTEM.createDirectories(it) }                                // 写入文件
-                                // 写入文件
-                                FileSystem.SYSTEM.sink(dbFile).buffer().use { fileSink ->
-                                    // writeAll 会从当前 zip entry 读取直到结束
-                                    fileSink.writeAll(zipSource)
-                                    fileSink.flush()
+
+                                if (data.downloads.isNotEmpty()) {
+                                    database.downloadDao().insertAll(data.downloads)
                                 }
                             }
                             zis.closeEntry()

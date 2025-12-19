@@ -25,6 +25,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import kotlin.time.Clock
 
 @Single
 class DownloadManager(
@@ -73,7 +74,7 @@ class DownloadManager(
         val entity = existing?.copy(
             status = DownloadStatus.PENDING.value,
             progress = 0f,
-            createTime = System.currentTimeMillis()
+            createTime = Clock.System.now().toEpochMilliseconds()
         ) ?: DownloadEntity(
             illustId = illustId,
             index = index,
@@ -87,7 +88,7 @@ class DownloadManager(
             progress = 0f,
             filePath = "",
             fileUri = "",
-            createTime = System.currentTimeMillis()
+            createTime = Clock.System.now().toEpochMilliseconds()
         )
         downloadDao.insert(entity)
 

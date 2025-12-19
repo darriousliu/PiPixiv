@@ -2,9 +2,11 @@ package com.mrl.pixiv.common.datasource.local.entity
 
 import androidx.compose.runtime.Stable
 import androidx.room.Entity
+import kotlinx.serialization.Serializable
 
 @Entity(tableName = "download", primaryKeys = ["illustId", "index"])
 @Stable
+@Serializable
 data class DownloadEntity(
     val illustId: Long,
     val index: Int,
@@ -15,9 +17,9 @@ data class DownloadEntity(
     val originalUrl: String,
     val subFolder: String? = null,
     val status: Int, // 0: Pending, 1: Running, 2: Success, 3: Failed
-    val progress: Float,
-    val filePath: String,
-    val fileUri: String,
+    val progress: Float = 0f,
+    val filePath: String = "",
+    val fileUri: String = "",
     val createTime: Long,
 )
 

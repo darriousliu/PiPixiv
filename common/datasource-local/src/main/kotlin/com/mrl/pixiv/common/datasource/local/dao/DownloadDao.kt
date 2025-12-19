@@ -14,6 +14,9 @@ interface DownloadDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: DownloadEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(entities: List<DownloadEntity>)
+
     @Update
     suspend fun update(entity: DownloadEntity)
 
