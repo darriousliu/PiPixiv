@@ -120,7 +120,8 @@ class DownloadManager(
                 workManager.getWorkInfoByIdFlow(request.id).collect { workInfo ->
                     val state = workInfo?.state
                     if (state == WorkInfo.State.SUCCEEDED) {
-                        downloadManagerListener.onDownloadCompleted(entity)
+                        val newEntity = downloadDao.getDownload(entity.illustId, entity.index)
+                        downloadManagerListener.onDownloadCompleted(newEntity ?: entity)
                     }
                     if (state != null && state.isFinished) {
                         this.cancel()

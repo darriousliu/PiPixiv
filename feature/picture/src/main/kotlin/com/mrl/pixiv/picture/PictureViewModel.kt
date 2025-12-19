@@ -16,6 +16,7 @@ import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
+import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.repository.BlockingRepository
 import com.mrl.pixiv.common.repository.DownloadManager
@@ -389,9 +390,11 @@ class PictureViewModel(
                 originalUrl = downloadUrl,
                 subFolder = subFolder,
             ) { entity ->
-                ShareUtil.createShareImage(entity.filePath, shareLauncher)
-                showLoading(false)
-                closeBottomSheet()
+                if (entity.status == DownloadStatus.SUCCESS.value) {
+                    ShareUtil.createShareImage(entity.fileUri, shareLauncher)
+                    showLoading(false)
+                    closeBottomSheet()
+                }
             }
         }
     }
