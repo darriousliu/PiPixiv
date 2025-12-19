@@ -110,7 +110,7 @@ import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
-import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
@@ -252,8 +252,8 @@ internal fun PictureScreen(
         }
     }
     val isFollowed = illust.user.isFollowing
-    val isIllustBlocked = BlockingRepository.collectIllustBlockAsState(illustId = illust.id)
-    val isUserBlocked = BlockingRepository.collectUserBlockAsState(userId = illust.user.id)
+    val isIllustBlocked = BlockingRepositoryV2.collectIllustBlockAsState(illustId = illust.id)
+    val isUserBlocked = BlockingRepositoryV2.collectUserBlockAsState(userId = illust.user.id)
     val isAnyBlocked = isIllustBlocked || isUserBlocked
     val placeholder = rememberVectorPainter(Icons.Rounded.Refresh)
 

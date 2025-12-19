@@ -65,7 +65,7 @@ import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.kts.spaceBy
-import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RDrawable
@@ -97,7 +97,7 @@ fun ProfileDetailScreen(
     val userInfo = state.userInfo
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val lazyListState = rememberLazyListState()
-    val isBlocked = BlockingRepository.collectUserBlockAsState(uid)
+    val isBlocked = BlockingRepositoryV2.collectUserBlockAsState(uid)
 
     Scaffold(
         modifier = modifier

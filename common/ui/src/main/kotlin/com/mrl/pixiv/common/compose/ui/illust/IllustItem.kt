@@ -86,7 +86,7 @@ import com.mrl.pixiv.common.data.illust.BookmarkDetailTag
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
-import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.RString
@@ -111,8 +111,8 @@ fun SquareIllustItem(
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     var showPopupTip by rememberSaveable { mutableStateOf(false) }
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
-    val isIllustBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
-    val isUserBlocked = BlockingRepository.collectUserBlockAsState(illust.user.id)
+    val isIllustBlocked = BlockingRepositoryV2.collectIllustBlockAsState(illust.id)
+    val isUserBlocked = BlockingRepositoryV2.collectUserBlockAsState(illust.user.id)
     val enableTransition = enableTransition && !isIllustBlocked && !isUserBlocked
     val onClick = {
         navToPictureScreen(prefix, enableTransition)
@@ -244,8 +244,8 @@ fun RectangleIllustItem(
     val sharedTransitionScope = LocalSharedTransitionScope.current
     val animatedContentScope = LocalNavAnimatedContentScope.current
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
-    val isIllustBlocked = BlockingRepository.collectIllustBlockAsState(illust.id)
-    val isUserBlocked = BlockingRepository.collectUserBlockAsState(illust.user.id)
+    val isIllustBlocked = BlockingRepositoryV2.collectIllustBlockAsState(illust.id)
+    val isUserBlocked = BlockingRepositoryV2.collectUserBlockAsState(illust.user.id)
     val enableTransition = enableTransition && !isIllustBlocked && !isUserBlocked
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val onBookmarkLongClick = {

@@ -9,7 +9,7 @@ import com.mrl.pixiv.common.data.user.IllustsWithNextUrl
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.data.user.UserIllustsResp
 import com.mrl.pixiv.common.data.user.UserNovelsResp
-import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserInfoValue
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
@@ -99,14 +99,14 @@ class ProfileDetailViewModel(
     fun blockUser(userId: Long) {
         launchIO {
             async { PixivRepository.postMuteSetting(addUserIds = listOf(userId)) }
-            async { BlockingRepository.blockUser(userId) }
+            async { BlockingRepositoryV2.blockUser(userId) }
         }
     }
 
     fun removeBlockUser(userId: Long) {
         launchIO {
             async { PixivRepository.postMuteSetting(deleteUserIds = listOf(userId)) }
-            async { BlockingRepository.removeBlockUser(userId) }
+            async { BlockingRepositoryV2.removeBlockUser(userId) }
         }
     }
 }

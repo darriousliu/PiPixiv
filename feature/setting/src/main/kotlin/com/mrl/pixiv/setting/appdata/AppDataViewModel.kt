@@ -12,11 +12,12 @@ import androidx.annotation.IntRange
 import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import com.mrl.pixiv.common.data.Tag
+import com.mrl.pixiv.common.data.comment.Comment
 import com.mrl.pixiv.common.data.search.Search
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.datasource.local.PixivDatabase
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
-import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
@@ -49,6 +50,7 @@ data class AppExportData(
     val searchHistory: Search,
     val blockIllusts: Set<String>,
     val blockUsers: Set<String>,
+    val blockComments: List<Comment>,
     val bookmarkedTags: List<Tag>,
     val downloads: List<DownloadEntity> = emptyList()
 )
@@ -116,8 +118,9 @@ class AppDataViewModel(
                 val data = AppExportData(
                     userPreference = SettingRepository.userPreferenceFlow.value,
                     searchHistory = SearchRepository.searchHistoryFlow.value,
-                    blockIllusts = BlockingRepository.blockIllustsFlow.value ?: emptySet(),
-                    blockUsers = BlockingRepository.blockUsersFlow.value ?: emptySet(),
+                    blockIllusts = BlockingRepositoryV2.blockIllustsFlow.value ?: emptySet(),
+                    blockUsers = BlockingRepositoryV2.blockUsersFlow.value ?: emptySet(),
+                    blockComments = BlockingRepositoryV2.blockCommentsFlow.value,
                     bookmarkedTags = BookmarkedTagRepository.bookmarkedTags.value,
                     downloads = downloads
                 )
@@ -175,7 +178,11 @@ class AppDataViewModel(
                                 val data = json.decodeFromString<AppExportData>(jsonString)
                                 SettingRepository.restore(data.userPreference)
                                 SearchRepository.restore(data.searchHistory)
-                                BlockingRepository.restore(data.blockIllusts, data.blockUsers)
+                                BlockingRepositoryV2.restore(
+                                    data.blockIllusts,
+                                    data.blockUsers,
+                                    data.blockComments
+                                )
                                 BookmarkedTagRepository.restore(data.bookmarkedTags)
 
                                 if (data.downloads.isNotEmpty()) {

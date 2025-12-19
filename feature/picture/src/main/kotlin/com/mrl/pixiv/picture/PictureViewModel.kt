@@ -18,7 +18,7 @@ import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
-import com.mrl.pixiv.common.repository.BlockingRepository
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.DownloadManager
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
@@ -402,11 +402,11 @@ class PictureViewModel(
     }
 
     fun blockIllust() {
-        BlockingRepository.blockIllust(state.illust?.id ?: return)
+        BlockingRepositoryV2.blockIllust(state.illust?.id ?: return)
     }
 
     fun removeBlockIllust() {
-        BlockingRepository.removeBlockIllust(state.illust?.id ?: return)
+        BlockingRepositoryV2.removeBlockIllust(state.illust?.id ?: return)
     }
 
     fun addHistory() {
@@ -420,7 +420,7 @@ class PictureViewModel(
         launchIO {
             PixivRepository.postMuteSetting(deleteUserIds = listOf(userId))
         }
-        BlockingRepository.removeBlockUser(userId)
+        BlockingRepositoryV2.removeBlockUser(userId)
     }
 
     fun downloadUgoiraAsGIF() {

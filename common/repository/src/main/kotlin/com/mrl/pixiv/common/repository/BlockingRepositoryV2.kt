@@ -54,13 +54,14 @@ object BlockingRepositoryV2 : MMKVOwner {
         blockComments.value = blockComments.value.filter { it.id != commentId }
     }
 
+    @Suppress("DEPRECATION")
     fun migrate() {
         restore(
             illusts = BlockingRepository.blockIllustsFlow.value.orEmpty(),
             users = BlockingRepository.blockUsersFlow.value.orEmpty(),
             comments = emptyList()
         )
-        BlockingRepository.restore(emptySet(), emptySet())
+//        BlockingRepository.restore(emptySet(), emptySet())
     }
 
     fun restore(illusts: Set<String>, users: Set<String>, comments: List<Comment>) {
