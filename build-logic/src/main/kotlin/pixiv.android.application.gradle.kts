@@ -1,4 +1,5 @@
 import com.mrl.pixiv.buildsrc.configureAndroidCompose
+import com.mrl.pixiv.buildsrc.configureKotlinAndroid
 
 plugins {
     id("com.android.application")
@@ -8,21 +9,9 @@ plugins {
 }
 
 android {
-    compileSdk {
-        version = release(36)
-    }
     defaultConfig {
-        minSdk = 26
         targetSdk = 36
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        proguardFiles.add(project.file("consumer-rules.pro"))
     }
-
-    compileOptions {
-        // Up to Java 11 APIs are available through desugaring
-        // https://developer.android.com/studio/write/java11-minimal-support-table
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
+    configureKotlinAndroid(this)
     configureAndroidCompose(this)
 }
