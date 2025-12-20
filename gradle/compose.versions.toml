@@ -41,6 +41,7 @@ jetbrains-material3-adaptive-navigation = { module = "org.jetbrains.compose.mate
 jetbrains-material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "jetbrain-material3" }
 jetbrains-material3-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-material3-window-size" }
 jetbrains-material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "material-icons" }
+jetbrains-material-icons = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "material-icons" }
 
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 
@@ -59,7 +60,7 @@ compose-graldePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin",
 [bundles]
 accompanist = ["accompanist-permissions"]
 baselibs-android = ["foundation", "animation", "ui", "material-icons", "material3-core", "material3-adaptive", "material3-adaptive-layout", "material3-adaptive-navigation", "material3-adaptive-navigation-suite", "material3-window-size", "material-icons-core"]
-baselibs = ["jetbrains-foundation", "jetbrains-animation", "jetbrains-ui", "jetbrains-material3", "jetbrains-material3-adaptive", "jetbrains-material3-adaptive-layout", "jetbrains-material3-adaptive-navigation", "jetbrains-material3-adaptive-navigation-suite", "jetbrains-material3-window-size", "jetbrains-material-icons-core"]
+baselibs = ["jetbrains-foundation", "jetbrains-animation", "jetbrains-ui", "jetbrains-material3", "jetbrains-material3-adaptive", "jetbrains-material3-adaptive-layout", "jetbrains-material3-adaptive-navigation", "jetbrains-material3-adaptive-navigation-suite", "jetbrains-material3-window-size", "jetbrains-material-icons-core", "jetbrains-material-icons"]
 navigation3-android = [
     "androidx-navigation3-runtime", "androidx-navigation3-ui",
     "androidx-material3-adaptive-navigation3",

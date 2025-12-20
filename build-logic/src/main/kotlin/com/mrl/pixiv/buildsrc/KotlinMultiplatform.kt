@@ -80,6 +80,7 @@ internal fun KotlinMultiplatformExtension.composeDependencies() {
         commonMain.dependencies {
             // Compose
             implementation(compose.findBundle("baselibs").get())
+            implementation(compose.findLibrary("jetbrains-compose-resources").get())
         }
         androidMain.dependencies {
 

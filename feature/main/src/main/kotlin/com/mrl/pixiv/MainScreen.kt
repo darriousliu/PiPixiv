@@ -22,6 +22,7 @@ import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.home.HomeScreen
 import com.mrl.pixiv.latest.LatestScreen
 import com.mrl.pixiv.profile.ProfileScreen
@@ -42,17 +43,17 @@ fun MainScreen(
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
     val screens = remember {
         listOf(
-            MainPage.Home,
-            MainPage.Ranking,
-            MainPage.Latest,
-            MainPage.Search,
-            MainPage.Profile,
+            MainPage.Home to RString.home,
+            MainPage.Ranking to RString.ranking,
+            MainPage.Latest to RString.new_artworks,
+            MainPage.Search to RString.search,
+            MainPage.Profile to RString.my,
         )
     }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            screens.forEach { screen ->
+            screens.forEach { (screen, title) ->
                 item(
                     selected = page == screen,
                     onClick = {
@@ -72,7 +73,7 @@ fun MainScreen(
                         }
                     },
                     label = {
-                        Text(text = stringResource(screen.title))
+                        Text(text = stringResource(title))
                     }
                 )
             }

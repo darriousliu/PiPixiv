@@ -21,6 +21,7 @@ kotzilla = "1.4.2"
 gifkt = "0.3.0"
 sonner = "0.4.0"
 jetbrains-lifecycle = "2.10.0-alpha07"
+konfig = "0.17.1"
 
 [libraries]
 compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
@@ -73,7 +74,7 @@ lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifec
 
 [bundles]
 koin = ["koin", "koin-compose", "koin-annotations", "koin-compose-viewmodel"]
-coil3 = ["coil3-core", "coil3-gif", "coil3-compose", "coil3-network-ktor3"]
+coil3 = ["coil3-core", "coil3-compose", "coil3-network-ktor3"]
 richtext = ["richtext-commonmark", "richtext-m3"]
 lottie = ["lottie", "lottie-compose"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]
@@ -83,3 +84,4 @@ lifecycle = ["lifecycle-common", "lifecycle-runtime-compose", "lifecycle-viewmod
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle" }
 kotzilla = { id = "io.kotzilla.kotzilla-plugin", version.ref = "kotzilla" }
+build-konfig = { id = "com.codingfeline.buildkonfig", version.ref = "konfig" }

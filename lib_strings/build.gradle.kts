@@ -10,11 +10,6 @@ kotlin {
             enable = true
         }
     }
-    sourceSets {
-        commonMain.dependencies {
-            implementation(composes.jetbrains.compose.resources)
-        }
-    }
 }
 
 compose {

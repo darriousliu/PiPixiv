@@ -15,6 +15,7 @@ dependencies {
     implementation(kotlinx.bundles.serialization)
     // Ktor
     implementation(kotlinx.bundles.ktor)
+    implementation(kotlinx.ktor.client.okhttp)
     // DateTime
     implementation(kotlinx.datetime)
 }

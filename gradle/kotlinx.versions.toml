@@ -43,7 +43,7 @@ compose-compiler-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compile
 [bundles]
 coroutines = ["coroutines-core", "coroutines-android"]
 serialization = ["serialization-json", "serialization-json-okio", "serialization-protobuf"]
-ktor = ["ktor-client-core", "ktor-client-okhttp", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktorfit-lite"]
+ktor = ["ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktorfit-lite"]
 
 [plugins]
 android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

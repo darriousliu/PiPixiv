@@ -111,6 +111,7 @@ dependencies {
     // Coil3
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)
+    implementation(libs.coil3.gif)
     // MMKV
     implementation(libs.mmkv)
     implementation(libs.mmkv.kotlin)

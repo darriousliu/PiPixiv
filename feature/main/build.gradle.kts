@@ -20,4 +20,5 @@ dependencies {
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)
     implementation(kotlinx.datetime)
+    implementation(composes.bundles.baselibs)
 }

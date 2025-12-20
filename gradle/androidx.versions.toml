@@ -14,6 +14,7 @@ paging = "3.3.6"
 work = "2.11.0"
 window = "1.5.1"
 room = "2.8.4"
+annotation = "1.9.1"
 
 [libraries]
 android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -24,6 +25,7 @@ core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
 splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
 profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
 tracing = { module = "androidx.tracing:tracing", version.ref = "tracing" }
+annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 
 lifecycle-common = { module = "androidx.lifecycle:lifecycle-common", version.ref = "lifecycle" }
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }

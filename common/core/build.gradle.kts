@@ -1,38 +1,64 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec
+
 plugins {
-    id("pixiv.android.library.compose")
+    id("pixiv.multiplatform.compose")
     alias(kotlinx.plugins.serialization)
     alias(kotlinx.plugins.parcelize)
+    alias(libs.plugins.build.konfig)
 }
 
-android {
-    namespace = "com.mrl.pixiv.common"
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.common"
 
-    buildFeatures {
-        buildConfig = true
+        androidResources {
+            enable = true
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            api(project(":lib_strings"))
+            if (project.findProperty("applyFirebasePlugins") == "true") {
+                api(project(":common:analytics-default"))
+            } else {
+                api(project(":common:analytics-foss"))
+            }
+            implementation(project(":common:data"))
+            implementation(composes.jetbrains.compose.resources)
+            implementation(androidx.annotation)
+            implementation(composes.bundles.navigation3)
+            // Ktor
+            implementation(kotlinx.bundles.ktor)
+            // Serialization
+            implementation(kotlinx.bundles.serialization)
+            // DateTime
+            implementation(kotlinx.datetime)
+            // Coil3
+            implementation(project.dependencies.platform(libs.coil3.bom))
+            implementation(libs.bundles.coil3)
+            // MMKV
+            implementation(libs.mmkv.kotlin)
+            // Toast
+            implementation(libs.sonner)
+        }
+        androidMain.dependencies {
+            implementation(libs.material)
+            implementation(androidx.lifecycle.process)
+            implementation(composes.bundles.navigation3.android)
+            implementation(kotlinx.ktor.client.okhttp)
+            implementation(libs.coil3.gif)
+            implementation(libs.mmkv)
+        }
     }
 }
 
-dependencies {
-    api(project(":lib_strings"))
-    if (project.findProperty("applyFirebasePlugins") == "true") {
-        api(project(":common:analytics-default"))
-    } else {
-        api(project(":common:analytics-foss"))
-    }
-    implementation(project(":common:data"))
+buildkonfig {
+    packageName = "com.mrl.pixiv.common"
 
-    implementation(libs.material)
-    implementation(composes.bundles.navigation3.android)
-    // Ktor
-    implementation(kotlinx.bundles.ktor)
-    // Serialization
-    implementation(kotlinx.bundles.serialization)
-    // DateTime
-    implementation(kotlinx.datetime)
-    // Coil3
-    implementation(platform(libs.coil3.bom))
-    implementation(libs.bundles.coil3)
-    // MMKV
-    implementation(libs.mmkv)
-    implementation(libs.mmkv.kotlin)
+    defaultConfigs {
+        buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", properties["debug"].toString())
+        buildConfigField(FieldSpec.Type.INT, "versionCode", properties["versionCode"].toString())
+        buildConfigField(FieldSpec.Type.STRING, "versionName", properties["versionName"].toString())
+    }
 }
