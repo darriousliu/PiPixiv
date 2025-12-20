@@ -13,7 +13,7 @@ dependencies {
     implementation(project(":common:core"))
 
     // Navigation3
-    implementation(compose.androidx.navigation3.runtime)
+    implementation(composes.androidx.navigation3.runtime)
     implementation(libs.compose.webview.multiplatform)
     implementation(libs.okio)
 }

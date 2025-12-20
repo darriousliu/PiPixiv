@@ -1,5 +1,5 @@
 plugins {
-    id("pixiv.multiplatform")
+    id("pixiv.multiplatform.compose")
 }
 
 kotlin {
@@ -10,7 +10,17 @@ kotlin {
             enable = true
         }
     }
+    sourceSets {
+        commonMain.dependencies {
+            implementation(composes.jetbrains.compose.resources)
+        }
+    }
 }
 
-dependencies {
+compose {
+    resources {
+        publicResClass = true
+        packageOfResClass = "com.mrl.pixiv.strings"
+//        nameOfResClass = "R"
+    }
 }

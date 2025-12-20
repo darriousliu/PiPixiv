@@ -1,13 +1,10 @@
 plugins {
-    alias(kotlinx.plugins.kotlinMultiplatform)
-    alias(androidx.plugins.android.kotlin.multiplatform.library)
+    id("pixiv.multiplatform.compose")
 }
 
 kotlin {
     androidLibrary {
         namespace = "com.mrl.pixiv"
-        compileSdk = 36
-        minSdk = 26
     }
 
     listOf(
@@ -25,6 +22,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                implementation(composes.bundles.navigation3)
             }
         }
         androidMain {
@@ -35,6 +33,11 @@ kotlin {
         iosMain {
             dependencies {
 
+            }
+        }
+        jvmMain {
+            dependencies {
+                implementation(compose.desktop.currentOs)
             }
         }
     }

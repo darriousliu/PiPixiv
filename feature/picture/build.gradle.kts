@@ -16,9 +16,9 @@ dependencies {
     // Paging
     implementation(androidx.bundles.paging)
     // Permission
-    implementation(compose.bundles.accompanist)
+    implementation(composes.bundles.accompanist)
     // Navigation3
-    implementation(compose.bundles.navigation3)
+    implementation(composes.bundles.navigation3.android)
     // Coil3
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)

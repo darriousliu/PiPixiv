@@ -15,4 +15,5 @@ plugins {
     alias(libs.plugins.kotzilla) apply false
     alias(androidx.plugins.android.kotlin.multiplatform.library) apply false
     alias(kotlinx.plugins.kotlinMultiplatform) apply false
+    alias(composes.plugins.composeMultiplatform) apply false
 }

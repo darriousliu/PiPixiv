@@ -25,7 +25,7 @@ dependencyResolutionManagement {
         create("kotlinx") {
             from(files("../gradle/kotlinx.versions.toml"))
         }
-        create("compose") {
+        create("composes") {
             from(files("../gradle/compose.versions.toml"))
         }
     }

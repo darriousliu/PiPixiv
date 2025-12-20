@@ -22,7 +22,7 @@ dependencies {
     implementation(project(":common:data"))
 
     implementation(libs.material)
-    implementation(compose.bundles.navigation3)
+    implementation(composes.bundles.navigation3.android)
     // Ktor
     implementation(kotlinx.bundles.ktor)
     // Serialization

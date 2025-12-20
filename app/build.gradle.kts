@@ -107,7 +107,7 @@ dependencies {
     // ProfileInstaller
     implementation(androidx.profileinstaller)
     // Navigation3
-    api(compose.bundles.navigation3)
+    implementation(composes.bundles.navigation3.android)
     // Coil3
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)

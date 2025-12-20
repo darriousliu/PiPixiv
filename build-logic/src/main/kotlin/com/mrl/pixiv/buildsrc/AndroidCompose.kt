@@ -42,16 +42,17 @@ fun Project.configureAndroidCompose(
         }
     }
 
-    val compose = extensions.getByType<VersionCatalogsExtension>().named("compose")
+    val compose = extensions.getByType<VersionCatalogsExtension>().named("composes")
     val kotlinx = extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
     dependencies {
         implementation(platform(compose.findLibrary("bom").get()))
-        implementation(compose.findBundle("baselibs").get())
+        implementation(compose.findBundle("baselibs-android").get())
         // KotlinX Collections Immutable
         implementation(kotlinx.findLibrary("collections-immutable").get())
         // Toast
         implementation(libs.findLibrary("sonner").get())
+        debugImplementation(compose.findLibrary("ui-tooling").get())
     }
 }
 

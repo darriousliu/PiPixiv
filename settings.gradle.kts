@@ -33,7 +33,7 @@ dependencyResolutionManagement {
         create("androidx") {
             from(files("gradle/androidx.versions.toml"))
         }
-        create("compose") {
+        create("composes") {
             from(files("gradle/compose.versions.toml"))
         }
     }

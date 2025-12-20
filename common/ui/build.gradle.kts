@@ -17,7 +17,7 @@ dependencies {
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)
     // Navigation3
-    implementation(compose.bundles.navigation3)
+    implementation(composes.bundles.navigation3.android)
     // Toast
     implementation(libs.sonner)
 }

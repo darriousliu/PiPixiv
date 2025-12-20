@@ -39,7 +39,7 @@ internal fun KotlinMultiplatformExtension.commonDependencies() {
     sourceSets.apply {
         commonMain.dependencies {
             // Lifecycle
-//        implementation(androidx.findBundle("lifecycle").get())
+            implementation(libs.findBundle("lifecycle").get())
             // Coroutines
             implementation(
                 project.dependencies.platform(
@@ -67,6 +67,28 @@ internal fun KotlinMultiplatformExtension.commonDependencies() {
         }
     }
     project.dependencies {
+        kspAndroid(libs.findLibrary("koin-ksp-compiler").get())
+        kspIos(libs.findLibrary("koin-ksp-compiler").get())
+        kspJvm(libs.findLibrary("koin-ksp-compiler").get())
         kspCommonMainMetadata(libs.findLibrary("koin-ksp-compiler").get())
+    }
+}
+
+internal fun KotlinMultiplatformExtension.composeDependencies() {
+    val compose = project.extensions.getByType<VersionCatalogsExtension>().named("composes")
+    sourceSets.apply {
+        commonMain.dependencies {
+            // Compose
+            implementation(compose.findBundle("baselibs").get())
+        }
+        androidMain.dependencies {
+
+        }
+        iosMain.dependencies {
+
+        }
+        jvmMain.dependencies {
+
+        }
     }
 }
