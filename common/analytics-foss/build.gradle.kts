@@ -1,12 +1,10 @@
 plugins {
-    id("pixiv.android.library")
+    id("pixiv.multiplatform")
 
 }
 
-android {
-    namespace = "com.mrl.pixiv.common.analytics.foss"
-}
-
-dependencies {
-
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.common.analytics.foss"
+    }
 }

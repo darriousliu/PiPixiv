@@ -18,8 +18,10 @@ fun Application.initializeFirebase(isDebug: Boolean) {
     Firebase.crashlytics.isCrashlyticsCollectionEnabled = !isDebug
 }
 
-
-fun logEvent(event: String, params: Map<String, Any>? = null) {
+actual fun logEvent(
+    event: String,
+    params: Map<String, Any>?
+) {
     firebaseAnalytics.logEvent(event) {
         params?.forEach { (k, v) ->
             when (v) {
@@ -35,6 +37,6 @@ fun logEvent(event: String, params: Map<String, Any>? = null) {
     }
 }
 
-fun logException(e: Throwable) {
+actual fun logException(e: Throwable) {
     firebaseCrashlytics.recordException(e)
 }
