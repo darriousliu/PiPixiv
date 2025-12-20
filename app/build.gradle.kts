@@ -84,8 +84,9 @@ android {
             } else {
                 "foss"
             }
+            val releaseType = if (buildType.isDebuggable) "debug" else "release"
             (this as? ApkVariantOutputImpl)?.outputFileName =
-                "${rootProject.name}-v${defaultConfig.versionName}-$name.apk"
+                "${rootProject.name}-v${defaultConfig.versionName}-$name-$releaseType.apk"
         }
     }
 }
