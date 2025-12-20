@@ -41,8 +41,8 @@ import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.viewmodel.asState
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 private const val KEY_TITLE_BLOCK_COMMENTS_ENTRY = "title_block_comments_entry"
 

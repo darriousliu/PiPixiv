@@ -52,6 +52,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "PiPixiv"
 include(":app")
+include(":composeApp")
 include(":lib_strings")
 include(":baselineprofile")
 

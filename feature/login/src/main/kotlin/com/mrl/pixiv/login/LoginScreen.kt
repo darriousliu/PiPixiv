@@ -34,8 +34,8 @@ import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.PlatformWebViewParams
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewState
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable

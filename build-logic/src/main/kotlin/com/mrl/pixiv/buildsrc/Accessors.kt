@@ -12,3 +12,6 @@ fun DependencyHandler.implementation(dependencyNotation: Any): Dependency? =
 
 fun DependencyHandler.ksp(dependencyNotation: Any): Dependency? =
     add("ksp", dependencyNotation)
+
+fun DependencyHandler.kspCommonMainMetadata(dependencyNotation: Any): Dependency? =
+    add("kspCommonMainMetadata", dependencyNotation)

@@ -80,7 +80,7 @@ internal fun Project.configureKotlinAndroid(
 /**
  * Configure base Kotlin options
  */
-private fun Project.configureKotlin() {
+internal fun Project.configureKotlin() {
     // Use withType to workaround https://youtrack.jetbrains.com/issue/KT-55947
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {

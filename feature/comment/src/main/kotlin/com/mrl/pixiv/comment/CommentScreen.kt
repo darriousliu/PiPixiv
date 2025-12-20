@@ -58,8 +58,8 @@ import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.common.viewmodel.state
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)

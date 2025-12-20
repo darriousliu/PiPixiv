@@ -37,8 +37,9 @@ coil3-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3" }
 richtext-commonmark = { module = "com.halilibo.compose-richtext:richtext-commonmark", version.ref = "richtext" }
 richtext-m3 = { module = "com.halilibo.compose-richtext:richtext-ui-material3", version.ref = "richtext" }
 
-koin = { module = "io.insert-koin:koin-android", version.ref = "koin" }
-koin-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+koin = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 koin-annotations = { group = "io.insert-koin", name = "koin-annotations", version.ref = "koinAnnotation" }
 koin-ksp-compiler = { group = "io.insert-koin", name = "koin-ksp-compiler", version.ref = "koinAnnotation" }
 
@@ -66,7 +67,7 @@ gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
 sonner = { module = "io.github.brdominguez:compose-sonner", version.ref = "sonner" }
 
 [bundles]
-koin = ["koin", "koin-compose", "koin-annotations"]
+koin = ["koin", "koin-compose", "koin-annotations", "koin-compose-viewmodel"]
 coil3 = ["coil3-core", "coil3-gif", "coil3-compose", "coil3-network-ktor3"]
 richtext = ["richtext-commonmark", "richtext-m3"]
 lottie = ["lottie", "lottie-compose"]

@@ -30,8 +30,8 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.search.result.components.FilterBottomSheet
 import com.mrl.pixiv.search.result.components.SearchResultAppBar
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable

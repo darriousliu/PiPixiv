@@ -31,8 +31,8 @@ import com.mrl.pixiv.follow.FollowingPage
 import com.mrl.pixiv.follow.FollowingScreenBody
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LatestScreen(

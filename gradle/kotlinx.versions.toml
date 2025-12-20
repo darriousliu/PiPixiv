@@ -17,6 +17,7 @@ collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-im
 coroutines-bom = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "coroutines" }
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android" }
+coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing" }
 #coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava" }
 #coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test" }
 
@@ -50,5 +51,6 @@ serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref 
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 
 

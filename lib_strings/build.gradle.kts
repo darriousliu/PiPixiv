@@ -1,9 +1,15 @@
 plugins {
-    id("pixiv.android.library")
+    id("pixiv.multiplatform")
 }
 
-android {
-    namespace = "com.mrl.pixiv.strings"
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.strings"
+
+        androidResources {
+            enable = true
+        }
+    }
 }
 
 dependencies {
