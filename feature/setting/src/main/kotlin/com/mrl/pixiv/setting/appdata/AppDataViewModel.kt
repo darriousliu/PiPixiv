@@ -21,7 +21,6 @@ import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
-import com.mrl.pixiv.common.toast.ToastMessage
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.OLD_DOWNLOAD_DIR
 import com.mrl.pixiv.common.util.RString
@@ -146,12 +145,7 @@ class AppDataViewModel(
                 ToastUtil.safeShortToast(RString.export_success)
             } catch (e: Exception) {
                 e.printStackTrace()
-                ToastUtil.safeShortToast(
-                    ToastMessage.Resource(
-                        RString.export_failed,
-                        arrayOf(e.message.orEmpty())
-                    )
-                )
+                ToastUtil.safeShortToast(RString.export_failed, e.message.orEmpty())
             } finally {
                 updateState { copy(isLoading = false) }
             }
@@ -197,12 +191,7 @@ class AppDataViewModel(
                 ToastUtil.safeShortToast(RString.import_success)
             } catch (e: Exception) {
                 e.printStackTrace()
-                ToastUtil.safeShortToast(
-                    ToastMessage.Resource(
-                        RString.import_failed,
-                        arrayOf(e.message.orEmpty())
-                    )
-                )
+                ToastUtil.safeShortToast(RString.import_failed, e.message.orEmpty())
             } finally {
                 updateState { copy(isLoading = false) }
             }
