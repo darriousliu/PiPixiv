@@ -61,6 +61,16 @@ kotlin {
             implementation(libs.coil3.gif)
             implementation(libs.mmkv)
         }
+        jvmMain.dependencies {
+            // MMKV
+            val osName = System.getProperty("os.name")
+            when {
+                osName == "Mac OS X" -> implementation(libs.mmkv.kotlin.nativelib.macos)
+                osName.startsWith("Win") -> implementation(libs.mmkv.kotlin.nativelib.windows)
+                osName.startsWith("Linux") -> implementation(libs.mmkv.kotlin.nativelib.linux)
+                else -> error("Unsupported OS: $osName")
+            }
+        }
     }
 }
 
