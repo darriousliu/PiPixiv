@@ -1,10 +1,11 @@
 package com.mrl.pixiv.common.toast
 
 import androidx.compose.runtime.Composable
+import org.jetbrains.compose.resources.StringResource
 
 sealed class ToastMessage {
     data class Resource(
-        val resId: Int,
+        val resId: StringResource,
         val args: Array<Any> = arrayOf()
     ) : ToastMessage() {
         override fun equals(other: Any?): Boolean {
@@ -20,7 +21,7 @@ sealed class ToastMessage {
         }
 
         override fun hashCode(): Int {
-            var result = resId
+            var result = resId.hashCode()
             result = 31 * result + args.contentHashCode()
             return result
         }
