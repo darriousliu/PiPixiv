@@ -27,7 +27,11 @@ class OAuthLoginViewModel : BaseMviViewModel<OAuthLoginState, OAuthLoginAction>(
     }
 
     private fun login(refreshToken: String) {
-        launchIO {
+        launchIO(
+            onError = {
+                updateState { copy(loading = false) }
+            }
+        ) {
             updateState { copy(loading = true) }
             AuthManager.login(refreshToken)
             updateState { copy(isLogin = true, loading = false) }

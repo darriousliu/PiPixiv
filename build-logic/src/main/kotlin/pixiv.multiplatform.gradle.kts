@@ -35,6 +35,10 @@ kotlin {
         }
     }
 
+    sourceSets.commonMain {
+        kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+    }
+
     commonDependencies()
 }
 

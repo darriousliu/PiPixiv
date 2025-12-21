@@ -1,21 +1,44 @@
 plugins {
-    id("pixiv.android.library")
+    id("pixiv.multiplatform")
     alias(kotlinx.plugins.serialization)
 }
 
-android {
-    namespace = "com.mrl.pixiv.common.network"
-}
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.common.network"
+    }
 
-dependencies {
-    implementation(project(":common:data"))
-    implementation(project(":common:core"))
+    applyDefaultHierarchyTemplate()
 
-    // Serialization
-    implementation(kotlinx.bundles.serialization)
-    // Ktor
-    implementation(kotlinx.bundles.ktor)
-    implementation(kotlinx.ktor.client.okhttp)
-    // DateTime
-    implementation(kotlinx.datetime)
+    sourceSets {
+        val androidJvmMain by creating {
+            dependsOn(commonMain.get())
+        }
+        androidMain.get().dependsOn(androidJvmMain)
+        jvmMain.get().dependsOn(androidJvmMain)
+        commonMain.dependencies {
+            implementation(project(":common:data"))
+            implementation(project(":common:core"))
+
+            // Serialization
+            implementation(kotlinx.bundles.serialization)
+            // Ktor
+            implementation(kotlinx.bundles.ktor)
+
+            // DateTime
+            implementation(kotlinx.datetime)
+        }
+
+        androidMain.dependencies {
+            implementation(kotlinx.ktor.client.okhttp)
+        }
+
+        iosMain.dependencies {
+            implementation(kotlinx.ktor.client.darwin)
+        }
+
+        jvmMain.dependencies {
+            implementation(kotlinx.ktor.client.okhttp)
+        }
+    }
 }

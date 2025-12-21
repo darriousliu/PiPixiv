@@ -1,11 +1,9 @@
 package com.mrl.pixiv.common.network
 
-import com.mrl.pixiv.common.network.NetworkUtil.hostnameVerifier
 import com.mrl.pixiv.common.serialize.JSON
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
-import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -76,18 +74,6 @@ internal fun <T : HttpClientEngineConfig> imageHttpClient(
     }
 }
 
-internal val baseHttpClient: HttpClient
-    get() = httpClient(OkHttp) {
-        config {
-            retryOnConnectionFailure(true)
-            hostnameVerifier(hostnameVerifier)
-        }
-    }
+internal expect val baseHttpClient: HttpClient
 
-internal val baseImageHttpClient: HttpClient
-    get() = imageHttpClient(OkHttp) {
-        config {
-            retryOnConnectionFailure(true)
-            hostnameVerifier(hostnameVerifier)
-        }
-    }
+internal expect val baseImageHttpClient: HttpClient

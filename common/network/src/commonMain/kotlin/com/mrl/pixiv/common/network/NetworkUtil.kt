@@ -1,13 +1,13 @@
 package com.mrl.pixiv.common.network
 
-import android.os.Build
 import androidx.compose.ui.text.intl.Locale
 import com.mrl.pixiv.common.data.Constants.HashSalt
 import com.mrl.pixiv.common.data.Constants.IMAGE_HOST
-import com.mrl.pixiv.common.data.Constants.hostMap
 import com.mrl.pixiv.common.data.setting.UserPreference
+import com.mrl.pixiv.common.util.DeviceInfo
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.encodedPath
+import io.ktor.utils.io.core.toByteArray
 import kotlinx.datetime.LocalDate.Formats.ISO
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -19,7 +19,6 @@ import kotlinx.datetime.toLocalDateTime
 import okio.ByteString.Companion.toByteString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import javax.net.ssl.HostnameVerifier
 import kotlin.time.Clock
 
 interface NetworkFeature {
@@ -32,11 +31,6 @@ internal object NetworkUtil : KoinComponent {
     private val networkFeature by inject<NetworkFeature>()
     val imageHost: String
         get() = networkFeature.provideUserPreference().imageHost.ifEmpty { IMAGE_HOST }
-
-    val hostnameVerifier = HostnameVerifier { hostname, session ->
-        // 检查主机名是否是你期望连接的IP地址或域名
-        hostname in hostMap.keys || hostname in hostMap.values || hostname == imageHost || hostname == "doh.dns.sb"
-    }
 
     private val iso8601DateTimeFormat = LocalDateTime.Format {
         date(ISO)
@@ -85,7 +79,7 @@ internal object NetworkUtil : KoinComponent {
             remove("User-Agent")
             set(
                 "User-Agent",
-                "PixivAndroidApp/6.158.0 (Android ${Build.VERSION.RELEASE}; ${Build.MODEL})"
+                "Pixiv${DeviceInfo.PLATFORM.replaceFirstChar { it.uppercase() }}App/${DeviceInfo.APP_VERSION} (${DeviceInfo.PLATFORM} ${DeviceInfo.VERSION}; ${DeviceInfo.MODEL})"
             )
             if (!request.url.encodedPath.contains("/auth/token")) {
                 set("Authorization", "Bearer ${requireUserAccessToken()}")
@@ -94,9 +88,9 @@ internal object NetworkUtil : KoinComponent {
             set("Accept-Language", locale.toLanguageTag().replace("-", "_"))
             // zh-hans
             set("App-Accept-Language", appAcceptLanguage)
-            set("App-OS", "android")
-            set("App-OS-Version", Build.VERSION.RELEASE)
-            set("App-Version", "6.158.0")
+            set("App-OS", DeviceInfo.PLATFORM.lowercase())
+            set("App-OS-Version", DeviceInfo.VERSION)
+            set("App-Version", DeviceInfo.APP_VERSION)
             set("X-Client-Time", isoDate)
             set("X-Client-Hash", encode("$isoDate$HashSalt"))
 //            set("Host", request.host)
