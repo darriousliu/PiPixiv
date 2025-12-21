@@ -1,20 +1,24 @@
 plugins {
-    id("pixiv.android.library.compose")
+    id("pixiv.multiplatform.compose")
     alias(kotlinx.plugins.serialization)
     alias(kotlinx.plugins.ktorfit)
 }
 
-android {
-    namespace = "com.mrl.pixiv.common.datasource.remote"
-}
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.common.datasource.remote"
+    }
 
-dependencies {
-    implementation(project(":common:data"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":common:data"))
 
-    // Serialization
-    implementation(kotlinx.bundles.serialization)
-    // Ktorfit
-    implementation(kotlinx.ktorfit.lite)
+            // Serialization
+            implementation(kotlinx.bundles.serialization)
+            // Ktorfit
+            implementation(kotlinx.ktorfit.lite)
+        }
+    }
 }
 
 ktorfit {
