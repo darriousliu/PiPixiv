@@ -6,23 +6,6 @@ import java.io.File
 val File?.isExist: Boolean
     get() = this != null && exists()
 
-fun joinPaths(vararg paths: String): String {
-    var file = File(paths[0])
-    for (i in 1 until paths.size) {
-        file = file.resolve(paths[i])
-    }
-    return file.path
-}
-
-fun deleteFiles(path: String): Boolean {
-    val file = File(path)
-    if (file.isExist) {
-        return deleteFiles(file)
-    }
-
-    return true
-}
-
 /**
  * 删除文件或者文件夹
  *

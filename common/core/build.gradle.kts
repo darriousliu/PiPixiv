@@ -51,6 +51,7 @@ kotlin {
             implementation(libs.sonner)
             // FileKit
             implementation(libs.bundles.filekit)
+            implementation(libs.mp.stools)
         }
         androidMain.dependencies {
             implementation(libs.material)

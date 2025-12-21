@@ -1,6 +1,7 @@
 [versions]
 composeWebviewMultiplatform = "2.0.3"
 material = "1.13.0"
+mp_stools = "1.6.3"
 okio = "3.16.4"
 coil3 = "3.3.0"
 richtext = "0.20.0"
@@ -29,6 +30,7 @@ compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-
 
 
 material = { module = "com.google.android.material:material", version.ref = "material" }
+mp_stools = { module = "net.sergeych:mp_stools", version.ref = "mp_stools" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 coil3-bom = { module = "io.coil-kt.coil3:coil-bom", version.ref = "coil3" }

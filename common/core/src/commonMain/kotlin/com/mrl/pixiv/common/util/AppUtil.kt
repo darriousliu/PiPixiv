@@ -2,6 +2,11 @@ package com.mrl.pixiv.common.util
 
 import coil3.PlatformContext
 import com.mrl.pixiv.common.BuildKonfig
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.cacheDir
+import io.github.vinceglb.filekit.databasesDir
+import io.github.vinceglb.filekit.filesDir
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 
@@ -28,5 +33,14 @@ object AppUtil {
         return runBlocking { getPlatformString(resId, *args) }
     }
 }
+
+val PlatformContext.cacheDir: PlatformFile
+    get() = FileKit.cacheDir
+
+val PlatformContext.filesDir: PlatformFile
+    get() = FileKit.filesDir
+
+val PlatformContext.databasesDir: PlatformFile
+    get() = FileKit.databasesDir
 
 expect fun getPlatformString(resId: Int, vararg args: Any): String
