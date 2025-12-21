@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -56,7 +55,6 @@ fun AboutScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val uriHandler = LocalUriHandler.current
-    val context = LocalContext.current
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
     val latestVersionInfo by VersionManager.latestVersionInfo.collectAsStateWithLifecycle()
     var showUpdateDialog by retain { mutableStateOf(false) }
@@ -143,14 +141,12 @@ fun AboutScreen(
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
-                            val intent =
-                                ShareUtil.createShareIntent(
-                                    AppUtil.getString(
-                                        RString.recommend_content,
-                                        Constants.GITHUB_RELEASE_URL
-                                    )
+                            ShareUtil.shareText(
+                                AppUtil.getString(
+                                    RString.recommend_content,
+                                    Constants.GITHUB_RELEASE_URL
                                 )
-                            context.startActivity(intent)
+                            )
                         },
                     supportingContent = {
                         Text(text = stringResource(RString.recommend_this_app))
