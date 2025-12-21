@@ -16,7 +16,15 @@ kotlin {
         }
     }
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
+        val androidJvmMain by creating {
+            dependsOn(commonMain.get())
+        }
+        androidMain.get().dependsOn(androidJvmMain)
+        jvmMain.get().dependsOn(androidJvmMain)
+
         commonMain.dependencies {
             api(project(":lib_strings"))
             if (project.findProperty("applyFirebasePlugins") == "true") {
@@ -41,6 +49,8 @@ kotlin {
             implementation(libs.mmkv.kotlin)
             // Toast
             implementation(libs.sonner)
+            // FileKit
+            implementation(libs.bundles.filekit)
         }
         androidMain.dependencies {
             implementation(libs.material)

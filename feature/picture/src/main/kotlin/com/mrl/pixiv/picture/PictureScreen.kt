@@ -5,11 +5,7 @@ package com.mrl.pixiv.picture
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.READ_MEDIA_IMAGES
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
 import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
@@ -69,7 +65,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -98,7 +93,6 @@ import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
-import com.mrl.pixiv.common.compose.LocalToaster
 import com.mrl.pixiv.common.compose.deepBlue
 import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
@@ -129,7 +123,6 @@ import com.mrl.pixiv.common.util.getScreenHeight
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.picture.components.UgoiraPlayer
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -218,19 +211,7 @@ internal fun PictureScreen(
     } else {
         relatedIllusts.itemCount / relatedSpanCount + 1
     }
-    val scope = rememberCoroutineScope()
-    val toaster = LocalToaster.current
-    val shareLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            // 处理分享结果
-            if (result.resultCode == Activity.RESULT_OK) {
-                scope.launch {
-                    toaster.show(RString.sharing_success)
-                }
-            } else {
-                // 分享失败或取消
-            }
-        }
+
     val lazyListState = rememberLazyListState()
     val currPage by remember {
         derivedStateOf {
@@ -282,9 +263,6 @@ internal fun PictureScreen(
                     isUserBlocked = isUserBlocked,
                     onBack = onBack,
                     popBackToHomeScreen = popBackToHomeScreen,
-                    onShare = {
-                        shareLauncher.launch(it)
-                    },
                     navToUserDetailScreen = navToUserDetailScreen,
                     onBlock = pictureViewModel::blockIllust,
                     onRemoveBlock = pictureViewModel::removeBlockIllust
@@ -676,8 +654,7 @@ internal fun PictureScreen(
                         pictureViewModel.shareImage(
                             state.bottomSheetState.index,
                             state.bottomSheetState.downloadUrl,
-                            illust,
-                            shareLauncher
+                            illust
                         )
                     }
                 )
@@ -909,7 +886,6 @@ private fun PictureTopBar(
     isUserBlocked: Boolean,
     onBack: () -> Unit,
     popBackToHomeScreen: () -> Unit,
-    onShare: (Intent) -> Unit,
     navToUserDetailScreen: (Long) -> Unit,
     onBlock: () -> Unit,
     onRemoveBlock: () -> Unit,
@@ -986,10 +962,9 @@ private fun PictureTopBar(
                 )
                 BottomMenuItem(
                     onClick = {
-                        val shareIntent = ShareUtil.createShareIntent(
+                        ShareUtil.shareText(
                             "${illust.title} | ${illust.user.name} #pixiv https://www.pixiv.net/artworks/${illust.id}"
                         )
-                        onShare(shareIntent)
                         showBottomMenu = false
                     },
                     text = stringResource(RString.share),

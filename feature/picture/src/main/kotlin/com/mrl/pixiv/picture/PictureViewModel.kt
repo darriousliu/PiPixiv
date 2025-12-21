@@ -1,9 +1,6 @@
 package com.mrl.pixiv.picture
 
-import android.content.Intent
 import android.util.Log
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.result.ActivityResult
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -371,7 +368,6 @@ class PictureViewModel(
         index: Int,
         downloadUrl: String,
         illust: Illust,
-        shareLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
     ) {
         launchIO {
             showLoading(true)
@@ -392,7 +388,7 @@ class PictureViewModel(
                 subFolder = subFolder,
             ) { entity ->
                 if (entity != null && entity.status == DownloadStatus.SUCCESS.value) {
-                    ShareUtil.createShareImage(entity.fileUri, shareLauncher)
+                    ShareUtil.shareImage(entity.fileUri)
                 } else {
                     ToastUtil.safeShortToast(RString.download_failed)
                 }

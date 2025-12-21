@@ -307,10 +307,11 @@ private fun ToastMessage(toastState: ToasterState) {
             when (val message = it.message) {
                 is String -> BasicText(text = message, color = { contentColor })
                 is Int -> BasicText(text = stringResource(message), color = { contentColor })
-                is ToastMessage.Resource -> BasicText(
-                    text = stringResource(message.resId, *message.args),
-                    color = { contentColor }
-                )
+                // todo
+//                is ToastMessage.Resource -> BasicText(
+//                    text = stringResource(message.resId, *message.args),
+//                    color = { contentColor }
+//                )
 
                 is ToastMessage.Compose -> message.content()
                 else -> BasicText(text = it.message.toString(), color = { contentColor })

@@ -28,7 +28,7 @@ internal fun Project.configureKotlinMultiplatform(
 
     configureKotlin()
 
-
+    // todo
 //    configureSortKoinKspGeneration()
 }
 

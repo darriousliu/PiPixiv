@@ -22,6 +22,7 @@ gifkt = "0.3.0"
 sonner = "0.4.0"
 jetbrains-lifecycle = "2.10.0-alpha07"
 konfig = "0.17.1"
+filekit = "0.12.0"
 
 [libraries]
 compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
@@ -72,6 +73,11 @@ lifecycle-common = { module = "org.jetbrains.androidx.lifecycle:lifecycle-common
 lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-lifecycle" }
 
+filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
+filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
+
 [bundles]
 koin = ["koin", "koin-compose", "koin-annotations", "koin-compose-viewmodel"]
 coil3 = ["coil3-core", "coil3-compose", "coil3-network-ktor3"]
@@ -79,6 +85,7 @@ richtext = ["richtext-commonmark", "richtext-m3"]
 lottie = ["lottie", "lottie-compose"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 lifecycle = ["lifecycle-common", "lifecycle-runtime-compose", "lifecycle-viewmodel-compose"]
+filekit = ["filekit-core", "filekit-dialogs", "filekit-dialogs-compose", "filekit-coil"]
 
 [plugins]
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
