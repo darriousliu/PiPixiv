@@ -8,7 +8,6 @@ import android.provider.MediaStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.OutputStream
 
 
 val OLD_DOWNLOAD_DIR = "${Environment.DIRECTORY_DCIM}/PiPixiv/"
@@ -17,12 +16,11 @@ val DOWNLOAD_DIR = "${Environment.DIRECTORY_PICTURES}/PiPixiv/"
 enum class PictureType(
     val extension: String,
     val mimeType: String,
-    val compressFormat: Bitmap.CompressFormat? = null
 ) {
-    PNG(".png", "image/png", Bitmap.CompressFormat.PNG),
-    JPG(".jpg", "image/jpeg", Bitmap.CompressFormat.JPEG),
-    JPEG(".jpeg", "image/jpeg", Bitmap.CompressFormat.JPEG),
-    GIF(".gif", "image/gif", null);
+    PNG(".png", "image/png"),
+    JPG(".jpg", "image/jpeg"),
+    JPEG(".jpeg", "image/jpeg"),
+    GIF(".gif", "image/gif");
 
     companion object {
         fun fromMimeType(mimeType: String?): PictureType? {
@@ -151,20 +149,6 @@ fun File.toBitmap(): Bitmap? {
         e.printStackTrace()
         null
     }
-}
-
-fun createDownloadOutputStream(
-    fileName: String,
-    type: PictureType,
-    subFolder: String? = null
-): OutputStream? {
-    val context = AppUtil.appContext
-    val contentValues = createContentValues(fileName, type, subFolder)
-    val uri = context.contentResolver.insert(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-        contentValues
-    )
-    return uri?.let { context.contentResolver.openOutputStream(it) }
 }
 
 private fun createContentValues(
