@@ -84,7 +84,7 @@ internal fun KotlinMultiplatformExtension.composeDependencies() {
             implementation(libs.findLibrary("sonner").get())
         }
         androidMain.dependencies {
-
+            implementation(compose.findBundle("baselibs-android").get())
         }
         iosMain.dependencies {
 

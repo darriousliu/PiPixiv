@@ -23,6 +23,7 @@ kotlin {
             implementation(libs.okio)
             implementation(androidx.room.runtime)
             implementation(libs.html.converter)
+            implementation(libs.bundles.filekit)
         }
     }
 }
