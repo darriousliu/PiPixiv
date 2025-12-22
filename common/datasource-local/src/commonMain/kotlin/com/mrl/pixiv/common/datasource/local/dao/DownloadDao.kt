@@ -20,6 +20,9 @@ interface DownloadDao {
     @Update
     suspend fun update(entity: DownloadEntity)
 
+    @Query("UPDATE download SET progress = :progress WHERE illustId = :illustId AND `index` = :index")
+    suspend fun updateProgress(illustId: Long, index: Int, progress: Float)
+
     @Delete
     suspend fun delete(entity: DownloadEntity)
 

@@ -13,23 +13,7 @@ import java.io.File
 val OLD_DOWNLOAD_DIR = "${Environment.DIRECTORY_DCIM}/PiPixiv/"
 val DOWNLOAD_DIR = "${Environment.DIRECTORY_PICTURES}/PiPixiv/"
 
-enum class PictureType(
-    val extension: String,
-    val mimeType: String,
-) {
-    PNG(".png", "image/png"),
-    JPG(".jpg", "image/jpeg"),
-    JPEG(".jpeg", "image/jpeg"),
-    GIF(".gif", "image/gif");
-
-    companion object {
-        fun fromMimeType(mimeType: String?): PictureType? {
-            return entries.find { it.mimeType == mimeType?.lowercase() }
-        }
-    }
-}
-
-fun isImageExists(fileName: String, type: PictureType, subFolder: String? = null): Boolean {
+actual fun isImageExists(fileName: String, type: PictureType, subFolder: String?): Boolean {
     val context = AppUtil.appContext
     val projection = arrayOf(MediaStore.Images.Media._ID)
     val selection =

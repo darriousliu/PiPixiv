@@ -28,6 +28,7 @@ kotlin {
             implementation(libs.bundles.coil3)
             // GIF encoder
             implementation(libs.gifkt)
+            implementation(libs.filekit.core)
         }
 
         androidMain.dependencies {
