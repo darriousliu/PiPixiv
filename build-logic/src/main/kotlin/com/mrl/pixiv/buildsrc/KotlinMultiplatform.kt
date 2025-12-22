@@ -71,11 +71,17 @@ internal fun KotlinMultiplatformExtension.commonDependencies() {
 
 internal fun KotlinMultiplatformExtension.composeDependencies() {
     val compose = project.extensions.getByType<VersionCatalogsExtension>().named("composes")
+    val kotlinx = project.extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
+    val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
     sourceSets.apply {
         commonMain.dependencies {
             // Compose
             implementation(compose.findBundle("baselibs").get())
             implementation(compose.findLibrary("jetbrains-compose-resources").get())
+            // KotlinX Collections Immutable
+            implementation(kotlinx.findLibrary("collections-immutable").get())
+            // Toast
+            implementation(libs.findLibrary("sonner").get())
         }
         androidMain.dependencies {
 

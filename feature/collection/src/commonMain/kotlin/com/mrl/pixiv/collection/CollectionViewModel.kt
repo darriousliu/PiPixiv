@@ -11,10 +11,13 @@ import com.mrl.pixiv.common.data.user.UserBookmarksIllustQuery
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.paging.CollectionIllustPagingSource
 import com.mrl.pixiv.common.util.AppUtil
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.common.viewmodel.state
+import com.mrl.pixiv.strings.all
+import com.mrl.pixiv.strings.non_translate_uncategorized
+import com.mrl.pixiv.strings.uncategorized
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -114,14 +117,14 @@ class CollectionViewModel(
             RestrictBookmarkTag(
                 isPublic = isPublic,
                 count = null,
-                displayName = AppUtil.getString(RString.all),
+                displayName = AppUtil.getString(RStrings.all),
                 name = null,
             ),
             RestrictBookmarkTag(
                 isPublic = isPublic,
                 count = null,
-                displayName = AppUtil.getString(RString.uncategorized),
-                name = AppUtil.getString(RString.non_translate_uncategorized)
+                displayName = AppUtil.getString(RStrings.uncategorized),
+                name = AppUtil.getString(RStrings.non_translate_uncategorized)
             )
         )
     }

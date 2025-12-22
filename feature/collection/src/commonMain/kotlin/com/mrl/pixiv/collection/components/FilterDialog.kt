@@ -28,17 +28,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.mrl.pixiv.collection.RestrictBookmarkTag
 import com.mrl.pixiv.common.compose.lightBlue
 import com.mrl.pixiv.common.data.Restrict
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
+import com.mrl.pixiv.strings.bookmark_tags
+import com.mrl.pixiv.strings.word_private
+import com.mrl.pixiv.strings.word_public
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FilterDialog(
@@ -94,7 +97,7 @@ fun FilterDialog(
                             modifier = Modifier.clip(MaterialTheme.shapes.small)
                         ) {
                             Text(
-                                text = stringResource(RString.word_public),
+                                text = stringResource(RStrings.word_public),
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
@@ -106,14 +109,14 @@ fun FilterDialog(
                             modifier = Modifier.clip(MaterialTheme.shapes.small)
                         ) {
                             Text(
-                                text = stringResource(RString.word_private),
+                                text = stringResource(RStrings.word_private),
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
                     }
                 }
                 Text(
-                    text = stringResource(RString.bookmark_tags),
+                    text = stringResource(RStrings.bookmark_tags),
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                         .fillMaxWidth()

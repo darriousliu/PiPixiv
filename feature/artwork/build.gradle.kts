@@ -1,17 +1,21 @@
 plugins {
-    id("pixiv.android.library.compose")
+    id("pixiv.multiplatform.compose")
 }
 
-android {
-    namespace = "com.mrl.pixiv.artwork"
-}
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.artwork"
+    }
 
-dependencies {
-    implementation(project(":common:data"))
-    implementation(project(":common:repository"))
-    implementation(project(":common:ui"))
-    implementation(project(":common:core"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":common:data"))
+            implementation(project(":common:repository"))
+            implementation(project(":common:ui"))
+            implementation(project(":common:core"))
 
-    // Paging
-    implementation(androidx.bundles.paging)
+            // Paging
+            implementation(androidx.bundles.paging)
+        }
+    }
 }
