@@ -26,7 +26,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -43,8 +42,18 @@ import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.CommentRepository
 import com.mrl.pixiv.common.repository.isSelf
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
+import com.mrl.pixiv.strings.block_comment
+import com.mrl.pixiv.strings.cancel
+import com.mrl.pixiv.strings.confirm
+import com.mrl.pixiv.strings.confirm_to_delete_comment
+import com.mrl.pixiv.strings.delete
+import com.mrl.pixiv.strings.reply
+import com.mrl.pixiv.strings.report_comment
+import com.mrl.pixiv.strings.unblock_comment
+import com.mrl.pixiv.strings.view_replies
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun CommentItem(
@@ -85,7 +94,7 @@ fun CommentItem(
                 )
                 if (comment.user.isSelf) {
                     Text(
-                        text = stringResource(RString.delete),
+                        text = stringResource(RStrings.delete),
                         modifier = Modifier
                             .throttleClick(indication = ripple()) {
                                 showDeleteConfirm = true
@@ -97,7 +106,7 @@ fun CommentItem(
                 }
                 if (!isBlockScreen) {
                     Text(
-                        text = stringResource(RString.reply),
+                        text = stringResource(RStrings.reply),
                         modifier = Modifier
                             .throttleClick(indication = ripple()) {
                                 onReplyComment()
@@ -126,7 +135,7 @@ fun CommentItem(
                             if (isBlockScreen) {
                                 DropdownMenuItem(
                                     text = {
-                                        Text(text = stringResource(RString.unblock_comment))
+                                        Text(text = stringResource(RStrings.unblock_comment))
                                     },
                                     onClick = {
                                         onRemoveBlock()
@@ -135,7 +144,7 @@ fun CommentItem(
                             } else {
                                 DropdownMenuItem(
                                     text = {
-                                        Text(text = stringResource(RString.block_comment))
+                                        Text(text = stringResource(RStrings.block_comment))
                                     },
                                     onClick = {
                                         onBlockComment()
@@ -146,7 +155,7 @@ fun CommentItem(
                                 if (comment.stamp == null) {
                                     DropdownMenuItem(
                                         text = {
-                                            Text(text = stringResource(RString.report_comment))
+                                            Text(text = stringResource(RStrings.report_comment))
                                         },
                                         onClick = {
                                             onReportComment()
@@ -197,7 +206,7 @@ fun CommentItem(
             }
             if (!isBlockScreen && comment.hasReplies && onViewReplies != null) {
                 Text(
-                    text = stringResource(RString.view_replies),
+                    text = stringResource(RStrings.view_replies),
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier
@@ -223,18 +232,18 @@ fun CommentItem(
                         showDeleteConfirm = false
                     }
                 ) {
-                    Text(text = stringResource(RString.confirm))
+                    Text(text = stringResource(RStrings.confirm))
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteConfirm = false }
                 ) {
-                    Text(text = stringResource(RString.cancel))
+                    Text(text = stringResource(RStrings.cancel))
                 }
             },
             title = {
-                Text(text = stringResource(RString.confirm_to_delete_comment))
+                Text(text = stringResource(RStrings.confirm_to_delete_comment))
             }
         )
     }

@@ -15,14 +15,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.comment.components.CommentItem
 import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.hPadding
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.strings.block_comments
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -37,7 +38,7 @@ fun BlockCommentsScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(RString.block_comments))
+                    Text(text = stringResource(RStrings.block_comments))
                 },
                 navigationIcon = {
                     IconButton(

@@ -34,7 +34,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -52,12 +51,16 @@ import com.mrl.pixiv.common.repository.CommentRepository
 import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.ReportType
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.common.viewmodel.state
+import com.mrl.pixiv.strings.comment_success
+import com.mrl.pixiv.strings.delete_comment_success
+import com.mrl.pixiv.strings.view_comments
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -96,7 +99,7 @@ fun CommentScreen(
                         replies.refresh()
                     }
                     showInputSheet = false
-                    ToastUtil.safeShortToast(RString.comment_success)
+                    ToastUtil.safeShortToast(RStrings.comment_success)
                 }
 
                 is CommentSideEffect.CommentDeleted -> {
@@ -104,7 +107,7 @@ fun CommentScreen(
                     if (viewModel.state.expandedComment != null) {
                         replies.refresh()
                     }
-                    ToastUtil.safeShortToast(RString.delete_comment_success)
+                    ToastUtil.safeShortToast(RStrings.delete_comment_success)
                 }
             }
         }
@@ -129,7 +132,7 @@ fun CommentScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(RString.view_comments))
+                    Text(text = stringResource(RStrings.view_comments))
                 },
                 navigationIcon = {
                     IconButton(

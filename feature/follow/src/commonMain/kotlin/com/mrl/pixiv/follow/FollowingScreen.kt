@@ -1,5 +1,6 @@
 package com.mrl.pixiv.follow
 
+//import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -41,8 +42,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.res.stringResource
-//import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -62,11 +61,16 @@ import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.strings.follow
+import com.mrl.pixiv.strings.followed
+import com.mrl.pixiv.strings.word_private
+import com.mrl.pixiv.strings.word_public
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -96,7 +100,7 @@ fun FollowingScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(RString.followed))
+                    Text(text = stringResource(RStrings.followed))
                 },
                 navigationIcon = {
                     IconButton(
@@ -127,7 +131,7 @@ fun FollowingScreen(
                 ) {
                     pages.forEachIndexed { index, page ->
                         Tab(
-                            text = { Text(text = stringResource(if (page == FollowingPage.PUBLIC) RString.word_public else RString.word_private)) },
+                            text = { Text(text = stringResource(if (page == FollowingPage.PUBLIC) RStrings.word_public else RStrings.word_private)) },
                             selected = pagerState.currentPage == index,
                             onClick = {
                                 scope.launch {
@@ -314,7 +318,7 @@ private fun FollowingUserCard(
                     }
                 ) {
                     Text(
-                        text = stringResource(RString.followed),
+                        text = stringResource(RStrings.followed),
                     )
                 }
             } else {
@@ -324,7 +328,7 @@ private fun FollowingUserCard(
                     }
                 ) {
                     Text(
-                        text = stringResource(RString.follow),
+                        text = stringResource(RStrings.follow),
                     )
                 }
             }

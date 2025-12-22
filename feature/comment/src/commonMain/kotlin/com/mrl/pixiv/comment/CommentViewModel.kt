@@ -16,11 +16,13 @@ import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.paging.CommentPagingSource
 import com.mrl.pixiv.common.repository.paging.CommentRepliesPagingSource
 import com.mrl.pixiv.common.router.CommentType
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import com.mrl.pixiv.strings.comment_failed
+import com.mrl.pixiv.strings.delete_comment_failed
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -106,7 +108,7 @@ class CommentViewModel(
     fun sendText(isSubComment: Boolean = false) {
         launchIO(
             onError = {
-                ToastUtil.safeShortToast(RString.comment_failed)
+                ToastUtil.safeShortToast(RStrings.comment_failed)
             }
         ) {
             val input = if (isSubComment) subCommentInput else currentInput
@@ -146,7 +148,7 @@ class CommentViewModel(
     fun sendStamp(stamp: Stamp, isSubComment: Boolean = false) {
         launchIO(
             onError = {
-                ToastUtil.safeShortToast(RString.comment_failed)
+                ToastUtil.safeShortToast(RStrings.comment_failed)
             }
         ) {
             updateState { copy(isSending = true) }
@@ -186,7 +188,7 @@ class CommentViewModel(
     fun deleteComment(commentId: Long) {
         launchIO(
             onError = {
-                ToastUtil.safeShortToast(RString.delete_comment_failed)
+                ToastUtil.safeShortToast(RStrings.delete_comment_failed)
             }
         ) {
             when (type) {
