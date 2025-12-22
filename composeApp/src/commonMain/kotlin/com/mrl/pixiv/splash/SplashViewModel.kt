@@ -1,6 +1,5 @@
 package com.mrl.pixiv.splash
 
-import android.content.Intent
 import androidx.compose.runtime.Stable
 import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.router.Destination
@@ -8,6 +7,8 @@ import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.annotation.KoinViewModel
+
+expect class Intent
 
 @Stable
 data class SplashState(

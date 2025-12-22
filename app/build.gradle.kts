@@ -98,6 +98,7 @@ dependencies {
     implementation(project(":common:repository"))
     implementation(project(":common:ui"))
     implementation(project(":common:core"))
+    implementation(project(":composeApp"))
     rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
         implementation(project(":feature:${it.name}"))
     }

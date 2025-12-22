@@ -9,8 +9,13 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import coil3.ImageLoader
@@ -41,14 +46,14 @@ class MainActivity : BaseActivity() {
 
     @Composable
     override fun BuildContent() {
-        val isSystemInDarkTheme = isSystemInDarkTheme()
-        LaunchedEffect(isSystemInDarkTheme) {
+        val darkTheme = isSystemInDarkTheme()
+        LaunchedEffect(darkTheme) {
             // Draw edge-to-edge and set system bars color to transparent
             val lightStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.BLACK)
             val darkStyle = SystemBarStyle.dark(Color.TRANSPARENT)
             enableEdgeToEdge(
-                statusBarStyle = if (isSystemInDarkTheme) darkStyle else lightStyle,
-                navigationBarStyle = if (isSystemInDarkTheme) darkStyle else lightStyle,
+                statusBarStyle = if (darkTheme) darkStyle else lightStyle,
+                navigationBarStyle = if (darkTheme) darkStyle else lightStyle,
             )
         }
         SetUpImageLoaderFactory()
@@ -56,7 +61,20 @@ class MainActivity : BaseActivity() {
         LaunchedEffect(Unit) {
             handleIntent(intent)
         }
-        PiPixivTheme {
+        PiPixivTheme(
+            darkTheme = darkTheme,
+            colorScheme = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                    val context = LocalContext.current
+                    if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(
+                        context
+                    )
+                }
+
+                darkTheme -> darkColorScheme()
+                else -> expressiveLightColorScheme()
+            }
+        ) {
             val state = splashViewModel.asState()
             state.startDestination?.let {
                 Navigation3MainGraph(startDestination = it)

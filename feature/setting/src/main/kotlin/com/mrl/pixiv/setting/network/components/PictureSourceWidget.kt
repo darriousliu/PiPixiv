@@ -30,13 +30,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
+//import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.RString
 import com.mrl.pixiv.common.util.throttleClick
 
-@Preview
+//@Preview
 @Composable
 fun PictureSourceWidget(
     modifier: Modifier = Modifier,
