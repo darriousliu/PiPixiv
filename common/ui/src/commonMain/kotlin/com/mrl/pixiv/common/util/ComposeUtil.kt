@@ -42,7 +42,7 @@ inline fun Modifier.throttleClick(
         onLongClick,
         onDoubleClick
     ) {
-        val currentTimeMillis = System.currentTimeMillis()
+        val currentTimeMillis = currentTimeMillis()
         if (currentTimeMillis - time >= lastClickTime) {//判断点击间隔,如果在间隔内则不回调
             onClick()
             lastClickTime = currentTimeMillis
@@ -59,7 +59,7 @@ fun throttleClick(
     var lastClickTime by remember { mutableLongStateOf(value = 0L) }
     return remember(onClick) {
         {
-            val currentTimeMillis = System.currentTimeMillis()
+            val currentTimeMillis = currentTimeMillis()
             if (currentTimeMillis - time >= lastClickTime) {//判断点击间隔,如果在间隔内则不回调
                 onClick()
                 lastClickTime = currentTimeMillis

@@ -56,9 +56,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -67,8 +65,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
-import coil3.request.allowRgb565
 import coil3.request.crossfade
 import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
@@ -89,10 +87,20 @@ import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SettingRepository
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.allowRgb565
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
+import com.mrl.pixiv.strings.add_tags
+import com.mrl.pixiv.strings.add_to_favorite
+import com.mrl.pixiv.strings.bookmark_tags
+import com.mrl.pixiv.strings.cancel_favorite
+import com.mrl.pixiv.strings.edit_favorite
+import com.mrl.pixiv.strings.long_click_to_edit_favorite
+import com.mrl.pixiv.strings.word_private
+import com.mrl.pixiv.strings.word_public
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -151,7 +159,7 @@ fun SquareIllustItem(
                     .conditionally(isIllustBlocked || isUserBlocked) {
                         blur(50.dp, BlurredEdgeTreatment(shape))
                     },
-                model = ImageRequest.Builder(LocalContext.current)
+                model = ImageRequest.Builder(LocalPlatformContext.current)
                     .data(illust.imageUrls.squareMedium)
                     .crossfade(1.seconds.inWholeMilliseconds.toInt())
                     .allowRgb565(true)
@@ -208,7 +216,7 @@ fun SquareIllustItem(
                             offset = IntOffset(x = 0, y = -100)
                         ) {
                             Text(
-                                text = stringResource(RString.long_click_to_edit_favorite),
+                                text = stringResource(RStrings.long_click_to_edit_favorite),
                                 modifier = Modifier
                                     .background(lightBlue, MaterialTheme.shapes.small)
                                     .padding(8.dp)
@@ -251,7 +259,7 @@ fun RectangleIllustItem(
     val onBookmarkLongClick = {
         showBottomSheet = true
     }
-    val context = LocalContext.current
+    val context = LocalPlatformContext.current
 
     with(sharedTransitionScope) {
         val shape = 10f.round
@@ -400,8 +408,8 @@ fun BottomBookmarkSheet(
         var inputTag by remember { mutableStateOf(TextFieldValue()) }
 
         Text(
-            text = if (isBookmarked) stringResource(RString.edit_favorite) else stringResource(
-                RString.add_to_favorite
+            text = if (isBookmarked) stringResource(RStrings.edit_favorite) else stringResource(
+                RStrings.add_to_favorite
             ),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
@@ -413,8 +421,8 @@ fun BottomBookmarkSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (publicSwitch) stringResource(RString.word_public)
-                else stringResource(RString.word_private)
+                text = if (publicSwitch) stringResource(RStrings.word_public)
+                else stringResource(RStrings.word_private)
             )
             Switch(checked = publicSwitch, onCheckedChange = { publicSwitch = it })
         }
@@ -427,7 +435,7 @@ fun BottomBookmarkSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = stringResource(RString.bookmark_tags),
+                text = stringResource(RStrings.bookmark_tags),
                 style = MaterialTheme.typography.labelMedium,
             )
             Text(
@@ -447,7 +455,7 @@ fun BottomBookmarkSheet(
                 onValueChange = { inputTag = it },
                 modifier = Modifier.weight(1f),
                 enabled = selectedTagsIndex.size < 10,
-                placeholder = { Text(text = stringResource(RString.add_tags)) },
+                placeholder = { Text(text = stringResource(RStrings.add_tags)) },
                 shape = MaterialTheme.shapes.small,
                 colors = transparentIndicatorColors
             )
@@ -512,7 +520,7 @@ fun BottomBookmarkSheet(
                 )
                 8f.HSpacer
                 Text(
-                    text = stringResource(if (isBookmarked) RString.edit_favorite else RString.add_to_favorite),
+                    text = stringResource(if (isBookmarked) RStrings.edit_favorite else RStrings.add_to_favorite),
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
@@ -524,7 +532,7 @@ fun BottomBookmarkSheet(
                     },
                 ) {
                     Text(
-                        text = stringResource(RString.cancel_favorite),
+                        text = stringResource(RStrings.cancel_favorite),
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }
