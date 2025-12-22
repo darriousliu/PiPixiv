@@ -12,8 +12,11 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.currentTimeMillis
 import com.mrl.pixiv.strings.network_error
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 object AuthManager : MMKVUser {
+    private val tokenRefreshMutex = Mutex()
     var userRefreshToken by mmkvString()
         private set
     private var userAccessToken by mmkvString()
@@ -30,23 +33,25 @@ object AuthManager : MMKVUser {
 
     suspend fun requireUserAccessToken(force: Boolean = false): String =
         withIOContext {
-            return@withIOContext runCatching {
-                if (userAccessToken.isEmpty()) {
-                    throw IllegalStateException("User access token is empty")
-                }
-                if (isNeedRefreshToken || force) {
-                    val resp = PixivRepository.refreshToken(
-                        AuthTokenFieldReq(
-                            grantType = GrantType.REFRESH_TOKEN.value,
-                            refreshToken = userRefreshToken
+            tokenRefreshMutex.withLock {
+                return@withLock runCatching {
+                    if (userAccessToken.isEmpty()) {
+                        throw IllegalStateException("User access token is empty")
+                    }
+                    if (isNeedRefreshToken || force) {
+                        val resp = PixivRepository.refreshToken(
+                            AuthTokenFieldReq(
+                                grantType = GrantType.REFRESH_TOKEN.value,
+                                refreshToken = userRefreshToken
+                            )
                         )
-                    )
-                    updateUserInfo(resp)
-                }
-                userAccessToken
-            }.onFailure {
-                ToastUtil.safeShortToast(RStrings.network_error)
-            }.getOrNull().orEmpty()
+                        updateUserInfo(resp)
+                    }
+                    userAccessToken
+                }.onFailure {
+                    ToastUtil.safeShortToast(RStrings.network_error)
+                }.getOrNull().orEmpty()
+            }
         }
 
     suspend fun login(code: String, codeVerifier: String) {
