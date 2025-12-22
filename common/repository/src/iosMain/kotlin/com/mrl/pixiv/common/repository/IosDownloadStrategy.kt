@@ -5,6 +5,7 @@ import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.repository.util.generateFileName
 import com.mrl.pixiv.common.util.PictureType
+import com.mrl.pixiv.common.util.ZipUtil
 import com.shakster.gifkt.GifEncoder
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.refTo
