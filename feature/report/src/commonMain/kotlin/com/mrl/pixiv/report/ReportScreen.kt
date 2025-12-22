@@ -35,14 +35,21 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.ReportType
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.strings.please_select
+import com.mrl.pixiv.strings.report
+import com.mrl.pixiv.strings.report_detail
+import com.mrl.pixiv.strings.report_detail_hint
+import com.mrl.pixiv.strings.report_reason
+import com.mrl.pixiv.strings.report_success
+import com.mrl.pixiv.strings.send
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -69,7 +76,7 @@ fun ReportScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(RString.report))
+                    Text(text = stringResource(RStrings.report))
                 },
                 navigationIcon = {
                     IconButton(
@@ -102,7 +109,7 @@ fun ReportScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 Text(
-                    text = stringResource(RString.report_reason),
+                    text = stringResource(RStrings.report_reason),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
@@ -110,7 +117,7 @@ fun ReportScreen(
 
                 val selectedTopic = state.topicList.find { it.topicId == state.selectedTopicId }
                 Text(
-                    text = selectedTopic?.topicTitle ?: stringResource(RString.please_select),
+                    text = selectedTopic?.topicTitle ?: stringResource(RStrings.please_select),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showTopicSheet = true }
@@ -119,7 +126,7 @@ fun ReportScreen(
                 )
 
                 Text(
-                    text = stringResource(RString.report_detail),
+                    text = stringResource(RStrings.report_detail),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
@@ -130,7 +137,7 @@ fun ReportScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    placeholder = { Text(stringResource(RString.report_detail_hint)) },
+                    placeholder = { Text(stringResource(RStrings.report_detail_hint)) },
                     supportingText = {
                         Text(
                             text = "${reportContent.text.length}/$MAX_REPORT_CONTENT_LENGTH",
@@ -144,7 +151,7 @@ fun ReportScreen(
                 Button(
                     onClick = {
                         viewModel.submitReport()
-                        ToastUtil.safeShortToast(RString.report_success)
+                        ToastUtil.safeShortToast(RStrings.report_success)
                         navigationManager.popBackStack()
                     },
                     enabled = state.selectedTopicId != null && reportContent.text.isNotBlank(),
@@ -152,7 +159,7 @@ fun ReportScreen(
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
                 ) {
-                    Text(text = stringResource(RString.send))
+                    Text(text = stringResource(RStrings.send))
                 }
             }
         }
