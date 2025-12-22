@@ -14,6 +14,7 @@ paging = "3.3.6"
 work = "2.11.0"
 window = "1.5.1"
 room = "2.8.4"
+sqlite = "2.6.2"
 annotation = "1.9.1"
 
 [libraries]
@@ -46,6 +47,7 @@ window = { module = "androidx.window:window", version.ref = "window" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
