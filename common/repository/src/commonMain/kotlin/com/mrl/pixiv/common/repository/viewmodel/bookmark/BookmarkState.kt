@@ -6,6 +6,7 @@ import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.repository.PixivRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 
 val Illust.isBookmark: Boolean
     get() = BookmarkState.state[id] ?: isBookmarked

@@ -6,6 +6,7 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.User
 import com.mrl.pixiv.common.repository.PixivRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 
 val User.isFollowing: Boolean
     get() = FollowState.state[id] ?: isFollowed

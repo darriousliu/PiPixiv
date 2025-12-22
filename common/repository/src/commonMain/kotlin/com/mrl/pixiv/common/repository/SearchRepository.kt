@@ -5,6 +5,7 @@ import com.mrl.pixiv.common.data.search.SearchHistory
 import com.mrl.pixiv.common.mmkv.MMKVUser
 import com.mrl.pixiv.common.mmkv.asMutableStateFlow
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
+import com.mrl.pixiv.common.util.currentTimeMillis
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -33,7 +34,7 @@ object SearchRepository : MMKVUser {
                         add(
                             0, SearchHistory(
                                 keyword = searchWords,
-                                timestamp = System.currentTimeMillis()
+                                timestamp = currentTimeMillis()
                             )
                         )
                     }

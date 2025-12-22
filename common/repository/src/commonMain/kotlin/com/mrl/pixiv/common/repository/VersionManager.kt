@@ -4,8 +4,9 @@ import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.serialize.JSON
 import com.mrl.pixiv.common.util.AppUtil
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
+import com.mrl.pixiv.strings.already_updated
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -13,6 +14,7 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -67,7 +69,7 @@ object VersionManager {
                     _hasNewVersion.value = false
                     _latestVersionInfo.value = null
                     if (showToast) {
-                        ToastUtil.safeShortToast(RString.already_updated)
+                        ToastUtil.safeShortToast(RStrings.already_updated)
                     }
                 }
             } catch (e: Exception) {

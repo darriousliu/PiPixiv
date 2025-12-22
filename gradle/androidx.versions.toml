@@ -10,7 +10,7 @@ splashscreen = "1.2.0"
 profileinstaller = "1.4.1"
 navigation = "2.9.6"
 datastore = "1.2.0"
-paging = "3.3.6"
+paging = "3.4.0-beta01"
 work = "2.11.0"
 window = "1.5.1"
 room = "2.8.4"
@@ -40,7 +40,7 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
-paging = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
+paging = { module = "androidx.paging:paging-common", version.ref = "paging" }
 paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 
 window = { module = "androidx.window:window", version.ref = "window" }

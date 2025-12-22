@@ -8,9 +8,10 @@ import com.mrl.pixiv.common.data.auth.GrantType
 import com.mrl.pixiv.common.mmkv.MMKVUser
 import com.mrl.pixiv.common.mmkv.mmkvLong
 import com.mrl.pixiv.common.mmkv.mmkvString
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.currentTimeMillis
+import com.mrl.pixiv.strings.network_error
 
 object AuthManager : MMKVUser {
     var userRefreshToken by mmkvString()
@@ -44,7 +45,7 @@ object AuthManager : MMKVUser {
                 }
                 userAccessToken
             }.onFailure {
-                ToastUtil.safeShortToast(RString.network_error)
+                ToastUtil.safeShortToast(RStrings.network_error)
             }.getOrNull().orEmpty()
         }
 
