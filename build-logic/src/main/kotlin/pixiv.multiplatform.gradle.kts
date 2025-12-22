@@ -1,6 +1,8 @@
 import com.android.build.api.dsl.androidLibrary
 import com.mrl.pixiv.buildsrc.commonDependencies
+import com.mrl.pixiv.buildsrc.configureKotlin
 import com.mrl.pixiv.buildsrc.configureKotlinMultiplatform
+import com.mrl.pixiv.buildsrc.optIns
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -12,7 +14,7 @@ plugins {
 kotlin {
     jvmToolchain(22)
     compilerOptions {
-        freeCompilerArgs.add("-Xexpect-actual-classes")
+        freeCompilerArgs.addAll(optIns)
     }
 
     @Suppress("UnstableApiUsage")
@@ -24,7 +26,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_21)
         }
 
-        configureKotlinMultiplatform(this)
+        configureKotlinMultiplatform()
     }
 
     iosArm64()
@@ -41,6 +43,7 @@ kotlin {
     }
 
     commonDependencies()
+    configureKotlin()
 }
 
 androidComponents {

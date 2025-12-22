@@ -1,35 +1,25 @@
 package com.mrl.pixiv.buildsrc
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
-import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-internal fun Project.configureKotlinMultiplatform(
-    kmpTarget: KotlinMultiplatformAndroidLibraryTarget,
-) {
-    with(kmpTarget) {
-        compileSdk {
-            version = release(36)
-        }
-        minSdk = 26
+internal fun KotlinMultiplatformAndroidLibraryTarget.configureKotlinMultiplatform() {
+    compileSdk {
+        version = release(36)
+    }
+    minSdk = 26
 
-        withDeviceTest {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
-
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
+    withDeviceTest {
+        instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    configureKotlin()
-
-    // todo
-//    configureSortKoinKspGeneration()
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
 }
 
 internal fun KotlinMultiplatformExtension.commonDependencies() {
