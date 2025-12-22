@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.data.search
 
+import androidx.compose.runtime.Stable
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Tag
 import kotlinx.serialization.SerialName
@@ -24,6 +25,7 @@ data class SearchAutoCompleteResp(
     val tags: List<Tag>
 )
 
+@Stable
 @Serializable
 data class TrendingTag(
     val illust: Illust,
