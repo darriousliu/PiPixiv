@@ -22,10 +22,6 @@ kotlin {
             // FileKit
             implementation(libs.filekit.core)
         }
-        androidMain.dependencies {
-            // WorkManager
-            implementation(androidx.bundles.workmanager)
-        }
     }
 
 }
