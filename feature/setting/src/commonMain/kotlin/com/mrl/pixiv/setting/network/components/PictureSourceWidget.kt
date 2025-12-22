@@ -1,10 +1,10 @@
 package com.mrl.pixiv.setting.network.components
 
+//import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -28,13 +28,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
-//import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.util.AppUtil
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.isImeVisible
 import com.mrl.pixiv.common.util.throttleClick
+import com.mrl.pixiv.strings.image_source
+import com.mrl.pixiv.strings.label_default
+import com.mrl.pixiv.strings.self_defined_source
+import org.jetbrains.compose.resources.stringResource
 
 //@Preview
 @Composable
@@ -45,7 +48,7 @@ fun PictureSourceWidget(
 ) {
     val map = remember {
         mapOf(
-            "i.pximg.net" to "${AppUtil.getString(RString.label_default)}: i.pximg.net",
+            "i.pximg.net" to "${AppUtil.getString(RStrings.label_default)}: i.pximg.net",
             "i.pixiv.cat" to "i.pixiv.cat",
             "i.pixiv.re" to "i.pixiv.re"
         )
@@ -61,7 +64,7 @@ fun PictureSourceWidget(
         Column {
             ListItem(
                 headlineContent = {
-                    Text(text = stringResource(RString.image_source))
+                    Text(text = stringResource(RStrings.image_source))
                 },
                 trailingContent = {
                     IconButton(
@@ -116,7 +119,7 @@ fun PictureSourceWidget(
                 value = imageHost,
                 onValueChange = { imageHost = it },
                 singleLine = true,
-                label = { Text(text = stringResource(RString.self_defined_source)) },
+                label = { Text(text = stringResource(RStrings.self_defined_source)) },
                 trailingIcon = {
                     IconButton(
                         onClick = { savePictureSourceHost(imageHost.text) },

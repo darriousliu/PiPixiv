@@ -33,8 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.data.Constants
@@ -42,10 +40,26 @@ import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.repository.VersionManager.getCurrentFlavorAsset
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.AppUtil
-import com.mrl.pixiv.common.util.CmnRDrawable
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RDrawables
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.throttleClick
+import com.mrl.pixiv.strings.about
+import com.mrl.pixiv.strings.app_name
+import com.mrl.pixiv.strings.cancel
+import com.mrl.pixiv.strings.check_update
+import com.mrl.pixiv.strings.current_version
+import com.mrl.pixiv.strings.download
+import com.mrl.pixiv.strings.feedback
+import com.mrl.pixiv.strings.feedback_content
+import com.mrl.pixiv.strings.ic_launcher
+import com.mrl.pixiv.strings.new_version_available
+import com.mrl.pixiv.strings.project_url
+import com.mrl.pixiv.strings.recommend_content
+import com.mrl.pixiv.strings.recommend_this_app
+import com.mrl.pixiv.strings.share_app
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +77,7 @@ fun AboutScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(RString.about)) },
+                title = { Text(text = stringResource(RStrings.about)) },
                 navigationIcon = {
                     IconButton(onClick = { navigationManager.popBackStack() }) {
                         Icon(
@@ -90,19 +104,19 @@ fun AboutScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Image(
-                    painter = painterResource(id = CmnRDrawable.ic_launcher),
+                    painter = painterResource(RDrawables.ic_launcher),
                     contentDescription = null,
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape),
                 )
                 Text(
-                    text = stringResource(RString.app_name),
+                    text = stringResource(RStrings.app_name),
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(top = 16.dp)
                 )
                 Text(
-                    text = stringResource(RString.current_version, AppUtil.versionName),
+                    text = stringResource(RStrings.current_version, AppUtil.versionName),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -111,7 +125,7 @@ fun AboutScreen(
             Column {
                 // Project URL
                 ListItem(
-                    headlineContent = { Text(text = stringResource(RString.project_url)) },
+                    headlineContent = { Text(text = stringResource(RStrings.project_url)) },
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
@@ -124,43 +138,43 @@ fun AboutScreen(
 
                 // Feedback
                 ListItem(
-                    headlineContent = { Text(text = stringResource(RString.feedback)) },
+                    headlineContent = { Text(text = stringResource(RStrings.feedback)) },
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
                             uriHandler.openUri(Constants.GITHUB_ISSUE_URL)
                         },
                     supportingContent = {
-                        Text(text = stringResource(RString.feedback_content))
+                        Text(text = stringResource(RStrings.feedback_content))
                     }
                 )
 
                 // Share App
                 ListItem(
-                    headlineContent = { Text(text = stringResource(RString.share_app)) },
+                    headlineContent = { Text(text = stringResource(RStrings.share_app)) },
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                         .throttleClick(indication = ripple()) {
                             ShareUtil.shareText(
                                 AppUtil.getString(
-                                    RString.recommend_content,
+                                    RStrings.recommend_content,
                                     Constants.GITHUB_RELEASE_URL
                                 )
                             )
                         },
                     supportingContent = {
-                        Text(text = stringResource(RString.recommend_this_app))
+                        Text(text = stringResource(RStrings.recommend_this_app))
                     }
                 )
 
                 // Check Update
                 ListItem(
-                    headlineContent = { Text(text = stringResource(RString.check_update)) },
+                    headlineContent = { Text(text = stringResource(RStrings.check_update)) },
                     trailingContent = {
                         if (hasNewVersion) {
                             Badge {
                                 Text(
-                                    text = stringResource(RString.new_version_available),
+                                    text = stringResource(RStrings.new_version_available),
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 )
                             }
@@ -194,7 +208,7 @@ fun AboutScreen(
                         uriHandler.openUri(url)
                     }
                 ) {
-                    Text(text = stringResource(RString.download))
+                    Text(text = stringResource(RStrings.download))
                 }
             },
             dismissButton = {
@@ -203,7 +217,7 @@ fun AboutScreen(
                         showUpdateDialog = false
                     }
                 ) {
-                    Text(text = stringResource(RString.cancel))
+                    Text(text = stringResource(RStrings.cancel))
                 }
             },
             title = {

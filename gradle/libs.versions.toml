@@ -24,6 +24,7 @@ sonner = "0.4.0"
 jetbrains-lifecycle = "2.10.0-alpha07"
 konfig = "0.17.1"
 filekit = "0.12.0"
+htmlconverter = "1.1.0"
 
 [libraries]
 compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
@@ -82,6 +83,8 @@ filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "file
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
 filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
+
+html-converter = { module = "be.digitalia.compose.htmlconverter:htmlconverter", version.ref = "htmlconverter" }
 
 [bundles]
 koin = ["koin", "koin-compose", "koin-annotations", "koin-compose-viewmodel"]

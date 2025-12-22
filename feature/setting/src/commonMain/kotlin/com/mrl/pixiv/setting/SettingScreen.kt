@@ -1,9 +1,5 @@
 package com.mrl.pixiv.setting
 
-import android.content.Intent
-import android.os.Build
-import android.provider.Settings
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -12,10 +8,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
-import androidx.compose.material.icons.rounded.AddLink
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.NetworkWifi
@@ -45,19 +41,30 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
-import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
+import com.mrl.pixiv.strings.app_language
+import com.mrl.pixiv.strings.cancel
+import com.mrl.pixiv.strings.confirm
+import com.mrl.pixiv.strings.download_single_folder_by_user_desc
+import com.mrl.pixiv.strings.download_single_folder_by_user_title
+import com.mrl.pixiv.strings.file_name_format_title
+import com.mrl.pixiv.strings.label_default
+import com.mrl.pixiv.strings.network_setting
+import com.mrl.pixiv.strings.r18
+import com.mrl.pixiv.strings.r18_alert_message
+import com.mrl.pixiv.strings.setting
+import com.mrl.pixiv.strings.span_count_adaptive
+import com.mrl.pixiv.strings.span_count_landscape
+import com.mrl.pixiv.strings.span_count_portrait
+import com.mrl.pixiv.strings.tips
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 const val KEY_LANGUAGE = "language"
@@ -76,13 +83,10 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager = koinInject()
 ) {
-    val context = LocalContext.current
-    val labelDefault = stringResource(RString.label_default)
-    val languages = remember { getLangs(context) }
+    val labelDefault = stringResource(RStrings.label_default)
+    val languages = remember { getLanguages() }
     var currentLanguage by remember(labelDefault) {
-        mutableStateOf(
-            AppCompatDelegate.getApplicationLocales().get(0)?.toLanguageTag() ?: labelDefault
-        )
+        mutableStateOf(getInitialLanguages() ?: labelDefault)
     }
     val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
 
@@ -90,7 +94,7 @@ fun SettingScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(RString.setting))
+                    Text(text = stringResource(RStrings.setting))
                 },
                 navigationIcon = {
                     IconButton(
@@ -114,16 +118,11 @@ fun SettingScreen(
                 ListItem(
                     headlineContent = {
                         LaunchedEffect(currentLanguage, labelDefault) {
-                            val locale = if (currentLanguage == labelDefault) {
-                                LocaleListCompat.getEmptyLocaleList()
-                            } else {
-                                LocaleListCompat.forLanguageTags(currentLanguage)
-                            }
-                            AppCompatDelegate.setApplicationLocales(locale)
+                            triggerLocaleChange(currentLanguage, labelDefault)
                         }
 
                         Text(
-                            text = stringResource(RString.app_language),
+                            text = stringResource(RStrings.app_language),
                         )
                     },
                     leadingContent = {
@@ -171,7 +170,7 @@ fun SettingScreen(
                 ListItem(
                     headlineContent = {
                         Text(
-                            text = stringResource(RString.network_setting),
+                            text = stringResource(RStrings.network_setting),
                         )
                     },
                     modifier = Modifier
@@ -191,61 +190,20 @@ fun SettingScreen(
                     }
                 )
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                item(KEY_DEFAULT_OPEN_LINK) {
-                    ListItem(
-                        headlineContent = {
-                            Text(
-                                text = stringResource(RString.default_open),
-                            )
-                        },
-                        modifier = Modifier
-                            .height(IntrinsicSize.Min)
-                            .throttleClick(
-                                indication = ripple()
-                            ) {
-                                try {
-                                    val intent = Intent().apply {
-                                        action =
-                                            Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS
-                                        addCategory(Intent.CATEGORY_DEFAULT)
-                                        data = "package:${context.packageName}".toUri()
-                                        addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                                        addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                                    }
-                                    context.startActivity(intent)
-                                } catch (_: Throwable) {
-                                }
-                            },
-                        supportingContent = {
-                            Text(
-                                text = stringResource(RString.allow_open_link),
-                            )
-                        },
-                        leadingContent = {
-                            Column(
-                                modifier = Modifier.fillMaxHeight(),
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Icon(imageVector = Icons.Rounded.AddLink, contentDescription = null)
-                            }
-                        },
-                    )
-                }
-            }
+
             item(key = KEY_DIVIDER_1) {
                 HorizontalDivider(modifier = Modifier.padding(8.dp))
             }
             item(key = KEY_PORTRAIT_SPAN_COUNT) {
                 SpanCountSetting(
-                    title = stringResource(RString.span_count_portrait),
+                    title = stringResource(RStrings.span_count_portrait),
                     currentSpanCount = userPreference.spanCountPortrait,
                     onSpanCountChange = SettingRepository::setSpanCountPortrait,
                 )
             }
             item(key = KEY_LANDSCAPE_SPAN_COUNT) {
                 SpanCountSetting(
-                    title = stringResource(RString.span_count_landscape),
+                    title = stringResource(RStrings.span_count_landscape),
                     currentSpanCount = userPreference.spanCountLandscape,
                     onSpanCountChange = SettingRepository::setSpanCountLandscape,
                 )
@@ -257,7 +215,7 @@ fun SettingScreen(
                 ListItem(
                     headlineContent = {
                         Text(
-                            text = stringResource(RString.download_single_folder_by_user_title),
+                            text = stringResource(RStrings.download_single_folder_by_user_title),
                         )
                     },
                     modifier = Modifier
@@ -269,7 +227,7 @@ fun SettingScreen(
                         },
                     supportingContent = {
                         Text(
-                            text = stringResource(RString.download_single_folder_by_user_desc),
+                            text = stringResource(RStrings.download_single_folder_by_user_desc),
                         )
                     },
                     leadingContent = {
@@ -297,7 +255,7 @@ fun SettingScreen(
                 ListItem(
                     headlineContent = {
                         Text(
-                            text = stringResource(RString.file_name_format_title),
+                            text = stringResource(RStrings.file_name_format_title),
                         )
                     },
                     modifier = Modifier
@@ -321,6 +279,7 @@ fun SettingScreen(
                 var showWarningDialog by rememberSaveable { mutableStateOf(false) }
 
                 if (showWarningDialog) {
+                    val tipText = stringResource(RStrings.r18_alert_message)
                     AlertDialog(
                         onDismissRequest = { showWarningDialog = false },
                         confirmButton = {
@@ -330,14 +289,14 @@ fun SettingScreen(
                                     showWarningDialog = false
                                 }
                             ) {
-                                Text(text = stringResource(RString.confirm))
+                                Text(text = stringResource(RStrings.confirm))
                             }
                         },
-                        title = { Text(text = stringResource(RString.tips)) },
-                        text = { Text(text = AnnotatedString.fromHtml(stringResource(RString.r18_alert_message))) },
+                        title = { Text(text = stringResource(RStrings.tips)) },
+                        text = { Text(text = remember(tipText) { htmlToAnnotatedString(tipText) }) },
                         dismissButton = {
                             TextButton(onClick = { showWarningDialog = false }) {
-                                Text(text = stringResource(RString.cancel))
+                                Text(text = stringResource(RStrings.cancel))
                             }
                         }
                     )
@@ -346,7 +305,7 @@ fun SettingScreen(
                 ListItem(
                     headlineContent = {
                         Text(
-                            text = stringResource(RString.r18),
+                            text = stringResource(RStrings.r18),
                         )
                     },
                     modifier = Modifier
@@ -391,7 +350,7 @@ private fun SpanCountSetting(
         2 to "2",
         3 to "3",
         4 to "4",
-        -1 to stringResource(RString.span_count_adaptive),
+        -1 to stringResource(RStrings.span_count_adaptive),
     )
 
     val currentLabel = options.find { it.first == currentSpanCount }?.second
@@ -440,3 +399,13 @@ private fun SpanCountSetting(
         }
     )
 }
+
+expect fun getInitialLanguages(): String?
+
+expect fun triggerLocaleChange(
+    currentLanguage: String,
+    labelDefault: String
+)
+
+@Composable
+expect fun LazyListScope.AppLinkItem()

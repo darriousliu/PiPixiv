@@ -29,13 +29,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.strings.file_name_format_title
+import com.mrl.pixiv.strings.legend_illust_id
+import com.mrl.pixiv.strings.legend_index
+import com.mrl.pixiv.strings.legend_meaning
+import com.mrl.pixiv.strings.legend_template
+import com.mrl.pixiv.strings.legend_title
+import com.mrl.pixiv.strings.legend_user_id
+import com.mrl.pixiv.strings.legend_user_name
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -50,7 +58,7 @@ fun FileNameFormatScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(RString.file_name_format_title)) },
+                title = { Text(text = stringResource(RStrings.file_name_format_title)) },
                 navigationIcon = {
                     IconButton(
                         onClick = navigationManager::popBackStack,
@@ -91,7 +99,7 @@ fun FileNameFormatScreen(
         ) {
             OutlinedTextField(
                 state = format,
-                label = { Text(text = stringResource(RString.file_name_format_title)) },
+                label = { Text(text = stringResource(RStrings.file_name_format_title)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -123,15 +131,18 @@ fun FileNameFormatScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(modifier = Modifier.padding(16.dp)) {
-                Text(text = stringResource(RString.legend_template), modifier = Modifier.weight(1f))
-                Text(text = stringResource(RString.legend_meaning), modifier = Modifier.weight(1f))
+                Text(
+                    text = stringResource(RStrings.legend_template),
+                    modifier = Modifier.weight(1f)
+                )
+                Text(text = stringResource(RStrings.legend_meaning), modifier = Modifier.weight(1f))
             }
             val legends = listOf(
-                "{illust_id}" to RString.legend_illust_id,
-                "{title}" to RString.legend_title,
-                "{user_id}" to RString.legend_user_id,
-                "{user_name}" to RString.legend_user_name,
-                "{index}" to RString.legend_index,
+                "{illust_id}" to RStrings.legend_illust_id,
+                "{title}" to RStrings.legend_title,
+                "{user_id}" to RStrings.legend_user_id,
+                "{user_name}" to RStrings.legend_user_name,
+                "{index}" to RStrings.legend_index,
             )
 
             legends.forEach { (key, res) ->

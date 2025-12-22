@@ -33,14 +33,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.BlockingGridDefaults
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.strings.block_comments
+import com.mrl.pixiv.strings.block_settings
+import com.mrl.pixiv.strings.block_tags
+import com.mrl.pixiv.strings.block_user
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -64,7 +68,7 @@ fun BlockSettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(RString.block_settings),
+                        text = stringResource(RStrings.block_settings),
                     )
                 },
                 navigationIcon = {
@@ -137,7 +141,7 @@ fun BlockSettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(RString.block_comments),
+                            text = stringResource(RStrings.block_comments),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Icon(
@@ -152,7 +156,7 @@ fun BlockSettingsScreen(
                         span = { GridItemSpan(maxLineSpan) },
                     ) {
                         Text(
-                            text = stringResource(RString.block_user),
+                            text = stringResource(RStrings.block_user),
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
@@ -203,7 +207,7 @@ fun BlockSettingsScreen(
                         span = { GridItemSpan(maxLineSpan) },
                     ) {
                         Text(
-                            text = stringResource(RString.block_tags),
+                            text = stringResource(RStrings.block_tags),
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }

@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.util
 
 import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.delete
 import io.github.vinceglb.filekit.isDirectory
 import io.github.vinceglb.filekit.list
 import io.github.vinceglb.filekit.size
@@ -22,6 +23,13 @@ fun PlatformFile.calculateSize(): Long {
     return size().coerceAtMost(
         Long.MAX_VALUE
     )
+}
+
+suspend fun PlatformFile.deleteRecursively() {
+    if (isDirectory()) {
+        list().forEach { it.deleteRecursively() }
+    }
+    delete()
 }
 
 private const val KB = 1024

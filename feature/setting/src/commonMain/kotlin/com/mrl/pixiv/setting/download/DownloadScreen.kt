@@ -36,16 +36,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.strings.delete
+import com.mrl.pixiv.strings.download_manager
+import com.mrl.pixiv.strings.retry
+import com.mrl.pixiv.strings.status_all
+import com.mrl.pixiv.strings.status_completed
+import com.mrl.pixiv.strings.status_failed
+import com.mrl.pixiv.strings.status_running
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -60,10 +67,10 @@ fun DownloadScreen(
     val downloads by viewModel.currentDownloads.collectAsStateWithLifecycle()
     val tabs = remember {
         listOf(
-            DownloadState.FILTER_ALL to RString.status_all,
-            DownloadStatus.SUCCESS.value to RString.status_completed,
-            DownloadStatus.FAILED.value to RString.status_failed,
-            DownloadStatus.RUNNING.value to RString.status_running,
+            DownloadState.FILTER_ALL to RStrings.status_all,
+            DownloadStatus.SUCCESS.value to RStrings.status_completed,
+            DownloadStatus.FAILED.value to RStrings.status_failed,
+            DownloadStatus.RUNNING.value to RStrings.status_running,
         )
     }
 
@@ -71,7 +78,7 @@ fun DownloadScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(RString.download_manager)) },
+                title = { Text(stringResource(RStrings.download_manager)) },
                 navigationIcon = {
                     IconButton(
                         onClick = navigationManager::popBackStack,
@@ -182,9 +189,9 @@ fun DownloadItem(
                         Text(
                             text = stringResource(
                                 when (item.status) {
-                                    DownloadStatus.SUCCESS.value -> RString.status_completed
-                                    DownloadStatus.FAILED.value -> RString.status_failed
-                                    else -> RString.status_running
+                                    DownloadStatus.SUCCESS.value -> RStrings.status_completed
+                                    DownloadStatus.FAILED.value -> RStrings.status_failed
+                                    else -> RStrings.status_running
                                 }
                             ),
                             style = MaterialTheme.typography.bodySmall,
@@ -198,14 +205,14 @@ fun DownloadItem(
                     IconButton(onClick = onRetry) {
                         Icon(
                             imageVector = Icons.Rounded.Refresh,
-                            contentDescription = stringResource(RString.retry)
+                            contentDescription = stringResource(RStrings.retry)
                         )
                     }
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Rounded.Delete,
-                        contentDescription = stringResource(RString.delete)
+                        contentDescription = stringResource(RStrings.delete)
                     )
                 }
             }
