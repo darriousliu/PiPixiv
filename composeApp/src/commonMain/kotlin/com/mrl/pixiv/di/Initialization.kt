@@ -7,6 +7,7 @@ import org.koin.dsl.KoinAppDeclaration
 
 object Initialization {
     fun initKoin(platformKoinAppDeclaration: KoinAppDeclaration = {}) {
+        initializeMMKV()
         startKoin {
             platformKoinAppDeclaration()
             initKotzilla(isDebug)
@@ -14,3 +15,5 @@ object Initialization {
         }
     }
 }
+
+expect fun initializeMMKV()
