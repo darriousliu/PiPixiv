@@ -9,9 +9,6 @@ kotlin {
     }
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":common:data"))
-            implementation(project(":common:core"))
-
             // Serialization
             implementation(kotlinx.bundles.serialization)
             // Room
