@@ -1,6 +1,5 @@
 import com.android.build.api.dsl.androidLibrary
 import com.mrl.pixiv.buildsrc.commonDependencies
-import com.mrl.pixiv.buildsrc.configureKotlin
 import com.mrl.pixiv.buildsrc.configureKotlinMultiplatform
 import com.mrl.pixiv.buildsrc.optIns
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -12,7 +11,7 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(22)
+    jvmToolchain(25)
     compilerOptions {
         freeCompilerArgs.addAll(optIns)
     }
@@ -23,7 +22,7 @@ kotlin {
         minSdk = 26
 
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
 
         configureKotlinMultiplatform()
@@ -34,7 +33,7 @@ kotlin {
 
     jvm {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_22)
         }
     }
 
@@ -43,7 +42,6 @@ kotlin {
     }
 
     commonDependencies()
-    configureKotlin()
 }
 
 androidComponents {
