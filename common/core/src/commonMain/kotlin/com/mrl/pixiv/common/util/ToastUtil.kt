@@ -16,18 +16,6 @@ object ToastUtil : CoroutineScope by MainScope() {
     private val _toastFlow = Channel<Toast>()
     val toastFlow: Flow<Toast> = _toastFlow.receiveAsFlow()
 
-    fun safeShortToast(strId: Int, vararg params: Any) {
-        val text = ""
-        launch {
-            _toastFlow.send(
-                Toast(
-                    message = text,
-                    duration = ToasterDefaults.DurationShort,
-                )
-            )
-        }
-    }
-
     fun safeShortToast(strId: StringResource, vararg params: Any) {
         val text = AppUtil.getString(strId, *params)
         launch {

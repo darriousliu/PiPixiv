@@ -4,7 +4,3 @@ package com.mrl.pixiv.common.util
 fun <T> AppUtil.getSystemService(serviceName: String): T? {
     return appContext.getSystemService(serviceName) as? T
 }
-
-actual fun getPlatformString(resId: Int, vararg args: Any): String {
-    return AppUtil.appContext.getString(resId, *args)
-}

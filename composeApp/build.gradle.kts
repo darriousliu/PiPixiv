@@ -1,3 +1,4 @@
+import com.mrl.pixiv.buildsrc.configureRemoveKoinMeta
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -30,13 +31,17 @@ kotlin {
                 implementation(project(":common:repository"))
                 implementation(project(":common:ui"))
                 implementation(project(":common:core"))
-//                rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
-//                    implementation(project(":feature:${it.name}"))
-//                }
+                rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
+                    implementation(project(":feature:${it.name}"))
+                }
                 implementation(composes.bundles.navigation3)
                 // Coil3
                 implementation(project.dependencies.platform(libs.coil3.bom))
                 implementation(libs.bundles.coil3)
+                // FileKit
+                implementation(libs.filekit.core)
+                // MMKV
+                implementation(libs.mmkv.kotlin)
             }
         }
         androidMain {
@@ -56,6 +61,8 @@ kotlin {
             }
         }
     }
+
+    configureRemoveKoinMeta()
 }
 
 compose.desktop {
@@ -66,6 +73,24 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.mrl.pixiv"
             packageVersion = properties["versionName"]?.toString()
+        }
+
+        buildTypes.release.proguard {
+            configurationFiles.from("compose-desktop.pro")
+        }
+    }
+}
+
+afterEvaluate {
+    tasks.withType<JavaExec> {
+        jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
+        jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED")
+        jvmArgs("--enable-native-access", "ALL-UNNAMED")
+
+        if (System.getProperty("os.name").contains("Mac")) {
+            jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
+            jvmArgs("--add-opens", "java.desktop/sun.lwawt=ALL-UNNAMED")
+            jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
         }
     }
 }

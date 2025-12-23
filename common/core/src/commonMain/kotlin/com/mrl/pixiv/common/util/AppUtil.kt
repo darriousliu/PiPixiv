@@ -28,10 +28,6 @@ object AppUtil {
     fun getString(resId: StringResource, vararg args: Any): String {
         return runBlocking { org.jetbrains.compose.resources.getString(resId, *args) }
     }
-
-    fun getString(resId: Int, vararg args: Any): String {
-        return runBlocking { getPlatformString(resId, *args) }
-    }
 }
 
 val PlatformContext.cacheDir: PlatformFile
@@ -42,5 +38,3 @@ val PlatformContext.filesDir: PlatformFile
 
 val PlatformContext.databasesDir: PlatformFile
     get() = FileKit.databasesDir
-
-expect fun getPlatformString(resId: Int, vararg args: Any): String
