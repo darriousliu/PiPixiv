@@ -78,6 +78,7 @@ internal fun KotlinMultiplatformExtension.composeDependencies() {
             // Compose
             implementation(compose.findBundle("baselibs").get())
             implementation(compose.findLibrary("jetbrains-compose-resources").get())
+            implementation(compose.findLibrary("jetbrains-ui-tooling-preview").get())
             // KotlinX Collections Immutable
             implementation(kotlinx.findLibrary("collections-immutable").get())
             // Toast

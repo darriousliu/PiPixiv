@@ -9,3 +9,8 @@ plugins {
 kotlin {
     composeDependencies()
 }
+
+dependencies {
+    val compose = project.extensions.getByType<VersionCatalogsExtension>().named("composes")
+    "androidRuntimeClasspath"(compose.findLibrary("ui-tooling").get())
+}
