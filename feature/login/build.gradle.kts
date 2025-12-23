@@ -20,5 +20,9 @@ kotlin {
             implementation(libs.okio)
             implementation(kotlinx.ktor.client.core)
         }
+
+        jvmMain.dependencies {
+            implementation(libs.filekit.core)
+        }
     }
 }

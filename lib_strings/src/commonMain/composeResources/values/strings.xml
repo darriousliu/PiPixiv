@@ -187,4 +187,13 @@
     <string name="send">发送</string>
     <string name="report_success">举报成功</string>
     <string name="report_failed">举报失败</string>
+    <string name="init_browser">初始化浏览器...</string>
+    <string name="downloading_browser">下载浏览器: %1$s</string>
+    <string name="unzipping_browser">解压浏览器...</string>
+    <string name="browser_initialized">浏览器初始化完成</string>
+    <string name="initializing_browser">正在初始化浏览器...</string>
+    <string name="installing_browser">安装浏览器...</string>
+    <string name="locating_browser">定位浏览器...</string>
+    <string name="download_browser">下载浏览器</string>
+    <string name="browser_reason">内置浏览器比较大约300m，如果不下载，可以使用手机登陆然后导出token，使用token登陆</string>
 </resources>

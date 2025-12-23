@@ -47,6 +47,7 @@ import com.mrl.pixiv.follow.FollowingScreen
 import com.mrl.pixiv.history.HistoryScreen
 import com.mrl.pixiv.login.LoginOptionScreen
 import com.mrl.pixiv.login.LoginScreen
+import com.mrl.pixiv.login.browser.DownloadBrowserScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
@@ -277,6 +278,10 @@ fun Navigation3MainGraph(
                             id = it.id,
                             type = it.type,
                         )
+                    }
+                    // 下载浏览器页面，JVM桌面only
+                    entry<Destination.DownloadBrowser> {
+                        DownloadBrowserScreen()
                     }
                 }
             )
