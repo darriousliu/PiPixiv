@@ -11,7 +11,9 @@ import com.mrl.pixiv.common.util.PictureType
 import com.shakster.gifkt.GifEncoder
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.createDirectories
+import io.github.vinceglb.filekit.div
 import io.github.vinceglb.filekit.exists
 import io.github.vinceglb.filekit.pictureDir
 import io.ktor.client.HttpClient
@@ -45,6 +47,8 @@ class JvmDownloadStrategy(
 
     private val scope = CoroutineScope(Dispatchers.IO)
     private val jobs = ConcurrentHashMap<String, Job>()
+
+    override val downloadFolder = (FileKit.pictureDir / "PiPixiv").absolutePath()
 
     override suspend fun enqueue(illustId: Long, index: Int, url: String, subFolder: String?) {
         val key = getKey(illustId, index)
@@ -237,8 +241,9 @@ class JvmDownloadStrategy(
     }
 
     private fun getFile(fileName: String, type: PictureType, subFolder: String?): File {
-        val baseDir = FileKit.pictureDir
-        val folder = if (subFolder != null) PlatformFile(baseDir, subFolder) else baseDir
+        val baseDir = downloadFolder
+        val folder =
+            if (subFolder != null) PlatformFile(baseDir) / subFolder else PlatformFile(baseDir)
         if (!folder.exists()) {
             folder.createDirectories()
         }

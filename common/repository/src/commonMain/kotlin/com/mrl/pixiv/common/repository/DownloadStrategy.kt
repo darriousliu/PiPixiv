@@ -4,6 +4,8 @@ import com.mrl.pixiv.common.util.PictureType
 import kotlinx.coroutines.flow.Flow
 
 interface DownloadStrategy {
+    val downloadFolder: String
+
     suspend fun enqueue(
         illustId: Long,
         index: Int,

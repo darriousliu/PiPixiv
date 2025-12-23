@@ -9,6 +9,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.mrl.pixiv.common.repository.worker.DownloadWorker
+import com.mrl.pixiv.common.util.DOWNLOAD_DIR
 import com.mrl.pixiv.common.util.PictureType
 import com.mrl.pixiv.common.util.getDownloadPath
 import com.mrl.pixiv.common.util.isImageExists
@@ -20,6 +21,7 @@ import org.koin.core.annotation.Single
 class AndroidDownloadStrategy(
     private val context: Context
 ) : DownloadStrategy {
+    override val downloadFolder = DOWNLOAD_DIR
 
     override suspend fun enqueue(
         illustId: Long,

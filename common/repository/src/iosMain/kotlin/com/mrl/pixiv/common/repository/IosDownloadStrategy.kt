@@ -60,11 +60,12 @@ class IosDownloadStrategy(
     private val scope = CoroutineScope(Dispatchers.IO)
     private val session: NSURLSession
     private val delegate: DownloadDelegate
+    override val downloadFolder = "PiPixiv"
 
     init {
         val config =
             NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier("com.mrl.pixiv.background_download")
-        delegate = DownloadDelegate(downloadDao, scope, zipUtil)
+        delegate = DownloadDelegate(downloadDao, scope, zipUtil, downloadFolder)
         session = NSURLSession.sessionWithConfiguration(config, delegate, null)
     }
 
@@ -121,7 +122,8 @@ class IosDownloadStrategy(
 class DownloadDelegate(
     private val downloadDao: DownloadDao,
     private val scope: CoroutineScope,
-    private val zipUtil: ZipUtil
+    private val zipUtil: ZipUtil,
+    val downloadFolder: String,
 ) : NSObject(), NSURLSessionDownloadDelegateProtocol {
 
     override fun URLSession(
@@ -275,7 +277,7 @@ class DownloadDelegate(
             localId = placeholder?.localIdentifier
 
             if (placeholder != null) {
-                val albumName = "PiPixiv"
+                val albumName = downloadFolder
                 val fetchOptions = PHFetchOptions()
                 fetchOptions.predicate = NSPredicate.predicateWithFormat("title = %@", albumName)
 
