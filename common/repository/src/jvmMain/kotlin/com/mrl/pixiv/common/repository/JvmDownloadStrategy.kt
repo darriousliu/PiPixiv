@@ -103,8 +103,8 @@ class JvmDownloadStrategy(
         val finalEntity = entity.copy(
             status = DownloadStatus.SUCCESS.value,
             progress = 1f,
-            filePath = file.absolutePath,
-            fileUri = "file://${file.absolutePath}"
+            filePath = file.absolutePath.replace("\\", "/"),
+            fileUri = "file:///${file.absolutePath.replace("\\", "/")}"
         )
         downloadDao.update(finalEntity)
     }
@@ -160,8 +160,8 @@ class JvmDownloadStrategy(
         val finalEntity = entity.copy(
             status = DownloadStatus.SUCCESS.value,
             progress = 1f,
-            filePath = gifFile.absolutePath,
-            fileUri = "file://${gifFile.absolutePath}"
+            filePath = gifFile.absolutePath.replace("\\", "/"),
+            fileUri = "file:///${gifFile.absolutePath.replace("\\", "/")}"
         )
         downloadDao.update(finalEntity)
     }
@@ -235,7 +235,7 @@ class JvmDownloadStrategy(
     ): Pair<String, String>? {
         val file = getFile(fileName, type, subFolder)
         if (file.exists()) {
-            return "file://${file.absolutePath}" to file.absolutePath
+            return "file:///${file.absolutePath}" to file.absolutePath
         }
         return null
     }

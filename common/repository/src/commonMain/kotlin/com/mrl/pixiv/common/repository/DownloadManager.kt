@@ -47,7 +47,7 @@ class DownloadManager(
 
             val mimeType = MimeTypeMap.getMimeTypeFromUrl(originalUrl)
             val type = PictureType.fromMimeType(mimeType)
-            if (type != null && isImageExists(fileName, type, subFolder)) {
+            if (type != null && isImageExists(fileName, type, subFolder, existing.fileUri)) {
                 val fileInfo =
                     downloadStrategy.getExistingFileInfo(illustId, index, fileName, type, subFolder)
                 if (fileInfo != null) {

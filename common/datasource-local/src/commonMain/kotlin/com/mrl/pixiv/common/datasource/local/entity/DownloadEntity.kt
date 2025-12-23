@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
  * @property fileUri 下载后的文件URI：
  * - Android: content://格式。
  * - iOS: ph://<PHAsset.localIdentifier>
- * - Desktop: file://格式。
+ * - Desktop: file:///格式。
  * @property createTime 创建时间的时间戳。
  */
 @Entity(tableName = "download", primaryKeys = ["illustId", "index"])

@@ -13,7 +13,12 @@ import java.io.File
 val OLD_DOWNLOAD_DIR = "${Environment.DIRECTORY_DCIM}/PiPixiv/"
 val DOWNLOAD_DIR = "${Environment.DIRECTORY_PICTURES}/PiPixiv/"
 
-actual fun isImageExists(fileName: String, type: PictureType, subFolder: String?): Boolean {
+actual fun isImageExists(
+    fileName: String,
+    type: PictureType,
+    subFolder: String?,
+    fileUri: String
+): Boolean {
     val context = AppUtil.appContext
     val projection = arrayOf(MediaStore.Images.Media._ID)
     val selection =

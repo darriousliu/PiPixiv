@@ -134,6 +134,7 @@ import com.mrl.pixiv.strings.user_blocked
 import com.mrl.pixiv.strings.view_comments
 import com.mrl.pixiv.strings.view_comments_count
 import com.mrl.pixiv.strings.viewed
+import io.ktor.util.PlatformUtils
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -740,7 +741,11 @@ private fun BottomMenu(
                 modifier = Modifier
                     .fillMaxWidth()
                     .throttleClick {
-                        permissionsState.launchMultiplePermissionRequest()
+                        if (PlatformUtils.IS_JVM) {
+                            onShare()
+                        } else {
+                            permissionsState.launchMultiplePermissionRequest()
+                        }
                     }
                     .padding(vertical = 10.dp)
             ) {

@@ -7,6 +7,7 @@ import java.awt.datatransfer.Transferable
 import java.awt.datatransfer.UnsupportedFlavorException
 import java.io.File
 import java.net.URI
+import java.nio.file.Paths
 import javax.imageio.ImageIO
 
 actual fun copyToClipboard(text: String) {
@@ -17,7 +18,12 @@ actual fun copyToClipboard(text: String) {
 
 fun copyImageToClipboard(imageUri: String) {
     val image = try {
-        ImageIO.read(File(URI(imageUri)))
+        val file = if (imageUri.startsWith("file:")) {
+            Paths.get(URI(imageUri)).toFile()
+        } else {
+            File(imageUri)
+        }
+        ImageIO.read(file)
     } catch (e: Exception) {
         e.printStackTrace()
         null

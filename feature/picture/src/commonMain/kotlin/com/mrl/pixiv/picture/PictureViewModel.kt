@@ -30,6 +30,7 @@ import com.mrl.pixiv.common.util.ZipUtil
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.common.viewmodel.state
+import com.mrl.pixiv.strings.copy_to_clipboard
 import com.mrl.pixiv.strings.download_add_to_queue
 import com.mrl.pixiv.strings.download_failed
 import io.github.vinceglb.filekit.FileKit
@@ -50,6 +51,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
+import io.ktor.util.PlatformUtils
 import io.ktor.utils.io.asSource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -399,6 +401,9 @@ class PictureViewModel(
             ) { entity ->
                 if (entity != null && entity.status == DownloadStatus.SUCCESS.value) {
                     ShareUtil.shareImage(entity.fileUri)
+                    if (PlatformUtils.IS_JVM) {
+                        ToastUtil.safeShortToast(RStrings.copy_to_clipboard)
+                    }
                 } else {
                     ToastUtil.safeShortToast(RStrings.download_failed)
                 }
