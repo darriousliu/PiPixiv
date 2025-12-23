@@ -4,7 +4,6 @@ import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 internal fun KotlinMultiplatformAndroidLibraryTarget.configureKotlinMultiplatform() {
@@ -15,10 +14,6 @@ internal fun KotlinMultiplatformAndroidLibraryTarget.configureKotlinMultiplatfor
 
     withDeviceTest {
         instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 
