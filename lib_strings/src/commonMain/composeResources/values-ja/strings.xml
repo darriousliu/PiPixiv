@@ -25,7 +25,7 @@
     <string name="sign_up">新規登録</string>
     <string name="sign_in">ログイン</string>
     <string name="sign_with_token">トークンでログイン</string>
-    <string name="download_with_size">ダウンロード (%s)</string>
+    <string name="download_with_size">ダウンロード (%1$s)</string>
     <string name="followed">フォロー中</string>
     <string name="follow">フォロー</string>
     <string name="related_artworks">関連作品</string>
@@ -146,9 +146,9 @@
     <string name="feedback_content">問題のフィードバックと共同開発を歓迎します</string>
     <string name="share_app">アプリを共有</string>
     <string name="recommend_this_app">このアプリをお勧めします</string>
-    <string name="recommend_content">サードパーティPixivクライアント\n%s</string>
+    <string name="recommend_content">サードパーティPixivクライアント\n%1$s</string>
     <string name="new_version_available">新しいバージョンが利用可能です</string>
-    <string name="current_version">現在のバージョン: %s</string>
+    <string name="current_version">現在のバージョン: %1$s</string>
     <string name="download">ダウンロード</string>
     <string name="premium_required">Pixiv Premiumが必要です</string>
     <string name="export_data">データをエクスポート</string>

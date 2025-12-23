@@ -25,7 +25,7 @@
     <string name="sign_up">Registrieren</string>
     <string name="sign_in">Anmelden</string>
     <string name="sign_with_token">Mit Token anmelden</string>
-    <string name="download_with_size">Herunterladen (%s)</string>
+    <string name="download_with_size">Herunterladen (%1$s)</string>
     <string name="followed">Gefolgt</string>
     <string name="follow">Folgen</string>
     <string name="related_artworks">Verwandte Kunstwerke</string>
@@ -146,9 +146,9 @@
     <string name="feedback_content">Wir freuen uns über Feedback und gemeinsame Entwicklung</string>
     <string name="share_app">App teilen</string>
     <string name="recommend_this_app">Diese App empfehlen</string>
-    <string name="recommend_content">Pixiv-Client von Drittanbietern\n%s</string>
+    <string name="recommend_content">Pixiv-Client von Drittanbietern\n%1$s</string>
     <string name="new_version_available">Neue Version verfügbar</string>
-    <string name="current_version">Aktuelle Version: %s</string>
+    <string name="current_version">Aktuelle Version: %1$s</string>
     <string name="download">Download</string>
     <string name="premium_required">Pixiv Premium erforderlich</string>
     <string name="export_data">Daten exportieren</string>

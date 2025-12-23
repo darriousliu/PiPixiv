@@ -24,7 +24,7 @@
     <string name="sign_in">تسجيل الدخول</string>
     <string name="sign_up">التسجيل</string>
     <string name="sign_with_token">تسجيل الدخول بالرمز</string>
-    <string name="download_with_size">تنزيل (%s)</string>
+    <string name="download_with_size">تنزيل (%1$s)</string>
     <string name="followed">متابَع</string>
     <string name="follow">متابعة</string>
     <string name="related_artworks">أعمال ذات صلة</string>
@@ -146,9 +146,9 @@
     <string name="feedback_content">نرحب بملاحظاتك ومساهمتك في التطوير</string>
     <string name="share_app">مشاركة التطبيق</string>
     <string name="recommend_this_app">وصي بهذا التطبيق</string>
-    <string name="recommend_content">عميل Pixiv من جهات خارجية\n%s</string>
+    <string name="recommend_content">عميل Pixiv من جهات خارجية\n%1$s</string>
     <string name="new_version_available">نسخة جديدة متاحة</string>
-    <string name="current_version">الإصدار الحالي: %s</string>
+    <string name="current_version">الإصدار الحالي: %1$s</string>
     <string name="download">تحميل</string>
     <string name="premium_required">Pixiv Premium مطلوب</string>
     <string name="export_data">تصدير البيانات</string>

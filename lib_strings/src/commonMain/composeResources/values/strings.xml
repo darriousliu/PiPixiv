@@ -27,7 +27,7 @@
     <string name="sign_in">登录</string>
     <string name="sign_up">注册</string>
     <string name="sign_with_token">使用Token登陆</string>
-    <string name="download_with_size">下载 (%s)</string>
+    <string name="download_with_size">下载 (%1$s)</string>
     <string name="followed">已关注</string>
     <string name="follow">关注</string>
     <string name="related_artworks">相关作品</string>
@@ -150,9 +150,9 @@
     <string name="feedback_content">欢迎反馈问题和共同开发</string>
     <string name="share_app">分享应用</string>
     <string name="recommend_this_app">推荐这个app</string>
-    <string name="recommend_content">第三方Pixiv客户端\n%s</string>
+    <string name="recommend_content">第三方Pixiv客户端\n%1$s</string>
     <string name="new_version_available">有新版本</string>
-    <string name="current_version">当前版本：%s</string>
+    <string name="current_version">当前版本：%1$s</string>
     <string name="download">下载</string>
     <string name="premium_required">需要Pixiv Premium</string>
     <string name="export_data">导出数据</string>

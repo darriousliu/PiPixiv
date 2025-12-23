@@ -25,7 +25,7 @@
     <string name="sign_up">Регистрация</string>
     <string name="sign_in">Войти</string>
     <string name="sign_with_token">Войти с токеном</string>
-    <string name="download_with_size">Скачать (%s)</string>
+    <string name="download_with_size">Скачать (%1$s)</string>
     <string name="followed">Подписан</string>
     <string name="follow">Подписаться</string>
     <string name="related_artworks">Похожие работы</string>
@@ -146,9 +146,9 @@
     <string name="feedback_content">Приветствуем отзывы об ошибках и совместную разработку</string>
     <string name="share_app">Поделиться приложением</string>
     <string name="recommend_this_app">Рекомендовать это приложение</string>
-    <string name="recommend_content">Клиент Pixiv третьей стороны\n%s</string>
+    <string name="recommend_content">Клиент Pixiv третьей стороны\n%1$s</string>
     <string name="new_version_available">Доступна новая версия</string>
-    <string name="current_version">Текущая версия: %s</string>
+    <string name="current_version">Текущая версия: %1$s</string>
     <string name="download">Загрузить</string>
     <string name="premium_required">Требуется Pixiv Premium</string>
     <string name="export_data">Экспорт данных</string>

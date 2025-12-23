@@ -146,9 +146,9 @@
     <string name="feedback_content">Bienvenue pour signaler les problèmes et co-développer</string>
     <string name="share_app">Partager l\'application</string>
     <string name="recommend_this_app">Recommander cette application</string>
-    <string name="recommend_content">Client Pixiv tiers\n%s</string>
+    <string name="recommend_content">Client Pixiv tiers\n%1$s</string>
     <string name="new_version_available">Nouvelle version disponible</string>
-    <string name="current_version">Version actuelle : %s</string>
+    <string name="current_version">Version actuelle : %1$s</string>
     <string name="download">Télécharger</string>
     <string name="premium_required">Pixiv Premium requis</string>
     <string name="export_data">Exporter les données</string>

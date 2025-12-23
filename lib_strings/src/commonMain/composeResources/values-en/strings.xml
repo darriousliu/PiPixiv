@@ -25,7 +25,7 @@
     <string name="sign_up">Sign up</string>
     <string name="sign_in">Sign in</string>
     <string name="sign_with_token">Sign in with Token</string>
-    <string name="download_with_size">Download (%s)</string>
+    <string name="download_with_size">Download (%1$s)</string>
     <string name="followed">Followed</string>
     <string name="follow">Follow</string>
     <string name="related_artworks">Related artworks</string>
@@ -146,9 +146,9 @@
     <string name="feedback_content">Welcome to feedback issues and co-develop</string>
     <string name="share_app">Share App</string>
     <string name="recommend_this_app">Recommend this app</string>
-    <string name="recommend_content">Third-party Pixiv Client\n%s</string>
+    <string name="recommend_content">Third-party Pixiv Client\n%1$s</string>
     <string name="new_version_available">New version available</string>
-    <string name="current_version">Current version: %s</string>
+    <string name="current_version">Current version: %1$s</string>
     <string name="download">Download</string>
     <string name="premium_required">Pixiv Premium Required</string>
     <string name="export_data">Export data</string>

@@ -25,7 +25,7 @@
     <string name="sign_in">로그인</string>
     <string name="sign_up">회원가입</string>
     <string name="sign_with_token">토큰으로 로그인</string>
-    <string name="download_with_size">다운로드 (%s)</string>
+    <string name="download_with_size">다운로드 (%1$s)</string>
     <string name="followed">팔로우 중</string>
     <string name="follow">팔로우</string>
     <string name="related_artworks">관련 작품</string>
@@ -146,9 +146,9 @@
     <string name="feedback_content">문제 피드백 및 공동 개발을 환영합니다</string>
     <string name="share_app">앱 공유</string>
     <string name="recommend_this_app">이 앱 추천</string>
-    <string name="recommend_content">타사 Pixiv 클라이언트\n%s</string>
+    <string name="recommend_content">타사 Pixiv 클라이언트\n%1$s</string>
     <string name="new_version_available">새 버전 사용 가능</string>
-    <string name="current_version">현재 버전: %s</string>
+    <string name="current_version">현재 버전: %1$s</string>
     <string name="download">다운로드</string>
     <string name="premium_required">Pixiv Premium 필요</string>
     <string name="export_data">데이터 내보내기</string>

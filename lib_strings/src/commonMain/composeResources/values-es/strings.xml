@@ -25,7 +25,7 @@
     <string name="sign_up">Registrarse</string>
     <string name="sign_in">Iniciar sesión</string>
     <string name="sign_with_token">Iniciar sesión con Token</string>
-    <string name="download_with_size">Descargar (%s)</string>
+    <string name="download_with_size">Descargar (%1$s)</string>
     <string name="followed">Siguiendo</string>
     <string name="follow">Seguir</string>
     <string name="related_artworks">Obras relacionadas</string>
@@ -146,9 +146,9 @@
     <string name="feedback_content">Bienvenido a comentarios de problemas y co-desarrollo</string>
     <string name="share_app">Compartir aplicación</string>
     <string name="recommend_this_app">Recomendar esta aplicación</string>
-    <string name="recommend_content">Cliente Pixiv de terceros\n%s</string>
+    <string name="recommend_content">Cliente Pixiv de terceros\n%1$s</string>
     <string name="new_version_available">Nueva versión disponible</string>
-    <string name="current_version">Versión actual: %s</string>
+    <string name="current_version">Versión actual: %1$s</string>
     <string name="download">Descargar</string>
     <string name="premium_required">Se requiere Pixiv Premium</string>
     <string name="export_data">Exportar datos</string>

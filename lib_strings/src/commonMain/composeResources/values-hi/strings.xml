@@ -25,7 +25,7 @@
     <string name="sign_up">साइन अप करें</string>
     <string name="sign_in">साइन इन करें</string>
     <string name="sign_with_token">टोकन के साथ साइन इन करें</string>
-    <string name="download_with_size">डाउनलोड करें (%s)</string>
+    <string name="download_with_size">डाउनलोड करें (%1$s)</string>
     <string name="followed">फॉलो किया गया</string>
     <string name="follow">फॉलो करें</string>
     <string name="related_artworks">संबंधित कलाकृतियाँ</string>
@@ -146,9 +146,9 @@
     <string name="feedback_content">समस्या प्रतिक्रिया और सह-विकास के लिए स्वागत है</string>
     <string name="share_app">ऐप साझा करें</string>
     <string name="recommend_this_app">इस ऐप की सिफारिश करें</string>
-    <string name="recommend_content">तृतीय-पक्ष Pixiv क्लाइंट\n%s</string>
+    <string name="recommend_content">तृतीय-पक्ष Pixiv क्लाइंट\n%1$s</string>
     <string name="new_version_available">नया संस्करण उपलब्ध है</string>
-    <string name="current_version">वर्तमान संस्करण: %s</string>
+    <string name="current_version">वर्तमान संस्करण: %1$s</string>
     <string name="download">डाउनलोड करें</string>
     <string name="premium_required">Pixiv Premium आवश्यक है</string>
     <string name="export_data">डेटा निर्यात करें</string>

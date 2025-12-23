@@ -25,7 +25,7 @@
     <string name="sign_in">登入</string>
     <string name="sign_up">註冊</string>
     <string name="sign_with_token">使用 Token 登入</string>
-    <string name="download_with_size">下載 (%s)</string>
+    <string name="download_with_size">下載 (%1$s)</string>
     <string name="followed">已追蹤</string>
     <string name="follow">追蹤</string>
     <string name="related_artworks">相關作品</string>
@@ -146,9 +146,9 @@
     <string name="feedback_content">歡迎回饋問題與共同開發</string>
     <string name="share_app">分享應用程式</string>
     <string name="recommend_this_app">推薦這個 App</string>
-    <string name="recommend_content">第三方 Pixiv 用戶端\n%s</string>
+    <string name="recommend_content">第三方 Pixiv 用戶端\n%1$s</string>
     <string name="new_version_available">有新版本</string>
-    <string name="current_version">當前版本：%s</string>
+    <string name="current_version">當前版本：%1$s</string>
     <string name="download">下載</string>
     <string name="premium_required">需要 Pixiv Premium</string>
     <string name="export_data">匯出數據</string>
