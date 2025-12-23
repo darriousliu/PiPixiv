@@ -1,8 +1,14 @@
 package com.mrl.pixiv.login.browser
 
-actual fun DownloadBrowserViewModel.initKCEF(
-    updateState: (DownloadBrowserState.() -> DownloadBrowserState) -> Unit,
-    onFinish: () -> Unit
+actual suspend fun initKCEF(
+    onInit: () -> Unit,
+    onDownloading: (Float) -> Unit,
+    onExtracting: () -> Unit,
+    onInitialized: () -> Unit,
+    onInitializing: () -> Unit,
+    onInstall: () -> Unit,
+    onLocating: () -> Unit,
+    onError: (Throwable?) -> Unit
 ) {
 }
 

@@ -29,9 +29,10 @@ fun generateWebViewUrl(create: Boolean) =
         "https://app-api.pixiv.net/web/v1/login?code_challenge=${getCodeChallenge()}&code_challenge_method=S256&client=pixiv-android"
     }
 
-fun checkUri(uri: Url): Pair<String, String>? {
-    if (uri.protocol.name == "pixiv" && uri.host == "account") {
-        val code = uri.parameters["code"]
+fun checkUri(url: String): Pair<String, String>? {
+    val url = Url(url)
+    if (url.protocol.name == "pixiv" && url.host == "account") {
+        val code = url.parameters["code"]
         return if (code != null) code to codeVerifier else null
     }
     return null

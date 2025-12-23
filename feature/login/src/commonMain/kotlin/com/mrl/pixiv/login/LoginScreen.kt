@@ -21,13 +21,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.multiplatform.webview.request.RequestInterceptor
+import com.multiplatform.webview.request.WebRequest
+import com.multiplatform.webview.request.WebRequestInterceptResult
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.NativeWebView
-import com.multiplatform.webview.web.PlatformWebViewParams
 import com.multiplatform.webview.web.WebView
+import com.multiplatform.webview.web.WebViewNavigator
+import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewState
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -41,6 +46,22 @@ fun LoginScreen(
 ) {
     val state = viewModel.asState()
     val webViewState = rememberWebViewState(url = startUrl)
+    val webViewNavigator = rememberWebViewNavigator(
+        requestInterceptor = object : RequestInterceptor {
+            override fun onInterceptUrlRequest(
+                request: WebRequest,
+                navigator: WebViewNavigator
+            ): WebRequestInterceptResult {
+                Logger.d("LoginScreen") { "shouldOverrideUrlLoading: ${request.url}" }
+                val codePair = checkUri(request.url)
+                if (codePair != null) {
+                    viewModel.dispatch(LoginAction.Login(codePair.first, codePair.second))
+                    return WebRequestInterceptResult.Reject
+                }
+                return WebRequestInterceptResult.Allow
+            }
+        }
+    )
     val loadingState = webViewState.loadingState
 
     LaunchedEffect(Unit) {
@@ -89,16 +110,20 @@ fun LoginScreen(
                     progress = { loadingState.progress }
                 )
             }
-            WebView(
-                modifier = Modifier.weight(1f),
-                state = webViewState,
-                onCreated = { webview ->
-                    webview.setUp()
-                },
-                platformWebViewParams = createPlatformWebViewParams { code, codeVerifier ->
-                    viewModel.dispatch(LoginAction.Login(code, codeVerifier))
+            if (state.webViewInitialized) {
+                WebView(
+                    modifier = Modifier.fillMaxSize(1f),
+                    state = webViewState,
+                    navigator = webViewNavigator,
+                    onCreated = { webview ->
+                        webview.setUp()
+                    },
+                )
+            } else {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CircularWavyProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-            )
+            }
         }
     }
     if (state.loading) {
@@ -114,7 +139,3 @@ fun LoginScreen(
 }
 
 internal expect fun NativeWebView.setUp()
-
-internal expect fun createPlatformWebViewParams(
-    onLogin: (String, String) -> Unit,
-): PlatformWebViewParams

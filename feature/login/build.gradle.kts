@@ -19,6 +19,7 @@ kotlin {
             implementation(libs.compose.webview.multiplatform)
             implementation(libs.okio)
             implementation(kotlinx.ktor.client.core)
+            implementation(libs.mp.stools)
         }
 
         jvmMain.dependencies {
