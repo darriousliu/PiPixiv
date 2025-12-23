@@ -1,13 +1,13 @@
 package com.mrl.pixiv.picture
 
-import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
@@ -22,15 +22,26 @@ import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.paging.RelatedIllustPaging
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
-import com.mrl.pixiv.common.util.AppUtil
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.TAG
 import com.mrl.pixiv.common.util.ToastUtil
-import com.mrl.pixiv.common.util.toBitmap
+import com.mrl.pixiv.common.util.ZipUtil
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.common.viewmodel.state
+import com.mrl.pixiv.strings.download_add_to_queue
+import com.mrl.pixiv.strings.download_failed
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.absolutePath
+import io.github.vinceglb.filekit.cacheDir
+import io.github.vinceglb.filekit.createDirectories
+import io.github.vinceglb.filekit.div
+import io.github.vinceglb.filekit.exists
+import io.github.vinceglb.filekit.readBytes
+import io.github.vinceglb.filekit.size
+import io.github.vinceglb.filekit.write
 import io.ktor.client.HttpClient
 import io.ktor.client.request.request
 import io.ktor.client.request.url
@@ -39,18 +50,18 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
-import io.ktor.utils.io.jvm.javaio.toInputStream
+import io.ktor.utils.io.asSource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.io.buffered
+import kotlinx.io.readByteArray
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
-import java.io.File
-import java.io.FileOutputStream
-import java.util.zip.ZipFile
 
 @Stable
 data class PictureState(
@@ -101,6 +112,7 @@ sealed class PictureAction : ViewIntent {
 class PictureViewModel(
     illust: Illust?,
     illustId: Long?,
+    private val zipUtil: ZipUtil,
 ) : BaseMviViewModel<PictureState, PictureAction>(
     initialState = PictureState(illust = illust),
 ), KoinComponent {
@@ -111,7 +123,7 @@ class PictureViewModel(
     }.flow.cachedIn(viewModelScope)
 
     private val cachedDownloadSize = mutableMapOf<Int, Long>()
-    private val ugoiraDir = AppUtil.appContext.cacheDir.resolve("ugoira")
+    private val ugoiraDir = FileKit.cacheDir / "ugoira"
     private var cachedUgoiraMetadata: UgoiraMetadata? = null
 
     override suspend fun handleIntent(intent: PictureAction) {
@@ -150,14 +162,13 @@ class PictureViewModel(
             updateState { copy(ugoiraState = ugoiraState.copy(loading = true)) }
             val resp = PixivRepository.getUgoiraMetadata(illustId)
             cachedUgoiraMetadata = resp.ugoiraMetadata
-            if (!ugoiraDir.exists()) ugoiraDir.mkdirs()
-            val file = ugoiraDir.resolve("$illustId.zip")
-            if (file.exists() && file.length() > 0) {
-                val imageFiles =
-                    unzipUgoira(ZipFile(file), illustId).mapIndexed { index, img ->
-                        img.toBitmap()!!.asImageBitmap() to resp.ugoiraMetadata.frames[index].delay
-                    }
-                Log.e(TAG, "downloadUgoira: $imageFiles")
+            if (!ugoiraDir.exists()) ugoiraDir.createDirectories()
+            val file = ugoiraDir / "$illustId.zip"
+            if (file.exists() && file.size() > 0) {
+                val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
+                    img.readBytes().decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
+                }
+                Logger.e(TAG) { "downloadUgoira: $imageFiles" }
                 updateState {
                     copy(
                         ugoiraState = ugoiraState.copy(
@@ -173,18 +184,15 @@ class PictureViewModel(
                     url.takeFrom(zipUrl)
                 }
                 if (response.status.isSuccess()) {
-                    response.bodyAsChannel().toInputStream().use { inputStream ->
-                        file.outputStream().use { outputStream ->
-                            inputStream.copyTo(outputStream)
-                        }
+                    response.bodyAsChannel().asSource().buffered().use { source ->
+                        file.write(source.readByteArray())
                     }
                     // 解压
-                    val imageFiles =
-                        unzipUgoira(ZipFile(file), illustId).mapIndexed { index, img ->
-                            img.toBitmap()!!
-                                .asImageBitmap() to resp.ugoiraMetadata.frames[index].delay
-                        }
-                    Log.e(TAG, "downloadUgoira: $imageFiles")
+                    val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
+                        img.readBytes()
+                            .decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
+                    }
+                    Logger.e(TAG) { "downloadUgoira: $imageFiles" }
                     updateState {
                         copy(
                             ugoiraState = ugoiraState.copy(
@@ -199,20 +207,22 @@ class PictureViewModel(
         }
     }
 
-    private fun unzipUgoira(zipFile: ZipFile, illustId: Long): MutableList<File> {
-        val unzipDir = ugoiraDir.resolve("$illustId")
-        val list = mutableListOf<File>()
-        unzipDir.mkdirs()
-        zipFile.entries().asSequence().forEach { zipEntry ->
-            val newFile = File(unzipDir, zipEntry.name)
-            if (zipEntry.isDirectory) {
-                newFile.mkdirs()
+    private suspend fun unzipUgoira(
+        zipFile: PlatformFile,
+        illustId: Long
+    ): MutableList<PlatformFile> {
+        val unzipDir = ugoiraDir / "$illustId"
+        val list = mutableListOf<PlatformFile>()
+        unzipDir.createDirectories()
+        val entries = zipUtil.getZipEntryList(zipFile.absolutePath())
+        entries.forEach { (zipEntryName, isDirectory) ->
+            val newFile = PlatformFile(unzipDir, zipEntryName)
+            if (isDirectory) {
+                newFile.createDirectories()
             } else {
                 if (!newFile.exists()) {
-                    FileOutputStream(newFile).use { fileOutputStream ->
-                        zipFile.getInputStream(zipEntry).use { inputStream ->
-                            inputStream.copyTo(fileOutputStream)
-                        }
+                    zipUtil.getZipEntryContent(zipFile.absolutePath(), zipEntryName)?.let { bytes ->
+                        newFile.write(bytes)
                     }
                 }
                 list.add(newFile)
@@ -268,7 +278,7 @@ class PictureViewModel(
             )
 
             closeBottomSheet()
-            ToastUtil.safeShortToast(RString.download_add_to_queue)
+            ToastUtil.safeShortToast(RStrings.download_add_to_queue)
         }
     }
 
@@ -390,7 +400,7 @@ class PictureViewModel(
                 if (entity != null && entity.status == DownloadStatus.SUCCESS.value) {
                     ShareUtil.shareImage(entity.fileUri)
                 } else {
-                    ToastUtil.safeShortToast(RString.download_failed)
+                    ToastUtil.safeShortToast(RStrings.download_failed)
                 }
                 showLoading(false)
             }
@@ -454,7 +464,7 @@ class PictureViewModel(
 
             closeBottomSheet()
             showLoading(false)
-            ToastUtil.safeShortToast(RString.download_add_to_queue)
+            ToastUtil.safeShortToast(RStrings.download_add_to_queue)
         }
     }
 

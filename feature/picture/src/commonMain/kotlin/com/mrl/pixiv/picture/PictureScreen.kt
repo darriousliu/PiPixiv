@@ -1,11 +1,5 @@
-@file:OptIn(ExperimentalPermissionsApi::class)
-
 package com.mrl.pixiv.picture
 
-import android.Manifest.permission.READ_EXTERNAL_STORAGE
-import android.Manifest.permission.READ_MEDIA_IMAGES
-import android.annotation.SuppressLint
-import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
@@ -72,10 +66,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -85,9 +77,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi
+import com.mohamedrejeb.calf.permissions.Permission
+import com.mohamedrejeb.calf.permissions.rememberMultiplePermissionsState
 import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.IllustGridDefaults
@@ -112,10 +106,10 @@ import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.common.util.RString
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.ToastUtil
-import com.mrl.pixiv.common.util.adaptiveFileSize
+import com.mrl.pixiv.common.util.adaptiveFileSize1
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
 import com.mrl.pixiv.common.util.copyToClipboard
@@ -123,6 +117,24 @@ import com.mrl.pixiv.common.util.getScreenHeight
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.picture.components.UgoiraPlayer
+import com.mrl.pixiv.strings.bookmark_add_success
+import com.mrl.pixiv.strings.cancel_user_blocked
+import com.mrl.pixiv.strings.collection
+import com.mrl.pixiv.strings.copy_to_clipboard
+import com.mrl.pixiv.strings.download_with_size
+import com.mrl.pixiv.strings.follow
+import com.mrl.pixiv.strings.followed
+import com.mrl.pixiv.strings.hide_illust
+import com.mrl.pixiv.strings.illust_hidden
+import com.mrl.pixiv.strings.liked
+import com.mrl.pixiv.strings.related_artworks
+import com.mrl.pixiv.strings.share
+import com.mrl.pixiv.strings.show_illust
+import com.mrl.pixiv.strings.user_blocked
+import com.mrl.pixiv.strings.view_comments
+import com.mrl.pixiv.strings.view_comments_count
+import com.mrl.pixiv.strings.viewed
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -170,7 +182,6 @@ private const val KEY_VIEW_COMMENTS = "view_comments"
 private const val KEY_ILLUST_RELATED_TITLE = "illust_related_title"
 private const val KEY_SPACER = "spacer"
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 internal fun PictureScreen(
     illust: Illust,
@@ -302,7 +313,7 @@ internal fun PictureScreen(
                     },
                     title = {
                         Text(
-                            text = stringResource(if (isIllustBlocked) RString.illust_hidden else RString.user_blocked),
+                            text = stringResource(if (isIllustBlocked) RStrings.illust_hidden else RStrings.user_blocked),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },
@@ -315,7 +326,7 @@ internal fun PictureScreen(
                             }
                         ) {
                             Text(
-                                text = stringResource(if (isIllustBlocked) RString.show_illust else RString.cancel_user_blocked)
+                                text = stringResource(if (isIllustBlocked) RStrings.show_illust else RStrings.cancel_user_blocked)
                             )
                         }
                     }
@@ -353,7 +364,7 @@ internal fun PictureScreen(
                                 if (illust.pageCount > 1) {
                                     illust.metaPages?.get(index)?.let {
                                         AsyncImage(
-                                            model = ImageRequest.Builder(LocalContext.current)
+                                            model = ImageRequest.Builder(LocalPlatformContext.current)
                                                 .data(it.imageUrls?.medium)
                                                 .placeholderMemoryCacheKey("image-${illust.id}-$index")
                                                 .build(),
@@ -380,7 +391,7 @@ internal fun PictureScreen(
                                     }
                                 } else {
                                     AsyncImage(
-                                        model = ImageRequest.Builder(LocalContext.current)
+                                        model = ImageRequest.Builder(LocalPlatformContext.current)
                                             .data(illust.imageUrls.medium)
                                             .placeholderMemoryCacheKey("image-${illust.id}-$index")
                                             .build(),
@@ -424,12 +435,16 @@ internal fun PictureScreen(
                                 style = TextStyle(fontSize = 12.sp),
                             )
                             Text(
-                                text = illust.totalView.toString() + " ${stringResource(RString.viewed)}",
+                                text = illust.totalView.toString() + " ${stringResource(RStrings.viewed)}",
                                 Modifier.padding(start = 10.dp),
                                 style = TextStyle(fontSize = 12.sp),
                             )
                             Text(
-                                text = illust.totalBookmarks.toString() + " ${stringResource(RString.liked)}",
+                                text = illust.totalBookmarks.toString() + " ${
+                                    stringResource(
+                                        RStrings.liked
+                                    )
+                                }",
                                 Modifier.padding(start = 10.dp),
                                 style = TextStyle(fontSize = 12.sp),
                             )
@@ -529,17 +544,17 @@ internal fun PictureScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Comment,
-                                contentDescription = stringResource(RString.view_comments)
+                                contentDescription = stringResource(RStrings.view_comments)
                             )
                             5.HSpacer
                             Text(
                                 text = if (illust.totalComments != null) {
                                     stringResource(
-                                        RString.view_comments_count,
+                                        RStrings.view_comments_count,
                                         illust.totalComments!!
                                     )
                                 } else {
-                                    stringResource(RString.view_comments)
+                                    stringResource(RStrings.view_comments)
                                 },
                                 style = MaterialTheme.typography.bodyLarge
                             )
@@ -548,7 +563,7 @@ internal fun PictureScreen(
                     item(key = KEY_ILLUST_RELATED_TITLE) {
                         //相关作品文字，显示在中间
                         Text(
-                            text = stringResource(RString.related_artworks),
+                            text = stringResource(RStrings.related_artworks),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 50.dp, bottom = 10.dp),
@@ -637,7 +652,7 @@ internal fun PictureScreen(
                     onDismissRequest = {
                         pictureViewModel.closeBottomSheet()
                     },
-                    downloadSize = state.bottomSheetState.downloadSize.adaptiveFileSize(),
+                    downloadSize = state.bottomSheetState.downloadSize.adaptiveFileSize1(),
                     onDownload = {
                         // 下载原始图片
                         if (illust.type == Type.Ugoira) {
@@ -674,6 +689,9 @@ internal fun PictureScreen(
     }
 }
 
+expect val permission: Permission
+
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun BottomMenu(
     onDismissRequest: () -> Unit,
@@ -683,11 +701,14 @@ private fun BottomMenu(
     onShare: () -> Unit = {}
 ) {
     val bottomSheetState = rememberModalBottomSheetState(true)
-    val readMediaImagePermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        rememberMultiplePermissionsState(permissions = listOf(READ_MEDIA_IMAGES))
-    } else {
-        rememberMultiplePermissionsState(permissions = listOf(READ_EXTERNAL_STORAGE))
-    }
+    val permissionsState =
+        rememberMultiplePermissionsState(listOf(permission)) {
+            val allGranted = it.values.all { it }
+            if (allGranted) {
+                onShare()
+            }
+        }
+
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -711,7 +732,7 @@ private fun BottomMenu(
                     contentDescription = null
                 )
                 Text(
-                    text = stringResource(RString.download_with_size, downloadSize),
+                    text = stringResource(RStrings.download_with_size, downloadSize),
                     modifier = Modifier.padding(start = 10.dp)
                 )
             }
@@ -719,16 +740,13 @@ private fun BottomMenu(
                 modifier = Modifier
                     .fillMaxWidth()
                     .throttleClick {
-                        readMediaImagePermission.launchMultiplePermissionRequest()
-                        if (readMediaImagePermission.allPermissionsGranted) {
-                            onShare()
-                        }
+                        permissionsState.launchMultiplePermissionRequest()
                     }
                     .padding(vertical = 10.dp)
             ) {
                 Icon(imageVector = Icons.Rounded.Share, contentDescription = null)
                 Text(
-                    text = stringResource(RString.share),
+                    text = stringResource(RStrings.share),
                     modifier = Modifier.padding(start = 10.dp)
                 )
             }
@@ -783,20 +801,20 @@ private fun TagItem(
             text = {
                 Column {
                     Text(
-                        text = stringResource(RString.collection),
+                        text = stringResource(RStrings.collection),
                         modifier = Modifier
                             .fillMaxWidth()
                             .throttleClick(
                                 indication = indication
                             ) {
                                 BookmarkedTagRepository.addTag(tag)
-                                ToastUtil.safeShortToast(RString.bookmark_add_success)
+                                ToastUtil.safeShortToast(RStrings.bookmark_add_success)
                                 showCollectionDialog = false
                             }
                             .then(itemModifier)
                     )
                     Text(
-                        text = stringResource(RString.copy_to_clipboard),
+                        text = stringResource(RStrings.copy_to_clipboard),
                         modifier = Modifier
                             .fillMaxWidth()
                             .throttleClick(
@@ -860,7 +878,7 @@ private fun UserFollowInfo(
                 }
             ) {
                 Text(
-                    text = stringResource(RString.followed),
+                    text = stringResource(RStrings.followed),
                 )
             }
         } else {
@@ -870,7 +888,7 @@ private fun UserFollowInfo(
                 }
             ) {
                 Text(
-                    text = stringResource(RString.follow),
+                    text = stringResource(RStrings.follow),
                 )
             }
         }
@@ -967,7 +985,7 @@ private fun PictureTopBar(
                         )
                         showBottomMenu = false
                     },
-                    text = stringResource(RString.share),
+                    text = stringResource(RStrings.share),
                     modifier = Modifier.padding(vertical = 15.dp),
                     icon = {
                         Icon(
@@ -981,7 +999,7 @@ private fun PictureTopBar(
                         if (isIllustBlocked) onRemoveBlock() else onBlock()
                         showBottomMenu = false
                     },
-                    text = stringResource(if (isIllustBlocked) RString.show_illust else RString.hide_illust),
+                    text = stringResource(if (isIllustBlocked) RStrings.show_illust else RStrings.hide_illust),
                     modifier = Modifier.padding(vertical = 15.dp),
                     icon = {
                         Icon(

@@ -100,8 +100,8 @@ class AndroidZipUtil : ZipUtil {
         }
     }
 
-    override fun getZipEntryList(zipFilePath: String): List<String> {
-        val entryList = mutableListOf<String>()
+    override fun getZipEntryList(zipFilePath: String): List<Pair<String, Boolean>> {
+        val entryList = mutableListOf<Pair<String, Boolean>>()
         try {
             val inputStream = getInputStream(zipFilePath)
 
@@ -109,7 +109,7 @@ class AndroidZipUtil : ZipUtil {
                 ZipInputStream(fis.buffered()).use { zis ->
                     var entry = zis.nextEntry
                     while (entry != null) {
-                        entryList.add(entry.name)
+                        entryList.add(entry.name to entry.isDirectory)
                         zis.closeEntry()
                         entry = zis.nextEntry
                     }

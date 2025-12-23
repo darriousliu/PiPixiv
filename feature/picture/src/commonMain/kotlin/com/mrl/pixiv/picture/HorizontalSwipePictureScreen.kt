@@ -1,6 +1,5 @@
 package com.mrl.pixiv.picture
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -8,6 +7,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationEventHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.repository.IllustCacheRepo
@@ -41,7 +43,10 @@ fun HorizontalSwipePictureScreen(
             }
         }
     }
-    BackHandler(onBack = onBack)
+    NavigationEventHandler(
+        state = rememberNavigationEventState(NavigationEventInfo.None),
+        onBackCompleted = onBack
+    )
     HorizontalPager(
         modifier = modifier,
         state = pagerState,
