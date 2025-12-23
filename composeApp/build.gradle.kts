@@ -1,5 +1,8 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 plugins {
     id("pixiv.multiplatform.compose")
+    alias(composes.plugins.composeHotReload)
 }
 
 kotlin {
@@ -51,6 +54,18 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
             }
+        }
+    }
+}
+
+compose.desktop {
+    application {
+        mainClass = "com.mrl.pixiv.MainKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "com.mrl.pixiv"
+            packageVersion = properties["versionName"]?.toString()
         }
     }
 }

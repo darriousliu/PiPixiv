@@ -17,4 +17,5 @@ plugins {
     alias(kotlinx.plugins.kotlinMultiplatform) apply false
     alias(composes.plugins.composeMultiplatform) apply false
     alias(libs.plugins.build.konfig) apply false
+    alias(composes.plugins.composeHotReload) apply false
 }
