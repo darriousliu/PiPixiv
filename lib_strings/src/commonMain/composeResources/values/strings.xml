@@ -195,5 +195,5 @@
     <string name="installing_browser">安装浏览器...</string>
     <string name="locating_browser">定位浏览器...</string>
     <string name="download_browser">下载浏览器</string>
-    <string name="browser_reason">内置浏览器比较大约300m，如果不下载，可以使用手机登陆然后导出token，使用token登陆</string>
+    <string name="browser_reason">在首次通过网页登录前，需要下载嵌入式浏览器以提供完整的登录体验，这会占用您大约300M的磁盘空间，如果介意大小，可以下载手机版PiPixiv，登陆后点击"我的 -> 导出Token"，粘贴到电脑使用token登陆</string>
 </resources>

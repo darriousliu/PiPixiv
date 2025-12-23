@@ -10,9 +10,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":lib_strings"))
             implementation(project(":common:data"))
             implementation(project(":common:network"))
-            api(project(":common:datasource-local"))
+            implementation(project(":common:datasource-local"))
             implementation(project(":common:datasource-remote"))
             implementation(project(":common:core"))
 
