@@ -34,6 +34,7 @@ fun DownloadBrowserScreen(
         viewModel.sideEffect.collect { effect ->
             when (effect) {
                 is DownloadBrowserEffect.NavigateToLogin -> {
+                    navigationManager.popBackStack()
                     navigationManager.navigate(Destination.Login(generateWebViewUrl(false)))
                 }
             }

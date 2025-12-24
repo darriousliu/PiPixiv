@@ -1,6 +1,7 @@
 package com.mrl.pixiv.login.browser
 
 import dev.datlag.kcef.KCEF
+import dev.datlag.kcef.KCEFAcknowledge
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.cacheDir
@@ -10,6 +11,7 @@ import io.github.vinceglb.filekit.resolve
 
 private val WEBVIEW_INSTALL_DIR = FileKit.filesDir / "webview"
 
+@OptIn(KCEFAcknowledge::class)
 actual suspend fun initKCEF(
     onInit: () -> Unit,
     onDownloading: (Float) -> Unit,
@@ -21,6 +23,11 @@ actual suspend fun initKCEF(
     onError: (Throwable?) -> Unit,
 ) {
     onInit()
+    val client = KCEF.newClientOrNull()
+    if (client != null) {
+        onInitialized()
+        return
+    }
     KCEF.init(
         builder = {
             installDir(WEBVIEW_INSTALL_DIR.file)
@@ -43,8 +50,13 @@ actual suspend fun initKCEF(
         },
         onError = onError,
     )
+    onInitialized()
 }
 
 actual fun isBrowserAvailable(): Boolean {
     return WEBVIEW_INSTALL_DIR.file.exists()
+}
+
+actual fun isJetbrainsRuntime(): Boolean {
+    return System.getProperty("java.vendor").contains("JetBrains", ignoreCase = true)
 }

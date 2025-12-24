@@ -13,3 +13,5 @@ actual suspend fun initKCEF(
 }
 
 actual fun isBrowserAvailable(): Boolean = true
+
+actual fun isJetbrainsRuntime(): Boolean = false

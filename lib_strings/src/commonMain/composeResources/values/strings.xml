@@ -187,6 +187,7 @@
     <string name="send">发送</string>
     <string name="report_success">举报成功</string>
     <string name="report_failed">举报失败</string>
+    <string name="jetbrains_runtime_error">JetBrains运行时环境不支持当前库所使用的JCEF嵌入式浏览器，请使用Token登陆</string>
     <string name="init_browser">初始化浏览器...</string>
     <string name="downloading_browser">下载浏览器: %1$s</string>
     <string name="unzipping_browser">解压浏览器...</string>

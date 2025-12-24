@@ -115,3 +115,5 @@ expect suspend fun initKCEF(
 )
 
 expect fun isBrowserAvailable(): Boolean
+
+expect fun isJetbrainsRuntime(): Boolean
