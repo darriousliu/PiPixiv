@@ -43,7 +43,7 @@
     <string name="theme_light">فاتح</string>
     <string name="theme_dark">داكن</string>
     <string name="illustration_works">أعمال توضيحية</string>
-    <string name="illustration_count">%d عمل</string>
+    <string name="illustration_count">%1$d عمل</string>
     <string name="history">السجل</string>
     <string name="collection">المجموعة</string>
     <string name="tags_partially_match">العلامات متطابقة جزئياً</string>
@@ -161,7 +161,7 @@
     <string name="import_failed">فشل الاستيراد: %1$s</string>
     <string name="view_comments">عرض التعليقات</string>
     <string name="view_replies">عرض الردود</string>
-    <string name="view_comments_count">عرض التعليقات (%d)</string>
+    <string name="view_comments_count">عرض التعليقات (%1$d)</string>
     <string name="no_comments">لا توجد تعليقات بعد</string>
     <string name="add_comment">إضافة تعليق</string>
     <string name="reply">رد</string>

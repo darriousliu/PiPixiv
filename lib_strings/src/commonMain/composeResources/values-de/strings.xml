@@ -44,7 +44,7 @@
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
     <string name="illustration_works">Illustrationswerke</string>
-    <string name="illustration_count">%d Werke</string>
+    <string name="illustration_count">%1$d Werke</string>
     <string name="history">Verlauf</string>
     <string name="collection">Sammlung</string>
     <string name="tags_partially_match">Tags stimmen teilweise überein</string>
@@ -161,7 +161,7 @@
     <string name="import_failed">Import fehlgeschlagen: %1$s</string>
     <string name="view_comments">Kommentare anzeigen</string>
     <string name="view_replies">Antworten anzeigen</string>
-    <string name="view_comments_count">Kommentare anzeigen (%d)</string>
+    <string name="view_comments_count">Kommentare anzeigen (%1$d)</string>
     <string name="no_comments">Noch keine Kommentare</string>
     <string name="add_comment">Kommentar hinzufügen</string>
     <string name="reply">Antworten</string>

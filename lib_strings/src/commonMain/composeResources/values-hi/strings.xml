@@ -44,7 +44,7 @@
     <string name="theme_light">हल्का</string>
     <string name="theme_dark">गहरा</string>
     <string name="illustration_works">चित्रण कार्य</string>
-    <string name="illustration_count">%d कार्य</string>
+    <string name="illustration_count">%1$d कार्य</string>
     <string name="history">इतिहास</string>
     <string name="collection">संग्रह</string>
     <string name="tags_partially_match">टैग आंशिक रूप से मेल खाते हैं</string>
@@ -161,7 +161,7 @@
     <string name="import_failed">आयात विफल: %1$s</string>
     <string name="view_comments">टिप्पणियाँ देखें</string>
     <string name="view_replies">जवाब देखें</string>
-    <string name="view_comments_count">टिप्पणियाँ देखें (%d)</string>
+    <string name="view_comments_count">टिप्पणियाँ देखें (%1$d)</string>
     <string name="no_comments">अभी तक कोई टिप्पणी नहीं</string>
     <string name="add_comment">टिप्पणी जोड़ें</string>
     <string name="reply">जवाब दें</string>

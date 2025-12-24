@@ -44,7 +44,7 @@
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Escuro</string>
     <string name="illustration_works">Obras de ilustração</string>
-    <string name="illustration_count">%d obras</string>
+    <string name="illustration_count">%1$d obras</string>
     <string name="history">Histórico</string>
     <string name="collection">Coleção</string>
     <string name="tags_partially_match">Tags correspondem parcialmente</string>
@@ -161,7 +161,7 @@
     <string name="import_failed">Falha na importação: %1$s</string>
     <string name="view_comments">Ver comentários</string>
     <string name="view_replies">Ver respostas</string>
-    <string name="view_comments_count">Ver comentários (%d)</string>
+    <string name="view_comments_count">Ver comentários (%1$d)</string>
     <string name="no_comments">Ainda não há comentários</string>
     <string name="add_comment">Adicionar comentário</string>
     <string name="reply">Responder</string>

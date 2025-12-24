@@ -44,7 +44,7 @@
     <string name="theme_light">라이트</string>
     <string name="theme_dark">다크</string>
     <string name="illustration_works">일러스트 작품</string>
-    <string name="illustration_count">%d개 작품</string>
+    <string name="illustration_count">%1$d개 작품</string>
     <string name="history">기록</string>
     <string name="collection">컬렉션</string>
     <string name="tags_partially_match">태그 부분 일치</string>
@@ -161,7 +161,7 @@
     <string name="import_failed">가져오기 실패: %1$s</string>
     <string name="view_comments">댓글 보기</string>
     <string name="view_replies">답글 보기</string>
-    <string name="view_comments_count">댓글 보기(%d)</string>
+    <string name="view_comments_count">댓글 보기(%1$d)</string>
     <string name="no_comments">현재 댓글이 없습니다</string>
     <string name="add_comment">댓글 추가</string>
     <string name="reply">답글</string>

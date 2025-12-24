@@ -44,7 +44,7 @@
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Темная</string>
     <string name="illustration_works">Работы иллюстрации</string>
-    <string name="illustration_count">%d работ</string>
+    <string name="illustration_count">%1$d работ</string>
     <string name="history">История</string>
     <string name="collection">Коллекция</string>
     <string name="tags_partially_match">Теги частично совпадают</string>
@@ -161,7 +161,7 @@
     <string name="import_failed">Ошибка импорта: %1$s</string>
     <string name="view_comments">Посмотреть комментарии</string>
     <string name="view_replies">Посмотреть ответы</string>
-    <string name="view_comments_count">Посмотреть комментарии (%d)</string>
+    <string name="view_comments_count">Посмотреть комментарии (%1$d)</string>
     <string name="no_comments">Комментариев пока нет</string>
     <string name="add_comment">Добавить комментарий</string>
     <string name="reply">Ответить</string>

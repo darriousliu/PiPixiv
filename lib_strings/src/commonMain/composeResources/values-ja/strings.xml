@@ -44,7 +44,7 @@
     <string name="theme_light">ライト</string>
     <string name="theme_dark">ダーク</string>
     <string name="illustration_works">イラスト作品</string>
-    <string name="illustration_count">%d作品</string>
+    <string name="illustration_count">%1$d作品</string>
     <string name="history">履歴</string>
     <string name="collection">コレクション</string>
     <string name="tags_partially_match">タグ部分一致</string>
@@ -161,7 +161,7 @@
     <string name="import_failed">インポートに失敗しました: %1$s</string>
     <string name="view_comments">コメントを表示</string>
     <string name="view_replies">返信を表示</string>
-    <string name="view_comments_count">コメントを表示(%d)</string>
+    <string name="view_comments_count">コメントを表示(%1$d)</string>
     <string name="no_comments">コメントはまだありません</string>
     <string name="add_comment">コメントを追加</string>
     <string name="reply">返信</string>
