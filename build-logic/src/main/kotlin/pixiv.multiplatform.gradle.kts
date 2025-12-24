@@ -11,7 +11,7 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(25)
+    jvmToolchain(21)
     compilerOptions {
         freeCompilerArgs.addAll(optIns)
     }
@@ -33,7 +33,7 @@ kotlin {
 
     jvm {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_22)
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 
