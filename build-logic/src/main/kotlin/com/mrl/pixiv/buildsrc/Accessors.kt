@@ -4,15 +4,8 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.kotlin.dsl.DependencyHandlerScope
 
-// coreLibraryDesugaring
-fun DependencyHandler.coreLibraryDesugaring(dependencyNotation: Any): Dependency? =
-    add("coreLibraryDesugaring", dependencyNotation)
-
 fun DependencyHandler.implementation(dependencyNotation: Any): Dependency? =
     add("implementation", dependencyNotation)
-
-fun DependencyHandler.debugImplementation(dependencyNotation: Any): Dependency? =
-    add("debugImplementation", dependencyNotation)
 
 fun DependencyHandler.ksp(dependencyNotation: Any): Dependency? =
     add("ksp", dependencyNotation)

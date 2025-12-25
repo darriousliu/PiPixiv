@@ -1,6 +1,7 @@
 import com.android.build.api.dsl.androidLibrary
 import com.mrl.pixiv.buildsrc.commonDependencies
 import com.mrl.pixiv.buildsrc.configureKotlinMultiplatform
+import com.mrl.pixiv.buildsrc.configureSortKoinKspGeneration
 import com.mrl.pixiv.buildsrc.optIns
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -26,6 +27,7 @@ kotlin {
         }
 
         configureKotlinMultiplatform()
+        configureSortKoinKspGeneration()
     }
 
     iosArm64()
