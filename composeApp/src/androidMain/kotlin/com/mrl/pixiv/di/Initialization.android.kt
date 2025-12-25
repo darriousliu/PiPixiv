@@ -1,8 +1,9 @@
 package com.mrl.pixiv.di
 
+import com.ctrip.flight.mmkv.MMKVLogLevel
+import com.ctrip.flight.mmkv.initialize
 import com.mrl.pixiv.common.util.AppUtil
-import com.tencent.mmkv.MMKV
 
-actual fun initializeMMKV() {
-    MMKV.initialize(AppUtil.appContext)
+actual fun initializeMMKV(logLevel: MMKVLogLevel) {
+    initialize(AppUtil.appContext, logLevel)
 }

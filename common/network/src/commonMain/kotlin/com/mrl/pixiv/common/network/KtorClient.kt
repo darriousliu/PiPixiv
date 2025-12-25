@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.network
 
 import com.mrl.pixiv.common.serialize.JSON
+import com.mrl.pixiv.common.util.isDebug
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
@@ -37,7 +38,7 @@ internal fun <T : HttpClientEngineConfig> httpClient(
         }
 
         install(Logging) {
-            level = LogLevel.ALL
+            level = if (isDebug) LogLevel.ALL else LogLevel.NONE
             logger =
                 object : Logger {
                     override fun log(message: String) {
