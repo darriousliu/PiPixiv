@@ -18,4 +18,5 @@ plugins {
     alias(composes.plugins.composeMultiplatform) apply false
     alias(libs.plugins.build.konfig) apply false
     alias(composes.plugins.composeHotReload) apply false
+    alias(kotlinx.plugins.native.cocoapods) apply false
 }

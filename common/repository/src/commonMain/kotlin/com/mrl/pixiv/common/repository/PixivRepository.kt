@@ -13,6 +13,7 @@ import com.mrl.pixiv.common.network.ApiClient
 import com.mrl.pixiv.common.network.AuthClient
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
+import io.ktor.util.PlatformUtils
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
@@ -22,7 +23,11 @@ object PixivRepository : KoinComponent {
     private val apiHttpClient by inject<HttpClient>(named<ApiClient>())
 
     private val enableBypassSniffing: Boolean
-        get() = SettingRepository.userPreferenceFlow.value.enableBypassSniffing
+        get() = if (PlatformUtils.IS_NATIVE) {
+            true
+        } else {
+            SettingRepository.userPreferenceFlow.value.enableBypassSniffing
+        }
 
     private val authKtorfit = Ktorfit.Builder()
         .baseUrl(

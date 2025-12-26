@@ -8,6 +8,7 @@ import io.ktor.client.engine.darwin.DarwinClientEngineConfig
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSURLAuthenticationMethodServerTrust
 import platform.Foundation.NSURLCredential
+import platform.Foundation.NSURLSessionAuthChallengeDisposition
 import platform.Foundation.NSURLSessionAuthChallengePerformDefaultHandling
 import platform.Foundation.NSURLSessionAuthChallengeUseCredential
 import platform.Foundation.credentialForTrust
@@ -32,17 +33,18 @@ internal actual val baseImageHttpClient: HttpClient
 @OptIn(ExperimentalForeignApi::class)
 private fun DarwinClientEngineConfig.configureHandleChallenge() {
     handleChallenge { _, _, challenge, completionHandler ->
+        completionHandler as (NSURLSessionAuthChallengeDisposition, NSURLCredential?) -> Unit
         if (challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust) {
             val host = challenge.protectionSpace.host
             if (host in hostMap.keys || host in hostMap.values || host == imageHost || host == "doh.dns.sb") {
                 val credential =
                     NSURLCredential.credentialForTrust(challenge.protectionSpace.serverTrust!!)
-                completionHandler(NSURLSessionAuthChallengeUseCredential.toInt(), credential)
+                completionHandler(NSURLSessionAuthChallengeUseCredential, credential)
             } else {
-                completionHandler(NSURLSessionAuthChallengePerformDefaultHandling.toInt(), null)
+                completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, null)
             }
         } else {
-            completionHandler(NSURLSessionAuthChallengePerformDefaultHandling.toInt(), null)
+            completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, null)
         }
     }
 }

@@ -8,6 +8,7 @@ import com.mrl.pixiv.common.util.PictureType
 import com.mrl.pixiv.common.util.ZipUtil
 import com.shakster.gifkt.GifEncoder
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.cstr
 import kotlinx.cinterop.refTo
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.CoroutineScope
@@ -279,7 +280,7 @@ class DownloadDelegate(
             if (placeholder != null) {
                 val albumName = downloadFolder
                 val fetchOptions = PHFetchOptions()
-                fetchOptions.predicate = NSPredicate.predicateWithFormat("title = %@", albumName)
+                fetchOptions.predicate = NSPredicate.predicateWithFormat("title = %@", albumName.cstr)
 
                 val collections = PHAssetCollection.fetchAssetCollectionsWithType(
                     PHAssetCollectionTypeAlbum,

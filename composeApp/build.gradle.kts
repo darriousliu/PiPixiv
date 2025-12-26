@@ -4,6 +4,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     id("pixiv.multiplatform.compose")
     alias(composes.plugins.composeHotReload)
+    alias(kotlinx.plugins.native.cocoapods)
 }
 
 kotlin {
@@ -11,13 +12,18 @@ kotlin {
         namespace = "com.mrl.pixiv"
     }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
+    iosArm64()
+    iosSimulatorArm64()
+
+    cocoapods {
+        summary = "Some description for the Shared Module"
+        homepage = "Link to the Shared Module homepage"
+        version = "1.0"
+        ios.deploymentTarget = "18.2"
+        framework {
             baseName = "ComposeApp"
             isStatic = true
+            export(project(":common:core"))
         }
     }
 
@@ -32,7 +38,7 @@ kotlin {
                 implementation(project(":common:network"))
                 implementation(project(":common:repository"))
                 implementation(project(":common:ui"))
-                implementation(project(":common:core"))
+                api(project(":common:core"))
                 rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
                     implementation(project(":feature:${it.name}"))
                 }
