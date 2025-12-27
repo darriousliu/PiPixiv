@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import com.mrl.pixiv.common.repository.SettingRepository
 import platform.Foundation.NSLocale
+import platform.Foundation.NSUserDefaults
 import platform.Foundation.preferredLanguages
 
 actual fun getInitialLanguages(): String? {
@@ -17,6 +18,14 @@ actual fun triggerLocaleChange(
     var finalLang: String? = currentLanguage
     if (currentLanguage == labelDefault) {
         finalLang = null
+    }
+    if (finalLang == null) {
+        NSUserDefaults.standardUserDefaults.removeObjectForKey("AppleLanguages")
+    } else {
+        NSUserDefaults.standardUserDefaults.setObject(
+            arrayListOf(currentLanguage),
+            "AppleLanguages"
+        )
     }
     SettingRepository.updateSettings {
         copy(appLanguage = finalLang)
