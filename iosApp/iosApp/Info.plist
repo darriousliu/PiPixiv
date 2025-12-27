@@ -4,5 +4,9 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>PHOTO_LIBRARY_ADD_USAGE</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>PHOTO_LIBRARY_USAGE</string>
 </dict>
 </plist>

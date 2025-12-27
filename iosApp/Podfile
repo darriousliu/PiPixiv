@@ -8,4 +8,5 @@ target 'iosApp' do
   pod 'composeApp', :path => '../composeApp'
   # Pods for iosApp
   pod 'MMKV', '2.3.0'
+  pod 'ZIPFoundation', '~> 0.9'
 end
