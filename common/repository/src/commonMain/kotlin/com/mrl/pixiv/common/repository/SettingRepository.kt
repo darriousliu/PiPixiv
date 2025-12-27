@@ -87,7 +87,7 @@ object SettingRepository : MMKVUser {
         it.copy(fileNameFormat = format)
     }
 
-    fun updateSettings(block: (UserPreference) -> UserPreference) {
+    fun updateSettings(block: UserPreference.() -> UserPreference) {
         userPreference.update(block)
     }
 

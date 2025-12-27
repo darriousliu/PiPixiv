@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserPreference(
+    val appLanguage: String? = null,
     val theme: String = SettingTheme.SYSTEM.name,
     val enableBypassSniffing: Boolean = false,
     val isR18Enabled: Boolean = false,
