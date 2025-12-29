@@ -1,5 +1,4 @@
 [versions]
-calf = "0.9.0"
 composeWebviewMultiplatform = "2.0.3"
 material = "1.13.0"
 mp_stools = "1.6.3"
@@ -28,7 +27,6 @@ filekit = "0.12.0"
 htmlconverter = "1.1.0"
 
 [libraries]
-calf-permissions = { module = "com.mohamedrejeb.calf:calf-permissions", version.ref = "calf" }
 compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
 
 

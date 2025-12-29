@@ -27,13 +27,12 @@ kotlin {
             implementation(libs.bundles.coil3)
             // FileKit
             implementation(libs.filekit.core)
-            // Permission
-            implementation(libs.calf.permissions)
         }
-
         androidMain.dependencies {
             // Navigation3
             implementation(composes.bundles.navigation3.android)
+            // Permission
+            implementation(composes.accompanist.permissions)
         }
     }
 }

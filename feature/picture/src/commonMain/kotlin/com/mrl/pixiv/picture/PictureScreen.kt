@@ -79,9 +79,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
-import com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi
-import com.mohamedrejeb.calf.permissions.Permission
-import com.mohamedrejeb.calf.permissions.rememberMultiplePermissionsState
 import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.IllustGridDefaults
@@ -134,7 +131,6 @@ import com.mrl.pixiv.strings.user_blocked
 import com.mrl.pixiv.strings.view_comments
 import com.mrl.pixiv.strings.view_comments_count
 import com.mrl.pixiv.strings.viewed
-import io.ktor.util.PlatformUtils
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -690,9 +686,11 @@ internal fun PictureScreen(
     }
 }
 
-expect val permission: Permission
+@Composable
+internal expect fun Modifier.clickWithPermission(
+    onClick: () -> Unit
+): Modifier
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun BottomMenu(
     onDismissRequest: () -> Unit,
@@ -702,14 +700,6 @@ private fun BottomMenu(
     onShare: () -> Unit = {}
 ) {
     val bottomSheetState = rememberModalBottomSheetState(true)
-    val permissionsState =
-        rememberMultiplePermissionsState(listOf(permission)) {
-            val allGranted = it.values.all { it }
-            if (allGranted) {
-                onShare()
-            }
-        }
-
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -740,12 +730,8 @@ private fun BottomMenu(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .throttleClick {
-                        if (PlatformUtils.IS_JVM) {
-                            onShare()
-                        } else {
-                            permissionsState.launchMultiplePermissionRequest()
-                        }
+                    .clickWithPermission {
+                        onShare()
                     }
                     .padding(vertical = 10.dp)
             ) {

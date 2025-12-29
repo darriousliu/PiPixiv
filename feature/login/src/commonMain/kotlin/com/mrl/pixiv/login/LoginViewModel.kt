@@ -2,11 +2,12 @@ package com.mrl.pixiv.login
 
 import androidx.compose.runtime.Stable
 import com.mrl.pixiv.common.repository.AuthManager
+import com.mrl.pixiv.common.util.isDesktop
+import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.login.browser.initKCEF
-import io.ktor.util.PlatformUtils
 import org.koin.android.annotation.KoinViewModel
 
 @Stable
@@ -25,10 +26,10 @@ sealed class LoginEvent : SideEffect {
 
 @KoinViewModel
 class LoginViewModel : BaseMviViewModel<LoginState, LoginAction>(
-    initialState = LoginState(webViewInitialized = !PlatformUtils.IS_JVM || isKCEFInitialized),
+    initialState = LoginState(webViewInitialized = !platform.isDesktop() || isKCEFInitialized),
 ) {
     init {
-        if (PlatformUtils.IS_JVM && !isKCEFInitialized) {
+        if (platform.isDesktop() && !isKCEFInitialized) {
             launchIO {
                 initKCEF(
                     onInit = { updateState { copy(webViewInitialized = false) } },

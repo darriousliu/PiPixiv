@@ -1,4 +1,5 @@
 [versions]
+accompanist = "0.37.3"
 compose-bom = "2025.12.01"
 navigation3 = "1.0.0"
 jetbrains-navigation3 = "1.0.0-alpha06"
@@ -42,6 +43,8 @@ jetbrains-material3-adaptive-navigation-suite = { module = "org.jetbrains.compos
 jetbrains-material3-window-size = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "jetbrains-material3-window-size" }
 jetbrains-material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "material-icons" }
 jetbrains-material-icons = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "material-icons" }
+
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }

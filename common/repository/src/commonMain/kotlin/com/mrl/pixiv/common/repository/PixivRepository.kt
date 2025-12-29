@@ -11,9 +11,10 @@ import com.mrl.pixiv.common.datasource.remote.createAuthApi
 import com.mrl.pixiv.common.datasource.remote.createPixivApi
 import com.mrl.pixiv.common.network.ApiClient
 import com.mrl.pixiv.common.network.AuthClient
+import com.mrl.pixiv.common.util.isIOS
+import com.mrl.pixiv.common.util.platform
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
-import io.ktor.util.PlatformUtils
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
@@ -23,7 +24,7 @@ object PixivRepository : KoinComponent {
     private val apiHttpClient by inject<HttpClient>(named<ApiClient>())
 
     private val enableBypassSniffing: Boolean
-        get() = if (PlatformUtils.IS_NATIVE) {
+        get() = if (platform.isIOS()) {
             true
         } else {
             SettingRepository.userPreferenceFlow.value.enableBypassSniffing
