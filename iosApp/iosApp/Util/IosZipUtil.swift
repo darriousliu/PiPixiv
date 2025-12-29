@@ -6,8 +6,8 @@ class IosZipUtil: NSObject, ZipUtil {
     static let shared = IosZipUtil()
 
     func compress(sourcePath: String, destinationPath: String) -> Bool {
-        let sourceURL = URL(fileURLWithPath: sourcePath)
-        let destinationURL = URL(fileURLWithPath: destinationPath)
+        let sourceURL = getValidURL(path: sourcePath)
+        let destinationURL = getValidURL(path: destinationPath)
         do {
             try FileManager.default.zipItem(at: sourceURL, to: destinationURL)
             return true
@@ -18,8 +18,8 @@ class IosZipUtil: NSObject, ZipUtil {
     }
 
     func getZipEntryContent(zipFilePath: String, entryName: String) -> KotlinByteArray? {
-        let sourceURL = URL(fileURLWithPath: zipFilePath)
-        guard let archive = Archive(url: sourceURL, accessMode: .read),
+        let sourceURL = getValidURL(path: zipFilePath)
+        guard let archive = try? Archive(url: sourceURL, accessMode: .read),
               let entry = archive[entryName]
         else {
             return nil
@@ -43,8 +43,8 @@ class IosZipUtil: NSObject, ZipUtil {
     }
 
     func getZipEntryList(zipFilePath: String) -> [KotlinPair<NSString, KotlinBoolean>] {
-        let sourceURL = URL(fileURLWithPath: zipFilePath)
-        guard let archive = Archive(url: sourceURL, accessMode: .read) else {
+        let sourceURL = getValidURL(path: zipFilePath)
+        guard let archive = try? Archive(url: sourceURL, accessMode: .read) else {
             return []
         }
 
@@ -59,8 +59,8 @@ class IosZipUtil: NSObject, ZipUtil {
     }
 
     func unzip(sourcePath: String, destinationPath: String) -> Bool {
-        let sourceURL = URL(fileURLWithPath: sourcePath)
-        let destinationURL = URL(fileURLWithPath: destinationPath)
+        let sourceURL = getValidURL(path: sourcePath)
+        let destinationURL = getValidURL(path: destinationPath)
         do {
             try FileManager.default.createDirectory(at: destinationURL, withIntermediateDirectories: true, attributes: nil)
             try FileManager.default.unzipItem(at: sourceURL, to: destinationURL)
@@ -68,6 +68,14 @@ class IosZipUtil: NSObject, ZipUtil {
         } catch {
             print("unzip error: \(error)")
             return false
+        }
+    }
+
+    private func getValidURL(path: String) -> URL {
+        return if path.hasPrefix("file://") {
+            URL(string: path)!
+        } else {
+            URL(fileURLWithPath: path)
         }
     }
 }
