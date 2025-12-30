@@ -8,11 +8,155 @@
 
 /* Begin PBXBuildFile section */
 		4A6860B121E899E92E042D75 /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2504AD42144A33BDD9A4E7F9 /* Pods_iosApp.framework */; };
+		C01A0AE72F0257EE00B7AE17 /* PhotoUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ADE2F0257EE00B7AE17 /* PhotoUtil.kt */; };
+		C01A0AE82F0257EE00B7AE17 /* BaseMviViewModel.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AD02F0257EE00B7AE17 /* BaseMviViewModel.kt */; };
+		C01A0AE92F0257EE00B7AE17 /* DeviceInfo.ios.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ADC2F0257EE00B7AE17 /* DeviceInfo.ios.kt */; };
+		C01A0AEA2F0257EE00B7AE17 /* MMKVSerializableProperty.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AB22F0257EE00B7AE17 /* MMKVSerializableProperty.kt */; };
+		C01A0AEB2F0257EE00B7AE17 /* LocaleHelper.ios.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ADD2F0257EE00B7AE17 /* LocaleHelper.ios.kt */; };
+		C01A0AEC2F0257EE00B7AE17 /* MMKVConfig.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AB02F0257EE00B7AE17 /* MMKVConfig.kt */; };
+		C01A0AED2F0257EE00B7AE17 /* DestinationsDeepLink.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AB72F0257EE00B7AE17 /* DestinationsDeepLink.kt */; };
+		C01A0AEE2F0257EE00B7AE17 /* ShareUtil.ios.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ADF2F0257EE00B7AE17 /* ShareUtil.ios.kt */; };
+		C01A0AEF2F0257EE00B7AE17 /* CoroutineExt.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AAE2F0257EE00B7AE17 /* CoroutineExt.kt */; };
+		C01A0AF02F0257EE00B7AE17 /* Constants.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC12F0257EE00B7AE17 /* Constants.kt */; };
+		C01A0AF12F0257EE00B7AE17 /* CoroutineExt.ios.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AD82F0257EE00B7AE17 /* CoroutineExt.ios.kt */; };
+		C01A0AF22F0257EE00B7AE17 /* CopyUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC22F0257EE00B7AE17 /* CopyUtil.kt */; };
+		C01A0AF32F0257EE00B7AE17 /* ToastMessage.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ABD2F0257EE00B7AE17 /* ToastMessage.kt */; };
+		C01A0AF42F0257EE00B7AE17 /* NavigationManager.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AB92F0257EE00B7AE17 /* NavigationManager.kt */; };
+		C01A0AF52F0257EE00B7AE17 /* TimeUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ACC2F0257EE00B7AE17 /* TimeUtil.kt */; };
+		C01A0AF62F0257EE00B7AE17 /* DeviceInfo.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC42F0257EE00B7AE17 /* DeviceInfo.kt */; };
+		C01A0AF72F0257EE00B7AE17 /* ExtUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC52F0257EE00B7AE17 /* ExtUtil.kt */; };
+		C01A0AF82F0257EE00B7AE17 /* FileUtils.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC62F0257EE00B7AE17 /* FileUtils.kt */; };
+		C01A0AF92F0257EE00B7AE17 /* AppUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ABF2F0257EE00B7AE17 /* AppUtil.kt */; };
+		C01A0AFA2F0257EE00B7AE17 /* ToastUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ACD2F0257EE00B7AE17 /* ToastUtil.kt */; };
+		C01A0AFB2F0257EE00B7AE17 /* BitmapUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC02F0257EE00B7AE17 /* BitmapUtil.kt */; };
+		C01A0AFC2F0257EE00B7AE17 /* IllustCacheRepo.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AB52F0257EE00B7AE17 /* IllustCacheRepo.kt */; };
+		C01A0AFD2F0257EE00B7AE17 /* CancelException.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AAD2F0257EE00B7AE17 /* CancelException.kt */; };
+		C01A0AFE2F0257EE00B7AE17 /* ScreenUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ACA2F0257EE00B7AE17 /* ScreenUtil.kt */; };
+		C01A0AFF2F0257EE00B7AE17 /* ZipUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ACE2F0257EE00B7AE17 /* ZipUtil.kt */; };
+		C01A0B002F0257EE00B7AE17 /* PictureType.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC92F0257EE00B7AE17 /* PictureType.kt */; };
+		C01A0B012F0257EE00B7AE17 /* ShareUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ACB2F0257EE00B7AE17 /* ShareUtil.kt */; };
+		C01A0B022F0257EE00B7AE17 /* Navigation.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AB82F0257EE00B7AE17 /* Navigation.kt */; };
+		C01A0B032F0257EE00B7AE17 /* MMKVStateFlowProperty.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AB32F0257EE00B7AE17 /* MMKVStateFlowProperty.kt */; };
+		C01A0B042F0257EE00B7AE17 /* LazyStateUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC72F0257EE00B7AE17 /* LazyStateUtil.kt */; };
+		C01A0B052F0257EE00B7AE17 /* LocaleHelper.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC82F0257EE00B7AE17 /* LocaleHelper.kt */; };
+		C01A0B062F0257EE00B7AE17 /* CopyUtil.ios.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ADB2F0257EE00B7AE17 /* CopyUtil.ios.kt */; };
+		C01A0B072F0257EE00B7AE17 /* MMKVProperty.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AB12F0257EE00B7AE17 /* MMKVProperty.kt */; };
+		C01A0B082F0257EE00B7AE17 /* AnimationDefaults.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AAB2F0257EE00B7AE17 /* AnimationDefaults.kt */; };
+		C01A0B092F0257EE00B7AE17 /* BitmapUtil.ios.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ADA2F0257EE00B7AE17 /* BitmapUtil.ios.kt */; };
+		C01A0B0A2F0257EE00B7AE17 /* DebounceUtil.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0AC32F0257EE00B7AE17 /* DebounceUtil.kt */; };
+		C01A0B0B2F0257EE00B7AE17 /* Json.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0ABB2F0257EE00B7AE17 /* Json.kt */; };
+		C01A0B8C2F02585100B7AE17 /* String.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B692F02585100B7AE17 /* String.kt */; };
+		C01A0B8D2F02585100B7AE17 /* IllustFollowingPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B602F02585100B7AE17 /* IllustFollowingPagingSource.kt */; };
+		C01A0B8E2F02585100B7AE17 /* CommentRepository.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B742F02585100B7AE17 /* CommentRepository.kt */; };
+		C01A0B8F2F02585100B7AE17 /* IllustRecommendedPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B622F02585100B7AE17 /* IllustRecommendedPagingSource.kt */; };
+		C01A0B902F02585100B7AE17 /* BlockingRepository.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B712F02585100B7AE17 /* BlockingRepository.kt */; };
+		C01A0B912F02585100B7AE17 /* RelatedIllustPaging.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B632F02585100B7AE17 /* RelatedIllustPaging.kt */; };
+		C01A0B922F02585100B7AE17 /* IosDownloadStrategy.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B842F02585100B7AE17 /* IosDownloadStrategy.kt */; };
+		C01A0B932F02585100B7AE17 /* FileName.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B672F02585100B7AE17 /* FileName.kt */; };
+		C01A0B942F02585100B7AE17 /* CommentPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B5C2F02585100B7AE17 /* CommentPagingSource.kt */; };
+		C01A0B952F02585100B7AE17 /* SearchIllustPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B642F02585100B7AE17 /* SearchIllustPagingSource.kt */; };
+		C01A0B962F02585100B7AE17 /* UserManager.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B7B2F02585100B7AE17 /* UserManager.kt */; };
+		C01A0B972F02585100B7AE17 /* CollectionIllustPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B5B2F02585100B7AE17 /* CollectionIllustPagingSource.kt */; };
+		C01A0B982F02585100B7AE17 /* FollowState.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B6D2F02585100B7AE17 /* FollowState.kt */; };
+		C01A0B992F02585100B7AE17 /* CommentRepliesPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B5D2F02585100B7AE17 /* CommentRepliesPagingSource.kt */; };
+		C01A0B9A2F02585100B7AE17 /* BookmarkedTagRepository.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B732F02585100B7AE17 /* BookmarkedTagRepository.kt */; };
+		C01A0B9B2F02585100B7AE17 /* HistoryIllustPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B5F2F02585100B7AE17 /* HistoryIllustPagingSource.kt */; };
+		C01A0B9C2F02585100B7AE17 /* PixivRepository.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B782F02585100B7AE17 /* PixivRepository.kt */; };
+		C01A0B9D2F02585100B7AE17 /* SettingRepository.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B7A2F02585100B7AE17 /* SettingRepository.kt */; };
+		C01A0B9E2F02585100B7AE17 /* BlockingRepositoryV2.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B722F02585100B7AE17 /* BlockingRepositoryV2.kt */; };
+		C01A0B9F2F02585100B7AE17 /* SearchRepository.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B792F02585100B7AE17 /* SearchRepository.kt */; };
+		C01A0BA02F02585100B7AE17 /* FollowingPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B5E2F02585100B7AE17 /* FollowingPagingSource.kt */; };
+		C01A0BA12F02585100B7AE17 /* IllustRankingPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B612F02585100B7AE17 /* IllustRankingPagingSource.kt */; };
+		C01A0BA22F02585100B7AE17 /* NetworkFeatureImpl.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B772F02585100B7AE17 /* NetworkFeatureImpl.kt */; };
+		C01A0BA32F02585100B7AE17 /* Filter.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B682F02585100B7AE17 /* Filter.kt */; };
+		C01A0BA42F02585100B7AE17 /* VersionManager.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B7C2F02585100B7AE17 /* VersionManager.kt */; };
+		C01A0BA52F02585100B7AE17 /* DownloadStrategy.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B762F02585100B7AE17 /* DownloadStrategy.kt */; };
+		C01A0BA62F02585100B7AE17 /* AuthManager.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B702F02585100B7AE17 /* AuthManager.kt */; };
+		C01A0BA72F02585100B7AE17 /* DownloadManager.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B752F02585100B7AE17 /* DownloadManager.kt */; };
+		C01A0BA82F02585100B7AE17 /* BookmarkState.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B6B2F02585100B7AE17 /* BookmarkState.kt */; };
+		C01A0BA92F02585100B7AE17 /* UserIllustPagingSource.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0B652F02585100B7AE17 /* UserIllustPagingSource.kt */; };
+		C01A0BBC2F02591900B7AE17 /* PictureScreen.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0BAD2F02591900B7AE17 /* PictureScreen.kt */; };
+		C01A0BBD2F02591900B7AE17 /* PictureScreen.ios.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0BB52F02591900B7AE17 /* PictureScreen.ios.kt */; };
+		C01A0BBE2F02591900B7AE17 /* UgoilaPlayer.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0BAA2F02591900B7AE17 /* UgoilaPlayer.kt */; };
+		C01A0BBF2F02591900B7AE17 /* PictureViewModel.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0BAE2F02591900B7AE17 /* PictureViewModel.kt */; };
+		C01A0BC02F02591900B7AE17 /* HorizontalSwipePictureScreen.kt in Resources */ = {isa = PBXBuildFile; fileRef = C01A0BAC2F02591900B7AE17 /* HorizontalSwipePictureScreen.kt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1AC48DF89C56FF002CE5A60C /* PiPixiv.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PiPixiv.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2504AD42144A33BDD9A4E7F9 /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C01A0AAB2F0257EE00B7AE17 /* AnimationDefaults.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = AnimationDefaults.kt; sourceTree = "<group>"; };
+		C01A0AAD2F0257EE00B7AE17 /* CancelException.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CancelException.kt; sourceTree = "<group>"; };
+		C01A0AAE2F0257EE00B7AE17 /* CoroutineExt.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CoroutineExt.kt; sourceTree = "<group>"; };
+		C01A0AB02F0257EE00B7AE17 /* MMKVConfig.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = MMKVConfig.kt; sourceTree = "<group>"; };
+		C01A0AB12F0257EE00B7AE17 /* MMKVProperty.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = MMKVProperty.kt; sourceTree = "<group>"; };
+		C01A0AB22F0257EE00B7AE17 /* MMKVSerializableProperty.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = MMKVSerializableProperty.kt; sourceTree = "<group>"; };
+		C01A0AB32F0257EE00B7AE17 /* MMKVStateFlowProperty.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = MMKVStateFlowProperty.kt; sourceTree = "<group>"; };
+		C01A0AB52F0257EE00B7AE17 /* IllustCacheRepo.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IllustCacheRepo.kt; sourceTree = "<group>"; };
+		C01A0AB72F0257EE00B7AE17 /* DestinationsDeepLink.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DestinationsDeepLink.kt; sourceTree = "<group>"; };
+		C01A0AB82F0257EE00B7AE17 /* Navigation.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Navigation.kt; sourceTree = "<group>"; };
+		C01A0AB92F0257EE00B7AE17 /* NavigationManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = NavigationManager.kt; sourceTree = "<group>"; };
+		C01A0ABB2F0257EE00B7AE17 /* Json.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Json.kt; sourceTree = "<group>"; };
+		C01A0ABD2F0257EE00B7AE17 /* ToastMessage.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ToastMessage.kt; sourceTree = "<group>"; };
+		C01A0ABF2F0257EE00B7AE17 /* AppUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = AppUtil.kt; sourceTree = "<group>"; };
+		C01A0AC02F0257EE00B7AE17 /* BitmapUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BitmapUtil.kt; sourceTree = "<group>"; };
+		C01A0AC12F0257EE00B7AE17 /* Constants.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Constants.kt; sourceTree = "<group>"; };
+		C01A0AC22F0257EE00B7AE17 /* CopyUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CopyUtil.kt; sourceTree = "<group>"; };
+		C01A0AC32F0257EE00B7AE17 /* DebounceUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DebounceUtil.kt; sourceTree = "<group>"; };
+		C01A0AC42F0257EE00B7AE17 /* DeviceInfo.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DeviceInfo.kt; sourceTree = "<group>"; };
+		C01A0AC52F0257EE00B7AE17 /* ExtUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ExtUtil.kt; sourceTree = "<group>"; };
+		C01A0AC62F0257EE00B7AE17 /* FileUtils.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = FileUtils.kt; sourceTree = "<group>"; };
+		C01A0AC72F0257EE00B7AE17 /* LazyStateUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LazyStateUtil.kt; sourceTree = "<group>"; };
+		C01A0AC82F0257EE00B7AE17 /* LocaleHelper.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LocaleHelper.kt; sourceTree = "<group>"; };
+		C01A0AC92F0257EE00B7AE17 /* PictureType.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureType.kt; sourceTree = "<group>"; };
+		C01A0ACA2F0257EE00B7AE17 /* ScreenUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ScreenUtil.kt; sourceTree = "<group>"; };
+		C01A0ACB2F0257EE00B7AE17 /* ShareUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ShareUtil.kt; sourceTree = "<group>"; };
+		C01A0ACC2F0257EE00B7AE17 /* TimeUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = TimeUtil.kt; sourceTree = "<group>"; };
+		C01A0ACD2F0257EE00B7AE17 /* ToastUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ToastUtil.kt; sourceTree = "<group>"; };
+		C01A0ACE2F0257EE00B7AE17 /* ZipUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ZipUtil.kt; sourceTree = "<group>"; };
+		C01A0AD02F0257EE00B7AE17 /* BaseMviViewModel.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BaseMviViewModel.kt; sourceTree = "<group>"; };
+		C01A0AD82F0257EE00B7AE17 /* CoroutineExt.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CoroutineExt.ios.kt; sourceTree = "<group>"; };
+		C01A0ADA2F0257EE00B7AE17 /* BitmapUtil.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BitmapUtil.ios.kt; sourceTree = "<group>"; };
+		C01A0ADB2F0257EE00B7AE17 /* CopyUtil.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CopyUtil.ios.kt; sourceTree = "<group>"; };
+		C01A0ADC2F0257EE00B7AE17 /* DeviceInfo.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DeviceInfo.ios.kt; sourceTree = "<group>"; };
+		C01A0ADD2F0257EE00B7AE17 /* LocaleHelper.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LocaleHelper.ios.kt; sourceTree = "<group>"; };
+		C01A0ADE2F0257EE00B7AE17 /* PhotoUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PhotoUtil.kt; sourceTree = "<group>"; };
+		C01A0ADF2F0257EE00B7AE17 /* ShareUtil.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ShareUtil.ios.kt; sourceTree = "<group>"; };
+		C01A0B5B2F02585100B7AE17 /* CollectionIllustPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CollectionIllustPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B5C2F02585100B7AE17 /* CommentPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CommentPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B5D2F02585100B7AE17 /* CommentRepliesPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CommentRepliesPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B5E2F02585100B7AE17 /* FollowingPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = FollowingPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B5F2F02585100B7AE17 /* HistoryIllustPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = HistoryIllustPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B602F02585100B7AE17 /* IllustFollowingPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IllustFollowingPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B612F02585100B7AE17 /* IllustRankingPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IllustRankingPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B622F02585100B7AE17 /* IllustRecommendedPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IllustRecommendedPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B632F02585100B7AE17 /* RelatedIllustPaging.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = RelatedIllustPaging.kt; sourceTree = "<group>"; };
+		C01A0B642F02585100B7AE17 /* SearchIllustPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SearchIllustPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B652F02585100B7AE17 /* UserIllustPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UserIllustPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B672F02585100B7AE17 /* FileName.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = FileName.kt; sourceTree = "<group>"; };
+		C01A0B682F02585100B7AE17 /* Filter.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Filter.kt; sourceTree = "<group>"; };
+		C01A0B692F02585100B7AE17 /* String.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = String.kt; sourceTree = "<group>"; };
+		C01A0B6B2F02585100B7AE17 /* BookmarkState.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BookmarkState.kt; sourceTree = "<group>"; };
+		C01A0B6D2F02585100B7AE17 /* FollowState.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = FollowState.kt; sourceTree = "<group>"; };
+		C01A0B702F02585100B7AE17 /* AuthManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = AuthManager.kt; sourceTree = "<group>"; };
+		C01A0B712F02585100B7AE17 /* BlockingRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BlockingRepository.kt; sourceTree = "<group>"; };
+		C01A0B722F02585100B7AE17 /* BlockingRepositoryV2.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BlockingRepositoryV2.kt; sourceTree = "<group>"; };
+		C01A0B732F02585100B7AE17 /* BookmarkedTagRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BookmarkedTagRepository.kt; sourceTree = "<group>"; };
+		C01A0B742F02585100B7AE17 /* CommentRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CommentRepository.kt; sourceTree = "<group>"; };
+		C01A0B752F02585100B7AE17 /* DownloadManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DownloadManager.kt; sourceTree = "<group>"; };
+		C01A0B762F02585100B7AE17 /* DownloadStrategy.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DownloadStrategy.kt; sourceTree = "<group>"; };
+		C01A0B772F02585100B7AE17 /* NetworkFeatureImpl.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = NetworkFeatureImpl.kt; sourceTree = "<group>"; };
+		C01A0B782F02585100B7AE17 /* PixivRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PixivRepository.kt; sourceTree = "<group>"; };
+		C01A0B792F02585100B7AE17 /* SearchRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SearchRepository.kt; sourceTree = "<group>"; };
+		C01A0B7A2F02585100B7AE17 /* SettingRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SettingRepository.kt; sourceTree = "<group>"; };
+		C01A0B7B2F02585100B7AE17 /* UserManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UserManager.kt; sourceTree = "<group>"; };
+		C01A0B7C2F02585100B7AE17 /* VersionManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = VersionManager.kt; sourceTree = "<group>"; };
+		C01A0B842F02585100B7AE17 /* IosDownloadStrategy.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IosDownloadStrategy.kt; sourceTree = "<group>"; };
+		C01A0BAA2F02591900B7AE17 /* UgoilaPlayer.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UgoilaPlayer.kt; sourceTree = "<group>"; };
+		C01A0BAC2F02591900B7AE17 /* HorizontalSwipePictureScreen.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = HorizontalSwipePictureScreen.kt; sourceTree = "<group>"; };
+		C01A0BAD2F02591900B7AE17 /* PictureScreen.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureScreen.kt; sourceTree = "<group>"; };
+		C01A0BAE2F02591900B7AE17 /* PictureViewModel.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureViewModel.kt; sourceTree = "<group>"; };
+		C01A0BB52F02591900B7AE17 /* PictureScreen.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureScreen.ios.kt; sourceTree = "<group>"; };
 		CB0D53EC7F7BC041DC3D12E3 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
 		E70F5D8DF511C34329B7AB8C /* Pods-iosApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.release.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +202,7 @@
 		13FB1504F13FA0729B060EA4 = {
 			isa = PBXGroup;
 			children = (
+				C01A0AAA2F02579500B7AE17 /* Kotlin */,
 				ED62C2B061C4347F8C06C2D7 /* Configuration */,
 				3F4C35825AB99DE17A5B0D16 /* iosApp */,
 				82B5335CC846DD695CF9A3C7 /* Products */,
@@ -90,6 +235,531 @@
 			);
 			name = Products;
 			sourceTree = "<group>";
+		};
+		C01A0AAA2F02579500B7AE17 /* Kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB42F02591900B7AE17 /* commonMain */,
+				C01A0BBB2F02591900B7AE17 /* iosMain */,
+				C01A0B832F02585100B7AE17 /* commonMain */,
+				C01A0B8B2F02585100B7AE17 /* iosMain */,
+				C01A0AD72F0257EE00B7AE17 /* commonMain */,
+				C01A0AE62F0257EE00B7AE17 /* iosMain */,
+			);
+			path = Kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0AAC2F0257EE00B7AE17 /* animation */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AAB2F0257EE00B7AE17 /* AnimationDefaults.kt */,
+			);
+			path = animation;
+			sourceTree = "<group>";
+		};
+		C01A0AAF2F0257EE00B7AE17 /* coroutine */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AAD2F0257EE00B7AE17 /* CancelException.kt */,
+				C01A0AAE2F0257EE00B7AE17 /* CoroutineExt.kt */,
+			);
+			path = coroutine;
+			sourceTree = "<group>";
+		};
+		C01A0AB42F0257EE00B7AE17 /* mmkv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AB02F0257EE00B7AE17 /* MMKVConfig.kt */,
+				C01A0AB12F0257EE00B7AE17 /* MMKVProperty.kt */,
+				C01A0AB22F0257EE00B7AE17 /* MMKVSerializableProperty.kt */,
+				C01A0AB32F0257EE00B7AE17 /* MMKVStateFlowProperty.kt */,
+			);
+			path = mmkv;
+			sourceTree = "<group>";
+		};
+		C01A0AB62F0257EE00B7AE17 /* repository */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AB52F0257EE00B7AE17 /* IllustCacheRepo.kt */,
+			);
+			path = repository;
+			sourceTree = "<group>";
+		};
+		C01A0ABA2F0257EE00B7AE17 /* router */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AB72F0257EE00B7AE17 /* DestinationsDeepLink.kt */,
+				C01A0AB82F0257EE00B7AE17 /* Navigation.kt */,
+				C01A0AB92F0257EE00B7AE17 /* NavigationManager.kt */,
+			);
+			path = router;
+			sourceTree = "<group>";
+		};
+		C01A0ABC2F0257EE00B7AE17 /* serialize */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0ABB2F0257EE00B7AE17 /* Json.kt */,
+			);
+			path = serialize;
+			sourceTree = "<group>";
+		};
+		C01A0ABE2F0257EE00B7AE17 /* toast */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0ABD2F0257EE00B7AE17 /* ToastMessage.kt */,
+			);
+			path = toast;
+			sourceTree = "<group>";
+		};
+		C01A0ACF2F0257EE00B7AE17 /* util */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0ABF2F0257EE00B7AE17 /* AppUtil.kt */,
+				C01A0AC02F0257EE00B7AE17 /* BitmapUtil.kt */,
+				C01A0AC12F0257EE00B7AE17 /* Constants.kt */,
+				C01A0AC22F0257EE00B7AE17 /* CopyUtil.kt */,
+				C01A0AC32F0257EE00B7AE17 /* DebounceUtil.kt */,
+				C01A0AC42F0257EE00B7AE17 /* DeviceInfo.kt */,
+				C01A0AC52F0257EE00B7AE17 /* ExtUtil.kt */,
+				C01A0AC62F0257EE00B7AE17 /* FileUtils.kt */,
+				C01A0AC72F0257EE00B7AE17 /* LazyStateUtil.kt */,
+				C01A0AC82F0257EE00B7AE17 /* LocaleHelper.kt */,
+				C01A0AC92F0257EE00B7AE17 /* PictureType.kt */,
+				C01A0ACA2F0257EE00B7AE17 /* ScreenUtil.kt */,
+				C01A0ACB2F0257EE00B7AE17 /* ShareUtil.kt */,
+				C01A0ACC2F0257EE00B7AE17 /* TimeUtil.kt */,
+				C01A0ACD2F0257EE00B7AE17 /* ToastUtil.kt */,
+				C01A0ACE2F0257EE00B7AE17 /* ZipUtil.kt */,
+			);
+			path = util;
+			sourceTree = "<group>";
+		};
+		C01A0AD12F0257EE00B7AE17 /* viewmodel */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD02F0257EE00B7AE17 /* BaseMviViewModel.kt */,
+			);
+			path = viewmodel;
+			sourceTree = "<group>";
+		};
+		C01A0AD22F0257EE00B7AE17 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AAC2F0257EE00B7AE17 /* animation */,
+				C01A0AAF2F0257EE00B7AE17 /* coroutine */,
+				C01A0AB42F0257EE00B7AE17 /* mmkv */,
+				C01A0AB62F0257EE00B7AE17 /* repository */,
+				C01A0ABA2F0257EE00B7AE17 /* router */,
+				C01A0ABC2F0257EE00B7AE17 /* serialize */,
+				C01A0ABE2F0257EE00B7AE17 /* toast */,
+				C01A0ACF2F0257EE00B7AE17 /* util */,
+				C01A0AD12F0257EE00B7AE17 /* viewmodel */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		C01A0AD32F0257EE00B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD22F0257EE00B7AE17 /* common */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0AD42F0257EE00B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD32F0257EE00B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0AD52F0257EE00B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD42F0257EE00B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0AD62F0257EE00B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD52F0257EE00B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0AD72F0257EE00B7AE17 /* commonMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD62F0257EE00B7AE17 /* kotlin */,
+			);
+			name = commonMain;
+			path = ../common/core/src/commonMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0AD92F0257EE00B7AE17 /* coroutine */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD82F0257EE00B7AE17 /* CoroutineExt.ios.kt */,
+			);
+			path = coroutine;
+			sourceTree = "<group>";
+		};
+		C01A0AE02F0257EE00B7AE17 /* util */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0ADA2F0257EE00B7AE17 /* BitmapUtil.ios.kt */,
+				C01A0ADB2F0257EE00B7AE17 /* CopyUtil.ios.kt */,
+				C01A0ADC2F0257EE00B7AE17 /* DeviceInfo.ios.kt */,
+				C01A0ADD2F0257EE00B7AE17 /* LocaleHelper.ios.kt */,
+				C01A0ADE2F0257EE00B7AE17 /* PhotoUtil.kt */,
+				C01A0ADF2F0257EE00B7AE17 /* ShareUtil.ios.kt */,
+			);
+			path = util;
+			sourceTree = "<group>";
+		};
+		C01A0AE12F0257EE00B7AE17 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD92F0257EE00B7AE17 /* coroutine */,
+				C01A0AE02F0257EE00B7AE17 /* util */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		C01A0AE22F0257EE00B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE12F0257EE00B7AE17 /* common */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0AE32F0257EE00B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE22F0257EE00B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0AE42F0257EE00B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE32F0257EE00B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0AE52F0257EE00B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE42F0257EE00B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0AE62F0257EE00B7AE17 /* iosMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE52F0257EE00B7AE17 /* kotlin */,
+			);
+			name = iosMain;
+			path = ../common/core/src/iosMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0B662F02585100B7AE17 /* paging */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B5B2F02585100B7AE17 /* CollectionIllustPagingSource.kt */,
+				C01A0B5C2F02585100B7AE17 /* CommentPagingSource.kt */,
+				C01A0B5D2F02585100B7AE17 /* CommentRepliesPagingSource.kt */,
+				C01A0B5E2F02585100B7AE17 /* FollowingPagingSource.kt */,
+				C01A0B5F2F02585100B7AE17 /* HistoryIllustPagingSource.kt */,
+				C01A0B602F02585100B7AE17 /* IllustFollowingPagingSource.kt */,
+				C01A0B612F02585100B7AE17 /* IllustRankingPagingSource.kt */,
+				C01A0B622F02585100B7AE17 /* IllustRecommendedPagingSource.kt */,
+				C01A0B632F02585100B7AE17 /* RelatedIllustPaging.kt */,
+				C01A0B642F02585100B7AE17 /* SearchIllustPagingSource.kt */,
+				C01A0B652F02585100B7AE17 /* UserIllustPagingSource.kt */,
+			);
+			path = paging;
+			sourceTree = "<group>";
+		};
+		C01A0B6A2F02585100B7AE17 /* util */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B672F02585100B7AE17 /* FileName.kt */,
+				C01A0B682F02585100B7AE17 /* Filter.kt */,
+				C01A0B692F02585100B7AE17 /* String.kt */,
+			);
+			path = util;
+			sourceTree = "<group>";
+		};
+		C01A0B6C2F02585100B7AE17 /* bookmark */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B6B2F02585100B7AE17 /* BookmarkState.kt */,
+			);
+			path = bookmark;
+			sourceTree = "<group>";
+		};
+		C01A0B6E2F02585100B7AE17 /* follow */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B6D2F02585100B7AE17 /* FollowState.kt */,
+			);
+			path = follow;
+			sourceTree = "<group>";
+		};
+		C01A0B6F2F02585100B7AE17 /* viewmodel */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B6C2F02585100B7AE17 /* bookmark */,
+				C01A0B6E2F02585100B7AE17 /* follow */,
+			);
+			path = viewmodel;
+			sourceTree = "<group>";
+		};
+		C01A0B7D2F02585100B7AE17 /* repository */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B662F02585100B7AE17 /* paging */,
+				C01A0B6A2F02585100B7AE17 /* util */,
+				C01A0B6F2F02585100B7AE17 /* viewmodel */,
+				C01A0B702F02585100B7AE17 /* AuthManager.kt */,
+				C01A0B712F02585100B7AE17 /* BlockingRepository.kt */,
+				C01A0B722F02585100B7AE17 /* BlockingRepositoryV2.kt */,
+				C01A0B732F02585100B7AE17 /* BookmarkedTagRepository.kt */,
+				C01A0B742F02585100B7AE17 /* CommentRepository.kt */,
+				C01A0B752F02585100B7AE17 /* DownloadManager.kt */,
+				C01A0B762F02585100B7AE17 /* DownloadStrategy.kt */,
+				C01A0B772F02585100B7AE17 /* NetworkFeatureImpl.kt */,
+				C01A0B782F02585100B7AE17 /* PixivRepository.kt */,
+				C01A0B792F02585100B7AE17 /* SearchRepository.kt */,
+				C01A0B7A2F02585100B7AE17 /* SettingRepository.kt */,
+				C01A0B7B2F02585100B7AE17 /* UserManager.kt */,
+				C01A0B7C2F02585100B7AE17 /* VersionManager.kt */,
+			);
+			path = repository;
+			sourceTree = "<group>";
+		};
+		C01A0B7E2F02585100B7AE17 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B7D2F02585100B7AE17 /* repository */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		C01A0B7F2F02585100B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B7E2F02585100B7AE17 /* common */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0B802F02585100B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B7F2F02585100B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0B812F02585100B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B802F02585100B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0B822F02585100B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B812F02585100B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0B832F02585100B7AE17 /* commonMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B822F02585100B7AE17 /* kotlin */,
+			);
+			name = commonMain;
+			path = ../common/repository/src/commonMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0B852F02585100B7AE17 /* repository */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B842F02585100B7AE17 /* IosDownloadStrategy.kt */,
+			);
+			path = repository;
+			sourceTree = "<group>";
+		};
+		C01A0B862F02585100B7AE17 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B852F02585100B7AE17 /* repository */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		C01A0B872F02585100B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B862F02585100B7AE17 /* common */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0B882F02585100B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B872F02585100B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0B892F02585100B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B882F02585100B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0B8A2F02585100B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B892F02585100B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0B8B2F02585100B7AE17 /* iosMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B8A2F02585100B7AE17 /* kotlin */,
+			);
+			name = iosMain;
+			path = ../common/repository/src/iosMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0BAB2F02591900B7AE17 /* components */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BAA2F02591900B7AE17 /* UgoilaPlayer.kt */,
+			);
+			path = components;
+			sourceTree = "<group>";
+		};
+		C01A0BAF2F02591900B7AE17 /* picture */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BAB2F02591900B7AE17 /* components */,
+				C01A0BAC2F02591900B7AE17 /* HorizontalSwipePictureScreen.kt */,
+				C01A0BAD2F02591900B7AE17 /* PictureScreen.kt */,
+				C01A0BAE2F02591900B7AE17 /* PictureViewModel.kt */,
+			);
+			path = picture;
+			sourceTree = "<group>";
+		};
+		C01A0BB02F02591900B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BAF2F02591900B7AE17 /* picture */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0BB12F02591900B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB02F02591900B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0BB22F02591900B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB12F02591900B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0BB32F02591900B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB22F02591900B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0BB42F02591900B7AE17 /* commonMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB32F02591900B7AE17 /* kotlin */,
+			);
+			name = commonMain;
+			path = ../feature/picture/src/commonMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0BB62F02591900B7AE17 /* picture */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB52F02591900B7AE17 /* PictureScreen.ios.kt */,
+			);
+			path = picture;
+			sourceTree = "<group>";
+		};
+		C01A0BB72F02591900B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB62F02591900B7AE17 /* picture */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0BB82F02591900B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB72F02591900B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0BB92F02591900B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB82F02591900B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0BBA2F02591900B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB92F02591900B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0BBB2F02591900B7AE17 /* iosMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BBA2F02591900B7AE17 /* kotlin */,
+			);
+			name = iosMain;
+			path = ../feature/picture/src/iosMain;
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -167,6 +837,78 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C01A0BBC2F02591900B7AE17 /* PictureScreen.kt in Resources */,
+				C01A0BBD2F02591900B7AE17 /* PictureScreen.ios.kt in Resources */,
+				C01A0BBE2F02591900B7AE17 /* UgoilaPlayer.kt in Resources */,
+				C01A0BBF2F02591900B7AE17 /* PictureViewModel.kt in Resources */,
+				C01A0BC02F02591900B7AE17 /* HorizontalSwipePictureScreen.kt in Resources */,
+				C01A0AE72F0257EE00B7AE17 /* PhotoUtil.kt in Resources */,
+				C01A0AE82F0257EE00B7AE17 /* BaseMviViewModel.kt in Resources */,
+				C01A0AE92F0257EE00B7AE17 /* DeviceInfo.ios.kt in Resources */,
+				C01A0AEA2F0257EE00B7AE17 /* MMKVSerializableProperty.kt in Resources */,
+				C01A0AEB2F0257EE00B7AE17 /* LocaleHelper.ios.kt in Resources */,
+				C01A0B8C2F02585100B7AE17 /* String.kt in Resources */,
+				C01A0B8D2F02585100B7AE17 /* IllustFollowingPagingSource.kt in Resources */,
+				C01A0B8E2F02585100B7AE17 /* CommentRepository.kt in Resources */,
+				C01A0B8F2F02585100B7AE17 /* IllustRecommendedPagingSource.kt in Resources */,
+				C01A0B902F02585100B7AE17 /* BlockingRepository.kt in Resources */,
+				C01A0B912F02585100B7AE17 /* RelatedIllustPaging.kt in Resources */,
+				C01A0B922F02585100B7AE17 /* IosDownloadStrategy.kt in Resources */,
+				C01A0B932F02585100B7AE17 /* FileName.kt in Resources */,
+				C01A0B942F02585100B7AE17 /* CommentPagingSource.kt in Resources */,
+				C01A0B952F02585100B7AE17 /* SearchIllustPagingSource.kt in Resources */,
+				C01A0B962F02585100B7AE17 /* UserManager.kt in Resources */,
+				C01A0B972F02585100B7AE17 /* CollectionIllustPagingSource.kt in Resources */,
+				C01A0B982F02585100B7AE17 /* FollowState.kt in Resources */,
+				C01A0B992F02585100B7AE17 /* CommentRepliesPagingSource.kt in Resources */,
+				C01A0B9A2F02585100B7AE17 /* BookmarkedTagRepository.kt in Resources */,
+				C01A0B9B2F02585100B7AE17 /* HistoryIllustPagingSource.kt in Resources */,
+				C01A0B9C2F02585100B7AE17 /* PixivRepository.kt in Resources */,
+				C01A0B9D2F02585100B7AE17 /* SettingRepository.kt in Resources */,
+				C01A0B9E2F02585100B7AE17 /* BlockingRepositoryV2.kt in Resources */,
+				C01A0B9F2F02585100B7AE17 /* SearchRepository.kt in Resources */,
+				C01A0BA02F02585100B7AE17 /* FollowingPagingSource.kt in Resources */,
+				C01A0BA12F02585100B7AE17 /* IllustRankingPagingSource.kt in Resources */,
+				C01A0BA22F02585100B7AE17 /* NetworkFeatureImpl.kt in Resources */,
+				C01A0BA32F02585100B7AE17 /* Filter.kt in Resources */,
+				C01A0BA42F02585100B7AE17 /* VersionManager.kt in Resources */,
+				C01A0BA52F02585100B7AE17 /* DownloadStrategy.kt in Resources */,
+				C01A0BA62F02585100B7AE17 /* AuthManager.kt in Resources */,
+				C01A0BA72F02585100B7AE17 /* DownloadManager.kt in Resources */,
+				C01A0BA82F02585100B7AE17 /* BookmarkState.kt in Resources */,
+				C01A0BA92F02585100B7AE17 /* UserIllustPagingSource.kt in Resources */,
+				C01A0AEC2F0257EE00B7AE17 /* MMKVConfig.kt in Resources */,
+				C01A0AED2F0257EE00B7AE17 /* DestinationsDeepLink.kt in Resources */,
+				C01A0AEE2F0257EE00B7AE17 /* ShareUtil.ios.kt in Resources */,
+				C01A0AEF2F0257EE00B7AE17 /* CoroutineExt.kt in Resources */,
+				C01A0AF02F0257EE00B7AE17 /* Constants.kt in Resources */,
+				C01A0AF12F0257EE00B7AE17 /* CoroutineExt.ios.kt in Resources */,
+				C01A0AF22F0257EE00B7AE17 /* CopyUtil.kt in Resources */,
+				C01A0AF32F0257EE00B7AE17 /* ToastMessage.kt in Resources */,
+				C01A0AF42F0257EE00B7AE17 /* NavigationManager.kt in Resources */,
+				C01A0AF52F0257EE00B7AE17 /* TimeUtil.kt in Resources */,
+				C01A0AF62F0257EE00B7AE17 /* DeviceInfo.kt in Resources */,
+				C01A0AF72F0257EE00B7AE17 /* ExtUtil.kt in Resources */,
+				C01A0AF82F0257EE00B7AE17 /* FileUtils.kt in Resources */,
+				C01A0AF92F0257EE00B7AE17 /* AppUtil.kt in Resources */,
+				C01A0AFA2F0257EE00B7AE17 /* ToastUtil.kt in Resources */,
+				C01A0AFB2F0257EE00B7AE17 /* BitmapUtil.kt in Resources */,
+				C01A0AFC2F0257EE00B7AE17 /* IllustCacheRepo.kt in Resources */,
+				C01A0AFD2F0257EE00B7AE17 /* CancelException.kt in Resources */,
+				C01A0AFE2F0257EE00B7AE17 /* ScreenUtil.kt in Resources */,
+				C01A0AFF2F0257EE00B7AE17 /* ZipUtil.kt in Resources */,
+				C01A0B002F0257EE00B7AE17 /* PictureType.kt in Resources */,
+				C01A0B012F0257EE00B7AE17 /* ShareUtil.kt in Resources */,
+				C01A0B022F0257EE00B7AE17 /* Navigation.kt in Resources */,
+				C01A0B032F0257EE00B7AE17 /* MMKVStateFlowProperty.kt in Resources */,
+				C01A0B042F0257EE00B7AE17 /* LazyStateUtil.kt in Resources */,
+				C01A0B052F0257EE00B7AE17 /* LocaleHelper.kt in Resources */,
+				C01A0B062F0257EE00B7AE17 /* CopyUtil.ios.kt in Resources */,
+				C01A0B072F0257EE00B7AE17 /* MMKVProperty.kt in Resources */,
+				C01A0B082F0257EE00B7AE17 /* AnimationDefaults.kt in Resources */,
+				C01A0B092F0257EE00B7AE17 /* BitmapUtil.ios.kt in Resources */,
+				C01A0B0A2F0257EE00B7AE17 /* DebounceUtil.kt in Resources */,
+				C01A0B0B2F0257EE00B7AE17 /* Json.kt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
