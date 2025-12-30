@@ -19,11 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.router.NavigationManager
@@ -64,9 +60,6 @@ fun AppDataScreen(
 ) {
     val scope = rememberCoroutineScope()
     val state = viewModel.asState()
-
-    var trigger by remember { mutableIntStateOf(0) }
-    val cacheDirSize = remember(trigger) { FileKit.cacheDir.calculateSize().adaptiveFileSize1() }
 
     val exportLauncher = rememberFileSaverLauncher { file ->
         file?.let { viewModel.exportData(it) }
@@ -146,7 +139,7 @@ fun AppDataScreen(
 
             ListItem(
                 headlineContent = {
-                    Text(text = stringResource(RStrings.clear_cache, cacheDirSize))
+                    Text(text = stringResource(RStrings.clear_cache, viewModel.cacheDirSize))
                 },
                 modifier = Modifier.clickable {
                     scope.launch(Dispatchers.IO) {
@@ -155,7 +148,7 @@ fun AppDataScreen(
                             it.deleteRecursively()
                         }
                         ToastUtil.safeShortToast(RStrings.cache_cleared, dirSize)
-                        trigger++
+                        viewModel.refreshCacheSize()
                     }
                 },
                 leadingContent = {

@@ -2,6 +2,9 @@ package com.mrl.pixiv.setting.appdata
 
 import androidx.annotation.IntRange
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.mrl.pixiv.common.data.Tag
 import com.mrl.pixiv.common.data.comment.Comment
 import com.mrl.pixiv.common.data.search.Search
@@ -15,6 +18,8 @@ import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.ZipUtil
+import com.mrl.pixiv.common.util.adaptiveFileSize1
+import com.mrl.pixiv.common.util.calculateSize
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -67,7 +72,10 @@ class AppDataViewModel(
 ) : BaseMviViewModel<AppDataState, ViewIntent>(
     initialState = AppDataState(),
 ) {
+    var cacheDirSize by mutableStateOf(0L.adaptiveFileSize1())
+
     init {
+        refreshCacheSize()
         checkOldData()
     }
 
@@ -154,6 +162,12 @@ class AppDataViewModel(
                 sendEffect = ::sendEffect,
                 checkOldData = ::checkOldData
             )
+        }
+    }
+
+    fun refreshCacheSize() {
+        launchIO {
+            cacheDirSize = FileKit.cacheDir.calculateSize().adaptiveFileSize1()
         }
     }
 }
