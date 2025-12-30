@@ -14,12 +14,9 @@ import coil3.PlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
-import com.mrl.pixiv.common.analytics.initKotzilla
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
-import com.mrl.pixiv.common.util.isDebug
 import com.mrl.pixiv.common.viewmodel.asState
-import com.mrl.pixiv.di.allModule
 import com.mrl.pixiv.navigation.Navigation3MainGraph
 import com.mrl.pixiv.splash.SplashViewModel
 import com.mrl.pixiv.theme.PiPixivTheme
@@ -31,7 +28,6 @@ import io.github.vinceglb.filekit.toKotlinxIoPath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import okio.Path.Companion.toPath
-import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -44,26 +40,19 @@ fun App(
 ) {
     val appLanguage by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appLanguage }
 
-    KoinApplication(
-        application = {
-            initKotzilla(isDebug)
-            modules(allModule)
-        }
-    ) {
-        SetUpImageLoaderFactory(imageLoaderBuilder)
+    SetUpImageLoaderFactory(imageLoaderBuilder)
 
-        key(appLanguage) {
-            PiPixivTheme(
-                darkTheme = darkTheme,
-                colorScheme = colorScheme
-            ) {
-                val state = splashViewModel.asState()
-                state.startDestination?.let {
-                    Navigation3MainGraph(
-                        startDestination = it,
-                        modifier = modifier
-                    )
-                }
+    key(appLanguage) {
+        PiPixivTheme(
+            darkTheme = darkTheme,
+            colorScheme = colorScheme
+        ) {
+            val state = splashViewModel.asState()
+            state.startDestination?.let {
+                Navigation3MainGraph(
+                    startDestination = it,
+                    modifier = modifier
+                )
             }
         }
     }
