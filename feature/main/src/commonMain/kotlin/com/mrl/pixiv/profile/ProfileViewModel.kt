@@ -1,7 +1,6 @@
 package com.mrl.pixiv.profile
 
 import com.mrl.pixiv.common.data.setting.SettingTheme
-import com.mrl.pixiv.common.data.setting.setAppCompatDelegateThemeMode
 import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
@@ -9,6 +8,7 @@ import com.mrl.pixiv.common.repository.UserManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.copyToClipboard
+import com.mrl.pixiv.common.util.setAppCompatDelegateThemeMode
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.strings.copy_to_clipboard
@@ -18,7 +18,6 @@ data object ProfileState
 
 sealed class ProfileAction : ViewIntent {
     data object GetUserInfo : ProfileAction()
-    data class ChangeAppTheme(val theme: SettingTheme) : ProfileAction()
     data object ExportToken : ProfileAction()
 }
 
@@ -29,7 +28,6 @@ class ProfileViewModel : BaseMviViewModel<ProfileState, ProfileAction>(
     override suspend fun handleIntent(intent: ProfileAction) {
         when (intent) {
             is ProfileAction.GetUserInfo -> getUserInfo()
-            is ProfileAction.ChangeAppTheme -> changeAppTheme(intent.theme)
             is ProfileAction.ExportToken -> exportToken()
         }
     }
@@ -47,7 +45,7 @@ class ProfileViewModel : BaseMviViewModel<ProfileState, ProfileAction>(
         SearchRepository.clear()
     }
 
-    private fun changeAppTheme(theme: SettingTheme) {
+    fun changeAppTheme(theme: SettingTheme) {
         SettingRepository.setSettingTheme(theme)
         setAppCompatDelegateThemeMode(theme)
     }

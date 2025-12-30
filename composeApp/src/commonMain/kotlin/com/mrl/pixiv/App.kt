@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.Image
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -17,6 +16,7 @@ import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
 import com.mrl.pixiv.common.analytics.initKotzilla
 import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.util.isDebug
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.di.allModule
@@ -42,7 +42,8 @@ fun App(
     imageLoaderBuilder: ImageLoader.Builder.() -> Unit = {},
     splashViewModel: SplashViewModel = koinViewModel()
 ) {
-    val appLang by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
+    val appLanguage by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appLanguage }
+
     KoinApplication(
         application = {
             initKotzilla(isDebug)
@@ -51,7 +52,7 @@ fun App(
     ) {
         SetUpImageLoaderFactory(imageLoaderBuilder)
 
-        key(appLang) {
+        key(appLanguage) {
             PiPixivTheme(
                 darkTheme = darkTheme,
                 colorScheme = colorScheme

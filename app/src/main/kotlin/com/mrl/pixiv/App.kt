@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import com.mrl.pixiv.common.analytics.FLAVOR
 import com.mrl.pixiv.common.analytics.initializeFirebase
-import com.mrl.pixiv.common.data.setting.setAppCompatDelegateThemeMode
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.VersionManager
@@ -12,6 +11,7 @@ import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.deleteFiles
 import com.mrl.pixiv.common.util.isDebug
 import com.mrl.pixiv.common.util.isExist
+import com.mrl.pixiv.common.util.setAppCompatDelegateThemeMode
 import com.mrl.pixiv.di.Initialization
 import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.DelicateCoroutinesApi

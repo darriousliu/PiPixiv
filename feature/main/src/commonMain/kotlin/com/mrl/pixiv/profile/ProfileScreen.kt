@@ -50,7 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.setting.SettingTheme
-import com.mrl.pixiv.common.data.setting.getAppCompatDelegateThemeMode
+import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.router.NavigationManager
@@ -110,7 +110,7 @@ fun ProfileScreen(
         topBar = {
             ProfileAppBar(
                 onChangeAppTheme = { theme ->
-                    viewModel.dispatch(ProfileAction.ChangeAppTheme(theme = theme))
+                    viewModel.changeAppTheme(theme)
                 }
             )
         },
@@ -416,6 +416,7 @@ fun ProfileScreen(
 private fun ProfileAppBar(
     onChangeAppTheme: (SettingTheme) -> Unit = {},
 ) {
+    val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
     var expanded by remember { mutableStateOf(false) }
     TopAppBar(
         title = {},
@@ -443,7 +444,7 @@ private fun ProfileAppBar(
                                     text = stringResource(resId),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
-                                if (getAppCompatDelegateThemeMode() == theme) {
+                                if (userPreference.theme == theme.name) {
                                     Icon(
                                         imageVector = Icons.Rounded.Check,
                                         contentDescription = null
