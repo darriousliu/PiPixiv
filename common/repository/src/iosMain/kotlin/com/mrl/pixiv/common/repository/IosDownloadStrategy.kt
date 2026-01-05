@@ -129,7 +129,7 @@ class DownloadDelegate(
 
         runBlocking {
             val entity = downloadDao.getDownload(illustId, index) ?: return@runBlocking
-            Logger.e("URLSession") { "$entity" }
+            Logger.d("URLSession") { "$entity" }
             if (entity.originalUrl.endsWith(".zip")) {
                 handleUgoira(entity, didFinishDownloadingToURL)
             } else {
@@ -239,15 +239,15 @@ class DownloadDelegate(
             entity.userName,
             entity.index
         )
-        Logger.e("handleImage") { fileName }
-        Logger.e("handleImage") { tempFileUrl.toString() }
+        Logger.d("handleImage") { fileName }
+        Logger.d("handleImage") { tempFileUrl.toString() }
         val extension = "." + entity.originalUrl.substringAfterLast('.', "")
         val finalFileName = fileName + extension
 
         val fileManager = NSFileManager.defaultManager
         val tempDir = NSURL.fileURLWithPath(NSTemporaryDirectory())
         val finalFileUrl = tempDir.URLByAppendingPathComponent(finalFileName)
-        Logger.e("handleImage") { "$finalFileUrl" }
+        Logger.d("handleImage") { "$finalFileUrl" }
 
         if (finalFileUrl != null) {
             try {
@@ -255,9 +255,7 @@ class DownloadDelegate(
                     fileManager.removeItemAtURL(finalFileUrl, null)
                 }
 
-                fileManager.copyItemAtURL(tempFileUrl, finalFileUrl, null).also {
-                    Logger.e("handleImage") { "File moved to ${finalFileUrl.path} $it" }
-                }
+                fileManager.copyItemAtURL(tempFileUrl, finalFileUrl, null)
                 saveToAlbum(entity, finalFileUrl)
             } catch (e: Exception) {
                 Logger.e("DownloadDelegate", e)
