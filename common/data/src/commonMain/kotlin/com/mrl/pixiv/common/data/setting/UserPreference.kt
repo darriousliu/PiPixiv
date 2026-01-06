@@ -44,7 +44,7 @@ data class UserPreference(
             val proxyType: ProxyType = ProxyType.HTTP
         ) : BypassSetting {
             enum class ProxyType {
-                HTTP, HTTPS
+                HTTP, SOCKS
             }
         }
 

@@ -33,7 +33,7 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.network_plan
 import com.mrl.pixiv.strings.protocol_http
-import com.mrl.pixiv.strings.protocol_https
+import com.mrl.pixiv.strings.protocol_socks
 import com.mrl.pixiv.strings.proxy_host
 import com.mrl.pixiv.strings.proxy_port
 import com.mrl.pixiv.strings.proxy_type
@@ -226,7 +226,7 @@ fun ProxyEditor(
                                 text = stringResource(
                                     when (type) {
                                         UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> RStrings.protocol_http
-                                        UserPreference.BypassSetting.Proxy.ProxyType.HTTPS -> RStrings.protocol_https
+                                        UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> RStrings.protocol_socks
                                     }
                                 ),
                                 modifier = Modifier.padding(start = 8.dp)
@@ -262,7 +262,7 @@ fun ProxyEditor(
                     text = stringResource(
                         when (setting.proxyType) {
                             UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> RStrings.protocol_http
-                            UserPreference.BypassSetting.Proxy.ProxyType.HTTPS -> RStrings.protocol_https
+                            UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> RStrings.protocol_socks
                         }
                     )
                 )
