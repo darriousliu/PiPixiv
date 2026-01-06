@@ -2,7 +2,6 @@ package com.mrl.pixiv.common.repository
 
 import com.mrl.pixiv.common.data.Constants.API_HOST
 import com.mrl.pixiv.common.data.Constants.AUTH_HOST
-import com.mrl.pixiv.common.data.Constants.hostMap
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.auth.AuthTokenFieldReq
@@ -11,8 +10,6 @@ import com.mrl.pixiv.common.datasource.remote.createAuthApi
 import com.mrl.pixiv.common.datasource.remote.createPixivApi
 import com.mrl.pixiv.common.network.ApiClient
 import com.mrl.pixiv.common.network.AuthClient
-import com.mrl.pixiv.common.util.isIOS
-import com.mrl.pixiv.common.util.platform
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import org.koin.core.component.KoinComponent
@@ -23,23 +20,16 @@ object PixivRepository : KoinComponent {
     private val authHttpClient by inject<HttpClient>(named<AuthClient>())
     private val apiHttpClient by inject<HttpClient>(named<ApiClient>())
 
-    private val enableBypassSniffing: Boolean
-        get() = if (platform.isIOS()) {
-            true
-        } else {
-            SettingRepository.userPreferenceFlow.value.enableBypassSniffing
-        }
-
     private val authKtorfit = Ktorfit.Builder()
         .baseUrl(
-            "https://${if (enableBypassSniffing) AUTH_HOST else hostMap[AUTH_HOST]!!}/"
+            "https://$AUTH_HOST/"
         )
         .httpClient(authHttpClient)
         .build()
 
     private val apiKtorfit = Ktorfit.Builder()
         .baseUrl(
-            "https://${if (enableBypassSniffing) API_HOST else hostMap[API_HOST]!!}/"
+            "https://$API_HOST/"
         )
         .httpClient(apiHttpClient)
         .build()

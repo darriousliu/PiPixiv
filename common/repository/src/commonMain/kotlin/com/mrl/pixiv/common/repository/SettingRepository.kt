@@ -55,10 +55,6 @@ object SettingRepository : MMKVUser {
         it.copy(theme = theme.toString())
     }
 
-    fun setEnableBypassSniffing(enable: Boolean) = userPreference.update {
-        it.copy(enableBypassSniffing = enable)
-    }
-
     fun setPictureSourceHost(host: String) = userPreference.update {
         it.copy(imageHost = host)
     }
