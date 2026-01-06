@@ -63,8 +63,6 @@
     <string name="app_language">App-Sprache</string>
     <string name="setting">Einstellungen</string>
     <string name="network_setting">Netzwerkeinstellungen</string>
-    <string name="enable_bypass_sniffing">Bypass-Sniffing aktivieren</string>
-    <string name="close_to_use_ip_directly">Wenn deaktiviert, direkte IP-Verbindung verwenden</string>
     <string name="restart_app_to_take_effect">App neu starten, um Änderungen zu übernehmen</string>
     <string name="image_source">Bildquelle</string>
     <string name="self_defined_source">Benutzerdefinierte Bildquelle</string>

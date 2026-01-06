@@ -63,8 +63,6 @@
     <string name="app_language">ऐप भाषा</string>
     <string name="setting">सेटिंग</string>
     <string name="network_setting">नेटवर्क सेटिंग</string>
-    <string name="enable_bypass_sniffing">बायपास स्निफिंग सक्षम करें</string>
-    <string name="close_to_use_ip_directly">बंद होने पर, सीधे IP कनेक्ट का उपयोग करें</string>
     <string name="restart_app_to_take_effect">प्रभावी होने के लिए ऐप को पुनरारंभ करें</string>
     <string name="image_source">छवि स्रोत</string>
     <string name="self_defined_source">स्व-परिभाषित छवि स्रोत</string>

@@ -62,8 +62,6 @@
     <string name="app_language">لغة التطبيق</string>
     <string name="setting">الإعدادات</string>
     <string name="network_setting">إعدادات الشبكة</string>
-    <string name="enable_bypass_sniffing">تمكين تجاوز الاستنشاق</string>
-    <string name="close_to_use_ip_directly">في حالة التعطيل، استخدام الاتصال المباشر بـ IP</string>
     <string name="restart_app_to_take_effect">أعد تشغيل التطبيق لتطبيق التغييرات</string>
     <string name="image_source">مصدر الصورة</string>
     <string name="self_defined_source">مصدر صورة مخصص</string>

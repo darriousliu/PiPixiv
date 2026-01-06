@@ -63,8 +63,6 @@
     <string name="app_language">Язык приложения</string>
     <string name="setting">Настройки</string>
     <string name="network_setting">Настройки сети</string>
-    <string name="enable_bypass_sniffing">Включить обход обнаружения</string>
-    <string name="close_to_use_ip_directly">Если отключено, использовать прямое IP-подключение</string>
     <string name="restart_app_to_take_effect">Перезапустите приложение для применения изменений</string>
     <string name="image_source">Источник изображения</string>
     <string name="self_defined_source">Пользовательский источник изображения</string>

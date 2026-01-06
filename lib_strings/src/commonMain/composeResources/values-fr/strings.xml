@@ -63,8 +63,6 @@
     <string name="app_language">Langue de l\'application</string>
     <string name="setting">Paramètres</string>
     <string name="network_setting">Paramètres réseau</string>
-    <string name="enable_bypass_sniffing">Activer le contournement de détection</string>
-    <string name="close_to_use_ip_directly">Si désactivé, utiliser la connexion IP directe</string>
     <string name="restart_app_to_take_effect">Redémarrer l\'application pour appliquer les modifications</string>
     <string name="image_source">Source d\'image</string>
     <string name="self_defined_source">Source d\'image personnalisée</string>

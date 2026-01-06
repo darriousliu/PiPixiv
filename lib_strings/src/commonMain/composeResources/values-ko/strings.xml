@@ -63,8 +63,6 @@
     <string name="app_language">앱 언어</string>
     <string name="setting">설정</string>
     <string name="network_setting">네트워크 설정</string>
-    <string name="enable_bypass_sniffing">우회 스니핑 활성화</string>
-    <string name="close_to_use_ip_directly">비활성화 시 IP 직접 연결 사용</string>
     <string name="restart_app_to_take_effect">앱 재시작 시 적용</string>
     <string name="image_source">이미지 소스</string>
     <string name="self_defined_source">사용자 정의 이미지 소스</string>

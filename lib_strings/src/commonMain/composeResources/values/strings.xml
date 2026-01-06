@@ -80,8 +80,6 @@
     <string name="sni_non_strict_ssl">忽略SSL错误</string>
     <string name="protocol_http" translatable="false">HTTP</string>
     <string name="protocol_https" translatable="false">HTTPS</string>
-    <string name="enable_bypass_sniffing">是否开启绕过嗅探</string>
-    <string name="close_to_use_ip_directly">关闭则使用IP直连</string>
     <string name="restart_app_to_take_effect">重启App生效</string>
     <string name="image_source">图源</string>
     <string name="self_defined_source">自定义图源</string>

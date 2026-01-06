@@ -63,8 +63,6 @@
     <string name="app_language">應用程式語言</string>
     <string name="setting">設定</string>
     <string name="network_setting">網路設定</string>
-    <string name="enable_bypass_sniffing">是否開啟繞過偵測</string>
-    <string name="close_to_use_ip_directly">關閉則使用 IP 直連</string>
     <string name="restart_app_to_take_effect">重啟 App 後生效</string>
     <string name="image_source">圖源</string>
     <string name="self_defined_source">自定義圖源</string>

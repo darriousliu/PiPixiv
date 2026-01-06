@@ -63,8 +63,6 @@
     <string name="app_language">アプリの言語</string>
     <string name="setting">設定</string>
     <string name="network_setting">ネットワーク設定</string>
-    <string name="enable_bypass_sniffing">バイパススニッフィングを有効にする</string>
-    <string name="close_to_use_ip_directly">オフの場合、IP直接接続を使用</string>
     <string name="restart_app_to_take_effect">アプリを再起動して有効にする</string>
     <string name="image_source">画像ソース</string>
     <string name="self_defined_source">カスタム画像ソース</string>
