@@ -1,10 +1,15 @@
 package com.mrl.pixiv.common.network
 
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Constants.hostMap
+import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.network.NetworkUtil.imageHost
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.ProxyBuilder
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.engine.darwin.DarwinClientEngineConfig
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSURLAuthenticationMethodServerTrust
 import platform.Foundation.NSURLCredential
@@ -20,6 +25,29 @@ internal actual val baseHttpClient: HttpClient
             setAllowsCellularAccess(true)
         }
         configureHandleChallenge()
+        when (val bypassSetting = NetworkUtil.bypassSetting) {
+            is UserPreference.BypassSetting.None -> {}
+            is UserPreference.BypassSetting.Proxy -> {
+                proxy = when (bypassSetting.proxyType) {
+                    UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> ProxyBuilder.http(
+                        URLBuilder(
+                            protocol = URLProtocol.HTTP,
+                            host = bypassSetting.host,
+                            port = bypassSetting.port
+                        ).build()
+                    )
+
+                    UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> ProxyBuilder.socks(
+                        host = bypassSetting.host,
+                        port = bypassSetting.port
+                    )
+                }
+            }
+
+            is UserPreference.BypassSetting.SNI -> {
+                Logger.w("HttpClient") { "SNI is not supported on iOS" }
+            }
+        }
     }
 
 internal actual val baseImageHttpClient: HttpClient

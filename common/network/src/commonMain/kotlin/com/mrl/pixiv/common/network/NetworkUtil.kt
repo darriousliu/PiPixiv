@@ -32,6 +32,9 @@ internal object NetworkUtil : KoinComponent {
     val imageHost: String
         get() = networkFeature.provideUserPreference().imageHost.ifEmpty { IMAGE_HOST }
 
+    val bypassSetting: UserPreference.BypassSetting
+        get() = networkFeature.provideUserPreference().bypassSetting
+
     private val iso8601DateTimeFormat = LocalDateTime.Format {
         date(ISO)
         alternativeParsing({

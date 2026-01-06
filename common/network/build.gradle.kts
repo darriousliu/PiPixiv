@@ -29,6 +29,11 @@ kotlin {
             implementation(kotlinx.datetime)
         }
 
+        androidJvmMain.dependencies {
+            implementation(project.dependencies.platform(libs.okhttp.bom))
+            implementation(libs.okhttp)
+        }
+
         androidMain.dependencies {
             implementation(kotlinx.ktor.client.okhttp)
         }
