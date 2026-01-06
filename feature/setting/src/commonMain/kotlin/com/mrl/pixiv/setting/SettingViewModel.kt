@@ -1,5 +1,6 @@
 package com.mrl.pixiv.setting
 
+import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
@@ -8,27 +9,26 @@ import org.koin.android.annotation.KoinViewModel
 
 data object SettingState
 
-sealed class SettingAction : ViewIntent {
-    data object SwitchBypassSniffing : SettingAction()
-    data class SavePictureSourceHost(val host: String) : SettingAction()
-}
+sealed class SettingAction : ViewIntent
 
 @KoinViewModel
 class SettingViewModel : BaseMviViewModel<SettingState, SettingAction>(
     initialState = SettingState,
 ) {
     override suspend fun handleIntent(intent: SettingAction) {
-        when (intent) {
-            is SettingAction.SwitchBypassSniffing -> switchBypassSniffing()
-            is SettingAction.SavePictureSourceHost -> savePictureSourceHost(intent.host)
-        }
     }
 
-    private fun savePictureSourceHost(host: String) {
+    fun savePictureSourceHost(host: String) {
         SettingRepository.setPictureSourceHost(host)
     }
 
-    private fun switchBypassSniffing() {
+    fun switchBypassSniffing() {
         SettingRepository.setEnableBypassSniffing(!requireUserPreferenceValue.enableBypassSniffing)
+    }
+
+    fun updateBypassSetting(setting: UserPreference.BypassSetting) {
+        SettingRepository.updateSettings {
+            copy(bypassSetting = setting)
+        }
     }
 }

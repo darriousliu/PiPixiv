@@ -10,9 +10,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -24,11 +22,9 @@ import com.mrl.pixiv.common.compose.LocalToaster
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.setting.SettingAction
 import com.mrl.pixiv.setting.SettingViewModel
+import com.mrl.pixiv.setting.network.components.BypassSettingEditor
 import com.mrl.pixiv.setting.network.components.PictureSourceWidget
-import com.mrl.pixiv.strings.close_to_use_ip_directly
-import com.mrl.pixiv.strings.enable_bypass_sniffing
 import com.mrl.pixiv.strings.network_setting
 import com.mrl.pixiv.strings.restart_app_to_take_effect
 import org.jetbrains.compose.resources.stringResource
@@ -68,33 +64,25 @@ fun NetworkSettingScreen(
                 .imePadding()
         ) {
             val itemModifier = Modifier.padding(horizontal = 8.dp)
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(RStrings.enable_bypass_sniffing),
-                    )
-                },
+
+            BypassSettingEditor(
                 modifier = itemModifier,
-                supportingContent = {
-                    Text(
-                        text = stringResource(RStrings.close_to_use_ip_directly),
-                    )
-                },
-                trailingContent = {
-                    Switch(
-                        checked = userPreference.enableBypassSniffing,
-                        onCheckedChange = { viewModel.dispatch(SettingAction.SwitchBypassSniffing) }
-                    )
-                }
+                bypassSetting = userPreference.bypassSetting,
+                onUpdate = { setting -> viewModel.updateBypassSetting(setting) }
             )
+
             PictureSourceWidget(
                 modifier = itemModifier,
                 currentSelected = userPreference.imageHost,
-                savePictureSourceHost = {
-                    viewModel.dispatch(SettingAction.SavePictureSourceHost(it))
+                savePictureSourceHost = { host ->
+                    viewModel.savePictureSourceHost(host)
                     toaster.show(RStrings.restart_app_to_take_effect)
                 }
             )
         }
     }
 }
+
+
+
+

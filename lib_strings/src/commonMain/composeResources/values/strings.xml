@@ -65,6 +65,21 @@
     <string name="app_language">应用语言</string>
     <string name="setting">设置</string>
     <string name="network_setting">网络设置</string>
+    <string name="network_plan">网络方案</string>
+    <string name="use_none">不使用</string>
+    <string name="use_proxy">使用代理</string>
+    <string name="use_sni">使用SNI</string>
+    <string name="use_none_desc">不使用代理或嗅探，直接连接Pixiv</string>
+    <string name="use_proxy_desc">通过代理服务器连接Pixiv</string>
+    <string name="use_sni_desc">通过SNI绕过封锁连接Pixiv</string>
+    <string name="proxy_host">代理地址</string>
+    <string name="proxy_port">代理端口</string>
+    <string name="proxy_type">代理类型</string>
+    <string name="sni_doh_url">DoH地址</string>
+    <string name="sni_timeout">DoH超时时间 (秒)</string>
+    <string name="sni_non_strict_ssl">忽略SSL错误</string>
+    <string name="protocol_http" translatable="false">HTTP</string>
+    <string name="protocol_https" translatable="false">HTTPS</string>
     <string name="enable_bypass_sniffing">是否开启绕过嗅探</string>
     <string name="close_to_use_ip_directly">关闭则使用IP直连</string>
     <string name="restart_app_to_take_effect">重启App生效</string>
