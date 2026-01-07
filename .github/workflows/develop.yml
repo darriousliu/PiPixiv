@@ -218,8 +218,6 @@ jobs:
 
       - name: Build iOS IPA
         run: |
-          cd iosApp
-          pod install --repo-update
           xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Release -sdk iphoneos -archivePath $PWD/build/iosApp.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
           mkdir -p build/Payload
           cp -R build/iosApp.xcarchive/Products/Applications/iosApp.app build/Payload/
