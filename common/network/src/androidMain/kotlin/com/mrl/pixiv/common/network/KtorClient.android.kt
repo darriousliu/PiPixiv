@@ -2,6 +2,7 @@ package com.mrl.pixiv.common.network
 
 import com.mrl.pixiv.common.data.setting.UserPreference
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.engine.okhttp.OkHttpConfig
 import java.net.InetSocketAddress
@@ -51,3 +52,5 @@ private fun OkHttpConfig.configureProxyOrSNI() {
         }
     }
 }
+
+actual val httpEngineFactory: HttpClientEngineFactory<*> = OkHttp

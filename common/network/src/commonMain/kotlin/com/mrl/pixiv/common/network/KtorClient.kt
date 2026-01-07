@@ -78,3 +78,5 @@ internal fun <T : HttpClientEngineConfig> imageHttpClient(
 internal expect val baseHttpClient: HttpClient
 
 internal expect val baseImageHttpClient: HttpClient
+
+expect val httpEngineFactory: HttpClientEngineFactory<*>

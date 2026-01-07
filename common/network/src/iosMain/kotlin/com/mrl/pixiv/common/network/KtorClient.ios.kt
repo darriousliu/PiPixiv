@@ -5,6 +5,7 @@ import com.mrl.pixiv.common.data.Constants.hostMap
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.network.NetworkUtil.imageHost
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.engine.darwin.DarwinClientEngineConfig
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -26,7 +27,7 @@ internal actual val baseHttpClient: HttpClient
     }
 
 internal actual val baseImageHttpClient: HttpClient
-    get() = httpClient(Darwin) {
+    get() = imageHttpClient(Darwin) {
         configureRequest {
             setAllowsCellularAccess(true)
         }
@@ -97,3 +98,4 @@ private fun DarwinClientEngineConfig.configureProxy() {
     }
 }
 
+actual val httpEngineFactory: HttpClientEngineFactory<*> = Darwin
