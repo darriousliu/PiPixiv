@@ -213,6 +213,7 @@ jobs:
       - name: Link Dependencies
         run: |
           ./gradlew :composeApp:generateDummyFramework
+          ./gradlew :composeApp:podspec
           cd iosApp
           pod install --repo-update
 
