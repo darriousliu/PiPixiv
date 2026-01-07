@@ -208,7 +208,13 @@ jobs:
       - name: Setup CocoaPods
         uses: maxim-lobanov/setup-cocoapods@v1
         with:
-          version: 1.14.3
+          version: 1.16.1
+
+      - name: Link Dependencies
+        run: |
+          ./gradlew :composeApp:generateDummyFramework
+          cd iosApp
+          pod install --repo-update
 
       - name: Build iOS IPA
         run: |
