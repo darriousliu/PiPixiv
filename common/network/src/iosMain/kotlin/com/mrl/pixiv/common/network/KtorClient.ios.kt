@@ -5,11 +5,8 @@ import com.mrl.pixiv.common.data.Constants.hostMap
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.network.NetworkUtil.imageHost
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.ProxyBuilder
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.engine.darwin.DarwinClientEngineConfig
-import io.ktor.http.URLBuilder
-import io.ktor.http.URLProtocol
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSURLAuthenticationMethodServerTrust
 import platform.Foundation.NSURLCredential
@@ -60,20 +57,38 @@ private fun DarwinClientEngineConfig.configureProxy() {
     when (val bypassSetting = NetworkUtil.bypassSetting) {
         is UserPreference.BypassSetting.None -> {}
         is UserPreference.BypassSetting.Proxy -> {
-            proxy = when (bypassSetting.proxyType) {
-                UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> ProxyBuilder.http(
-                    URLBuilder(
-                        protocol = URLProtocol.HTTP,
-                        host = bypassSetting.host,
-                        port = bypassSetting.port
-                    ).build()
-                )
+            configureSession {
+                connectionProxyDictionary = buildMap {
+                    if (bypassSetting.proxyType == UserPreference.BypassSetting.Proxy.ProxyType.HTTP) {
+                        put("HTTPEnable", true)
+                        put("HTTPProxy", bypassSetting.host)
+                        put("HTTPPort", bypassSetting.port)
 
-                UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> ProxyBuilder.socks(
-                    host = bypassSetting.host,
-                    port = bypassSetting.port
-                )
+                        put("HTTPSEnable", true)
+                        put("HTTPSProxy", bypassSetting.host)
+                        put("HTTPSPort", bypassSetting.port)
+                    }
+                    if (bypassSetting.proxyType == UserPreference.BypassSetting.Proxy.ProxyType.SOCKS) {
+                        put("SOCKSEnable", true)
+                        put("SOCKSProxy", bypassSetting.host)
+                        put("SOCKSPort", bypassSetting.port)
+                    }
+                }
             }
+//            proxy = when (bypassSetting.proxyType) {
+//                UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> ProxyBuilder.http(
+//                    URLBuilder(
+//                        protocol = URLProtocol.HTTP,
+//                        host = bypassSetting.host,
+//                        port = bypassSetting.port
+//                    ).build()
+//                )
+//
+//                UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> ProxyBuilder.socks(
+//                    host = bypassSetting.host,
+//                    port = bypassSetting.port
+//                )
+//            }
         }
 
         is UserPreference.BypassSetting.SNI -> {
