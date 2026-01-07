@@ -1,3 +1,4 @@
+
 import com.mrl.pixiv.buildsrc.configureRemoveKoinMeta
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
@@ -5,6 +6,7 @@ plugins {
     id("pixiv.multiplatform.compose")
     alias(composes.plugins.composeHotReload)
     alias(kotlinx.plugins.native.cocoapods)
+    alias(libs.plugins.kotzilla)
 }
 
 kotlin {
@@ -78,7 +80,7 @@ compose.desktop {
         mainClass = "com.mrl.pixiv.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
             packageName = "com.mrl.pixiv"
             packageVersion = properties["versionName"]?.toString()
         }

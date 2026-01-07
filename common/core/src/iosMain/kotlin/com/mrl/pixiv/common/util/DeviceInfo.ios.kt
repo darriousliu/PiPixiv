@@ -13,4 +13,7 @@ actual object DeviceInfo {
         get() = UIDevice.currentDevice.model
 
     actual val APP_VERSION = "8.4.0"
+    actual val DISPLAY_NAME by lazy {
+        UIDevice.currentDevice.model
+    }
 }

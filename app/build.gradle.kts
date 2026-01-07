@@ -7,7 +7,6 @@ plugins {
 if (project.findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.google.services.get().pluginId)
     pluginManager.apply(libs.plugins.firebase.crashlytics.get().pluginId)
-    pluginManager.apply(libs.plugins.kotzilla.get().pluginId)
 }
 
 android {

@@ -5,4 +5,5 @@ expect object DeviceInfo {
     val VERSION: String
     val MODEL: String
     val APP_VERSION: String
+    val DISPLAY_NAME: String
 }
