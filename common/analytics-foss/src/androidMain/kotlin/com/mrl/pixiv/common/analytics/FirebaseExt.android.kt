@@ -1,4 +1,4 @@
-package com.mrl.pixiv.common.analytics.com.mrl.pixiv.common.analytics
+package com.mrl.pixiv.common.analytics
 
 import android.app.Application
 
