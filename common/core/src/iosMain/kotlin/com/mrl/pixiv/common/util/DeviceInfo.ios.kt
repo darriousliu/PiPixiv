@@ -1,6 +1,13 @@
 package com.mrl.pixiv.common.util
 
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.toKString
 import platform.UIKit.UIDevice
+import platform.posix.uname
+import platform.posix.utsname
 
 actual object DeviceInfo {
     private val systemName = UIDevice.currentDevice.systemName
@@ -14,7 +21,7 @@ actual object DeviceInfo {
 
     actual val APP_VERSION = "8.4.0"
     actual val DISPLAY_NAME by lazy {
-        deviceModelMapping[MODEL] ?: MODEL
+        deviceModelMapping[deviceIdentifier] ?: MODEL
     }
 }
 
@@ -188,4 +195,16 @@ private val deviceModelMapping by lazy {
         "iPad17,3" to "iPad Pro 13-inch (M5)",
         "iPad17,4" to "iPad Pro 13-inch (M5)"
     )
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private val deviceIdentifier: String by lazy {
+    memScoped {
+        val systemInfo = alloc<utsname>()
+        uname(systemInfo.ptr)
+
+        // 将 machine 字段转换为字符串
+        val machineBytes = systemInfo.machine
+        machineBytes.toKString()
+    }
 }
