@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - develop
+      - feature/cmp-migrate
   workflow_dispatch:
     inputs:
       name:
@@ -10,7 +11,7 @@ on:
         default: "Generate dev build"
 
 jobs:
-  build:
+  android:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -20,7 +21,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: 21
+          java-version: 25
           cache: 'gradle'
 
       - name: Setup Android SDK
@@ -32,78 +33,216 @@ jobs:
       - name: Decode Keystore
         env:
           ENCODED_STRING: ${{ secrets.KEYSTORE_BASE_64 }}
-          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-
         run: |
-          echo ${{ github.ref }}
           echo $ENCODED_STRING > keystore-b64.txt
           base64 -d keystore-b64.txt > pipixiv.jks
 
       - name: Add Google Services
         env:
           GOOGLE_SERVICE_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-
         run: |
           echo $GOOGLE_SERVICE_JSON > app/google-services.json
 
       - name: Add Kotzilla Sdk
         env:
           KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
+          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
         run: |
-          echo $KOTZILLA_SDK_JSON > app/kotzilla.json
+          echo $KOTZILLA_SDK_JSON > composeApp/kotzilla.json
+          sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Build Foss Release apk
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PACKAGE_TOKEN: ${{ secrets.GH_PACKAGE_TOKEN }}
         run: |
           ./gradlew assembleRelease -PapplyFirebasePlugins=false --stacktrace
           mkdir -p app/build/outputs/apk/foss
-          mv app/build/outputs/apk/release app/build/outputs/apk/foss/
+          find app/build/outputs/apk/release -name "*.apk" -exec mv {} app/build/outputs/apk/foss/ \; || true
 
       - name: Build Default Release apk
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PACKAGE_TOKEN: ${{ secrets.GH_PACKAGE_TOKEN }}
         run: |
           ./gradlew assembleRelease -PapplyFirebasePlugins=true --stacktrace
           mkdir -p app/build/outputs/apk/default
-          mv app/build/outputs/apk/release app/build/outputs/apk/default/
+          find app/build/outputs/apk/release -name "*.apk" -exec mv {} app/build/outputs/apk/default/ \; || true
 
-      - name: Get release file apk path
-        id: releaseApks
-        run: |
-          RELEASE_APKS=$(find app/build/outputs/apk/*/release/*.apk)
-          echo "Found APKs:"
-          echo "$RELEASE_APKS"
-          delimiter="|"
-          echo "release_apks<<$delimiter" >> $GITHUB_OUTPUT
-          echo "$RELEASE_APKS" >> $GITHUB_OUTPUT
-          echo "$delimiter" >> $GITHUB_OUTPUT
-
-      - name: Upload Release Build to Artifacts
-        uses: actions/upload-artifact@v6
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: release-apks
-          path: ${{ steps.releaseApks.outputs.release_apks }}
+          name: android-apks
+          path: |
+            app/build/outputs/apk/foss/*.apk
+            app/build/outputs/apk/default/*.apk
+
+  desktop-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 25
+          cache: 'gradle'
+
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Add Kotzilla Sdk
+        env:
+          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
+          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
+        run: |
+          echo $KOTZILLA_SDK_JSON > composeApp/kotzilla.json
+          sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
+
+      - name: Build Linux Distributions
+        run: ./gradlew packageReleaseDeb packageReleaseRpm
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifacts
+          path: |
+            composeApp/build/compose/binaries/main/deb/*.deb
+            composeApp/build/compose/binaries/main/rpm/*.rpm
+
+  desktop-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 25
+          cache: 'gradle'
+
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Add Kotzilla Sdk
+        env:
+          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
+          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
+        run: |
+          $env:KOTZILLA_SDK_JSON | Out-File -FilePath composeApp/kotzilla.json -Encoding utf8
+          $path = "common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt"
+          (Get-Content $path) -replace 'setApiKey.*', "setApiKey(`"$env:KOTZILLA_SDK_API_KEY`")" | Set-Content $path
+
+      - name: Build Windows Distribution
+        run: ./gradlew packageReleaseMsi
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-artifacts
+          path: composeApp/build/compose/binaries/main/msi/*.msi
+
+  desktop-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 25
+          cache: 'gradle'
+
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Add Kotzilla Sdk
+        env:
+          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
+          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
+        run: |
+          echo "$KOTZILLA_SDK_JSON" > composeApp/kotzilla.json
+          sed -i '' "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
+
+      - name: Build MacOS Distribution
+        run: ./gradlew packageReleaseDmg
+
+      - name: Upload MacOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-artifacts
+          path: composeApp/build/compose/binaries/main/dmg/*.dmg
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 25
+          cache: 'gradle'
+
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Add Kotzilla Sdk
+        env:
+          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
+          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
+        run: |
+          echo "$KOTZILLA_SDK_JSON" > composeApp/kotzilla.json
+          sed -i '' "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
+
+      - name: Setup CocoaPods
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          version: 1.14.3
+
+      - name: Build iOS IPA
+        run: |
+          cd iosApp
+          pod install --repo-update
+          xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Release -sdk iphoneos -archivePath $PWD/build/iosApp.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          mkdir -p build/Payload
+          cp -R build/iosApp.xcarchive/Products/Applications/iosApp.app build/Payload/
+          cd build
+          zip -r iosApp.ipa Payload
+
+      - name: Upload iOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-artifacts
+          path: iosApp/build/iosApp.ipa
+
+  release:
+    needs: [android, desktop-linux, desktop-windows, desktop-macos, ios]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
       - name: Get tag name
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          set -x
-          echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+        run: echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
 
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        id: create_release
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -115,4 +254,9 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            ${{ steps.releaseApks.outputs.release_apks }}
+            artifacts/android-apks/**/*.apk
+            artifacts/linux-artifacts/**/*.deb
+            artifacts/linux-artifacts/**/*.rpm
+            artifacts/windows-artifacts/**/*.msi
+            artifacts/macos-artifacts/**/*.dmg
+            artifacts/ios-artifacts/*.ipa
