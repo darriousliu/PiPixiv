@@ -24,30 +24,8 @@ internal actual val baseHttpClient: HttpClient
         configureRequest {
             setAllowsCellularAccess(true)
         }
-        configureHandleChallenge()
-        when (val bypassSetting = NetworkUtil.bypassSetting) {
-            is UserPreference.BypassSetting.None -> {}
-            is UserPreference.BypassSetting.Proxy -> {
-                proxy = when (bypassSetting.proxyType) {
-                    UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> ProxyBuilder.http(
-                        URLBuilder(
-                            protocol = URLProtocol.HTTP,
-                            host = bypassSetting.host,
-                            port = bypassSetting.port
-                        ).build()
-                    )
-
-                    UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> ProxyBuilder.socks(
-                        host = bypassSetting.host,
-                        port = bypassSetting.port
-                    )
-                }
-            }
-
-            is UserPreference.BypassSetting.SNI -> {
-                Logger.w("HttpClient") { "SNI is not supported on iOS" }
-            }
-        }
+//        configureHandleChallenge()
+        configureProxy()
     }
 
 internal actual val baseImageHttpClient: HttpClient
@@ -55,7 +33,8 @@ internal actual val baseImageHttpClient: HttpClient
         configureRequest {
             setAllowsCellularAccess(true)
         }
-        configureHandleChallenge()
+//        configureHandleChallenge()
+        configureProxy()
     }
 
 @OptIn(ExperimentalForeignApi::class)
@@ -73,6 +52,32 @@ private fun DarwinClientEngineConfig.configureHandleChallenge() {
             }
         } else {
             completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, null)
+        }
+    }
+}
+
+private fun DarwinClientEngineConfig.configureProxy() {
+    when (val bypassSetting = NetworkUtil.bypassSetting) {
+        is UserPreference.BypassSetting.None -> {}
+        is UserPreference.BypassSetting.Proxy -> {
+            proxy = when (bypassSetting.proxyType) {
+                UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> ProxyBuilder.http(
+                    URLBuilder(
+                        protocol = URLProtocol.HTTP,
+                        host = bypassSetting.host,
+                        port = bypassSetting.port
+                    ).build()
+                )
+
+                UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> ProxyBuilder.socks(
+                    host = bypassSetting.host,
+                    port = bypassSetting.port
+                )
+            }
+        }
+
+        is UserPreference.BypassSetting.SNI -> {
+            Logger.w("HttpClient") { "SNI is not supported on iOS" }
         }
     }
 }

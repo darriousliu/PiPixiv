@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.isIOS
+import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.network_plan
 import com.mrl.pixiv.strings.protocol_http
@@ -94,10 +96,10 @@ fun BypassSettingEditor(
             horizontalArrangement = 8.spaceBy
         ) {
             val types = remember {
-                listOf(
+                listOfNotNull(
                     UserPreference.BypassSetting.None,
                     UserPreference.BypassSetting.Proxy(),
-                    UserPreference.BypassSetting.SNI()
+                    if (platform.isIOS()) null else UserPreference.BypassSetting.SNI()
                 )
             }
 
