@@ -84,6 +84,15 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
             packageName = "com.mrl.pixiv"
             packageVersion = properties["versionName"]?.toString()
+            windows {
+                iconFile.set(file("icons/pipixiv.ico"))
+                shortcut = true
+            }
+            linux {
+                iconFile.set(file("icons/pipixiv.png"))
+                shortcut = true
+            }
+            macOS { iconFile.set(file("icons/pipixiv.icns")) }
         }
 
         buildTypes.release.proguard {
