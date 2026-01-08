@@ -182,7 +182,7 @@ jobs:
           path: composeApp/build/compose/binaries/main/dmg/*.dmg
 
   ios:
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
