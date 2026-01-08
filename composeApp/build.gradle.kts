@@ -1,6 +1,6 @@
-
 import com.mrl.pixiv.buildsrc.configureRemoveKoinMeta
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
 
 plugins {
     id("pixiv.multiplatform.compose")
@@ -80,27 +80,84 @@ compose.desktop {
         mainClass = "com.mrl.pixiv.MainKt"
 
         nativeDistributions {
+            includeAllModules = true
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
             packageName = "com.mrl.pixiv"
             packageVersion = properties["versionName"]?.toString()
         }
 
         buildTypes.release.proguard {
-            configurationFiles.from("compose-desktop.pro")
+            version = "7.8.2"
+        }
+
+        // release mode
+        jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
+        jvmArgs(
+            "--add-opens",
+            "java.desktop/java.awt.peer=ALL-UNNAMED"
+        ) // recommended but not necessary
+
+        if ("Mac" in System.getProperty("os.name")) {
+            jvmArgs("--add-opens", "java.desktop/sun.lwawt=ALL-UNNAMED")
+            jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
+        }
+        afterEvaluate {
+            tasks.withType<JavaExec> {
+                jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
+                jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED")
+                jvmArgs("--enable-native-access", "ALL-UNNAMED")
+
+                if (System.getProperty("os.name").contains("Mac")) {
+                    jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
+                    jvmArgs("--add-opens", "java.desktop/sun.lwawt=ALL-UNNAMED")
+                    jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
+                }
+            }
         }
     }
 }
 
-afterEvaluate {
-    tasks.withType<JavaExec> {
-        jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
-        jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED")
-        jvmArgs("--enable-native-access", "ALL-UNNAMED")
+logger.quiet("debug: ${properties["debug"]}")
 
-        if (System.getProperty("os.name").contains("Mac")) {
-            jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
-            jvmArgs("--add-opens", "java.desktop/sun.lwawt=ALL-UNNAMED")
-            jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
+if (properties["debug"] != "true") {
+    gradle.projectsEvaluated {
+        tasks.named("proguardReleaseJars").configure {
+            doFirst {
+                layout.buildDirectory.file("compose/binaries/main-release/proguard")
+                    .get().asFile.mkdirs()
+            }
+        }
+    }
+
+    tasks.withType(AbstractProguardTask::class.java) {
+        val proguardFile = File.createTempFile("tmp", ".pro", temporaryDir)
+        proguardFile.deleteOnExit()
+
+        compose.desktop.application.buildTypes.release.proguard {
+            configurationFiles.from(proguardFile, file("compose-desktop.pro"))
+            optimize = false // fixme(tarsin): proguard internal error
+            obfuscate = true
+            joinOutputJars = true
+        }
+
+        doFirst {
+            proguardFile.bufferedWriter().use { proguardFileWriter ->
+                sourceSets["jvmMain"].runtimeClasspath
+                    .filter { it.extension == "jar" }
+                    .forEach { jar ->
+                        val zip = zipTree(jar)
+                        zip.matching { include("META-INF/**/proguard/*.pro") }.forEach {
+                            proguardFileWriter.appendLine("########   ${jar.name} ${it.name}")
+                            proguardFileWriter.appendLine(it.readText())
+                        }
+                        zip.matching { include("META-INF/services/*") }.forEach {
+                            it.readLines().forEach { cls ->
+                                val rule = "-keep class $cls"
+                                proguardFileWriter.appendLine(rule)
+                            }
+                        }
+                    }
+            }
         }
     }
 }

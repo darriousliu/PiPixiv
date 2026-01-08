@@ -5,6 +5,8 @@ import com.mrl.pixiv.common.analytics.initKotzilla
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.DeviceInfo
 import com.mrl.pixiv.common.util.isDebug
+import com.mrl.pixiv.common.util.isDesktop
+import com.mrl.pixiv.common.util.platform
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 
@@ -13,7 +15,9 @@ object Initialization {
         initializeMMKV(logLevel = MMKVLogLevel.LevelInfo)
         startKoin {
             platformKoinAppDeclaration()
-            initKotzilla(isDebug, AppUtil.versionName, DeviceInfo.DISPLAY_NAME)
+            if (!platform.isDesktop()) {
+                initKotzilla(isDebug, AppUtil.versionName, DeviceInfo.DISPLAY_NAME)
+            }
             modules(allModule)
         }
     }
