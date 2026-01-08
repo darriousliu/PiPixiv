@@ -104,7 +104,7 @@ jobs:
           sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Build Linux Distributions
-        run: ./gradlew packageReleaseDeb packageReleaseRpm
+        run: ./gradlew packageReleaseDeb packageReleaseRpm -Pdebug=false
 
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
@@ -140,7 +140,7 @@ jobs:
           (Get-Content $path) -replace 'setApiKey.*', "setApiKey(`"$env:KOTZILLA_SDK_API_KEY`")" | Set-Content $path
 
       - name: Build Windows Distribution
-        run: ./gradlew packageReleaseMsi
+        run: ./gradlew packageReleaseMsi -Pdebug=false
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
@@ -173,7 +173,7 @@ jobs:
           sed -i '' "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Build MacOS Distribution
-        run: ./gradlew packageReleaseDmg
+        run: ./gradlew packageReleaseDmg -Pdebug=false
 
       - name: Upload MacOS Artifacts
         uses: actions/upload-artifact@v4
