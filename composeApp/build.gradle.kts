@@ -82,7 +82,7 @@ compose.desktop {
         nativeDistributions {
             includeAllModules = true
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
-            packageName = "com.mrl.pixiv"
+            packageName = rootProject.name
             packageVersion = properties["versionName"]?.toString()
             windows {
                 iconFile.set(file("icons/pipixiv.ico"))
