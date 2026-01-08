@@ -220,10 +220,10 @@ jobs:
           cd iosApp
           pod install --repo-update
           xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Release -sdk iphoneos -archivePath $PWD/build/iosApp.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          mkdir -p build/Payload
-          cp -R build/iosApp.xcarchive/Products/Applications/iosApp.app build/Payload/
-          cd build
-          zip -r iosApp.ipa Payload
+          mkdir -p $PWD/build/Payload
+          cp -R $PWD/build/iosApp.xcarchive/Products/Applications/PiPixiv.app $PWD/build/Payload/
+          cd $PWD/build
+          zip -r PiPixiv.ipa Payload
 
       - name: Upload iOS Artifacts
         uses: actions/upload-artifact@v4
@@ -246,6 +246,14 @@ jobs:
 
       - name: Get tag name
         run: echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+
+      - name: Rename desktop and iOS artifacts
+        run: |
+          mv artifacts/linux-artifacts/*.deb artifacts/linux-artifacts/PiPixiv_${VERSION_TAG}-amd64.deb
+          mv artifacts/linux-artifacts/*.rpm artifacts/linux-artifacts/PiPixiv_${VERSION_TAG}-amd64.rpm
+          mv artifacts/windows-artifacts/*.msi artifacts/windows-artifacts/PiPixiv_${VERSION_TAG}-amd64.msi
+          mv artifacts/macos-artifacts/*.dmg artifacts/macos-artifacts/PiPixiv_${VERSION_TAG}-arm64.dmg
+          mv artifacts/ios-artifacts/*.ipa artifacts/ios-artifacts/PiPixiv-${VERSION_TAG}.ipa
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
