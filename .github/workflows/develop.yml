@@ -230,7 +230,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-artifacts
-          path: build/Pixiv.ipa
+          path: build/PiPixiv.ipa
 
   release:
     needs: [android, desktop-linux, desktop-windows, desktop-macos, ios]
