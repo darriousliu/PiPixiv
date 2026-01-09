@@ -5,6 +5,7 @@
 
 # kcef
 -keep class org.cef.** { *; }
+-keep class kotlinx.coroutines.swing.SwingDispatcherFactory
 
 -keep class de.jensklingenberg.ktorfit.** { *; }
 -keepclassmembers class de.jensklingenberg.ktorfit.** { *; }

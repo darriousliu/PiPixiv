@@ -169,4 +169,8 @@ if (properties["debug"] != "true") {
             }
         }
     }
+} else {
+    compose.desktop.application.buildTypes.release.proguard {
+        isEnabled = false
+    }
 }
