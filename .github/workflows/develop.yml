@@ -219,17 +219,18 @@ jobs:
         run: |
           cd iosApp
           pod install --repo-update
-          xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Release -sdk iphoneos -archivePath $PWD/build/iosApp.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          mkdir -p $PWD/build/Payload
-          cp -R $PWD/build/iosApp.xcarchive/Products/Applications/PiPixiv.app $PWD/build/Payload/
-          cd $PWD/build
+          xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Release -sdk iphoneos -archivePath ../build/iosApp.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          mkdir -p ../build/Payload
+          cp -R ../build/iosApp.xcarchive/Products/Applications/PiPixiv.app ../build/Payload/
+          cd ../build
           zip -r PiPixiv.ipa Payload
+          echo "PiPixiv.ipa path: $(pwd)/PiPixiv.ipa"
 
       - name: Upload iOS Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ios-artifacts
-          path: $PWD/iosApp/build/Pixiv.ipa
+          path: build/Pixiv.ipa
 
   release:
     needs: [android, desktop-linux, desktop-windows, desktop-macos, ios]
