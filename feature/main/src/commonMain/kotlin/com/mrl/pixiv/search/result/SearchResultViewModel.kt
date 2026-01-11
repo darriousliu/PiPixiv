@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.repository.paging.SearchIllustPagingSource
+import com.mrl.pixiv.common.repository.paging.SearchUserPagingSource
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -76,6 +77,14 @@ class SearchResultViewModel(
             )
         }.flow
     }.cachedIn(viewModelScope)
+
+    val userSearchResults = uiState.map { it.searchWords }
+        .distinctUntilChanged()
+        .flatMapLatest { words ->
+            Pager(config = PagingConfig(pageSize = 20)) {
+                SearchUserPagingSource(word = words)
+            }.flow
+        }.cachedIn(viewModelScope)
 
     override suspend fun handleIntent(intent: SearchResultAction) {
         when (intent) {

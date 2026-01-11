@@ -17,6 +17,7 @@ import com.mrl.pixiv.common.data.search.SearchAutoCompleteResp
 import com.mrl.pixiv.common.data.search.SearchIllustResp
 import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
+import com.mrl.pixiv.common.data.search.SearchUserResp
 import com.mrl.pixiv.common.data.search.TrendingTagsResp
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadataResp
 import com.mrl.pixiv.common.data.user.IllustsWithNextUrl
@@ -114,6 +115,18 @@ interface PixivApi {
     suspend fun searchIllustNext(
         @QueryMap queryMap: Map<String, String>,
     ): SearchIllustResp
+
+    @GET("v1/search/user")
+    suspend fun searchUser(
+        @Query("word") word: String,
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("offset") offset: Int? = null,
+    ): SearchUserResp
+
+    @GET("v1/search/user")
+    suspend fun searchUserNext(
+        @QueryMap queryMap: Map<String, String>,
+    ): SearchUserResp
 
     @GET("v2/search/autocomplete")
     suspend fun searchAutoComplete(

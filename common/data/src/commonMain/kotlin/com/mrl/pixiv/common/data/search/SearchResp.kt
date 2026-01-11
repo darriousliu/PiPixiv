@@ -3,6 +3,7 @@ package com.mrl.pixiv.common.data.search
 import androidx.compose.runtime.Stable
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Tag
+import com.mrl.pixiv.common.data.user.UserPreview
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,6 +19,14 @@ data class SearchIllustResp(
 
     @SerialName("show_ai")
     val showAi: Boolean = true
+)
+
+@Serializable
+data class SearchUserResp(
+    @SerialName("user_previews")
+    val userPreviews: List<UserPreview>,
+    @SerialName("next_url")
+    val nextUrl: String? = null
 )
 
 @Serializable

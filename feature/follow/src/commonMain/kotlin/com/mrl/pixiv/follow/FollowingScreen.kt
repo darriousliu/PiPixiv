@@ -264,7 +264,7 @@ fun FollowingScreenBody(
 }
 
 @Composable
-private fun FollowingUserCard(
+fun FollowingUserCard(
     illusts: ImmutableList<Illust>,
     userName: String,
     userId: Long,

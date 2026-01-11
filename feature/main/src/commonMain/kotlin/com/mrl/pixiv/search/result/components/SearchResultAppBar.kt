@@ -66,6 +66,7 @@ internal fun SearchResultAppBar(
     popBack: () -> Unit,
     showBottomSheet: () -> Unit,
     modifier: Modifier = Modifier,
+    showFilterAction: Boolean = true,
 ) {
     var showBookmarkMenu by rememberSaveable { mutableStateOf(false) }
     var showDateRangePicker by rememberSaveable { mutableStateOf(false) }
@@ -97,48 +98,50 @@ internal fun SearchResultAppBar(
             }
         },
         actions = {
-            // Date Range Picker
-            IconButton(
-                onClick = { showDateRangePicker = true },
-                shapes = IconButtonDefaults.shapes(),
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.CalendarMonth,
-                    contentDescription = "Date Range",
-                    tint = if (searchDateRange != null) MaterialTheme.colorScheme.primary else LocalContentColor.current
-                )
-            }
-            // Bookmark Range
-            IconButton(
-                onClick = {
-                    showBookmarkMenu = true
-                    if (!isPremium) {
-                        toaster.show(RStrings.premium_required, duration = 2.seconds)
-                    }
-                },
-                shapes = IconButtonDefaults.shapes(),
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.CollectionsBookmark,
-                    contentDescription = "Bookmark Range",
-                    tint = if (bookmarkNumRange != null) MaterialTheme.colorScheme.primary else LocalContentColor.current
-                )
-                BookmarkRangeSelector(
-                    expanded = showBookmarkMenu,
-                    onDismissRequest = { showBookmarkMenu = false },
-                    bookmarkNumRange = bookmarkNumRange,
-                    onBookmarkNumRangeChanged = onBookmarkNumRangeChanged
-                )
-            }
-            //筛选按钮
-            IconButton(
-                onClick = showBottomSheet,
-                shapes = IconButtonDefaults.shapes(),
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.FilterAlt,
-                    contentDescription = "Filter"
-                )
+            if (showFilterAction) {
+                // Date Range Picker
+                IconButton(
+                    onClick = { showDateRangePicker = true },
+                    shapes = IconButtonDefaults.shapes(),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.CalendarMonth,
+                        contentDescription = "Date Range",
+                        tint = if (searchDateRange != null) MaterialTheme.colorScheme.primary else LocalContentColor.current
+                    )
+                }
+                // Bookmark Range
+                IconButton(
+                    onClick = {
+                        showBookmarkMenu = true
+                        if (!isPremium) {
+                            toaster.show(RStrings.premium_required, duration = 2.seconds)
+                        }
+                    },
+                    shapes = IconButtonDefaults.shapes(),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.CollectionsBookmark,
+                        contentDescription = "Bookmark Range",
+                        tint = if (bookmarkNumRange != null) MaterialTheme.colorScheme.primary else LocalContentColor.current
+                    )
+                    BookmarkRangeSelector(
+                        expanded = showBookmarkMenu,
+                        onDismissRequest = { showBookmarkMenu = false },
+                        bookmarkNumRange = bookmarkNumRange,
+                        onBookmarkNumRangeChanged = onBookmarkNumRangeChanged
+                    )
+                }
+                //筛选按钮
+                IconButton(
+                    onClick = showBottomSheet,
+                    shapes = IconButtonDefaults.shapes(),
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.FilterAlt,
+                        contentDescription = "Filter"
+                    )
+                }
             }
         }
     )
