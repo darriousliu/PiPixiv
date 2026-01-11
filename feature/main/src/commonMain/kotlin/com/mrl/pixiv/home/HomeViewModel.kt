@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.mrl.pixiv.common.repository.UserManager
 import com.mrl.pixiv.common.repository.paging.IllustRecommendedPagingSource
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -26,6 +27,16 @@ class HomeViewModel : BaseMviViewModel<HomeState, HomeAction>(
         IllustRecommendedPagingSource()
     }.flow.cachedIn(viewModelScope)
 
+    init {
+        loadUserInfo()
+    }
+
     override suspend fun handleIntent(intent: HomeAction) {
+    }
+
+    private fun loadUserInfo() {
+        launchIO {
+            UserManager.updateUserInfoAsync()
+        }
     }
 }
