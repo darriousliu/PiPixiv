@@ -17,6 +17,7 @@ import org.koin.android.annotation.KoinViewModel
 @Stable
 data class SearchState(
     val autoCompleteSearchWords: ImmutableList<Tag> = persistentListOf(),
+    val isIdSearch: Boolean = false,
 ) {
     data class SearchFilter(
         val sort: SearchSort = SearchSort.POPULAR_DESC,
@@ -30,6 +31,10 @@ sealed class SearchAction : ViewIntent {
 
     data class UpdateSearchWords(
         val searchWords: String,
+    ) : SearchAction()
+
+    data class UpdateIsIdSearch(
+        val isIdSearch: Boolean,
     ) : SearchAction()
 
     data class SearchAutoComplete(
@@ -60,6 +65,7 @@ class SearchViewModel : BaseMviViewModel<SearchState, SearchAction>(
             is SearchAction.AddSearchHistory -> addSearchHistory(intent)
             is SearchAction.DeleteSearchHistory -> deleteSearchHistory(intent)
             is SearchAction.UpdateSearchWords -> searchWords = intent.searchWords
+            is SearchAction.UpdateIsIdSearch -> updateState { copy(isIdSearch = intent.isIdSearch) }
             else -> Unit
         }
     }

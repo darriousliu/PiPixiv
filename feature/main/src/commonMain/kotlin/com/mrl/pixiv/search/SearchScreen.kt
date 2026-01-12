@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -46,6 +48,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -111,9 +114,21 @@ fun SearchScreen(
                 onSearch = {
                     dispatch(SearchAction.AddSearchHistory(textState.text))
                     focusRequester.freeFocus()
-                    navigationManager.navigateToSearchResultScreen(textState.text)
+                    navigationManager.navigateToSearchResultScreen(textState.text, state.isIdSearch)
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { dispatch(SearchAction.UpdateIsIdSearch(!state.isIdSearch)) },
+                modifier = Modifier.imePadding()
+            ) {
+                Text(
+                    text = " ID ",
+                    textDecoration = if (state.isIdSearch) null else TextDecoration.LineThrough,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
         }
     ) {
         // 用LazyColumn构造自动补全列表，点击跳转搜索结果页面
@@ -150,7 +165,10 @@ fun SearchScreen(
                             .throttleClick(indication = ripple()) {
                                 dispatch(SearchAction.AddSearchHistory(it.keyword))
                                 focusRequester.freeFocus()
-                                navigationManager.navigateToSearchResultScreen(it.keyword)
+                                navigationManager.navigateToSearchResultScreen(
+                                    it.keyword,
+                                    state.isIdSearch
+                                )
                             }
                             .padding(8.dp)
                             .animateItem(),
@@ -180,7 +198,10 @@ fun SearchScreen(
                             .throttleClick(indication = ripple()) {
                                 dispatch(SearchAction.AddSearchHistory(word.name))
                                 focusRequester.freeFocus()
-                                navigationManager.navigateToSearchResultScreen(word.name)
+                                navigationManager.navigateToSearchResultScreen(
+                                    word.name,
+                                    state.isIdSearch
+                                )
                             }
                             .padding(8.dp),
                         verticalArrangement = Arrangement.Center,
@@ -235,7 +256,8 @@ private fun SearchScreenAppBar(
                 }
                 Surface(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxHeight()
                         .padding(horizontal = 8.dp),
                     shape = MaterialTheme.shapes.extraLarge
                 ) {

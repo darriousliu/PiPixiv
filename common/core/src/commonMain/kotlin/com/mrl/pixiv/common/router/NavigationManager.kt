@@ -105,8 +105,8 @@ class NavigationManager(
         backStack.navigate(Destination.PictureDeeplink(illustId))
     }
 
-    fun navigateToSearchResultScreen(searchWord: String) {
-        backStack.navigate(route = Destination.SearchResults(searchWord))
+    fun navigateToSearchResultScreen(searchWord: String, isIdSearch: Boolean = false) {
+        backStack.navigate(route = Destination.SearchResults(searchWord, isIdSearch))
     }
 
     fun navigateToProfileDetailScreen(userId: Long) {

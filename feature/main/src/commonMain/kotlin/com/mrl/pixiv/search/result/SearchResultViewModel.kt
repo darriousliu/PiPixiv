@@ -48,6 +48,7 @@ sealed class SearchResultAction : ViewIntent {
 @KoinViewModel
 class SearchResultViewModel(
     searchWords: String,
+    private val isIdSearch: Boolean,
 ) : BaseMviViewModel<SearchResultState, SearchResultAction>(
     initialState = SearchResultState(searchWords = searchWords),
 ), KoinComponent {
@@ -73,7 +74,8 @@ class SearchResultViewModel(
                     endDate = endDate?.format(LocalDate.Formats.ISO),
                     searchAiType = filter.searchAiType,
                 ),
-                isPremium = isPremium
+                isPremium = isPremium,
+                isIdSearch = isIdSearch
             )
         }.flow
     }.cachedIn(viewModelScope)
@@ -82,9 +84,10 @@ class SearchResultViewModel(
         .distinctUntilChanged()
         .flatMapLatest { words ->
             Pager(config = PagingConfig(pageSize = 20)) {
-                SearchUserPagingSource(word = words)
+                SearchUserPagingSource(word = words, isIdSearch = isIdSearch)
             }.flow
         }.cachedIn(viewModelScope)
+
 
     override suspend fun handleIntent(intent: SearchResultAction) {
         when (intent) {

@@ -458,7 +458,7 @@ internal fun PictureScreen(
                                 TagItem(
                                     tag = tag,
                                     onClick = {
-                                        navToSearchResultScreen(tag.name)
+                                        navToSearchResultScreen(tag.name, false)
                                         dispatch(PictureAction.AddSearchHistory(tag.name))
                                     }
                                 )

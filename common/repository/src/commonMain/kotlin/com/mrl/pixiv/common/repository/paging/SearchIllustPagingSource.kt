@@ -2,6 +2,7 @@ package com.mrl.pixiv.common.repository.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
@@ -15,6 +16,7 @@ import com.mrl.pixiv.common.repository.util.queryParams
 class SearchIllustPagingSource(
     private val query: SearchIllustQuery,
     private val isPremium: Boolean,
+    private val isIdSearch: Boolean
 ) : PagingSource<SearchIllustQuery, Illust>() {
     override fun getRefreshKey(state: PagingState<SearchIllustQuery, Illust>): SearchIllustQuery? {
         return null
@@ -22,6 +24,19 @@ class SearchIllustPagingSource(
 
     override suspend fun load(params: LoadParams<SearchIllustQuery>): LoadResult<SearchIllustQuery, Illust> {
         return try {
+            if (isIdSearch) {
+                val illustId = query.word.toLongOrNull() ?: return LoadResult.Page(
+                    data = emptyList(),
+                    prevKey = null,
+                    nextKey = null
+                )
+                val resp = PixivRepository.getIllustDetail(illustId, Filter.ANDROID.value)
+                return LoadResult.Page(
+                    data = listOf(resp.illust),
+                    prevKey = null,
+                    nextKey = null
+                )
+            }
             val resp = if (params.key == null) {
                 if (query.sort == SearchSort.POPULAR_DESC && !isPremium) {
                     PixivRepository.searchPopularPreviewIllust(query)

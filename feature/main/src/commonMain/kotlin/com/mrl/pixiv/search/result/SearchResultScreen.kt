@@ -55,8 +55,9 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun SearchResultsScreen(
     searchWords: String,
+    isIdSearch: Boolean = false,
     modifier: Modifier = Modifier,
-    viewModel: SearchResultViewModel = koinViewModel { parametersOf(searchWords) },
+    viewModel: SearchResultViewModel = koinViewModel { parametersOf(searchWords, isIdSearch) },
     navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()

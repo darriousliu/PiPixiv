@@ -53,6 +53,7 @@ sealed class Destination : NavKey {
     @Serializable
     data class SearchResults(
         val searchWords: String,
+        val isIdSearch: Boolean = false,
     ) : Destination()
 
     @Serializable

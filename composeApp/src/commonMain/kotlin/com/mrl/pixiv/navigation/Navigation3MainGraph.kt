@@ -155,8 +155,10 @@ fun Navigation3MainGraph(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
                         val searchWord = it.searchWords
+                        val isIdSearch = it.isIdSearch
                         SearchResultsScreen(
                             searchWords = searchWord,
+                            isIdSearch = isIdSearch,
                         )
                     }
 
