@@ -56,6 +56,8 @@ jobs:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           ./gradlew assembleRelease -PapplyFirebasePlugins=false --stacktrace
           mkdir -p app/build/outputs/apk/foss
@@ -66,6 +68,8 @@ jobs:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           ./gradlew assembleRelease -PapplyFirebasePlugins=true --stacktrace
           mkdir -p app/build/outputs/apk/default
@@ -104,6 +108,9 @@ jobs:
           sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Build Linux Distributions
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew packageReleaseDeb packageReleaseRpm -Pdebug=false
 
       - name: Upload Linux Artifacts
@@ -140,6 +147,9 @@ jobs:
           (Get-Content $path) -replace 'setApiKey.*', "setApiKey(`"$env:KOTZILLA_SDK_API_KEY`")" | Set-Content $path
 
       - name: Build Windows Distribution
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew packageReleaseMsi -Pdebug=false
 
       - name: Upload Windows Artifacts
@@ -173,6 +183,9 @@ jobs:
           sed -i '' "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Build MacOS Distribution
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew packageReleaseDmg -Pdebug=false
 
       - name: Upload MacOS Artifacts
@@ -216,6 +229,9 @@ jobs:
           ./gradlew :composeApp:podspec
 
       - name: Build iOS IPA
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           cd iosApp
           pod install --repo-update
