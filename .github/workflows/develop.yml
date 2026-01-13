@@ -224,6 +224,9 @@ jobs:
           version: 1.16.1
 
       - name: Link Dependencies
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           ./gradlew :composeApp:generateDummyFramework
           ./gradlew :composeApp:podspec
