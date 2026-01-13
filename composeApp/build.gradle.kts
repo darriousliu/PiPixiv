@@ -9,6 +9,10 @@ plugins {
     alias(libs.plugins.kotzilla)
 }
 
+if (properties["applyFirebasePlugins"] == "true") {
+    pluginManager.apply(libs.plugins.sentry.kmp.get().pluginId)
+}
+
 kotlin {
     androidLibrary {
         namespace = "com.mrl.pixiv"

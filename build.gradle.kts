@@ -19,4 +19,6 @@ plugins {
     alias(libs.plugins.build.konfig) apply false
     alias(composes.plugins.composeHotReload) apply false
     alias(kotlinx.plugins.native.cocoapods) apply false
+    alias(libs.plugins.sentry.android) apply false
+    alias(libs.plugins.sentry.kmp) apply false
 }

@@ -6,6 +6,7 @@ import com.google.firebase.analytics.analytics
 import com.google.firebase.analytics.logEvent
 import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.initialize
+import io.sentry.kotlin.multiplatform.Sentry
 
 private val firebaseAnalytics
     get() = Firebase.analytics
@@ -39,4 +40,5 @@ actual fun logEvent(
 
 actual fun logException(e: Throwable) {
     firebaseCrashlytics.recordException(e)
+    Sentry.captureException(e)
 }

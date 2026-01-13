@@ -3,6 +3,7 @@ import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 plugins {
     id("pixiv.android.application")
     alias(androidx.plugins.baselineprofile)
+    alias(libs.plugins.sentry.android)
 }
 if (project.findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.google.services.get().pluginId)
@@ -117,4 +118,28 @@ dependencies {
     // MMKV
     implementation(libs.mmkv)
     implementation(libs.mmkv.kotlin)
+}
+
+sentry {
+    // Disables or enables debug log output, e.g. for for sentry-cli.
+    // Default is disabled.
+    debug.set(true)
+    org.set("pipixiv")
+    projectName.set("pipixiv")
+    authToken.set(System.getenv("SENTRY_AUTH_TOKEN"))
+    url = null
+    includeProguardMapping.set(true)
+    autoUploadProguardMapping.set(true)
+    uploadNativeSymbols.set(false)
+    autoUploadNativeSymbols.set(true)
+    includeNativeSources.set(false)
+    includeSourceContext.set(false)
+    tracingInstrumentation {
+        enabled.set(false)
+    }
+    autoInstallation {
+        enabled.set(false)
+    }
+    includeDependenciesReport.set(false)
+    telemetry.set(false)
 }

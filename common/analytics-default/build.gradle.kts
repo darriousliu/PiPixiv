@@ -1,6 +1,5 @@
 plugins {
     id("pixiv.multiplatform")
-
 }
 
 kotlin {
@@ -12,6 +11,8 @@ kotlin {
         commonMain.dependencies {
             // Kotzilla
             implementation(libs.kotzilla.sdk)
+            // Sentry
+            implementation(libs.sentry.multiplatform)
         }
         androidMain.dependencies {
             // Firebase

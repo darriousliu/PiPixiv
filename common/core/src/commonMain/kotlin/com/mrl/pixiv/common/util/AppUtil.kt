@@ -17,6 +17,8 @@ object AppUtil {
 
     val versionCode = BuildKonfig.versionCode
 
+    val sentryDsn = BuildKonfig.sentryDsn
+
     lateinit var flavor: String
         private set
 
