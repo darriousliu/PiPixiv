@@ -4,6 +4,7 @@ package com.mrl.pixiv.follow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -263,6 +264,8 @@ fun FollowingScreenBody(
     }
 }
 
+private const val PREVIEW_SIZE = 3
+
 @Composable
 fun FollowingUserCard(
     illusts: ImmutableList<Illust>,
@@ -276,7 +279,8 @@ fun FollowingUserCard(
 ) {
     Card(modifier = modifier) {
         Row {
-            illusts.take(3).forEachIndexed { index, it ->
+            val preview = illusts.take(PREVIEW_SIZE)
+            preview.forEachIndexed { index, it ->
                 val isBookmarked = it.isBookmark
                 SquareIllustItem(
                     illust = it,
@@ -295,6 +299,9 @@ fun FollowingUserCard(
                     elevation = 0.dp,
                     shape = RectangleShape
                 )
+            }
+            if (preview.size < PREVIEW_SIZE) {
+                Spacer(modifier = Modifier.weight((PREVIEW_SIZE - preview.size).toFloat()))
             }
         }
         Row(
