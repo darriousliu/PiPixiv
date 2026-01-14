@@ -207,4 +207,5 @@
     <string name="users">المستخدمون</string>
     <string name="illusts">الرسوم التوضيحية</string>
     <string name="id_search">البحث بالمعرف (ID)</string>
+    <string name="max_bookmark_tags_reached">حد أقصى %1$d من الوسوم</string>
 </resources>

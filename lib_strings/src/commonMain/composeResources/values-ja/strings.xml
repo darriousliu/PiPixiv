@@ -207,4 +207,5 @@
     <string name="users">ユーザー</string>
     <string name="illusts">イラスト</string>
     <string name="id_search">ID検索</string>
+    <string name="max_bookmark_tags_reached">最大 %1$d 個のタグを選択できます</string>
 </resources>

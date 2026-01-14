@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -88,6 +89,7 @@ import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.allowRgb565
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
@@ -97,6 +99,7 @@ import com.mrl.pixiv.strings.bookmark_tags
 import com.mrl.pixiv.strings.cancel_favorite
 import com.mrl.pixiv.strings.edit_favorite
 import com.mrl.pixiv.strings.long_click_to_edit_favorite
+import com.mrl.pixiv.strings.max_bookmark_tags_reached
 import com.mrl.pixiv.strings.word_private
 import com.mrl.pixiv.strings.word_public
 import kotlinx.coroutines.delay
@@ -379,6 +382,8 @@ fun RectangleIllustItem(
     }
 }
 
+private const val MAX_BOOKMARK_TAGS = 10
+
 @Composable
 fun BottomBookmarkSheet(
     hideBottomSheet: () -> Unit,
@@ -433,15 +438,36 @@ fun BottomBookmarkSheet(
 //                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
                 .padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(RStrings.bookmark_tags),
                 style = MaterialTheme.typography.labelMedium,
             )
-            Text(
-                text = "${selectedTagsIndex.size} / 10",
-                style = MaterialTheme.typography.labelMedium
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${selectedTagsIndex.size} / $MAX_BOOKMARK_TAGS",
+                    style = MaterialTheme.typography.labelMedium
+                )
+                Checkbox(
+                    checked = allTags.count { it.second }.let {
+                        it == MAX_BOOKMARK_TAGS || it == allTags.size
+                    },
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            (0..<minOf(allTags.size, MAX_BOOKMARK_TAGS)).forEach { index ->
+                                allTags[index] = allTags[index].first to true
+                            }
+                        } else {
+                            allTags.indices.forEach { index ->
+                                allTags[index] = allTags[index].first to false
+                            }
+                        }
+                    }
+                )
+            }
         }
         Row(
             modifier = Modifier
@@ -454,7 +480,7 @@ fun BottomBookmarkSheet(
                 value = inputTag,
                 onValueChange = { inputTag = it },
                 modifier = Modifier.weight(1f),
-                enabled = selectedTagsIndex.size < 10,
+                enabled = selectedTagsIndex.size < MAX_BOOKMARK_TAGS,
                 placeholder = { Text(text = stringResource(RStrings.add_tags)) },
                 shape = MaterialTheme.shapes.small,
                 colors = transparentIndicatorColors
@@ -474,10 +500,27 @@ fun BottomBookmarkSheet(
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            itemsIndexed(allTags) { index, item ->
+            itemsIndexed(
+                items = allTags,
+                key = { index, item -> "${index}_${item.first}" }
+            ) { index, item ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .throttleClick(indication = ripple()) {
+                            if (item.second) {
+                                allTags[index] = item.first to false
+                            } else {
+                                if (selectedTagsIndex.size < MAX_BOOKMARK_TAGS) {
+                                    allTags[index] = item.first to true
+                                } else {
+                                    ToastUtil.safeShortToast(
+                                        RStrings.max_bookmark_tags_reached,
+                                        MAX_BOOKMARK_TAGS
+                                    )
+                                }
+                            }
+                        }
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -488,8 +531,19 @@ fun BottomBookmarkSheet(
                     )
                     Checkbox(
                         checked = item.second,
-                        onCheckedChange = {
-                            allTags[index] = item.first to it
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                if (selectedTagsIndex.size < MAX_BOOKMARK_TAGS) {
+                                    allTags[index] = item.first to true
+                                } else {
+                                    ToastUtil.safeShortToast(
+                                        RStrings.max_bookmark_tags_reached,
+                                        MAX_BOOKMARK_TAGS
+                                    )
+                                }
+                            } else {
+                                allTags[index] = item.first to false
+                            }
                         }
                     )
                 }
@@ -589,9 +643,7 @@ private fun PageBadge(
         Icon(
             imageVector = Icons.Rounded.FileCopy,
             contentDescription = null,
-            modifier = Modifier
-
-                .size(10.dp)
+            modifier = Modifier.size(10.dp)
         )
         2f.HSpacer
         Text(

@@ -207,4 +207,5 @@
     <string name="users">Usuarios</string>
     <string name="illusts">Ilustraciones</string>
     <string name="id_search">Búsqueda por ID</string>
+    <string name="max_bookmark_tags_reached">Selecciona hasta %1$d etiquetas</string>
 </resources>

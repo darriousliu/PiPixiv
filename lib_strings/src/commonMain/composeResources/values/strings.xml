@@ -213,4 +213,5 @@
     <string name="users">用户</string>
     <string name="illusts">插画</string>
     <string name="id_search">ID搜索</string>
+    <string name="max_bookmark_tags_reached">最多选择%1$d个标签</string>
 </resources>

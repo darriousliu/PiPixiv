@@ -207,4 +207,5 @@
     <string name="users">उपयोगकर्ता</string>
     <string name="illusts">चित्र</string>
     <string name="id_search">ID खोज</string>
+    <string name="max_bookmark_tags_reached">अधिकतम %1$d टैग चुनें</string>
 </resources>
