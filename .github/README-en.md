@@ -12,6 +12,7 @@ A cross-platform third-party Pixiv App entirely written
 by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-blue.svg?logo=kotlin)](https://kotlinlang.org)
+![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-1.10.0-blue)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/master-lzh/PiPixiv/release.yml)](https://github.com/master-lzh/PiPixiv/actions/workflows/release.yml)
 [![License: Apache-2.0](https://img.shields.io/github/license/master-lzh/PiPixiv?labelColor=27303D&color=0877d2)](/LICENSE)
 
