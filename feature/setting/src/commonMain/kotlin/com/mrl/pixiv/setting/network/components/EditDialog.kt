@@ -36,7 +36,6 @@ fun EditDialog(
                 onValueChange = { text = it },
                 modifier = Modifier.fillMaxWidth(),
                 isError = !isValid(text),
-                singleLine = true,
                 keyboardOptions = keyboardOptions
             )
         },

@@ -16,8 +16,8 @@ object Constants {
     val hostMap: Map<String, String> = mapOf(
         API_HOST to "210.140.139.155",
         AUTH_HOST to "210.140.139.155",
-        IMAGE_HOST to "210.140.92.144",
-        STATIC_IMAGE_HOST to "210.140.92.143",
+        IMAGE_HOST to "210.140.139.133",
+        STATIC_IMAGE_HOST to "210.140.139.133",
         "doh" to "doh.dns.sb",
     )
     const val GITHUB_URL = "https://github.com/darriousliu/PiPixiv"

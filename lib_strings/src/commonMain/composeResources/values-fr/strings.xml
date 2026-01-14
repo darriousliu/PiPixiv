@@ -76,6 +76,8 @@
     <string name="sni_doh_url">Adresse DoH</string>
     <string name="sni_timeout">Délai d\'expiration DoH (secondes)</string>
     <string name="sni_non_strict_ssl">Ignorer les erreurs SSL</string>
+    <string name="internal_ip_pool">Pool d\'IP interne</string>
+    <string name="internal_ip_pool_desc">Utiliser le pool d\'IP interne pour la résolution SNI en cas d\'échec de DoH</string>
     <string name="restart_app_to_take_effect">Redémarrer l\'application pour appliquer les modifications</string>
     <string name="image_source">Source d\'image</string>
     <string name="self_defined_source">Source d\'image personnalisée</string>

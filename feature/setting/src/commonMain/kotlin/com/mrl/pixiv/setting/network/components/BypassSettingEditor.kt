@@ -29,10 +29,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.serialize.fromJson
+import com.mrl.pixiv.common.serialize.toJson
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.isIOS
 import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.strings.cancel
+import com.mrl.pixiv.strings.internal_ip_pool
+import com.mrl.pixiv.strings.internal_ip_pool_desc
 import com.mrl.pixiv.strings.network_plan
 import com.mrl.pixiv.strings.protocol_http
 import com.mrl.pixiv.strings.protocol_socks
@@ -281,6 +285,8 @@ fun SniEditor(
 ) {
     var showEditUrl by remember { mutableStateOf(false) }
     var showEditTimeout by remember { mutableStateOf(false) }
+    var showEditInternalIpPool by remember { mutableStateOf(false) }
+
 
     if (showEditUrl) {
         EditDialog(
@@ -314,6 +320,33 @@ fun SniEditor(
         )
     }
 
+    if (showEditInternalIpPool) {
+        EditDialog(
+            title = stringResource(RStrings.internal_ip_pool),
+            initialValue = setting.fallback.toJson(),
+            onConfirm = onConfirm@{
+                val fallback = try {
+                    it.fromJson<Map<String, String>>()
+                } catch (_: Exception) {
+                    showEditInternalIpPool = false
+                    return@onConfirm
+                }
+                onUpdate(setting.copy(fallback = fallback))
+                showEditInternalIpPool = false
+            },
+            onDismiss = { showEditInternalIpPool = false },
+            isValid = {
+                runCatching {
+                    it.fromJson<Map<String, String>>()
+                    true
+                }.getOrElse {
+                    false
+                }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        )
+    }
+
     Column {
         ListItem(
             headlineContent = { Text(text = stringResource(RStrings.sni_doh_url)) },
@@ -333,6 +366,11 @@ fun SniEditor(
                     onCheckedChange = { onUpdate(setting.copy(nonStrictSSL = it)) }
                 )
             }
+        )
+        ListItem(
+            headlineContent = { Text(text = stringResource(RStrings.internal_ip_pool)) },
+            supportingContent = { Text(text = stringResource(RStrings.internal_ip_pool_desc)) },
+            modifier = Modifier.clickable { showEditInternalIpPool = true }
         )
     }
 }

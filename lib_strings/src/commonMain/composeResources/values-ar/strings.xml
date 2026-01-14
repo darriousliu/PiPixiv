@@ -75,6 +75,8 @@
     <string name="sni_doh_url">عنوان DoH</string>
     <string name="sni_timeout">وقت انتهاء DoH (ثوانٍ)</string>
     <string name="sni_non_strict_ssl">تجاهل أخطاء SSL</string>
+    <string name="internal_ip_pool">مجمع عناوين IP الداخلي</string>
+    <string name="internal_ip_pool_desc">استخدم مجمع عناوين IP الداخلي لتحليل SNI عند فشل DoH</string>
     <string name="restart_app_to_take_effect">أعد تشغيل التطبيق لتطبيق التغييرات</string>
     <string name="image_source">مصدر الصورة</string>
     <string name="self_defined_source">مصدر صورة مخصص</string>

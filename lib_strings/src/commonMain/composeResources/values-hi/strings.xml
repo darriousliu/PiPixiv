@@ -76,6 +76,8 @@
     <string name="sni_doh_url">DoH पता</string>
     <string name="sni_timeout">DoH टाइमआउट (सेकंड)</string>
     <string name="sni_non_strict_ssl">SSL त्रुटियों को अनदेखा करें</string>
+    <string name="internal_ip_pool">आंतरिक आईपी पूल</string>
+    <string name="internal_ip_pool_desc">DoH विफल होने पर SNI रेज़ोल्यूशन के लिए आंतरिक आईपी पूल का उपयोग करें</string>
     <string name="restart_app_to_take_effect">प्रभावी होने के लिए ऐप को पुनरारंभ करें</string>
     <string name="image_source">छवि स्रोत</string>
     <string name="self_defined_source">स्व-परिभाषित छवि स्रोत</string>

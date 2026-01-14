@@ -52,6 +52,11 @@ fun OkHttpClient.Builder.bypassSNI(
     dohTimeout: Int,
 ) = dns(SNIReplaceDNS(queryUrl, dohTimeout, nonStrictSSL, fallback))
     .sslSocketFactory(BypassSSLSocketFactory, BypassTrustManager)
+    .apply {
+        if (nonStrictSSL) {
+            ignoreSSL()
+        }
+    }
 
 private data class SNIReplaceDNS(
     val queryUrl: String,

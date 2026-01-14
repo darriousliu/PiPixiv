@@ -76,6 +76,8 @@
     <string name="sni_doh_url">DoH 位址</string>
     <string name="sni_timeout">DoH 逾時時間 (秒)</string>
     <string name="sni_non_strict_ssl">忽略 SSL 錯誤</string>
+    <string name="internal_ip_pool">內置 IP 池</string>
+    <string name="internal_ip_pool_desc">DoH 失敗時使用內置 IP 池進行 SNI 解析</string>
     <string name="restart_app_to_take_effect">重啟 App 後生效</string>
     <string name="image_source">圖源</string>
     <string name="self_defined_source">自定義圖源</string>

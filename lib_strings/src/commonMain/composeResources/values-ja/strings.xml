@@ -76,6 +76,8 @@
     <string name="sni_doh_url">DoHアドレス</string>
     <string name="sni_timeout">DoHタイムアウト（秒）</string>
     <string name="sni_non_strict_ssl">SSLエラーを無視</string>
+    <string name="internal_ip_pool">内蔵IPプール</string>
+    <string name="internal_ip_pool_desc">DoH失敗時に内蔵IPプールを使用してSNI解析を行う</string>
     <string name="restart_app_to_take_effect">アプリを再起動して有効にする</string>
     <string name="image_source">画像ソース</string>
     <string name="self_defined_source">カスタム画像ソース</string>

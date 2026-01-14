@@ -76,6 +76,8 @@
     <string name="sni_doh_url">DoH 주소</string>
     <string name="sni_timeout">DoH 제한 시간 (초)</string>
     <string name="sni_non_strict_ssl">SSL 오류 무시</string>
+    <string name="internal_ip_pool">내장 IP 풀</string>
+    <string name="internal_ip_pool_desc">DoH 실패 시 내장 IP 풀을 사용하여 SNI 해석 수행</string>
     <string name="restart_app_to_take_effect">앱 재시작 시 적용</string>
     <string name="image_source">이미지 소스</string>
     <string name="self_defined_source">사용자 정의 이미지 소스</string>

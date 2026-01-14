@@ -76,6 +76,8 @@
     <string name="sni_doh_url">Адрес DoH</string>
     <string name="sni_timeout">Тайм-аут DoH (сек.)</string>
     <string name="sni_non_strict_ssl">Игнорировать ошибки SSL</string>
+    <string name="internal_ip_pool">Внутренний пул IP-адресов</string>
+    <string name="internal_ip_pool_desc">Использовать внутренний пул IP-адресов для разрешения SNI при сбое DoH</string>
     <string name="restart_app_to_take_effect">Перезапустите приложение для применения изменений</string>
     <string name="image_source">Источник изображения</string>
     <string name="self_defined_source">Пользовательский источник изображения</string>
