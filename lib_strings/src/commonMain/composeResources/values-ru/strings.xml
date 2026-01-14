@@ -63,6 +63,19 @@
     <string name="app_language">Язык приложения</string>
     <string name="setting">Настройки</string>
     <string name="network_setting">Настройки сети</string>
+    <string name="network_plan">Сетевой план</string>
+    <string name="use_none">Не использовать</string>
+    <string name="use_proxy">Использовать прокси</string>
+    <string name="use_sni">Использовать SNI</string>
+    <string name="use_none_desc">Не использовать прокси или сниффинг, подключаться к Pixiv напрямую</string>
+    <string name="use_proxy_desc">Подключаться к Pixiv через прокси-сервер</string>
+    <string name="use_sni_desc">Обходить блокировки для подключения к Pixiv через SNI</string>
+    <string name="proxy_host">Адрес прокси</string>
+    <string name="proxy_port">Порт прокси</string>
+    <string name="proxy_type">Тип прокси</string>
+    <string name="sni_doh_url">Адрес DoH</string>
+    <string name="sni_timeout">Тайм-аут DoH (сек.)</string>
+    <string name="sni_non_strict_ssl">Игнорировать ошибки SSL</string>
     <string name="restart_app_to_take_effect">Перезапустите приложение для применения изменений</string>
     <string name="image_source">Источник изображения</string>
     <string name="self_defined_source">Пользовательский источник изображения</string>
@@ -181,4 +194,17 @@
     <string name="send">Отправить</string>
     <string name="report_success">Жалоба успешно отправлена</string>
     <string name="report_failed">Не удалось отправить жалобу</string>
+    <string name="jetbrains_runtime_error">Среда выполнения JetBrains не поддерживает встроенный браузер JCEF, используемый текущей библиотекой. Пожалуйста, используйте Token для входа.</string>
+    <string name="init_browser">Инициализация браузера...</string>
+    <string name="downloading_browser">Загрузка браузера: %1$s</string>
+    <string name="unzipping_browser">Распаковка браузера...</string>
+    <string name="browser_initialized">Браузер инициализирован</string>
+    <string name="initializing_browser">Выполняется инициализация браузера...</string>
+    <string name="installing_browser">Установка браузера...</string>
+    <string name="locating_browser">Поиск браузера...</string>
+    <string name="download_browser">Скачать браузер</string>
+    <string name="browser_reason">Перед первым входом через веб-интерфейс необходимо загрузить встроенный браузер для обеспечения полноценного процесса аутентификации. Это займет около 300 МБ дискового пространства. Если объем памяти критичен, вы можете скачать мобильную версию PiPixiv, нажать «Мой -> Экспорт Token» и вставить его на компьютере для входа по токену.</string>
+    <string name="users">Пользователи</string>
+    <string name="illusts">Иллюстрации</string>
+    <string name="id_search">Поиск по ID</string>
 </resources>

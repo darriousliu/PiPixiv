@@ -63,6 +63,19 @@
     <string name="app_language">App Language</string>
     <string name="setting">Setting</string>
     <string name="network_setting">Network Setting</string>
+    <string name="network_plan">Network Plan</string>
+    <string name="use_none">Do Not Use</string>
+    <string name="use_proxy">Use Proxy</string>
+    <string name="use_sni">Use SNI</string>
+    <string name="use_none_desc">Do not use proxy or sniffing, connect to Pixiv directly</string>
+    <string name="use_proxy_desc">Connect to Pixiv through a proxy server</string>
+    <string name="use_sni_desc">Bypass blocks to connect to Pixiv via SNI</string>
+    <string name="proxy_host">Proxy Address</string>
+    <string name="proxy_port">Proxy Port</string>
+    <string name="proxy_type">Proxy Type</string>
+    <string name="sni_doh_url">DoH Address</string>
+    <string name="sni_timeout">DoH Timeout (seconds)</string>
+    <string name="sni_non_strict_ssl">Ignore SSL Errors</string>
     <string name="restart_app_to_take_effect">Restart app to take effect</string>
     <string name="image_source">Image Source</string>
     <string name="self_defined_source">Self-defined Image Source</string>
@@ -181,4 +194,17 @@
     <string name="send">Send</string>
     <string name="report_success">Reported successfully</string>
     <string name="report_failed">Report failed</string>
+    <string name="jetbrains_runtime_error">The JetBrains runtime environment does not support the JCEF embedded browser used by the current library, please use Token to login</string>
+    <string name="init_browser">Initializing browser...</string>
+    <string name="downloading_browser">Downloading browser: %1$s</string>
+    <string name="unzipping_browser">Unzipping browser...</string>
+    <string name="browser_initialized">Browser initialized</string>
+    <string name="initializing_browser">Initializing browser...</string>
+    <string name="installing_browser">Installing browser...</string>
+    <string name="locating_browser">Locating browser...</string>
+    <string name="download_browser">Download browser</string>
+    <string name="browser_reason">Before logging in via the web for the first time, an embedded browser needs to be downloaded to provide a complete login experience. This will take up about 300MB of disk space. If you are concerned about the size, you can download the mobile version of PiPixiv, click \"My -> Export Token\", and paste it on your computer to use token login.</string>
+    <string name="users">Users</string>
+    <string name="illusts">Illustrations</string>
+    <string name="id_search">ID Search</string>
 </resources>

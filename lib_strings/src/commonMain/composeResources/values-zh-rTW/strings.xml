@@ -63,6 +63,19 @@
     <string name="app_language">應用程式語言</string>
     <string name="setting">設定</string>
     <string name="network_setting">網路設定</string>
+    <string name="network_plan">網路方案</string>
+    <string name="use_none">不使用</string>
+    <string name="use_proxy">使用代理</string>
+    <string name="use_sni">使用 SNI</string>
+    <string name="use_none_desc">不使用代理或嗅探，直接連線 Pixiv</string>
+    <string name="use_proxy_desc">透過代理伺服器連線 Pixiv</string>
+    <string name="use_sni_desc">透過 SNI 繞過封鎖以連線 Pixiv</string>
+    <string name="proxy_host">代理位址</string>
+    <string name="proxy_port">代理連接埠</string>
+    <string name="proxy_type">代理類型</string>
+    <string name="sni_doh_url">DoH 位址</string>
+    <string name="sni_timeout">DoH 逾時時間 (秒)</string>
+    <string name="sni_non_strict_ssl">忽略 SSL 錯誤</string>
     <string name="restart_app_to_take_effect">重啟 App 後生效</string>
     <string name="image_source">圖源</string>
     <string name="self_defined_source">自定義圖源</string>
@@ -181,4 +194,17 @@
     <string name="send">發送</string>
     <string name="report_success">檢舉成功</string>
     <string name="report_failed">檢舉失敗</string>
+    <string name="jetbrains_runtime_error">JetBrains 執行環境不支援目前程式庫所使用的 JCEF 嵌入式瀏覽器，請使用 Token 登入</string>
+    <string name="init_browser">正在初始化瀏覽器...</string>
+    <string name="downloading_browser">正在下載瀏覽器：%1$s</string>
+    <string name="unzipping_browser">正在解壓縮瀏覽器...</string>
+    <string name="browser_initialized">瀏覽器初始化完成</string>
+    <string name="initializing_browser">正在初始化瀏覽器...</string>
+    <string name="installing_browser">正在安裝瀏覽器...</string>
+    <string name="locating_browser">正在定位瀏覽器...</string>
+    <string name="download_browser">下載瀏覽器</string>
+    <string name="browser_reason">在首次透過網頁登入前，需要下載嵌入式瀏覽器以提供完整的登入體驗，這會佔用您大約 300MB 的磁碟空間。如果介意檔案大小，可以下載手機版 PiPixiv，登入後點選「我的 -> 匯出 Token」，貼到電腦上使用 Token 登入。</string>
+    <string name="users">使用者</string>
+    <string name="illusts">插畫</string>
+    <string name="id_search">ID 搜尋</string>
 </resources>

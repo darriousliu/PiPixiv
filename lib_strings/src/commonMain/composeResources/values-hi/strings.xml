@@ -63,6 +63,19 @@
     <string name="app_language">ऐप भाषा</string>
     <string name="setting">सेटिंग</string>
     <string name="network_setting">नेटवर्क सेटिंग</string>
+    <string name="network_plan">नेटवर्क योजना</string>
+    <string name="use_none">उपयोग न करें</string>
+    <string name="use_proxy">प्रॉक्सी का उपयोग करें</string>
+    <string name="use_sni">SNI का उपयोग करें</string>
+    <string name="use_none_desc">प्रॉक्सी या स्निफिंग का उपयोग न करें, सीधे Pixiv से जुड़ें</string>
+    <string name="use_proxy_desc">प्रॉक्सी सर्वर के माध्यम से Pixiv से जुड़ें</string>
+    <string name="use_sni_desc">SNI के माध्यम से ब्लॉक को बायपास करके Pixiv से जुड़ें</string>
+    <string name="proxy_host">प्रॉक्सी पता</string>
+    <string name="proxy_port">प्रॉक्सी पोर्ट</string>
+    <string name="proxy_type">प्रॉक्सी प्रकार</string>
+    <string name="sni_doh_url">DoH पता</string>
+    <string name="sni_timeout">DoH टाइमआउट (सेकंड)</string>
+    <string name="sni_non_strict_ssl">SSL त्रुटियों को अनदेखा करें</string>
     <string name="restart_app_to_take_effect">प्रभावी होने के लिए ऐप को पुनरारंभ करें</string>
     <string name="image_source">छवि स्रोत</string>
     <string name="self_defined_source">स्व-परिभाषित छवि स्रोत</string>
@@ -181,4 +194,17 @@
     <string name="send">भेजें</string>
     <string name="report_success">रिपोर्ट सफलतापूर्वक की गई</string>
     <string name="report_failed">रिपोर्ट विफल रही</string>
+    <string name="jetbrains_runtime_error">JetBrains रनटाइम एनवायरमेंट वर्तमान लाइब्रेरी द्वारा उपयोग किए जाने वाले JCEF एम्बेडेड ब्राउज़र का समर्थन नहीं करता है, कृपया लॉगिन करने के लिए टोकन का उपयोग करें</string>
+    <string name="init_browser">ब्राउज़र को इनिशियलाइज़ किया जा रहा है...</string>
+    <string name="downloading_browser">ब्राउज़र डाउनलोड हो रहा है: %1$s</string>
+    <string name="unzipping_browser">ब्राउज़र को अनज़िप किया जा रहा है...</string>
+    <string name="browser_initialized">ब्राउज़र इनिशियलाइज़ हो गया</string>
+    <string name="initializing_browser">ब्राउज़र इनिशियलाइज़ हो रहा है...</string>
+    <string name="installing_browser">ब्राउज़र इंस्टॉल हो रहा है...</string>
+    <string name="locating_browser">ब्राउज़र का पता लगाया जा रहा है...</string>
+    <string name="download_browser">ब्राउज़र डाउनलोड करें</string>
+    <string name="browser_reason">पहली बार वेब के माध्यम से लॉगिन करने से पहले, पूर्ण लॉगिन अनुभव प्रदान करने के लिए एक एम्बेडेड ब्राउज़र डाउनलोड करने की आवश्यकता होती है। यह आपके डिस्क स्पेस का लगभग 300MB घेरेगा। यदि आप साइज़ को लेकर चिंतित हैं, तो आप PiPixiv का मोबाइल संस्करण डाउनलोड कर सकते हैं, \"मेरा -> टोकन निर्यात करें\" पर क्लिक करें, और टोकन लॉगिन का उपयोग करने के लिए इसे कंप्यूटर पर पेस्ट करें।</string>
+    <string name="users">उपयोगकर्ता</string>
+    <string name="illusts">चित्र</string>
+    <string name="id_search">ID खोज</string>
 </resources>

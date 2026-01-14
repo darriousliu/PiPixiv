@@ -63,6 +63,19 @@
     <string name="app_language">앱 언어</string>
     <string name="setting">설정</string>
     <string name="network_setting">네트워크 설정</string>
+    <string name="network_plan">네트워크 플랜</string>
+    <string name="use_none">사용 안 함</string>
+    <string name="use_proxy">프록시 사용</string>
+    <string name="use_sni">SNI 사용</string>
+    <string name="use_none_desc">프록시나 스니핑을 사용하지 않고 Pixiv에 직접 연결합니다</string>
+    <string name="use_proxy_desc">프록시 서버를 통해 Pixiv에 연결합니다</string>
+    <string name="use_sni_desc">SNI를 통해 차단을 우회하여 Pixiv에 연결합니다</string>
+    <string name="proxy_host">프록시 주소</string>
+    <string name="proxy_port">프록시 포트</string>
+    <string name="proxy_type">프록시 유형</string>
+    <string name="sni_doh_url">DoH 주소</string>
+    <string name="sni_timeout">DoH 제한 시간 (초)</string>
+    <string name="sni_non_strict_ssl">SSL 오류 무시</string>
     <string name="restart_app_to_take_effect">앱 재시작 시 적용</string>
     <string name="image_source">이미지 소스</string>
     <string name="self_defined_source">사용자 정의 이미지 소스</string>
@@ -181,4 +194,17 @@
     <string name="send">보내기</string>
     <string name="report_success">신고 성공</string>
     <string name="report_failed">신고 실패</string>
+    <string name="jetbrains_runtime_error">JetBrains 런타임 환경이 현재 라이브러리에서 사용하는 JCEF 임베디드 브라우저를 지원하지 않습니다. 토큰을 사용하여 로그인해 주세요.</string>
+    <string name="init_browser">브라우저 초기화 중...</string>
+    <string name="downloading_browser">브라우저 다운로드 중: %1$s</string>
+    <string name="unzipping_browser">브라우저 압축 해제 중...</string>
+    <string name="browser_initialized">브라우저 초기화 완료</string>
+    <string name="initializing_browser">브라우저를 초기화하는 중...</string>
+    <string name="installing_browser">브라우저 설치 중...</string>
+    <string name="locating_browser">브라우저 위치 찾는 중...</string>
+    <string name="download_browser">브라우저 다운로드</string>
+    <string name="browser_reason">웹을 통해 처음 로그인하기 전에, 완전한 로그인 환경을 제공하기 위해 임베디드 브라우저를 다운로드해야 합니다. 이는 약 300MB의 디스크 공간을 차지합니다. 용량이 부담된다면 모바일 버전 PiPixiv를 다운로드하여 \"내 정보 -> 토큰 내보내기\"를 클릭한 후, 컴퓨터에 붙여넣어 토큰 로그인을 사용할 수 있습니다.</string>
+    <string name="users">사용자</string>
+    <string name="illusts">일러스트</string>
+    <string name="id_search">ID 검색</string>
 </resources>

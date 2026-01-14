@@ -63,6 +63,19 @@
     <string name="app_language">App-Sprache</string>
     <string name="setting">Einstellungen</string>
     <string name="network_setting">Netzwerkeinstellungen</string>
+    <string name="network_plan">Netzwerkplan</string>
+    <string name="use_none">Nicht verwenden</string>
+    <string name="use_proxy">Proxy verwenden</string>
+    <string name="use_sni">SNI verwenden</string>
+    <string name="use_none_desc">Keinen Proxy oder Sniffing verwenden, direkte Verbindung zu Pixiv</string>
+    <string name="use_proxy_desc">Über einen Proxy-Server mit Pixiv verbinden</string>
+    <string name="use_sni_desc">Blockierungen über SNI umgehen, um eine Verbindung zu Pixiv herzustellen</string>
+    <string name="proxy_host">Proxy-Adresse</string>
+    <string name="proxy_port">Proxy-Port</string>
+    <string name="proxy_type">Proxy-Typ</string>
+    <string name="sni_doh_url">DoH-Adresse</string>
+    <string name="sni_timeout">DoH-Timeout (Sekunden)</string>
+    <string name="sni_non_strict_ssl">SSL-Fehler ignorieren</string>
     <string name="restart_app_to_take_effect">App neu starten, um Änderungen zu übernehmen</string>
     <string name="image_source">Bildquelle</string>
     <string name="self_defined_source">Benutzerdefinierte Bildquelle</string>
@@ -181,4 +194,17 @@
     <string name="send">Senden</string>
     <string name="report_success">Meldung erfolgreich gesendet</string>
     <string name="report_failed">Meldung fehlgeschlagen</string>
+    <string name="jetbrains_runtime_error">Die JetBrains-Laufzeitumgebung unterstützt den von der aktuellen Bibliothek verwendeten eingebetteten JCEF-Browser nicht. Bitte verwenden Sie ein Token zur Anmeldung.</string>
+    <string name="init_browser">Browser wird initialisiert...</string>
+    <string name="downloading_browser">Browser wird heruntergeladen: %1$s</string>
+    <string name="unzipping_browser">Browser wird entpackt...</string>
+    <string name="browser_initialized">Browser initialisiert</string>
+    <string name="initializing_browser">Browser wird initialisiert...</string>
+    <string name="installing_browser">Browser wird installiert...</string>
+    <string name="locating_browser">Browser wird lokalisiert...</string>
+    <string name="download_browser">Browser herunterladen</string>
+    <string name="browser_reason">Bevor Sie sich zum ersten Mal über die Webseite anmelden, muss ein eingebetteter Browser heruntergeladen werden, um ein vollständiges Login-Erlebnis zu bieten. Dies wird etwa 300 MB Speicherplatz beanspruchen. Falls Sie den Speicherplatz sparen möchten, können Sie die mobile Version von PiPixiv herunterladen, unter \"Mein -> Token exportieren\" den Token kopieren und ihn am Computer zur Anmeldung verwenden.</string>
+    <string name="users">Benutzer</string>
+    <string name="illusts">Illustrationen</string>
+    <string name="id_search">ID-Suche</string>
 </resources>

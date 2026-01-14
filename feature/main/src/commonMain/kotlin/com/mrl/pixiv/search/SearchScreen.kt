@@ -61,6 +61,7 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.enter_keywords
 import com.mrl.pixiv.strings.find_for
+import com.mrl.pixiv.strings.id_search
 import com.mrl.pixiv.strings.search_history
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -124,7 +125,8 @@ fun SearchScreen(
                 modifier = Modifier.imePadding()
             ) {
                 Text(
-                    text = " ID ",
+                    text = stringResource(RStrings.id_search),
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     textDecoration = if (state.isIdSearch) null else TextDecoration.LineThrough,
                     style = MaterialTheme.typography.labelLarge,
                 )

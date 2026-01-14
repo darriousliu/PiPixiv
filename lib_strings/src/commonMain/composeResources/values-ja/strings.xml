@@ -63,6 +63,19 @@
     <string name="app_language">アプリの言語</string>
     <string name="setting">設定</string>
     <string name="network_setting">ネットワーク設定</string>
+    <string name="network_plan">ネットワークプラン</string>
+    <string name="use_none">使用しない</string>
+    <string name="use_proxy">プロキシを使用</string>
+    <string name="use_sni">SNIを使用</string>
+    <string name="use_none_desc">プロキシやスニッフィングを使用せず、Pixivに直接接続します</string>
+    <string name="use_proxy_desc">プロキシサーバー経由でPixivに接続します</string>
+    <string name="use_sni_desc">SNIを利用して検閲を回避し、Pixivに接続します</string>
+    <string name="proxy_host">プロキシのホスト名</string>
+    <string name="proxy_port">プロキシのポート</string>
+    <string name="proxy_type">プロキシの種類</string>
+    <string name="sni_doh_url">DoHアドレス</string>
+    <string name="sni_timeout">DoHタイムアウト（秒）</string>
+    <string name="sni_non_strict_ssl">SSLエラーを無視</string>
     <string name="restart_app_to_take_effect">アプリを再起動して有効にする</string>
     <string name="image_source">画像ソース</string>
     <string name="self_defined_source">カスタム画像ソース</string>
@@ -181,4 +194,17 @@
     <string name="send">送信</string>
     <string name="report_success">報告が完了しました</string>
     <string name="report_failed">報告に失敗しました</string>
+    <string name="jetbrains_runtime_error">JetBrainsランタイム環境は、現在のライブラリが使用しているJCEF組み込みブラウザをサポートしていません。Tokenを使用してログインしてください。</string>
+    <string name="init_browser">ブラウザを初期化中...</string>
+    <string name="downloading_browser">ブラウザをダウンロード中: %1$s</string>
+    <string name="unzipping_browser">ブラウザを解凍中...</string>
+    <string name="browser_initialized">ブラウザの初期化が完了しました</string>
+    <string name="initializing_browser">ブラウザを初期化しています...</string>
+    <string name="installing_browser">ブラウザをインストール中...</string>
+    <string name="locating_browser">ブラウザを特定中...</string>
+    <string name="download_browser">ブラウザをダウンロード</string>
+    <string name="browser_reason">初めてウェブ経由でログインする前に、完全なログイン体験を提供するために組み込みブラウザをダウンロードする必要があります。これには約300MBのディスク容量が必要です。容量が気になる場合は、モバイル版のPiPixivをダウンロードし、「マイページ -> Tokenを書き出し」をクリックして、PCに貼り付けてTokenログインを使用してください。</string>
+    <string name="users">ユーザー</string>
+    <string name="illusts">イラスト</string>
+    <string name="id_search">ID検索</string>
 </resources>

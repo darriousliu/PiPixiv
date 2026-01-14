@@ -62,6 +62,19 @@
     <string name="app_language">لغة التطبيق</string>
     <string name="setting">الإعدادات</string>
     <string name="network_setting">إعدادات الشبكة</string>
+    <string name="network_plan">خطة الشبكة</string>
+    <string name="use_none">لا تستخدم</string>
+    <string name="use_proxy">استخدام الوكيل</string>
+    <string name="use_sni">استخدام SNI</string>
+    <string name="use_none_desc">لا تستخدم الوكيل أو الاستنشاق، اتصل بـ Pixiv مباشرة</string>
+    <string name="use_proxy_desc">الاتصال بـ Pixiv عبر خادم وكيل</string>
+    <string name="use_sni_desc">تجاوز الحظر للاتصال بـ Pixiv عبر SNI</string>
+    <string name="proxy_host">عنوان الوكيل</string>
+    <string name="proxy_port">منفذ الوكيل</string>
+    <string name="proxy_type">نوع الوكيل</string>
+    <string name="sni_doh_url">عنوان DoH</string>
+    <string name="sni_timeout">وقت انتهاء DoH (ثوانٍ)</string>
+    <string name="sni_non_strict_ssl">تجاهل أخطاء SSL</string>
     <string name="restart_app_to_take_effect">أعد تشغيل التطبيق لتطبيق التغييرات</string>
     <string name="image_source">مصدر الصورة</string>
     <string name="self_defined_source">مصدر صورة مخصص</string>
@@ -181,4 +194,17 @@
     <string name="send">إرسال</string>
     <string name="report_success">تم الإبلاغ بنجاح</string>
     <string name="report_failed">فشل الإبلاغ</string>
+    <string name="jetbrains_runtime_error">بيئة تشغيل JetBrains لا تدعم متصفح JCEF المدمج الذي تستخدمه المكتبة الحالية، يرجى استخدام الرمز (Token) لتسجيل الدخول</string>
+    <string name="init_browser">تهيئة المتصفح...</string>
+    <string name="downloading_browser">جاري تحميل المتصفح: %1$s</string>
+    <string name="unzipping_browser">فك ضغط المتصفح...</string>
+    <string name="browser_initialized">تمت تهيئة المتصفح</string>
+    <string name="initializing_browser">جاري تهيئة المتصفح...</string>
+    <string name="installing_browser">تثبيت المتصفح...</string>
+    <string name="locating_browser">تحديد موقع المتصفح...</string>
+    <string name="download_browser">تحميل المتصفح</string>
+    <string name="browser_reason">قبل تسجيل الدخول عبر الويب لأول مرة، يلزم تنزيل متصفح مدمج لتوفير تجربة تسجيل دخول كاملة. سيشغل هذا حوالي 300 ميجابايت من مساحة القرص. إذا كنت تهتم بالمساحة، يمكنك تنزيل نسخة الهاتف المحمول من PiPixiv، ثم النقر على \"حسابي -> تصدير Token\"، ولصقه في الكمبيوتر لاستخدام الرمز لتسجيل الدخول.</string>
+    <string name="users">المستخدمون</string>
+    <string name="illusts">الرسوم التوضيحية</string>
+    <string name="id_search">البحث بالمعرف (ID)</string>
 </resources>

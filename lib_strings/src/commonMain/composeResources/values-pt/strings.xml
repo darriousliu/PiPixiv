@@ -63,6 +63,19 @@
     <string name="app_language">Idioma do aplicativo</string>
     <string name="setting">Configurações</string>
     <string name="network_setting">Configurações de rede</string>
+    <string name="network_plan">Plano de rede</string>
+    <string name="use_none">Não usar</string>
+    <string name="use_proxy">Usar proxy</string>
+    <string name="use_sni">Usar SNI</string>
+    <string name="use_none_desc">Não usar proxy ou detecção, conectar diretamente ao Pixiv</string>
+    <string name="use_proxy_desc">Conectar ao Pixiv através de um servidor proxy</string>
+    <string name="use_sni_desc">Contornar bloqueios para se conectar ao Pixiv via SNI</string>
+    <string name="proxy_host">Endereço do proxy</string>
+    <string name="proxy_port">Porta do proxy</string>
+    <string name="proxy_type">Tipo de proxy</string>
+    <string name="sni_doh_url">Endereço DoH</string>
+    <string name="sni_timeout">Tempo limite do DoH (segundos)</string>
+    <string name="sni_non_strict_ssl">Ignorar erros de SSL</string>
     <string name="restart_app_to_take_effect">Reinicie o aplicativo para aplicar as alterações</string>
     <string name="image_source">Fonte de imagem</string>
     <string name="self_defined_source">Fonte de imagem personalizada</string>
@@ -181,4 +194,17 @@
     <string name="send">Enviar</string>
     <string name="report_success">Denúncia enviada com sucesso</string>
     <string name="report_failed">Falha ao enviar denúncia</string>
+    <string name="jetbrains_runtime_error">O ambiente de execução do JetBrains não suporta o navegador incorporado JCEF usado pela biblioteca atual, por favor use o Token para fazer login</string>
+    <string name="init_browser">Inicializando o navegador...</string>
+    <string name="downloading_browser">Baixando o navegador: %1$s</string>
+    <string name="unzipping_browser">Descompactando o navegador...</string>
+    <string name="browser_initialized">Navegador inicializado</string>
+    <string name="initializing_browser">Inicializando o navegador...</string>
+    <string name="installing_browser">Instalando o navegador...</string>
+    <string name="locating_browser">Localizando o navegador...</string>
+    <string name="download_browser">Baixar navegador</string>
+    <string name="browser_reason">Antes de fazer o login pela web pela primeira vez, é necessário baixar um navegador incorporado para oferecer uma experiência de login completa. Isso ocupará cerca de 300 MB de espaço em disco. Se você se preocupa com o tamanho, pode baixar a versão móvel do PiPixiv, clicar em \"Meu -> Exportar Token\" e colá-lo no computador para usar o login por token.</string>
+    <string name="users">Usuários</string>
+    <string name="illusts">Ilustrações</string>
+    <string name="id_search">Pesquisa por ID</string>
 </resources>
