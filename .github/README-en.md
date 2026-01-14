@@ -8,8 +8,8 @@
 
 ### Third-party Pixiv Client
 
-A third-party Pixiv App entirely written
-by [Jetpack Compose](https://developer.android.com/develop/ui/compose)
+A cross-platform third-party Pixiv App entirely written
+by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/master-lzh/PiPixiv/release.yml)](https://github.com/master-lzh/PiPixiv/actions/workflows/release.yml)
@@ -21,7 +21,13 @@ by [Jetpack Compose](https://developer.android.com/develop/ui/compose)
 [![GitHub downloads](https://img.shields.io/github/downloads/master-lzh/PiPixiv/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/master-lzh/PiPixiv/releases)
 [![F-Droid Version](https://img.shields.io/f-droid/v/com.mrl.pixiv)](https://f-droid.org/packages/com.mrl.pixiv/)
 
-### Supports **[Android 8.0]()** or higher
+### Supported Platforms
+
+- **Android**: Android 8.0 or higher
+- **iOS**: iOS 17 or higher
+- **Windows**: x86_64
+- **macOS**: arm64 (Apple Silicon)
+- **Linux**: x86_64
 
 ## Features
 
