@@ -24,11 +24,13 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 ### Supported Platforms
 
+<div align="left">
 - **Android**: Android 8.0 or higher
 - **iOS**: iOS 17 or higher
 - **Windows**: x86_64
 - **macOS**: arm64 (Apple Silicon)
 - **Linux**: x86_64
+</div>
 
 ## Features
 

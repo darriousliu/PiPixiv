@@ -10,7 +10,8 @@
 
 ### 第三方 Pixiv 客户端
 
-一个完全由 [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) 编写的跨平台第三方 Pixiv 应用
+一个完全由 [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) 编写的跨平台第三方
+Pixiv 应用
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-blue.svg?logo=kotlin)](https://kotlinlang.org)
 ![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-1.10.0-blue)
@@ -25,11 +26,13 @@
 
 ### 支持平台
 
+<div align="left">
 - **Android**: Android 8.0 或更高版本
 - **iOS**: iOS 17 或更高版本
 - **Windows**: x86_64
 - **macOS**: arm64 (Apple Silicon)
 - **Linux**: x86_64
+</div>
 
 ## 功能
 
