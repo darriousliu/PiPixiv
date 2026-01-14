@@ -27,11 +27,13 @@ Pixiv 应用
 ### 支持平台
 
 <div align="left">
+
 - **Android**: Android 8.0 或更高版本
 - **iOS**: iOS 17 或更高版本
 - **Windows**: x86_64
 - **macOS**: arm64 (Apple Silicon)
 - **Linux**: x86_64
+
 </div>
 
 ## 功能
