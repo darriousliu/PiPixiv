@@ -1,24 +1,31 @@
 plugins {
-    id("pixiv.android.library.compose")
+    id("pixiv.multiplatform.compose")
     alias(kotlinx.plugins.serialization)
 }
 
-android {
-    namespace = "com.mrl.pixiv.common.datasource.local"
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.common.datasource.local"
+    }
+    sourceSets {
+        commonMain.dependencies {
+            // Serialization
+            implementation(kotlinx.bundles.serialization)
+            // Room
+            implementation(androidx.room.runtime)
+            implementation(androidx.sqlite.bundled)
+            // Koin
+            implementation(libs.bundles.koin)
+            // FileKit
+            implementation(libs.filekit.core)
+        }
+    }
+
 }
 
 dependencies {
-    implementation(project(":common:data"))
-    implementation(project(":common:core"))
-
-    // Serialization
-    implementation(kotlinx.bundles.serialization)
-    // Room
-    implementation(androidx.room.runtime)
-    ksp(androidx.room.compiler)
-    // WorkManager
-    implementation(androidx.bundles.workmanager)
-    // Koin
-    implementation(libs.bundles.koin)
-    ksp(libs.koin.ksp.compiler)
+    kspAndroid(androidx.room.compiler)
+    kspIosArm64(androidx.room.compiler)
+    kspIosSimulatorArm64(androidx.room.compiler)
+    kspJvm(androidx.room.compiler)
 }

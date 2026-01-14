@@ -3,11 +3,11 @@ import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 plugins {
     id("pixiv.android.application")
     alias(androidx.plugins.baselineprofile)
+    alias(libs.plugins.sentry.android)
 }
 if (project.findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.google.services.get().pluginId)
     pluginManager.apply(libs.plugins.firebase.crashlytics.get().pluginId)
-    pluginManager.apply(libs.plugins.kotzilla.get().pluginId)
 }
 
 android {
@@ -19,8 +19,8 @@ android {
 
     defaultConfig {
         applicationId = "com.mrl.pixiv"
-        versionCode = 10400
-        versionName = "1.4.0"
+        versionCode = properties["versionCode"].toString().toInt()
+        versionName = properties["versionName"].toString()
 
         vectorDrawables {
             useSupportLibrary = true
@@ -30,6 +30,11 @@ android {
             abiFilters.add("arm64-v8a")
             abiFilters.add("x86_64")
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     dependenciesInfo {
@@ -98,20 +103,43 @@ dependencies {
     implementation(project(":common:repository"))
     implementation(project(":common:ui"))
     implementation(project(":common:core"))
-    rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
-        implementation(project(":feature:${it.name}"))
-    }
+    implementation(project(":composeApp"))
 
     // splash screen
     implementation(androidx.splashscreen)
     // ProfileInstaller
     implementation(androidx.profileinstaller)
     // Navigation3
-    api(compose.bundles.navigation3)
+    implementation(composes.bundles.navigation3.android)
     // Coil3
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)
+    implementation(libs.coil3.gif)
     // MMKV
     implementation(libs.mmkv)
     implementation(libs.mmkv.kotlin)
+}
+
+sentry {
+    // Disables or enables debug log output, e.g. for for sentry-cli.
+    // Default is disabled.
+    debug.set(true)
+    org.set("pipixiv")
+    projectName.set("pipixiv")
+    authToken.set(System.getenv("SENTRY_AUTH_TOKEN"))
+    url = null
+    includeProguardMapping.set(true)
+    autoUploadProguardMapping.set(true)
+    uploadNativeSymbols.set(false)
+    autoUploadNativeSymbols.set(true)
+    includeNativeSources.set(false)
+    includeSourceContext.set(false)
+    tracingInstrumentation {
+        enabled.set(false)
+    }
+    autoInstallation {
+        enabled.set(false)
+    }
+    includeDependenciesReport.set(false)
+    telemetry.set(false)
 }

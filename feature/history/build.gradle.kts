@@ -1,17 +1,22 @@
 plugins {
-    id("pixiv.android.library.compose")
+    id("pixiv.multiplatform.compose")
 }
 
-android {
-    namespace = "com.mrl.pixiv.history"
-}
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.history"
+    }
 
-dependencies {
-    implementation(project(":common:data"))
-    implementation(project(":common:repository"))
-    implementation(project(":common:ui"))
-    implementation(project(":common:core"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":lib_strings"))
+            implementation(project(":common:data"))
+            implementation(project(":common:repository"))
+            implementation(project(":common:ui"))
+            implementation(project(":common:core"))
 
-    // Paging
-    implementation(androidx.bundles.paging)
+            // Paging
+            implementation(androidx.bundles.paging)
+        }
+    }
 }

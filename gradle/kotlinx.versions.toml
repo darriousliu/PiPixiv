@@ -4,7 +4,7 @@ ksp = "2.3.4"
 serialization = "1.9.0"
 coroutines = "1.10.2"
 ktor = "3.3.3"
-ktorfit = "2.7.1"
+ktorfit = "2.7.2"
 datetime = "0.7.1"
 collections-immutable = "0.4.0"
 
@@ -17,6 +17,7 @@ collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-im
 coroutines-bom = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "coroutines" }
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android" }
+coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing" }
 #coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava" }
 #coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test" }
 
@@ -32,6 +33,7 @@ ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devto
 # Ktor
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
@@ -42,7 +44,7 @@ compose-compiler-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compile
 [bundles]
 coroutines = ["coroutines-core", "coroutines-android"]
 serialization = ["serialization-json", "serialization-json-okio", "serialization-protobuf"]
-ktor = ["ktor-client-core", "ktor-client-okhttp", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktorfit-lite"]
+ktor = ["ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktorfit-lite"]
 
 [plugins]
 android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -50,5 +52,7 @@ serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref 
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+native-cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 
 

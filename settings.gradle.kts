@@ -1,15 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-import java.io.FileInputStream
-import java.util.Properties
-
-
-val localProperties = Properties()
-val localFile = file("local.properties")
-if (localFile.exists()) {
-    localProperties.load(FileInputStream(localFile))
-}
-
 pluginManagement {
     includeBuild("build-logic")
     repositories {
@@ -25,6 +15,7 @@ pluginManagement {
         maven(url = "https://www.jitpack.io")
     }
 }
+
 dependencyResolutionManagement {
     versionCatalogs {
         create("kotlinx") {
@@ -33,7 +24,7 @@ dependencyResolutionManagement {
         create("androidx") {
             from(files("gradle/androidx.versions.toml"))
         }
-        create("compose") {
+        create("composes") {
             from(files("gradle/compose.versions.toml"))
         }
     }
@@ -48,10 +39,18 @@ dependencyResolutionManagement {
         }
         mavenCentral()
         maven(url = "https://www.jitpack.io")
+        maven("https://maven.universablockchain.com/")
+        maven("https://jogamp.org/deployment/maven")
     }
 }
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 rootProject.name = "PiPixiv"
 include(":app")
+include(":composeApp")
 include(":lib_strings")
 include(":baselineprofile")
 

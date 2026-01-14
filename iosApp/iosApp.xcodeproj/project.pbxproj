@@ -1,0 +1,1086 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4A6860B121E899E92E042D75 /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2504AD42144A33BDD9A4E7F9 /* Pods_iosApp.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1AC48DF89C56FF002CE5A60C /* PiPixiv.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PiPixiv.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2504AD42144A33BDD9A4E7F9 /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C01A0AAB2F0257EE00B7AE17 /* AnimationDefaults.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = AnimationDefaults.kt; sourceTree = "<group>"; };
+		C01A0AAD2F0257EE00B7AE17 /* CancelException.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CancelException.kt; sourceTree = "<group>"; };
+		C01A0AAE2F0257EE00B7AE17 /* CoroutineExt.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CoroutineExt.kt; sourceTree = "<group>"; };
+		C01A0AB02F0257EE00B7AE17 /* MMKVConfig.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = MMKVConfig.kt; sourceTree = "<group>"; };
+		C01A0AB12F0257EE00B7AE17 /* MMKVProperty.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = MMKVProperty.kt; sourceTree = "<group>"; };
+		C01A0AB22F0257EE00B7AE17 /* MMKVSerializableProperty.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = MMKVSerializableProperty.kt; sourceTree = "<group>"; };
+		C01A0AB32F0257EE00B7AE17 /* MMKVStateFlowProperty.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = MMKVStateFlowProperty.kt; sourceTree = "<group>"; };
+		C01A0AB52F0257EE00B7AE17 /* IllustCacheRepo.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IllustCacheRepo.kt; sourceTree = "<group>"; };
+		C01A0AB72F0257EE00B7AE17 /* DestinationsDeepLink.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DestinationsDeepLink.kt; sourceTree = "<group>"; };
+		C01A0AB82F0257EE00B7AE17 /* Navigation.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Navigation.kt; sourceTree = "<group>"; };
+		C01A0AB92F0257EE00B7AE17 /* NavigationManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = NavigationManager.kt; sourceTree = "<group>"; };
+		C01A0ABB2F0257EE00B7AE17 /* Json.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Json.kt; sourceTree = "<group>"; };
+		C01A0ABD2F0257EE00B7AE17 /* ToastMessage.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ToastMessage.kt; sourceTree = "<group>"; };
+		C01A0ABF2F0257EE00B7AE17 /* AppUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = AppUtil.kt; sourceTree = "<group>"; };
+		C01A0AC02F0257EE00B7AE17 /* BitmapUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BitmapUtil.kt; sourceTree = "<group>"; };
+		C01A0AC12F0257EE00B7AE17 /* Constants.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Constants.kt; sourceTree = "<group>"; };
+		C01A0AC22F0257EE00B7AE17 /* CopyUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CopyUtil.kt; sourceTree = "<group>"; };
+		C01A0AC32F0257EE00B7AE17 /* DebounceUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DebounceUtil.kt; sourceTree = "<group>"; };
+		C01A0AC42F0257EE00B7AE17 /* DeviceInfo.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DeviceInfo.kt; sourceTree = "<group>"; };
+		C01A0AC52F0257EE00B7AE17 /* ExtUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ExtUtil.kt; sourceTree = "<group>"; };
+		C01A0AC62F0257EE00B7AE17 /* FileUtils.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = FileUtils.kt; sourceTree = "<group>"; };
+		C01A0AC72F0257EE00B7AE17 /* LazyStateUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LazyStateUtil.kt; sourceTree = "<group>"; };
+		C01A0AC82F0257EE00B7AE17 /* LocaleHelper.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LocaleHelper.kt; sourceTree = "<group>"; };
+		C01A0AC92F0257EE00B7AE17 /* PictureType.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureType.kt; sourceTree = "<group>"; };
+		C01A0ACA2F0257EE00B7AE17 /* ScreenUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ScreenUtil.kt; sourceTree = "<group>"; };
+		C01A0ACB2F0257EE00B7AE17 /* ShareUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ShareUtil.kt; sourceTree = "<group>"; };
+		C01A0ACC2F0257EE00B7AE17 /* TimeUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = TimeUtil.kt; sourceTree = "<group>"; };
+		C01A0ACD2F0257EE00B7AE17 /* ToastUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ToastUtil.kt; sourceTree = "<group>"; };
+		C01A0ACE2F0257EE00B7AE17 /* ZipUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ZipUtil.kt; sourceTree = "<group>"; };
+		C01A0AD02F0257EE00B7AE17 /* BaseMviViewModel.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BaseMviViewModel.kt; sourceTree = "<group>"; };
+		C01A0AD82F0257EE00B7AE17 /* CoroutineExt.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CoroutineExt.ios.kt; sourceTree = "<group>"; };
+		C01A0ADA2F0257EE00B7AE17 /* BitmapUtil.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BitmapUtil.ios.kt; sourceTree = "<group>"; };
+		C01A0ADB2F0257EE00B7AE17 /* CopyUtil.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CopyUtil.ios.kt; sourceTree = "<group>"; };
+		C01A0ADC2F0257EE00B7AE17 /* DeviceInfo.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DeviceInfo.ios.kt; sourceTree = "<group>"; };
+		C01A0ADD2F0257EE00B7AE17 /* LocaleHelper.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LocaleHelper.ios.kt; sourceTree = "<group>"; };
+		C01A0ADE2F0257EE00B7AE17 /* PhotoUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PhotoUtil.kt; sourceTree = "<group>"; };
+		C01A0ADF2F0257EE00B7AE17 /* ShareUtil.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ShareUtil.ios.kt; sourceTree = "<group>"; };
+		C01A0B5B2F02585100B7AE17 /* CollectionIllustPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CollectionIllustPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B5C2F02585100B7AE17 /* CommentPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CommentPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B5D2F02585100B7AE17 /* CommentRepliesPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CommentRepliesPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B5E2F02585100B7AE17 /* FollowingPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = FollowingPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B5F2F02585100B7AE17 /* HistoryIllustPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = HistoryIllustPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B602F02585100B7AE17 /* IllustFollowingPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IllustFollowingPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B612F02585100B7AE17 /* IllustRankingPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IllustRankingPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B622F02585100B7AE17 /* IllustRecommendedPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IllustRecommendedPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B632F02585100B7AE17 /* RelatedIllustPaging.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = RelatedIllustPaging.kt; sourceTree = "<group>"; };
+		C01A0B642F02585100B7AE17 /* SearchIllustPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SearchIllustPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B652F02585100B7AE17 /* UserIllustPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UserIllustPagingSource.kt; sourceTree = "<group>"; };
+		C01A0B672F02585100B7AE17 /* FileName.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = FileName.kt; sourceTree = "<group>"; };
+		C01A0B682F02585100B7AE17 /* Filter.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Filter.kt; sourceTree = "<group>"; };
+		C01A0B692F02585100B7AE17 /* String.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = String.kt; sourceTree = "<group>"; };
+		C01A0B6B2F02585100B7AE17 /* BookmarkState.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BookmarkState.kt; sourceTree = "<group>"; };
+		C01A0B6D2F02585100B7AE17 /* FollowState.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = FollowState.kt; sourceTree = "<group>"; };
+		C01A0B702F02585100B7AE17 /* AuthManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = AuthManager.kt; sourceTree = "<group>"; };
+		C01A0B712F02585100B7AE17 /* BlockingRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BlockingRepository.kt; sourceTree = "<group>"; };
+		C01A0B722F02585100B7AE17 /* BlockingRepositoryV2.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BlockingRepositoryV2.kt; sourceTree = "<group>"; };
+		C01A0B732F02585100B7AE17 /* BookmarkedTagRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BookmarkedTagRepository.kt; sourceTree = "<group>"; };
+		C01A0B742F02585100B7AE17 /* CommentRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CommentRepository.kt; sourceTree = "<group>"; };
+		C01A0B752F02585100B7AE17 /* DownloadManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DownloadManager.kt; sourceTree = "<group>"; };
+		C01A0B762F02585100B7AE17 /* DownloadStrategy.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DownloadStrategy.kt; sourceTree = "<group>"; };
+		C01A0B772F02585100B7AE17 /* NetworkFeatureImpl.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = NetworkFeatureImpl.kt; sourceTree = "<group>"; };
+		C01A0B782F02585100B7AE17 /* PixivRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PixivRepository.kt; sourceTree = "<group>"; };
+		C01A0B792F02585100B7AE17 /* SearchRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SearchRepository.kt; sourceTree = "<group>"; };
+		C01A0B7A2F02585100B7AE17 /* SettingRepository.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SettingRepository.kt; sourceTree = "<group>"; };
+		C01A0B7B2F02585100B7AE17 /* UserManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UserManager.kt; sourceTree = "<group>"; };
+		C01A0B7C2F02585100B7AE17 /* VersionManager.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = VersionManager.kt; sourceTree = "<group>"; };
+		C01A0B842F02585100B7AE17 /* IosDownloadStrategy.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = IosDownloadStrategy.kt; sourceTree = "<group>"; };
+		C01A0BAA2F02591900B7AE17 /* UgoilaPlayer.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = UgoilaPlayer.kt; sourceTree = "<group>"; };
+		C01A0BAC2F02591900B7AE17 /* HorizontalSwipePictureScreen.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = HorizontalSwipePictureScreen.kt; sourceTree = "<group>"; };
+		C01A0BAD2F02591900B7AE17 /* PictureScreen.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureScreen.kt; sourceTree = "<group>"; };
+		C01A0BAE2F02591900B7AE17 /* PictureViewModel.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureViewModel.kt; sourceTree = "<group>"; };
+		C01A0BB52F02591900B7AE17 /* PictureScreen.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureScreen.ios.kt; sourceTree = "<group>"; };
+		CB0D53EC7F7BC041DC3D12E3 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
+		E70F5D8DF511C34329B7AB8C /* Pods-iosApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.release.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1B890274F54DA38651D5F002 /* Exceptions for "iosApp" folder in "iosApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 534376758C41CE97B3B3FE54 /* iosApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		3F4C35825AB99DE17A5B0D16 /* iosApp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1B890274F54DA38651D5F002 /* Exceptions for "iosApp" folder in "iosApp" target */,
+			);
+			path = iosApp;
+			sourceTree = "<group>";
+		};
+		ED62C2B061C4347F8C06C2D7 /* Configuration */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Configuration;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A77EDA681E5C6E56DBEFFB68 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A6860B121E899E92E042D75 /* Pods_iosApp.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		13FB1504F13FA0729B060EA4 = {
+			isa = PBXGroup;
+			children = (
+				C01A0AAA2F02579500B7AE17 /* Kotlin */,
+				ED62C2B061C4347F8C06C2D7 /* Configuration */,
+				3F4C35825AB99DE17A5B0D16 /* iosApp */,
+				82B5335CC846DD695CF9A3C7 /* Products */,
+				2D12737CF1E984537BD9783C /* Pods */,
+				3FDED1B73117747DF4C8684C /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		2D12737CF1E984537BD9783C /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				CB0D53EC7F7BC041DC3D12E3 /* Pods-iosApp.debug.xcconfig */,
+				E70F5D8DF511C34329B7AB8C /* Pods-iosApp.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		3FDED1B73117747DF4C8684C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2504AD42144A33BDD9A4E7F9 /* Pods_iosApp.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		82B5335CC846DD695CF9A3C7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1AC48DF89C56FF002CE5A60C /* PiPixiv.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C01A0AAA2F02579500B7AE17 /* Kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB42F02591900B7AE17 /* commonMain */,
+				C01A0BBB2F02591900B7AE17 /* iosMain */,
+				C01A0B832F02585100B7AE17 /* commonMain */,
+				C01A0B8B2F02585100B7AE17 /* iosMain */,
+				C01A0AD72F0257EE00B7AE17 /* commonMain */,
+				C01A0AE62F0257EE00B7AE17 /* iosMain */,
+			);
+			path = Kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0AAC2F0257EE00B7AE17 /* animation */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AAB2F0257EE00B7AE17 /* AnimationDefaults.kt */,
+			);
+			path = animation;
+			sourceTree = "<group>";
+		};
+		C01A0AAF2F0257EE00B7AE17 /* coroutine */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AAD2F0257EE00B7AE17 /* CancelException.kt */,
+				C01A0AAE2F0257EE00B7AE17 /* CoroutineExt.kt */,
+			);
+			path = coroutine;
+			sourceTree = "<group>";
+		};
+		C01A0AB42F0257EE00B7AE17 /* mmkv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AB02F0257EE00B7AE17 /* MMKVConfig.kt */,
+				C01A0AB12F0257EE00B7AE17 /* MMKVProperty.kt */,
+				C01A0AB22F0257EE00B7AE17 /* MMKVSerializableProperty.kt */,
+				C01A0AB32F0257EE00B7AE17 /* MMKVStateFlowProperty.kt */,
+			);
+			path = mmkv;
+			sourceTree = "<group>";
+		};
+		C01A0AB62F0257EE00B7AE17 /* repository */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AB52F0257EE00B7AE17 /* IllustCacheRepo.kt */,
+			);
+			path = repository;
+			sourceTree = "<group>";
+		};
+		C01A0ABA2F0257EE00B7AE17 /* router */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AB72F0257EE00B7AE17 /* DestinationsDeepLink.kt */,
+				C01A0AB82F0257EE00B7AE17 /* Navigation.kt */,
+				C01A0AB92F0257EE00B7AE17 /* NavigationManager.kt */,
+			);
+			path = router;
+			sourceTree = "<group>";
+		};
+		C01A0ABC2F0257EE00B7AE17 /* serialize */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0ABB2F0257EE00B7AE17 /* Json.kt */,
+			);
+			path = serialize;
+			sourceTree = "<group>";
+		};
+		C01A0ABE2F0257EE00B7AE17 /* toast */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0ABD2F0257EE00B7AE17 /* ToastMessage.kt */,
+			);
+			path = toast;
+			sourceTree = "<group>";
+		};
+		C01A0ACF2F0257EE00B7AE17 /* util */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0ABF2F0257EE00B7AE17 /* AppUtil.kt */,
+				C01A0AC02F0257EE00B7AE17 /* BitmapUtil.kt */,
+				C01A0AC12F0257EE00B7AE17 /* Constants.kt */,
+				C01A0AC22F0257EE00B7AE17 /* CopyUtil.kt */,
+				C01A0AC32F0257EE00B7AE17 /* DebounceUtil.kt */,
+				C01A0AC42F0257EE00B7AE17 /* DeviceInfo.kt */,
+				C01A0AC52F0257EE00B7AE17 /* ExtUtil.kt */,
+				C01A0AC62F0257EE00B7AE17 /* FileUtils.kt */,
+				C01A0AC72F0257EE00B7AE17 /* LazyStateUtil.kt */,
+				C01A0AC82F0257EE00B7AE17 /* LocaleHelper.kt */,
+				C01A0AC92F0257EE00B7AE17 /* PictureType.kt */,
+				C01A0ACA2F0257EE00B7AE17 /* ScreenUtil.kt */,
+				C01A0ACB2F0257EE00B7AE17 /* ShareUtil.kt */,
+				C01A0ACC2F0257EE00B7AE17 /* TimeUtil.kt */,
+				C01A0ACD2F0257EE00B7AE17 /* ToastUtil.kt */,
+				C01A0ACE2F0257EE00B7AE17 /* ZipUtil.kt */,
+			);
+			path = util;
+			sourceTree = "<group>";
+		};
+		C01A0AD12F0257EE00B7AE17 /* viewmodel */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD02F0257EE00B7AE17 /* BaseMviViewModel.kt */,
+			);
+			path = viewmodel;
+			sourceTree = "<group>";
+		};
+		C01A0AD22F0257EE00B7AE17 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AAC2F0257EE00B7AE17 /* animation */,
+				C01A0AAF2F0257EE00B7AE17 /* coroutine */,
+				C01A0AB42F0257EE00B7AE17 /* mmkv */,
+				C01A0AB62F0257EE00B7AE17 /* repository */,
+				C01A0ABA2F0257EE00B7AE17 /* router */,
+				C01A0ABC2F0257EE00B7AE17 /* serialize */,
+				C01A0ABE2F0257EE00B7AE17 /* toast */,
+				C01A0ACF2F0257EE00B7AE17 /* util */,
+				C01A0AD12F0257EE00B7AE17 /* viewmodel */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		C01A0AD32F0257EE00B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD22F0257EE00B7AE17 /* common */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0AD42F0257EE00B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD32F0257EE00B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0AD52F0257EE00B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD42F0257EE00B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0AD62F0257EE00B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD52F0257EE00B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0AD72F0257EE00B7AE17 /* commonMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD62F0257EE00B7AE17 /* kotlin */,
+			);
+			name = commonMain;
+			path = ../common/core/src/commonMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0AD92F0257EE00B7AE17 /* coroutine */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD82F0257EE00B7AE17 /* CoroutineExt.ios.kt */,
+			);
+			path = coroutine;
+			sourceTree = "<group>";
+		};
+		C01A0AE02F0257EE00B7AE17 /* util */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0ADA2F0257EE00B7AE17 /* BitmapUtil.ios.kt */,
+				C01A0ADB2F0257EE00B7AE17 /* CopyUtil.ios.kt */,
+				C01A0ADC2F0257EE00B7AE17 /* DeviceInfo.ios.kt */,
+				C01A0ADD2F0257EE00B7AE17 /* LocaleHelper.ios.kt */,
+				C01A0ADE2F0257EE00B7AE17 /* PhotoUtil.kt */,
+				C01A0ADF2F0257EE00B7AE17 /* ShareUtil.ios.kt */,
+			);
+			path = util;
+			sourceTree = "<group>";
+		};
+		C01A0AE12F0257EE00B7AE17 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AD92F0257EE00B7AE17 /* coroutine */,
+				C01A0AE02F0257EE00B7AE17 /* util */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		C01A0AE22F0257EE00B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE12F0257EE00B7AE17 /* common */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0AE32F0257EE00B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE22F0257EE00B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0AE42F0257EE00B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE32F0257EE00B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0AE52F0257EE00B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE42F0257EE00B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0AE62F0257EE00B7AE17 /* iosMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0AE52F0257EE00B7AE17 /* kotlin */,
+			);
+			name = iosMain;
+			path = ../common/core/src/iosMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0B662F02585100B7AE17 /* paging */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B5B2F02585100B7AE17 /* CollectionIllustPagingSource.kt */,
+				C01A0B5C2F02585100B7AE17 /* CommentPagingSource.kt */,
+				C01A0B5D2F02585100B7AE17 /* CommentRepliesPagingSource.kt */,
+				C01A0B5E2F02585100B7AE17 /* FollowingPagingSource.kt */,
+				C01A0B5F2F02585100B7AE17 /* HistoryIllustPagingSource.kt */,
+				C01A0B602F02585100B7AE17 /* IllustFollowingPagingSource.kt */,
+				C01A0B612F02585100B7AE17 /* IllustRankingPagingSource.kt */,
+				C01A0B622F02585100B7AE17 /* IllustRecommendedPagingSource.kt */,
+				C01A0B632F02585100B7AE17 /* RelatedIllustPaging.kt */,
+				C01A0B642F02585100B7AE17 /* SearchIllustPagingSource.kt */,
+				C01A0B652F02585100B7AE17 /* UserIllustPagingSource.kt */,
+			);
+			path = paging;
+			sourceTree = "<group>";
+		};
+		C01A0B6A2F02585100B7AE17 /* util */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B672F02585100B7AE17 /* FileName.kt */,
+				C01A0B682F02585100B7AE17 /* Filter.kt */,
+				C01A0B692F02585100B7AE17 /* String.kt */,
+			);
+			path = util;
+			sourceTree = "<group>";
+		};
+		C01A0B6C2F02585100B7AE17 /* bookmark */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B6B2F02585100B7AE17 /* BookmarkState.kt */,
+			);
+			path = bookmark;
+			sourceTree = "<group>";
+		};
+		C01A0B6E2F02585100B7AE17 /* follow */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B6D2F02585100B7AE17 /* FollowState.kt */,
+			);
+			path = follow;
+			sourceTree = "<group>";
+		};
+		C01A0B6F2F02585100B7AE17 /* viewmodel */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B6C2F02585100B7AE17 /* bookmark */,
+				C01A0B6E2F02585100B7AE17 /* follow */,
+			);
+			path = viewmodel;
+			sourceTree = "<group>";
+		};
+		C01A0B7D2F02585100B7AE17 /* repository */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B662F02585100B7AE17 /* paging */,
+				C01A0B6A2F02585100B7AE17 /* util */,
+				C01A0B6F2F02585100B7AE17 /* viewmodel */,
+				C01A0B702F02585100B7AE17 /* AuthManager.kt */,
+				C01A0B712F02585100B7AE17 /* BlockingRepository.kt */,
+				C01A0B722F02585100B7AE17 /* BlockingRepositoryV2.kt */,
+				C01A0B732F02585100B7AE17 /* BookmarkedTagRepository.kt */,
+				C01A0B742F02585100B7AE17 /* CommentRepository.kt */,
+				C01A0B752F02585100B7AE17 /* DownloadManager.kt */,
+				C01A0B762F02585100B7AE17 /* DownloadStrategy.kt */,
+				C01A0B772F02585100B7AE17 /* NetworkFeatureImpl.kt */,
+				C01A0B782F02585100B7AE17 /* PixivRepository.kt */,
+				C01A0B792F02585100B7AE17 /* SearchRepository.kt */,
+				C01A0B7A2F02585100B7AE17 /* SettingRepository.kt */,
+				C01A0B7B2F02585100B7AE17 /* UserManager.kt */,
+				C01A0B7C2F02585100B7AE17 /* VersionManager.kt */,
+			);
+			path = repository;
+			sourceTree = "<group>";
+		};
+		C01A0B7E2F02585100B7AE17 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B7D2F02585100B7AE17 /* repository */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		C01A0B7F2F02585100B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B7E2F02585100B7AE17 /* common */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0B802F02585100B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B7F2F02585100B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0B812F02585100B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B802F02585100B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0B822F02585100B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B812F02585100B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0B832F02585100B7AE17 /* commonMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B822F02585100B7AE17 /* kotlin */,
+			);
+			name = commonMain;
+			path = ../common/repository/src/commonMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0B852F02585100B7AE17 /* repository */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B842F02585100B7AE17 /* IosDownloadStrategy.kt */,
+			);
+			path = repository;
+			sourceTree = "<group>";
+		};
+		C01A0B862F02585100B7AE17 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B852F02585100B7AE17 /* repository */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		C01A0B872F02585100B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B862F02585100B7AE17 /* common */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0B882F02585100B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B872F02585100B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0B892F02585100B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B882F02585100B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0B8A2F02585100B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B892F02585100B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0B8B2F02585100B7AE17 /* iosMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0B8A2F02585100B7AE17 /* kotlin */,
+			);
+			name = iosMain;
+			path = ../common/repository/src/iosMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0BAB2F02591900B7AE17 /* components */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BAA2F02591900B7AE17 /* UgoilaPlayer.kt */,
+			);
+			path = components;
+			sourceTree = "<group>";
+		};
+		C01A0BAF2F02591900B7AE17 /* picture */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BAB2F02591900B7AE17 /* components */,
+				C01A0BAC2F02591900B7AE17 /* HorizontalSwipePictureScreen.kt */,
+				C01A0BAD2F02591900B7AE17 /* PictureScreen.kt */,
+				C01A0BAE2F02591900B7AE17 /* PictureViewModel.kt */,
+			);
+			path = picture;
+			sourceTree = "<group>";
+		};
+		C01A0BB02F02591900B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BAF2F02591900B7AE17 /* picture */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0BB12F02591900B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB02F02591900B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0BB22F02591900B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB12F02591900B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0BB32F02591900B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB22F02591900B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0BB42F02591900B7AE17 /* commonMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB32F02591900B7AE17 /* kotlin */,
+			);
+			name = commonMain;
+			path = ../feature/picture/src/commonMain;
+			sourceTree = SOURCE_ROOT;
+		};
+		C01A0BB62F02591900B7AE17 /* picture */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB52F02591900B7AE17 /* PictureScreen.ios.kt */,
+			);
+			path = picture;
+			sourceTree = "<group>";
+		};
+		C01A0BB72F02591900B7AE17 /* pixiv */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB62F02591900B7AE17 /* picture */,
+			);
+			path = pixiv;
+			sourceTree = "<group>";
+		};
+		C01A0BB82F02591900B7AE17 /* mrl */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB72F02591900B7AE17 /* pixiv */,
+			);
+			path = mrl;
+			sourceTree = "<group>";
+		};
+		C01A0BB92F02591900B7AE17 /* com */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB82F02591900B7AE17 /* mrl */,
+			);
+			path = com;
+			sourceTree = "<group>";
+		};
+		C01A0BBA2F02591900B7AE17 /* kotlin */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BB92F02591900B7AE17 /* com */,
+			);
+			path = kotlin;
+			sourceTree = "<group>";
+		};
+		C01A0BBB2F02591900B7AE17 /* iosMain */ = {
+			isa = PBXGroup;
+			children = (
+				C01A0BBA2F02591900B7AE17 /* kotlin */,
+			);
+			name = iosMain;
+			path = ../feature/picture/src/iosMain;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		534376758C41CE97B3B3FE54 /* iosApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B318C7DF8D91F57AAC6D575B /* Build configuration list for PBXNativeTarget "iosApp" */;
+			buildPhases = (
+				CA900429C41C014157108DC9 /* [CP] Check Pods Manifest.lock */,
+				ACB848C9BFCA9510147D6DBD /* Sources */,
+				A77EDA681E5C6E56DBEFFB68 /* Frameworks */,
+				24F94AA9C94BB9A21AE42529 /* Resources */,
+				C92FA5578BDA7EF5A40B2B40 /* [CP] Embed Pods Frameworks */,
+				8C7ED8E2DAAC34B8B13C28B9 /* [CP] Copy Pods Resources */,
+				C0962F912F161D1800594D9A /* Upload DSYM */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3F4C35825AB99DE17A5B0D16 /* iosApp */,
+			);
+			name = iosApp;
+			productName = iosApp;
+			productReference = 1AC48DF89C56FF002CE5A60C /* PiPixiv.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4A5E5E1D683F7C51CAF044AC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					534376758C41CE97B3B3FE54 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+				};
+			};
+			buildConfigurationList = 043B81CDAC2B66B475FB041E /* Build configuration list for PBXProject "iosApp" */;
+			developmentRegion = "zh-Hans";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				ar,
+				"zh-Hans",
+				"zh-Hant",
+				fr,
+				de,
+				hi,
+				ja,
+				ko,
+				ru,
+				es,
+				"pt-PT",
+			);
+			mainGroup = 13FB1504F13FA0729B060EA4;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 82B5335CC846DD695CF9A3C7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				534376758C41CE97B3B3FE54 /* iosApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		24F94AA9C94BB9A21AE42529 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8C7ED8E2DAAC34B8B13C28B9 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C0962F912F161D1800594D9A /* Upload DSYM */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${EXECUTABLE_NAME}",
+			);
+			name = "Upload DSYM";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\nif which sentry-cli >/dev/null; then\nexport SENTRY_ORG=pipixiv\nexport SENTRY_PROJECT=pipixiv\n\nERROR=$(sentry-cli debug-files upload \\\n\"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\nif [ ! $? -eq 0 ]; then\necho \"warning: sentry-cli - $ERROR\"\nfi\nelse\necho \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
+		};
+		C92FA5578BDA7EF5A40B2B40 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CA900429C41C014157108DC9 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-iosApp-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		ACB848C9BFCA9510147D6DBD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		519592D01D29DC3818146A6B /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E70F5D8DF511C34329B7AB8C /* Pods-iosApp.release.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
+				DEVELOPMENT_TEAM = J669KBG846;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = iosApp/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = PHOTO_LIBRARY_ADD_USAGE;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = PHOTO_LIBRARY_USAGE;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.4.0;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		588F09B6E8545708A2796C17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = ED62C2B061C4347F8C06C2D7 /* Configuration */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AFBDDD4D5601F8B741B172F4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = ED62C2B061C4347F8C06C2D7 /* Configuration */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C510B83DF99DF05F94B59688 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = CB0D53EC7F7BC041DC3D12E3 /* Pods-iosApp.debug.xcconfig */;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
+				DEVELOPMENT_TEAM = J669KBG846;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = iosApp/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = PHOTO_LIBRARY_ADD_USAGE;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = PHOTO_LIBRARY_USAGE;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.4.0;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		043B81CDAC2B66B475FB041E /* Build configuration list for PBXProject "iosApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AFBDDD4D5601F8B741B172F4 /* Debug */,
+				588F09B6E8545708A2796C17 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B318C7DF8D91F57AAC6D575B /* Build configuration list for PBXNativeTarget "iosApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C510B83DF99DF05F94B59688 /* Debug */,
+				519592D01D29DC3818146A6B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4A5E5E1D683F7C51CAF044AC /* Project object */;
+}

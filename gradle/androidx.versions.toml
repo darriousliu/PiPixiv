@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.2"
 lifecycle = "2.10.0"
 appcompat = "1.7.1"
 baselineprofile = "1.4.1"
@@ -10,10 +10,12 @@ splashscreen = "1.2.0"
 profileinstaller = "1.4.1"
 navigation = "2.9.6"
 datastore = "1.2.0"
-paging = "3.3.6"
+paging = "3.4.0-beta01"
 work = "2.11.0"
 window = "1.5.1"
 room = "2.8.4"
+sqlite = "2.6.2"
+annotation = "1.9.1"
 
 [libraries]
 android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -24,6 +26,7 @@ core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
 splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
 profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
 tracing = { module = "androidx.tracing:tracing", version.ref = "tracing" }
+annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 
 lifecycle-common = { module = "androidx.lifecycle:lifecycle-common", version.ref = "lifecycle" }
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
@@ -37,19 +40,21 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
-paging = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
+paging = { module = "androidx.paging:paging-common", version.ref = "paging" }
 paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 
 window = { module = "androidx.window:window", version.ref = "window" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 
 
 [bundles]

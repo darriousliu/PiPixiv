@@ -1,14 +1,18 @@
 plugins {
-    id("pixiv.android.library.compose")
+    id("pixiv.multiplatform.compose")
     alias(kotlinx.plugins.serialization)
 }
 
-android {
-    namespace = "com.mrl.pixiv.common.data"
-}
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.common.data"
+    }
 
-dependencies {
-    // Serialization
-    implementation(kotlinx.bundles.serialization)
-    implementation(kotlinx.datetime)
+    sourceSets {
+        commonMain.dependencies {
+            // Serialization
+            implementation(kotlinx.bundles.serialization)
+            implementation(kotlinx.datetime)
+        }
+    }
 }

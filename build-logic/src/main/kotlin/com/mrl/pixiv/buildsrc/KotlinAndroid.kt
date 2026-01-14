@@ -47,8 +47,8 @@ internal fun Project.configureKotlinAndroid(
         compileOptions {
             // Up to Java 11 APIs are available through desugaring
             // https://developer.android.com/studio/write/java11-minimal-support-table
-            sourceCompatibility = JavaVersion.VERSION_21
-            targetCompatibility = JavaVersion.VERSION_21
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
         }
     }
 
@@ -71,8 +71,6 @@ internal fun Project.configureKotlinAndroid(
         // Logger
         implementation(libs.findLibrary("kermit").get())
     }
-
-    configureSortKoinKspGeneration()
 }
 
 
@@ -80,42 +78,42 @@ internal fun Project.configureKotlinAndroid(
 /**
  * Configure base Kotlin options
  */
-private fun Project.configureKotlin() {
+internal fun Project.configureKotlin() {
     // Use withType to workaround https://youtrack.jetbrains.com/issue/KT-55947
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             // Set JVM target to 11
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_17)
             // Treat all Kotlin warnings as errors (disabled by default)
             // Override by setting warningsAsErrors=true in your ~/.gradle/gradle.properties
             val warningsAsErrors: String? by project
             allWarningsAsErrors.set(warningsAsErrors.toBoolean())
-            freeCompilerArgs.addAll(
-                listOf(
-                    "-opt-in=kotlin.RequiresOptIn",
-                    // Enable experimental coroutines APIs, including Flow
-                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                    "-opt-in=kotlinx.coroutines.FlowPreview",
-                    "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
-                    "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
-                    "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
-                    "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
-                    "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
-                    "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-                    "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
-                    "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
-                    "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
-                    "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
-                    "-opt-in=coil3.annotation.ExperimentalCoilApi",
-                    "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
-                    "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-                    "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-                    "-opt-in=kotlin.time.ExperimentalTime",
-                    "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
-                    "-Xannotation-default-target=param-property",
-                    "-Xstring-concat=inline"
-                )
-            )
+            freeCompilerArgs.addAll(optIns)
         }
     }
 }
+
+internal val optIns = listOf(
+    "-Xexpect-actual-classes",
+    "-opt-in=kotlin.RequiresOptIn",
+    // Enable experimental coroutines APIs, including Flow
+    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+    "-opt-in=kotlinx.coroutines.FlowPreview",
+    "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
+    "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+    "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+    "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+    "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+    "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+    "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
+    "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
+    "-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi",
+    "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
+    "-opt-in=coil3.annotation.ExperimentalCoilApi",
+    "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
+    "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
+    "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+    "-opt-in=kotlin.time.ExperimentalTime",
+    "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
+    "-Xannotation-default-target=param-property",
+)

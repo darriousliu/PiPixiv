@@ -1,31 +1,40 @@
 plugins {
-    id("pixiv.android.library.compose")
+    id("pixiv.multiplatform.compose")
     alias(kotlinx.plugins.serialization)
 }
 
-android {
-    namespace = "com.mrl.pixiv.common.repository"
-}
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.common.repository"
+    }
 
-dependencies {
-    implementation(project(":common:data"))
-    implementation(project(":common:network"))
-    api(project(":common:datasource-local"))
-    implementation(project(":common:datasource-remote"))
-    implementation(project(":common:core"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":lib_strings"))
+            implementation(project(":common:data"))
+            implementation(project(":common:network"))
+            implementation(project(":common:datasource-local"))
+            implementation(project(":common:datasource-remote"))
+            implementation(project(":common:core"))
 
-    // Paging
-    implementation(androidx.bundles.paging)
-    // Serialization
-    implementation(kotlinx.bundles.serialization)
-    // Ktor
-    implementation(kotlinx.bundles.ktor)
+            // Paging
+            implementation(androidx.bundles.paging)
+            // Serialization
+            implementation(kotlinx.bundles.serialization)
+            // Ktor
+            implementation(kotlinx.bundles.ktor)
 
-    // WorkManager
-    implementation(androidx.bundles.workmanager)
-    // Coil
-    implementation(platform(libs.coil3.bom))
-    implementation(libs.bundles.coil3)
-    // GIF encoder
-    implementation(libs.gifkt)
+            // Coil
+            implementation(project.dependencies.platform(libs.coil3.bom))
+            implementation(libs.bundles.coil3)
+            // GIF encoder
+            implementation(libs.gifkt)
+            implementation(libs.filekit.core)
+        }
+
+        androidMain.dependencies {
+            // WorkManager
+            implementation(androidx.bundles.workmanager)
+        }
+    }
 }
