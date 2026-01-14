@@ -45,6 +45,8 @@ class SplashViewModel : BaseMviViewModel<SplashState, SplashAction>(
             AuthManager.requireUserAccessToken()
             if (AuthManager.isLogin) {
                 routeToHome()
+            } else {
+                routeToLogin()
             }
         }
     }
