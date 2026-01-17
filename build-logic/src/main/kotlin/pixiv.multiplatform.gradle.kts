@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
 import com.mrl.pixiv.buildsrc.commonDependencies
 import com.mrl.pixiv.buildsrc.configureKotlinMultiplatform
 import com.mrl.pixiv.buildsrc.configureSortKoinKspGeneration
@@ -17,7 +16,6 @@ kotlin {
         freeCompilerArgs.addAll(optIns)
     }
 
-    @Suppress("UnstableApiUsage")
     androidLibrary {
         compileSdk = 36
         minSdk = 26

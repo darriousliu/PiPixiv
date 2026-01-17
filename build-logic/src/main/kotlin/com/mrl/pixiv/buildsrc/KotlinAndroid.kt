@@ -31,20 +31,20 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
     commonExtension.apply {
         compileSdk {
             version = release(36)
         }
 
-        defaultConfig {
+        defaultConfig.apply {
             minSdk = 26
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             proguardFiles.add(file("consumer-rules.pro"))
         }
 
-        compileOptions {
+        compileOptions.apply {
             // Up to Java 11 APIs are available through desugaring
             // https://developer.android.com/studio/write/java11-minimal-support-table
             sourceCompatibility = JavaVersion.VERSION_17
