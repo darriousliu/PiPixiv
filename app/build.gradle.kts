@@ -11,7 +11,7 @@ if (project.findProperty("applyFirebasePlugins") == "true") {
 }
 
 android {
-    namespace = "com.mrl.pixiv.android"
+    namespace = "com.mrl.pixiv"
 
     lint {
         disable.add("Instantiatable")
