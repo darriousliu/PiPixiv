@@ -47,7 +47,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
@@ -56,6 +55,7 @@ import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
@@ -222,7 +222,7 @@ fun FollowingScreenBody(
                 ) {
                     items(
                         followingUsers.itemCount,
-                        key = followingUsers.itemKey { it.user.id }
+                        key = followingUsers.itemIndexKey { index, user -> "${index}_${user.user.id}" }
                     ) {
                         val userPreview = followingUsers[it] ?: return@items
                         FollowingUserCard(
@@ -251,8 +251,8 @@ fun FollowingScreenBody(
                     verticalArrangement = 10f.spaceBy,
                 ) {
                     items(
-                        followingUsers.itemCount,
-                        key = followingUsers.itemKey { it.user.id }
+                        count = followingUsers.itemCount,
+                        key = followingUsers.itemIndexKey { index, item -> "${index}_${item.user.id}" }
                     ) {
                         val userPreview = followingUsers[it] ?: return@items
                         FollowingUserCard(

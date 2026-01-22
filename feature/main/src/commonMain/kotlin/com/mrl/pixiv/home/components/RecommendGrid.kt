@@ -8,10 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
@@ -32,7 +32,10 @@ fun RecommendGrid(
         horizontalArrangement = layoutParams.horizontalArrangement,
         modifier = Modifier.fillMaxSize()
     ) {
-        items(recommendImageList.itemCount, key = recommendImageList.itemKey { it.id }) {
+        items(
+            count = recommendImageList.itemCount,
+            key = recommendImageList.itemIndexKey { index, item -> "${index}_${item.id}" }
+        ) {
             val illust = recommendImageList[it] ?: return@items
             val isBookmarked = illust.isBookmark
             RectangleIllustItem(

@@ -39,13 +39,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.mrl.pixiv.comment.components.CommentInput
 import com.mrl.pixiv.comment.components.CommentInputPlaceholder
 import com.mrl.pixiv.comment.components.CommentItem
 import com.mrl.pixiv.common.data.comment.Comment
 import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.hPadding
+import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.CommentRepository
 import com.mrl.pixiv.common.router.CommentType
@@ -191,7 +191,7 @@ fun CommentScreen(
             ) {
                 items(
                     count = comments.itemCount,
-                    key = comments.itemKey { it.id }
+                    key = comments.itemIndexKey { index, item -> "${index}_${item.id}" }
                 ) { index ->
                     val comment = comments[index] ?: return@items
                     val isBlocked = BlockingRepositoryV2.collectCommentBlockAsState(comment.id)
@@ -368,7 +368,7 @@ private fun RepliesContent(
 
         items(
             count = replies.itemCount,
-            key = replies.itemKey { it.id }
+            key = replies.itemIndexKey { index, item -> "${index}_${item.id}" }
         ) { index ->
             val comment = replies[index] ?: return@items
             Column(

@@ -23,10 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.data.Restrict
+import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
@@ -83,7 +83,7 @@ fun TrendingPage(
                 }
                 items(
                     count = illustsFollowing.itemCount,
-                    key = illustsFollowing.itemKey { it.id }
+                    key = illustsFollowing.itemIndexKey { index, item -> "${index}_${item.id}" }
                 ) { index ->
                     val illust = illustsFollowing[index] ?: return@items
                     val isBookmarked = illust.isBookmark

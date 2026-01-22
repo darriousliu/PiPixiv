@@ -34,10 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
+import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
@@ -192,8 +192,8 @@ fun SearchResultsScreen(
                             verticalArrangement = 10f.spaceBy,
                         ) {
                             items(
-                                userSearchResults.itemCount,
-                                key = userSearchResults.itemKey { it.user.id }
+                                count = userSearchResults.itemCount,
+                                key = userSearchResults.itemIndexKey { index, item -> "${index}_${item.user.id}" }
                             ) { index ->
                                 val userPreview = userSearchResults[index] ?: return@items
                                 FollowingUserCard(

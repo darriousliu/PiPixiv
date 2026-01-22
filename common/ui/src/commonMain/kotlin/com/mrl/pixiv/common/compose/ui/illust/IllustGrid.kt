@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
@@ -40,7 +40,7 @@ fun LazyGridScope.illustGrid(
     }
     items(
         illusts.itemCount,
-        key = { index -> illusts.itemKey { "${index}_${it.id}" }(index) }
+        key = illusts.itemIndexKey { index, item -> "${index}_${item.id}" }
     ) { index ->
         val illust = illusts[index] ?: return@items
         val isBookmarked = illust.isBookmark
@@ -81,7 +81,7 @@ fun LazyStaggeredGridScope.illustGrid(
     }
     items(
         illusts.itemCount,
-        key = { index -> illusts.itemKey { "${index}_${it.id}" }(index) }
+        key = illusts.itemIndexKey { index, item -> "${index}_${item.id}" }
     ) { index ->
         val illust = illusts[index] ?: return@items
         val isBookmarked = illust.isBookmark
