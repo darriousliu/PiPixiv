@@ -22,8 +22,10 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.kts.spaceBy
@@ -71,8 +74,16 @@ fun SearchResultsScreen(
     val isRefreshing = searchResults.loadState.refresh is LoadState.Loading
     val isUserRefreshing = userSearchResults.loadState.refresh is LoadState.Loading
 
-    val pagerState = rememberPagerState { 2 }
+    val pages = remember { SearchResultsPage.entries }
+    val pagerState = rememberPagerState { SearchResultsPage.entries.size }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(pagerState.currentPage) {
+        logEvent("screen_view", buildMap {
+            put("screen_name", "SearchResults")
+            put("page_name", SearchResultsPage.entries[pagerState.currentPage].name)
+        })
+    }
 
     Scaffold(
         topBar = {
@@ -120,79 +131,83 @@ fun SearchResultsScreen(
         HorizontalPager(
             state = pagerState,
             modifier = modifier.padding(it),
-        ) { page ->
-            if (page == 0) {
-                PullToRefreshBox(
-                    isRefreshing = isRefreshing,
-                    onRefresh = { searchResults.refresh() },
-                    state = pullRefreshState,
-                    indicator = {
-                        PullToRefreshDefaults.LoadingIndicator(
-                            state = pullRefreshState,
-                            isRefreshing = isRefreshing,
-                            modifier = Modifier.align(Alignment.TopCenter),
-                        )
-                    },
-                ) {
-                    LazyVerticalGrid(
-                        modifier = Modifier.fillMaxSize(),
-                        columns = layoutParams.gridCells,
-                        verticalArrangement = layoutParams.verticalArrangement,
-                        horizontalArrangement = layoutParams.horizontalArrangement,
-                        contentPadding = PaddingValues(
-                            start = 8.dp,
-                            top = 8.dp,
-                            end = 8.dp,
-                            bottom = WindowInsets.navigationBars.asPaddingValues()
-                                .calculateBottomPadding()
-                        ),
+        ) { index ->
+            when (pages[index]) {
+                SearchResultsPage.Illusts -> {
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = { searchResults.refresh() },
+                        state = pullRefreshState,
+                        indicator = {
+                            PullToRefreshDefaults.LoadingIndicator(
+                                state = pullRefreshState,
+                                isRefreshing = isRefreshing,
+                                modifier = Modifier.align(Alignment.TopCenter),
+                            )
+                        },
                     ) {
-                        illustGrid(
-                            illusts = searchResults,
-                            navToPictureScreen = navigationManager::navigateToPictureScreen,
-                        )
+                        LazyVerticalGrid(
+                            modifier = Modifier.fillMaxSize(),
+                            columns = layoutParams.gridCells,
+                            verticalArrangement = layoutParams.verticalArrangement,
+                            horizontalArrangement = layoutParams.horizontalArrangement,
+                            contentPadding = PaddingValues(
+                                start = 8.dp,
+                                top = 8.dp,
+                                end = 8.dp,
+                                bottom = WindowInsets.navigationBars.asPaddingValues()
+                                    .calculateBottomPadding()
+                            ),
+                        ) {
+                            illustGrid(
+                                illusts = searchResults,
+                                navToPictureScreen = navigationManager::navigateToPictureScreen,
+                            )
+                        }
                     }
                 }
-            } else {
-                PullToRefreshBox(
-                    isRefreshing = isUserRefreshing,
-                    onRefresh = { userSearchResults.refresh() },
-                    state = userPullRefreshState,
-                    indicator = {
-                        PullToRefreshDefaults.LoadingIndicator(
-                            state = userPullRefreshState,
-                            isRefreshing = isUserRefreshing,
-                            modifier = Modifier.align(Alignment.TopCenter),
-                        )
-                    },
-                ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            top = 10.dp,
-                            end = 16.dp,
-                            bottom = WindowInsets.navigationBars.asPaddingValues()
-                                .calculateBottomPadding()
-                        ),
-                        verticalArrangement = 10f.spaceBy,
-                    ) {
-                        items(
-                            userSearchResults.itemCount,
-                            key = userSearchResults.itemKey { it.user.id }
-                        ) { index ->
-                            val userPreview = userSearchResults[index] ?: return@items
-                            FollowingUserCard(
-                                illusts = userPreview.illusts.toImmutableList(),
-                                userName = userPreview.user.name,
-                                userId = userPreview.user.id,
-                                userAvatar = userPreview.user.profileImageUrls.medium,
-                                isFollowed = userPreview.user.isFollowing,
-                                navToPictureScreen = navigationManager::navigateToPictureScreen,
-                                navToUserProfile = {
-                                    navigationManager.navigateToProfileDetailScreen(userPreview.user.id)
-                                }
+
+                SearchResultsPage.Users -> {
+                    PullToRefreshBox(
+                        isRefreshing = isUserRefreshing,
+                        onRefresh = { userSearchResults.refresh() },
+                        state = userPullRefreshState,
+                        indicator = {
+                            PullToRefreshDefaults.LoadingIndicator(
+                                state = userPullRefreshState,
+                                isRefreshing = isUserRefreshing,
+                                modifier = Modifier.align(Alignment.TopCenter),
                             )
+                        },
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(
+                                start = 16.dp,
+                                top = 10.dp,
+                                end = 16.dp,
+                                bottom = WindowInsets.navigationBars.asPaddingValues()
+                                    .calculateBottomPadding()
+                            ),
+                            verticalArrangement = 10f.spaceBy,
+                        ) {
+                            items(
+                                userSearchResults.itemCount,
+                                key = userSearchResults.itemKey { it.user.id }
+                            ) { index ->
+                                val userPreview = userSearchResults[index] ?: return@items
+                                FollowingUserCard(
+                                    illusts = userPreview.illusts.toImmutableList(),
+                                    userName = userPreview.user.name,
+                                    userId = userPreview.user.id,
+                                    userAvatar = userPreview.user.profileImageUrls.medium,
+                                    isFollowed = userPreview.user.isFollowing,
+                                    navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                    navToUserProfile = {
+                                        navigationManager.navigateToProfileDetailScreen(userPreview.user.id)
+                                    }
+                                )
+                            }
                         }
                     }
                 }

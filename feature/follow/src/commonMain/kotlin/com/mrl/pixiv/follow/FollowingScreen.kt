@@ -38,6 +38,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
@@ -77,8 +79,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 enum class FollowingPage {
-    PUBLIC,
-    PRIVATE,
+    Public,
+    Private,
 }
 
 @Composable
@@ -90,8 +92,8 @@ fun FollowingScreen(
 ) {
     val scope = rememberCoroutineScope()
     val pages = remember {
-        if (uid.isSelf) listOf(FollowingPage.PUBLIC, FollowingPage.PRIVATE)
-        else listOf(FollowingPage.PUBLIC)
+        if (uid.isSelf) listOf(FollowingPage.Public, FollowingPage.Private)
+        else listOf(FollowingPage.Public)
     }
     val pagerState = rememberPagerState { pages.size }
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
@@ -132,7 +134,7 @@ fun FollowingScreen(
                 ) {
                     pages.forEachIndexed { index, page ->
                         Tab(
-                            text = { Text(text = stringResource(if (page == FollowingPage.PUBLIC) RStrings.word_public else RStrings.word_private)) },
+                            text = { Text(text = stringResource(if (page == FollowingPage.Public) RStrings.word_public else RStrings.word_private)) },
                             selected = pagerState.currentPage == index,
                             onClick = {
                                 scope.launch {
@@ -172,16 +174,23 @@ fun FollowingScreenBody(
 ) {
     val pullRefreshState = rememberPullToRefreshState()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+
+    LaunchedEffect(pagerState.currentPage) {
+        logEvent("screen_view", buildMap {
+            put("screen_name", "Following")
+            put("page_name", FollowingPage.entries[pagerState.currentPage].name)
+        })
+    }
+
     HorizontalPager(
         state = pagerState,
         modifier = modifier,
         userScrollEnabled = userScrollEnabled
-    ) {
-        val page = pages[it]
-        val followingUsers = if (page == FollowingPage.PUBLIC) {
-            viewModel.publicFollowingPageSource.collectAsLazyPagingItems()
-        } else {
-            viewModel.privateFollowingPageSource.collectAsLazyPagingItems()
+    ) { index ->
+        val page = pages[index]
+        val followingUsers = when (page) {
+            FollowingPage.Public -> viewModel.publicFollowingPageSource.collectAsLazyPagingItems()
+            FollowingPage.Private -> viewModel.privateFollowingPageSource.collectAsLazyPagingItems()
         }
         val isRefreshing = followingUsers.loadState.refresh is LoadState.Loading
         PullToRefreshBox(
@@ -200,7 +209,7 @@ fun FollowingScreenBody(
                 val layoutParams = IllustGridDefaults.userFollowingParameters()
                 LazyVerticalGrid(
                     columns = layoutParams.gridCells,
-                    state = lazyGridState[it],
+                    state = lazyGridState[index],
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = 16.dp,
@@ -232,7 +241,7 @@ fun FollowingScreenBody(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    state = lazyListState[it],
+                    state = lazyListState[index],
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         top = 10.dp,

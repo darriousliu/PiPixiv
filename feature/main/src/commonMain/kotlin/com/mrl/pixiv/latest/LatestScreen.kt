@@ -16,12 +16,14 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.router.NavigationManager
@@ -31,7 +33,7 @@ import com.mrl.pixiv.follow.FollowingScreenBody
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.latest_tab_following
 import com.mrl.pixiv.strings.latest_tab_trend
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -43,11 +45,18 @@ fun LatestScreen(
     viewModel: LatestViewModel = koinViewModel(),
     navigationManager: NavigationManager = koinInject(),
 ) {
-    val pages = remember { LatestPage.entries.toList() }
+    val pages = remember { LatestPage.entries }
     val pagerState = viewModel.pagerState
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+
+    LaunchedEffect(pagerState.currentPage) {
+        logEvent("screen_view", buildMap {
+            put("screen_name", "Latest")
+            put("page_name", pages[pagerState.currentPage].name)
+        })
+    }
 
     Scaffold(
         modifier = modifier,
@@ -75,9 +84,9 @@ fun LatestScreen(
                         Text(
                             text = stringResource(
                                 when (it) {
-                                    LatestPage.TREND -> RStrings.latest_tab_trend
-                                    LatestPage.COLLECTION -> RStrings.collection
-                                    LatestPage.FOLLOWING -> RStrings.latest_tab_following
+                                    LatestPage.Trend -> RStrings.latest_tab_trend
+                                    LatestPage.Collection -> RStrings.collection
+                                    LatestPage.Following -> RStrings.latest_tab_following
                                 }
                             )
                         )
@@ -87,23 +96,21 @@ fun LatestScreen(
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.weight(1f)
-            ) {
-                val page = pages[it]
+            ) { index ->
+                val page = pages[index]
                 when (page) {
-                    LatestPage.TREND -> {
+                    LatestPage.Trend -> {
                         TrendingPage()
                     }
 
-                    LatestPage.COLLECTION -> {
+                    LatestPage.Collection -> {
                         CollectionPage(
                             uid = userInfo.user.id,
                         )
                     }
 
-                    LatestPage.FOLLOWING -> {
-                        val pages = remember {
-                            persistentListOf(FollowingPage.PUBLIC, FollowingPage.PRIVATE)
-                        }
+                    LatestPage.Following -> {
+                        val pages = remember { FollowingPage.entries.toImmutableList() }
                         val pagerState = rememberPagerState { pages.size }
                         FollowingScreenBody(
                             uid = userInfo.user.id,

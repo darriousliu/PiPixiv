@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.kts.HSpacer
@@ -149,6 +150,10 @@ fun RankingScreen(
                 if (state.currentMode != mode) {
                     viewModel.selectMode(mode)
                 }
+                logEvent("screen_view", buildMap {
+                    put("screen_name", "Ranking")
+                    put("mode", mode.value)
+                })
             }
         }
     }
