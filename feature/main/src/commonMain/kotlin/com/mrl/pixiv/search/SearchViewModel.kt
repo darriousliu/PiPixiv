@@ -87,4 +87,13 @@ class SearchViewModel : BaseMviViewModel<SearchState, SearchAction>(
             }
         }
     }
+
+    fun addSearchIdHistory(searchId: String) {
+        searchWords = searchId
+        SearchRepository.addSearchIdHistory(searchId)
+    }
+
+    fun deleteSearchIdHistory(searchId: String) {
+        SearchRepository.removeSearchIdHistory(searchId)
+    }
 }

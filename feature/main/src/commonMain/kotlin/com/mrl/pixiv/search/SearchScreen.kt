@@ -3,8 +3,6 @@ package com.mrl.pixiv.search
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -25,6 +23,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -63,6 +62,7 @@ import com.mrl.pixiv.strings.enter_keywords
 import com.mrl.pixiv.strings.find_for
 import com.mrl.pixiv.strings.id_search
 import com.mrl.pixiv.strings.search_history
+import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -76,6 +76,9 @@ fun SearchScreen(
     val dispatch = viewModel::dispatch
     val state = viewModel.asState()
     val searchHistory by SearchRepository.searchHistoryFlow.collectAsStateWithLifecycle()
+    val searchIdHistory by remember {
+        SearchRepository.searchIdHistoryFlow.map { it?.toList().orEmpty() }
+    }.collectAsStateWithLifecycle(emptyList())
     var textState by remember { mutableStateOf(TextFieldValue(viewModel.searchWords)) }
     val focusRequester = remember { FocusRequester() }
     LifecycleResumeEffect(Unit) {
@@ -113,7 +116,11 @@ fun SearchScreen(
                 },
                 onBack = { navigationManager.popBackStack() },
                 onSearch = {
-                    dispatch(SearchAction.AddSearchHistory(textState.text))
+                    if (state.isIdSearch) {
+                        viewModel.addSearchIdHistory(textState.text)
+                    } else {
+                        dispatch(SearchAction.AddSearchHistory(textState.text))
+                    }
                     focusRequester.freeFocus()
                     navigationManager.navigateToSearchResultScreen(textState.text, state.isIdSearch)
                 }
@@ -160,43 +167,81 @@ fun SearchScreen(
                 }
             }
             if (textState.text.isEmpty()) {
-                items(searchHistory.searchHistoryList) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .throttleClick(indication = ripple()) {
-                                dispatch(SearchAction.AddSearchHistory(it.keyword))
-                                focusRequester.freeFocus()
-                                navigationManager.navigateToSearchResultScreen(
-                                    it.keyword,
-                                    state.isIdSearch
+                if (state.isIdSearch) {
+                    items(
+                        items = searchIdHistory,
+                        key = { it }
+                    ) {
+                        ListItem(
+                            headlineContent = { Text(text = it) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .throttleClick(indication = ripple()) {
+                                    viewModel.addSearchIdHistory(it)
+                                    focusRequester.freeFocus()
+                                    navigationManager.navigateToSearchResultScreen(it, true)
+                                }
+                                .animateItem(),
+                            trailingContent = {
+                                Icon(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .throttleClick(indication = ripple()) {
+                                            viewModel.deleteSearchIdHistory(it)
+                                        },
+                                    imageVector = Icons.Rounded.Close,
+                                    contentDescription = "delete"
                                 )
                             }
-                            .padding(8.dp)
-                            .animateItem(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = it.keyword,
-                            style = MaterialTheme.typography.bodyLarge,
                         )
-                        Icon(
-                            modifier = Modifier
-                                .size(24.dp)
+                    }
+                } else {
+                    items(
+                        items = searchHistory.searchHistoryList,
+                        key = { it.keyword }
+                    ) {
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    text = it.keyword,
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth()
                                 .throttleClick(indication = ripple()) {
-                                    dispatch(SearchAction.DeleteSearchHistory(it.keyword))
-                                },
-                            imageVector = Icons.Rounded.Close,
-                            contentDescription = "delete"
+                                    dispatch(SearchAction.AddSearchHistory(it.keyword))
+                                    focusRequester.freeFocus()
+                                    navigationManager.navigateToSearchResultScreen(
+                                        it.keyword,
+                                        false
+                                    )
+                                }
+                                .animateItem(),
+                            trailingContent = {
+                                Icon(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .throttleClick(indication = ripple()) {
+                                            dispatch(SearchAction.DeleteSearchHistory(it.keyword))
+                                        },
+                                    imageVector = Icons.Rounded.Close,
+                                    contentDescription = "delete"
+                                )
+                            }
                         )
                     }
                 }
             } else {
-                items(state.autoCompleteSearchWords, key = { it.name }) { word ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                items(
+                    items = state.autoCompleteSearchWords,
+                    key = { it.name }
+                ) { word ->
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = word.name,
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
                             .throttleClick(indication = ripple()) {
                                 dispatch(SearchAction.AddSearchHistory(word.name))
                                 focusRequester.freeFocus()
@@ -204,23 +249,16 @@ fun SearchScreen(
                                     word.name,
                                     state.isIdSearch
                                 )
+                            },
+                        supportingContent = {
+                            if (word.translatedName.isNotBlank()) {
+                                Text(
+                                    text = word.translatedName,
+//                                    style = MaterialTheme.typography.bodySmall,
+                                )
                             }
-                            .padding(8.dp),
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(
-                            text = word.name,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(bottom = 4.dp),
-                        )
-                        if (word.translatedName.isNotBlank()) {
-                            Text(
-                                text = word.translatedName,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(bottom = 8.dp),
-                            )
                         }
-                    }
+                    )
                 }
             }
         }

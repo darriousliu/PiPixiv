@@ -45,6 +45,7 @@ import org.koin.android.annotation.KoinViewModel
 data class AppExportData(
     val userPreference: UserPreference,
     val searchHistory: Search,
+    val searchIdHistory: Set<String>,
     val blockIllusts: Set<String>,
     val blockUsers: Set<String>,
     val blockComments: List<Comment>,
@@ -98,6 +99,7 @@ class AppDataViewModel(
                 val data = AppExportData(
                     userPreference = SettingRepository.userPreferenceFlow.value,
                     searchHistory = SearchRepository.searchHistoryFlow.value,
+                    searchIdHistory = SearchRepository.searchIdHistoryFlow.value.orEmpty(),
                     blockIllusts = BlockingRepositoryV2.blockIllustsFlow.value ?: emptySet(),
                     blockUsers = BlockingRepositoryV2.blockUsersFlow.value ?: emptySet(),
                     blockComments = BlockingRepositoryV2.blockCommentsFlow.value,
@@ -134,7 +136,7 @@ class AppDataViewModel(
                 val json = Json { ignoreUnknownKeys = true }
                 val data = json.decodeFromString<AppExportData>(jsonString)
                 SettingRepository.restore(data.userPreference)
-                SearchRepository.restore(data.searchHistory)
+                SearchRepository.restore(data.searchHistory, data.searchIdHistory)
                 BlockingRepositoryV2.restore(
                     data.blockIllusts,
                     data.blockUsers,

@@ -127,7 +127,10 @@ fun SearchPreviewScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                items(state.trendingTags) { tag ->
+                items(
+                    items = state.trendingTags,
+                    key = { it.tag }
+                ) { tag ->
                     TrendingItem(
                         trendingTag = tag,
                         onSearch = {

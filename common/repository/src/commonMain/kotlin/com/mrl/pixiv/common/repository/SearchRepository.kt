@@ -5,6 +5,7 @@ import com.mrl.pixiv.common.data.search.SearchHistory
 import com.mrl.pixiv.common.mmkv.MMKVUser
 import com.mrl.pixiv.common.mmkv.asMutableStateFlow
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
+import com.mrl.pixiv.common.mmkv.mmkvStringSet
 import com.mrl.pixiv.common.util.currentTimeMillis
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -12,6 +13,9 @@ import kotlinx.coroutines.flow.update
 object SearchRepository : MMKVUser {
     private val searchHistory by mmkvSerializable(Search()).asMutableStateFlow()
     val searchHistoryFlow = searchHistory.asStateFlow()
+
+    private val searchIdHistory by mmkvStringSet(emptySet()).asMutableStateFlow()
+    val searchIdHistoryFlow = searchIdHistory.asStateFlow()
 
     fun deleteSearchHistory(searchWords: String) {
         searchHistory.update {
@@ -52,15 +56,23 @@ object SearchRepository : MMKVUser {
         }
     }
 
-    fun clear() {
-        searchHistory.update {
-            it.copy(
-                searchHistoryList = emptyList()
-            )
-        }
+    fun addSearchIdHistory(searchId: String) {
+        searchIdHistory.update { (it ?: emptySet()) + searchId }
     }
 
-    fun restore(search: Search) {
+    fun removeSearchIdHistory(searchId: String) {
+        searchIdHistory.update { it?.minus(searchId) }
+    }
+
+    fun clear() {
+        searchHistory.update {
+            it.copy(searchHistoryList = emptyList())
+        }
+        searchIdHistory.update { emptySet() }
+    }
+
+    fun restore(search: Search, searchIds: Set<String>) {
         searchHistory.value = search
+        searchIdHistory.value = searchIds
     }
 }
