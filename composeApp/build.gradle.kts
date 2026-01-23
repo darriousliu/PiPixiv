@@ -178,3 +178,114 @@ if (properties["debug"] != "true") {
         isEnabled = false
     }
 }
+
+fun ipaArguments(
+    destination: String = "generic/platform=iOS",
+    sdk: String = "iphoneos",
+): Array<String> {
+    return arrayOf(
+        "xcodebuild",
+        "-workspace", "PiPixiv.xcworkspace",
+        "-scheme", "PiPixiv",
+        "-destination", destination,
+        "-sdk", sdk,
+        "CODE_SIGNING_ALLOWED=NO",
+        "CODE_SIGNING_REQUIRED=NO",
+    )
+}
+
+val buildReleaseArchive = tasks.register("buildReleaseArchive", Exec::class) {
+    group = "build"
+    description = "Builds the iOS framework for Release"
+    workingDir(rootDir.resolve("iosApp"))
+
+    dependsOn(":composeApp:linkPodReleaseFrameworkIosArm64")
+    val output = layout.buildDirectory.dir("archives/release/PiPixiv.xcarchive")
+    outputs.dir(output)
+    commandLine(
+        *ipaArguments(),
+        "archive",
+        "-configuration", "Release",
+        "-archivePath", output.get().asFile.absolutePath,
+    )
+}
+
+@CacheableTask
+abstract class BuildIpaTask : DefaultTask() {
+
+    /* -------------------------------------------------------------
+     * Inputs / outputs
+     * ----------------------------------------------------------- */
+
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    abstract val archiveDir: DirectoryProperty
+
+    @get:OutputFile
+    abstract val outputIpa: RegularFileProperty
+
+    /* -------------------------------------------------------------
+     * Services (injected)
+     * ----------------------------------------------------------- */
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    /* -------------------------------------------------------------
+     * Action
+     * ----------------------------------------------------------- */
+
+    @TaskAction
+    fun buildIpa() {
+        // 1. Locate the .app inside the .xcarchive
+        val appDir = archiveDir.get().asFile.resolve("Products/Applications/PiPixiv.app")
+        if (!appDir.exists())
+            throw GradleException("Could not find PiPixiv.app in archive at: ${appDir.absolutePath}")
+
+        // 2. Create temporary Payload directory and copy .app into it
+        val payloadDir = File(temporaryDir, "Payload").apply { mkdirs() }
+        val destApp = File(payloadDir, appDir.name)
+        appDir.copyRecursively(destApp, overwrite = true)
+
+        // 3. Inject placeholder (ad‑hoc) code signature so AltStore / SideStore accept it
+        logger.lifecycle("[IPA] Ad‑hoc signing ${destApp.name} …")
+        execOperations.exec {
+            commandLine(
+                "codesign", "--force", "--deep", "--sign", "-", "--timestamp=none",
+                destApp.absolutePath,
+            )
+        }
+
+        // 4. Zip Payload ⇒ .ipa using the system `zip` command
+        //
+        //    -r : recurse into directories
+        //    -y : store symbolic links as the link instead of the referenced file
+        //
+        // The working directory is the temporary folder so the archive
+        // has a top‑level "Payload/" directory (required for .ipa files).
+        val zipFile = File(temporaryDir, "PiPixiv.zip")
+        execOperations.exec {
+            workingDir(temporaryDir)
+            commandLine("zip", "-r", "-y", zipFile.absolutePath, "Payload")
+        }
+
+        // 5. Move to final location (with .ipa extension)
+        outputIpa.get().asFile.apply {
+            parentFile.mkdirs()
+            delete()
+            zipFile.renameTo(this)
+        }
+
+        logger.lifecycle("[IPA] Created ad‑hoc‑signed IPA at: ${outputIpa.get().asFile.absolutePath}")
+    }
+}
+
+tasks.register("buildReleaseIpa", BuildIpaTask::class) {
+    description = "Manually packages the .app from the .xcarchive into an unsigned .ipa"
+    group = "build"
+
+    // Adjust these paths as needed
+    archiveDir = layout.buildDirectory.dir("archives/release/PiPixiv.xcarchive")
+    outputIpa = layout.buildDirectory.file("archives/release/PiPixiv.ipa")
+    dependsOn(buildReleaseArchive)
+}

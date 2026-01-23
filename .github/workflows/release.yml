@@ -239,18 +239,15 @@ jobs:
         run: |
           cd iosApp
           pod install --repo-update
-          xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Release -sdk iphoneos -archivePath ../build/iosApp.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          mkdir -p ../build/Payload
-          cp -R ../build/iosApp.xcarchive/Products/Applications/PiPixiv.app ../build/Payload/
-          cd ../build
-          zip -r PiPixiv.ipa Payload
+          cd ..
+          ./gradlew :composeApp:buildReleaseIpa
           echo "PiPixiv.ipa path: $(pwd)/PiPixiv.ipa"
 
       - name: Upload iOS Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: ios-artifacts
-          path: build/PiPixiv.ipa
+          path: composeApp/build/archives/release/PiPixiv.ipa
 
   release:
     needs: [ android, desktop-linux, desktop-windows, desktop-macos, ios ]
