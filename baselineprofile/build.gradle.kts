@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(androidx.plugins.android.test)
-    alias(androidx.plugins.baselineprofile)
+//    alias(androidx.plugins.baselineprofile)
 }
 
 kotlin {
@@ -20,16 +20,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    flavorDimensions += "version"
-    productFlavors {
-        create("default") {
-            dimension = flavorDimensionList[0]
-        }
-        create("foss") {
-            dimension = flavorDimensionList[0]
-        }
-    }
-
     defaultConfig {
         minSdk = 28
         targetSdk = 36
@@ -43,9 +33,9 @@ android {
 
 // This is the configuration block for the Baseline Profile plugin.
 // You can specify to run the generators on a managed devices or connected devices.
-baselineProfile {
-    useConnectedDevices = true
-}
+//baselineProfile {
+//    useConnectedDevices = true
+//}
 
 dependencies {
     implementation(libs.androidx.test.ext.junit)

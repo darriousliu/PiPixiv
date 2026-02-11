@@ -1,8 +1,11 @@
-import com.android.build.gradle.internal.api.ApkVariantOutputImpl
+
+import com.android.build.api.artifact.SingleArtifact
+import com.mrl.pixiv.buildsrc.CopyApk
+import org.gradle.internal.extensions.stdlib.capitalized
 
 plugins {
     id("pixiv.android.application")
-    alias(androidx.plugins.baselineprofile)
+//    alias(androidx.plugins.baselineprofile)
     alias(libs.plugins.sentry.android)
 }
 if (project.findProperty("applyFirebasePlugins") == "true") {
@@ -82,22 +85,32 @@ android {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
     }
-    applicationVariants.configureEach {
-        outputs.configureEach {
-            val name = if (project.findProperty("applyFirebasePlugins") == "true") {
-                "default"
-            } else {
-                "foss"
-            }
-            val releaseType = if (buildType.isDebuggable) "debug" else "release"
-            (this as? ApkVariantOutputImpl)?.outputFileName =
-                "${rootProject.name}-v${defaultConfig.versionName}-$name-$releaseType.apk"
+}
+
+androidComponents {
+    onVariants { variant ->
+        // create a task that will be responsible for copying the APKs
+        val copyTask = project.tasks.register<CopyApk>("copyApksFor${variant.name.capitalized()}") {
+//            dependsOn("create${variant.name.capitalized()}ApkListingFileRedirect")
+            // set the output only. the input will be automatically provided via the
+            // wiring mechanism
+            output.set(project.layout.projectDirectory.dir(variant.name))
+
+            // provide an instance of the artifact loader. This is necessary for
+            // some artifacts. See Artifact.ContainsMany
+            builtArtifactsLoader.set(variant.artifacts.getBuiltArtifactsLoader())
+
         }
+
+        // Wire the task to respond to artifact creation
+        variant.artifacts.use(copyTask).wiredWith {
+            it.input
+        }.toListenTo(SingleArtifact.APK)
     }
 }
 
 dependencies {
-    baselineProfile(project(":baselineprofile"))
+//    baselineProfile(project(":baselineprofile"))
     implementation(project(":common:data"))
     implementation(project(":common:network"))
     implementation(project(":common:repository"))
