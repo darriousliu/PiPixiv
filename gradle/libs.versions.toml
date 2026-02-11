@@ -75,7 +75,7 @@ mmkv-kotlin = { module = "io.github.darriousliu:mmkv-kotlin", version.ref = "mmk
 mmkv-kotlin-nativelib-windows = { module = "io.github.darriousliu:mmkv-kotlin-nativelib-windows", version.ref = "mmkv-kotlin" }
 mmkv-kotlin-nativelib-macos = { module = "io.github.darriousliu:mmkv-kotlin-nativelib-macos", version.ref = "mmkv-kotlin" }
 mmkv-kotlin-nativelib-linux = { module = "io.github.darriousliu:mmkv-kotlin-nativelib-linux", version.ref = "mmkv-kotlin" }
-kotzilla-sdk = { group = "io.kotzilla", name = "kotzilla-sdk", version.ref = "kotzilla" }
+kotzilla-sdk = { group = "io.kotzilla", name = "kotzilla-sdk-compose", version.ref = "kotzilla" }
 gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
 sonner = { module = "io.github.brdominguez:compose-sonner", version.ref = "sonner" }
 

@@ -289,3 +289,7 @@ tasks.register("buildReleaseIpa", BuildIpaTask::class) {
     outputIpa = layout.buildDirectory.file("archives/release/PiPixiv.ipa")
     dependsOn(buildReleaseArchive)
 }
+
+tasks.matching { it.name == "kspCommonMainKotlinMetadata" }.configureEach {
+    dependsOn("generateKotzillaConfig")
+}
