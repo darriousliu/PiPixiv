@@ -89,6 +89,7 @@ android {
 
 androidComponents {
     onVariants { variant ->
+        if (variant.name.contains("debug", true)) return@onVariants
         // create a task that will be responsible for copying the APKs
         val copyTask = project.tasks.register<CopyApk>("copyApksFor${variant.name.capitalized()}") {
 //            dependsOn("create${variant.name.capitalized()}ApkListingFileRedirect")
