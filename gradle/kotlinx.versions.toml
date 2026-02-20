@@ -1,11 +1,11 @@
 [versions]
-kotlin = "2.3.0"
-ksp = "2.3.5"
+kotlin = "2.3.10"
+ksp = "2.3.6"
 serialization = "1.10.0"
 coroutines = "1.10.2"
 ktor = "3.4.0"
 ktorfit = "2.7.2"
-datetime = "0.7.1"
+datetime = "0.7.1-0.6.x-compat"
 collections-immutable = "0.4.0"
 
 [libraries]
