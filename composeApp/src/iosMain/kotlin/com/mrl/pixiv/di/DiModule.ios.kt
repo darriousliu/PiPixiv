@@ -46,7 +46,6 @@ public val com_mrl_pixiv_IosAppModule : Module get() = module {
     defineComMrlPixivHistoryHistoryViewModel()
     defineComMrlPixivHomeHomeViewModel()
     defineComMrlPixivLatestLatestViewModel()
-    defineComMrlPixivLoginBrowserDownloadBrowserViewModel()
     defineComMrlPixivLoginLoginViewModel()
     defineComMrlPixivLoginOauthOAuthLoginViewModel()
     defineComMrlPixivPicturePictureViewModel()
