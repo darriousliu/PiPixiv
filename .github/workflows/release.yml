@@ -119,7 +119,7 @@ jobs:
         with:
           name: linux-artifacts
           path: |
-            composeApp/build/compose/binaries/main-release/app/*.AppImage
+            composeApp/build/compose/binaries/main-release/app/
 
   desktop-windows:
     runs-on: windows-latest
