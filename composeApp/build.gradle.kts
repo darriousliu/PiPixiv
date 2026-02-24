@@ -91,6 +91,7 @@ compose.desktop {
             windows {
                 iconFile.set(file("icons/pipixiv.ico"))
                 shortcut = true
+                perUserInstall = true
             }
             linux {
                 iconFile.set(file("icons/pipixiv.png"))
