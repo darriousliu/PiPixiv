@@ -25,15 +25,15 @@ import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
-import com.multiplatform.webview.request.RequestInterceptor
-import com.multiplatform.webview.request.WebRequest
-import com.multiplatform.webview.request.WebRequestInterceptResult
-import com.multiplatform.webview.web.LoadingState
-import com.multiplatform.webview.web.NativeWebView
-import com.multiplatform.webview.web.WebView
-import com.multiplatform.webview.web.WebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewState
+import io.github.kdroidfilter.webview.request.RequestInterceptor
+import io.github.kdroidfilter.webview.request.WebRequest
+import io.github.kdroidfilter.webview.request.WebRequestInterceptResult
+import io.github.kdroidfilter.webview.web.LoadingState
+import io.github.kdroidfilter.webview.web.NativeWebView
+import io.github.kdroidfilter.webview.web.WebView
+import io.github.kdroidfilter.webview.web.WebViewNavigator
+import io.github.kdroidfilter.webview.web.rememberWebViewNavigator
+import io.github.kdroidfilter.webview.web.rememberWebViewState
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -110,20 +110,14 @@ fun LoginScreen(
                     progress = { loadingState.progress }
                 )
             }
-            if (state.webViewInitialized) {
-                WebView(
-                    modifier = Modifier.fillMaxSize(1f),
-                    state = webViewState,
-                    navigator = webViewNavigator,
-                    onCreated = { webview ->
-                        webview.setUp()
-                    },
-                )
-            } else {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    CircularWavyProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-            }
+            WebView(
+                modifier = Modifier.fillMaxSize(1f),
+                state = webViewState,
+                navigator = webViewNavigator,
+                onCreated = { webview ->
+                    webview.setUp()
+                },
+            )
         }
     }
     if (state.loading) {

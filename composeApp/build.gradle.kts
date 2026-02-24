@@ -103,30 +103,7 @@ compose.desktop {
             version = "7.8.2"
         }
 
-        // release mode
-        jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
-        jvmArgs(
-            "--add-opens",
-            "java.desktop/java.awt.peer=ALL-UNNAMED"
-        ) // recommended but not necessary
-
-        if ("Mac" in System.getProperty("os.name")) {
-            jvmArgs("--add-opens", "java.desktop/sun.lwawt=ALL-UNNAMED")
-            jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
-        }
-        afterEvaluate {
-            tasks.withType<JavaExec> {
-                jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
-                jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED")
-                jvmArgs("--enable-native-access", "ALL-UNNAMED")
-
-                if (System.getProperty("os.name").contains("Mac")) {
-                    jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
-                    jvmArgs("--add-opens", "java.desktop/sun.lwawt=ALL-UNNAMED")
-                    jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
-                }
-            }
-        }
+        jvmArgs("--enable-native-access", "ALL-UNNAMED")
     }
 }
 

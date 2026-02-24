@@ -2,9 +2,7 @@ package com.mrl.pixiv.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -14,7 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,12 +25,7 @@ import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RDrawables
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.login.browser.isBrowserAvailable
-import com.mrl.pixiv.login.browser.isJetbrainsRuntime
-import com.mrl.pixiv.strings.browser_reason
-import com.mrl.pixiv.strings.download_browser
 import com.mrl.pixiv.strings.ic_launcher
-import com.mrl.pixiv.strings.jetbrains_runtime_error
 import com.mrl.pixiv.strings.sign_in
 import com.mrl.pixiv.strings.sign_up
 import com.mrl.pixiv.strings.sign_with_token
@@ -46,8 +38,6 @@ fun LoginOptionScreen(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager = koinInject(),
 ) {
-    val isBrowserAvailable = isBrowserAvailable()
-    val isJetbrainsRuntime = isJetbrainsRuntime()
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
@@ -83,7 +73,6 @@ fun LoginOptionScreen(
                 },
                 shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.fillMaxWidth(),
-                enabled = isBrowserAvailable && !isJetbrainsRuntime,
             ) {
                 Text(
                     text = stringResource(RStrings.sign_in)
@@ -95,7 +84,6 @@ fun LoginOptionScreen(
                 },
                 shapes = ButtonDefaults.shapes(),
                 modifier = Modifier.fillMaxWidth(),
-                enabled = isBrowserAvailable && !isJetbrainsRuntime,
             ) {
                 Text(
                     text = stringResource(RStrings.sign_up)
@@ -110,28 +98,6 @@ fun LoginOptionScreen(
             ) {
                 Text(
                     text = stringResource(RStrings.sign_with_token)
-                )
-            }
-            if (!isBrowserAvailable || isJetbrainsRuntime) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        navigationManager.navigate(Destination.DownloadBrowser)
-                    },
-                    shapes = ButtonDefaults.shapes(),
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isJetbrainsRuntime
-                ) {
-                    Text(
-                        text = stringResource(RStrings.download_browser)
-                    )
-                }
-                Text(
-                    text = stringResource(
-                        if (isJetbrainsRuntime) RStrings.jetbrains_runtime_error
-                        else RStrings.browser_reason
-                    ),
-                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }

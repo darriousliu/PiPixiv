@@ -1,5 +1,5 @@
 [versions]
-composeWebviewMultiplatform = "2.0.3"
+composeWebviewMultiplatform = "1.0.0-alpha-10"
 material = "1.13.0"
 mp_stools = "1.6.3"
 okio = "3.16.4"
@@ -30,8 +30,9 @@ sentry-bom = "8.33.0"
 sentry-plugin = "6.1.0"
 sentry-kmp = "0.24.0"
 
+
 [libraries]
-compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
+compose-webview-multiplatform = { module = "io.github.kdroidfilter:composewebview", version.ref = "composeWebviewMultiplatform" }
 
 
 material = { module = "com.google.android.material:material", version.ref = "material" }

@@ -3,10 +3,6 @@
 -allowaccessmodification
 -repackageclasses
 
-# kcef
--keep class org.cef.** { *; }
--keep class kotlinx.coroutines.swing.SwingDispatcherFactory
-
 -keep class de.jensklingenberg.ktorfit.** { *; }
 -keepclassmembers class de.jensklingenberg.ktorfit.** { *; }
 
@@ -24,6 +20,11 @@
 # androidx sqlite
 -keep class androidx.sqlite.SQLiteException
 -keep class androidx.sqlite.driver.bundled.** { *; }
+
+# JNA
+-keep class com.sun.jna.* { *; }
+-keep class * extends com.sun.jna.* { *; }
+-keepclassmembers class * extends com.sun.jna.* { public *; }
 
 # -printmapping mappings-desktop-currentOS.txt
 

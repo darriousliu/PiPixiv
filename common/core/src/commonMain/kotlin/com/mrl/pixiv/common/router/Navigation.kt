@@ -106,9 +106,6 @@ sealed class Destination : NavKey {
 
     @Serializable
     data class Report(val id: Long, val type: ReportType) : Destination()
-
-    @Serializable
-    data object DownloadBrowser : Destination()
 }
 
 @Serializable
