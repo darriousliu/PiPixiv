@@ -86,6 +86,7 @@ import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.deepBlue
 import com.mrl.pixiv.common.compose.ui.BlockSurface
+import com.mrl.pixiv.common.compose.ui.illust.BottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Illust
@@ -249,6 +250,8 @@ internal fun PictureScreen(
     val prefix = LocalSharedKeyPrefix.current
     val sharedTransitionScope = LocalSharedTransitionScope.current
     val animatedContentScope = LocalNavAnimatedContentScope.current
+    var showAdvancedBookmark by rememberSaveable { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(true)
     with(sharedTransitionScope) {
         Scaffold(
             modifier = modifier
@@ -282,7 +285,7 @@ internal fun PictureScreen(
                         onClick = throttleClick {
                             onBookmarkClick(Restrict.PUBLIC, null)
                         },
-                        shapes = IconButtonDefaults.shapes(),
+                        onLongClick = { showAdvancedBookmark = true },
                         modifier = Modifier.size(50.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -683,6 +686,22 @@ internal fun PictureScreen(
                 }
             }
         }
+    }
+
+    if (showAdvancedBookmark) {
+        BottomBookmarkSheet(
+            hideBottomSheet = { showAdvancedBookmark = false },
+            illust = illust,
+            bottomSheetState = bottomSheetState,
+            onBookmarkClick = { restrict, tags, isEdit ->
+                if (isEdit || !isBookmarked) {
+                    BookmarkState.bookmarkIllust(illust.id, restrict, tags)
+                } else {
+                    BookmarkState.deleteBookmarkIllust(illust.id)
+                }
+            },
+            isBookmarked = isBookmarked
+        )
     }
 }
 
