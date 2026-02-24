@@ -85,7 +85,13 @@ compose.desktop {
 
         nativeDistributions {
             includeAllModules = true
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.AppImage)
+            targetFormats(
+                *listOfNotNull(
+                    TargetFormat.Dmg,
+                    TargetFormat.Msi,
+                    if ("Mac" !in System.getProperty("os.name")) TargetFormat.AppImage else null
+                ).toTypedArray()
+            )
             packageName = rootProject.name
             packageVersion = properties["versionName"]?.toString()
             windows {
