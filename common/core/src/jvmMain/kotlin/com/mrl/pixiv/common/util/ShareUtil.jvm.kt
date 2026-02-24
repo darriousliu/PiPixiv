@@ -5,7 +5,7 @@ actual object ShareUtil {
         copyToClipboard(text)
     }
 
-    actual fun shareImage(imageUri: String) {
+    actual suspend fun shareImage(imageUri: String) {
         copyImageToClipboard(imageUri)
     }
 }

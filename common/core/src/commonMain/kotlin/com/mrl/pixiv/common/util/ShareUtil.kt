@@ -11,6 +11,6 @@ expect object ShareUtil {
      *
      * @param imageUri 图片文件URI。
      */
-    fun shareImage(imageUri: String)
+    suspend fun shareImage(imageUri: String)
 }
 

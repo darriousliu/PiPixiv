@@ -133,6 +133,6 @@ class DownloadManager(
     }
 
     fun interface DownloadManagerListener {
-        fun onDownloadCompleted(entity: DownloadEntity?)
+        suspend fun onDownloadCompleted(entity: DownloadEntity?)
     }
 }

@@ -13,7 +13,7 @@ actual object ShareUtil {
         AppUtil.appContext.startActivity(intent)
     }
 
-    actual fun shareImage(imageUri: String) {
+    actual suspend fun shareImage(imageUri: String) {
         val uri = imageUri.toUri()
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "image/*"

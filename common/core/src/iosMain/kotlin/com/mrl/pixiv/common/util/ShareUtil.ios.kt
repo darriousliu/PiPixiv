@@ -29,7 +29,7 @@ actual object ShareUtil {
      * @param imageUri ph://<PHAsset.localIdentifier>。
      */
     @OptIn(ExperimentalForeignApi::class)
-    actual fun shareImage(imageUri: String) {
+    actual suspend fun shareImage(imageUri: String) {
         if (imageUri.startsWith("ph://")) {
             val localIdentifier = imageUri.removePrefix("ph://")
             val fetchResult = PHAsset.fetchAssetsWithLocalIdentifiers(listOf(localIdentifier), null)
