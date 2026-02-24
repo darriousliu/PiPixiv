@@ -60,7 +60,7 @@ abstract class CopyApk : DefaultTask() {
                 append(".apk")
             }
 
-            File(artifact.outputFile).renameTo(outputDirectory.file(name).asFile)
+            File(artifact.outputFile).copyTo(outputDirectory.file(name).asFile, true)
         }
 
         // The above will only save the artifact themselves. It will not save the
