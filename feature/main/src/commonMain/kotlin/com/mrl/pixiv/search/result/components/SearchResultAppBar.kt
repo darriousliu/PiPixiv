@@ -14,7 +14,6 @@ import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DateRangePickerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -36,14 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mrl.pixiv.common.compose.LocalToaster
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.confirm
 import com.mrl.pixiv.strings.label_default
-import com.mrl.pixiv.strings.premium_required
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDateRange
 import kotlinx.datetime.TimeZone
@@ -52,16 +49,16 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SearchResultAppBar(
     searchWords: String,
     bookmarkNumRange: IntRange?,
+    bookmarkStringRange: String?,
     searchDateRange: LocalDateRange?,
     onBookmarkNumRangeChanged: (IntRange?) -> Unit,
+    onBookmarkStringRangeChanged: (String?) -> Unit,
     onSearchDateRangeChanged: (LocalDateRange?) -> Unit,
     popBack: () -> Unit,
     showBottomSheet: () -> Unit,
@@ -70,7 +67,6 @@ internal fun SearchResultAppBar(
 ) {
     var showBookmarkMenu by rememberSaveable { mutableStateOf(false) }
     var showDateRangePicker by rememberSaveable { mutableStateOf(false) }
-    val toaster = LocalToaster.current
     val isPremium by requireUserInfoFlow.map { it.profile.isPremium }
         .collectAsStateWithLifecycle(false)
 
@@ -114,9 +110,6 @@ internal fun SearchResultAppBar(
                 IconButton(
                     onClick = {
                         showBookmarkMenu = true
-                        if (!isPremium) {
-                            toaster.show(RStrings.premium_required, duration = 2.seconds)
-                        }
                     },
                     shapes = IconButtonDefaults.shapes(),
                 ) {
@@ -125,12 +118,21 @@ internal fun SearchResultAppBar(
                         contentDescription = "Bookmark Range",
                         tint = if (bookmarkNumRange != null) MaterialTheme.colorScheme.primary else LocalContentColor.current
                     )
-                    BookmarkRangeSelector(
-                        expanded = showBookmarkMenu,
-                        onDismissRequest = { showBookmarkMenu = false },
-                        bookmarkNumRange = bookmarkNumRange,
-                        onBookmarkNumRangeChanged = onBookmarkNumRangeChanged
-                    )
+                    if (isPremium) {
+                        PremiumBookmarkRangeSelector(
+                            expanded = showBookmarkMenu,
+                            onDismissRequest = { showBookmarkMenu = false },
+                            bookmarkNumRange = bookmarkNumRange,
+                            onBookmarkNumRangeChanged = onBookmarkNumRangeChanged
+                        )
+                    } else {
+                        NonPremiumBookmarkRangeSelector(
+                            expanded = showBookmarkMenu,
+                            onDismissRequest = { showBookmarkMenu = false },
+                            selectedRange = bookmarkStringRange,
+                            onBookmarkStringRangeChanged = onBookmarkStringRangeChanged
+                        )
+                    }
                 }
                 //筛选按钮
                 IconButton(
@@ -225,7 +227,7 @@ internal fun SearchResultAppBar(
 }
 
 @Composable
-private fun BookmarkRangeSelector(
+private fun PremiumBookmarkRangeSelector(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     bookmarkNumRange: IntRange?,
@@ -252,7 +254,7 @@ private fun BookmarkRangeSelector(
         ranges.forEach { (label, range) ->
             val isSelected = range == bookmarkNumRange
             DropdownMenuItem(
-                text = { Text(label) },
+                text = { Text(text = label) },
                 trailingIcon = if (isSelected) {
                     {
                         Icon(
@@ -263,6 +265,52 @@ private fun BookmarkRangeSelector(
                 } else null,
                 onClick = {
                     onBookmarkNumRangeChanged(range)
+                    onDismissRequest()
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun NonPremiumBookmarkRangeSelector(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    selectedRange: String?,
+    onBookmarkStringRangeChanged: (String?) -> Unit
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+    ) {
+        val ranges = listOf(
+            stringResource(RStrings.label_default) to null,
+            "100 users入り" to "100 users入り",
+            "250 users入り" to "250 users入り",
+            "500 users入り" to "500 users入り",
+            "1000 users入り" to "1000 users入り",
+            "5000 users入り" to "5000 users入り",
+            "7500 users入り" to "7500 users入り",
+            "10000 users入り" to "10000 users入り",
+            "20000 users入り" to "20000 users入り",
+            "30000 users入り" to "30000 users入り",
+            "50000 users入り" to "50000 users入り",
+        )
+
+        ranges.forEach { (label, range) ->
+            val isSelected = range == selectedRange
+            DropdownMenuItem(
+                text = { Text(text = label) },
+                trailingIcon = if (isSelected) {
+                    {
+                        Icon(
+                            imageVector = Icons.Rounded.Check,
+                            contentDescription = null
+                        )
+                    }
+                } else null,
+                onClick = {
+                    onBookmarkStringRangeChanged(range)
                     onDismissRequest()
                 }
             )

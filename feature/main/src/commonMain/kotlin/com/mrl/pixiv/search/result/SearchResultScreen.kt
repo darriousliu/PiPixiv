@@ -91,20 +91,16 @@ fun SearchResultsScreen(
                 SearchResultAppBar(
                     searchWords = state.searchWords,
                     bookmarkNumRange = state.bookmarkNumRange,
+                    bookmarkStringRange = state.bookmarkStringRange,
                     searchDateRange = state.searchDateRange,
                     onBookmarkNumRangeChanged = {
-                        viewModel.dispatch(
-                            SearchResultAction.UpdateBookmarkNumRange(
-                                it
-                            )
-                        )
+                        viewModel.dispatch(SearchResultAction.UpdateBookmarkNumRange(it))
+                    },
+                    onBookmarkStringRangeChanged = {
+                        viewModel.updateBookmarkStringRange(it)
                     },
                     onSearchDateRangeChanged = {
-                        viewModel.dispatch(
-                            SearchResultAction.UpdateSearchDateRange(
-                                it
-                            )
-                        )
+                        viewModel.dispatch(SearchResultAction.UpdateSearchDateRange(it))
                     },
                     popBack = navigationManager::popBackStack,
                     showBottomSheet = {

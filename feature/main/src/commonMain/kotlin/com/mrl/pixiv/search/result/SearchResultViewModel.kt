@@ -27,6 +27,7 @@ import org.koin.core.component.KoinComponent
 data class SearchResultState(
     val searchWords: String = "",
     val bookmarkNumRange: IntRange? = null,
+    val bookmarkStringRange: String? = null,
     val searchDateRange: LocalDateRange? = null,
     val searchFilter: SearchFilter = SearchFilter(),
 )
@@ -58,7 +59,11 @@ class SearchResultViewModel(
     ) { state, isPremium ->
         state to isPremium
     }.flatMapLatest { (state, isPremium) ->
-        val words = state.searchWords
+        val words = if (state.bookmarkStringRange != null) {
+            "${state.searchWords} ${state.bookmarkStringRange}"
+        } else {
+            state.searchWords
+        }
         val filter = state.searchFilter
         val startDate = state.searchDateRange?.start
         val endDate = state.searchDateRange?.endInclusive
@@ -95,10 +100,19 @@ class SearchResultViewModel(
                 updateState { copy(searchFilter = intent.searchFilter) }
 
             is SearchResultAction.UpdateBookmarkNumRange ->
-                updateState { copy(bookmarkNumRange = intent.bookmarkNumRange) }
+                updateState {
+                    copy(
+                        bookmarkNumRange = intent.bookmarkNumRange,
+                        bookmarkStringRange = null
+                    )
+                }
 
             is SearchResultAction.UpdateSearchDateRange ->
                 updateState { copy(searchDateRange = intent.searchDateRange) }
         }
+    }
+
+    fun updateBookmarkStringRange(range: String?) {
+        updateState { copy(bookmarkStringRange = range, bookmarkNumRange = null) }
     }
 }
