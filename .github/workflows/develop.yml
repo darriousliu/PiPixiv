@@ -111,15 +111,14 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: ./gradlew packageReleaseDeb packageReleaseRpm -Pdebug=false
+        run: ./gradlew packageReleaseAppImage -Pdebug=false
 
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: linux-artifacts
           path: |
-            composeApp/build/compose/binaries/main-release/deb/*.deb
-            composeApp/build/compose/binaries/main-release/rpm/*.rpm
+            composeApp/build/compose/binaries/main-release/app/*.AppImage
 
   desktop-windows:
     runs-on: windows-latest
