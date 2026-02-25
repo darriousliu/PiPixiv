@@ -197,7 +197,8 @@ fun SquareIllustItem(
                 ) {
                     IconButton(
                         onClick = throttleClick {
-                            onBookmarkClick(Restrict.PUBLIC, null, false)
+                            val restrict = if (SettingRepository.userPreferenceFlow.value.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+                            onBookmarkClick(restrict, null, false)
                         },
                         onLongClick = { showBottomSheet = true },
                     ) {
@@ -336,7 +337,8 @@ fun RectangleIllustItem(
                     }
                     IconButton(
                         onClick = throttleClick {
-                            onBookmarkClick(Restrict.PUBLIC, null, false)
+                            val restrict = if (SettingRepository.userPreferenceFlow.value.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+                            onBookmarkClick(restrict, null, false)
                         },
                         onLongClick = onBookmarkLongClick,
                     ) {

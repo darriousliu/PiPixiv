@@ -98,6 +98,7 @@ import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
+import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
@@ -283,7 +284,8 @@ internal fun PictureScreen(
                 if (!isAnyBlocked) {
                     IconButton(
                         onClick = throttleClick {
-                            onBookmarkClick(Restrict.PUBLIC, null)
+                            val restrict = if (SettingRepository.userPreferenceFlow.value.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+                            onBookmarkClick(restrict, null)
                         },
                         onLongClick = { showAdvancedBookmark = true },
                         modifier = Modifier.size(50.dp),

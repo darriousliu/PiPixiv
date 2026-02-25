@@ -19,6 +19,7 @@ data class UserPreference(
     val spanCountPortrait: Int = 2,
     val spanCountLandscape: Int = -1,
     val fileNameFormat: String = DEFAULT_FILE_NAME_FORMAT,
+    val defaultPrivateBookmark: Boolean = false,
 ) {
     companion object {
         const val TEMPLATE_ILLUST_ID = "{illust_id}"

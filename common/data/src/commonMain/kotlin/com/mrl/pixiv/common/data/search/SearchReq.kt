@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.data.search
 
 import com.mrl.pixiv.common.data.Filter
+import kotlinx.serialization.Serializable
 
 data class SearchIllustQuery(
     val filter: Filter = Filter.ANDROID,
@@ -35,11 +36,13 @@ data class SearchIllustQuery(
 }
 
 
+@Serializable
 enum class SearchAiType(val value: Int) {
     SHOW_AI(0),
     HIDE_AI(1);
 }
 
+@Serializable
 enum class SearchSort(val value: String) {
     DATE_DESC("date_desc"),
     DATE_ASC("date_asc"),
@@ -49,6 +52,7 @@ enum class SearchSort(val value: String) {
 }
 
 
+@Serializable
 enum class SearchTarget(val value: String) {
     PARTIAL_MATCH_FOR_TAGS("partial_match_for_tags"),
     EXACT_MATCH_FOR_TAGS("exact_match_for_tags"),

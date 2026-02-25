@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.mrl.pixiv.common.data.Tag
 import com.mrl.pixiv.common.data.comment.Comment
+import com.mrl.pixiv.common.data.search.LocalSearchFilter
 import com.mrl.pixiv.common.data.search.Search
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.datasource.local.PixivDatabase
@@ -50,7 +51,9 @@ data class AppExportData(
     val blockUsers: Set<String>,
     val blockComments: List<Comment>,
     val bookmarkedTags: List<Tag>,
-    val downloads: List<DownloadEntity> = emptyList()
+    val downloads: List<DownloadEntity> = emptyList(),
+    val savedSearchFilter: LocalSearchFilter = LocalSearchFilter(),
+    val rememberSearchFilter: Boolean = false,
 )
 
 @Stable
@@ -104,7 +107,9 @@ class AppDataViewModel(
                     blockUsers = BlockingRepositoryV2.blockUsersFlow.value ?: emptySet(),
                     blockComments = BlockingRepositoryV2.blockCommentsFlow.value,
                     bookmarkedTags = BookmarkedTagRepository.bookmarkedTags.value,
-                    downloads = downloads
+                    downloads = downloads,
+                    savedSearchFilter = SearchRepository.savedSearchFilterValue,
+                    rememberSearchFilter = SearchRepository.rememberSearchFilterValue,
                 )
                 val json = Json {
                     ignoreUnknownKeys = true
@@ -136,7 +141,12 @@ class AppDataViewModel(
                 val json = Json { ignoreUnknownKeys = true }
                 val data = json.decodeFromString<AppExportData>(jsonString)
                 SettingRepository.restore(data.userPreference)
-                SearchRepository.restore(data.searchHistory, data.searchIdHistory)
+                SearchRepository.restore(
+                    data.searchHistory,
+                    data.searchIdHistory,
+                    data.savedSearchFilter,
+                    data.rememberSearchFilter
+                )
                 BlockingRepositoryV2.restore(
                     data.blockIllusts,
                     data.blockUsers,

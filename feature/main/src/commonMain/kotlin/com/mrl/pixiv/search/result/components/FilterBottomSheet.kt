@@ -29,9 +29,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.LocalToaster
+import com.mrl.pixiv.common.data.search.LocalSearchFilter
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
+import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
@@ -45,6 +47,7 @@ import com.mrl.pixiv.strings.popular_desc
 import com.mrl.pixiv.strings.popular_female
 import com.mrl.pixiv.strings.popular_male
 import com.mrl.pixiv.strings.premium_required
+import com.mrl.pixiv.strings.remember_current_selection
 import com.mrl.pixiv.strings.tags_exact_match
 import com.mrl.pixiv.strings.tags_partially_match
 import com.mrl.pixiv.strings.title_and_description
@@ -65,6 +68,7 @@ internal fun FilterBottomSheet(
     val scope = rememberCoroutineScope()
     val toaster = LocalToaster.current
     val isPremium by requireUserInfoFlow.map { it.profile.isPremium }.collectAsStateWithLifecycle(false)
+    val rememberFilter by SearchRepository.rememberSearchFilterFlow.collectAsStateWithLifecycle()
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
@@ -105,6 +109,15 @@ internal fun FilterBottomSheet(
                             }
                         }
                     onUpdateFilter(innerSearchFilter)
+                    if (rememberFilter) {
+                        SearchRepository.setSavedSearchFilter(
+                            LocalSearchFilter(
+                                sort = innerSearchFilter.sort,
+                                searchTarget = innerSearchFilter.searchTarget,
+                                searchAiType = innerSearchFilter.searchAiType,
+                            )
+                        )
+                    }
                 }
             )
         }
@@ -169,6 +182,32 @@ internal fun FilterBottomSheet(
                         innerSearchFilter = innerSearchFilter.copy(
                             searchAiType = if (checked) SearchAiType.SHOW_AI else SearchAiType.HIDE_AI
                         )
+                    }
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .throttleClick(
+                        indication = ripple()
+                    ) {
+                        SearchRepository.setRememberSearchFilter(!rememberFilter)
+                    }
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(RStrings.remember_current_selection),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Switch(
+                    checked = rememberFilter,
+                    onCheckedChange = { checked ->
+                        SearchRepository.setRememberSearchFilter(checked)
                     }
                 )
             }

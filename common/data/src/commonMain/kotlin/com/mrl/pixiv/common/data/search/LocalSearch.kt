@@ -12,3 +12,10 @@ data class SearchHistory(
     val keyword: String,
     val timestamp: Long,
 )
+
+@Serializable
+data class LocalSearchFilter(
+    val sort: SearchSort = SearchSort.POPULAR_DESC,
+    val searchTarget: SearchTarget = SearchTarget.PARTIAL_MATCH_FOR_TAGS,
+    val searchAiType: SearchAiType = SearchAiType.HIDE_AI,
+)

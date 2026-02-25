@@ -1,9 +1,11 @@
 package com.mrl.pixiv.common.repository
 
+import com.mrl.pixiv.common.data.search.LocalSearchFilter
 import com.mrl.pixiv.common.data.search.Search
 import com.mrl.pixiv.common.data.search.SearchHistory
 import com.mrl.pixiv.common.mmkv.MMKVUser
 import com.mrl.pixiv.common.mmkv.asMutableStateFlow
+import com.mrl.pixiv.common.mmkv.mmkvBool
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
 import com.mrl.pixiv.common.mmkv.mmkvStringSet
 import com.mrl.pixiv.common.util.currentTimeMillis
@@ -16,6 +18,26 @@ object SearchRepository : MMKVUser {
 
     private val searchIdHistory by mmkvStringSet(emptySet()).asMutableStateFlow()
     val searchIdHistoryFlow = searchIdHistory.asStateFlow()
+
+    private val _savedSearchFilter by mmkvSerializable(LocalSearchFilter()).asMutableStateFlow()
+    val savedSearchFilterFlow = _savedSearchFilter.asStateFlow()
+
+    private val _rememberSearchFilter by mmkvBool(false).asMutableStateFlow()
+    val rememberSearchFilterFlow = _rememberSearchFilter.asStateFlow()
+
+    val rememberSearchFilterValue: Boolean
+        get() = _rememberSearchFilter.value
+
+    val savedSearchFilterValue: LocalSearchFilter
+        get() = _savedSearchFilter.value
+
+    fun setRememberSearchFilter(remember: Boolean) {
+        _rememberSearchFilter.value = remember
+    }
+
+    fun setSavedSearchFilter(filter: LocalSearchFilter) {
+        _savedSearchFilter.value = filter
+    }
 
     fun deleteSearchHistory(searchWords: String) {
         searchHistory.update {
@@ -71,8 +93,14 @@ object SearchRepository : MMKVUser {
         searchIdHistory.update { emptySet() }
     }
 
-    fun restore(search: Search, searchIds: Set<String>) {
+    fun restore(search: Search, searchIds: Set<String>, savedFilter: LocalSearchFilter? = null, rememberFilter: Boolean? = null) {
         searchHistory.value = search
         searchIdHistory.value = searchIds
+        if (savedFilter != null) {
+            _savedSearchFilter.value = savedFilter
+        }
+        if (rememberFilter != null) {
+            _rememberSearchFilter.value = rememberFilter
+        }
     }
 }
