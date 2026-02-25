@@ -8,6 +8,7 @@ import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.repository.paging.SearchIllustPagingSource
 import com.mrl.pixiv.common.repository.paging.SearchUserPagingSource
+import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -51,7 +52,19 @@ class SearchResultViewModel(
     searchWords: String,
     private val isIdSearch: Boolean,
 ) : BaseMviViewModel<SearchResultState, SearchResultAction>(
-    initialState = SearchResultState(searchWords = searchWords),
+    initialState = SearchResultState(
+        searchWords = searchWords,
+        searchFilter = if (SearchRepository.rememberSearchFilterValue) {
+            val saved = SearchRepository.savedSearchFilterValue
+            SearchFilter(
+                sort = saved.sort,
+                searchTarget = saved.searchTarget,
+                searchAiType = saved.searchAiType,
+            )
+        } else {
+            SearchFilter()
+        }
+    ),
 ), KoinComponent {
     val searchResults = combine(
         uiState,

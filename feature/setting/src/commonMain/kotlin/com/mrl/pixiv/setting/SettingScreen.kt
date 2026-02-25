@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.NetworkWifi
 import androidx.compose.material.icons.rounded.Save
@@ -52,6 +53,7 @@ import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.app_language
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.confirm
+import com.mrl.pixiv.strings.default_private_bookmark
 import com.mrl.pixiv.strings.download_single_folder_by_user_desc
 import com.mrl.pixiv.strings.download_single_folder_by_user_title
 import com.mrl.pixiv.strings.file_name_format_title
@@ -77,6 +79,7 @@ const val KEY_DIVIDER_2 = "divider_2"
 const val KEY_DOWNLOAD_SINGLE_FOLDER_BY_USER = "download_single_folder_by_user"
 const val KEY_FILE_NAME_FORMAT = "file_name_format"
 const val KEY_R18_ENABLED = "r18_enabled"
+const val KEY_DEFAULT_PRIVATE_BOOKMARK = "default_private_bookmark"
 
 @Composable
 fun SettingScreen(
@@ -331,6 +334,30 @@ fun SettingScreen(
                                     SettingRepository.setIsR18Enabled(false)
                                 }
                             }
+                        )
+                    }
+                )
+            }
+            item(key = KEY_DEFAULT_PRIVATE_BOOKMARK) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RStrings.default_private_bookmark),
+                        )
+                    },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            SettingRepository.setDefaultPrivateBookmark(!userPreference.defaultPrivateBookmark)
+                        },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.Favorite, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = userPreference.defaultPrivateBookmark,
+                            onCheckedChange = { SettingRepository.setDefaultPrivateBookmark(it) }
                         )
                     }
                 )

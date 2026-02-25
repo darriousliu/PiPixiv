@@ -83,6 +83,10 @@ object SettingRepository : MMKVUser {
         it.copy(fileNameFormat = format)
     }
 
+    fun setDefaultPrivateBookmark(enable: Boolean) = userPreference.update {
+        it.copy(defaultPrivateBookmark = enable)
+    }
+
     fun updateSettings(block: UserPreference.() -> UserPreference) {
         userPreference.update(block)
     }
