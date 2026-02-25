@@ -98,6 +98,9 @@ compose.desktop {
                 iconFile.set(file("icons/pipixiv.ico"))
                 shortcut = true
                 perUserInstall = true
+                msiPackageVersion = properties["versionName"]?.toString()
+                upgradeUuid = "650ae9c7-32ad-400e-93f3-6b0874eccc1c"
+                menuGroup = rootProject.name
             }
             linux {
                 iconFile.set(file("icons/pipixiv.png"))
