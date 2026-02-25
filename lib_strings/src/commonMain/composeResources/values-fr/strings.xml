@@ -210,4 +210,6 @@
     <string name="illusts">Illustrations</string>
     <string name="id_search">Recherche par ID</string>
     <string name="max_bookmark_tags_reached">Sélectionnez jusqu\'à %1$d tags</string>
+    <string name="remember_current_selection">Mémoriser la sélection actuelle</string>
+    <string name="default_private_bookmark">Favori privé par défaut</string>
 </resources>

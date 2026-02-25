@@ -210,4 +210,6 @@
     <string name="illusts">चित्र</string>
     <string name="id_search">ID खोज</string>
     <string name="max_bookmark_tags_reached">अधिकतम %1$d टैग चुनें</string>
+    <string name="remember_current_selection">वर्तमान चयन याद रखें</string>
+    <string name="default_private_bookmark">डिफ़ॉल्ट निजी बुकमार्क</string>
 </resources>
