@@ -1,0 +1,391 @@
+---
+description: PiPixiv 新功能开发标准规范 - 测试、代码质量与 PR 流程要求
+alwaysApply: true
+enabled: true
+updatedAt: 2026-03-05T00:00:00.000Z
+provider: CodeBuddy
+---
+
+# PiPixiv 新功能开发标准规范
+
+> 为保证 `PiPixiv` 项目的高质量和稳定性，所有新功能的开发必须严格遵循本规范。
+> 工作分支：**develop**
+
+---
+
+## 1. 概述
+
+本规范涵盖以下方面：
+- 新功能开发流程（分支、提交、PR）
+- 代码结构与分层要求
+- UI 组件开发规范
+- Compose Preview 规范
+- 代码自查 Checklist
+
+---
+
+## 2. 开发流程
+
+### 2.1 分支策略
+
+```
+main          ← 稳定发布分支
+  └── develop ← 主开发分支（所有 PR 合并至此）
+        └── feature/xxx   ← 新功能分支（从 develop 切出）
+        └── fix/xxx       ← Bug 修复分支
+        └── chore/xxx     ← 工程/依赖维护分支
+```
+
+**规则**：
+- ✅ 所有新功能从 `develop` 切出功能分支开发
+- ✅ 完成后向 `develop` 提 PR
+- ❌ 禁止直接向 `main` 提交代码
+
+### 2.2 提交信息规范
+
+遵循 **Conventional Commits** 格式：
+
+```
+<type>(<scope>): <subject>
+
+type:
+  feat     - 新功能
+  fix      - Bug 修复
+  refactor - 重构（不涉及功能变更）
+  perf     - 性能优化
+  style    - 代码格式（不影响逻辑）
+  docs     - 文档更新
+  chore    - 构建/依赖更新
+  test     - 测试相关
+
+scope: 受影响的模块名（可选），如 feature/home, common/network
+
+示例：
+  feat(feature/picture): add ugoira auto-play toggle
+  fix(common/network): handle token expiry on 401 response
+  chore(deps): bump ktor to 3.x.x
+```
+
+---
+
+## 3. 新功能实现规范
+
+### 3.1 Feature 模块创建
+
+新增独立功能时，在 `feature/` 目录下创建新模块：
+
+```
+feature/
+└── new-feature/
+    ├── build.gradle.kts
+    └── src/main/kotlin/com/mrl/pixiv/new_feature/
+        ├── NewFeatureScreen.kt      # UI 层
+        ├── NewFeatureViewModel.kt   # 业务逻辑层
+        └── components/              # 子组件（可选）
+            └── XxxItem.kt
+```
+
+**build.gradle.kts 模板**：
+
+```kotlin
+plugins {
+    id("pixiv.android.library.compose")
+}
+
+android {
+    namespace = "com.mrl.pixiv.new_feature"
+}
+
+dependencies {
+    implementation(project(":common:data"))
+    implementation(project(":common:repository"))
+    implementation(project(":common:ui"))
+    implementation(project(":common:core"))
+
+    // 按需添加 Paging
+    // implementation(androidx.bundles.paging)
+}
+```
+
+### 3.2 ViewModel 开发规范
+
+参考 MVI 架构规范，新 ViewModel 必须满足：
+
+```kotlin
+// ✅ 必须使用 @KoinViewModel 注解
+@KoinViewModel
+class NewFeatureViewModel(
+    // 通过构造函数参数注入依赖（Koin 自动处理）
+    private val someParam: String,
+) : BaseMviViewModel<NewFeatureState, NewFeatureAction>(
+    initialState = NewFeatureState()
+) {
+    override suspend fun handleIntent(intent: NewFeatureAction) {
+        when (intent) {
+            // ✅ 穷举所有 Action
+        }
+    }
+}
+```
+
+**State 设计要求**：
+- ✅ 使用 `data class` + 默认值（方便 `copy` 更新）
+- ✅ 列表字段使用 `ImmutableList<T>`（`kotlinx-collections-immutable`）
+- ✅ 加载状态字段命名为 `loading: Boolean = false`
+- ✅ 错误信息通过 `SideEffect.Error` 发送，不放入 State
+
+### 3.3 路由注册
+
+新 Screen 必须在导航图中注册：
+
+**Step 1**：在 `common/core/.../router/Navigation.kt` 中添加 `Destination`：
+
+```kotlin
+@Serializable
+data class NewFeature(
+    val someId: Long,  // 路由参数必须可序列化
+) : Destination()
+```
+
+**Step 2**：在 `NavigationManager` 中添加导航方法：
+
+```kotlin
+fun navigateToNewFeatureScreen(someId: Long) {
+    backStack.navigate(route = Destination.NewFeature(someId))
+}
+```
+
+**Step 3**：在 `app/.../navigation/Navigation3MainGraph.kt` 中注册 entry：
+
+```kotlin
+entry<Destination.NewFeature> {
+    NewFeatureScreen(someId = it.someId)
+}
+```
+
+---
+
+## 4. Compose UI 开发规范
+
+### 4.1 Screen 级 Composable 结构
+
+```kotlin
+@Composable
+fun NewFeatureScreen(
+    someId: Long,
+    modifier: Modifier = Modifier,
+    viewModel: NewFeatureViewModel = koinViewModel { parametersOf(someId) },
+    navigationManager: NavigationManager = koinInject(),
+) {
+    val state = viewModel.asState()
+
+    // 副作用处理
+    LaunchedEffect(Unit) {
+        viewModel.sideEffect.collect { effect ->
+            when (effect) {
+                is SideEffect.Error -> ToastUtil.safeShortToast(effect.throwable.message)
+                // ... 处理其他副作用
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = { /* TopAppBar */ },
+        modifier = modifier,
+    ) { paddingValues ->
+        // 主体内容
+    }
+}
+```
+
+### 4.2 Compose Preview
+
+每个 Screen 和复杂子组件**必须**添加 `@Preview`：
+
+```kotlin
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun NewFeatureScreenPreview() {
+    PiPixivTheme {
+        // 使用假数据预览
+        NewFeatureContent(
+            state = NewFeatureState(
+                loading = false,
+                items = persistentListOf(
+                    // Mock 数据...
+                )
+            ),
+            onAction = {}
+        )
+    }
+}
+```
+
+**规则**：
+- ✅ 同时提供亮色和暗色模式 Preview
+- ✅ Preview 函数命名：`XxxPreview`，设为 `private`
+- ✅ 将含副作用（ViewModel/Koin）的逻辑与纯 UI 函数分离，便于 Preview
+
+### 4.3 SubComposable 设计
+
+将 Screen 拆分为不依赖 Koin 的纯 UI 函数，便于 Preview 和测试：
+
+```kotlin
+// ✅ Screen（含 Koin 依赖）
+@Composable
+fun NewFeatureScreen(modifier: Modifier = Modifier) {
+    val viewModel: NewFeatureViewModel = koinViewModel()
+    val state = viewModel.asState()
+    NewFeatureContent(
+        state = state,
+        onAction = viewModel::dispatch,
+        modifier = modifier,
+    )
+}
+
+// ✅ Content（纯 UI，可 Preview）
+@Composable
+internal fun NewFeatureContent(
+    state: NewFeatureState,
+    onAction: (NewFeatureAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // 纯 UI 逻辑
+}
+```
+
+---
+
+## 5. API 新端点接入规范
+
+当需要接入新的 Pixiv API 端点时：
+
+**Step 1**：在 `common/datasource-remote` 的 `PixivApi.kt` 中添加接口方法：
+
+```kotlin
+@GET("v1/new/endpoint")
+suspend fun getNewData(
+    @Query("filter") filter: String,
+    @Query("param") param: String,
+): NewDataResp
+```
+
+**Step 2**：在 `common/data` 中添加对应 Response DTO：
+
+```kotlin
+@Serializable
+data class NewDataResp(
+    @SerialName("new_field")
+    val newField: String = "",
+    // ...
+)
+```
+
+**Step 3**：在 `PixivRepository` 中封装调用：
+
+```kotlin
+suspend fun getNewData(param: String) =
+    apiApi.getNewData(Filter.ANDROID.value, param)
+```
+
+**Step 4**：在 ViewModel 中通过 `launchIO` 调用 Repository：
+
+```kotlin
+private fun loadNewData() {
+    launchIO {
+        updateState { copy(loading = true) }
+        val data = PixivRepository.getNewData(someParam)
+        updateState { copy(loading = false, items = data.items.toImmutableList()) }
+    }
+}
+```
+
+---
+
+## 6. 分页功能开发规范
+
+新的分页列表功能必须使用 **Paging 3**：
+
+```kotlin
+// ✅ 新增 PagingSource（放在 common/repository/.../paging/ 目录）
+class NewFeaturePagingSource(
+    private val param: String,
+) : PagingSource<Map<String, String>, Item>() {
+
+    override fun getRefreshKey(state: PagingState<Map<String, String>, Item>): Map<String, String>? = null
+
+    override suspend fun load(params: LoadParams<Map<String, String>>): LoadResult<Map<String, String>, Item> {
+        return try {
+            val resp = if (params.key == null) {
+                PixivRepository.getNewData(param)
+            } else {
+                PixivRepository.loadMoreNewData(params.key!!)
+            }
+            LoadResult.Page(
+                data = resp.items,
+                prevKey = null,
+                nextKey = resp.nextUrl?.parseQueryParams()
+            )
+        } catch (e: Exception) {
+            LoadResult.Error(e)
+        }
+    }
+}
+
+// ✅ 在 ViewModel 中声明 Flow
+val items = Pager(PagingConfig(pageSize = 20)) {
+    NewFeaturePagingSource(param)
+}.flow.cachedIn(viewModelScope)
+
+// ✅ 在 Composable 中收集
+val lazyItems = viewModel.items.collectAsLazyPagingItems()
+```
+
+---
+
+## 7. 依赖更新规范
+
+项目使用 **Renovate** 自动管理依赖更新（`renovate.json`）。
+
+**手动更新规则**：
+- 更新版本必须修改对应的 `gradle/*.versions.toml` 文件
+- 重大版本升级（major）需在 PR 描述中说明 Breaking Changes
+- Compose Multiplatform 版本升级需验证所有平台构建通过
+
+---
+
+## 8. 新功能开发 Checklist
+
+开发新功能时，提交 PR 前请自查以下清单：
+
+### 8.1 代码结构
+- [ ] Feature 模块结构正确（Screen / ViewModel / components 分离）
+- [ ] ViewModel 继承 `BaseMviViewModel`，使用 `@KoinViewModel` 注解
+- [ ] State 使用 `ImmutableList` 存储列表数据
+- [ ] 路由在 `Navigation.kt` 中定义，在 `NavigationManager` 中封装，在 `Navigation3MainGraph.kt` 中注册
+
+### 8.2 网络层
+- [ ] 新 API 接口定义在 `PixivApi.kt` 中
+- [ ] Response DTO 定义在 `common/data` 中，使用 `@Serializable` 注解
+- [ ] Repository 方法封装在 `PixivRepository` 中
+- [ ] ViewModel 通过 `launchIO` 调用 Repository
+
+### 8.3 UI 规范
+- [ ] Screen 与 Content 分离（便于 Preview）
+- [ ] 添加了亮色 + 暗色双模式 `@Preview`
+- [ ] 使用 `MaterialTheme.colorScheme` 而非硬编码颜色
+- [ ] 用户可见字符串定义在 `lib_strings` 中
+
+### 8.4 构建与分支
+- [ ] 从 `develop` 切出功能分支，向 `develop` 提 PR
+- [ ] 遵循 Conventional Commits 提交信息格式
+- [ ] 新增依赖已添加到对应 `*.versions.toml` 版本目录文件
+- [ ] FOSS 变体相关埋点/分析代码有空实现
+
+### 8.5 代码质量
+- [ ] 无 hardcoded 字符串（UI 文本）
+- [ ] 无 hardcoded 颜色值
+- [ ] 无 hardcoded 依赖版本号
+- [ ] ❌ 无直接 `feature/*` → `feature/*` 依赖
+- [ ] ❌ 无在 Screen 层直接调用网络 API
