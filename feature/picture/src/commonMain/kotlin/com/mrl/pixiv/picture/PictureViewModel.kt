@@ -171,7 +171,7 @@ class PictureViewModel(
                 val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
                     img.readBytes().decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
                 }
-                Logger.e(TAG) { "downloadUgoira: $imageFiles" }
+                Logger.e(tag = TAG) { "downloadUgoira: $imageFiles" }
                 updateState {
                     copy(
                         ugoiraState = ugoiraState.copy(
@@ -195,7 +195,7 @@ class PictureViewModel(
                         img.readBytes()
                             .decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
                     }
-                    Logger.e(TAG) { "downloadUgoira: $imageFiles" }
+                    Logger.e(tag = TAG) { "downloadUgoira: $imageFiles" }
                     updateState {
                         copy(
                             ugoiraState = ugoiraState.copy(

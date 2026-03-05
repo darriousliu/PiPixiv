@@ -52,7 +52,7 @@ fun LoginScreen(
                 request: WebRequest,
                 navigator: WebViewNavigator
             ): WebRequestInterceptResult {
-                Logger.d("LoginScreen") { "shouldOverrideUrlLoading: ${request.url}" }
+                Logger.d(tag = "LoginScreen") { "shouldOverrideUrlLoading: ${request.url}" }
                 val codePair = checkUri(request.url)
                 if (codePair != null) {
                     viewModel.dispatch(LoginAction.Login(codePair.first, codePair.second))
