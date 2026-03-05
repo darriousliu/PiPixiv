@@ -74,7 +74,7 @@ object VersionManager {
                     }
                 }
             } catch (e: Exception) {
-                Logger.e("VersionManager", e) { "Failed to check update" }
+                Logger.e(throwable = e, tag = "VersionManager") { "Failed to check update" }
             }
         }
     }

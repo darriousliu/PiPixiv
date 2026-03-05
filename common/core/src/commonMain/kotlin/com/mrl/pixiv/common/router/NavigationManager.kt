@@ -97,7 +97,7 @@ class NavigationManager(
             IllustCacheRepo[prefix] = illusts
             backStack.navigate(Destination.Picture(index, prefix, enableTransition))
         }.let {
-            Logger.i("Navigation") { "navigateToPictureScreen cost: $it" }
+            Logger.i(tag = "Navigation") { "navigateToPictureScreen cost: $it" }
         }
     }
 

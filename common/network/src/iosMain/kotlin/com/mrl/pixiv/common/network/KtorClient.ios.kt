@@ -93,7 +93,7 @@ private fun DarwinClientEngineConfig.configureProxy() {
         }
 
         is UserPreference.BypassSetting.SNI -> {
-            Logger.w("HttpClient") { "SNI is not supported on iOS" }
+            Logger.w(tag = "HttpClient") { "SNI is not supported on iOS" }
         }
     }
 }

@@ -60,8 +60,6 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           ./gradlew assembleRelease -PapplyFirebasePlugins=false --stacktrace
-          mkdir -p app/build/outputs/apk/foss
-          find app/build/outputs/apk/release -name "*.apk" -exec mv {} app/build/outputs/apk/foss/ \; || true
 
       - name: Build Default Release apk
         env:
@@ -72,16 +70,14 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           ./gradlew assembleRelease -PapplyFirebasePlugins=true --stacktrace
-          mkdir -p app/build/outputs/apk/default
-          find app/build/outputs/apk/release -name "*.apk" -exec mv {} app/build/outputs/apk/default/ \; || true
 
       - name: Upload Android Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: android-apks
           path: |
-            app/build/outputs/apk/foss/*.apk
-            app/build/outputs/apk/default/*.apk
+            app/release/foss/*.apk
+            app/release/default/*.apk
 
   desktop-linux:
     runs-on: ubuntu-latest
