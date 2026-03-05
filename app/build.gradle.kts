@@ -95,7 +95,15 @@ androidComponents {
 //            dependsOn("create${variant.name.capitalized()}ApkListingFileRedirect")
             // set the output only. the input will be automatically provided via the
             // wiring mechanism
-            output.set(project.layout.projectDirectory.dir(variant.name))
+            output.set(
+                project.layout.projectDirectory.dir(variant.name).dir(
+                    if (project.findProperty("applyFirebasePlugins") == "true") {
+                        "default"
+                    } else {
+                        "foss"
+                    }
+                )
+            )
 
             // provide an instance of the artifact loader. This is necessary for
             // some artifacts. See Artifact.ContainsMany
