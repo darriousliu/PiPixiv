@@ -1,5 +1,9 @@
 ---
-apply: 始终
+description: PiPixiv 新功能开发标准规范 - 测试、代码质量与 PR 流程要求
+alwaysApply: true
+enabled: true
+updatedAt: 2026-03-05T00:00:00.000Z
+provider: CodeBuddy
 ---
 
 # PiPixiv 新功能开发标准规范
