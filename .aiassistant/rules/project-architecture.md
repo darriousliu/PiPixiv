@@ -180,6 +180,7 @@ data class XxxState(
     val items: ImmutableList<Item> = persistentListOf(),
 )
 
+// 尽量不要使用，而是直接在UI中调用函数
 sealed class XxxAction : ViewIntent {
     data object LoadData : XxxAction()
     data class UpdateFilter(val filter: Filter) : XxxAction()
