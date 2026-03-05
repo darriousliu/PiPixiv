@@ -113,12 +113,16 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew packageReleaseAppImage -Pdebug=false
 
+      - name: Package Linux Distribution
+        run: |
+          cd composeApp/build/compose/binaries/main-release
+          tar -czf PiPixiv-linux-x86_64.tar.gz -C app .
+
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: linux-artifacts
-          path: |
-            composeApp/build/compose/binaries/main-release/app/
+          path: composeApp/build/compose/binaries/main-release/PiPixiv-linux-x86_64.tar.gz
 
   desktop-windows:
     runs-on: windows-latest
@@ -265,8 +269,7 @@ jobs:
 
       - name: Rename desktop and iOS artifacts
         run: |
-          mv artifacts/linux-artifacts/*.deb artifacts/linux-artifacts/PiPixiv-${VERSION_TAG}-x86_64.deb
-          mv artifacts/linux-artifacts/*.rpm artifacts/linux-artifacts/PiPixiv-${VERSION_TAG}-x86_64.rpm
+          mv artifacts/linux-artifacts/PiPixiv-linux-x86_64.tar.gz artifacts/linux-artifacts/PiPixiv-${VERSION_TAG}-linux-x86_64.tar.gz
           mv artifacts/windows-artifacts/*.msi artifacts/windows-artifacts/PiPixiv-${VERSION_TAG}-x86_64.msi
           mv artifacts/macos-artifacts/*.dmg artifacts/macos-artifacts/PiPixiv-${VERSION_TAG}-arm64.dmg
           mv artifacts/ios-artifacts/*.ipa artifacts/ios-artifacts/PiPixiv-${VERSION_TAG}.ipa
@@ -284,8 +287,7 @@ jobs:
           prerelease: false
           files: |
             artifacts/android-apks/**/*.apk
-            artifacts/linux-artifacts/**/*.deb
-            artifacts/linux-artifacts/**/*.rpm
+            artifacts/linux-artifacts/**/*.tar.gz
             artifacts/windows-artifacts/**/*.msi
             artifacts/macos-artifacts/**/*.dmg
             artifacts/ios-artifacts/*.ipa
