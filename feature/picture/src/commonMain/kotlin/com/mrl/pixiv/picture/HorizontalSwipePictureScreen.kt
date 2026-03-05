@@ -27,14 +27,22 @@ fun HorizontalSwipePictureScreen(
     modifier: Modifier = Modifier
 ) {
     val browsedIllusts = remember { mutableSetOf<Long>() }
-    val pagerState = rememberPagerState(index) { illusts.size }
     val navigationManager = koinInject<NavigationManager>()
     val onBack: () -> Unit = {
         IllustCacheRepo.removeList(prefix)
         navigationManager.popBackStack()
     }
-    LaunchedEffect(pagerState.currentPage) {
-        browsedIllusts.add(illusts[pagerState.currentPage].id)
+    if (illusts.isEmpty()) {
+        LaunchedEffect(Unit) {
+            onBack()
+        }
+        return
+    }
+    val safeIndex = index.coerceIn(0, illusts.lastIndex)
+    val pagerState = rememberPagerState(safeIndex) { illusts.size }
+    LaunchedEffect(pagerState.currentPage, illusts) {
+        val current = illusts.getOrNull(pagerState.currentPage) ?: return@LaunchedEffect
+        browsedIllusts.add(current.id)
     }
     DisposableEffect(Unit) {
         onDispose {
@@ -51,8 +59,9 @@ fun HorizontalSwipePictureScreen(
         modifier = modifier,
         state = pagerState,
     ) {
+        val illust = illusts.getOrNull(it) ?: return@HorizontalPager
         PictureScreen(
-            illust = illusts[it],
+            illust = illust,
             onBack = onBack,
             enableTransition = enableTransition,
         )
