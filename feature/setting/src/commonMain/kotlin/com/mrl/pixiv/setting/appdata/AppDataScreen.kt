@@ -36,6 +36,7 @@ import com.mrl.pixiv.strings.export_data
 import com.mrl.pixiv.strings.import_data
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.cacheDir
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
@@ -61,7 +62,9 @@ fun AppDataScreen(
     val scope = rememberCoroutineScope()
     val state = viewModel.asState()
 
-    val exportLauncher = rememberFileSaverLauncher { file ->
+    val exportLauncher = rememberFileSaverLauncher(
+        dialogSettings =FileKitDialogSettings.createDefault()
+    ) { file ->
         file?.let { viewModel.exportData(it) }
     }
 
