@@ -28,10 +28,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * Configure Compose-specific options
  */
 fun Project.configureAndroidCompose(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
     commonExtension.apply {
-        buildFeatures {
+        buildFeatures.apply {
             compose = true
         }
     }
@@ -42,16 +42,10 @@ fun Project.configureAndroidCompose(
         }
     }
 
-    val compose = extensions.getByType<VersionCatalogsExtension>().named("compose")
-    val kotlinx = extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
-    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+    val compose = extensions.getByType<VersionCatalogsExtension>().named("composes")
     dependencies {
         implementation(platform(compose.findLibrary("bom").get()))
-        implementation(compose.findBundle("baselibs").get())
-        // KotlinX Collections Immutable
-        implementation(kotlinx.findLibrary("collections-immutable").get())
-        // Toast
-        implementation(libs.findLibrary("sonner").get())
+        implementation(compose.findBundle("baselibs-android").get())
     }
 }
 

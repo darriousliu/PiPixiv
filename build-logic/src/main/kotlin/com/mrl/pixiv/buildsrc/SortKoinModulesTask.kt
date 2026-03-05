@@ -1,64 +1,80 @@
 package com.mrl.pixiv.buildsrc
 
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 fun Project.configureSortKoinKspGeneration() {
-    val taskBlock: (variant: String) -> Unit = { variant ->
-        val cap = variant.uppercaseFirstChar()
+    val registerSortTask =
+        { variant: String, kspOutputDirPath: Provider<Directory>, kspTaskName: String, compileTaskName: String ->
+            val cap = variant.uppercaseFirstChar()
 
-        val kspOutputDirPath = layout.buildDirectory.dir(
-            "generated/ksp/$variant/kotlin/org/koin/ksp/generated"
-        )
+            val sortTaskName = "sort${cap}KoinModules"
+            // 避免重复注册
+            if (tasks.names.contains(sortTaskName).not()) {
+                tasks.whenTaskAdded {
+                    if (name == kspTaskName) {
+                        val sortTask = tasks.register<SortKoinModulesTask>(sortTaskName) {
+                            group = "koin"
+                            description = "Sort Koin KSP generated modules for variant: $variant"
+                            kspOutputDir.set(kspOutputDirPath)
 
-        val sortTask = tasks.register<SortKoinModulesTask>("sort${cap}KoinModules") {
-            group = "koin"
-            description = "Sort Koin KSP generated modules for variant: $variant"
-            kspOutputDir.set(kspOutputDirPath)
+                            onlyIf {
+                                val dir = kspOutputDir.orNull?.asFile
+                                dir != null && dir.exists()
+                            }
+                        }
 
-            onlyIf {
-                val dir = kspOutputDir.orNull?.asFile
-                dir != null && dir.exists()
+                        // 关键：平铺式建立依赖，不要嵌套 configure
+                        // sort <- ksp
+                        try {
+                            sortTask.configure {
+                                dependsOn(tasks.named(kspTaskName))
+                            }
+
+                            // compile <- sort
+                            tasks.named(compileTaskName).configure {
+                                dependsOn(sortTask)
+                            }
+
+                            logger.quiet("✅ 已链接: $kspTaskName → ${sortTask.name} → $compileTaskName")
+                        } catch (e: Exception) {
+                            logger.info("⚠️ 无法链接任务 $variant: ${e.message}")
+                        }
+                    }
+                }
             }
         }
 
-        val kspTaskName = "ksp${cap}Kotlin"
-        val compileTaskName = "compile${cap}Kotlin"
+    if (plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
+        extensions.configure<KotlinMultiplatformExtension> {
+            targets.configureEach {
+                val mainCompilation = compilations.findByName("main")
+                if (mainCompilation != null) {
+                    val platform = name
+                    val cap = platform.uppercaseFirstChar()
+                    // build/generated/ksp/{platform}/{platform}Main/kotlin/org/koin/ksp/generated
+                    val kspOutputDirPath = layout.buildDirectory.dir(
+                        "generated/ksp/$platform/${platform}Main/kotlin/org/koin/ksp/generated"
+                    )
 
-        // 关键：平铺式建立依赖，不要嵌套 configure
-        // sort <- ksp
-        sortTask.configure {
-            dependsOn(tasks.named(kspTaskName))
-        }
-
-        // compile <- sort
-        tasks.named(compileTaskName).configure {
-            dependsOn(sortTask)
-        }
-
-        logger.quiet("✅ 已链接: $kspTaskName → ${sortTask.name} → $compileTaskName")
-    }
-
-    if (plugins.hasPlugin("com.android.application")) {
-        extensions.configure<BaseAppModuleExtension> {
-            applicationVariants.all {
-                taskBlock(name)
-            }
-        }
-    } else {
-        extensions.configure<LibraryExtension> {
-            libraryVariants.all {
-                taskBlock(name)
+                    registerSortTask(
+                        platform,
+                        kspOutputDirPath,
+                        if (platform == "android") "ksp${cap}Main" else "kspKotlin${cap}",
+                        if (platform == "android") "compile${cap}Main" else "compileKotlin${cap}"
+                    )
+                }
             }
         }
     }

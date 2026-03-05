@@ -10,9 +10,11 @@
 
 ### 第三方 Pixiv 客户端
 
-一个完全由 [Jetpack Compose](https://developer.android.com/develop/ui/compose) 编写的第三方 Pixiv 应用
+一个完全由 [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) 编写的跨平台第三方
+Pixiv 应用
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.2.21-blue.svg?logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3.10-blue.svg?logo=kotlin)](https://kotlinlang.org)
+![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-1.10.0-blue)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/master-lzh/PiPixiv/release.yml)](https://github.com/master-lzh/PiPixiv/actions/workflows/release.yml)
 [![License: Apache-2.0](https://img.shields.io/github/license/master-lzh/PiPixiv?labelColor=27303D&color=0877d2)](/LICENSE)
 
@@ -22,7 +24,17 @@
 [![GitHub downloads](https://img.shields.io/github/downloads/master-lzh/PiPixiv/total?label=下载量&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/master-lzh/PiPixiv/releases)
 [![F-Droid Version](https://img.shields.io/f-droid/v/com.mrl.pixiv)](https://f-droid.org/packages/com.mrl.pixiv/)
 
-### 支持 **[Android 8.0]()** 或更高版本
+### 支持平台
+
+<div align="left">
+
+- **Android**: Android 8.0 或更高版本
+- **iOS**: iOS 17 或更高版本
+- **Windows**: x86_64
+- **macOS**: arm64 (Apple Silicon)
+- **Linux**: x86_64
+
+</div>
 
 ## 功能
 

@@ -1,13 +1,16 @@
-import com.android.build.gradle.internal.api.ApkVariantOutputImpl
+
+import com.android.build.api.artifact.SingleArtifact
+import com.mrl.pixiv.buildsrc.CopyApk
+import org.gradle.internal.extensions.stdlib.capitalized
 
 plugins {
     id("pixiv.android.application")
-    alias(androidx.plugins.baselineprofile)
+//    alias(androidx.plugins.baselineprofile)
+    alias(libs.plugins.sentry.android)
 }
 if (project.findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.google.services.get().pluginId)
     pluginManager.apply(libs.plugins.firebase.crashlytics.get().pluginId)
-    pluginManager.apply(libs.plugins.kotzilla.get().pluginId)
 }
 
 android {
@@ -19,8 +22,8 @@ android {
 
     defaultConfig {
         applicationId = "com.mrl.pixiv"
-        versionCode = 10400
-        versionName = "1.4.0"
+        versionCode = properties["versionCode"].toString().toInt()
+        versionName = properties["versionName"].toString()
 
         vectorDrawables {
             useSupportLibrary = true
@@ -30,6 +33,11 @@ android {
             abiFilters.add("arm64-v8a")
             abiFilters.add("x86_64")
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     dependenciesInfo {
@@ -45,17 +53,6 @@ android {
             storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
             keyAlias = System.getenv("RELEASE_KEYSTORE_ALIAS")
             keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
-        }
-    }
-
-    flavorDimensions += "version"
-    productFlavors {
-        create("default") {
-            isDefault = true
-            dimension = flavorDimensionList[0]
-        }
-        create("foss") {
-            dimension = flavorDimensionList[0]
         }
     }
 
@@ -88,35 +85,75 @@ android {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
     }
-    applicationVariants.configureEach {
-        outputs.configureEach {
-            (this as? ApkVariantOutputImpl)?.outputFileName =
-                "${rootProject.name}-v${defaultConfig.versionName}-$name.apk"
+}
+
+androidComponents {
+    onVariants { variant ->
+        if (variant.name.contains("debug", true)) return@onVariants
+        // create a task that will be responsible for copying the APKs
+        val copyTask = project.tasks.register<CopyApk>("copyApksFor${variant.name.capitalized()}") {
+//            dependsOn("create${variant.name.capitalized()}ApkListingFileRedirect")
+            // set the output only. the input will be automatically provided via the
+            // wiring mechanism
+            output.set(project.layout.projectDirectory.dir(variant.name))
+
+            // provide an instance of the artifact loader. This is necessary for
+            // some artifacts. See Artifact.ContainsMany
+            builtArtifactsLoader.set(variant.artifacts.getBuiltArtifactsLoader())
+
         }
+
+        // Wire the task to respond to artifact creation
+        variant.artifacts.use(copyTask).wiredWith {
+            it.input
+        }.toListenTo(SingleArtifact.APK)
     }
 }
 
 dependencies {
-    baselineProfile(project(":baselineprofile"))
+//    baselineProfile(project(":baselineprofile"))
     implementation(project(":common:data"))
     implementation(project(":common:network"))
     implementation(project(":common:repository"))
     implementation(project(":common:ui"))
     implementation(project(":common:core"))
-    rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
-        implementation(project(":feature:${it.name}"))
-    }
+    implementation(project(":composeApp"))
 
     // splash screen
     implementation(androidx.splashscreen)
     // ProfileInstaller
     implementation(androidx.profileinstaller)
     // Navigation3
-    api(compose.bundles.navigation3)
+    implementation(composes.bundles.navigation3.android)
     // Coil3
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)
+    implementation(libs.coil3.gif)
     // MMKV
     implementation(libs.mmkv)
     implementation(libs.mmkv.kotlin)
+}
+
+sentry {
+    // Disables or enables debug log output, e.g. for for sentry-cli.
+    // Default is disabled.
+    debug.set(true)
+    org.set("pipixiv")
+    projectName.set("pipixiv")
+    authToken.set(System.getenv("SENTRY_AUTH_TOKEN"))
+    url = null
+    includeProguardMapping.set(true)
+    autoUploadProguardMapping.set(true)
+    uploadNativeSymbols.set(false)
+    autoUploadNativeSymbols.set(true)
+    includeNativeSources.set(false)
+    includeSourceContext.set(false)
+    tracingInstrumentation {
+        enabled.set(false)
+    }
+    autoInstallation {
+        enabled.set(false)
+    }
+    includeDependenciesReport.set(false)
+    telemetry.set(false)
 }

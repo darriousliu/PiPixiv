@@ -1,10 +1,21 @@
 plugins {
-    id("pixiv.android.library")
+    id("pixiv.multiplatform.compose")
 }
 
-android {
-    namespace = "com.mrl.pixiv.strings"
+kotlin {
+    androidLibrary {
+        namespace = "com.mrl.pixiv.strings"
+
+        androidResources {
+            enable = true
+        }
+    }
 }
 
-dependencies {
+compose {
+    resources {
+        publicResClass = true
+        packageOfResClass = "com.mrl.pixiv.strings"
+//        nameOfResClass = "R"
+    }
 }
