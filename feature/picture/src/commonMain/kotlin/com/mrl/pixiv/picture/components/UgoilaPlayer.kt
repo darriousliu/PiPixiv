@@ -43,13 +43,14 @@ fun UgoiraPlayer(
     if (images.isNotEmpty()) {
         if (playUgoira) {
             val infiniteTransition = rememberInfiniteTransition(label = "ugoiraPlayerTransition")
+            val lastIndex = images.lastIndex
             val currentIndex by infiniteTransition.animateValue(
                 initialValue = 0,
-                targetValue = images.size,
+                targetValue = lastIndex,
                 typeConverter = Int.VectorConverter,
                 animationSpec = infiniteRepeatable(
                     animation = keyframes {
-                        durationMillis = images.sumOf { it.second }.toInt()
+                        durationMillis = images.sumOf { it.second }.toInt().coerceAtLeast(1)
                         images.forEachIndexed { index, _ ->
                             if (index == 0) {
                                 0 at 0
@@ -136,4 +137,3 @@ fun UgoiraPlayer(
         }
     }
 }
-
