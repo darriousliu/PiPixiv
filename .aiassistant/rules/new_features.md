@@ -1,9 +1,5 @@
 ---
-description: PiPixiv 新功能开发标准规范 - 测试、代码质量与 PR 流程要求
-alwaysApply: true
-enabled: true
-updatedAt: 2026-03-05T00:00:00.000Z
-provider: CodeBuddy
+apply: 始终
 ---
 
 # PiPixiv 新功能开发标准规范
@@ -113,17 +109,15 @@ dependencies {
 
 ```kotlin
 // ✅ 必须使用 @KoinViewModel 注解
+// Action模式已经废弃，不推荐使用，推荐直接调用函数
 @KoinViewModel
 class NewFeatureViewModel(
     // 通过构造函数参数注入依赖（Koin 自动处理）
     private val someParam: String,
-) : BaseMviViewModel<NewFeatureState, NewFeatureAction>(
+) : BaseMviViewModel<NewFeatureState, ViewIntent>(
     initialState = NewFeatureState()
 ) {
-    override suspend fun handleIntent(intent: NewFeatureAction) {
-        when (intent) {
-            // ✅ 穷举所有 Action
-        }
+    fun logicFunction() {
     }
 }
 ```
@@ -216,7 +210,7 @@ private fun NewFeatureScreenPreview() {
                     // Mock 数据...
                 )
             ),
-            onAction = {}
+            onXXX = {}
         )
     }
 }
@@ -234,12 +228,14 @@ private fun NewFeatureScreenPreview() {
 ```kotlin
 // ✅ Screen（含 Koin 依赖）
 @Composable
-fun NewFeatureScreen(modifier: Modifier = Modifier) {
-    val viewModel: NewFeatureViewModel = koinViewModel()
+fun NewFeatureScreen(
+    modifier: Modifier = Modifier,
+    viewModel: NewFeatureViewModel = koinViewModel(),
+) {
     val state = viewModel.asState()
     NewFeatureContent(
         state = state,
-        onAction = viewModel::dispatch,
+        onXXX = viewModel::logicFunction,
         modifier = modifier,
     )
 }
