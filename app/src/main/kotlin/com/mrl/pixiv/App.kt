@@ -8,7 +8,6 @@ import com.mrl.pixiv.common.analytics.FLAVOR
 import com.mrl.pixiv.common.analytics.initializeFirebase
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.SettingRepository
-import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.deleteFiles
 import com.mrl.pixiv.common.util.isDebug
@@ -47,7 +46,6 @@ class App : Application() {
         migrateDataStoreToMMKV()
         migrateBlockingToNewFile()
         setAppCompatDelegateThemeMode(SettingRepository.settingTheme)
-        VersionManager.checkUpdate()
     }
 
     private fun migrateDataStoreToMMKV() {

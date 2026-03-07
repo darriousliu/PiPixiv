@@ -5,6 +5,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.navigation.Navigation3MainGraph
 import com.mrl.pixiv.splash.SplashViewModel
@@ -41,6 +43,10 @@ fun App(
     val appLanguage by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appLanguage }
 
     SetUpImageLoaderFactory(imageLoaderBuilder)
+
+    LaunchedEffect(Unit) {
+        VersionManager.checkUpdate()
+    }
 
     key(appLanguage) {
         PiPixivTheme(
