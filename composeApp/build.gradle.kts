@@ -1,3 +1,4 @@
+
 import com.mrl.pixiv.buildsrc.configureRemoveKoinMeta
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
@@ -6,7 +7,6 @@ plugins {
     id("pixiv.multiplatform.compose")
     alias(composes.plugins.composeHotReload)
     alias(kotlinx.plugins.native.cocoapods)
-    alias(libs.plugins.kotzilla)
 }
 
 if (properties["applyFirebasePlugins"] == "true") {
@@ -277,6 +277,4 @@ tasks.register("buildReleaseIpa", BuildIpaTask::class) {
     dependsOn(buildReleaseArchive)
 }
 
-tasks.matching { it.name == "kspCommonMainKotlinMetadata" }.configureEach {
-    dependsOn("generateKotzillaConfig")
-}
+

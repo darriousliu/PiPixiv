@@ -1,5 +1,6 @@
 plugins {
     id("pixiv.multiplatform")
+    alias(libs.plugins.kotzilla)
 }
 
 kotlin {
@@ -26,4 +27,12 @@ kotlin {
 
         }
     }
+}
+
+kotzilla {
+    versionName = properties["versionName"]!!.toString()
+}
+
+tasks.matching { it.name == "kspCommonMainKotlinMetadata" }.configureEach {
+    dependsOn("generateKotzillaConfig")
 }
