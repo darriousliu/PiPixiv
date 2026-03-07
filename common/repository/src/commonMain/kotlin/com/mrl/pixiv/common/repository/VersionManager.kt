@@ -89,7 +89,7 @@ object VersionManager {
 
             is Platform.Apple -> assets.find { it.name.contains(".ipa") }
             is Platform.Desktop -> when (platform) {
-                Platform.Desktop.Windows -> assets.find { it.name.contains(".exe") }
+                Platform.Desktop.Windows -> assets.find { it.name.contains(".msi") }
                 Platform.Desktop.MacOS -> assets.find { it.name.contains(".dmg") }
                 Platform.Desktop.Linux -> assets.find { it.name.contains(".tar.gz") }
             }
