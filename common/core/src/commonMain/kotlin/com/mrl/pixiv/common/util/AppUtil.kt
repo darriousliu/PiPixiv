@@ -13,11 +13,11 @@ import org.jetbrains.compose.resources.StringResource
 object AppUtil {
     lateinit var appContext: PlatformContext
         internal set
-    val versionName = BuildKonfig.versionName
+    const val versionName = BuildKonfig.versionName
 
-    val versionCode = BuildKonfig.versionCode
+    const val versionCode = BuildKonfig.versionCode
 
-    val sentryDsn = BuildKonfig.sentryDsn
+    const val sentryDsn = BuildKonfig.sentryDsn
 
     lateinit var flavor: String
         private set

@@ -83,9 +83,24 @@ buildkonfig {
     packageName = "com.mrl.pixiv.common"
 
     defaultConfigs {
-        buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", properties["debug"].toString())
-        buildConfigField(FieldSpec.Type.INT, "versionCode", properties["versionCode"].toString())
-        buildConfigField(FieldSpec.Type.STRING, "versionName", properties["versionName"].toString())
-        buildConfigField(FieldSpec.Type.STRING, "sentryDsn", sentryDsn)
+        buildConfigField(
+            FieldSpec.Type.BOOLEAN,
+            "DEBUG",
+            properties["debug"].toString(),
+            const = true
+        )
+        buildConfigField(
+            FieldSpec.Type.INT,
+            "versionCode",
+            properties["versionCode"].toString(),
+            const = true
+        )
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "versionName",
+            properties["versionName"].toString(),
+            const = true
+        )
+        buildConfigField(FieldSpec.Type.STRING, "sentryDsn", sentryDsn, const = true)
     }
 }
