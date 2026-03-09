@@ -89,11 +89,11 @@ private data class SNIReplaceDNS(
             val json = JSON.decodeFromString<CloudFlareDNSResponse>(resp.body.string())
             json.Answer.map { InetAddress.getByName(it.data) }
         } catch (e: Throwable) {
-            Logger.w(e) { "query DoH failed, use system dns" }
-
-            fallback[hostname]!!.let {
-                InetAddress.getAllByName(it)!!.toList()
-            } + Dns.SYSTEM.lookup(hostname)
+            Logger.w(e) { "query DoH failed, use fallback or system dns" }
+            val fallbackAddresses = fallback[hostname]?.let {
+                InetAddress.getAllByName(it).toList()
+            } ?: emptyList()
+            fallbackAddresses.ifEmpty { Dns.SYSTEM.lookup(hostname) }
         }
         Logger.d("DNS lookup $hostname result : $data")
         return data
@@ -134,6 +134,7 @@ private object BypassSSLSocketFactory : SSLSocketFactory() {
         autoClose: Boolean
     ): Socket {
         val inetAddress = paramSocket!!.inetAddress
+        if (autoClose) paramSocket.close()
         val sslSocket =
             (getDefault().createSocket(inetAddress, port) as SSLSocket).apply {
                 enabledProtocols = supportedProtocols
