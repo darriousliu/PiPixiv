@@ -24,7 +24,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
@@ -32,8 +31,6 @@ import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.follow.FollowingScreenBody
-import com.mrl.pixiv.follow.FollowingViewModel
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.latest_tab_following
 import com.mrl.pixiv.strings.latest_tab_trend
@@ -42,7 +39,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 @Composable
 fun LatestScreen(
@@ -56,6 +52,18 @@ fun LatestScreen(
     val scope = rememberCoroutineScope()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
     val refreshFlow = remember { MutableSharedFlow<LatestPage>() }
+    val page = pages[pagerState.currentPage]
+    val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
+    val scrollState = when (page) {
+        LatestPage.Trend -> viewModel.trendingLazyGirdState
+        LatestPage.Collection -> viewModel.collectionLazyGirdState
+        LatestPage.Following -> if (isWidthAtLeastMedium) {
+            viewModel.followingLazyGirdState
+        } else {
+            viewModel.followingLazyListState
+        }
+    }
+
 
     LaunchedEffect(pagerState.currentPage) {
         logEvent("screen_view", buildMap {
@@ -67,16 +75,6 @@ fun LatestScreen(
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            val windowAdaptiveInfo = currentWindowAdaptiveInfo()
-            val scrollState = when (pages[pagerState.currentPage]) {
-                LatestPage.Trend -> viewModel.trendingLazyGirdState
-                LatestPage.Collection -> viewModel.collectionLazyGirdState
-                LatestPage.Following -> if (windowAdaptiveInfo.isWidthAtLeastMedium) {
-                    viewModel.followingLazyGirdState
-                } else {
-                    viewModel.followingLazyListState
-                }
-            }
             BackToTopButton(
                 visibility = scrollState.canScrollBackward,
                 modifier = Modifier,
@@ -132,32 +130,20 @@ fun LatestScreen(
                 val page = pages[index]
                 when (page) {
                     LatestPage.Trend -> {
-                        TrendingPage(refreshFlow=refreshFlow)
+                        TrendingPage(refreshFlow = refreshFlow)
                     }
 
                     LatestPage.Collection -> {
                         CollectionPage(
                             uid = userInfo.user.id,
-                            refreshFlow=refreshFlow
+                            refreshFlow = refreshFlow
                         )
                     }
 
                     LatestPage.Following -> {
-                        val followingViewModel =
-                            koinViewModel<FollowingViewModel> { parametersOf(userInfo.user.id) }
-                        val followingUsers =
-                            followingViewModel.publicFollowingPageSource.collectAsLazyPagingItems()
-                        LaunchedEffect(Unit) {
-                            refreshFlow.collect {
-                                followingUsers.refresh()
-                            }
-                        }
-                        FollowingScreenBody(
-                            followingUsers = followingUsers,
-                            navToPictureScreen = navigationManager::navigateToPictureScreen,
-                            navToUserProfile = navigationManager::navigateToProfileDetailScreen,
-                            lazyListState = viewModel.followingLazyListState,
-                            lazyGridState = viewModel.followingLazyGirdState,
+                        FollowingPage(
+                            uid = userInfo.user.id,
+                            refreshFlow = refreshFlow
                         )
                     }
                 }

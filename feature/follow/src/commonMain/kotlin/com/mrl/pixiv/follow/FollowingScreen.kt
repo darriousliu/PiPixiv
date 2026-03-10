@@ -37,10 +37,12 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -49,6 +51,8 @@ import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
@@ -93,13 +97,29 @@ fun FollowingScreen(
     val pages = viewModel.pages
     val pagerState = viewModel.pagerState
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
-    val lazyListState = viewModel.lazyListState
-    val lazyGridState = viewModel.lazyGridState
+    val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
+    val lazyListStates = viewModel.lazyListState
+    val lazyGridStates = viewModel.lazyGridState
     val page = pages[pagerState.currentPage]
     val followingUsers = when (page) {
         FollowingPage.Public -> viewModel.publicFollowingPageSource.collectAsLazyPagingItems()
         FollowingPage.Private -> viewModel.privateFollowingPageSource.collectAsLazyPagingItems()
     }
+    val controller = remember(isWidthAtLeastMedium, pagerState.currentPage) {
+        if (isWidthAtLeastMedium) {
+            val lazyGridState = lazyGridStates[pagerState.currentPage]
+            keyboardScrollerController(lazyGridState) {
+                lazyGridState.layoutInfo.viewportSize.height.toFloat()
+            }
+        } else {
+            val lazyListState = lazyListStates[pagerState.currentPage]
+            keyboardScrollerController(lazyListState) {
+                lazyListState.layoutInfo.viewportSize.height.toFloat()
+            }
+        }
+    }
+
+    KeyEventListener(controller)
 
     Scaffold(
         modifier = modifier,
@@ -124,10 +144,10 @@ fun FollowingScreen(
             )
         },
         floatingActionButton = {
-            val scrollState = if (windowAdaptiveInfo.isWidthAtLeastMedium) {
-                lazyGridState[pagerState.currentPage]
+            val scrollState = if (isWidthAtLeastMedium) {
+                lazyGridStates[pagerState.currentPage]
             } else {
-                lazyListState[pagerState.currentPage]
+                lazyListStates[pagerState.currentPage]
             }
             BackToTopButton(
                 visibility = scrollState.canScrollBackward,
@@ -184,8 +204,8 @@ fun FollowingScreen(
                     followingUsers = followingUsers,
                     navToPictureScreen = navigationManager::navigateToPictureScreen,
                     navToUserProfile = navigationManager::navigateToProfileDetailScreen,
-                    lazyListState = lazyListState[index],
-                    lazyGridState = lazyGridState[index],
+                    lazyListState = lazyListStates[index],
+                    lazyGridState = lazyGridStates[index],
                 )
             }
         }
@@ -364,7 +384,7 @@ fun FollowingUserCard(
     }
 }
 
-//@Preview
+@Preview
 @Composable
 private fun FollowingUserCardPreview() {
     FollowingUserCard(

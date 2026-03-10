@@ -46,6 +46,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.kts.HSpacer
@@ -252,6 +254,13 @@ fun RankingScreen(
             val pullRefreshState = rememberPullToRefreshState()
             val onRefresh = rankingList::refresh
             val isRefreshing = rankingList.loadState.refresh is LoadState.Loading
+            val controller = remember {
+                keyboardScrollerController(lazyStaggeredGridState) {
+                    lazyStaggeredGridState.layoutInfo.viewportSize.height.toFloat()
+                }
+            }
+
+            KeyEventListener(controller)
 
             PullToRefreshBox(
                 isRefreshing = isRefreshing,

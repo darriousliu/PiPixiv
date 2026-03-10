@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
@@ -68,6 +70,14 @@ fun HistoryScreen(
     }.collectAsLazyPagingItems()
     val lazyGridState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
+    val controller = remember {
+        keyboardScrollerController(lazyGridState) {
+            lazyGridState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
+
     Scaffold(
         modifier = modifier,
         topBar = {

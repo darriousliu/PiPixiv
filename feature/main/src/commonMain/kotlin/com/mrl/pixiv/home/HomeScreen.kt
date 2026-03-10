@@ -19,11 +19,14 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -46,6 +49,13 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val pullRefreshState = rememberPullToRefreshState()
     val onRefresh = recommendImageList::refresh
+    val controller = remember {
+        keyboardScrollerController(lazyStaggeredGridState) {
+            lazyStaggeredGridState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
 
     Scaffold(
         modifier = modifier,

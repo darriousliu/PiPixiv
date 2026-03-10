@@ -31,11 +31,14 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.BlockingGridDefaults
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.router.Destination
@@ -66,6 +69,13 @@ fun BlockSettingsScreen(
     val state = viewModel.asState()
     val scope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
+    val controller = remember() {
+        keyboardScrollerController(lazyGridState) {
+            lazyGridState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
 
     Scaffold(
         modifier = modifier,

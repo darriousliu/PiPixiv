@@ -18,6 +18,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.itemIndexKey
@@ -55,6 +58,14 @@ fun TrendingPage(
     val trendingFilter by viewModel.trendingFilter.collectAsStateWithLifecycle()
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
     val isRefreshing = illustsFollowing.loadState.refresh is LoadState.Loading
+    val lazyGridState = viewModel.trendingLazyGirdState
+    val controller = remember {
+        keyboardScrollerController(lazyGridState) {
+            lazyGridState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
 
     LaunchedEffect(Unit) {
         refreshFlow.collect {
@@ -79,7 +90,7 @@ fun TrendingPage(
             LazyVerticalStaggeredGrid(
                 columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
-                state = viewModel.trendingLazyGirdState,
+                state = lazyGridState,
                 contentPadding = PaddingValues(horizontal = 5.dp, vertical = 10.dp),
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,

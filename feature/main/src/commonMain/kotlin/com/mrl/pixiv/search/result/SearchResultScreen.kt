@@ -40,6 +40,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.kts.itemIndexKey
@@ -84,7 +86,21 @@ fun SearchResultsScreen(
 
     val pages = remember { SearchResultsPage.entries }
     val pagerState = rememberPagerState { SearchResultsPage.entries.size }
+    val page = pages[pagerState.currentPage]
     val scope = rememberCoroutineScope()
+    val controller = remember(page) {
+        when (page) {
+            SearchResultsPage.Illusts -> keyboardScrollerController(illustsGridState) {
+                illustsGridState.layoutInfo.viewportSize.height.toFloat()
+            }
+
+            SearchResultsPage.Users -> keyboardScrollerController(usersListState) {
+                usersListState.layoutInfo.viewportSize.height.toFloat()
+            }
+        }
+    }
+
+    KeyEventListener(controller)
 
     LaunchedEffect(pagerState.currentPage) {
         logEvent("screen_view", buildMap {
