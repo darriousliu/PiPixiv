@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
@@ -45,7 +44,6 @@ import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.search.preview.components.TrendingItem
 import com.mrl.pixiv.strings.enter_keywords
 import com.mrl.pixiv.strings.popular_tags
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -92,17 +90,6 @@ fun SearchPreviewScreen(
                         }
                     )
                 }
-            )
-        },
-        floatingActionButton = {
-            BackToTopButton(
-                visibility = lazyGridState.canScrollBackward,
-                modifier = Modifier,
-                onAction = {
-                    scope.launch {
-                        lazyGridState.scrollToItem(0)
-                    }
-                },
             )
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
