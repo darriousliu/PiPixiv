@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
@@ -44,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
@@ -54,6 +54,7 @@ import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.user.UserPreview
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
@@ -94,6 +95,11 @@ fun FollowingScreen(
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
     val lazyListState = viewModel.lazyListState
     val lazyGridState = viewModel.lazyGridState
+    val page = pages[pagerState.currentPage]
+    val followingUsers = when (page) {
+        FollowingPage.Public -> viewModel.publicFollowingPageSource.collectAsLazyPagingItems()
+        FollowingPage.Private -> viewModel.privateFollowingPageSource.collectAsLazyPagingItems()
+    }
 
     Scaffold(
         modifier = modifier,
@@ -126,12 +132,15 @@ fun FollowingScreen(
             BackToTopButton(
                 visibility = scrollState.canScrollBackward,
                 modifier = Modifier,
-                onAction = {
+                onBackToTop = {
                     when (scrollState) {
                         is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
                         is LazyGridState -> scope.launch { scrollState.scrollToItem(0) }
                     }
                 },
+                onRefresh = {
+                    followingUsers.refresh()
+                }
             )
         },
         contentWindowInsets = WindowInsets.statusBars,
@@ -160,129 +169,116 @@ fun FollowingScreen(
                     }
                 }
             }
-            FollowingScreenBody(
-                uid = uid,
-                navToPictureScreen = navigationManager::navigateToPictureScreen,
-                navToUserProfile = navigationManager::navigateToProfileDetailScreen,
-                pages = pages.toImmutableList(),
-                pagerState = pagerState,
-                modifier = Modifier.weight(1f),
-                viewModel = viewModel,
-                lazyListState = lazyListState,
-                lazyGridState = lazyGridState,
-            )
+            LaunchedEffect(pagerState.currentPage) {
+                logEvent("screen_view", buildMap {
+                    put("screen_name", "Following")
+                    put("page_name", FollowingPage.entries[pagerState.currentPage].name)
+                })
+            }
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = modifier.weight(1f),
+            ) { index ->
+                FollowingScreenBody(
+                    followingUsers = followingUsers,
+                    navToPictureScreen = navigationManager::navigateToPictureScreen,
+                    navToUserProfile = navigationManager::navigateToProfileDetailScreen,
+                    lazyListState = lazyListState[index],
+                    lazyGridState = lazyGridState[index],
+                )
+            }
         }
     }
 }
 
 @Composable
 fun FollowingScreenBody(
-    uid: Long,
+    followingUsers: LazyPagingItems<UserPreview>,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     navToUserProfile: (Long) -> Unit,
-    pages: ImmutableList<FollowingPage>,
-    pagerState: PagerState,
     modifier: Modifier = Modifier,
-    viewModel: FollowingViewModel = koinViewModel { parametersOf(uid) },
-    userScrollEnabled: Boolean = true,
-    lazyListState: List<LazyListState> = List(pagerState.pageCount) { rememberLazyListState() },
-    lazyGridState: List<LazyGridState> = List(pagerState.pageCount) { rememberLazyGridState() },
+    lazyListState: LazyListState = rememberLazyListState(),
+    lazyGridState: LazyGridState = rememberLazyGridState(),
 ) {
     val pullRefreshState = rememberPullToRefreshState()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
 
-    LaunchedEffect(pagerState.currentPage) {
-        logEvent("screen_view", buildMap {
-            put("screen_name", "Following")
-            put("page_name", FollowingPage.entries[pagerState.currentPage].name)
-        })
-    }
-
-    HorizontalPager(
-        state = pagerState,
+    val isRefreshing = followingUsers.loadState.refresh is LoadState.Loading
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { followingUsers.refresh() },
         modifier = modifier,
-        userScrollEnabled = userScrollEnabled
-    ) { index ->
-        val page = pages[index]
-        val followingUsers = when (page) {
-            FollowingPage.Public -> viewModel.publicFollowingPageSource.collectAsLazyPagingItems()
-            FollowingPage.Private -> viewModel.privateFollowingPageSource.collectAsLazyPagingItems()
+        state = pullRefreshState,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = pullRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
         }
-        val isRefreshing = followingUsers.loadState.refresh is LoadState.Loading
-        PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = { followingUsers.refresh() },
-            state = pullRefreshState,
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    state = pullRefreshState,
-                    isRefreshing = isRefreshing,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                )
-            }
-        ) {
-            if (windowAdaptiveInfo.isWidthAtLeastMedium) {
-                val layoutParams = IllustGridDefaults.userFollowingParameters()
-                LazyVerticalGrid(
-                    columns = layoutParams.gridCells,
-                    state = lazyGridState[index],
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        top = 10.dp,
-                        end = 16.dp,
-                        bottom = 20.dp
-                    ),
-                    horizontalArrangement = layoutParams.horizontalArrangement,
-                    verticalArrangement = layoutParams.verticalArrangement,
+    ) {
+        if (windowAdaptiveInfo.isWidthAtLeastMedium) {
+            val layoutParams = IllustGridDefaults.userFollowingParameters()
+            LazyVerticalGrid(
+                columns = layoutParams.gridCells,
+                state = lazyGridState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    top = 10.dp,
+                    end = 16.dp,
+                    bottom = 20.dp
+                ),
+                horizontalArrangement = layoutParams.horizontalArrangement,
+                verticalArrangement = layoutParams.verticalArrangement,
+            ) {
+                items(
+                    followingUsers.itemCount,
+                    key = followingUsers.itemIndexKey { index, user -> "${index}_${user.user.id}" }
                 ) {
-                    items(
-                        followingUsers.itemCount,
-                        key = followingUsers.itemIndexKey { index, user -> "${index}_${user.user.id}" }
-                    ) {
-                        val userPreview = followingUsers[it] ?: return@items
-                        FollowingUserCard(
-                            illusts = userPreview.illusts.toImmutableList(),
-                            userName = userPreview.user.name,
-                            userId = userPreview.user.id,
-                            userAvatar = userPreview.user.profileImageUrls.medium,
-                            isFollowed = userPreview.user.isFollowing,
-                            navToPictureScreen = navToPictureScreen,
-                            navToUserProfile = {
-                                navToUserProfile(userPreview.user.id)
-                            }
-                        )
-                    }
+                    val userPreview = followingUsers[it] ?: return@items
+                    FollowingUserCard(
+                        illusts = userPreview.illusts.toImmutableList(),
+                        userName = userPreview.user.name,
+                        userId = userPreview.user.id,
+                        userAvatar = userPreview.user.profileImageUrls.medium,
+                        isFollowed = userPreview.user.isFollowing,
+                        navToPictureScreen = navToPictureScreen,
+                        navToUserProfile = {
+                            navToUserProfile(userPreview.user.id)
+                        }
+                    )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = lazyListState[index],
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        top = 10.dp,
-                        end = 16.dp,
-                        bottom = 20.dp
-                    ),
-                    verticalArrangement = 10f.spaceBy,
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = lazyListState,
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    top = 10.dp,
+                    end = 16.dp,
+                    bottom = 20.dp
+                ),
+                verticalArrangement = 10f.spaceBy,
+            ) {
+                items(
+                    count = followingUsers.itemCount,
+                    key = followingUsers.itemIndexKey { index, item -> "${index}_${item.user.id}" }
                 ) {
-                    items(
-                        count = followingUsers.itemCount,
-                        key = followingUsers.itemIndexKey { index, item -> "${index}_${item.user.id}" }
-                    ) {
-                        val userPreview = followingUsers[it] ?: return@items
-                        FollowingUserCard(
-                            illusts = userPreview.illusts.toImmutableList(),
-                            userName = userPreview.user.name,
-                            userId = userPreview.user.id,
-                            userAvatar = userPreview.user.profileImageUrls.medium,
-                            isFollowed = userPreview.user.isFollowing,
-                            navToPictureScreen = navToPictureScreen,
-                            navToUserProfile = {
-                                navToUserProfile(userPreview.user.id)
-                            }
-                        )
-                    }
+                    val userPreview = followingUsers[it] ?: return@items
+                    FollowingUserCard(
+                        illusts = userPreview.illusts.toImmutableList(),
+                        userName = userPreview.user.name,
+                        userId = userPreview.user.id,
+                        userAvatar = userPreview.user.profileImageUrls.medium,
+                        isFollowed = userPreview.user.isFollowing,
+                        navToPictureScreen = navToPictureScreen,
+                        navToUserProfile = {
+                            navToUserProfile(userPreview.user.id)
+                        }
+                    )
                 }
             }
         }

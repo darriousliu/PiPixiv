@@ -16,6 +16,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +36,7 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.all
 import com.mrl.pixiv.strings.word_private
 import com.mrl.pixiv.strings.word_public
+import kotlinx.coroutines.flow.SharedFlow
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -43,6 +45,7 @@ private const val KEY_TOP_SPACE = "top_space"
 
 @Composable
 fun TrendingPage(
+    refreshFlow: SharedFlow<LatestPage>,
     modifier: Modifier = Modifier,
     viewModel: LatestViewModel = koinViewModel(),
 ) {
@@ -52,6 +55,12 @@ fun TrendingPage(
     val trendingFilter by viewModel.trendingFilter.collectAsStateWithLifecycle()
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
     val isRefreshing = illustsFollowing.loadState.refresh is LoadState.Loading
+
+    LaunchedEffect(Unit) {
+        refreshFlow.collect {
+            illustsFollowing.refresh()
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,

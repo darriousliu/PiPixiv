@@ -76,11 +76,14 @@ fun CollectionScreen(
             BackToTopButton(
                 visibility = lazyGridState.canScrollBackward,
                 modifier = Modifier,
-                onAction = {
+                onBackToTop = {
                     scope.launch {
                         lazyGridState.scrollToItem(0)
                     }
                 },
+                onRefresh = {
+                    userBookmarksIllusts.refresh()
+                }
             )
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),

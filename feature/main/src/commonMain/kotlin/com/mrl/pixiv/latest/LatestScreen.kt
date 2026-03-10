@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -25,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
@@ -32,16 +32,17 @@ import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.follow.FollowingPage
 import com.mrl.pixiv.follow.FollowingScreenBody
+import com.mrl.pixiv.follow.FollowingViewModel
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.latest_tab_following
 import com.mrl.pixiv.strings.latest_tab_trend
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun LatestScreen(
@@ -54,6 +55,7 @@ fun LatestScreen(
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val refreshFlow = remember { MutableSharedFlow<LatestPage>() }
 
     LaunchedEffect(pagerState.currentPage) {
         logEvent("screen_view", buildMap {
@@ -70,21 +72,26 @@ fun LatestScreen(
                 LatestPage.Trend -> viewModel.trendingLazyGirdState
                 LatestPage.Collection -> viewModel.collectionLazyGirdState
                 LatestPage.Following -> if (windowAdaptiveInfo.isWidthAtLeastMedium) {
-                    viewModel.followingLazyGirdState.first()
+                    viewModel.followingLazyGirdState
                 } else {
-                    viewModel.followingLazyListState.first()
+                    viewModel.followingLazyListState
                 }
             }
             BackToTopButton(
                 visibility = scrollState.canScrollBackward,
                 modifier = Modifier,
-                onAction = {
+                onBackToTop = {
                     when (scrollState) {
                         is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
                         is LazyGridState -> scope.launch { scrollState.scrollToItem(0) }
                         is LazyStaggeredGridState -> scope.launch { scrollState.scrollToItem(0) }
                     }
                 },
+                onRefresh = {
+                    scope.launch {
+                        refreshFlow.emit(pages[pagerState.currentPage])
+                    }
+                }
             )
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
@@ -125,25 +132,30 @@ fun LatestScreen(
                 val page = pages[index]
                 when (page) {
                     LatestPage.Trend -> {
-                        TrendingPage()
+                        TrendingPage(refreshFlow=refreshFlow)
                     }
 
                     LatestPage.Collection -> {
                         CollectionPage(
                             uid = userInfo.user.id,
+                            refreshFlow=refreshFlow
                         )
                     }
 
                     LatestPage.Following -> {
-                        val pages = remember { persistentListOf(FollowingPage.Public) }
-                        val pagerState = rememberPagerState { pages.size }
+                        val followingViewModel =
+                            koinViewModel<FollowingViewModel> { parametersOf(userInfo.user.id) }
+                        val followingUsers =
+                            followingViewModel.publicFollowingPageSource.collectAsLazyPagingItems()
+                        LaunchedEffect(Unit) {
+                            refreshFlow.collect {
+                                followingUsers.refresh()
+                            }
+                        }
                         FollowingScreenBody(
-                            uid = userInfo.user.id,
+                            followingUsers = followingUsers,
                             navToPictureScreen = navigationManager::navigateToPictureScreen,
                             navToUserProfile = navigationManager::navigateToProfileDetailScreen,
-                            pages = pages,
-                            pagerState = pagerState,
-                            userScrollEnabled = false,
                             lazyListState = viewModel.followingLazyListState,
                             lazyGridState = viewModel.followingLazyGirdState,
                         )

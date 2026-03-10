@@ -26,8 +26,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun BackToTopButton(
     visibility: Boolean,
-    onAction: suspend () -> Unit,
+    onBackToTop: suspend () -> Unit,
     modifier: Modifier = Modifier,
+    onRefresh: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     AnimatedContent(
@@ -41,14 +42,14 @@ fun BackToTopButton(
             KeyEventListener {
                 if (it.type != KeyEventType.KeyUp) return@KeyEventListener
                 if (it.key == Key.R) {
-                    onAction()
+                    onBackToTop()
                 }
             }
             FloatingActionButton(
                 modifier = modifier,
                 onClick = {
                     scope.launch {
-                        onAction()
+                        onBackToTop()
                     }
                 },
             ) {
@@ -58,6 +59,12 @@ fun BackToTopButton(
                 )
             }
         } else {
+            KeyEventListener {
+                if (it.type != KeyEventType.KeyUp) return@KeyEventListener
+                if (it.key == Key.R) {
+                    onRefresh()
+                }
+            }
             Spacer(modifier = Modifier.size(56.dp))
         }
     }

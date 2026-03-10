@@ -57,9 +57,12 @@ fun ArtworkScreen(
             BackToTopButton(
                 visibility = lazyGridState.canScrollBackward,
                 modifier = Modifier,
-                onAction = {
+                onBackToTop = {
                     lazyGridState.scrollToItem(0)
                 },
+                onRefresh = {
+                    userIllusts.refresh()
+                }
             )
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),

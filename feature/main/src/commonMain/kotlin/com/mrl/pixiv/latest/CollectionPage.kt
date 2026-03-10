@@ -21,6 +21,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -45,6 +46,7 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.word_private
 import com.mrl.pixiv.strings.word_public
+import kotlinx.coroutines.flow.SharedFlow
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -55,6 +57,7 @@ private const val KEY_TOP_SPACE = "top_space"
 @Composable
 fun CollectionPage(
     uid: Long,
+    refreshFlow: SharedFlow<LatestPage>,
     modifier: Modifier = Modifier,
     viewModel: CollectionViewModel = koinViewModel { parametersOf(uid) },
     latestViewModel: LatestViewModel = koinViewModel(),
@@ -66,6 +69,12 @@ fun CollectionPage(
     var showFilterDialog by rememberSaveable { mutableStateOf(false) }
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
     val isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading
+
+    LaunchedEffect(Unit) {
+        refreshFlow.collect {
+            userBookmarksIllusts.refresh()
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,

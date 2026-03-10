@@ -108,7 +108,7 @@ fun BlockSettingsScreen(
             BackToTopButton(
                 visibility = lazyGridState.canScrollBackward,
                 modifier = Modifier,
-                onAction = {
+                onBackToTop = {
                     scope.launch {
                         lazyGridState.scrollToItem(0)
                     }

@@ -138,12 +138,18 @@ fun SearchResultsScreen(
             BackToTopButton(
                 visibility = scrollState.canScrollBackward,
                 modifier = Modifier,
-                onAction = {
+                onBackToTop = {
                     when (scrollState) {
                         is LazyGridState -> scope.launch { scrollState.scrollToItem(0) }
                         is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
                     }
                 },
+                onRefresh = {
+                    when (pages[pagerState.currentPage]) {
+                        SearchResultsPage.Illusts -> searchResults.refresh()
+                        SearchResultsPage.Users -> userSearchResults.refresh()
+                    }
+                }
             )
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),

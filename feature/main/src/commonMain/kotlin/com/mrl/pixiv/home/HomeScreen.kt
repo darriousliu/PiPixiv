@@ -72,9 +72,10 @@ fun HomeScreen(
                 BackToTopButton(
                     visibility = lazyStaggeredGridState.canScrollBackward,
                     modifier = Modifier,
-                    onAction = {
+                    onBackToTop = {
                         lazyStaggeredGridState.scrollToItem(0)
                     },
+                    onRefresh = onRefresh
                 )
             }
         },

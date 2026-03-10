@@ -225,12 +225,16 @@ fun RankingScreen(
             val mode = state.availableModes.getOrNull(pagerState.currentPage)
             if (mode != null) {
                 val lazyStaggeredGridState = viewModel.getLazyStaggeredGridState(mode)
+                val rankingList = viewModel.getRankingFlow(mode).collectAsLazyPagingItems()
                 BackToTopButton(
                     visibility = lazyStaggeredGridState.canScrollBackward,
                     modifier = Modifier,
-                    onAction = {
+                    onBackToTop = {
                         lazyStaggeredGridState.scrollToItem(0)
                     },
+                    onRefresh = {
+                        rankingList.refresh()
+                    }
                 )
             }
         },

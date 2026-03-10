@@ -84,11 +84,14 @@ fun HistoryScreen(
             BackToTopButton(
                 visibility = lazyGridState.canScrollBackward,
                 modifier = Modifier,
-                onAction = {
+                onBackToTop = {
                     scope.launch {
                         lazyGridState.scrollToItem(0)
                     }
                 },
+                onRefresh = {
+                    illusts.refresh()
+                }
             )
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
