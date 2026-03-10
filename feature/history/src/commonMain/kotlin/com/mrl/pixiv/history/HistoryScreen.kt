@@ -1,5 +1,6 @@
 package com.mrl.pixiv.history
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -29,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
@@ -42,6 +44,7 @@ import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -107,25 +110,29 @@ fun HistoryScreen(
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         val layoutParams = IllustGridDefaults.relatedLayoutParameters()
-        LazyVerticalGrid(
-            state = lazyGridState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it),
-            columns = layoutParams.gridCells,
-            verticalArrangement = layoutParams.verticalArrangement,
-            horizontalArrangement = layoutParams.horizontalArrangement,
-            contentPadding = PaddingValues(
-                start = 8.dp,
-                top = 8.dp,
-                end = 8.dp,
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            ),
-        ) {
-            illustGrid(
-                illusts = illusts,
-                navToPictureScreen = navigationManager::navigateToPictureScreen,
-                enableLoading = true
+        Box(modifier = Modifier.fillMaxSize().padding(it)) {
+            LazyVerticalGrid(
+                state = lazyGridState,
+                modifier = Modifier.fillMaxSize(),
+                columns = layoutParams.gridCells,
+                verticalArrangement = layoutParams.verticalArrangement,
+                horizontalArrangement = layoutParams.horizontalArrangement,
+                contentPadding = PaddingValues(
+                    start = 8.dp,
+                    top = 8.dp,
+                    end = 8.dp,
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                ),
+            ) {
+                illustGrid(
+                    illusts = illusts,
+                    navToPictureScreen = navigationManager::navigateToPictureScreen,
+                    enableLoading = true
+                )
+            }
+            VerticalScrollbar(
+                state = lazyGridState,
+                modifier = Modifier.align(Alignment.CenterEnd)
             )
         }
     }

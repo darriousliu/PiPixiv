@@ -43,6 +43,7 @@ import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
@@ -207,6 +208,10 @@ fun SearchResultsScreen(
                                 navToPictureScreen = navigationManager::navigateToPictureScreen,
                             )
                         }
+                        VerticalScrollbar(
+                            state = illustsGridState,
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        )
                     }
                 }
 
@@ -253,6 +258,10 @@ fun SearchResultsScreen(
                                 )
                             }
                         }
+                        VerticalScrollbar(
+                            state = usersListState,
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        )
                     }
                 }
             }

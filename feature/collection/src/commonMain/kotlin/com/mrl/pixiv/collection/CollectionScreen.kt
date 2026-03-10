@@ -40,6 +40,7 @@ import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.router.NavigationManager
@@ -133,6 +134,10 @@ fun CollectionScreen(
                     navToPictureScreen = navigationManager::navigateToPictureScreen,
                 )
             }
+            VerticalScrollbar(
+                state = lazyGridState,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
         }
         if (showFilterDialog) {
             FilterDialog(
