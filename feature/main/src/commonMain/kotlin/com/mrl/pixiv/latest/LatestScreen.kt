@@ -29,7 +29,6 @@ import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
-import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.latest_tab_following
@@ -37,14 +36,12 @@ import com.mrl.pixiv.strings.latest_tab_trend
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LatestScreen(
     modifier: Modifier = Modifier,
     viewModel: LatestViewModel = koinViewModel(),
-    navigationManager: NavigationManager = koinInject(),
 ) {
     val pages = remember { LatestPage.entries }
     val pagerState = viewModel.pagerState
