@@ -1,6 +1,5 @@
 package com.mrl.pixiv.common.network
 
-import com.mrl.pixiv.common.data.Constants.AUTH_HOST
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.plugin
@@ -15,7 +14,6 @@ fun authHttpClient() = baseHttpClient.apply {
         NetworkUtil.addAuthHeader(request)
         request.apply {
             headers.remove("Authorization")
-            headers["Host"] = AUTH_HOST
         }
         execute(request)
     }
