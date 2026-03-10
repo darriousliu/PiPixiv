@@ -19,8 +19,8 @@ class LatestViewModel : ViewModel() {
     val pagerState = PagerState { LatestPage.entries.size }
     val trendingLazyGirdState = LazyStaggeredGridState()
     val collectionLazyGirdState = LazyStaggeredGridState()
-    val followingLazyListState = List(pagerState.pageCount) { LazyListState() }
-    val followingLazyGirdState = List(pagerState.pageCount) { LazyGridState() }
+    val followingLazyListState = List(1) { LazyListState() }
+    val followingLazyGirdState = List(1) { LazyGridState() }
 
     val trendingFilter = MutableStateFlow(Restrict.ALL)
 

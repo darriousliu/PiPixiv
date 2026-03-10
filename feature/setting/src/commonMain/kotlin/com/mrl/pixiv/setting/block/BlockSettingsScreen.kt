@@ -31,10 +31,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.BlockingGridDefaults
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
@@ -44,6 +46,7 @@ import com.mrl.pixiv.strings.block_comments
 import com.mrl.pixiv.strings.block_settings
 import com.mrl.pixiv.strings.block_tags
 import com.mrl.pixiv.strings.block_user
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -61,6 +64,8 @@ fun BlockSettingsScreen(
 ) {
     val navigationManager = koinInject<NavigationManager>()
     val state = viewModel.asState()
+    val scope = rememberCoroutineScope()
+    val lazyGridState = rememberLazyGridState()
 
     Scaffold(
         modifier = modifier,
@@ -98,9 +103,19 @@ fun BlockSettingsScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            BackToTopButton(
+                visibility = lazyGridState.canScrollBackward,
+                modifier = Modifier,
+                onAction = {
+                    scope.launch {
+                        lazyGridState.scrollToItem(0)
+                    }
+                },
+            )
         }
     ) {
-        val lazyGridState = rememberLazyGridState()
         val layoutParams = BlockingGridDefaults.blockingLayoutParameters()
         val userEmpty = state.allMutedUsers.isEmpty()
         val tagEmpty = state.allMutedTags.isEmpty()

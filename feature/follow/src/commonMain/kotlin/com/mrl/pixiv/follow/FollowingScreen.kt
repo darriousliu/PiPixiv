@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
@@ -39,7 +38,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,12 +50,12 @@ import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.compose.rememberThrottleClick
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
-import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
@@ -91,12 +89,11 @@ fun FollowingScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val scope = rememberCoroutineScope()
-    val pages = remember {
-        if (uid.isSelf) listOf(FollowingPage.Public, FollowingPage.Private)
-        else listOf(FollowingPage.Public)
-    }
-    val pagerState = rememberPagerState { pages.size }
+    val pages = viewModel.pages
+    val pagerState = viewModel.pagerState
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val lazyListState = viewModel.lazyListState
+    val lazyGridState = viewModel.lazyGridState
 
     Scaffold(
         modifier = modifier,
@@ -118,6 +115,23 @@ fun FollowingScreen(
                         )
                     }
                 }
+            )
+        },
+        floatingActionButton = {
+            val scrollState = if (windowAdaptiveInfo.isWidthAtLeastMedium) {
+                lazyGridState[pagerState.currentPage]
+            } else {
+                lazyListState[pagerState.currentPage]
+            }
+            BackToTopButton(
+                visibility = scrollState.canScrollBackward,
+                modifier = Modifier,
+                onAction = {
+                    when (scrollState) {
+                        is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
+                        is LazyGridState -> scope.launch { scrollState.scrollToItem(0) }
+                    }
+                },
             )
         },
         contentWindowInsets = WindowInsets.statusBars,
@@ -154,6 +168,8 @@ fun FollowingScreen(
                 pagerState = pagerState,
                 modifier = Modifier.weight(1f),
                 viewModel = viewModel,
+                lazyListState = lazyListState,
+                lazyGridState = lazyGridState,
             )
         }
     }

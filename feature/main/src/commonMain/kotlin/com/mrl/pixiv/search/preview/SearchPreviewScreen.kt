@@ -31,11 +31,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
@@ -43,6 +45,7 @@ import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.search.preview.components.TrendingItem
 import com.mrl.pixiv.strings.enter_keywords
 import com.mrl.pixiv.strings.popular_tags
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -57,6 +60,7 @@ fun SearchPreviewScreen(
     val textState by remember { mutableStateOf(TextFieldValue()) }
     val lazyGridState = viewModel.lazyGridState
     val pullRefreshState = rememberPullToRefreshState()
+    val scope = rememberCoroutineScope()
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -88,6 +92,17 @@ fun SearchPreviewScreen(
                         }
                     )
                 }
+            )
+        },
+        floatingActionButton = {
+            BackToTopButton(
+                visibility = lazyGridState.canScrollBackward,
+                modifier = Modifier,
+                onAction = {
+                    scope.launch {
+                        lazyGridState.scrollToItem(0)
+                    }
+                },
             )
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),

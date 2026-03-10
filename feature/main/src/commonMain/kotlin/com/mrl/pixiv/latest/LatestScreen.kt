@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -24,7 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -33,7 +37,7 @@ import com.mrl.pixiv.follow.FollowingScreenBody
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.latest_tab_following
 import com.mrl.pixiv.strings.latest_tab_trend
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -60,8 +64,29 @@ fun LatestScreen(
 
     Scaffold(
         modifier = modifier,
-        floatingActionButton = {},
-        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButton = {
+            val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+            val scrollState = when (pages[pagerState.currentPage]) {
+                LatestPage.Trend -> viewModel.trendingLazyGirdState
+                LatestPage.Collection -> viewModel.collectionLazyGirdState
+                LatestPage.Following -> if (windowAdaptiveInfo.isWidthAtLeastMedium) {
+                    viewModel.followingLazyGirdState.first()
+                } else {
+                    viewModel.followingLazyListState.first()
+                }
+            }
+            BackToTopButton(
+                visibility = scrollState.canScrollBackward,
+                modifier = Modifier,
+                onAction = {
+                    when (scrollState) {
+                        is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
+                        is LazyGridState -> scope.launch { scrollState.scrollToItem(0) }
+                        is LazyStaggeredGridState -> scope.launch { scrollState.scrollToItem(0) }
+                    }
+                },
+            )
+        },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         Column(modifier = Modifier.padding(it)) {
@@ -110,7 +135,7 @@ fun LatestScreen(
                     }
 
                     LatestPage.Following -> {
-                        val pages = remember { FollowingPage.entries.toImmutableList() }
+                        val pages = remember { persistentListOf(FollowingPage.Public) }
                         val pagerState = rememberPagerState { pages.size }
                         FollowingScreenBody(
                             uid = userInfo.user.id,

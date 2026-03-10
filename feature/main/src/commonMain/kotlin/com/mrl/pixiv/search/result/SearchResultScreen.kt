@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.PrimaryTabRow
@@ -36,6 +40,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
@@ -73,6 +78,9 @@ fun SearchResultsScreen(
     val userPullRefreshState = rememberPullToRefreshState()
     val isRefreshing = searchResults.loadState.refresh is LoadState.Loading
     val isUserRefreshing = userSearchResults.loadState.refresh is LoadState.Loading
+
+    val illustsGridState = rememberLazyGridState()
+    val usersListState = rememberLazyListState()
 
     val pages = remember { SearchResultsPage.entries }
     val pagerState = rememberPagerState { SearchResultsPage.entries.size }
@@ -122,6 +130,22 @@ fun SearchResultsScreen(
                 }
             }
         },
+        floatingActionButton = {
+            val scrollState = when (pages[pagerState.currentPage]) {
+                SearchResultsPage.Illusts -> illustsGridState
+                SearchResultsPage.Users -> usersListState
+            }
+            BackToTopButton(
+                visibility = scrollState.canScrollBackward,
+                modifier = Modifier,
+                onAction = {
+                    when (scrollState) {
+                        is LazyGridState -> scope.launch { scrollState.scrollToItem(0) }
+                        is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
+                    }
+                },
+            )
+        },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         HorizontalPager(
@@ -144,6 +168,7 @@ fun SearchResultsScreen(
                     ) {
                         LazyVerticalGrid(
                             modifier = Modifier.fillMaxSize(),
+                            state = illustsGridState,
                             columns = layoutParams.gridCells,
                             verticalArrangement = layoutParams.verticalArrangement,
                             horizontalArrangement = layoutParams.horizontalArrangement,
@@ -178,6 +203,7 @@ fun SearchResultsScreen(
                     ) {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
+                            state = usersListState,
                             contentPadding = PaddingValues(
                                 start = 16.dp,
                                 top = 10.dp,

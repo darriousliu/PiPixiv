@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -46,15 +47,24 @@ fun ArtworkScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val userIllusts = viewModel.userIllusts.collectAsLazyPagingItems()
+    val lazyGridState = rememberLazyGridState()
     Scaffold(
         modifier = modifier,
         topBar = {
             CollectionTopAppBar(onBack = navigationManager::popBackStack)
         },
+        floatingActionButton = {
+            BackToTopButton(
+                visibility = lazyGridState.canScrollBackward,
+                modifier = Modifier,
+                onAction = {
+                    lazyGridState.scrollToItem(0)
+                },
+            )
+        },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         val layoutParams = IllustGridDefaults.relatedLayoutParameters()
-        val lazyGridState = rememberLazyGridState()
         val pullRefreshState = rememberPullToRefreshState()
         val isRefreshing = userIllusts.loadState.refresh is LoadState.Loading
 

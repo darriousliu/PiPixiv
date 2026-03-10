@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -26,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.home.components.RecommendGrid
@@ -70,19 +69,13 @@ fun HomeScreen(
         },
         floatingActionButton = {
             if (recommendImageList.itemCount > 0) {
-                FloatingActionButton(
+                BackToTopButton(
+                    visibility = lazyStaggeredGridState.canScrollBackward,
                     modifier = Modifier,
-                    onClick = {
-                        scope.launch {
-                            lazyStaggeredGridState.scrollToItem(0)
-                        }
+                    onAction = {
+                        lazyStaggeredGridState.scrollToItem(0)
                     },
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.ArrowUpward,
-                        contentDescription = null
-                    )
-                }
+                )
             }
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),

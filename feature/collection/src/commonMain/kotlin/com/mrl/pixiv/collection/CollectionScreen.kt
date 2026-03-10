@@ -25,6 +25,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,12 +36,14 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.collection.components.FilterDialog
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.collection
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -57,6 +60,8 @@ fun CollectionScreen(
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
     val dispatch = viewModel::dispatch
     var showFilterDialog by rememberSaveable { mutableStateOf(false) }
+    val lazyGridState = rememberLazyGridState()
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = modifier,
@@ -67,10 +72,20 @@ fun CollectionScreen(
                 onBack = { navigationManager.popBackStack() }
             )
         },
+        floatingActionButton = {
+            BackToTopButton(
+                visibility = lazyGridState.canScrollBackward,
+                modifier = Modifier,
+                onAction = {
+                    scope.launch {
+                        lazyGridState.scrollToItem(0)
+                    }
+                },
+            )
+        },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         val layoutParams = IllustGridDefaults.relatedLayoutParameters()
-        val lazyGridState = rememberLazyGridState()
         val pullRefreshState = rememberPullToRefreshState()
         val isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading
 

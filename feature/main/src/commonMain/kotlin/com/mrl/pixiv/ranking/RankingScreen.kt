@@ -46,6 +46,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
@@ -218,6 +219,19 @@ fun RankingScreen(
                         )
                     }
                 }
+            }
+        },
+        floatingActionButton = {
+            val mode = state.availableModes.getOrNull(pagerState.currentPage)
+            if (mode != null) {
+                val lazyStaggeredGridState = viewModel.getLazyStaggeredGridState(mode)
+                BackToTopButton(
+                    visibility = lazyStaggeredGridState.canScrollBackward,
+                    modifier = Modifier,
+                    onAction = {
+                        lazyStaggeredGridState.scrollToItem(0)
+                    },
+                )
             }
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
