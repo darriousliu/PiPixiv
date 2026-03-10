@@ -28,6 +28,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.home.components.RecommendGrid
@@ -112,6 +113,10 @@ fun HomeScreen(
                     recommendImageList = recommendImageList,
                     navToPictureScreen = navigationManager::navigateToPictureScreen,
                     lazyStaggeredGridState = lazyStaggeredGridState,
+                )
+                VerticalScrollbar(
+                    state = lazyStaggeredGridState,
+                    modifier = Modifier.align(Alignment.CenterEnd)
                 )
             }
         }

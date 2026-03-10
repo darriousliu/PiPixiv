@@ -40,6 +40,7 @@ import com.mrl.pixiv.common.compose.BlockingGridDefaults
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
@@ -138,21 +139,24 @@ fun BlockSettingsScreen(
                 CircularWavyProgressIndicator()
             }
         } else {
-            LazyVerticalGrid(
-                state = lazyGridState,
+            Box(
                 modifier = Modifier
                     .padding(it)
-                    .fillMaxSize(),
-                columns = layoutParams.gridCells,
-                verticalArrangement = layoutParams.verticalArrangement,
-                horizontalArrangement = layoutParams.horizontalArrangement,
-                contentPadding = PaddingValues(
-                    start = 8.dp,
-                    top = 8.dp,
-                    end = 8.dp,
-                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                ),
+                    .fillMaxSize()
             ) {
+                LazyVerticalGrid(
+                    state = lazyGridState,
+                    modifier = Modifier.fillMaxSize(),
+                    columns = layoutParams.gridCells,
+                    verticalArrangement = layoutParams.verticalArrangement,
+                    horizontalArrangement = layoutParams.horizontalArrangement,
+                    contentPadding = PaddingValues(
+                        start = 8.dp,
+                        top = 8.dp,
+                        end = 8.dp,
+                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    ),
+                ) {
                 item(
                     key = KEY_TITLE_BLOCK_COMMENTS_ENTRY,
                     span = { GridItemSpan(maxLineSpan) }
@@ -263,6 +267,10 @@ fun BlockSettingsScreen(
                         }
                     }
                 }
+                VerticalScrollbar(
+                    state = lazyGridState,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                )
             }
         }
     }

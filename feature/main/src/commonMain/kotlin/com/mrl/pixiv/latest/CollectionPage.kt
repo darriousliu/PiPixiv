@@ -39,6 +39,7 @@ import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
@@ -142,6 +143,10 @@ fun CollectionPage(
                     )
                 }
             }
+            VerticalScrollbar(
+                state = lazyGridState,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
             Row(
                 modifier = Modifier.align(Alignment.TopCenter),
                 horizontalArrangement = 8f.spaceBy
