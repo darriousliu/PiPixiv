@@ -212,4 +212,6 @@
     <string name="max_bookmark_tags_reached">태그를 최대 %1$d개까지 선택할 수 있습니다</string>
     <string name="remember_current_selection">현재 선택 기억</string>
     <string name="default_private_bookmark">기본 비공개 북마크</string>
+    <string name="save_as">다른 이름으로 저장</string>
+    <string name="copy_link">링크 복사</string>
 </resources>

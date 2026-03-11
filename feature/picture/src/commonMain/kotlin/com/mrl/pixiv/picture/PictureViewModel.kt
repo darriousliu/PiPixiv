@@ -417,6 +417,29 @@ class PictureViewModel(
         BlockingRepositoryV2.blockIllust(state.illust?.id ?: return)
     }
 
+    fun saveAsImage(url: String, file: PlatformFile) {
+        launchIO {
+            try {
+                showLoading(true)
+                val response = imageOkHttpClient.request {
+                    url(url)
+                }
+                if (response.status.isSuccess()) {
+                    val bytes = response.bodyAsChannel().asSource().buffered().use { it.readByteArray() }
+                    file.write(bytes)
+                    ToastUtil.safeShortToast(RStrings.download_success)
+                } else {
+                    ToastUtil.safeShortToast(RStrings.download_failed)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ToastUtil.safeShortToast(RStrings.download_failed)
+            } finally {
+                showLoading(false)
+            }
+        }
+    }
+
     fun removeBlockIllust() {
         BlockingRepositoryV2.removeBlockIllust(state.illust?.id ?: return)
     }

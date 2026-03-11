@@ -27,6 +27,8 @@ kotlin {
             implementation(libs.bundles.coil3)
             // FileKit
             implementation(libs.filekit.core)
+            implementation(libs.filekit.dialogs)
+            implementation(libs.filekit.dialogs.compose)
         }
         androidMain.dependencies {
             // Navigation3

@@ -218,4 +218,6 @@
     <string name="max_bookmark_tags_reached">最多选择%1$d个标签</string>
     <string name="remember_current_selection">记住当前选择</string>
     <string name="default_private_bookmark">默认私人收藏</string>
+    <string name="save_as">另存为</string>
+    <string name="copy_link">复制链接</string>
 </resources>
