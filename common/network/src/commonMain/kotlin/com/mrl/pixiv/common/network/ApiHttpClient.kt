@@ -1,6 +1,5 @@
 package com.mrl.pixiv.common.network
 
-import com.mrl.pixiv.common.data.Constants.API_HOST
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
@@ -18,9 +17,6 @@ fun apiHttpClient() = baseHttpClient.apply {
     plugin(HttpSend).apply {
         intercept { request ->
             NetworkUtil.addAuthHeader(request)
-            request.apply {
-                headers["Host"] = API_HOST
-            }
             execute(request)
         }
         intercept { request ->
@@ -38,7 +34,7 @@ fun apiHttpClient() = baseHttpClient.apply {
             accept(ContentType.Application.Json)
         }
         HttpResponseValidator {
-            handleResponseExceptionWithRequest { cause, request ->
+            handleResponseExceptionWithRequest { cause, _ ->
                 val tokenExpiredException = cause as? ClientRequestException
                     ?: return@handleResponseExceptionWithRequest
                 if (tokenExpiredException.response.status in HttpStatusCode.BadRequest..HttpStatusCode.RequestHeaderFieldTooLarge) {

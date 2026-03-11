@@ -31,10 +31,16 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.BlockingGridDefaults
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
@@ -44,6 +50,7 @@ import com.mrl.pixiv.strings.block_comments
 import com.mrl.pixiv.strings.block_settings
 import com.mrl.pixiv.strings.block_tags
 import com.mrl.pixiv.strings.block_user
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -61,6 +68,15 @@ fun BlockSettingsScreen(
 ) {
     val navigationManager = koinInject<NavigationManager>()
     val state = viewModel.asState()
+    val scope = rememberCoroutineScope()
+    val lazyGridState = rememberLazyGridState()
+    val controller = remember() {
+        keyboardScrollerController(lazyGridState) {
+            lazyGridState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
 
     Scaffold(
         modifier = modifier,
@@ -98,9 +114,19 @@ fun BlockSettingsScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            BackToTopButton(
+                visibility = lazyGridState.canScrollBackward,
+                modifier = Modifier,
+                onBackToTop = {
+                    scope.launch {
+                        lazyGridState.scrollToItem(0)
+                    }
+                },
+            )
         }
     ) {
-        val lazyGridState = rememberLazyGridState()
         val layoutParams = BlockingGridDefaults.blockingLayoutParameters()
         val userEmpty = state.allMutedUsers.isEmpty()
         val tagEmpty = state.allMutedTags.isEmpty()
@@ -113,131 +139,140 @@ fun BlockSettingsScreen(
                 CircularWavyProgressIndicator()
             }
         } else {
-            LazyVerticalGrid(
-                state = lazyGridState,
+            Box(
                 modifier = Modifier
                     .padding(it)
-                    .fillMaxSize(),
-                columns = layoutParams.gridCells,
-                verticalArrangement = layoutParams.verticalArrangement,
-                horizontalArrangement = layoutParams.horizontalArrangement,
-                contentPadding = PaddingValues(
-                    start = 8.dp,
-                    top = 8.dp,
-                    end = 8.dp,
-                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                ),
+                    .fillMaxSize()
             ) {
-                item(
-                    key = KEY_TITLE_BLOCK_COMMENTS_ENTRY,
-                    span = { GridItemSpan(maxLineSpan) }
+                LazyVerticalGrid(
+                    state = lazyGridState,
+                    modifier = Modifier.fillMaxSize(),
+                    columns = layoutParams.gridCells,
+                    verticalArrangement = layoutParams.verticalArrangement,
+                    horizontalArrangement = layoutParams.horizontalArrangement,
+                    contentPadding = PaddingValues(
+                        start = 8.dp,
+                        top = 8.dp,
+                        end = 8.dp,
+                        bottom = WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding()
+                    ),
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { navigationManager.navigate(Destination.BlockComments) }
-                            .padding(vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(RStrings.block_comments),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                            contentDescription = null
-                        )
-                    }
-                }
-                if (!userEmpty) {
                     item(
-                        key = KEY_TITLE_MUTE_USERS,
-                        span = { GridItemSpan(maxLineSpan) },
-                    ) {
-                        Text(
-                            text = stringResource(RStrings.block_user),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
-                    items(
-                        items = state.allMutedUsers,
-                        key = { it.user.id }
+                        key = KEY_TITLE_BLOCK_COMMENTS_ENTRY,
+                        span = { GridItemSpan(maxLineSpan) }
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { navigationManager.navigate(Destination.BlockComments) }
+                                .padding(vertical = 12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                UserAvatar(
-                                    url = it.user.profileImageUrls.medium,
-                                    modifier = Modifier.size(40.dp),
-                                )
-                                Text(
-                                    text = it.user.name,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                            }
-                            Switch(
-                                checked = it.user.id !in state.toEditBlockUser,
-                                onCheckedChange = { checked ->
-                                    if (checked) {
-                                        viewModel.removeMutedUser(it.user.id)
-                                    } else {
-                                        viewModel.addMutedUser(it.user.id)
-                                    }
-                                }
-                            )
-                        }
-                    }
-                    item(
-                        key = KEY_DIVIDER,
-                        span = { GridItemSpan(maxLineSpan) },
-                    ) {
-                        HorizontalDivider()
-                    }
-                }
-                if (!tagEmpty) {
-                    item(
-                        key = KEY_TITLE_MUTE_TAGS,
-                        span = { GridItemSpan(maxLineSpan) },
-                    ) {
-                        Text(
-                            text = stringResource(RStrings.block_tags),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
-                    items(
-                        items = state.allMutedTags,
-                        key = { it.tag.name }
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = it.tag.name,
-                                modifier = Modifier.weight(1f),
-                                style = MaterialTheme.typography.bodyLarge,
+                                text = stringResource(RStrings.block_comments),
+                                style = MaterialTheme.typography.titleMedium,
                             )
-                            Switch(
-                                checked = it.tag.name !in state.toEditBlockTag,
-                                onCheckedChange = { checked ->
-                                    if (checked) {
-                                        viewModel.removeMutedTag(it.tag.name)
-                                    } else {
-                                        viewModel.addMutedTag(it.tag.name)
-                                    }
-                                }
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                                contentDescription = null
                             )
                         }
                     }
+                    if (!userEmpty) {
+                        item(
+                            key = KEY_TITLE_MUTE_USERS,
+                            span = { GridItemSpan(maxLineSpan) },
+                        ) {
+                            Text(
+                                text = stringResource(RStrings.block_user),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        }
+                        items(
+                            items = state.allMutedUsers,
+                            key = { it.user.id }
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    UserAvatar(
+                                        url = it.user.profileImageUrls.medium,
+                                        modifier = Modifier.size(40.dp),
+                                    )
+                                    Text(
+                                        text = it.user.name,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                }
+                                Switch(
+                                    checked = it.user.id !in state.toEditBlockUser,
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            viewModel.removeMutedUser(it.user.id)
+                                        } else {
+                                            viewModel.addMutedUser(it.user.id)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                        item(
+                            key = KEY_DIVIDER,
+                            span = { GridItemSpan(maxLineSpan) },
+                        ) {
+                            HorizontalDivider()
+                        }
+                    }
+                    if (!tagEmpty) {
+                        item(
+                            key = KEY_TITLE_MUTE_TAGS,
+                            span = { GridItemSpan(maxLineSpan) },
+                        ) {
+                            Text(
+                                text = stringResource(RStrings.block_tags),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        }
+                        items(
+                            items = state.allMutedTags,
+                            key = { it.tag.name }
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = it.tag.name,
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                                Switch(
+                                    checked = it.tag.name !in state.toEditBlockTag,
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            viewModel.removeMutedTag(it.tag.name)
+                                        } else {
+                                            viewModel.addMutedTag(it.tag.name)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
+                VerticalScrollbar(
+                    state = lazyGridState,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                )
             }
         }
     }

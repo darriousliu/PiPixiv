@@ -212,4 +212,6 @@
     <string name="max_bookmark_tags_reached">最大 %1$d 個のタグを選択できます</string>
     <string name="remember_current_selection">現在の選択を記憶</string>
     <string name="default_private_bookmark">デフォルトのプライベートブックマーク</string>
+    <string name="save_as">名前を付けて保存</string>
+    <string name="copy_link">リンクをコピー</string>
 </resources>

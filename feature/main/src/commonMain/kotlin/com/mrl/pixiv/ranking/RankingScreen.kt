@@ -46,6 +46,10 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
@@ -220,6 +224,23 @@ fun RankingScreen(
                 }
             }
         },
+        floatingActionButton = {
+            val mode = state.availableModes.getOrNull(pagerState.currentPage)
+            if (mode != null) {
+                val lazyStaggeredGridState = viewModel.getLazyStaggeredGridState(mode)
+                val rankingList = viewModel.getRankingFlow(mode).collectAsLazyPagingItems()
+                BackToTopButton(
+                    visibility = lazyStaggeredGridState.canScrollBackward,
+                    modifier = Modifier,
+                    onBackToTop = {
+                        lazyStaggeredGridState.scrollToItem(0)
+                    },
+                    onRefresh = {
+                        rankingList.refresh()
+                    }
+                )
+            }
+        },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) { paddingValues ->
         HorizontalPager(
@@ -234,6 +255,13 @@ fun RankingScreen(
             val pullRefreshState = rememberPullToRefreshState()
             val onRefresh = rankingList::refresh
             val isRefreshing = rankingList.loadState.refresh is LoadState.Loading
+            val controller = remember {
+                keyboardScrollerController(lazyStaggeredGridState) {
+                    lazyStaggeredGridState.layoutInfo.viewportSize.height.toFloat()
+                }
+            }
+
+            KeyEventListener(controller)
 
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
@@ -262,6 +290,10 @@ fun RankingScreen(
                         navToPictureScreen = navigationManager::navigateToPictureScreen
                     )
                 }
+                VerticalScrollbar(
+                    state = lazyStaggeredGridState,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                )
             }
         }
     }

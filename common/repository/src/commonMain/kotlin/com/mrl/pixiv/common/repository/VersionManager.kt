@@ -5,8 +5,10 @@ import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.network.httpEngineFactory
 import com.mrl.pixiv.common.serialize.JSON
 import com.mrl.pixiv.common.util.AppUtil
+import com.mrl.pixiv.common.util.Platform
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
+import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.strings.already_updated
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -80,7 +82,18 @@ object VersionManager {
     }
 
     fun GitHubRelease.getCurrentFlavorAsset(): GithubAsset? {
-        return assets.find { it.name.contains(AppUtil.flavor) }
+        return when (val platform = platform) {
+            is Platform.Android -> assets.find {
+                it.name.contains(AppUtil.flavor) && it.name.contains(".apk")
+            }
+
+            is Platform.Apple -> assets.find { it.name.contains(".ipa") }
+            is Platform.Desktop -> when (platform) {
+                Platform.Desktop.Windows -> assets.find { it.name.contains(".msi") }
+                Platform.Desktop.MacOS -> assets.find { it.name.contains(".dmg") }
+                Platform.Desktop.Linux -> assets.find { it.name.contains(".tar.gz") }
+            }
+        }
     }
 
     private fun compareVersions(v1: String, v2: String): Int {

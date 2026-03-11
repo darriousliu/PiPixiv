@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -21,11 +19,16 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.home.components.RecommendGrid
@@ -47,6 +50,13 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val pullRefreshState = rememberPullToRefreshState()
     val onRefresh = recommendImageList::refresh
+    val controller = remember {
+        keyboardScrollerController(lazyStaggeredGridState) {
+            lazyStaggeredGridState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
 
     Scaffold(
         modifier = modifier,
@@ -70,19 +80,14 @@ fun HomeScreen(
         },
         floatingActionButton = {
             if (recommendImageList.itemCount > 0) {
-                FloatingActionButton(
+                BackToTopButton(
+                    visibility = lazyStaggeredGridState.canScrollBackward,
                     modifier = Modifier,
-                    onClick = {
-                        scope.launch {
-                            lazyStaggeredGridState.scrollToItem(0)
-                        }
+                    onBackToTop = {
+                        lazyStaggeredGridState.scrollToItem(0)
                     },
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.ArrowUpward,
-                        contentDescription = null
-                    )
-                }
+                    onRefresh = onRefresh
+                )
             }
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
@@ -108,6 +113,10 @@ fun HomeScreen(
                     recommendImageList = recommendImageList,
                     navToPictureScreen = navigationManager::navigateToPictureScreen,
                     lazyStaggeredGridState = lazyStaggeredGridState,
+                )
+                VerticalScrollbar(
+                    state = lazyStaggeredGridState,
+                    modifier = Modifier.align(Alignment.CenterEnd)
                 )
             }
         }

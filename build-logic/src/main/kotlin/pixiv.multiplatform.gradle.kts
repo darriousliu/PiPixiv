@@ -16,9 +16,13 @@ kotlin {
         freeCompilerArgs.addAll(optIns)
     }
 
-    androidLibrary {
+    android {
         compileSdk = 36
         minSdk = 26
+
+        androidResources {
+            enable = true
+        }
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -33,7 +37,7 @@ kotlin {
 
     jvm {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_22)
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
 

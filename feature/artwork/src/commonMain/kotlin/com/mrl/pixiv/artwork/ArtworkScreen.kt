@@ -22,6 +22,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -29,6 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
+import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -46,15 +51,35 @@ fun ArtworkScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val userIllusts = viewModel.userIllusts.collectAsLazyPagingItems()
+    val lazyGridState = rememberLazyGridState()
+    val controller = remember {
+        keyboardScrollerController(lazyGridState) {
+            lazyGridState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
+
     Scaffold(
         modifier = modifier,
         topBar = {
             CollectionTopAppBar(onBack = navigationManager::popBackStack)
         },
+        floatingActionButton = {
+            BackToTopButton(
+                visibility = lazyGridState.canScrollBackward,
+                modifier = Modifier,
+                onBackToTop = {
+                    lazyGridState.scrollToItem(0)
+                },
+                onRefresh = {
+                    userIllusts.refresh()
+                }
+            )
+        },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         val layoutParams = IllustGridDefaults.relatedLayoutParameters()
-        val lazyGridState = rememberLazyGridState()
         val pullRefreshState = rememberPullToRefreshState()
         val isRefreshing = userIllusts.loadState.refresh is LoadState.Loading
 
@@ -89,6 +114,10 @@ fun ArtworkScreen(
                     navToPictureScreen = navigationManager::navigateToPictureScreen,
                 )
             }
+            VerticalScrollbar(
+                state = lazyGridState,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
         }
     }
 }

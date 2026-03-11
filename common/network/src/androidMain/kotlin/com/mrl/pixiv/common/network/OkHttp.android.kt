@@ -52,11 +52,6 @@ fun OkHttpClient.Builder.bypassSNI(
     dohTimeout: Int,
 ) = dns(SNIReplaceDNS(queryUrl, dohTimeout, nonStrictSSL, fallback))
     .sslSocketFactory(BypassSSLSocketFactory, BypassTrustManager)
-    .apply {
-        if (nonStrictSSL) {
-            ignoreSSL()
-        }
-    }
 
 private data class SNIReplaceDNS(
     val queryUrl: String,
@@ -87,13 +82,15 @@ private data class SNIReplaceDNS(
                     .build(),
             ).execute()
             val json = JSON.decodeFromString<CloudFlareDNSResponse>(resp.body.string())
-            json.Answer.map { InetAddress.getByName(it.data) }
+            json.Answer.map {
+                InetAddress.getByName(it.data)
+            }
         } catch (e: Throwable) {
             Logger.w(e) { "query DoH failed, use system dns" }
 
-            fallback[hostname]!!.let {
-                InetAddress.getAllByName(it)!!.toList()
-            } + Dns.SYSTEM.lookup(hostname)
+            (fallback[hostname]?.let {
+                InetAddress.getAllByName(it).toList()
+            } ?: emptyList()) + Dns.SYSTEM.lookup(hostname)
         }
         Logger.d("DNS lookup $hostname result : $data")
         return data

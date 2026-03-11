@@ -5,9 +5,11 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import co.touchlab.kermit.Severity
 import coil3.Image
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -16,6 +18,7 @@ import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.navigation.Navigation3MainGraph
 import com.mrl.pixiv.splash.SplashViewModel
@@ -29,6 +32,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import okio.Path.Companion.toPath
 import org.koin.compose.viewmodel.koinViewModel
+import co.touchlab.kermit.Logger as KermitLogger
+import coil3.util.Logger as CoilLogger
+import coil3.util.Logger.Level as CoilLogLevel
 
 @Composable
 fun App(
@@ -41,6 +47,10 @@ fun App(
     val appLanguage by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appLanguage }
 
     SetUpImageLoaderFactory(imageLoaderBuilder)
+
+    LaunchedEffect(Unit) {
+        VersionManager.checkUpdate()
+    }
 
     key(appLanguage) {
         PiPixivTheme(
@@ -71,6 +81,30 @@ private fun SetUpImageLoaderFactory(imageLoaderBuilder: ImageLoader.Builder.() -
             // Coil spawns a new thread for every image load by default
             .fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(8))
             .decoderCoroutineContext(Dispatchers.IO.limitedParallelism(2))
+            .logger(
+                object : CoilLogger {
+                    override var minLevel = CoilLogLevel.Info
+                    override fun log(
+                        tag: String,
+                        level: CoilLogLevel,
+                        message: String?,
+                        throwable: Throwable?,
+                    ) {
+                        KermitLogger.processLog(
+                            severity = when (level) {
+                                CoilLogLevel.Verbose -> Severity.Verbose
+                                CoilLogLevel.Debug -> Severity.Debug
+                                CoilLogLevel.Info -> Severity.Info
+                                CoilLogLevel.Warn -> Severity.Warn
+                                CoilLogLevel.Error -> Severity.Error
+                            },
+                            tag = tag,
+                            throwable = throwable,
+                            message = message.orEmpty(),
+                        )
+                    }
+                },
+            )
             .apply(imageLoaderBuilder)
             .build()
     }

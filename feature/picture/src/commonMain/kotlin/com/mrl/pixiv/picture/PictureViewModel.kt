@@ -35,6 +35,7 @@ import com.mrl.pixiv.common.viewmodel.state
 import com.mrl.pixiv.strings.copy_to_clipboard
 import com.mrl.pixiv.strings.download_add_to_queue
 import com.mrl.pixiv.strings.download_failed
+import com.mrl.pixiv.strings.download_success
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
@@ -415,6 +416,29 @@ class PictureViewModel(
 
     fun blockIllust() {
         BlockingRepositoryV2.blockIllust(state.illust?.id ?: return)
+    }
+
+    fun saveAsImage(imageUrl: String, file: PlatformFile) {
+        launchIO {
+            try {
+                showLoading(true)
+                val response = imageOkHttpClient.request {
+                    url(imageUrl)
+                }
+                if (response.status.isSuccess()) {
+                    val bytes = response.bodyAsChannel().asSource().buffered().use { it.readByteArray() }
+                    file.write(bytes)
+                    ToastUtil.safeShortToast(RStrings.download_success)
+                } else {
+                    ToastUtil.safeShortToast(RStrings.download_failed)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ToastUtil.safeShortToast(RStrings.download_failed)
+            } finally {
+                showLoading(false)
+            }
+        }
     }
 
     fun removeBlockIllust() {

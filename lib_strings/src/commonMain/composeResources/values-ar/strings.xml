@@ -212,4 +212,6 @@
     <string name="max_bookmark_tags_reached">حد أقصى %1$d من الوسوم</string>
     <string name="remember_current_selection">تذكر التحديد الحالي</string>
     <string name="default_private_bookmark">إشارة مرجعية خاصة افتراضية</string>
+    <string name="save_as">حفظ باسم</string>
+    <string name="copy_link">نسخ الرابط</string>
 </resources>

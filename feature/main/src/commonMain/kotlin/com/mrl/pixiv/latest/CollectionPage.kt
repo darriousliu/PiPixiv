@@ -21,8 +21,10 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,7 +36,10 @@ import com.mrl.pixiv.collection.CollectionAction
 import com.mrl.pixiv.collection.CollectionViewModel
 import com.mrl.pixiv.collection.components.FilterDialog
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
+import com.mrl.pixiv.common.compose.listener.KeyEventListener
+import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
+import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
@@ -45,6 +50,7 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.word_private
 import com.mrl.pixiv.strings.word_public
+import kotlinx.coroutines.flow.SharedFlow
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -55,6 +61,7 @@ private const val KEY_TOP_SPACE = "top_space"
 @Composable
 fun CollectionPage(
     uid: Long,
+    refreshFlow: SharedFlow<LatestPage>,
     modifier: Modifier = Modifier,
     viewModel: CollectionViewModel = koinViewModel { parametersOf(uid) },
     latestViewModel: LatestViewModel = koinViewModel(),
@@ -62,10 +69,24 @@ fun CollectionPage(
 ) {
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
     val pullRefreshState = rememberPullToRefreshState()
+    val lazyGridState = latestViewModel.collectionLazyGirdState
     val state = viewModel.asState()
     var showFilterDialog by rememberSaveable { mutableStateOf(false) }
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
     val isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading
+    val controller = remember {
+        keyboardScrollerController(lazyGridState) {
+            lazyGridState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
+
+    LaunchedEffect(Unit) {
+        refreshFlow.collect {
+            userBookmarksIllusts.refresh()
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -84,7 +105,7 @@ fun CollectionPage(
             LazyVerticalStaggeredGrid(
                 columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
-                state = latestViewModel.collectionLazyGirdState,
+                state = lazyGridState,
                 contentPadding = PaddingValues(horizontal = 5.dp, vertical = 10.dp),
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,
@@ -122,6 +143,10 @@ fun CollectionPage(
                     )
                 }
             }
+            VerticalScrollbar(
+                state = lazyGridState,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
             Row(
                 modifier = Modifier.align(Alignment.TopCenter),
                 horizontalArrangement = 8f.spaceBy

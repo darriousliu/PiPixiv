@@ -48,7 +48,7 @@ jobs:
           KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
           KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
         run: |
-          echo $KOTZILLA_SDK_JSON > composeApp/kotzilla.json
+          echo $KOTZILLA_SDK_JSON > common/analytics-default/kotzilla.json
           sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Build Foss Release apk
@@ -100,7 +100,7 @@ jobs:
           KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
           KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
         run: |
-          echo $KOTZILLA_SDK_JSON > composeApp/kotzilla.json
+          echo $KOTZILLA_SDK_JSON > common/analytics-default/kotzilla.json
           sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Build Linux Distributions
@@ -141,7 +141,7 @@ jobs:
           KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
           KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
         run: |
-          $env:KOTZILLA_SDK_JSON | Out-File -FilePath composeApp/kotzilla.json -Encoding utf8
+          $env:KOTZILLA_SDK_JSON | Out-File -FilePath common/analytics-default/kotzilla.json -Encoding utf8
           $path = "common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt"
           (Get-Content $path) -replace 'setApiKey.*', "setApiKey(`"$env:KOTZILLA_SDK_API_KEY`")" | Set-Content $path
 
@@ -178,7 +178,7 @@ jobs:
           KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
           KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
         run: |
-          echo "$KOTZILLA_SDK_JSON" > composeApp/kotzilla.json
+          echo "$KOTZILLA_SDK_JSON" > common/analytics-default/kotzilla.json
           sed -i '' "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Build MacOS Distribution
@@ -214,7 +214,7 @@ jobs:
           KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
           KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
         run: |
-          echo "$KOTZILLA_SDK_JSON" > composeApp/kotzilla.json
+          echo "$KOTZILLA_SDK_JSON" > common/analytics-default/kotzilla.json
           sed -i '' "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Setup CocoaPods

@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.RStrings
@@ -39,7 +40,7 @@ import com.mrl.pixiv.strings.label_default
 import com.mrl.pixiv.strings.self_defined_source
 import org.jetbrains.compose.resources.stringResource
 
-//@Preview
+@Preview
 @Composable
 fun PictureSourceWidget(
     modifier: Modifier = Modifier,

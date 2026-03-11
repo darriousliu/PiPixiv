@@ -389,3 +389,6 @@ val lazyItems = viewModel.items.collectAsLazyPagingItems()
 - [ ] 无 hardcoded 依赖版本号
 - [ ] ❌ 无直接 `feature/*` → `feature/*` 依赖
 - [ ] ❌ 无在 Screen 层直接调用网络 API
+
+## 9 README更新
+- 新功能需要更新到中文和英文的README中
