@@ -79,7 +79,11 @@ buildkonfig {
         val f = rootProject.file("local.properties")
         if (f.exists()) f.inputStream().use { load(it) }
     }
-    val sentryDsn = props.getProperty("sentryDsn") ?: System.getenv("SENTRY_DSN")
+    val sentryDsn = if (properties["applyFirebasePlugins"] == "true") {
+        props.getProperty("sentryDsn") ?: System.getenv("SENTRY_DSN")
+    } else {
+        "unused"
+    }
     packageName = "com.mrl.pixiv.common"
 
     defaultConfigs {
