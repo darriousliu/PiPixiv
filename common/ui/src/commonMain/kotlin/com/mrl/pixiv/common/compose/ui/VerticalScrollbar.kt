@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.compose.ui
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -9,11 +10,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -25,11 +27,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.util.isDesktop
 import com.mrl.pixiv.common.util.platform
 import kotlinx.coroutines.launch
 
-private const val SCROLLBAR_WIDTH_DP = 4f
-private const val SCROLLBAR_CORNER_RADIUS_DP = 2f
+private const val SCROLLBAR_WIDTH_DP = 10f
+private const val SCROLLBAR_CORNER_RADIUS_DP = 4f
 private const val SCROLLBAR_PADDING_DP = 2f
 private const val MIN_THUMB_SIZE_FRACTION = 0.05f
 private const val DESKTOP_ALPHA = 0.5f
@@ -69,17 +72,27 @@ private fun ScrollbarImpl(
 ) {
     val isDesktop = remember { platform.isDesktop() }
     val scope = rememberCoroutineScope()
-    val thumbColor = MaterialTheme.colorScheme.onSurface
+    val thumbColor = LocalContentColor.current
+
+    var isDragging by remember { mutableStateOf(false) }
 
     val targetAlpha = when {
         isDesktop -> DESKTOP_ALPHA
-        isScrollInProgress -> SCROLLING_ALPHA
+        isScrollInProgress || isDragging -> SCROLLING_ALPHA
         else -> 0f
     }
     val alpha by animateFloatAsState(
         targetValue = targetAlpha,
-        animationSpec = tween(if (isScrollInProgress || isDesktop) 150 else 800),
+        animationSpec = tween(if (isScrollInProgress || isDragging || isDesktop) 150 else 800),
         label = "scrollbar_alpha"
+    )
+
+    // Smooth the thumb position during normal scroll to reduce jitter from unstable
+    // avgItemHeight estimates; use snap() during drag so the thumb tracks the finger exactly.
+    val smoothedThumbOffset by animateFloatAsState(
+        targetValue = metrics.thumbOffsetFraction,
+        animationSpec = if (isDragging) snap() else tween(durationMillis = 50),
+        label = "scrollbar_thumb_offset"
     )
 
     val currentMetrics by rememberUpdatedState(metrics)
@@ -96,10 +109,13 @@ private fun ScrollbarImpl(
             .pointerInput(Unit) {
                 detectVerticalDragGestures(
                     onDragStart = { offset ->
+                        isDragging = true
                         dragStartPointerY = offset.y
                         dragStartThumbOffset = currentMetrics.thumbOffsetFraction
                     },
-                    onDrag = { change, _ ->
+                    onDragEnd = { isDragging = false },
+                    onDragCancel = { isDragging = false },
+                    onVerticalDrag = { change, _ ->
                         val delta =
                             (change.position.y - dragStartPointerY) / size.height
                         val thumbSizeFraction = currentMetrics.thumbSizeFraction
@@ -123,7 +139,7 @@ private fun ScrollbarImpl(
         val left = size.width - thumbWidth - paddingX
 
         val thumbHeight = size.height * currentMetrics.thumbSizeFraction
-        val thumbTop = size.height * currentMetrics.thumbOffsetFraction
+        val thumbTop = size.height * smoothedThumbOffset
 
         drawRoundRect(
             color = thumbColor,
@@ -162,10 +178,17 @@ fun VerticalScrollbar(
         metrics = metrics,
         isScrollInProgress = state.isScrollInProgress,
         onScrollToFraction = { fraction ->
-            val totalItems = state.layoutInfo.totalItemsCount
-            val maxIndex = (totalItems - 1).coerceAtLeast(0)
-            val targetIndex = (fraction * maxIndex).toInt().coerceIn(0, maxIndex)
-            state.scrollToItem(targetIndex)
+            val info = state.layoutInfo
+            val totalItems = info.totalItemsCount
+            if (totalItems > 0) {
+                val avgItemHeight = info.visibleItemsInfo.map { it.size }.average().toFloat()
+                val viewportHeight = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
+                val totalHeight = totalItems * avgItemHeight
+                val targetOffset = (fraction * (totalHeight - viewportHeight)).coerceAtLeast(0f)
+                val targetIndex = (targetOffset / avgItemHeight).toInt().coerceIn(0, totalItems - 1)
+                val subOffset = (targetOffset - targetIndex * avgItemHeight).toInt().coerceAtLeast(0)
+                state.scrollToItem(targetIndex, subOffset)
+            }
         },
         modifier = modifier,
     )
@@ -205,10 +228,22 @@ fun VerticalScrollbar(
         metrics = metrics,
         isScrollInProgress = state.isScrollInProgress,
         onScrollToFraction = { fraction ->
-            val totalItems = state.layoutInfo.totalItemsCount
-            val maxIndex = (totalItems - 1).coerceAtLeast(0)
-            val targetIndex = (fraction * maxIndex).toInt().coerceIn(0, maxIndex)
-            state.scrollToItem(targetIndex)
+            val info = state.layoutInfo
+            val totalItems = info.totalItemsCount
+            if (totalItems > 0) {
+                val visible = info.visibleItemsInfo
+                val avgItemHeight = visible.map { it.size.height }.average().toFloat()
+                val viewportHeight = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
+                val firstItemY = visible.first().offset.y
+                val colCount = visible.count { it.offset.y == firstItemY }.coerceAtLeast(1)
+                val totalRows = (totalItems + colCount - 1) / colCount
+                val totalHeight = totalRows * avgItemHeight
+                val targetOffset = (fraction * (totalHeight - viewportHeight)).coerceAtLeast(0f)
+                val targetRow = (targetOffset / avgItemHeight).toInt().coerceIn(0, totalRows - 1)
+                val subOffset = (targetOffset - targetRow * avgItemHeight).toInt().coerceAtLeast(0)
+                val targetIndex = (targetRow * colCount).coerceIn(0, totalItems - 1)
+                state.scrollToItem(targetIndex, subOffset)
+            }
         },
         modifier = modifier,
     )
@@ -247,10 +282,21 @@ fun VerticalScrollbar(
         metrics = metrics,
         isScrollInProgress = state.isScrollInProgress,
         onScrollToFraction = { fraction ->
-            val totalItems = state.layoutInfo.totalItemsCount
-            val maxIndex = (totalItems - 1).coerceAtLeast(0)
-            val targetIndex = (fraction * maxIndex).toInt().coerceIn(0, maxIndex)
-            state.scrollToItem(targetIndex)
+            val info = state.layoutInfo
+            val totalItems = info.totalItemsCount
+            if (totalItems > 0) {
+                val visible = info.visibleItemsInfo
+                val avgItemHeight = visible.map { it.size.height }.average().toFloat()
+                val viewportHeight = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
+                val laneCount = visible.distinctBy { it.offset.x }.size.coerceAtLeast(1)
+                val estimatedRowCount = (totalItems + laneCount - 1) / laneCount
+                val totalHeight = estimatedRowCount * avgItemHeight
+                val targetOffset = (fraction * (totalHeight - viewportHeight)).coerceAtLeast(0f)
+                val targetRow = (targetOffset / avgItemHeight).toInt().coerceIn(0, estimatedRowCount - 1)
+                val subOffset = (targetOffset - targetRow * avgItemHeight).toInt().coerceAtLeast(0)
+                val targetIndex = (targetRow * laneCount).coerceIn(0, totalItems - 1)
+                state.scrollToItem(targetIndex, subOffset)
+            }
         },
         modifier = modifier,
     )

@@ -154,116 +154,118 @@ fun BlockSettingsScreen(
                         start = 8.dp,
                         top = 8.dp,
                         end = 8.dp,
-                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                        bottom = WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding()
                     ),
                 ) {
-                item(
-                    key = KEY_TITLE_BLOCK_COMMENTS_ENTRY,
-                    span = { GridItemSpan(maxLineSpan) }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { navigationManager.navigate(Destination.BlockComments) }
-                            .padding(vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(RStrings.block_comments),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                            contentDescription = null
-                        )
-                    }
-                }
-                if (!userEmpty) {
                     item(
-                        key = KEY_TITLE_MUTE_USERS,
-                        span = { GridItemSpan(maxLineSpan) },
-                    ) {
-                        Text(
-                            text = stringResource(RStrings.block_user),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
-                    items(
-                        items = state.allMutedUsers,
-                        key = { it.user.id }
+                        key = KEY_TITLE_BLOCK_COMMENTS_ENTRY,
+                        span = { GridItemSpan(maxLineSpan) }
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { navigationManager.navigate(Destination.BlockComments) }
+                                .padding(vertical = 12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                UserAvatar(
-                                    url = it.user.profileImageUrls.medium,
-                                    modifier = Modifier.size(40.dp),
-                                )
-                                Text(
-                                    text = it.user.name,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                            }
-                            Switch(
-                                checked = it.user.id !in state.toEditBlockUser,
-                                onCheckedChange = { checked ->
-                                    if (checked) {
-                                        viewModel.removeMutedUser(it.user.id)
-                                    } else {
-                                        viewModel.addMutedUser(it.user.id)
-                                    }
-                                }
+                            Text(
+                                text = stringResource(RStrings.block_comments),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                                contentDescription = null
                             )
                         }
                     }
-                    item(
-                        key = KEY_DIVIDER,
-                        span = { GridItemSpan(maxLineSpan) },
-                    ) {
-                        HorizontalDivider()
-                    }
-                }
-                if (!tagEmpty) {
-                    item(
-                        key = KEY_TITLE_MUTE_TAGS,
-                        span = { GridItemSpan(maxLineSpan) },
-                    ) {
-                        Text(
-                            text = stringResource(RStrings.block_tags),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
-                    items(
-                        items = state.allMutedTags,
-                        key = { it.tag.name }
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
+                    if (!userEmpty) {
+                        item(
+                            key = KEY_TITLE_MUTE_USERS,
+                            span = { GridItemSpan(maxLineSpan) },
                         ) {
                             Text(
-                                text = it.tag.name,
-                                modifier = Modifier.weight(1f),
-                                style = MaterialTheme.typography.bodyLarge,
+                                text = stringResource(RStrings.block_user),
+                                style = MaterialTheme.typography.titleMedium,
                             )
-                            Switch(
-                                checked = it.tag.name !in state.toEditBlockTag,
-                                onCheckedChange = { checked ->
-                                    if (checked) {
-                                        viewModel.removeMutedTag(it.tag.name)
-                                    } else {
-                                        viewModel.addMutedTag(it.tag.name)
-                                    }
+                        }
+                        items(
+                            items = state.allMutedUsers,
+                            key = { it.user.id }
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    UserAvatar(
+                                        url = it.user.profileImageUrls.medium,
+                                        modifier = Modifier.size(40.dp),
+                                    )
+                                    Text(
+                                        text = it.user.name,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
                                 }
+                                Switch(
+                                    checked = it.user.id !in state.toEditBlockUser,
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            viewModel.removeMutedUser(it.user.id)
+                                        } else {
+                                            viewModel.addMutedUser(it.user.id)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                        item(
+                            key = KEY_DIVIDER,
+                            span = { GridItemSpan(maxLineSpan) },
+                        ) {
+                            HorizontalDivider()
+                        }
+                    }
+                    if (!tagEmpty) {
+                        item(
+                            key = KEY_TITLE_MUTE_TAGS,
+                            span = { GridItemSpan(maxLineSpan) },
+                        ) {
+                            Text(
+                                text = stringResource(RStrings.block_tags),
+                                style = MaterialTheme.typography.titleMedium,
                             )
+                        }
+                        items(
+                            items = state.allMutedTags,
+                            key = { it.tag.name }
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = it.tag.name,
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                                Switch(
+                                    checked = it.tag.name !in state.toEditBlockTag,
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            viewModel.removeMutedTag(it.tag.name)
+                                        } else {
+                                            viewModel.addMutedTag(it.tag.name)
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
