@@ -14,7 +14,7 @@ if (properties["applyFirebasePlugins"] == "true") {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "com.mrl.pixiv.multiplatform"
     }
 
