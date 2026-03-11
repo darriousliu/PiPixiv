@@ -71,6 +71,8 @@ private fun ScrollbarImpl(
     onScrollToFraction: suspend (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (metrics.thumbSizeFraction >= 1f) return
+
     val isDesktop = remember { platform.isDesktop() }
     val scope = rememberCoroutineScope()
     val thumbColor = LocalContentColor.current
