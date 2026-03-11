@@ -22,6 +22,10 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
 [![F-Droid Version](https://img.shields.io/f-droid/v/com.mrl.pixiv)](https://f-droid.org/packages/com.mrl.pixiv/)
 
+## 📸 App Preview
+
+<img width="100%" alt="b48d643b-8bd4-479c-bc7b-9c586a9fafd8" src="https://github.com/user-attachments/assets/396ff31e-fecc-4447-bb6f-f9cb3e79b812" />
+
 ### 📱 Supported Platforms
 
 <div align="left">
@@ -63,13 +67,6 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 * More...
 
 </div>
-
-## 📸 App Preview
-
-| ![Home](https://github.com/darriousliu/PiPixiv/assets/60057825/0c9431bf-bff1-4752-9d62-f2721b3ade5e)           | ![SearchPreview](https://github.com/darriousliu/PiPixiv/assets/60057825/240c5011-cbdb-4423-8d41-b787b5495d4d) |
-|---------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
-| ![Search](https://github.com/darriousliu/PiPixiv/assets/60057825/8d44b554-7cdd-4eeb-a520-a93e6fc7507d)         | ![Search Result](https://github.com/darriousliu/PiPixiv/assets/60057825/7b7f6ea4-5df7-46b9-ba65-4cb1b2f52373) |
-| ![Picture Detail](https://github.com/darriousliu/PiPixiv/assets/60057825/dfe36948-525c-486d-a339-6c2c78b5aebf) |                                                                                                              |
 
 ## ⭐ Star History
 
