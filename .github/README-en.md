@@ -38,17 +38,23 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 <div align="left">
 
-* Log in using a Pixiv account.
-* Homepage recommended illustrations.
-* Search illustrations and sort by popularity, latest, etc.
-* View rankings (Daily, Weekly, Monthly, etc.).
-* Bookmark illustrations/Follow artists.
-* View browsing history.
-* View illustration details and recommended illustrations.
-* Long press on an image to download the original illustration or GIF, rename the download file.
-* App settings (Language, Network, Feature Switch, etc.).
-* Deep link support.
-* Block illustrations and users.
+* 🔐 Log in with Pixiv account (OAuth authentication).
+* 🏠 Homepage recommended illustrations in waterfall layout.
+* 🆕 Browse latest content (Discover, Bookmarks, Following).
+* 🔍 Search illustrations and users, sort by popularity, latest, etc.
+* 🏆 View rankings (Daily, Weekly, Monthly, Male/Female-oriented, AI-generated, R-18, etc.).
+* ❤️ Bookmark illustrations / Follow or unfollow artists.
+* 📜 Browsing history with search and clear support.
+* 🖼️ View illustration details (multi-page, UGOIRA animation, related artworks).
+* 💬 View and post comments.
+* 👤 View user profiles and artwork lists.
+* 👥 View following and follower lists.
+* 📁 Collection management (filter bookmarks by tag).
+* ⬇️ Download original illustrations or GIFs, customize file naming, manage download queue.
+* ⚙️ App settings (Language, Network proxy / SNI bypass, Image source, Grid columns, R-18 content, Private bookmarks, etc.).
+* 🚫 Block artworks, users and tags.
+* 🔗 Deep link support.
+* 📦 App data management (cache clearing, data export/import).
 
 ### To-do List
 
