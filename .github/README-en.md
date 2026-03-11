@@ -55,6 +55,7 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 * 🚫 Block artworks, users and tags.
 * 🔗 Deep link support.
 * 📦 App data management (cache clearing, data export/import).
+* 🔄 Desktop application scrolling list supports `R` shortcut key to return to top or refresh and ⬆️⬇️ key to scroll
 
 ### 📋 To-do List
 
