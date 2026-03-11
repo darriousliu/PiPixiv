@@ -86,6 +86,7 @@ Pixiv 应用
 - **[Koin](https://github.com/InsertKoinIO/koin)**: 面向 Kotlin 开发者的实用轻量级依赖注入框架
 - **[Mihon](https://github.com/mihonapp/mihon)**: 发现并阅读漫画、网络漫画、漫画等。参考应用程序语言切换功能
 - **[pixez-flutter](https://github.com/Notsfsssf/pixez-flutter)**: 参考登录实现方案
+- **[Pixiv-MultiPlatform](https://github.com/magic-cucumber/Pixiv-MultiPlatform)**: 参考桌面滚动快捷键实现方式
 
 </div>
 

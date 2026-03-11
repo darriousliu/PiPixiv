@@ -87,6 +87,7 @@ This project uses or references several open-source projects:
 - **[Mihon](https://github.com/mihonapp/mihon)**: Discover and read manga, webtoons, comics, etc.
   Reference application language switching feature
 - **[pixez-flutter](https://github.com/Notsfsssf/pixez-flutter)**: Reference login implementation
+- **[Pixiv-MultiPlatform](https://github.com/magic-cucumber/Pixiv-MultiPlatform)**: Reference desktop scrolling shortcut implementation
 
 </div>
 
