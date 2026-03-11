@@ -280,10 +280,10 @@ internal fun PictureScreen(
     val saveAsLauncher = rememberFileSaverLauncher(
         dialogSettings = FileKitDialogSettings.createDefault()
     ) { file ->
-        file?.let { chosenFile ->
-            val url = pendingSaveAsUrl ?: return@rememberFileSaverLauncher
-            pictureViewModel.saveAsImage(url, chosenFile)
-            pendingSaveAsUrl = null
+        val url = pendingSaveAsUrl
+        pendingSaveAsUrl = null
+        if (file != null && url != null) {
+            pictureViewModel.saveAsImage(url, file)
         }
     }
     with(sharedTransitionScope) {
