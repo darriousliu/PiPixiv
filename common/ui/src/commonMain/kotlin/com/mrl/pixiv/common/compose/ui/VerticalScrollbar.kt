@@ -29,6 +29,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.util.isDesktop
 import com.mrl.pixiv.common.util.platform
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 private const val SCROLLBAR_WIDTH_DP = 10f
@@ -100,13 +101,22 @@ private fun ScrollbarImpl(
 
     var dragStartPointerY by remember { mutableFloatStateOf(0f) }
     var dragStartThumbOffset by remember { mutableFloatStateOf(0f) }
+    // Holds the latest drag-scroll job so each new event cancels the previous one,
+    // avoiding a queue of stale scrollToItem calls on fast drags.
+    val scrollJobHolder = remember { object { var job: Job? = null } }
+
+    // Only intercept pointer events when the scrollbar is visible. On mobile the
+    // scrollbar is hidden (alpha == 0) when idle, so the modifier would create an
+    // invisible 8 dp hit-target on the right edge that steals taps/drags.
+    val isPointerEnabled = isDesktop || isScrollInProgress || isDragging
 
     Canvas(
         modifier = modifier
             .width((SCROLLBAR_WIDTH_DP + SCROLLBAR_PADDING_DP * 2).dp)
             .fillMaxHeight()
             .alpha(alpha)
-            .pointerInput(Unit) {
+            .pointerInput(isPointerEnabled) {
+                if (!isPointerEnabled) return@pointerInput
                 detectVerticalDragGestures(
                     onDragStart = { offset ->
                         isDragging = true
@@ -126,7 +136,10 @@ private fun ScrollbarImpl(
                             )
                         val scrollFraction = if (thumbSizeFraction >= 1f) 0f
                         else (newThumbOffset / (1f - thumbSizeFraction)).coerceIn(0f, 1f)
-                        scope.launch { currentOnScroll(scrollFraction) }
+                        // Cancel the previous job before launching a new one so only
+                        // the latest drag position triggers a scroll (coalescing updates).
+                        scrollJobHolder.job?.cancel()
+                        scrollJobHolder.job = scope.launch { currentOnScroll(scrollFraction) }
                     }
                 )
             }
@@ -162,7 +175,7 @@ fun VerticalScrollbar(
             if (visible.isEmpty() || info.totalItemsCount == 0) {
                 return@derivedStateOf ScrollbarMetrics(0f, 1f)
             }
-            val avgItemHeight = visible.map { it.size }.average().toFloat()
+            val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size; sum.toFloat() / visible.size }
             val viewportHeight =
                 (info.viewportEndOffset - info.viewportStartOffset).toFloat()
             val totalHeight = info.totalItemsCount * avgItemHeight
@@ -181,7 +194,7 @@ fun VerticalScrollbar(
             val info = state.layoutInfo
             val totalItems = info.totalItemsCount
             if (totalItems > 0) {
-                val avgItemHeight = info.visibleItemsInfo.map { it.size }.average().toFloat()
+                val avgItemHeight = run { val v = info.visibleItemsInfo; var sum = 0L; for (item in v) sum += item.size; sum.toFloat() / v.size }
                 val viewportHeight = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
                 val totalHeight = totalItems * avgItemHeight
                 val targetOffset = (fraction * (totalHeight - viewportHeight)).coerceAtLeast(0f)
@@ -206,7 +219,7 @@ fun VerticalScrollbar(
             if (visible.isEmpty() || info.totalItemsCount == 0) {
                 return@derivedStateOf ScrollbarMetrics(0f, 1f)
             }
-            val avgItemHeight = visible.map { it.size.height }.average().toFloat()
+            val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size.height; sum.toFloat() / visible.size }
             val viewportHeight =
                 (info.viewportEndOffset - info.viewportStartOffset).toFloat()
             // Estimate column count: items in the first row share the same y-offset
@@ -232,7 +245,7 @@ fun VerticalScrollbar(
             val totalItems = info.totalItemsCount
             if (totalItems > 0) {
                 val visible = info.visibleItemsInfo
-                val avgItemHeight = visible.map { it.size.height }.average().toFloat()
+                val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size.height; sum.toFloat() / visible.size }
                 val viewportHeight = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
                 val firstItemY = visible.first().offset.y
                 val colCount = visible.count { it.offset.y == firstItemY }.coerceAtLeast(1)
@@ -261,7 +274,7 @@ fun VerticalScrollbar(
             if (visible.isEmpty() || info.totalItemsCount == 0) {
                 return@derivedStateOf ScrollbarMetrics(0f, 1f)
             }
-            val avgItemHeight = visible.map { it.size.height }.average().toFloat()
+            val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size.height; sum.toFloat() / visible.size }
             val viewportHeight =
                 (info.viewportEndOffset - info.viewportStartOffset).toFloat()
             // Estimate lane count from distinct x-offsets of visible items
@@ -286,7 +299,7 @@ fun VerticalScrollbar(
             val totalItems = info.totalItemsCount
             if (totalItems > 0) {
                 val visible = info.visibleItemsInfo
-                val avgItemHeight = visible.map { it.size.height }.average().toFloat()
+                val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size.height; sum.toFloat() / visible.size }
                 val viewportHeight = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
                 val laneCount = visible.distinctBy { it.offset.x }.size.coerceAtLeast(1)
                 val estimatedRowCount = (totalItems + laneCount - 1) / laneCount
