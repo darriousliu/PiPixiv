@@ -18,9 +18,11 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,7 +33,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
+import com.mrl.pixiv.common.util.currentTimeMillis
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -61,11 +65,41 @@ private fun ScrollbarImpl(
 
     val isHovered by interactionSource.collectIsHoveredAsState()
     val isDragging by remember { derivedStateOf { dragInteraction.value != null } }
-    val isHighlighted = isScrollInProgress || isDragging || isHovered
+
+    var lastInteractionTime by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(isScrollInProgress, isDragging, isHovered) {
+        if (isScrollInProgress || isDragging || isHovered) {
+            lastInteractionTime = Long.MAX_VALUE
+        } else {
+            lastInteractionTime = currentTimeMillis()
+        }
+    }
+
+    var isTimeOut by remember { mutableStateOf(true) }
+    LaunchedEffect(lastInteractionTime) {
+        if (lastInteractionTime == Long.MAX_VALUE) {
+            isTimeOut = false
+        } else {
+            val now = currentTimeMillis()
+            val remaining = style.hideDelayMillis - (now - lastInteractionTime)
+            if (remaining > 0L) {
+                delay(remaining)
+            }
+            isTimeOut = true
+        }
+    }
+
+    val isHighlighted = isScrollInProgress || isDragging || isHovered || !isTimeOut
+
+    val durationMillis = when {
+        isHovered -> style.hoverDurationMillis
+        isHighlighted -> style.scrollDurationMillis
+        else -> style.hideDurationMillis
+    }
 
     val color by animateColorAsState(
         targetValue = if (isHighlighted) style.hoverColor else style.unhoverColor,
-        animationSpec = TweenSpec(durationMillis = style.hoverDurationMillis),
+        animationSpec = TweenSpec(durationMillis = durationMillis),
         label = "scrollbar_color",
     )
 
@@ -92,7 +126,7 @@ private fun ScrollbarImpl(
     val scrollJobHolder = remember { object { var job: Job? = null } }
 
     // 仅在滚动条处于交互状态时启用指针输入：这避免了在滚动条完全透明时在移动设备上创建不可见的点击目标。
-    val isPointerEnabled = isHovered || isScrollInProgress || isDragging
+    val isPointerEnabled = isHovered || isScrollInProgress || isDragging || color.alpha > 0f
 
     Canvas(
         modifier = modifier

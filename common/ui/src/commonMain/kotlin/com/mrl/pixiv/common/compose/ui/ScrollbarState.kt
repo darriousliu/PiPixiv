@@ -31,7 +31,9 @@ data class ScrollbarMetrics(
  * @param minimalHeight 最小滑块高度，以便其保持可抓取
  * @param thickness 滚动条轨道和滑块的交叉轴尺寸
  * @param shape 滑块的形状
- * @param hoverDurationMillis 颜色过渡动画的持续时间（毫秒）
+ * @param hoverDurationMillis 悬停时的颜色过渡动画持续时间（毫秒）
+ * @param scrollDurationMillis 静止到滚动时的颜色过渡动画持续时间（毫秒）
+ * @param hideDurationMillis 滚动到静止（消失）时的颜色过渡动画持续时间（毫秒）
  * @param unhoverColor 空闲时的滑块颜色（在移动设备上可以为 [Color.Transparent]）
  * @param hoverColor 滚动、拖动或悬停时的滑块颜色
  */
@@ -41,8 +43,11 @@ data class ScrollbarStyle(
     val thickness: Dp,
     val shape: Shape,
     val hoverDurationMillis: Int,
+    val scrollDurationMillis: Int,
+    val hideDurationMillis: Int,
     val unhoverColor: Color,
     val hoverColor: Color,
+    val hideDelayMillis: Int,
 )
 
 /** 简单的默认 [ScrollbarStyle]。在您的主题中通过 [LocalScrollbarStyle] 进行覆盖。 */
@@ -51,8 +56,11 @@ fun defaultScrollbarStyle() = ScrollbarStyle(
     thickness = 8.dp,
     shape = RoundedCornerShape(4.dp),
     hoverDurationMillis = 300,
-    unhoverColor = Color.Black.copy(alpha = 0.12f),
+    scrollDurationMillis = 300,
+    hideDurationMillis = 1000,
+    unhoverColor = Color.Transparent,
     hoverColor = Color.Black.copy(alpha = 0.50f),
+    hideDelayMillis = 1000,
 )
 
 /**

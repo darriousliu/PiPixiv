@@ -40,7 +40,6 @@ dependencyResolutionManagement {
         mavenCentral()
         maven(url = "https://www.jitpack.io")
         maven("https://maven.universablockchain.com/")
-        maven("https://jogamp.org/deployment/maven")
     }
 }
 
