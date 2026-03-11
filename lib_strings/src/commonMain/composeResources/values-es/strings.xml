@@ -212,4 +212,6 @@
     <string name="max_bookmark_tags_reached">Selecciona hasta %1$d etiquetas</string>
     <string name="remember_current_selection">Recordar selección actual</string>
     <string name="default_private_bookmark">Marcador privado predeterminado</string>
+    <string name="save_as">Guardar como</string>
+    <string name="copy_link">Copiar enlace</string>
 </resources>

@@ -212,4 +212,6 @@
     <string name="max_bookmark_tags_reached">Выберите до %1$d тегов</string>
     <string name="remember_current_selection">Запомнить текущий выбор</string>
     <string name="default_private_bookmark">Приватная закладка по умолчанию</string>
+    <string name="save_as">Сохранить как</string>
+    <string name="copy_link">Копировать ссылку</string>
 </resources>

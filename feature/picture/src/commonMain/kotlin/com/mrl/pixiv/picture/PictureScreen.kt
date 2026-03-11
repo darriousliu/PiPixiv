@@ -38,6 +38,8 @@ import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,8 +65,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -72,6 +78,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
@@ -113,13 +120,17 @@ import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
 import com.mrl.pixiv.common.util.copyToClipboard
 import com.mrl.pixiv.common.util.getScreenHeight
+import com.mrl.pixiv.common.util.isDesktop
+import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.picture.components.UgoiraPlayer
 import com.mrl.pixiv.strings.bookmark_add_success
 import com.mrl.pixiv.strings.cancel_user_blocked
 import com.mrl.pixiv.strings.collection
+import com.mrl.pixiv.strings.copy_link
 import com.mrl.pixiv.strings.copy_to_clipboard
+import com.mrl.pixiv.strings.download
 import com.mrl.pixiv.strings.download_with_size
 import com.mrl.pixiv.strings.follow
 import com.mrl.pixiv.strings.followed
@@ -127,12 +138,15 @@ import com.mrl.pixiv.strings.hide_illust
 import com.mrl.pixiv.strings.illust_hidden
 import com.mrl.pixiv.strings.liked
 import com.mrl.pixiv.strings.related_artworks
+import com.mrl.pixiv.strings.save_as
 import com.mrl.pixiv.strings.share
 import com.mrl.pixiv.strings.show_illust
 import com.mrl.pixiv.strings.user_blocked
 import com.mrl.pixiv.strings.view_comments
 import com.mrl.pixiv.strings.view_comments_count
 import com.mrl.pixiv.strings.viewed
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
+import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -253,6 +267,25 @@ internal fun PictureScreen(
     val animatedContentScope = LocalNavAnimatedContentScope.current
     var showAdvancedBookmark by rememberSaveable { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(true)
+    var contextMenuImageIndex by remember { mutableStateOf<Int?>(null) }
+    var contextMenuOffset by remember { mutableStateOf(Offset.Zero) }
+    var pendingSaveAsUrl by remember { mutableStateOf<String?>(null) }
+    val getOriginalUrl: (Int) -> String? = { index ->
+        if (illust.pageCount > 1) {
+            illust.metaPages?.get(index)?.imageUrls?.original
+        } else {
+            illust.metaSinglePage.originalImageURL
+        }
+    }
+    val saveAsLauncher = rememberFileSaverLauncher(
+        dialogSettings = FileKitDialogSettings.createDefault()
+    ) { file ->
+        file?.let { chosenFile ->
+            val url = pendingSaveAsUrl ?: return@rememberFileSaverLauncher
+            pictureViewModel.saveAsImage(url, chosenFile)
+            pendingSaveAsUrl = null
+        }
+    }
     with(sharedTransitionScope) {
         Scaffold(
             modifier = modifier
@@ -365,9 +398,62 @@ internal fun PictureScreen(
                                 val firstImageKey = "image-${illust.id}-0"
                                 if (illust.pageCount > 1) {
                                     illust.metaPages?.get(index)?.let {
+                                        Box {
+                                            AsyncImage(
+                                                model = ImageRequest.Builder(LocalPlatformContext.current)
+                                                    .data(it.imageUrls?.medium)
+                                                    .placeholderMemoryCacheKey("image-${illust.id}-$index")
+                                                    .build(),
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .conditionally(index == 0 && enableTransition) {
+                                                        sharedElement(
+                                                            sharedTransitionScope.rememberSharedContentState(
+                                                                key = "${prefix}-$firstImageKey"
+                                                            ),
+                                                            animatedVisibilityScope = animatedContentScope,
+                                                            placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
+                                                        )
+                                                    }
+                                                    .throttleClick(
+                                                        onLongClick = {
+                                                            dispatch(PictureAction.GetPictureInfo(index))
+                                                        }
+                                                    )
+                                                    .conditionally(platform.isDesktop()) {
+                                                        onRightClickDetect(index) { idx, offset ->
+                                                            contextMenuImageIndex = idx
+                                                            contextMenuOffset = offset
+                                                        }
+                                                    },
+                                                contentScale = ContentScale.FillWidth,
+                                                placeholder = placeholder,
+                                            )
+                                            if (platform.isDesktop()) {
+                                                ImageContextMenuDropdown(
+                                                    expanded = contextMenuImageIndex == index,
+                                                    offset = contextMenuOffset,
+                                                    originalUrl = getOriginalUrl(index),
+                                                    onDismiss = { contextMenuImageIndex = null },
+                                                    onDownload = { url ->
+                                                        pictureViewModel.downloadIllust(illust.id, index, url)
+                                                    },
+                                                    onSaveAs = { url ->
+                                                        pendingSaveAsUrl = url
+                                                        val (fileName, extension) = extractFileNameAndExtension(url)
+                                                        saveAsLauncher.launch(fileName, extension)
+                                                    },
+                                                    onCopyLink = { url -> copyToClipboard(url) }
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Box {
                                         AsyncImage(
                                             model = ImageRequest.Builder(LocalPlatformContext.current)
-                                                .data(it.imageUrls?.medium)
+                                                .data(illust.imageUrls.medium)
                                                 .placeholderMemoryCacheKey("image-${illust.id}-$index")
                                                 .build(),
                                             contentDescription = null,
@@ -384,39 +470,36 @@ internal fun PictureScreen(
                                                 }
                                                 .throttleClick(
                                                     onLongClick = {
-                                                        dispatch(PictureAction.GetPictureInfo(index))
+                                                        dispatch(PictureAction.GetPictureInfo(0))
                                                     }
-                                                ),
+                                                )
+                                                .conditionally(platform.isDesktop()) {
+                                                    onRightClickDetect(0) { idx, offset ->
+                                                        contextMenuImageIndex = idx
+                                                        contextMenuOffset = offset
+                                                    }
+                                                },
                                             contentScale = ContentScale.FillWidth,
                                             placeholder = placeholder,
                                         )
+                                        if (platform.isDesktop()) {
+                                            ImageContextMenuDropdown(
+                                                expanded = contextMenuImageIndex == 0,
+                                                offset = contextMenuOffset,
+                                                originalUrl = getOriginalUrl(0),
+                                                onDismiss = { contextMenuImageIndex = null },
+                                                onDownload = { url ->
+                                                    pictureViewModel.downloadIllust(illust.id, 0, url)
+                                                },
+                                                onSaveAs = { url ->
+                                                    pendingSaveAsUrl = url
+                                                    val (fileName, extension) = extractFileNameAndExtension(url)
+                                                    saveAsLauncher.launch(fileName, extension)
+                                                },
+                                                onCopyLink = { url -> copyToClipboard(url) }
+                                            )
+                                        }
                                     }
-                                } else {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(LocalPlatformContext.current)
-                                            .data(illust.imageUrls.medium)
-                                            .placeholderMemoryCacheKey("image-${illust.id}-$index")
-                                            .build(),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .conditionally(index == 0 && enableTransition) {
-                                                sharedElement(
-                                                    sharedTransitionScope.rememberSharedContentState(
-                                                        key = "${prefix}-$firstImageKey"
-                                                    ),
-                                                    animatedVisibilityScope = animatedContentScope,
-                                                    placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
-                                                )
-                                            }
-                                            .throttleClick(
-                                                onLongClick = {
-                                                    dispatch(PictureAction.GetPictureInfo(0))
-                                                }
-                                            ),
-                                        contentScale = ContentScale.FillWidth,
-                                        placeholder = placeholder,
-                                    )
                                 }
                             }
                         }
@@ -704,6 +787,72 @@ internal fun PictureScreen(
             },
             isBookmarked = isBookmarked
         )
+    }
+}
+
+private fun Modifier.onRightClickDetect(
+    index: Int,
+    onRightClick: (index: Int, offset: Offset) -> Unit
+): Modifier = pointerInput(Unit) {
+    awaitPointerEventScope {
+        while (true) {
+            val event = awaitPointerEvent()
+            if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
+                onRightClick(index, event.changes.firstOrNull()?.position ?: Offset.Zero)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ImageContextMenuDropdown(
+    expanded: Boolean,
+    offset: Offset,
+    originalUrl: String?,
+    onDismiss: () -> Unit,
+    onDownload: (url: String) -> Unit,
+    onSaveAs: (url: String) -> Unit,
+    onCopyLink: (url: String) -> Unit,
+) {
+    val density = LocalDensity.current
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismiss,
+        offset = with(density) {
+            DpOffset(offset.x.toDp(), offset.y.toDp())
+        }
+    ) {
+        DropdownMenuItem(
+            text = { Text(stringResource(RStrings.download)) },
+            onClick = {
+                onDismiss()
+                originalUrl?.let { onDownload(it) }
+            }
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(RStrings.save_as)) },
+            onClick = {
+                onDismiss()
+                originalUrl?.let { url -> onSaveAs(url) }
+            }
+        )
+        DropdownMenuItem(
+            text = { Text(stringResource(RStrings.copy_link)) },
+            onClick = {
+                onDismiss()
+                originalUrl?.let { onCopyLink(it) }
+            }
+        )
+    }
+}
+
+private fun extractFileNameAndExtension(url: String): Pair<String, String> {
+    val lastSegment = url.substringAfterLast("/").ifEmpty { url }
+    val dotIndex = lastSegment.lastIndexOf('.')
+    return if (dotIndex > 0) {
+        lastSegment.substring(0, dotIndex) to lastSegment.substring(dotIndex + 1)
+    } else {
+        lastSegment to "jpg"
     }
 }
 
