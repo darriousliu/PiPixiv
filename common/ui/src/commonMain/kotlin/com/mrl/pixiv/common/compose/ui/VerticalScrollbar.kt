@@ -1,17 +1,23 @@
 package com.mrl.pixiv.common.compose.ui
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -21,48 +27,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.dp
-import com.mrl.pixiv.common.util.isDesktop
-import com.mrl.pixiv.common.util.platform
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-
-private const val SCROLLBAR_WIDTH_DP = 10f
-private const val SCROLLBAR_CORNER_RADIUS_DP = 4f
-private const val SCROLLBAR_PADDING_DP = 2f
-private const val MIN_THUMB_SIZE_FRACTION = 0.05f
-private const val DESKTOP_ALPHA = 0.5f
-private const val SCROLLING_ALPHA = 0.7f
-
-private data class ScrollbarMetrics(
-    val thumbOffsetFraction: Float,
-    val thumbSizeFraction: Float,
-)
-
-private fun computeScrollbarMetrics(
-    scrollOffset: Float,
-    viewportHeight: Float,
-    totalContentHeight: Float,
-): ScrollbarMetrics {
-    if (totalContentHeight <= 0f || viewportHeight <= 0f || totalContentHeight <= viewportHeight) {
-        return ScrollbarMetrics(0f, 1f)
-    }
-    val thumbSizeFraction =
-        (viewportHeight / totalContentHeight).coerceIn(MIN_THUMB_SIZE_FRACTION, 1f)
-    if (thumbSizeFraction >= 1f) return ScrollbarMetrics(0f, 1f)
-    val maxScrollOffset = totalContentHeight - viewportHeight
-    val thumbOffsetFraction =
-        ((scrollOffset / maxScrollOffset) * (1f - thumbSizeFraction)).coerceIn(
-            0f,
-            1f - thumbSizeFraction
-        )
-    return ScrollbarMetrics(thumbOffsetFraction, thumbSizeFraction)
-}
 
 @Composable
 private fun ScrollbarImpl(
@@ -70,249 +40,177 @@ private fun ScrollbarImpl(
     isScrollInProgress: Boolean,
     onScrollToFraction: suspend (Float) -> Unit,
     modifier: Modifier = Modifier,
+    reverseLayout: Boolean = false,
+    style: ScrollbarStyle = LocalScrollbarStyle.current,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     if (metrics.thumbSizeFraction >= 1f) return
 
-    val isDesktop = remember { platform.isDesktop() }
     val scope = rememberCoroutineScope()
-    val thumbColor = LocalContentColor.current
 
-    var isDragging by remember { mutableStateOf(false) }
-
-    val targetAlpha = when {
-        isDesktop -> DESKTOP_ALPHA
-        isScrollInProgress || isDragging -> SCROLLING_ALPHA
-        else -> 0f
+    // 跟踪活动的拖动交互，以便在销毁时取消它，并通过 interactionSource 将其暴露给调用者（与 ScrollableState / Compose Desktop 行为一致）。
+    val dragInteraction = remember { mutableStateOf<DragInteraction.Start?>(null) }
+    DisposableEffect(interactionSource) {
+        onDispose {
+            dragInteraction.value?.let { interaction ->
+                interactionSource.tryEmit(DragInteraction.Cancel(interaction))
+                dragInteraction.value = null
+            }
+        }
     }
-    val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
-        animationSpec = tween(if (isScrollInProgress || isDragging || isDesktop) 150 else 800),
-        label = "scrollbar_alpha"
+
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val isDragging by remember { derivedStateOf { dragInteraction.value != null } }
+    val isHighlighted = isScrollInProgress || isDragging || isHovered
+
+    val color by animateColorAsState(
+        targetValue = if (isHighlighted) style.hoverColor else style.unhoverColor,
+        animationSpec = TweenSpec(durationMillis = style.hoverDurationMillis),
+        label = "scrollbar_color",
     )
 
-    // Smooth the thumb position during normal scroll to reduce jitter from unstable
-    // avgItemHeight estimates; use snap() during drag so the thumb tracks the finger exactly.
-    val smoothedThumbOffset by animateFloatAsState(
-        targetValue = metrics.thumbOffsetFraction,
+    // 计算显示空间的偏移量（已考虑 reverseLayout）并在正常滚动期间使其平滑；
+    // 在拖动期间即时更新，以便滑块准确跟踪手指。
+    val targetDisplayOffset = (if (reverseLayout) {
+        1f - metrics.thumbOffsetFraction - metrics.thumbSizeFraction
+    } else {
+        metrics.thumbOffsetFraction
+    }).coerceIn(0f, 1f)
+
+    val smoothedDisplayOffset by animateFloatAsState(
+        targetValue = targetDisplayOffset,
         animationSpec = if (isDragging) snap() else tween(durationMillis = 50),
-        label = "scrollbar_thumb_offset"
+        label = "scrollbar_thumb_offset",
     )
 
     val currentMetrics by rememberUpdatedState(metrics)
     val currentOnScroll by rememberUpdatedState(onScrollToFraction)
 
     var dragStartPointerY by remember { mutableFloatStateOf(0f) }
+    // dragStartThumbOffset 处于滚动比例空间（而非显示空间），以便可以一致地应用 reverseLayout 增量反转。
     var dragStartThumbOffset by remember { mutableFloatStateOf(0f) }
-    // Holds the latest drag-scroll job so each new event cancels the previous one,
-    // avoiding a queue of stale scrollToItem calls on fast drags.
     val scrollJobHolder = remember { object { var job: Job? = null } }
 
-    // Only intercept pointer events when the scrollbar is visible. On mobile the
-    // scrollbar is hidden (alpha == 0) when idle, so the modifier would create an
-    // invisible 8 dp hit-target on the right edge that steals taps/drags.
-    val isPointerEnabled = isDesktop || isScrollInProgress || isDragging
+    // 仅在滚动条处于交互状态时启用指针输入：这避免了在滚动条完全透明时在移动设备上创建不可见的点击目标。
+    val isPointerEnabled = isHovered || isScrollInProgress || isDragging
 
     Canvas(
         modifier = modifier
-            .width((SCROLLBAR_WIDTH_DP + SCROLLBAR_PADDING_DP * 2).dp)
+            .width(style.thickness)
             .fillMaxHeight()
-            .alpha(alpha)
+            .hoverable(interactionSource)
             .pointerInput(isPointerEnabled) {
                 if (!isPointerEnabled) return@pointerInput
                 detectVerticalDragGestures(
                     onDragStart = { offset ->
-                        isDragging = true
+                        val interaction = DragInteraction.Start()
+                        scope.launch { interactionSource.emit(interaction) }
+                        dragInteraction.value = interaction
                         dragStartPointerY = offset.y
                         dragStartThumbOffset = currentMetrics.thumbOffsetFraction
                     },
-                    onDragEnd = { isDragging = false },
-                    onDragCancel = { isDragging = false },
+                    onDragEnd = {
+                        dragInteraction.value?.let { interaction ->
+                            scope.launch { interactionSource.emit(DragInteraction.Stop(interaction)) }
+                        }
+                        dragInteraction.value = null
+                    },
+                    onDragCancel = {
+                        dragInteraction.value?.let { interaction ->
+                            scope.launch { interactionSource.emit(DragInteraction.Cancel(interaction)) }
+                        }
+                        dragInteraction.value = null
+                    },
                     onVerticalDrag = { change, _ ->
-                        val delta =
-                            (change.position.y - dragStartPointerY) / size.height
+                        val delta = (change.position.y - dragStartPointerY) / size.height
+                        // 在 reverseLayout 中取反 delta：向上拖动应增加滚动比例（移向反向列表的开头）。
+                        val adjustedDelta = if (reverseLayout) -delta else delta
                         val thumbSizeFraction = currentMetrics.thumbSizeFraction
                         val newThumbOffset =
-                            (dragStartThumbOffset + delta).coerceIn(
+                            (dragStartThumbOffset + adjustedDelta).coerceIn(
                                 0f,
-                                (1f - thumbSizeFraction).coerceAtLeast(0f)
+                                (1f - thumbSizeFraction).coerceAtLeast(0f),
                             )
                         val scrollFraction = if (thumbSizeFraction >= 1f) 0f
                         else (newThumbOffset / (1f - thumbSizeFraction)).coerceIn(0f, 1f)
-                        // Cancel the previous job before launching a new one so only
-                        // the latest drag position triggers a scroll (coalescing updates).
                         scrollJobHolder.job?.cancel()
                         scrollJobHolder.job = scope.launch { currentOnScroll(scrollFraction) }
-                    }
+                    },
                 )
             }
     ) {
-        if (alpha <= 0.01f) return@Canvas
+        if (color.alpha <= 0.01f) return@Canvas
 
-        val thumbWidth = SCROLLBAR_WIDTH_DP.dp.toPx()
-        val cornerRadius = SCROLLBAR_CORNER_RADIUS_DP.dp.toPx()
-        val paddingX = SCROLLBAR_PADDING_DP.dp.toPx()
-        val left = size.width - thumbWidth - paddingX
+        val minThumbPx = style.minimalHeight.toPx()
+        val thumbHeight = maxOf(size.height * currentMetrics.thumbSizeFraction, minThumbPx)
+        val thumbTop = size.height * smoothedDisplayOffset
 
-        val thumbHeight = size.height * currentMetrics.thumbSizeFraction
-        val thumbTop = size.height * smoothedThumbOffset
-
-        drawRoundRect(
-            color = thumbColor,
-            topLeft = Offset(left, thumbTop),
-            size = Size(thumbWidth, thumbHeight),
-            cornerRadius = CornerRadius(cornerRadius, cornerRadius),
+        val outline = style.shape.createOutline(
+            Size(size.width, thumbHeight),
+            layoutDirection,
+            this,
         )
+        translate(top = thumbTop) {
+            drawOutline(outline, color)
+        }
     }
 }
+
+/**
+ * 主要的 [VerticalScrollbar] 重载。接受任何 [ScrollbarState]，允许使用超出内置 lazy 变体的自定义状态实现。
+ *
+ * @param state 驱动滚动条的 [ScrollbarState]
+ * @param modifier 应用于此 composable 的 modifier
+ * @param reverseLayout 当列表以 `reverseLayout = true` 组合时设置为 `true`
+ * @param style 视觉样式；默认为 [LocalScrollbarStyle]
+ * @param interactionSource 接收 [DragInteraction] 事件的 [MutableInteractionSource]
+ */
+@Composable
+fun VerticalScrollbar(
+    state: ScrollbarState,
+    modifier: Modifier = Modifier,
+    reverseLayout: Boolean = false,
+    style: ScrollbarStyle = LocalScrollbarStyle.current,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+) {
+    val metrics by remember(state) { derivedStateOf { state.computeMetrics() } }
+
+    ScrollbarImpl(
+        metrics = metrics,
+        isScrollInProgress = state.isScrollInProgress,
+        onScrollToFraction = { fraction -> state.scrollToFraction(fraction) },
+        modifier = modifier,
+        reverseLayout = reverseLayout,
+        style = style,
+        interactionSource = interactionSource,
+    )
+}
+
+// ── 便捷重载 ─────────────────────────────────────────────────────────────
 
 @Composable
 fun VerticalScrollbar(
     state: LazyListState,
     modifier: Modifier = Modifier,
-) {
-    val metrics by remember {
-        derivedStateOf {
-            val info = state.layoutInfo
-            val visible = info.visibleItemsInfo
-            if (visible.isEmpty() || info.totalItemsCount == 0) {
-                return@derivedStateOf ScrollbarMetrics(0f, 1f)
-            }
-            val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size; sum.toFloat() / visible.size }
-            val viewportHeight =
-                (info.viewportEndOffset - info.viewportStartOffset).toFloat()
-            val totalHeight = info.totalItemsCount * avgItemHeight
-            computeScrollbarMetrics(
-                scrollOffset = state.firstVisibleItemIndex * avgItemHeight + state.firstVisibleItemScrollOffset,
-                viewportHeight = viewportHeight,
-                totalContentHeight = totalHeight,
-            )
-        }
-    }
-
-    ScrollbarImpl(
-        metrics = metrics,
-        isScrollInProgress = state.isScrollInProgress,
-        onScrollToFraction = { fraction ->
-            val info = state.layoutInfo
-            val totalItems = info.totalItemsCount
-            if (totalItems > 0) {
-                val avgItemHeight = run { val v = info.visibleItemsInfo; var sum = 0L; for (item in v) sum += item.size; sum.toFloat() / v.size }
-                val viewportHeight = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
-                val totalHeight = totalItems * avgItemHeight
-                val targetOffset = (fraction * (totalHeight - viewportHeight)).coerceAtLeast(0f)
-                val targetIndex = (targetOffset / avgItemHeight).toInt().coerceIn(0, totalItems - 1)
-                val subOffset = (targetOffset - targetIndex * avgItemHeight).toInt().coerceAtLeast(0)
-                state.scrollToItem(targetIndex, subOffset)
-            }
-        },
-        modifier = modifier,
-    )
-}
+    reverseLayout: Boolean = false,
+    style: ScrollbarStyle = LocalScrollbarStyle.current,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+) = VerticalScrollbar(rememberLazyListScrollbarState(state), modifier, reverseLayout, style, interactionSource)
 
 @Composable
 fun VerticalScrollbar(
     state: LazyGridState,
     modifier: Modifier = Modifier,
-) {
-    val metrics by remember {
-        derivedStateOf {
-            val info = state.layoutInfo
-            val visible = info.visibleItemsInfo
-            if (visible.isEmpty() || info.totalItemsCount == 0) {
-                return@derivedStateOf ScrollbarMetrics(0f, 1f)
-            }
-            val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size.height; sum.toFloat() / visible.size }
-            val viewportHeight =
-                (info.viewportEndOffset - info.viewportStartOffset).toFloat()
-            // Estimate column count: items in the first row share the same y-offset
-            val firstItemY = visible.first().offset.y
-            val colCount = visible.count { it.offset.y == firstItemY }.coerceAtLeast(1)
-            val totalRows = (info.totalItemsCount + colCount - 1) / colCount
-            val totalHeight = totalRows * avgItemHeight
-            val firstRow = state.firstVisibleItemIndex / colCount
-            val scrollOffset = firstRow * avgItemHeight + state.firstVisibleItemScrollOffset
-            computeScrollbarMetrics(
-                scrollOffset = scrollOffset,
-                viewportHeight = viewportHeight,
-                totalContentHeight = totalHeight,
-            )
-        }
-    }
-
-    ScrollbarImpl(
-        metrics = metrics,
-        isScrollInProgress = state.isScrollInProgress,
-        onScrollToFraction = { fraction ->
-            val info = state.layoutInfo
-            val totalItems = info.totalItemsCount
-            if (totalItems > 0) {
-                val visible = info.visibleItemsInfo
-                val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size.height; sum.toFloat() / visible.size }
-                val viewportHeight = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
-                val firstItemY = visible.first().offset.y
-                val colCount = visible.count { it.offset.y == firstItemY }.coerceAtLeast(1)
-                val totalRows = (totalItems + colCount - 1) / colCount
-                val totalHeight = totalRows * avgItemHeight
-                val targetOffset = (fraction * (totalHeight - viewportHeight)).coerceAtLeast(0f)
-                val targetRow = (targetOffset / avgItemHeight).toInt().coerceIn(0, totalRows - 1)
-                val subOffset = (targetOffset - targetRow * avgItemHeight).toInt().coerceAtLeast(0)
-                val targetIndex = (targetRow * colCount).coerceIn(0, totalItems - 1)
-                state.scrollToItem(targetIndex, subOffset)
-            }
-        },
-        modifier = modifier,
-    )
-}
+    reverseLayout: Boolean = false,
+    style: ScrollbarStyle = LocalScrollbarStyle.current,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+) = VerticalScrollbar(rememberLazyGridScrollbarState(state), modifier, reverseLayout, style, interactionSource)
 
 @Composable
 fun VerticalScrollbar(
     state: LazyStaggeredGridState,
     modifier: Modifier = Modifier,
-) {
-    val metrics by remember {
-        derivedStateOf {
-            val info = state.layoutInfo
-            val visible = info.visibleItemsInfo
-            if (visible.isEmpty() || info.totalItemsCount == 0) {
-                return@derivedStateOf ScrollbarMetrics(0f, 1f)
-            }
-            val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size.height; sum.toFloat() / visible.size }
-            val viewportHeight =
-                (info.viewportEndOffset - info.viewportStartOffset).toFloat()
-            // Estimate lane count from distinct x-offsets of visible items
-            val laneCount = visible.distinctBy { it.offset.x }.size.coerceAtLeast(1)
-            val estimatedRowCount = (info.totalItemsCount + laneCount - 1) / laneCount
-            val totalHeight = estimatedRowCount * avgItemHeight
-            val scrollOffset =
-                (state.firstVisibleItemIndex / laneCount) * avgItemHeight + state.firstVisibleItemScrollOffset
-            computeScrollbarMetrics(
-                scrollOffset = scrollOffset,
-                viewportHeight = viewportHeight,
-                totalContentHeight = totalHeight,
-            )
-        }
-    }
-
-    ScrollbarImpl(
-        metrics = metrics,
-        isScrollInProgress = state.isScrollInProgress,
-        onScrollToFraction = { fraction ->
-            val info = state.layoutInfo
-            val totalItems = info.totalItemsCount
-            if (totalItems > 0) {
-                val visible = info.visibleItemsInfo
-                val avgItemHeight = run { var sum = 0L; for (item in visible) sum += item.size.height; sum.toFloat() / visible.size }
-                val viewportHeight = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
-                val laneCount = visible.distinctBy { it.offset.x }.size.coerceAtLeast(1)
-                val estimatedRowCount = (totalItems + laneCount - 1) / laneCount
-                val totalHeight = estimatedRowCount * avgItemHeight
-                val targetOffset = (fraction * (totalHeight - viewportHeight)).coerceAtLeast(0f)
-                val targetRow = (targetOffset / avgItemHeight).toInt().coerceIn(0, estimatedRowCount - 1)
-                val subOffset = (targetOffset - targetRow * avgItemHeight).toInt().coerceAtLeast(0)
-                val targetIndex = (targetRow * laneCount).coerceIn(0, totalItems - 1)
-                state.scrollToItem(targetIndex, subOffset)
-            }
-        },
-        modifier = modifier,
-    )
-}
+    reverseLayout: Boolean = false,
+    style: ScrollbarStyle = LocalScrollbarStyle.current,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+) = VerticalScrollbar(rememberLazyStaggeredGridScrollbarState(state), modifier, reverseLayout, style, interactionSource)
