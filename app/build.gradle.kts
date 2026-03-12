@@ -15,6 +15,7 @@ if (project.findProperty("applyFirebasePlugins") == "true") {
 
 android {
     namespace = "com.mrl.pixiv"
+    ndkVersion = "28.2.13676358"
 
     lint {
         disable.add("Instantiatable")

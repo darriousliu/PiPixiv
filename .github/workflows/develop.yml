@@ -51,6 +51,9 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
+          sed -i -e '/firebase/d' -e '/google.services/d' {.,app}/build.gradle.kts
+          sed -i '/foojay/d' settings.gradle.kts
+          sed -i '/ProguardMapping/s/true/false/' app/build.gradle.kts
           ./gradlew assembleRelease -PapplyFirebasePlugins=false -Pdebug=false --stacktrace
 
       - name: Add Kotzilla Sdk
