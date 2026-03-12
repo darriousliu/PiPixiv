@@ -283,7 +283,7 @@ jobs:
           path: composeApp/build/archives/release/PiPixiv.ipa
 
   release:
-    needs: [ android, desktop-linux, desktop-windows, desktop-macos, ios ]
+    needs: [ android-foss, android-default, desktop-linux, desktop-windows, desktop-macos, ios ]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
