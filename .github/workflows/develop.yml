@@ -11,7 +11,52 @@ on:
         default: "Generate dev build"
 
 jobs:
-  android:
+  android-foss:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 25
+          cache: 'gradle'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Decode Keystore
+        env:
+          ENCODED_STRING: ${{ secrets.KEYSTORE_BASE_64 }}
+        run: |
+          echo $ENCODED_STRING > keystore-b64.txt
+          base64 -d keystore-b64.txt > pipixiv.jks
+
+      - name: Build Foss Release apk
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          sed -i -e '/firebase/d' -e '/google.services/d' {.,app}/build.gradle.kts
+          sed -i '/foojay/d' settings.gradle.kts
+          ./gradlew assembleRelease -PapplyFirebasePlugins=false -Pdebug=false --stacktrace
+
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-foss-apk
+          path: |
+            app/release/foss/*.apk
+
+  android-default:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -43,19 +88,6 @@ jobs:
         run: |
           echo $GOOGLE_SERVICE_JSON > app/google-services.json
 
-      - name: Build Foss Release apk
-        env:
-          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: |
-          sed -i -e '/firebase/d' -e '/google.services/d' {.,app}/build.gradle.kts
-          sed -i '/foojay/d' settings.gradle.kts
-          sed -i '/ProguardMapping/s/true/false/' app/build.gradle.kts
-          ./gradlew assembleRelease -PapplyFirebasePlugins=false -Pdebug=false --stacktrace
-
       - name: Add Kotzilla Sdk
         env:
           KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
@@ -77,9 +109,8 @@ jobs:
       - name: Upload Android Artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: android-apks
+          name: android-default-apk
           path: |
-            app/release/foss/*.apk
             app/release/default/*.apk
 
   desktop-linux:
@@ -285,7 +316,8 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            artifacts/android-apks/**/*.apk
+            artifacts/android-foss-apk/**/*.apk
+            artifacts/android-default-apk/**/*.apk
             artifacts/linux-artifacts/**/*.tar.gz
             artifacts/windows-artifacts/**/*.msi
             artifacts/macos-artifacts/**/*.dmg
