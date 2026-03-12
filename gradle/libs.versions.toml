@@ -36,7 +36,7 @@ compose-webview-multiplatform = { module = "io.github.kdroidfilter:composewebvie
 
 
 material = { module = "com.google.android.material:material", version.ref = "material" }
-mp_stools = { module = "net.sergeych:mp_stools", version.ref = "mp_stools" }
+mp_stools = { module = "io.github.darriousliu:mp_stools", version.ref = "mp_stools" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 coil3-bom = { module = "io.coil-kt.coil3:coil-bom", version.ref = "coil3" }
