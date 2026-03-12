@@ -1,20 +1,22 @@
-
 import com.android.build.api.artifact.SingleArtifact
 import com.mrl.pixiv.buildsrc.CopyApk
+import io.sentry.android.gradle.extensions.SentryPluginExtension
 import org.gradle.internal.extensions.stdlib.capitalized
 
 plugins {
     id("pixiv.android.application")
 //    alias(androidx.plugins.baselineprofile)
-    alias(libs.plugins.sentry.android)
+    alias(libs.plugins.sentry.android) apply false
 }
 if (project.findProperty("applyFirebasePlugins") == "true") {
+    pluginManager.apply(libs.plugins.sentry.android.get().pluginId)
     pluginManager.apply(libs.plugins.google.services.get().pluginId)
     pluginManager.apply(libs.plugins.firebase.crashlytics.get().pluginId)
 }
 
 android {
     namespace = "com.mrl.pixiv"
+    ndkVersion = "28.2.13676358"
 
     lint {
         disable.add("Instantiatable")
@@ -142,26 +144,26 @@ dependencies {
     implementation(libs.mmkv.kotlin)
 }
 
-sentry {
-    // Disables or enables debug log output, e.g. for for sentry-cli.
-    // Default is disabled.
-    debug.set(true)
-    org.set("pipixiv")
-    projectName.set("pipixiv")
-    authToken.set(System.getenv("SENTRY_AUTH_TOKEN"))
-    url = null
-    includeProguardMapping.set(true)
-    autoUploadProguardMapping.set(true)
-    uploadNativeSymbols.set(false)
-    autoUploadNativeSymbols.set(true)
-    includeNativeSources.set(false)
-    includeSourceContext.set(false)
-    tracingInstrumentation {
-        enabled.set(false)
+pluginManager.withPlugin(libs.plugins.sentry.android.get().pluginId) {
+    configure<SentryPluginExtension> {
+        debug.set(true)
+        org.set("pipixiv")
+        projectName.set("pipixiv")
+        authToken.set(System.getenv("SENTRY_AUTH_TOKEN"))
+        url = null
+        includeProguardMapping.set(true)
+        autoUploadProguardMapping.set(true)
+        uploadNativeSymbols.set(false)
+        autoUploadNativeSymbols.set(true)
+        includeNativeSources.set(false)
+        includeSourceContext.set(false)
+        tracingInstrumentation {
+            enabled.set(false)
+        }
+        autoInstallation {
+            enabled.set(false)
+        }
+        includeDependenciesReport.set(false)
+        telemetry.set(false)
     }
-    autoInstallation {
-        enabled.set(false)
-    }
-    includeDependenciesReport.set(false)
-    telemetry.set(false)
 }

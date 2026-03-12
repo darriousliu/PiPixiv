@@ -43,14 +43,6 @@ jobs:
         run: |
           echo $GOOGLE_SERVICE_JSON > app/google-services.json
 
-      - name: Add Kotzilla Sdk
-        env:
-          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
-          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
-        run: |
-          echo $KOTZILLA_SDK_JSON > common/analytics-default/kotzilla.json
-          sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
-
       - name: Build Foss Release apk
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
@@ -59,7 +51,18 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
-          ./gradlew assembleRelease -PapplyFirebasePlugins=false --stacktrace
+          sed -i -e '/firebase/d' -e '/google.services/d' {.,app}/build.gradle.kts
+          sed -i '/foojay/d' settings.gradle.kts
+          sed -i '/ProguardMapping/s/true/false/' app/build.gradle.kts
+          ./gradlew assembleRelease -PapplyFirebasePlugins=false -Pdebug=false --stacktrace
+
+      - name: Add Kotzilla Sdk
+        env:
+          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
+          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
+        run: |
+          echo $KOTZILLA_SDK_JSON > common/analytics-default/kotzilla.json
+          sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Build Default Release apk
         env:
@@ -69,7 +72,7 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
-          ./gradlew assembleRelease -PapplyFirebasePlugins=true --stacktrace
+          ./gradlew assembleRelease -PapplyFirebasePlugins=true -Pdebug=false --stacktrace
 
       - name: Upload Android Artifacts
         uses: actions/upload-artifact@v7
@@ -248,7 +251,7 @@ jobs:
           path: composeApp/build/archives/release/PiPixiv.ipa
 
   release:
-    needs: [android, desktop-linux, desktop-windows, desktop-macos, ios]
+    needs: [ android, desktop-linux, desktop-windows, desktop-macos, ios ]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
