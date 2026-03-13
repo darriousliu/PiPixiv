@@ -7,12 +7,12 @@ material3-navigation3 = "1.3.0-alpha09"
 viewmodel-navigation3 = "2.10.0"
 jetbrains-viewmodel-navigation3 = "2.10.0-beta01"
 # 1.5.0-alpha15开始依赖了1.11.0-alpha版本
-material3 = "1.5.0-alpha14"
+material3 = "1.5.0-alpha15"
 jetbrain-material3 = "1.10.0-alpha05"
 composeMultiplatform = "1.10.2"
 # 从1.3.0-alpha03开始，Material3 Adaptive使用的是1.11.0-alpha01版本的Compose Multiplatform
 # 等到1.11.0正式发布后，再升级
-jetbrains-material3-adaptive = "1.3.0-alpha02"
+jetbrains-material3-adaptive = "1.3.0-alpha06"
 jetbrains-material3-window-size = "1.10.0-alpha05"
 material-icons = "1.7.3"
 composeHotReload = "1.1.0-beta01"
