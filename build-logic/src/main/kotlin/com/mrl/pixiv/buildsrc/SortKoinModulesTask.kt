@@ -3,10 +3,10 @@ package com.mrl.pixiv.buildsrc
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.register
@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 fun Project.configureSortKoinKspGeneration() {
     val registerSortTask =
-        { variant: String, kspOutputDirPath: Provider<Directory>, kspTaskName: String, compileTaskName: String ->
+        { variant: String, kspOutputDirPaths: List<Provider<Directory>>, kspTaskName: String, compileTaskName: String ->
             val cap = variant.uppercaseFirstChar()
 
             val sortTaskName = "sort${cap}KoinModules"
@@ -27,11 +27,10 @@ fun Project.configureSortKoinKspGeneration() {
                         val sortTask = tasks.register<SortKoinModulesTask>(sortTaskName) {
                             group = "koin"
                             description = "Sort Koin KSP generated modules for variant: $variant"
-                            kspOutputDir.set(kspOutputDirPath)
+                            kspOutputDirs.from(kspOutputDirPaths)
 
                             onlyIf {
-                                val dir = kspOutputDir.orNull?.asFile
-                                dir != null && dir.exists()
+                                kspOutputDirs.files.any { it.exists() && it.isDirectory }
                             }
                         }
 
@@ -63,14 +62,21 @@ fun Project.configureSortKoinKspGeneration() {
                 if (mainCompilation != null) {
                     val platform = name
                     val cap = platform.uppercaseFirstChar()
+                    // KSP 可能输出到多个目录，如:
                     // build/generated/ksp/{platform}/{platform}Main/kotlin/org/koin/ksp/generated
-                    val kspOutputDirPath = layout.buildDirectory.dir(
-                        "generated/ksp/$platform/${platform}Main/kotlin/org/koin/ksp/generated"
+                    // build/generated/ksp/{platform}/commonMain/kotlin/org/koin/ksp/generated
+                    val kspOutputDirPaths = listOf(
+                        layout.buildDirectory.dir(
+                            "generated/ksp/$platform/${platform}Main/kotlin/org/koin/ksp/generated"
+                        ),
+                        layout.buildDirectory.dir(
+                            "generated/ksp/metadata/commonMain/kotlin/org/koin/ksp/generated"
+                        )
                     )
 
                     registerSortTask(
                         platform,
-                        kspOutputDirPath,
+                        kspOutputDirPaths,
                         if (platform == "android") "ksp${cap}Main" else "kspKotlin${cap}",
                         if (platform == "android") "compile${cap}Main" else "compileKotlin${cap}"
                     )
@@ -86,51 +92,54 @@ fun Project.configureSortKoinKspGeneration() {
 @DisableCachingByDefault(because = "KSP 生成文件不稳定，不启用任务缓存")
 abstract class SortKoinModulesTask : DefaultTask() {
 
-    // 📥 可选的输入目录（不存在时自动跳过）
-    @get:InputDirectory
-    abstract val kspOutputDir: DirectoryProperty
+    // 📥 可选的输入目录集合（不存在时自动跳过）
+    @get:InputFiles
+    abstract val kspOutputDirs: ConfigurableFileCollection
 
     @TaskAction
     fun sortModules() {
-        // 1️⃣ 检查目录是否存在
-        val outputDir = kspOutputDir.orNull?.asFile
+        val outputDirs = kspOutputDirs.files
+            .filter { it.exists() && it.isDirectory }
+            .sortedBy { it.absolutePath }
 
-        if (outputDir == null || !outputDir.exists()) {
-            logger.quiet("⏭️  KSP 输出目录不存在，跳过排序: ${outputDir?.absolutePath ?: "null"}")
+        if (outputDirs.isEmpty()) {
+            logger.quiet("⏭️  KSP 输出目录不存在，跳过排序")
             return  // 直接返回，不执行排序逻辑
         }
 
-        logger.quiet("  📂 处理目录: ${outputDir.absolutePath}")
+        outputDirs.forEach { outputDir ->
+            logger.quiet("  📂 处理目录: ${outputDir.absolutePath}")
 
-        // 2️⃣ 查找 .kt 文件
-        val moduleFiles = outputDir.listFiles { file ->
-            file.isFile && file.name.endsWith(".kt")
-        }?.sortedBy { it.name } ?: run {
-            logger.quiet("  ⚠️ 目录为空或不可读")
-            return
-        }
-
-        if (moduleFiles.isEmpty()) {
-            logger.quiet("  ⚠️ 未找到 .kt 文件，跳过排序")
-            return
-        }
-
-        logger.quiet("  📋 发现 ${moduleFiles.size} 个文件: ${moduleFiles.joinToString(", ") { it.name }}")
-
-        // 3️⃣ 执行排序
-        var sortedCount = 0
-        moduleFiles.forEach { moduleFile ->
-            val originalContent = moduleFile.readText(Charsets.UTF_8)
-            val sortedContent = sortKoinModuleContent(originalContent)
-
-            if (originalContent != sortedContent) {
-                moduleFile.writeText(sortedContent, Charsets.UTF_8)
-                logger.quiet("      ✅ Sorted: ${moduleFile.name}")
-                sortedCount++
+            // 2️⃣ 查找 .kt 文件
+            val moduleFiles = outputDir.listFiles { file ->
+                file.isFile && file.name.endsWith(".kt")
+            }?.sortedBy { it.name } ?: run {
+                logger.quiet("  ⚠️ 目录为空或不可读")
+                return@forEach
             }
-        }
 
-        logger.lifecycle("  📊 共排序 $sortedCount 个文件")
+            if (moduleFiles.isEmpty()) {
+                logger.quiet("  ⚠️ 未找到 .kt 文件，跳过排序")
+                return@forEach
+            }
+
+            logger.quiet("  📋 发现 ${moduleFiles.size} 个文件: ${moduleFiles.joinToString(", ") { it.name }}")
+
+            // 3️⃣ 执行排序
+            var sortedCount = 0
+            moduleFiles.forEach { moduleFile ->
+                val originalContent = moduleFile.readText(Charsets.UTF_8)
+                val sortedContent = sortKoinModuleContent(originalContent)
+
+                if (originalContent != sortedContent) {
+                    moduleFile.writeText(sortedContent, Charsets.UTF_8)
+                    logger.quiet("      ✅ Sorted: ${moduleFile.name}")
+                    sortedCount++
+                }
+            }
+
+            logger.lifecycle("  📊 [${outputDir.name}] 共排序 $sortedCount 个文件")
+        }
     }
 }
 
