@@ -77,8 +77,8 @@ import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.lightBlue
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
 import com.mrl.pixiv.common.coroutine.withIOContext
+import com.mrl.pixiv.common.data.AiType
 import com.mrl.pixiv.common.data.Illust
-import com.mrl.pixiv.common.data.IllustAiType
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.illust.BookmarkDetailTag
@@ -179,7 +179,7 @@ fun SquareIllustItem(
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (illust.illustAIType == IllustAiType.AiGeneratedWorks) {
+                if (illust.illustAIType == AiType.AiGeneratedWorks) {
                     AIBadge()
                 }
                 if (illust.type == Type.Ugoira) {
@@ -358,7 +358,7 @@ fun RectangleIllustItem(
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (illust.illustAIType == IllustAiType.AiGeneratedWorks) {
+                if (illust.illustAIType == AiType.AiGeneratedWorks) {
                     AIBadge()
                 }
                 if (illust.type == Type.Ugoira) {

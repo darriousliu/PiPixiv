@@ -116,7 +116,7 @@ data class Illust(
     val totalComments: Int? = null,
 
     @SerialName("illust_ai_type")
-    val illustAIType: IllustAiType = IllustAiType.Undefined,
+    val illustAIType: AiType = AiType.Undefined,
 
     @SerialName("illust_book_style")
     val illustBookStyle: Int = 0,
@@ -238,7 +238,7 @@ data class Novel(
     val isXRestricted: Boolean,
 
     @SerialName("novel_ai_type")
-    val novelAiType: Long
+    val novelAiType: AiType
 )
 
 
@@ -251,7 +251,7 @@ data class Series(
 
 @Serializable
 @Immutable
-enum class IllustAiType(val value: Int) {
+enum class AiType(val value: Int) {
     @SerialName("0")
     Undefined(0),
 
