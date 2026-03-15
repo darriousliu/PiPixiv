@@ -36,6 +36,7 @@ import com.mrl.pixiv.common.compose.FavoriteDualColor
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.HSpacer
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.util.allowRgb565
 import kotlin.time.Duration.Companion.seconds
@@ -72,8 +73,7 @@ fun NovelItem(
         )
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             // 左侧封面
             AsyncImage(
@@ -189,8 +189,8 @@ fun NovelItem(
             ) {
                 IconButton(
                     onClick = {
-                        val restrict = if (isBookmarked) {
-                            Restrict.PUBLIC
+                        val restrict = if (requireUserPreferenceValue.defaultPrivateBookmark) {
+                            Restrict.PRIVATE
                         } else {
                             Restrict.PUBLIC
                         }

@@ -105,7 +105,7 @@ import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
-import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
@@ -670,7 +670,7 @@ internal fun PictureScreen(
                     IconButton(
                         onClick = throttleClick {
                             val restrict =
-                                if (SettingRepository.userPreferenceFlow.value.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+                                if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
                             onBookmarkClick(restrict, null)
                         },
                         onLongClick = { showAdvancedBookmark = true },

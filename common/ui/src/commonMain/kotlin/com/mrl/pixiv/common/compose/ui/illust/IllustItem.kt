@@ -88,6 +88,7 @@ import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.allowRgb565
@@ -197,7 +198,8 @@ fun SquareIllustItem(
                 ) {
                     IconButton(
                         onClick = throttleClick {
-                            val restrict = if (SettingRepository.userPreferenceFlow.value.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+                            val restrict =
+                                if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
                             onBookmarkClick(restrict, null, false)
                         },
                         onLongClick = { showBottomSheet = true },
@@ -337,7 +339,8 @@ fun RectangleIllustItem(
                     }
                     IconButton(
                         onClick = throttleClick {
-                            val restrict = if (SettingRepository.userPreferenceFlow.value.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+                            val restrict =
+                                if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
                             onBookmarkClick(restrict, null, false)
                         },
                         onLongClick = onBookmarkLongClick,

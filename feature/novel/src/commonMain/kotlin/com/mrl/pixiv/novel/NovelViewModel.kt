@@ -1,21 +1,18 @@
 package com.mrl.pixiv.novel
 
 import androidx.compose.runtime.Stable
-import com.dokar.sonner.ToastType
 import com.mrl.pixiv.common.coroutine.withIOContext
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
-import com.mrl.pixiv.strings.bookmark_add_failed
-import com.mrl.pixiv.strings.bookmark_add_success
-import com.mrl.pixiv.strings.bookmark_delete_failed
-import com.mrl.pixiv.strings.bookmark_delete_success
 import com.mrl.pixiv.strings.load_failed
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.openFileSaver
@@ -139,42 +136,15 @@ class NovelViewModel(
     private fun toggleBookmark() {
         val novel = uiState.value.novel ?: return
         val currentBookmarkState = uiState.value.isBookmarked
+        if (currentBookmarkState) {
 
-        launchIO(
-            onError = { e ->
-                handleError(e)
-                ToastUtil.safeShortToast(
-                    if (currentBookmarkState) RStrings.bookmark_delete_failed else RStrings.bookmark_add_failed,
-                    e.message,
-                    type = ToastType.Error
-                )
-            }
-        ) {
-            if (currentBookmarkState) {
-                PixivRepository.postNovelBookmarkDelete(novel.id)
-                updateState {
-                    copy(
-                        isBookmarked = false,
-                        novel = novel.copy(
-                            isBookmarked = false,
-                            totalBookmarks = (novel.totalBookmarks - 1).coerceAtLeast(0)
-                        )
-                    )
-                }
-                ToastUtil.safeShortToast(RStrings.bookmark_delete_success, type = ToastType.Success)
-            } else {
-                PixivRepository.postNovelBookmarkAdd(novel.id, Restrict.PUBLIC)
-                updateState {
-                    copy(
-                        isBookmarked = true,
-                        novel = novel.copy(
-                            isBookmarked = true,
-                            totalBookmarks = novel.totalBookmarks + 1
-                        )
-                    )
-                }
-                ToastUtil.safeShortToast(RStrings.bookmark_add_success, type = ToastType.Success)
-            }
+            BookmarkState.deleteBookmarkNovel(novel.id)
+        } else {
+            val privateBookmark = requireUserPreferenceValue.defaultPrivateBookmark
+            BookmarkState.bookmarkNovel(
+                novel.id,
+                if (privateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+            )
         }
     }
 

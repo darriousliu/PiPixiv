@@ -39,7 +39,11 @@ object BookmarkState {
         }
     }
 
-    fun bookmarkNovel(id: Long, restrict: Restrict, tags: List<String>?) {
+    fun bookmarkNovel(
+        id: Long,
+        restrict: Restrict = Restrict.PUBLIC,
+        tags: List<String>? = null
+    ) {
         launchProcess(Dispatchers.IO) {
             PixivRepository.postNovelBookmarkAdd(id, restrict, tags)
             novelState[id] = true
