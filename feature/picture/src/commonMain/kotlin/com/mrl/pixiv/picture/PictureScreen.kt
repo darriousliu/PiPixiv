@@ -5,7 +5,6 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,7 +37,6 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -81,7 +79,6 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,21 +92,18 @@ import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
-import com.mrl.pixiv.common.compose.deepBlue
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.BlockSurface
+import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.illust.BottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Restrict
-import com.mrl.pixiv.common.data.Tag
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.kts.HSpacer
-import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
-import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
@@ -119,7 +113,6 @@ import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ShareUtil
-import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.adaptiveFileSize1
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
@@ -130,11 +123,8 @@ import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.picture.components.UgoiraPlayer
-import com.mrl.pixiv.strings.bookmark_add_success
 import com.mrl.pixiv.strings.cancel_user_blocked
-import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.copy_link
-import com.mrl.pixiv.strings.copy_to_clipboard
 import com.mrl.pixiv.strings.download
 import com.mrl.pixiv.strings.download_with_size
 import com.mrl.pixiv.strings.follow
@@ -1013,83 +1003,6 @@ private fun BottomMenu(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun TagItem(
-    tag: Tag,
-    onClick: () -> Unit,
-) {
-    var showCollectionDialog by rememberSaveable { mutableStateOf(false) }
-    Row(
-        modifier = Modifier
-            .background(
-                MaterialTheme.colorScheme.primaryContainer,
-                10f.round
-            )
-            .throttleClick(
-                onLongClick = {
-                    showCollectionDialog = true
-                },
-                onClick = onClick
-            )
-            .padding(horizontal = 10.dp, vertical = 2.5.dp),
-        horizontalArrangement = 5f.spaceBy,
-    ) {
-        Text(
-            text = "#" + tag.name,
-            modifier = Modifier,
-            color = MaterialTheme.colorScheme.primary,
-            style = TextStyle(fontSize = 13.sp, color = deepBlue),
-        )
-        Text(
-            text = tag.translatedName,
-            modifier = Modifier,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = TextStyle(fontSize = 13.sp)
-        )
-    }
-    if (showCollectionDialog) {
-        val indication = LocalIndication.current
-        val itemModifier = Modifier.padding(vertical = 8.dp)
-        AlertDialog(
-            onDismissRequest = { showCollectionDialog = false },
-            confirmButton = {},
-            title = {
-                Text(text = tag.name)
-            },
-            text = {
-                Column {
-                    Text(
-                        text = stringResource(RStrings.collection),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .throttleClick(
-                                indication = indication
-                            ) {
-                                BookmarkedTagRepository.addTag(tag)
-                                ToastUtil.safeShortToast(RStrings.bookmark_add_success)
-                                showCollectionDialog = false
-                            }
-                            .then(itemModifier)
-                    )
-                    Text(
-                        text = stringResource(RStrings.copy_to_clipboard),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .throttleClick(
-                                indication = indication
-                            ) {
-                                copyToClipboard(tag.name)
-                                showCollectionDialog = false
-                            }
-                            .then(itemModifier)
-                    )
-                }
-            }
-        )
     }
 }
 
