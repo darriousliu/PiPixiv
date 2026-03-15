@@ -33,7 +33,7 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -115,7 +115,7 @@ fun NovelScreen(
     // 沉浸逻辑: 滚动到正文区域时隐藏TopBar和FAB
     val isContentVisible by remember {
         derivedStateOf {
-            listState.layoutInfo.visibleItemsInfo.firstOrNull()?.key !is Int // index
+            listState.layoutInfo.visibleItemsInfo.firstOrNull()?.key is Int // index
         }
     }
     var manuallyShowTopBar by remember { mutableStateOf(false) }
@@ -131,7 +131,7 @@ fun NovelScreen(
         modifier = modifier.fillMaxSize(),
         floatingActionButton = {
             AnimatedVisibility(
-                visible = isContentVisible || manuallyShowTopBar,
+                visible = !isContentVisible || manuallyShowTopBar,
                 enter = slideInVertically(initialOffsetY = { it }),
                 exit = slideOutVertically(targetOffsetY = { it })
             ) {
@@ -178,7 +178,7 @@ fun NovelScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularWavyProgressIndicator()
                 }
             }
 
@@ -201,7 +201,7 @@ fun NovelScreen(
                         }
                     )
                     AnimatedVisibility(
-                        visible = isContentVisible || manuallyShowTopBar,
+                        visible = !isContentVisible || manuallyShowTopBar,
                         enter = slideInVertically(initialOffsetY = { -it }),
                         exit = slideOutVertically(targetOffsetY = { -it })
                     ) {
@@ -238,7 +238,7 @@ fun NovelScreen(
                                 }
                             },
                             windowInsets = TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Top),
-                            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = if (isContentVisible) Color.Unspecified else Color.Transparent)
                         )
                     }
                 }
