@@ -137,7 +137,6 @@ class NovelViewModel(
         val novel = uiState.value.novel ?: return
         val currentBookmarkState = uiState.value.isBookmarked
         if (currentBookmarkState) {
-
             BookmarkState.deleteBookmarkNovel(novel.id)
         } else {
             val privateBookmark = requireUserPreferenceValue.defaultPrivateBookmark
