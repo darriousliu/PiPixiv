@@ -2,7 +2,7 @@ package com.mrl.pixiv.common.data.user
 
 import com.mrl.pixiv.common.data.Restrict
 
-data class UserBookmarksIllustQuery(
+data class UserBookmarksQuery(
     val restrict: Restrict,
     val userId: Long,
     val tag: String? = null,
@@ -21,9 +21,3 @@ data class UserBookmarksIllustQuery(
         return map
     }
 }
-
-data class UserBookmarksNovelQuery(
-    val restrict: Restrict,
-    val userId: Long,
-    val tag: String = "",
-)

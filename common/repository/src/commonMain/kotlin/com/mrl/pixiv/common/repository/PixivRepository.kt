@@ -156,8 +156,9 @@ object PixivRepository : KoinComponent {
     suspend fun getUserBookmarksNovels(
         restrict: Restrict,
         userId: Long,
-        tag: String = ""
-    ) = apiApi.getUserBookmarksNovels(restrict.value, userId, tag)
+        tag: String? = null,
+        maxBookmarkId: Long? = null
+    ) = apiApi.getUserBookmarksNovels(restrict.value, userId, tag, maxBookmarkId)
 
     suspend fun loadMoreUserBookmarksNovel(queryMap: Map<String, String>) =
         apiApi.loadMoreUserBookmarksNovel(queryMap)

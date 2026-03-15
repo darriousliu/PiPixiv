@@ -38,6 +38,7 @@ import com.mrl.pixiv.common.compose.FavoriteDualColor
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.HSpacer
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.util.allowRgb565
 import kotlin.time.Duration.Companion.seconds
 
@@ -45,7 +46,6 @@ import kotlin.time.Duration.Companion.seconds
  * 小说列表项组件
  *
  * @param novel 小说数据
- * @param isBookmarked 是否已收藏
  * @param onNovelClick 点击小说时的回调
  * @param onBookmarkClick 点击收藏按钮时的回调
  * @param modifier 修饰符
@@ -53,12 +53,12 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun NovelItem(
     novel: Novel,
-    isBookmarked: Boolean,
     onNovelClick: (Long) -> Unit,
-    onBookmarkClick: (Restrict, List<String>?) -> Unit,
+    onBookmarkClick: (Boolean, Restrict, List<String>?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalPlatformContext.current
+    val isBookmarked = novel.isBookmark
 
     Card(
         modifier = modifier
@@ -198,7 +198,7 @@ fun NovelItem(
                         } else {
                             Restrict.PUBLIC
                         }
-                        onBookmarkClick(restrict, null)
+                        onBookmarkClick(isBookmarked, restrict, null)
                     }
                 ) {
                     Icon(

@@ -421,12 +421,11 @@ private fun NovelMode(
                 rankingList[index]?.let { novel ->
                     NovelItem(
                         novel = novel,
-                        isBookmarked = novel.isBookmarked,
                         onNovelClick = { novelId ->
                             navigateToNovelDetailScreen(novelId)
                         },
-                        onBookmarkClick = { restrict, tags ->
-                            if (novel.isBookmarked) {
+                        onBookmarkClick = { isBookmarked, restrict, tags ->
+                            if (isBookmarked) {
                                 BookmarkState.deleteBookmarkNovel(novel.id)
                             } else {
                                 BookmarkState.bookmarkNovel(novel.id, restrict, tags)
