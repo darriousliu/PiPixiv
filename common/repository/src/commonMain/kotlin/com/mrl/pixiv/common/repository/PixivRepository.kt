@@ -6,6 +6,7 @@ import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.auth.AuthTokenFieldReq
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
+import com.mrl.pixiv.common.data.search.SearchNovelQuery
 import com.mrl.pixiv.common.datasource.remote.createAuthApi
 import com.mrl.pixiv.common.datasource.remote.createPixivApi
 import com.mrl.pixiv.common.network.ApiClient
@@ -280,4 +281,91 @@ object PixivRepository : KoinComponent {
 
     suspend fun reportNovelComment(commentId: Long, topicId: Int, description: String) =
         apiApi.reportNovelComment(commentId, topicId, description)
+
+    // ==================== Novel Repository Methods ====================
+
+    suspend fun getUserNovels(
+        filter: Filter = Filter.ANDROID,
+        userId: Long,
+        offset: Int? = null
+    ) = apiApi.getUserNovels(filter.value, userId, offset)
+
+    suspend fun loadMoreUserNovels(queryMap: Map<String, String>) =
+        apiApi.loadMoreUserNovels(queryMap)
+
+    suspend fun getNovelSeries(
+        seriesId: Long,
+        filter: Filter = Filter.ANDROID,
+        offset: Int? = null
+    ) = apiApi.getNovelSeries(seriesId, filter.value, offset)
+
+    suspend fun loadMoreNovelSeries(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelSeries(queryMap)
+
+    suspend fun getNovelDetail(novelId: Long) = apiApi.getNovelDetail(novelId)
+
+    suspend fun getTrendingNovelTags(filter: Filter = Filter.ANDROID) =
+        apiApi.getTrendingNovelTags(filter.value)
+
+    suspend fun searchNovel(query: SearchNovelQuery) =
+        apiApi.searchNovel(
+            query.filter.value,
+            query.includeTranslatedTagResults,
+            query.mergePlainKeywordResults,
+            query.word,
+            query.sort.value,
+            query.searchTarget.value,
+            query.bookmarkNumMin,
+            query.bookmarkNumMax,
+            query.startDate,
+            query.endDate,
+            query.offset
+        )
+
+    suspend fun searchNovelNext(queryMap: Map<String, String>) =
+        apiApi.searchNovelNext(queryMap)
+
+    suspend fun getNovelRecommended(
+        filter: Filter = Filter.ANDROID,
+        includeRankingNovels: Boolean = true,
+        includePrivacyPolicy: Boolean = false
+    ) = apiApi.getNovelRecommended(filter.value, includeRankingNovels, includePrivacyPolicy)
+
+    suspend fun loadMoreNovelRecommended(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelRecommended(queryMap)
+
+    suspend fun getNovelRanking(
+        mode: String,
+        filter: Filter = Filter.ANDROID,
+        date: String? = null,
+        offset: Int? = null
+    ) = apiApi.getNovelRanking(mode, filter.value, date, offset)
+
+    suspend fun loadMoreNovelRanking(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelRanking(queryMap)
+
+    suspend fun getNovelNew(
+        filter: Filter = Filter.ANDROID,
+        offset: Int? = null
+    ) = apiApi.getNovelNew(filter.value, offset)
+
+    suspend fun loadMoreNovelNew(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelNew(queryMap)
+
+    suspend fun getFollowNovels(
+        restrict: Restrict = Restrict.ALL,
+        offset: Long? = null
+    ) = apiApi.getFollowNovels(restrict.value, offset)
+
+    suspend fun loadMoreFollowNovels(queryMap: Map<String, String>) =
+        apiApi.loadMoreFollowNovels(queryMap)
+
+    suspend fun postNovelBookmarkAdd(
+        novelId: Long,
+        restrict: Restrict = Restrict.PUBLIC,
+        tags: List<String>? = null
+    ) = apiApi.postNovelBookmarkAdd(novelId, restrict.value, tags)
+
+    suspend fun postNovelBookmarkDelete(novelId: Long) =
+        apiApi.postNovelBookmarkDelete(novelId)
 }

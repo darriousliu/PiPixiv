@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.data.setting
 
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.data.Constants.IMAGE_HOST
 import kotlinx.serialization.SerialName
@@ -20,6 +21,7 @@ data class UserPreference(
     val spanCountLandscape: Int = -1,
     val fileNameFormat: String = DEFAULT_FILE_NAME_FORMAT,
     val defaultPrivateBookmark: Boolean = false,
+    val appViewMode: AppViewMode = AppViewMode.ILLUST,
 ) {
     companion object {
         const val TEMPLATE_ILLUST_ID = "{illust_id}"

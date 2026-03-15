@@ -3,8 +3,13 @@ package com.mrl.pixiv.common.data.search
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Search(
+data class IllustSearch(
     val searchHistoryList: List<SearchHistory> = emptyList(),
+)
+
+@Serializable
+data class NovelSearch(
+    val novelSearchHistory: List<SearchHistory> = emptyList(),
 )
 
 @Serializable

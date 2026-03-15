@@ -11,6 +11,12 @@ import com.mrl.pixiv.common.data.illust.IllustBookmarkDetailResp
 import com.mrl.pixiv.common.data.illust.IllustDetailResp
 import com.mrl.pixiv.common.data.illust.IllustRecommendedResp
 import com.mrl.pixiv.common.data.mute.MutedResp
+import com.mrl.pixiv.common.data.novel.NovelDetailResp
+import com.mrl.pixiv.common.data.novel.NovelRankingResp
+import com.mrl.pixiv.common.data.novel.NovelRecommendedResp
+import com.mrl.pixiv.common.data.novel.NovelSeriesResp
+import com.mrl.pixiv.common.data.novel.SearchNovelResp
+import com.mrl.pixiv.common.data.novel.TrendingNovelTagsResp
 import com.mrl.pixiv.common.data.report.ReportTopicListResp
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchAutoCompleteResp
@@ -372,5 +378,122 @@ interface PixivApi {
         @Field("comment_id") commentId: Long,
         @Field("topic_id") topicId: Int,
         @Field("description") description: String,
+    ): EmptyResp
+
+    // ==================== Novel Endpoints ====================
+
+    @GET("v1/user/novels")
+    suspend fun getUserNovels(
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("user_id") userId: Long,
+        @Query("offset") offset: Int? = null,
+    ): UserNovelsResp
+
+    @GET("v1/user/novels")
+    suspend fun loadMoreUserNovels(
+        @QueryMap queryMap: Map<String, String>,
+    ): UserNovelsResp
+
+    @GET("v2/novel/series")
+    suspend fun getNovelSeries(
+        @Query("series_id") seriesId: Long,
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("offset") offset: Int? = null,
+    ): NovelSeriesResp
+
+    @GET("v2/novel/series")
+    suspend fun loadMoreNovelSeries(
+        @QueryMap queryMap: Map<String, String>,
+    ): NovelSeriesResp
+
+    @GET("v2/novel/detail")
+    suspend fun getNovelDetail(
+        @Query("novel_id") novelId: Long,
+    ): NovelDetailResp
+
+    @GET("v1/trending-tags/novel")
+    suspend fun getTrendingNovelTags(
+        @Query("filter") filter: String = Filter.ANDROID.value,
+    ): TrendingNovelTagsResp
+
+    @GET("v1/search/novel")
+    suspend fun searchNovel(
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("include_translated_tag_results") includeTranslatedTagResults: Boolean = true,
+        @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
+        @Query("word") word: String,
+        @Query("sort") sort: String = SearchSort.POPULAR_DESC.value,
+        @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
+        @Query("bookmark_num_min") bookmarkNumMin: Int? = null,
+        @Query("bookmark_num_max") bookmarkNumMax: Int? = null,
+        @Query("start_date") startDate: String? = null,
+        @Query("end_date") endDate: String? = null,
+        @Query("offset") offset: Int = 0,
+    ): SearchNovelResp
+
+    @GET("v1/search/novel")
+    suspend fun searchNovelNext(
+        @QueryMap queryMap: Map<String, String>,
+    ): SearchNovelResp
+
+    @GET("v1/novel/recommended")
+    suspend fun getNovelRecommended(
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("include_ranking_novels") includeRankingNovels: Boolean = true,
+        @Query("include_privacy_policy") includePrivacyPolicy: Boolean = false,
+    ): NovelRecommendedResp
+
+    @GET("v1/novel/recommended")
+    suspend fun loadMoreNovelRecommended(
+        @QueryMap queryMap: Map<String, String>,
+    ): NovelRecommendedResp
+
+    @GET("v1/novel/ranking")
+    suspend fun getNovelRanking(
+        @Query("mode") mode: String,
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("date") date: String? = null,
+        @Query("offset") offset: Int? = null,
+    ): NovelRankingResp
+
+    @GET("v1/novel/ranking")
+    suspend fun loadMoreNovelRanking(
+        @QueryMap queryMap: Map<String, String>,
+    ): NovelRankingResp
+
+    @GET("v1/novel/new")
+    suspend fun getNovelNew(
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("offset") offset: Int? = null,
+    ): UserNovelsResp
+
+    @GET("v1/novel/new")
+    suspend fun loadMoreNovelNew(
+        @QueryMap queryMap: Map<String, String>,
+    ): UserNovelsResp
+
+    @GET("v1/novel/follow")
+    suspend fun getFollowNovels(
+        @Query("restrict") restrict: String = Restrict.ALL.value,
+        @Query("offset") offset: Long? = null,
+    ): UserNovelsResp
+
+    @GET("v1/novel/follow")
+    suspend fun loadMoreFollowNovels(
+        @QueryMap queryMap: Map<String, String>,
+    ): UserNovelsResp
+
+    @FormUrlEncoded
+    @POST("v2/novel/bookmark/add")
+    suspend fun postNovelBookmarkAdd(
+        @Field("novel_id") novelId: Long,
+        @Field("restrict") restrict: String = Restrict.PUBLIC.value,
+        @Field("tags[]") tags: List<String>? = null,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v1/novel/bookmark/delete")
+    suspend fun postNovelBookmarkDelete(
+        @Field("novel_id") novelId: Long,
     ): EmptyResp
 }

@@ -61,6 +61,36 @@ enum class SearchTarget(val value: String) {
     KEYWORD("keyword");
 }
 
+data class SearchNovelQuery(
+    val filter: Filter = Filter.ANDROID,
+    val includeTranslatedTagResults: Boolean = true,
+    val mergePlainKeywordResults: Boolean = true,
+    val word: String,
+    val sort: SearchSort = SearchSort.POPULAR_DESC,
+    val searchTarget: SearchTarget = SearchTarget.PARTIAL_MATCH_FOR_TAGS,
+    val bookmarkNumMin: Int? = null,
+    val bookmarkNumMax: Int? = null,
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val offset: Int = 0,
+) {
+    fun toMap(): Map<String, String> {
+        val map = mutableMapOf<String, String>()
+        map["filter"] = filter.value
+        map["include_translated_tag_results"] = includeTranslatedTagResults.toString()
+        map["merge_plain_keyword_results"] = mergePlainKeywordResults.toString()
+        map["word"] = word
+        map["sort"] = sort.value
+        map["search_target"] = searchTarget.value
+        bookmarkNumMin?.let { map["bookmark_num_min"] = it.toString() }
+        bookmarkNumMax?.let { map["bookmark_num_max"] = it.toString() }
+        startDate?.let { map["start_date"] = it }
+        endDate?.let { map["end_date"] = it }
+        map["offset"] = offset.toString()
+        return map
+    }
+}
+
 data class SearchAutoCompleteQuery(
     val word: String,
     val mergePlainKeywordResults: Boolean = true,
