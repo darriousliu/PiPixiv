@@ -2,16 +2,22 @@ package com.mrl.pixiv.novel
 
 import androidx.compose.runtime.Stable
 import com.dokar.sonner.ToastType
+import com.mrl.pixiv.common.coroutine.withIOContext
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
+import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.openFileSaver
+import io.github.vinceglb.filekit.writeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.serialization.json.Json
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 
@@ -46,6 +52,10 @@ class NovelViewModel(
 ) : BaseMviViewModel<NovelState, NovelIntent>(
     initialState = NovelState()
 ), KoinComponent {
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     init {
         dispatch(NovelIntent.LoadNovelDetail(novelId))
@@ -70,13 +80,10 @@ class NovelViewModel(
             val response = PixivRepository.getNovelDetail(novelId)
             val novel = response.novel
 
-            // 使用caption作为示例文本(MVP版本)
-            val text = novel.caption.ifEmpty { "暂无内容" }
-            val paragraphs = text.split("\n").toImmutableList()
-
-            // TODO: 后续实现从webview HTML获取真实小说文本
-            // val novelTextResp = PixivRepository.getNovelText(novelId)
-            // val seriesNav = novelTextResp.seriesNavigation
+            val novelHtml = PixivRepository.getNovelContent(novelId)
+            val novelText = extractNovelData(novelHtml)
+            val text = novelText?.text.orEmpty()
+            val paragraphs = text.split("\n\n").toImmutableList()
 
             updateState {
                 copy(
@@ -85,8 +92,8 @@ class NovelViewModel(
                     novelText = text,
                     paragraphs = paragraphs,
                     isBookmarked = novel.isBookmarked,
-                    prevNovelId = null, // TODO: seriesNav?.prevNovel?.id
-                    nextNovelId = null, // TODO: seriesNav?.nextNovel?.id
+                    prevNovelId = novelText?.seriesNavigation?.prevNovel?.id,
+                    nextNovelId = novelText?.seriesNavigation?.nextNovel?.id,
                 )
             }
         } catch (e: Exception) {
@@ -95,6 +102,31 @@ class NovelViewModel(
             ToastUtil.safeShortToast("加载小说详情失败: ${e.message}")
         }
     }
+
+    private fun extractNovelData(html: String): NovelTextResp? {
+        // 正则解释：
+        // novel:\s* 匹配 `novel: `
+        // (\{.*?\}) 捕获组，非贪婪匹配花括号内的 JSON 内容
+        // \s*,\s*isOwnWork: 匹配结尾，确保截取到 `isOwnWork:` 前的逗号
+        // (?s) 即 DOT_MATCHES_ALL，让 . 能够匹配换行符
+        val regex = """novel:\s*(\{.*?\})\s*,\s*isOwnWork:""".toRegex()
+
+        val matchResult = regex.find(html)
+        val novelJsonString = matchResult?.groupValues?.get(1)
+
+        return if (!novelJsonString.isNullOrBlank()) {
+            try {
+                // 将截取到的 JSON 字符串反序列化为对象
+                json.decodeFromString<NovelTextResp>(novelJsonString)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        } else {
+            null
+        }
+    }
+
 
     private suspend fun toggleBookmark() {
         val novel = uiState.value.novel ?: return
@@ -155,8 +187,19 @@ class NovelViewModel(
         val novel = uiState.value.novel ?: return
         val text = uiState.value.novelText
 
-        // TODO: 实现txt文件导出
         // 这需要使用FileKit或平台特定API
-        ToastUtil.safeShortToast("导出功能开发中...", type = ToastType.Info)
+        launchUI {
+            val file = FileKit.openFileSaver(
+                suggestedName = novel.title,
+                extension = "txt"
+            )
+            if (file != null) {
+                withIOContext {
+                    file.writeString(text)
+                }
+            } else {
+                ToastUtil.safeShortToast("文件保存已取消", type = ToastType.Info)
+            }
+        }
     }
 }

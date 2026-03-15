@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -75,7 +73,6 @@ fun NovelItem(
     ) {
         Row(
             modifier = Modifier
-                .height(IntrinsicSize.Min)
                 .fillMaxWidth()
         ) {
             // 左侧封面
@@ -90,9 +87,8 @@ fun NovelItem(
                 contentDescription = novel.title,
                 modifier = Modifier
                     .width(80.dp)
-                    .fillMaxHeight()
+                    .height(IntrinsicSize.Min)
                     .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
-                contentScale = ContentScale.Crop
             )
 
             8.HSpacer

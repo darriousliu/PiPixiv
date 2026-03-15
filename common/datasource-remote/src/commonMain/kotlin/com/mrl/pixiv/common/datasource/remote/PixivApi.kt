@@ -510,4 +510,10 @@ interface PixivApi {
     suspend fun postNovelBookmarkDelete(
         @Field("novel_id") novelId: Long,
     ): EmptyResp
+
+    // https://app-api.pixiv.net/webview/v2/novel?id=22985815
+    @GET("webview/v2/novel")
+    suspend fun getNovelContent(
+        @Query("id") novelId: Long,
+    ): String
 }

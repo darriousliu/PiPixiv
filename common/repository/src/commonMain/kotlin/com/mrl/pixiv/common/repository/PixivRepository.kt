@@ -381,4 +381,6 @@ object PixivRepository : KoinComponent {
 
     suspend fun postNovelBookmarkDelete(novelId: Long) =
         apiApi.postNovelBookmarkDelete(novelId)
+
+    suspend fun getNovelContent(novelId: Long) = apiApi.getNovelContent(novelId)
 }

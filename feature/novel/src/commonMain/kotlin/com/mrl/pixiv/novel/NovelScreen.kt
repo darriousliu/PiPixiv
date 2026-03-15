@@ -67,6 +67,7 @@ import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.ui.TagItem
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.router.NavigationManager
@@ -190,6 +191,13 @@ fun NovelScreen(
                         listState = listState,
                         onContentClick = {
                             manuallyShowTopBar = !manuallyShowTopBar
+                        },
+                        onTagClick = { tag ->
+                            navigationManager.navigateToSearchResultScreen(
+                                searchWord = tag,
+                                isIdSearch = false,
+                                searchMode = AppViewMode.NOVEL
+                            )
                         }
                     )
                     AnimatedVisibility(
@@ -260,7 +268,8 @@ private fun NovelContent(
     state: NovelState,
     listState: LazyListState,
     modifier: Modifier = Modifier,
-    onContentClick: () -> Unit = {}
+    onContentClick: () -> Unit = {},
+    onTagClick: (String) -> Unit
 ) {
     val novel = state.novel ?: return
 
@@ -317,7 +326,7 @@ private fun NovelContent(
                     Icons.Rounded.Favorite,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 4.HSpacer
                 Text(
@@ -364,7 +373,9 @@ private fun NovelContent(
                 novel.tags.forEach { tag ->
                     TagItem(
                         tag = tag,
-                        onClick = { /* TODO: 搜索该标签 */ }
+                        onClick = {
+                            onTagClick(tag.name)
+                        }
                     )
                 }
             }
@@ -417,7 +428,7 @@ private fun NovelContent(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp)
                     .throttleClick(onClick = onContentClick)
             )
         }
