@@ -95,18 +95,13 @@ data class SearchNovelResp(
 @Immutable
 data class NovelTextResp(
     val text: String,
-
-    @SerialName("series_navigation")
     val seriesNavigation: SeriesNavigation? = null
 )
 
 @Serializable
 @Immutable
 data class SeriesNavigation(
-    @SerialName("next_novel")
     val nextNovel: SeriesNovel? = null,
-
-    @SerialName("prev_novel")
     val prevNovel: SeriesNovel? = null
 )
 
@@ -115,16 +110,9 @@ data class SeriesNavigation(
 data class SeriesNovel(
     val id: Long,
     val viewable: Boolean,
-
-    @SerialName("content_order")
     val contentOrder: String,
-
     val title: String,
-
-    @SerialName("cover_url")
     val coverUrl: String,
-
-    @SerialName("viewable_message")
     val viewableMessage: String? = null
 )
 
