@@ -48,6 +48,7 @@ import com.mrl.pixiv.history.HistoryScreen
 import com.mrl.pixiv.login.LoginOptionScreen
 import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
+import com.mrl.pixiv.novel.NovelScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
@@ -278,6 +279,11 @@ fun Navigation3MainGraph(
                         ReportScreen(
                             id = it.id,
                             type = it.type,
+                        )
+                    }
+                    entry<Destination.NovelDetail> {
+                        NovelScreen(
+                            novelId = it.novelId
                         )
                     }
                 }

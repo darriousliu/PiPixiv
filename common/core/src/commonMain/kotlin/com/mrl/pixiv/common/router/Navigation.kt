@@ -106,6 +106,11 @@ sealed class Destination : NavKey {
 
     @Serializable
     data class Report(val id: Long, val type: ReportType) : Destination()
+
+    @Serializable
+    data class NovelDetail(
+        val novelId: Long,
+    ) : Destination()
 }
 
 @Serializable

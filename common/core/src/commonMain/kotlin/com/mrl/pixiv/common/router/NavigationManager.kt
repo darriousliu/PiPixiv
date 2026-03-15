@@ -177,4 +177,8 @@ class NavigationManager(
     fun navigateToReportCommentScreen(commentId: Long, type: ReportType) {
         backStack.navigate(route = Destination.Report(commentId, type))
     }
+
+    fun navigateToNovelDetailScreen(novelId: Long) {
+        backStack.navigate(route = Destination.NovelDetail(novelId))
+    }
 }
