@@ -16,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
@@ -40,8 +39,7 @@ actual fun triggerLocaleChange(currentLanguage: String, labelDefault: String) {
     AppCompatDelegate.setApplicationLocales(locale)
 }
 
-@Composable
-actual fun LazyListScope.AppLinkItem() {
+actual fun LazyListScope.appLinkItem() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         item(KEY_DEFAULT_OPEN_LINK) {
             val context = LocalContext.current

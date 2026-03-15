@@ -193,6 +193,7 @@ fun SettingScreen(
                     }
                 )
             }
+            appLinkItem()
 
             item(key = KEY_DIVIDER_1) {
                 HorizontalDivider(modifier = Modifier.padding(8.dp))
@@ -434,5 +435,4 @@ expect fun triggerLocaleChange(
     labelDefault: String
 )
 
-@Composable
-expect fun LazyListScope.AppLinkItem()
+expect fun LazyListScope.appLinkItem()
