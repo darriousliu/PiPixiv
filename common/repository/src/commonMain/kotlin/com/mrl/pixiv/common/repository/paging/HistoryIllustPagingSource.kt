@@ -5,7 +5,7 @@ import androidx.paging.PagingState
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
-import com.mrl.pixiv.common.repository.util.filterNormal
+import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
 import org.koin.core.annotation.Factory
 
@@ -28,7 +28,7 @@ class HistoryIllustPagingSource : PagingSource<String, Illust>() {
             val illusts = if (requireUserPreferenceValue.isR18Enabled) {
                 resp.illusts.distinctBy { it.id }
             } else {
-                resp.illusts.distinctBy { it.id }.filterNormal()
+                resp.illusts.distinctBy { it.id }.filterNormalIllust()
             }
             LoadResult.Page(
                 data = illusts,

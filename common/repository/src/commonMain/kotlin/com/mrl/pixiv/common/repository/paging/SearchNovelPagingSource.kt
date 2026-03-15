@@ -2,77 +2,67 @@ package com.mrl.pixiv.common.repository.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.mrl.pixiv.common.data.Filter
-import com.mrl.pixiv.common.data.Illust
-import com.mrl.pixiv.common.data.search.SearchAiType
-import com.mrl.pixiv.common.data.search.SearchIllustQuery
+import com.mrl.pixiv.common.data.Novel
+import com.mrl.pixiv.common.data.search.SearchNovelQuery
 import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
-import com.mrl.pixiv.common.repository.util.filterNormalIllust
+import com.mrl.pixiv.common.repository.util.filterNormalNovel
 import com.mrl.pixiv.common.repository.util.queryParams
 
-class SearchIllustPagingSource(
-    private val query: SearchIllustQuery,
-    private val isPremium: Boolean,
+class SearchNovelPagingSource(
+    private val query: SearchNovelQuery,
     private val isIdSearch: Boolean
-) : PagingSource<SearchIllustQuery, Illust>() {
-    override fun getRefreshKey(state: PagingState<SearchIllustQuery, Illust>): SearchIllustQuery? {
+) : PagingSource<SearchNovelQuery, Novel>() {
+    override fun getRefreshKey(state: PagingState<SearchNovelQuery, Novel>): SearchNovelQuery? {
         return null
     }
 
-    override suspend fun load(params: LoadParams<SearchIllustQuery>): LoadResult<SearchIllustQuery, Illust> {
+    override suspend fun load(params: LoadParams<SearchNovelQuery>): LoadResult<SearchNovelQuery, Novel> {
         return try {
             if (isIdSearch) {
-                val illustId = query.word.toLongOrNull() ?: return LoadResult.Page(
+                val novelId = query.word.toLongOrNull() ?: return LoadResult.Page(
                     data = emptyList(),
                     prevKey = null,
                     nextKey = null
                 )
-                val resp = PixivRepository.getIllustDetail(illustId, Filter.ANDROID.value)
+                val resp = PixivRepository.getNovelDetail(novelId)
                 return LoadResult.Page(
-                    data = listOf(resp.illust),
+                    data = listOf(resp.novel),
                     prevKey = null,
                     nextKey = null
                 )
             }
             val resp = if (params.key == null) {
-                if (query.sort == SearchSort.POPULAR_DESC && !isPremium) {
-                    PixivRepository.searchPopularPreviewIllust(query)
-                } else {
-                    PixivRepository.searchIllust(query)
-                }
+                PixivRepository.searchNovel(query)
             } else {
-                PixivRepository.searchIllustNext(params.key!!.toMap())
+                PixivRepository.searchNovelNext(params.key!!.toMap())
             }
             val query = resp.nextUrl?.queryParams
-            val illusts = if (requireUserPreferenceValue.isR18Enabled) {
-                resp.illusts.distinctBy { it.id }
+            val novels = if (requireUserPreferenceValue.isR18Enabled) {
+                resp.novels.distinctBy { it.id }
             } else {
-                resp.illusts.distinctBy { it.id }.filterNormalIllust()
+                resp.novels.distinctBy { it.id }.filterNormalNovel()
             }
             if (query != null) {
-                val nextKey = SearchIllustQuery(
+                val nextKey = SearchNovelQuery(
                     word = query["word"] ?: "",
                     searchTarget = query["search_target"]
                         ?.let { SearchTarget.valueOf(it.uppercase()) }
                         ?: SearchTarget.PARTIAL_MATCH_FOR_TAGS,
                     sort = query["sort"]?.let { SearchSort.valueOf(it.uppercase()) }
                         ?: SearchSort.POPULAR_DESC,
-                    searchAiType = query["search_ai_type"]
-                        ?.let { type -> SearchAiType.entries.find { it.value == type.toInt() } }
-                        ?: SearchAiType.HIDE_AI,
                     offset = query["offset"]?.toInt() ?: 0,
                 )
                 LoadResult.Page(
-                    data = illusts,
+                    data = novels,
                     prevKey = params.key,
                     nextKey = nextKey
                 )
             } else {
                 LoadResult.Page(
-                    data = illusts,
+                    data = novels,
                     prevKey = params.key,
                     nextKey = null
                 )

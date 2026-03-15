@@ -3,34 +3,35 @@ package com.mrl.pixiv.common.repository.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.mrl.pixiv.common.data.Filter
-import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
-import com.mrl.pixiv.common.repository.util.filterNormalIllust
+import com.mrl.pixiv.common.repository.util.filterNormalNovel
 import com.mrl.pixiv.common.repository.util.queryParams
 
-class IllustRankingPagingSource(
+class NovelRankingPagingSource(
     private val mode: String,
     private val date: String? = null
-) : PagingSource<String, Illust>() {
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, Illust> {
+) : PagingSource<String, Novel>() {
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, Novel> {
         return try {
             val resp = if (params.key.isNullOrEmpty()) {
-                PixivRepository.getIllustRanking(
+                PixivRepository.getNovelRanking(
                     mode = mode,
                     filter = Filter.ANDROID,
-                    date = date
+                    date = date,
+                    offset = null
                 )
             } else {
-                PixivRepository.loadMoreIllustRanking(params.key?.queryParams ?: emptyMap())
+                PixivRepository.loadMoreNovelRanking(params.key?.queryParams ?: emptyMap())
             }
-            val illusts = if (requireUserPreferenceValue.isR18Enabled) {
-                resp.illusts.distinctBy { it.id }
+            val novels = if (requireUserPreferenceValue.isR18Enabled) {
+                resp.novels.distinctBy { it.id }
             } else {
-                resp.illusts.distinctBy { it.id }.filterNormalIllust()
+                resp.novels.distinctBy { it.id }.filterNormalNovel()
             }
             LoadResult.Page(
-                data = illusts,
+                data = novels,
                 prevKey = params.key,
                 nextKey = resp.nextUrl?.takeIf { it.isNotBlank() }
             )
@@ -39,7 +40,7 @@ class IllustRankingPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<String, Illust>): String? {
+    override fun getRefreshKey(state: PagingState<String, Novel>): String? {
         return null
     }
 }

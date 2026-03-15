@@ -7,7 +7,7 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.user.UserBookmarksIllustQuery
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
-import com.mrl.pixiv.common.repository.util.filterNormal
+import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
 
 class CollectionIllustPagingSource(
@@ -27,7 +27,7 @@ class CollectionIllustPagingSource(
             val illusts = if (requireUserPreferenceValue.isR18Enabled) {
                 resp.illusts.distinctBy { it.id }
             } else {
-                resp.illusts.distinctBy { it.id }.filterNormal()
+                resp.illusts.distinctBy { it.id }.filterNormalIllust()
             }
             if (query != null) {
                 val nextKey = UserBookmarksIllustQuery(
