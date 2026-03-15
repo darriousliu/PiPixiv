@@ -55,7 +55,6 @@ com.mrl.pixiv
 | Room | 本地数据库（插图历史、下载记录等） |
 | MMKV | 高性能 KV 存储（用户设置、Token 等） |
 | Kotlinx Serialization | JSON 序列化/反序列化 |
-| DataStore / Protobuf | 用户偏好设置 |
 
 ### 2.3 图片加载
 
@@ -180,28 +179,15 @@ data class XxxState(
     val items: ImmutableList<Item> = persistentListOf(),
 )
 
-// 尽量不要使用，而是直接在UI中调用函数
-sealed class XxxAction : ViewIntent {
-    data object LoadData : XxxAction()
-    data class UpdateFilter(val filter: Filter) : XxxAction()
-}
-
 // 可选：用于 UI 副作用（如导航事件）
 sealed class XxxEvent : SideEffect {
     data object NavigateToDetail : XxxEvent()
 }
 
 @KoinViewModel
-class XxxViewModel : BaseMviViewModel<XxxState, XxxAction>(
+class XxxViewModel : BaseMviViewModel<XxxState, ViewIntent>(
     initialState = XxxState()
 ) {
-    override suspend fun handleIntent(intent: XxxAction) {
-        when (intent) {
-            is XxxAction.LoadData -> loadData()
-            is XxxAction.UpdateFilter -> updateFilter(intent.filter)
-        }
-    }
-
     private fun loadData() {
         launchIO {
             updateState { copy(loading = true) }
