@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
@@ -38,11 +39,15 @@ import com.mrl.pixiv.collection.components.FilterDialog
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
-import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
+import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
+import com.mrl.pixiv.common.compose.ui.novel.NovelItem
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigationManager
@@ -60,6 +65,42 @@ private const val KEY_TOP_SPACE = "top_space"
 
 @Composable
 fun CollectionPage(
+    uid: Long,
+    refreshFlow: SharedFlow<LatestPage>,
+    modifier: Modifier = Modifier,
+    viewModel: CollectionViewModel = koinViewModel { parametersOf(uid) },
+    latestViewModel: LatestViewModel = koinViewModel(),
+    navigationManager: NavigationManager = koinInject(),
+) {
+    val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
+
+    when (appViewMode) {
+        AppViewMode.ILLUST -> {
+            CollectionIllustPage(
+                uid = uid,
+                refreshFlow = refreshFlow,
+                modifier = modifier,
+                viewModel = viewModel,
+                latestViewModel = latestViewModel,
+                navigationManager = navigationManager
+            )
+        }
+
+        AppViewMode.NOVEL -> {
+            CollectionNovelPage(
+                uid = uid,
+                refreshFlow = refreshFlow,
+                modifier = modifier,
+                viewModel = viewModel,
+                latestViewModel = latestViewModel,
+                navigationManager = navigationManager
+            )
+        }
+    }
+}
+
+@Composable
+private fun CollectionIllustPage(
     uid: Long,
     refreshFlow: SharedFlow<LatestPage>,
     modifier: Modifier = Modifier,
@@ -202,5 +243,108 @@ fun CollectionPage(
                 userBookmarksIllusts.refresh()
             }
         )
+    }
+}
+
+@Composable
+private fun CollectionNovelPage(
+    uid: Long,
+    refreshFlow: SharedFlow<LatestPage>,
+    modifier: Modifier = Modifier,
+    viewModel: CollectionViewModel = koinViewModel { parametersOf(uid) },
+    latestViewModel: LatestViewModel = koinViewModel(),
+    navigationManager: NavigationManager = koinInject(),
+) {
+    val userBookmarksNovels = viewModel.userBookmarksNovels.collectAsLazyPagingItems()
+    val pullRefreshState = rememberPullToRefreshState()
+    val lazyListState = latestViewModel.collectionNovelLazyListState
+    val state = viewModel.asState()
+    val isRefreshing = userBookmarksNovels.loadState.refresh is LoadState.Loading
+    val controller = remember {
+        keyboardScrollerController(lazyListState) {
+            lazyListState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
+
+    LaunchedEffect(Unit) {
+        refreshFlow.collect {
+            userBookmarksNovels.refresh()
+        }
+    }
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { userBookmarksNovels.refresh() },
+        modifier = modifier.fillMaxSize(),
+        state = pullRefreshState,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = pullRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
+    ) {
+        Box {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = lazyListState,
+                contentPadding = PaddingValues(vertical = 50.dp),
+            ) {
+                items(
+                    count = userBookmarksNovels.itemCount,
+                    key = userBookmarksNovels.itemIndexKey { index, item -> "${index}_${item.id}" }
+                ) { index ->
+                    userBookmarksNovels[index]?.let { novel ->
+                        NovelItem(
+                            novel = novel,
+                            isBookmarked = novel.isBookmarked,
+                            onNovelClick = { novelId ->
+                                navigationManager.navigateToNovelDetailScreen(novelId)
+                            },
+                            onBookmarkClick = { restrict, tags ->
+                                if (novel.isBookmarked) {
+                                    BookmarkState.deleteBookmarkNovel(novel.id)
+                                } else {
+                                    BookmarkState.bookmarkNovel(novel.id, restrict, tags)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+            VerticalScrollbar(
+                state = lazyListState,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
+            Row(
+                modifier = Modifier.align(Alignment.TopCenter),
+                horizontalArrangement = 8f.spaceBy
+            ) {
+                val options = listOf(
+                    RStrings.word_public to Restrict.PUBLIC,
+                    RStrings.word_private to Restrict.PRIVATE,
+                )
+                options.forEach { (label, restrict) ->
+                    FilterChip(
+                        selected = state.restrict == restrict,
+                        onClick = {
+                            viewModel.updateFilterTag(restrict, state.filterTag)
+                            userBookmarksNovels.refresh()
+                        },
+                        label = {
+                            Text(
+                                text = stringResource(label)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    )
+                }
+            }
+        }
     }
 }

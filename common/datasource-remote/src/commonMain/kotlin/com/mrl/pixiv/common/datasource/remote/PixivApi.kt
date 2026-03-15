@@ -16,7 +16,6 @@ import com.mrl.pixiv.common.data.novel.NovelRankingResp
 import com.mrl.pixiv.common.data.novel.NovelRecommendedResp
 import com.mrl.pixiv.common.data.novel.NovelSeriesResp
 import com.mrl.pixiv.common.data.novel.SearchNovelResp
-import com.mrl.pixiv.common.data.novel.TrendingNovelTagsResp
 import com.mrl.pixiv.common.data.report.ReportTopicListResp
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchAutoCompleteResp
@@ -188,6 +187,11 @@ interface PixivApi {
         @Query("tag") tag: String = "",
     ): UserNovelsResp
 
+    @GET("v1/user/bookmarks/novel")
+    suspend fun loadMoreUserBookmarksNovel(
+        @QueryMap queryMap: Map<String, String>,
+    ): UserNovelsResp
+
     @FormUrlEncoded
     @POST("v1/user/follow/add")
     suspend fun followUser(
@@ -266,6 +270,15 @@ interface PixivApi {
         @Query("word") word: String,
         @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
     ): SearchIllustResp
+
+    @GET("v1/search/popular-preview/novel")
+    suspend fun searchPopularPreviewNovel(
+        @Query("filter") filter: String = Filter.ANDROID.value,
+        @Query("include_translated_tag_results") includeTranslatedTagResults: Boolean = true,
+        @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
+        @Query("word") word: String,
+        @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
+    ): SearchNovelResp
 
     @GET("v3/illust/comments")
     suspend fun getIllustComments(
@@ -414,7 +427,7 @@ interface PixivApi {
     @GET("v1/trending-tags/novel")
     suspend fun getTrendingNovelTags(
         @Query("filter") filter: String = Filter.ANDROID.value,
-    ): TrendingNovelTagsResp
+    ): TrendingTagsResp
 
     @GET("v1/search/novel")
     suspend fun searchNovel(

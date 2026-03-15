@@ -221,6 +221,7 @@ fun FollowingScreenBody(
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
     lazyGridState: LazyGridState = rememberLazyGridState(),
+    showIllusts: Boolean = true,
 ) {
     val pullRefreshState = rememberPullToRefreshState()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
@@ -268,7 +269,8 @@ fun FollowingScreenBody(
                         navToPictureScreen = navToPictureScreen,
                         navToUserProfile = {
                             navToUserProfile(userPreview.user.id)
-                        }
+                        },
+                        showIllusts = showIllusts
                     )
                 }
             }
@@ -302,7 +304,8 @@ fun FollowingScreenBody(
                         navToPictureScreen = navToPictureScreen,
                         navToUserProfile = {
                             navToUserProfile(userPreview.user.id)
-                        }
+                        },
+                        showIllusts = showIllusts
                     )
                 }
             }
@@ -325,33 +328,36 @@ fun FollowingUserCard(
     isFollowed: Boolean,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     navToUserProfile: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showIllusts: Boolean = true
 ) {
     Card(modifier = modifier) {
-        Row {
-            val preview = illusts.take(PREVIEW_SIZE)
-            preview.forEachIndexed { index, it ->
-                val isBookmarked = it.isBookmark
-                SquareIllustItem(
-                    illust = it,
-                    isBookmarked = isBookmarked,
-                    onBookmarkClick = { restrict, tags, isEdit ->
-                        if (isEdit || !isBookmarked) {
-                            BookmarkState.bookmarkIllust(it.id, restrict, tags)
-                        } else {
-                            BookmarkState.deleteBookmarkIllust(it.id)
-                        }
-                    },
-                    navToPictureScreen = { prefix, enableTransition ->
-                        navToPictureScreen(illusts, index, prefix, enableTransition)
-                    },
-                    modifier = Modifier.weight(1f),
-                    elevation = 0.dp,
-                    shape = RectangleShape
-                )
-            }
-            if (preview.size < PREVIEW_SIZE) {
-                Spacer(modifier = Modifier.weight((PREVIEW_SIZE - preview.size).toFloat()))
+        if (showIllusts) {
+            Row {
+                val preview = illusts.take(PREVIEW_SIZE)
+                preview.forEachIndexed { index, it ->
+                    val isBookmarked = it.isBookmark
+                    SquareIllustItem(
+                        illust = it,
+                        isBookmarked = isBookmarked,
+                        onBookmarkClick = { restrict, tags, isEdit ->
+                            if (isEdit || !isBookmarked) {
+                                BookmarkState.bookmarkIllust(it.id, restrict, tags)
+                            } else {
+                                BookmarkState.deleteBookmarkIllust(it.id)
+                            }
+                        },
+                        navToPictureScreen = { prefix, enableTransition ->
+                            navToPictureScreen(illusts, index, prefix, enableTransition)
+                        },
+                        modifier = Modifier.weight(1f),
+                        elevation = 0.dp,
+                        shape = RectangleShape
+                    )
+                }
+                if (preview.size < PREVIEW_SIZE) {
+                    Spacer(modifier = Modifier.weight((PREVIEW_SIZE - preview.size).toFloat()))
+                }
             }
         }
         Row(

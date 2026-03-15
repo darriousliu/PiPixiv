@@ -1,6 +1,7 @@
 package com.mrl.pixiv.search.preview
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -37,13 +38,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.main.components.ViewModeToggleButton
 import com.mrl.pixiv.search.preview.components.TrendingItem
 import com.mrl.pixiv.strings.enter_keywords
 import com.mrl.pixiv.strings.popular_tags
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -59,6 +64,8 @@ fun SearchPreviewScreen(
     val lazyGridState = viewModel.lazyGridState
     val pullRefreshState = rememberPullToRefreshState()
     val scope = rememberCoroutineScope()
+    val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -91,6 +98,17 @@ fun SearchPreviewScreen(
                     )
                 }
             )
+        },
+        floatingActionButton = {
+            Column {
+                ViewModeToggleButton(
+                    currentMode = appViewMode,
+                    onModeChange = { mode ->
+                        viewModel.switchViewMode(mode)
+                        scope.launch { lazyGridState.scrollToItem(0) }
+                    }
+                )
+            }
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
@@ -136,7 +154,10 @@ fun SearchPreviewScreen(
                     TrendingItem(
                         trendingTag = tag,
                         onSearch = {
-                            navigationManager.navigateToSearchResultScreen(it)
+                            navigationManager.navigateToSearchResultScreen(
+                                searchWord = it,
+                                searchMode = appViewMode
+                            )
                             viewModel.dispatch(SearchPreviewAction.AddSearchHistory(it))
                         }
                     )

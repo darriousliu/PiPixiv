@@ -45,8 +45,11 @@ import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
+import com.mrl.pixiv.common.compose.ui.novel.NovelItem
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -55,7 +58,9 @@ import com.mrl.pixiv.follow.FollowingUserCard
 import com.mrl.pixiv.search.result.components.FilterBottomSheet
 import com.mrl.pixiv.search.result.components.SearchResultAppBar
 import com.mrl.pixiv.strings.illusts
+import com.mrl.pixiv.strings.novels
 import com.mrl.pixiv.strings.users
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -66,33 +71,52 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun SearchResultsScreen(
     searchWords: String,
-    isIdSearch: Boolean = false,
+    searchMode: AppViewMode,
     modifier: Modifier = Modifier,
-    viewModel: SearchResultViewModel = koinViewModel { parametersOf(searchWords, isIdSearch) },
+    isIdSearch: Boolean = false,
+    viewModel: SearchResultViewModel = koinViewModel {
+        parametersOf(
+            searchWords,
+            searchMode,
+            isIdSearch
+        )
+    },
     navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
     val searchResults = viewModel.searchResults.collectAsLazyPagingItems()
+    val novelSearchResults = viewModel.novelSearchResults.collectAsLazyPagingItems()
     val userSearchResults = viewModel.userSearchResults.collectAsLazyPagingItems()
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(true)
     val layoutParams = IllustGridDefaults.relatedLayoutParameters()
     val pullRefreshState = rememberPullToRefreshState()
+    val novelPullRefreshState = rememberPullToRefreshState()
     val userPullRefreshState = rememberPullToRefreshState()
     val isRefreshing = searchResults.loadState.refresh is LoadState.Loading
+    val isNovelRefreshing = novelSearchResults.loadState.refresh is LoadState.Loading
     val isUserRefreshing = userSearchResults.loadState.refresh is LoadState.Loading
 
     val illustsGridState = rememberLazyGridState()
+    val novelsListState = rememberLazyListState()
     val usersListState = rememberLazyListState()
 
     val pages = remember { SearchResultsPage.entries }
     val pagerState = rememberPagerState { SearchResultsPage.entries.size }
     val page = pages[pagerState.currentPage]
     val scope = rememberCoroutineScope()
-    val controller = remember(page) {
+    val controller = remember(page, searchMode) {
         when (page) {
-            SearchResultsPage.Illusts -> keyboardScrollerController(illustsGridState) {
-                illustsGridState.layoutInfo.viewportSize.height.toFloat()
+            SearchResultsPage.IllustsOrNovel -> {
+                when (searchMode) {
+                    AppViewMode.ILLUST -> keyboardScrollerController(illustsGridState) {
+                        illustsGridState.layoutInfo.viewportSize.height.toFloat()
+                    }
+
+                    AppViewMode.NOVEL -> keyboardScrollerController(novelsListState) {
+                        novelsListState.layoutInfo.viewportSize.height.toFloat()
+                    }
+                }
             }
 
             SearchResultsPage.Users -> keyboardScrollerController(usersListState) {
@@ -137,7 +161,14 @@ fun SearchResultsScreen(
                     Tab(
                         selected = pagerState.currentPage == 0,
                         onClick = { scope.launch { pagerState.animateScrollToPage(0) } },
-                        text = { Text(text = stringResource(RStrings.illusts)) }
+                        text = {
+                            Text(
+                                text = when (searchMode) {
+                                    AppViewMode.ILLUST -> stringResource(RStrings.illusts)
+                                    AppViewMode.NOVEL -> stringResource(RStrings.novels)
+                                }
+                            )
+                        }
                     )
                     Tab(
                         selected = pagerState.currentPage == 1,
@@ -149,7 +180,13 @@ fun SearchResultsScreen(
         },
         floatingActionButton = {
             val scrollState = when (pages[pagerState.currentPage]) {
-                SearchResultsPage.Illusts -> illustsGridState
+                SearchResultsPage.IllustsOrNovel -> {
+                    when (searchMode) {
+                        AppViewMode.ILLUST -> illustsGridState
+                        AppViewMode.NOVEL -> novelsListState
+                    }
+                }
+
                 SearchResultsPage.Users -> usersListState
             }
             BackToTopButton(
@@ -163,7 +200,13 @@ fun SearchResultsScreen(
                 },
                 onRefresh = {
                     when (pages[pagerState.currentPage]) {
-                        SearchResultsPage.Illusts -> searchResults.refresh()
+                        SearchResultsPage.IllustsOrNovel -> {
+                            when (searchMode) {
+                                AppViewMode.ILLUST -> searchResults.refresh()
+                                AppViewMode.NOVEL -> novelSearchResults.refresh()
+                            }
+                        }
+
                         SearchResultsPage.Users -> userSearchResults.refresh()
                     }
                 }
@@ -176,42 +219,105 @@ fun SearchResultsScreen(
             modifier = modifier.padding(it),
         ) { index ->
             when (pages[index]) {
-                SearchResultsPage.Illusts -> {
-                    PullToRefreshBox(
-                        isRefreshing = isRefreshing,
-                        onRefresh = { searchResults.refresh() },
-                        state = pullRefreshState,
-                        indicator = {
-                            PullToRefreshDefaults.LoadingIndicator(
-                                state = pullRefreshState,
+                SearchResultsPage.IllustsOrNovel -> {
+                    when (searchMode) {
+                        AppViewMode.ILLUST -> {
+                            PullToRefreshBox(
                                 isRefreshing = isRefreshing,
-                                modifier = Modifier.align(Alignment.TopCenter),
-                            )
-                        },
-                    ) {
-                        LazyVerticalGrid(
-                            modifier = Modifier.fillMaxSize(),
-                            state = illustsGridState,
-                            columns = layoutParams.gridCells,
-                            verticalArrangement = layoutParams.verticalArrangement,
-                            horizontalArrangement = layoutParams.horizontalArrangement,
-                            contentPadding = PaddingValues(
-                                start = 8.dp,
-                                top = 8.dp,
-                                end = 8.dp,
-                                bottom = WindowInsets.navigationBars.asPaddingValues()
-                                    .calculateBottomPadding()
-                            ),
-                        ) {
-                            illustGrid(
-                                illusts = searchResults,
-                                navToPictureScreen = navigationManager::navigateToPictureScreen,
-                            )
+                                onRefresh = { searchResults.refresh() },
+                                state = pullRefreshState,
+                                indicator = {
+                                    PullToRefreshDefaults.LoadingIndicator(
+                                        state = pullRefreshState,
+                                        isRefreshing = isRefreshing,
+                                        modifier = Modifier.align(Alignment.TopCenter),
+                                    )
+                                },
+                            ) {
+                                LazyVerticalGrid(
+                                    modifier = Modifier.fillMaxSize(),
+                                    state = illustsGridState,
+                                    columns = layoutParams.gridCells,
+                                    verticalArrangement = layoutParams.verticalArrangement,
+                                    horizontalArrangement = layoutParams.horizontalArrangement,
+                                    contentPadding = PaddingValues(
+                                        start = 8.dp,
+                                        top = 8.dp,
+                                        end = 8.dp,
+                                        bottom = WindowInsets.navigationBars.asPaddingValues()
+                                            .calculateBottomPadding()
+                                    ),
+                                ) {
+                                    illustGrid(
+                                        illusts = searchResults,
+                                        navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                    )
+                                }
+                                VerticalScrollbar(
+                                    state = illustsGridState,
+                                    modifier = Modifier.align(Alignment.CenterEnd)
+                                )
+                            }
                         }
-                        VerticalScrollbar(
-                            state = illustsGridState,
-                            modifier = Modifier.align(Alignment.CenterEnd)
-                        )
+
+                        AppViewMode.NOVEL -> {
+                            PullToRefreshBox(
+                                isRefreshing = isNovelRefreshing,
+                                onRefresh = { novelSearchResults.refresh() },
+                                state = novelPullRefreshState,
+                                indicator = {
+                                    PullToRefreshDefaults.LoadingIndicator(
+                                        state = novelPullRefreshState,
+                                        isRefreshing = isNovelRefreshing,
+                                        modifier = Modifier.align(Alignment.TopCenter),
+                                    )
+                                },
+                            ) {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    state = novelsListState,
+                                    contentPadding = PaddingValues(
+                                        start = 16.dp,
+                                        top = 10.dp,
+                                        end = 16.dp,
+                                        bottom = WindowInsets.navigationBars.asPaddingValues()
+                                            .calculateBottomPadding()
+                                    ),
+                                ) {
+                                    items(
+                                        count = novelSearchResults.itemCount,
+                                        key = novelSearchResults.itemIndexKey { index, item -> "${index}_${item.id}" }
+                                    ) { index ->
+                                        novelSearchResults[index]?.let { novel ->
+                                            NovelItem(
+                                                novel = novel,
+                                                isBookmarked = novel.isBookmarked,
+                                                onNovelClick = { novelId ->
+                                                    navigationManager.navigateToNovelDetailScreen(
+                                                        novelId
+                                                    )
+                                                },
+                                                onBookmarkClick = { restrict, tags ->
+                                                    if (novel.isBookmarked) {
+                                                        BookmarkState.deleteBookmarkNovel(novel.id)
+                                                    } else {
+                                                        BookmarkState.bookmarkNovel(
+                                                            novel.id,
+                                                            restrict,
+                                                            tags
+                                                        )
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                                VerticalScrollbar(
+                                    state = novelsListState,
+                                    modifier = Modifier.align(Alignment.CenterEnd)
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -246,7 +352,10 @@ fun SearchResultsScreen(
                             ) { index ->
                                 val userPreview = userSearchResults[index] ?: return@items
                                 FollowingUserCard(
-                                    illusts = userPreview.illusts.toImmutableList(),
+                                    illusts = when (searchMode) {
+                                        AppViewMode.ILLUST -> userPreview.illusts.toImmutableList()
+                                        AppViewMode.NOVEL -> persistentListOf()
+                                    },
                                     userName = userPreview.user.name,
                                     userId = userPreview.user.id,
                                     userAvatar = userPreview.user.profileImageUrls.medium,
@@ -276,7 +385,8 @@ fun SearchResultsScreen(
                 },
                 onUpdateFilter = {
                     viewModel.dispatch(SearchResultAction.UpdateFilter(it))
-                }
+                },
+                isNovelMode = searchMode == AppViewMode.NOVEL
             )
         }
     }

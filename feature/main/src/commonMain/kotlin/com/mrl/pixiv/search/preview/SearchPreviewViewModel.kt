@@ -1,10 +1,13 @@
 package com.mrl.pixiv.search.preview
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.search.TrendingTag
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import kotlinx.collections.immutable.ImmutableList
@@ -44,10 +47,18 @@ class SearchPreviewViewModel : BaseMviViewModel<SearchPreviewState, SearchPrevie
         SearchRepository.addSearchHistory(keyword)
     }
 
+    fun switchViewMode(mode: AppViewMode) {
+        SettingRepository.setAppViewMode(mode)
+        loadTrendingTags()
+    }
+
     private fun loadTrendingTags() {
         launchIO {
             updateState { copy(refreshing = true) }
-            val resp = PixivRepository.trendingTags(Filter.ANDROID)
+            val resp = when (requireUserPreferenceValue.appViewMode) {
+                AppViewMode.ILLUST -> PixivRepository.trendingTags(Filter.ANDROID)
+                AppViewMode.NOVEL -> PixivRepository.getTrendingNovelTags(Filter.ANDROID)
+            }
             updateState {
                 copy(trendingTags = resp.trendTags.toImmutableList(), refreshing = false)
             }

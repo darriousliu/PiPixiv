@@ -21,3 +21,9 @@ data class UserBookmarksIllustQuery(
         return map
     }
 }
+
+data class UserBookmarksNovelQuery(
+    val restrict: Restrict,
+    val userId: Long,
+    val tag: String = "",
+)

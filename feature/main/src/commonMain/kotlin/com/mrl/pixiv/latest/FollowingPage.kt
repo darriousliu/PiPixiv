@@ -3,12 +3,16 @@ package com.mrl.pixiv.latest
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
+import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.follow.FollowingScreenBody
 import com.mrl.pixiv.follow.FollowingViewModel
@@ -28,6 +32,7 @@ fun FollowingPage(
     val navigationManager = koinInject<NavigationManager>()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
     val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
+    val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
     val followingUsers = viewModel.publicFollowingPageSource.collectAsLazyPagingItems()
     val controller = remember(isWidthAtLeastMedium) {
         if (isWidthAtLeastMedium) {
@@ -54,5 +59,6 @@ fun FollowingPage(
         modifier = modifier,
         lazyListState = latestViewModel.followingLazyListState,
         lazyGridState = latestViewModel.followingLazyGirdState,
+        showIllusts = appViewMode == AppViewMode.ILLUST,
     )
 }

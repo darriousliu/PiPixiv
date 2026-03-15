@@ -1,12 +1,14 @@
 package com.mrl.pixiv.search
 
 import androidx.compose.runtime.Stable
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Tag
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
+import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import kotlinx.collections.immutable.ImmutableList
@@ -59,6 +61,9 @@ class SearchViewModel : BaseMviViewModel<SearchState, SearchAction>(
     var searchWords: String = ""
         private set
 
+    val appViewMode: AppViewMode
+        get() = SettingRepository.userPreferenceFlow.value.appViewMode
+
     override suspend fun handleIntent(intent: SearchAction) {
         when (intent) {
             is SearchAction.SearchAutoComplete -> searchAutoComplete(intent)
@@ -72,11 +77,17 @@ class SearchViewModel : BaseMviViewModel<SearchState, SearchAction>(
 
     private fun addSearchHistory(action: SearchAction.AddSearchHistory) {
         searchWords = action.searchWords
-        SearchRepository.addSearchHistory(action.searchWords)
+        when (appViewMode) {
+            AppViewMode.ILLUST -> SearchRepository.addSearchHistory(action.searchWords)
+            AppViewMode.NOVEL -> SearchRepository.addNovelSearchHistory(action.searchWords)
+        }
     }
 
     private fun deleteSearchHistory(action: SearchAction.DeleteSearchHistory) {
-        SearchRepository.deleteSearchHistory(action.searchWords)
+        when (appViewMode) {
+            AppViewMode.ILLUST -> SearchRepository.deleteSearchHistory(action.searchWords)
+            AppViewMode.NOVEL -> SearchRepository.deleteNovelSearchHistory(action.searchWords)
+        }
     }
 
     private fun searchAutoComplete(action: SearchAction.SearchAutoComplete) {
@@ -90,10 +101,20 @@ class SearchViewModel : BaseMviViewModel<SearchState, SearchAction>(
 
     fun addSearchIdHistory(searchId: String) {
         searchWords = searchId
-        SearchRepository.addSearchIdHistory(searchId)
+        when (appViewMode) {
+            AppViewMode.ILLUST -> SearchRepository.addSearchIdHistory(searchId)
+            AppViewMode.NOVEL -> SearchRepository.addNovelSearchIdHistory(searchId)
+        }
     }
 
     fun deleteSearchIdHistory(searchId: String) {
-        SearchRepository.removeSearchIdHistory(searchId)
+        when (appViewMode) {
+            AppViewMode.ILLUST -> SearchRepository.removeSearchIdHistory(searchId)
+            AppViewMode.NOVEL -> SearchRepository.removeNovelSearchIdHistory(searchId)
+        }
+    }
+
+    fun switchViewMode(mode: AppViewMode) {
+        SettingRepository.setAppViewMode(mode)
     }
 }

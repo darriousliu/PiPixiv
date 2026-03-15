@@ -8,8 +8,10 @@ import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.user.UserBookmarksIllustQuery
+import com.mrl.pixiv.common.data.user.UserBookmarksNovelQuery
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.paging.CollectionIllustPagingSource
+import com.mrl.pixiv.common.repository.paging.CollectionNovelPagingSource
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
@@ -56,6 +58,16 @@ class CollectionViewModel(
                 restrict = state.restrict,
                 userId = uid,
                 tag = state.filterTag
+            )
+        )
+    }.flow.cachedIn(viewModelScope)
+
+    val userBookmarksNovels = Pager(PagingConfig(pageSize = 30)) {
+        CollectionNovelPagingSource(
+            uid, UserBookmarksNovelQuery(
+                restrict = state.restrict,
+                userId = uid,
+                tag = state.filterTag ?: ""
             )
         )
     }.flow.cachedIn(viewModelScope)

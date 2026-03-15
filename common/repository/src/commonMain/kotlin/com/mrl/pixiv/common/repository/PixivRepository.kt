@@ -159,6 +159,9 @@ object PixivRepository : KoinComponent {
         tag: String = ""
     ) = apiApi.getUserBookmarksNovels(restrict.value, userId, tag)
 
+    suspend fun loadMoreUserBookmarksNovel(queryMap: Map<String, String>) =
+        apiApi.loadMoreUserBookmarksNovel(queryMap)
+
     suspend fun followUser(
         userId: Long,
         restrict: Restrict
@@ -216,6 +219,15 @@ object PixivRepository : KoinComponent {
 
     suspend fun searchPopularPreviewIllust(query: SearchIllustQuery) =
         apiApi.searchPopularPreviewIllust(
+            query.filter.value,
+            query.includeTranslatedTagResults,
+            query.mergePlainKeywordResults,
+            query.word,
+            query.searchTarget.value,
+        )
+
+    suspend fun searchPopularPreviewNovel(query: SearchNovelQuery) =
+        apiApi.searchPopularPreviewNovel(
             query.filter.value,
             query.includeTranslatedTagResults,
             query.mergePlainKeywordResults,

@@ -98,6 +98,7 @@ import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.illust.BottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
@@ -471,7 +472,7 @@ internal fun PictureScreen(
                     TagItem(
                         tag = tag,
                         onClick = {
-                            navToSearchResultScreen(tag.name, false)
+                            navToSearchResultScreen(tag.name, false, AppViewMode.ILLUST)
                             dispatch(PictureAction.AddSearchHistory(tag.name))
                         }
                     )

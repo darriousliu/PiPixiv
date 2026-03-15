@@ -13,6 +13,7 @@ import com.mrl.pixiv.common.repository.util.queryParams
 
 class SearchNovelPagingSource(
     private val query: SearchNovelQuery,
+    private val isPremium: Boolean,
     private val isIdSearch: Boolean
 ) : PagingSource<SearchNovelQuery, Novel>() {
     override fun getRefreshKey(state: PagingState<SearchNovelQuery, Novel>): SearchNovelQuery? {
@@ -35,7 +36,11 @@ class SearchNovelPagingSource(
                 )
             }
             val resp = if (params.key == null) {
-                PixivRepository.searchNovel(query)
+                if (query.sort == SearchSort.POPULAR_DESC && !isPremium) {
+                    PixivRepository.searchPopularPreviewNovel(query)
+                } else {
+                    PixivRepository.searchNovel(query)
+                }
             } else {
                 PixivRepository.searchNovelNext(params.key!!.toMap())
             }

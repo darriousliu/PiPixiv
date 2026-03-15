@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -33,6 +34,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,12 +53,20 @@ import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
+import com.mrl.pixiv.common.compose.ui.novel.NovelItem
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.HSpacer
+import com.mrl.pixiv.common.kts.VSpacer
+import com.mrl.pixiv.common.kts.itemIndexKey
+import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
+import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.main.components.ViewModeToggleButton
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.confirm
 import com.mrl.pixiv.strings.r18
@@ -84,6 +94,8 @@ fun RankingScreen(
 ) {
     val state = viewModel.asState()
     val scope = rememberCoroutineScope()
+    val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
+    val availableModes = state.availableModes(appViewMode)
 
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
 
@@ -101,9 +113,10 @@ fun RankingScreen(
             }
         }
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = viewModel.getRankingDate(state.currentMode)
-                ?.atTime(0, 0)
-                ?.toInstant(TimeZone.UTC)?.toEpochMilliseconds(),
+            initialSelectedDateMillis = when (appViewMode) {
+                AppViewMode.ILLUST -> viewModel.getIllustRankingDate(state.currentMode)
+                AppViewMode.NOVEL -> viewModel.getNovelRankingDate(state.currentMode)
+            }?.atTime(0, 0)?.toInstant(TimeZone.UTC)?.toEpochMilliseconds(),
             selectableDates = selectableDates
         )
         DatePickerDialog(
@@ -115,7 +128,7 @@ fun RankingScreen(
                             val date = Instant.fromEpochMilliseconds(millis)
                                 .toLocalDateTime(TimeZone.UTC)
                                 .date
-                            viewModel.changeDate(date)
+                            viewModel.changeDate(date, appViewMode)
                         }
                         showDatePicker = false
                     }
@@ -133,24 +146,26 @@ fun RankingScreen(
         }
     }
 
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { state.availableModes.size }
-    )
+    val pagerState = key(availableModes) {
+        rememberPagerState(
+            initialPage = 0,
+            pageCount = { availableModes.size }
+        )
+    }
 
     // Sync external mode selection (if any) with pager
-    LaunchedEffect(state.currentMode) {
-        val index = state.availableModes.indexOf(state.currentMode)
+    LaunchedEffect(state.currentMode, availableModes) {
+        val index = availableModes.indexOf(state.currentMode)
         if (index >= 0 && pagerState.currentPage != index) {
             pagerState.scrollToPage(index)
         }
     }
 
     // Sync pager scroll with mode selection
-    LaunchedEffect(pagerState) {
+    LaunchedEffect(pagerState, availableModes) {
         snapshotFlow { pagerState.currentPage }.collectLatest { page ->
-            if (page in state.availableModes.indices) {
-                val mode = state.availableModes[page]
+            if (page in availableModes.indices) {
+                val mode = availableModes[page]
                 if (state.currentMode != mode) {
                     viewModel.selectMode(mode)
                 }
@@ -194,12 +209,12 @@ fun RankingScreen(
                 Row {
                     PrimaryScrollableTabRow(
                         selectedTabIndex = pagerState.currentPage.coerceAtMost(
-                            state.availableModes.lastIndex.coerceAtLeast(0)
+                            availableModes.lastIndex.coerceAtLeast(0)
                         ),
                         modifier = Modifier.weight(1f),
                         edgePadding = 0.dp
                     ) {
-                        state.availableModes.forEachIndexed { index, mode ->
+                        availableModes.forEachIndexed { index, mode ->
                             Tab(
                                 selected = pagerState.currentPage == index,
                                 onClick = {
@@ -225,19 +240,31 @@ fun RankingScreen(
             }
         },
         floatingActionButton = {
-            val mode = state.availableModes.getOrNull(pagerState.currentPage)
-            if (mode != null) {
-                val lazyStaggeredGridState = viewModel.getLazyStaggeredGridState(mode)
-                val rankingList = viewModel.getRankingFlow(mode).collectAsLazyPagingItems()
-                BackToTopButton(
-                    visibility = lazyStaggeredGridState.canScrollBackward,
-                    modifier = Modifier,
-                    onBackToTop = {
-                        lazyStaggeredGridState.scrollToItem(0)
-                    },
-                    onRefresh = {
-                        rankingList.refresh()
+            Column {
+                val mode = availableModes.getOrNull(pagerState.currentPage)
+                if (mode != null) {
+                    val scrollToTop = suspend {
+                        when (appViewMode) {
+                            AppViewMode.ILLUST -> viewModel.getLazyStaggeredGridState(mode)
+                                .scrollToItem(0)
+
+                            AppViewMode.NOVEL -> viewModel.getLazyListState(mode).scrollToItem(0)
+                        }
                     }
+                    BackToTopButton(
+                        visibility = when (appViewMode) {
+                            AppViewMode.ILLUST -> viewModel.getLazyStaggeredGridState(mode).canScrollBackward
+                            AppViewMode.NOVEL -> viewModel.getLazyListState(mode).canScrollBackward
+                        },
+                        modifier = Modifier,
+                        onBackToTop = scrollToTop,
+                        onRefresh = { viewModel.refresh(mode) }
+                    )
+                }
+                8.VSpacer
+                ViewModeToggleButton(
+                    currentMode = appViewMode,
+                    onModeChange = viewModel::switchViewMode
                 )
             }
         },
@@ -249,52 +276,169 @@ fun RankingScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) { page ->
-            val mode = state.availableModes.getOrNull(page) ?: return@HorizontalPager
-            val rankingList = viewModel.getRankingFlow(mode).collectAsLazyPagingItems()
-            val lazyStaggeredGridState = viewModel.getLazyStaggeredGridState(mode)
-            val pullRefreshState = rememberPullToRefreshState()
-            val onRefresh = rankingList::refresh
-            val isRefreshing = rankingList.loadState.refresh is LoadState.Loading
-            val controller = remember {
-                keyboardScrollerController(lazyStaggeredGridState) {
-                    lazyStaggeredGridState.layoutInfo.viewportSize.height.toFloat()
-                }
-            }
+            val mode = availableModes.getOrNull(page) ?: return@HorizontalPager
 
-            KeyEventListener(controller)
-
-            PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                onRefresh = onRefresh,
-                modifier = Modifier.fillMaxSize(),
-                state = pullRefreshState,
-                indicator = {
-                    PullToRefreshDefaults.LoadingIndicator(
-                        state = pullRefreshState,
-                        isRefreshing = isRefreshing,
-                        modifier = Modifier.align(Alignment.TopCenter),
+            when (appViewMode) {
+                AppViewMode.ILLUST -> {
+                    IllustMode(
+                        mode = mode,
+                        navigateToPictureScreen = navigationManager::navigateToPictureScreen,
+                        viewModel = viewModel,
                     )
                 }
-            ) {
-                val layoutParams = RecommendGridDefaults.coverLayoutParameters()
-                LazyVerticalStaggeredGrid(
-                    state = lazyStaggeredGridState,
-                    contentPadding = PaddingValues(5.dp),
-                    columns = layoutParams.gridCells,
-                    verticalItemSpacing = layoutParams.verticalArrangement.spacing,
-                    horizontalArrangement = layoutParams.horizontalArrangement,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    illustGrid(
-                        illusts = rankingList,
-                        navToPictureScreen = navigationManager::navigateToPictureScreen
+
+                AppViewMode.NOVEL -> {
+                    NovelMode(
+                        mode = mode,
+                        navigateToNovelDetailScreen = navigationManager::navigateToNovelDetailScreen,
+                        viewModel = viewModel,
                     )
                 }
-                VerticalScrollbar(
-                    state = lazyStaggeredGridState,
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                )
             }
         }
+    }
+}
+
+@Composable
+private fun IllustMode(
+    mode: RankingMode,
+    navigateToPictureScreen: NavigateToHorizontalPictureScreen,
+    modifier: Modifier = Modifier,
+    viewModel: RankingViewModel = koinViewModel(),
+) {
+    val lazyStaggeredGridState = viewModel.getLazyStaggeredGridState(mode)
+    val rankingList = viewModel.getIllustRankingFlow(mode).collectAsLazyPagingItems()
+    val pullRefreshState = rememberPullToRefreshState()
+    val onRefresh = rankingList::refresh
+    val isRefreshing = rankingList.loadState.refresh is LoadState.Loading
+    val controller = remember {
+        keyboardScrollerController(lazyStaggeredGridState) {
+            lazyStaggeredGridState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
+
+    LaunchedEffect(mode) {
+        viewModel.sideEffect.collect { sideEffect ->
+            when (sideEffect) {
+                is RankingSideEffect.Refresh -> {
+                    if (sideEffect.mode == mode) {
+                        rankingList.refresh()
+                    }
+                }
+            }
+        }
+    }
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = modifier.fillMaxSize(),
+        state = pullRefreshState,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = pullRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
+    ) {
+        val layoutParams = RecommendGridDefaults.coverLayoutParameters()
+        LazyVerticalStaggeredGrid(
+            state = lazyStaggeredGridState,
+            contentPadding = PaddingValues(5.dp),
+            columns = layoutParams.gridCells,
+            verticalItemSpacing = layoutParams.verticalArrangement.spacing,
+            horizontalArrangement = layoutParams.horizontalArrangement,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            illustGrid(
+                illusts = rankingList,
+                navToPictureScreen = navigateToPictureScreen
+            )
+        }
+        VerticalScrollbar(
+            state = lazyStaggeredGridState,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        )
+    }
+}
+
+@Composable
+private fun NovelMode(
+    mode: RankingMode,
+    navigateToNovelDetailScreen: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: RankingViewModel = koinViewModel(),
+) {
+    val lazyListState = viewModel.getLazyListState(mode)
+    val rankingList = viewModel.getNovelRankingFlow(mode).collectAsLazyPagingItems()
+    val pullRefreshState = rememberPullToRefreshState()
+    val onRefresh = rankingList::refresh
+    val isRefreshing = rankingList.loadState.refresh is LoadState.Loading
+    val controller = remember {
+        keyboardScrollerController(lazyListState) {
+            lazyListState.layoutInfo.viewportSize.height.toFloat()
+        }
+    }
+
+    KeyEventListener(controller)
+
+    LaunchedEffect(mode) {
+        viewModel.sideEffect.collect { sideEffect ->
+            when (sideEffect) {
+                is RankingSideEffect.Refresh -> {
+                    if (sideEffect.mode == mode) {
+                        rankingList.refresh()
+                    }
+                }
+            }
+        }
+    }
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = modifier.fillMaxSize(),
+        state = pullRefreshState,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = pullRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = lazyListState,
+        ) {
+            items(
+                count = rankingList.itemCount,
+                key = rankingList.itemIndexKey { index, item -> "${index}_${item.id}" }
+            ) { index ->
+                rankingList[index]?.let { novel ->
+                    NovelItem(
+                        novel = novel,
+                        isBookmarked = novel.isBookmarked,
+                        onNovelClick = { novelId ->
+                            navigateToNovelDetailScreen(novelId)
+                        },
+                        onBookmarkClick = { restrict, tags ->
+                            if (novel.isBookmarked) {
+                                BookmarkState.deleteBookmarkNovel(novel.id)
+                            } else {
+                                BookmarkState.bookmarkNovel(novel.id, restrict, tags)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+        VerticalScrollbar(
+            state = lazyListState,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        )
     }
 }

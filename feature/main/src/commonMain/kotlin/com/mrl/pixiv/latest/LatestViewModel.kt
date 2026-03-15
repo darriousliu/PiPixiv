@@ -9,7 +9,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Restrict
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.paging.FollowNovelPagingSource
 import com.mrl.pixiv.common.repository.paging.IllustFollowingPagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.annotation.KoinViewModel
@@ -17,10 +20,16 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class LatestViewModel : ViewModel() {
     val pagerState = PagerState { LatestPage.entries.size }
+
+    // Illust states
     val trendingLazyGirdState = LazyStaggeredGridState()
     val collectionLazyGirdState = LazyStaggeredGridState()
     val followingLazyListState = LazyListState()
     val followingLazyGirdState = LazyGridState()
+
+    // Novel states
+    val trendingNovelLazyListState = LazyListState()
+    val collectionNovelLazyListState = LazyListState()
 
     val trendingFilter = MutableStateFlow(Restrict.ALL)
 
@@ -28,7 +37,15 @@ class LatestViewModel : ViewModel() {
         IllustFollowingPagingSource(restrict = trendingFilter.value)
     }.flow.cachedIn(viewModelScope)
 
+    val novelsFollowing = Pager(PagingConfig(pageSize = 30)) {
+        FollowNovelPagingSource(restrict = trendingFilter.value)
+    }.flow.cachedIn(viewModelScope)
+
     fun updateRestrict(restrict: Restrict) {
         trendingFilter.value = restrict
+    }
+
+    fun switchViewMode(mode: AppViewMode) {
+        SettingRepository.setAppViewMode(mode)
     }
 }

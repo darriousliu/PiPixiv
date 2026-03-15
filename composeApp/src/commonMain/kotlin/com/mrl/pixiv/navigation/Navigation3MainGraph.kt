@@ -120,9 +120,7 @@ fun Navigation3MainGraph(
                     }
 
                     // 详情页
-                    entry<Destination.ProfileDetail>(
-                        metadata = ListDetailSceneStrategy.detailPane()
-                    ) {
+                    entry<Destination.ProfileDetail> {
                         ProfileDetailScreen(
                             uid = it.userId
                         )
@@ -154,11 +152,10 @@ fun Navigation3MainGraph(
                     entry<Destination.SearchResults>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
-                        val searchWord = it.searchWords
-                        val isIdSearch = it.isIdSearch
                         SearchResultsScreen(
-                            searchWords = searchWord,
-                            isIdSearch = isIdSearch,
+                            searchWords = it.searchWords,
+                            searchMode = it.searchMode,
+                            isIdSearch = it.isIdSearch,
                         )
                     }
 
@@ -212,18 +209,17 @@ fun Navigation3MainGraph(
 
                     // 横向滑动作品详情页
                     entry<Destination.Picture>(
-                        metadata = ListDetailSceneStrategy.detailPane() +
-                                NavDisplay.transitionSpec {
-                                    scaleIn(
-                                        DefaultFloatAnimationSpec,
-                                        initialScale = 0.9f
-                                    ) + fadeIn(
-                                        DefaultFloatAnimationSpec
-                                    ) togetherWith scaleOut(
-                                        DefaultFloatAnimationSpec,
-                                        targetScale = 1.1f
-                                    ) + fadeOut(DefaultFloatAnimationSpec)
-                                } +
+                        metadata = NavDisplay.transitionSpec {
+                            scaleIn(
+                                DefaultFloatAnimationSpec,
+                                initialScale = 0.9f
+                            ) + fadeIn(
+                                DefaultFloatAnimationSpec
+                            ) togetherWith scaleOut(
+                                DefaultFloatAnimationSpec,
+                                targetScale = 1.1f
+                            ) + fadeOut(DefaultFloatAnimationSpec)
+                        } +
                                 NavDisplay.predictivePopTransitionSpec {
                                     scaleIn(
                                         DefaultFloatAnimationSpec,

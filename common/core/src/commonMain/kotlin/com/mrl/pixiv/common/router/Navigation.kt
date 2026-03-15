@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.navigation3.runtime.NavKey
+import com.mrl.pixiv.common.data.AppViewMode
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -54,6 +55,7 @@ sealed class Destination : NavKey {
     data class SearchResults(
         val searchWords: String,
         val isIdSearch: Boolean = false,
+        val searchMode: AppViewMode = AppViewMode.ILLUST,
     ) : Destination()
 
     @Serializable

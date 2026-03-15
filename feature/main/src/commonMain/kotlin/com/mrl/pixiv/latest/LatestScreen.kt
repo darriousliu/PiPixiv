@@ -28,8 +28,13 @@ import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.kts.VSpacer
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.main.components.ViewModeToggleButton
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.latest_tab_following
 import com.mrl.pixiv.strings.latest_tab_trend
@@ -51,13 +56,30 @@ fun LatestScreen(
     val refreshFlow = remember { MutableSharedFlow<LatestPage>() }
     val page = pages[pagerState.currentPage]
     val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
+    val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
     val scrollState = when (page) {
-        LatestPage.Trend -> viewModel.trendingLazyGirdState
-        LatestPage.Collection -> viewModel.collectionLazyGirdState
-        LatestPage.Following -> if (isWidthAtLeastMedium) {
-            viewModel.followingLazyGirdState
-        } else {
-            viewModel.followingLazyListState
+        LatestPage.Trend -> when (appViewMode) {
+            AppViewMode.ILLUST -> viewModel.trendingLazyGirdState
+            AppViewMode.NOVEL -> viewModel.trendingNovelLazyListState
+        }
+
+        LatestPage.Collection -> when (appViewMode) {
+            AppViewMode.ILLUST -> viewModel.collectionLazyGirdState
+            AppViewMode.NOVEL -> viewModel.collectionNovelLazyListState
+        }
+
+        LatestPage.Following -> when (appViewMode) {
+            AppViewMode.ILLUST -> if (isWidthAtLeastMedium) {
+                viewModel.followingLazyGirdState
+            } else {
+                viewModel.followingLazyListState
+            }
+
+            AppViewMode.NOVEL -> if (isWidthAtLeastMedium) {
+                viewModel.followingLazyGirdState
+            } else {
+                viewModel.followingLazyListState
+            }
         }
     }
 
@@ -72,22 +94,29 @@ fun LatestScreen(
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            BackToTopButton(
-                visibility = scrollState.canScrollBackward,
-                modifier = Modifier,
-                onBackToTop = {
-                    when (scrollState) {
-                        is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
-                        is LazyGridState -> scope.launch { scrollState.scrollToItem(0) }
-                        is LazyStaggeredGridState -> scope.launch { scrollState.scrollToItem(0) }
+            Column {
+                BackToTopButton(
+                    visibility = scrollState.canScrollBackward,
+                    modifier = Modifier,
+                    onBackToTop = {
+                        when (scrollState) {
+                            is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
+                            is LazyGridState -> scope.launch { scrollState.scrollToItem(0) }
+                            is LazyStaggeredGridState -> scope.launch { scrollState.scrollToItem(0) }
+                        }
+                    },
+                    onRefresh = {
+                        scope.launch {
+                            refreshFlow.emit(pages[pagerState.currentPage])
+                        }
                     }
-                },
-                onRefresh = {
-                    scope.launch {
-                        refreshFlow.emit(pages[pagerState.currentPage])
-                    }
-                }
-            )
+                )
+                8.VSpacer
+                ViewModeToggleButton(
+                    currentMode = appViewMode,
+                    onModeChange = viewModel::switchViewMode
+                )
+            }
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
