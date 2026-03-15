@@ -7,10 +7,16 @@ import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import com.mrl.pixiv.strings.bookmark_add_failed
+import com.mrl.pixiv.strings.bookmark_add_success
+import com.mrl.pixiv.strings.bookmark_delete_failed
+import com.mrl.pixiv.strings.bookmark_delete_success
+import com.mrl.pixiv.strings.load_failed
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.writeString
@@ -48,7 +54,7 @@ sealed class NovelIntent : ViewIntent {
 
 @KoinViewModel
 class NovelViewModel(
-    private val novelId: Long,
+    novelId: Long,
 ) : BaseMviViewModel<NovelState, NovelIntent>(
     initialState = NovelState()
 ), KoinComponent {
@@ -74,9 +80,15 @@ class NovelViewModel(
         }
     }
 
-    private suspend fun loadNovelDetail(novelId: Long) {
-        updateState { copy(loading = true) }
-        try {
+    private fun loadNovelDetail(novelId: Long) {
+        launchIO(
+            onError = { e ->
+                updateState { copy(loading = false) }
+                handleError(e)
+                ToastUtil.safeShortToast(RStrings.load_failed, e.message)
+            }
+        ) {
+            updateState { copy(loading = true) }
             val response = PixivRepository.getNovelDetail(novelId)
             val novel = response.novel
 
@@ -96,10 +108,6 @@ class NovelViewModel(
                     nextNovelId = novelText?.seriesNavigation?.nextNovel?.id,
                 )
             }
-        } catch (e: Exception) {
-            updateState { copy(loading = false) }
-            handleError(e)
-            ToastUtil.safeShortToast("加载小说详情失败: ${e.message}")
         }
     }
 
@@ -128,11 +136,20 @@ class NovelViewModel(
     }
 
 
-    private suspend fun toggleBookmark() {
+    private fun toggleBookmark() {
         val novel = uiState.value.novel ?: return
         val currentBookmarkState = uiState.value.isBookmarked
 
-        try {
+        launchIO(
+            onError = { e ->
+                handleError(e)
+                ToastUtil.safeShortToast(
+                    if (currentBookmarkState) RStrings.bookmark_delete_failed else RStrings.bookmark_add_failed,
+                    e.message,
+                    type = ToastType.Error
+                )
+            }
+        ) {
             if (currentBookmarkState) {
                 PixivRepository.postNovelBookmarkDelete(novel.id)
                 updateState {
@@ -144,7 +161,7 @@ class NovelViewModel(
                         )
                     )
                 }
-                ToastUtil.safeShortToast("已取消收藏", type = ToastType.Success)
+                ToastUtil.safeShortToast(RStrings.bookmark_delete_success, type = ToastType.Success)
             } else {
                 PixivRepository.postNovelBookmarkAdd(novel.id, Restrict.PUBLIC)
                 updateState {
@@ -156,11 +173,8 @@ class NovelViewModel(
                         )
                     )
                 }
-                ToastUtil.safeShortToast("收藏成功", type = ToastType.Success)
+                ToastUtil.safeShortToast(RStrings.bookmark_add_success, type = ToastType.Success)
             }
-        } catch (e: Exception) {
-            handleError(e)
-            ToastUtil.safeShortToast("操作失败: ${e.message}", type = ToastType.Error)
         }
     }
 
@@ -180,7 +194,6 @@ class NovelViewModel(
         val novel = uiState.value.novel ?: return
         val url = "https://www.pixiv.net/novel/show.php?id=${novel.id}"
         ShareUtil.shareText(url)
-        ToastUtil.safeShortToast("已复制链接", type = ToastType.Success)
     }
 
     private fun exportToTxt() {
@@ -197,8 +210,6 @@ class NovelViewModel(
                 withIOContext {
                     file.writeString(text)
                 }
-            } else {
-                ToastUtil.safeShortToast("文件保存已取消", type = ToastType.Info)
             }
         }
     }
