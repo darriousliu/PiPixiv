@@ -57,3 +57,15 @@ fun keyboardScrollerController(
         }
     }
 }
+
+@Composable
+fun EscBackHandler(
+    onBack: () -> Unit,
+) {
+    val updatedOnBack by rememberUpdatedState(onBack)
+    KeyEventListener {
+        if (it.key == Key.Escape && it.type == KeyEventType.KeyUp) {
+            updatedOnBack()
+        }
+    }
+}

@@ -36,6 +36,7 @@ import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.LocalToaster
+import com.mrl.pixiv.common.compose.listener.EscBackHandler
 import com.mrl.pixiv.common.repository.IllustCacheRepo
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
@@ -84,6 +85,10 @@ fun Navigation3MainGraph(
 
     HandleDeeplink(navigationManager)
     LogScreen(navigationManager)
+    EscBackHandler {
+        if (navigationManager.backStack.isEmpty()) return@EscBackHandler
+        navigationManager.popBackStack()
+    }
     SharedTransitionLayout {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,
