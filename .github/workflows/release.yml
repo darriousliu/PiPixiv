@@ -107,6 +107,11 @@ jobs:
         run: |
           ./gradlew assembleRelease -PapplyFirebasePlugins=true -Pdebug=false --stacktrace
 
+      - name: Upload Kotzilla Mapping Files
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          ./gradlew uploadMappingFileRelease
+
       - name: Upload Android Artifacts
         uses: actions/upload-artifact@v7
         with:

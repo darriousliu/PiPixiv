@@ -31,6 +31,8 @@ kotlin {
 
 kotzilla {
     versionName = properties["versionName"]!!.toString()
+    uploadMappingFile = false
+    autoAddDependencies = false
 }
 
 tasks.matching { it.name == "kspCommonMainKotlinMetadata" }.configureEach {
