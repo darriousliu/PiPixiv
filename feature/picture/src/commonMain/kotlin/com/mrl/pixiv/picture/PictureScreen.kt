@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.HideImage
@@ -261,6 +262,7 @@ internal fun PictureScreen(
     val isUserBlocked = BlockingRepositoryV2.collectUserBlockAsState(userId = illust.user.id)
     val isAnyBlocked = isIllustBlocked || isUserBlocked
     val placeholder = rememberVectorPainter(Icons.Rounded.Refresh)
+    val errorImage = rememberVectorPainter(Icons.Rounded.ErrorOutline)
 
     val prefix = LocalSharedKeyPrefix.current
     val sharedTransitionScope = LocalSharedTransitionScope.current
@@ -346,6 +348,7 @@ internal fun PictureScreen(
                                         },
                                     contentScale = ContentScale.FillWidth,
                                     placeholder = placeholder,
+                                    error = errorImage,
                                 )
                                 if (platform.isDesktop()) {
                                     ImageContextMenuDropdown(
@@ -400,6 +403,7 @@ internal fun PictureScreen(
                                     },
                                 contentScale = ContentScale.FillWidth,
                                 placeholder = placeholder,
+                                error = errorImage,
                             )
                             if (platform.isDesktop()) {
                                 ImageContextMenuDropdown(

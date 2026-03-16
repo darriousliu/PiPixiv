@@ -30,8 +30,10 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.Card
@@ -63,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -304,7 +307,9 @@ private fun NovelContent(
                 modifier = Modifier
                     .padding(top = 16.dp)
                     .fillMaxWidth(if (isWidthAtLeastMedium) 0.2f else 0.4f),
-                contentScale = ContentScale.FillWidth
+                contentScale = ContentScale.FillWidth,
+                placeholder = rememberVectorPainter(Icons.Rounded.Refresh),
+                error = rememberVectorPainter(Icons.Rounded.ErrorOutline),
             )
         }
 
