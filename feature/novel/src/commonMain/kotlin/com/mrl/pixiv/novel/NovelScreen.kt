@@ -305,7 +305,7 @@ private fun NovelContent(
                     .build(),
                 contentDescription = stringResource(RStrings.cover),
                 modifier = Modifier
-                    .padding(top = 16.dp)
+                    .padding(top = 56.dp)
                     .fillMaxWidth(if (isWidthAtLeastMedium) 0.2f else 0.4f),
                 contentScale = ContentScale.FillWidth,
                 placeholder = rememberVectorPainter(Icons.Rounded.Refresh),
