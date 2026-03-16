@@ -57,20 +57,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.touchlab.kermit.Logger
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -79,6 +84,7 @@ import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -96,6 +102,10 @@ import com.mrl.pixiv.strings.line_spacing_value
 import com.mrl.pixiv.strings.more
 import com.mrl.pixiv.strings.share_link
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -120,6 +130,7 @@ fun NovelScreen(
 ) {
     val state = viewModel.asState()
     val listState = rememberLazyListState()
+    val paragraphLayouts = remember(state.novel?.id) { mutableStateMapOf<Int, TextLayoutResult>() }
 
     // 沉浸逻辑: 滚动到正文区域时隐藏TopBar和FAB
     val isContentVisible by remember {
@@ -135,6 +146,77 @@ fun NovelScreen(
             delay(2000) // 2秒后自动隐藏
             manuallyShowTopBar = false
         }
+    }
+
+    val saveReadingProgress = remember(state.novel?.id, listState) {
+        {
+            val novel = state.novel ?: return@remember
+            if (state.paragraphs.isEmpty()) return@remember
+            val paragraphStartIndex =
+                paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
+            val progress = buildVisibleReadingProgress(
+                listState = listState,
+                paragraphStartIndex = paragraphStartIndex,
+                paragraphCount = state.paragraphs.size,
+                paragraphLayouts = paragraphLayouts,
+                paragraphs = state.paragraphs
+            ) ?: return@remember
+            viewModel.saveProgress(novelId = novel.id, progress = progress)
+        }
+    }
+
+    LaunchedEffect(state.novel?.id, listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .distinctUntilChanged()
+            .filter { !it }
+            .collect {
+                saveReadingProgress()
+            }
+    }
+
+    LaunchedEffect(state.restoreVersion, state.novel?.id) {
+        val novel = state.novel ?: return@LaunchedEffect
+        val resolvedProgress = state.restoreProgress ?: return@LaunchedEffect
+        if (state.paragraphs.isEmpty()) return@LaunchedEffect
+        val paragraphStartIndex =
+            paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
+
+        val targetItemIndex = paragraphStartIndex + resolvedProgress.paragraphIndex
+        Logger.d(tag = "NovelScreen") { "Restore: paragraphStartIndex=$paragraphStartIndex, targetItemIndex=$targetItemIndex" }
+
+        // 清空布局缓存并滚动到目标段落
+        paragraphLayouts.clear()
+        listState.scrollToItem(targetItemIndex, 0)
+
+        // 等待目标段落的布局完成
+        val layout = snapshotFlow { paragraphLayouts[resolvedProgress.paragraphIndex] }
+            .filterNotNull()
+            .first()
+
+        val targetParagraph = state.paragraphs[resolvedProgress.paragraphIndex]
+        val targetCharIndex = resolvedProgress.charIndex.coerceIn(0, targetParagraph.length)
+
+        // 根据字符位置计算所在行数
+        val lineIndex = layout.getLineForOffset(targetCharIndex)
+
+        // 获取该行顶部的Y坐标
+        val lineTop = layout.getLineTop(lineIndex)
+
+        // 补偿LazyColumn的内边距（如果有的话）
+        val beforeContentPaddingCompensation =
+            (-listState.layoutInfo.viewportStartOffset).coerceAtLeast(0)
+
+        // 计算最终偏移量：将该行的顶部与视口顶部对齐
+        val offset = (lineTop + beforeContentPaddingCompensation).toInt().coerceAtLeast(0)
+
+        Logger.d(tag = "NovelScreen") {
+            "Restore: paragraphIndex=${resolvedProgress.paragraphIndex}, " +
+                    "charIndex=$targetCharIndex, lineIndex=$lineIndex, " +
+                    "lineTop=$lineTop, offset=$offset"
+        }
+
+        // 执行滚动，将目标行的顶部与视口顶部对齐
+        listState.scrollToItem(targetItemIndex, offset)
     }
 
     Scaffold(
@@ -199,6 +281,9 @@ fun NovelScreen(
                     NovelContent(
                         state = state,
                         listState = listState,
+                        onParagraphTextLayout = { paragraphIndex, layout ->
+                            paragraphLayouts[paragraphIndex] = layout
+                        },
                         onContentClick = {
                             manuallyShowTopBar = !manuallyShowTopBar
                         },
@@ -273,8 +358,14 @@ fun NovelScreen(
         ) {
             NovelBottomSheetContent(
                 state = state,
-                onFontSizeChange = { viewModel.dispatch(NovelIntent.UpdateFontSize(it)) },
-                onLineSpacingChange = { viewModel.dispatch(NovelIntent.UpdateLineSpacing(it)) },
+                onFontSizeChange = {
+                    saveReadingProgress()
+                    viewModel.dispatch(NovelIntent.UpdateFontSize(it))
+                },
+                onLineSpacingChange = {
+                    saveReadingProgress()
+                    viewModel.dispatch(NovelIntent.UpdateLineSpacing(it))
+                },
                 onExport = { viewModel.dispatch(NovelIntent.ExportToTxt) },
                 onShare = { viewModel.dispatch(NovelIntent.ShareNovel) }
             )
@@ -287,6 +378,7 @@ private fun NovelContent(
     state: NovelState,
     listState: LazyListState,
     modifier: Modifier = Modifier,
+    onParagraphTextLayout: (Int, TextLayoutResult) -> Unit,
     onContentClick: () -> Unit = {},
     onTagClick: (String) -> Unit
 ) {
@@ -450,6 +542,9 @@ private fun NovelContent(
                     fontSize = state.fontSize.sp,
                     lineHeight = (state.fontSize + state.lineSpacingSp + 8).sp
                 ),
+                onTextLayout = { layoutResult ->
+                    onParagraphTextLayout(index, layoutResult)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -463,6 +558,63 @@ private fun NovelContent(
 
         item(key = KEY_SPACER_END) { Spacer(modifier = Modifier.height(32.dp)) }
     }
+}
+
+private fun paragraphStartItemIndex(
+    hasSeriesTitle: Boolean,
+    hasCaption: Boolean
+): Int {
+    var itemCountBeforeParagraphs = 6 // cover + title + stats + create_date + tags + divider
+    if (hasSeriesTitle) itemCountBeforeParagraphs += 1
+    if (hasCaption) itemCountBeforeParagraphs += 1
+    return itemCountBeforeParagraphs
+}
+
+private fun buildVisibleReadingProgress(
+    listState: LazyListState,
+    paragraphStartIndex: Int,
+    paragraphCount: Int,
+    paragraphLayouts: Map<Int, TextLayoutResult>,
+    paragraphs: List<String>
+): NovelReadingProgress? {
+    if (paragraphCount <= 0) return null
+    val layoutInfo = listState.layoutInfo
+    val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull() ?: return null
+    val firstVisibleIndex = firstVisibleItem.index
+    if (firstVisibleIndex !in paragraphStartIndex until (paragraphStartIndex + paragraphCount)) {
+        return null
+    }
+
+    val paragraphIndex = (firstVisibleIndex - paragraphStartIndex).coerceIn(0, paragraphCount - 1)
+    val paragraphLayout = paragraphLayouts[paragraphIndex] ?: return null
+
+    // 计算视口顶部相对于段落的Y坐标
+    val yInParagraph = (layoutInfo.viewportStartOffset - firstVisibleItem.offset)
+        .coerceIn(0, firstVisibleItem.size - 1)
+        .toFloat()
+
+    // 获取视口顶部对应的字符位置
+    val charAtViewportTop = paragraphLayout.getOffsetForPosition(
+        position = Offset(x = 0f, y = yInParagraph)
+    )
+
+    // 获取该字符所在的行号
+    val lineIndex = paragraphLayout.getLineForOffset(charAtViewportTop)
+
+    // 获取该行的第一个字符位置（行首字符）
+    val lineStartChar = paragraphLayout.getLineStart(lineIndex)
+
+    Logger.d(tag = "NovelScreen") {
+        "Save: paragraphIndex=$paragraphIndex, lineIndex=$lineIndex, " +
+                "lineStartChar=$lineStartChar, yInParagraph=$yInParagraph"
+    }
+
+    val paragraphHash = paragraphs[paragraphIndex].hashCode()
+    return NovelReadingProgress(
+        paragraphIndex = paragraphIndex,
+        charIndex = lineStartChar,
+        paragraphHash = paragraphHash
+    )
 }
 
 @Composable

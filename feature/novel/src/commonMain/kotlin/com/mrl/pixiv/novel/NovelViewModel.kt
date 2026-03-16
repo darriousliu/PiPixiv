@@ -1,10 +1,13 @@
 package com.mrl.pixiv.novel
 
 import androidx.compose.runtime.Stable
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.coroutine.withIOContext
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.novel.NovelTextResp
+import com.mrl.pixiv.common.repository.NovelReadingProgress
+import com.mrl.pixiv.common.repository.NovelReadingProgressRepository
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
@@ -37,6 +40,8 @@ data class NovelState(
     val paragraphs: ImmutableList<String> = persistentListOf(),
     val prevNovelId: Long? = null,
     val nextNovelId: Long? = null,
+    val restoreProgress: NovelReadingProgress? = null,
+    val restoreVersion: Long = 0L,
 )
 
 sealed class NovelIntent : ViewIntent {
@@ -53,9 +58,12 @@ sealed class NovelIntent : ViewIntent {
 @KoinViewModel
 class NovelViewModel(
     novelId: Long,
+    private val readingProgressRepository: NovelReadingProgressRepository
 ) : BaseMviViewModel<NovelState, NovelIntent>(
     initialState = NovelState()
 ), KoinComponent {
+    private var latestProgress: NovelReadingProgress? = null
+
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
@@ -86,14 +94,14 @@ class NovelViewModel(
                 ToastUtil.safeShortToast(RStrings.load_failed, e.message)
             }
         ) {
-            updateState { copy(loading = true) }
+            updateState { copy(loading = true, restoreProgress = null) }
             val response = PixivRepository.getNovelDetail(novelId)
             val novel = response.novel
 
             val novelHtml = PixivRepository.getNovelContent(novelId)
             val novelText = extractNovelData(novelHtml)
             val text = novelText?.text.orEmpty()
-            val paragraphs = text.split("\n\n").toImmutableList()
+            val paragraphs = text.split("\n").toImmutableList()
 
             updateState {
                 copy(
@@ -106,6 +114,8 @@ class NovelViewModel(
                     nextNovelId = novelText?.seriesNavigation?.nextNovel?.id,
                 )
             }
+
+            requestRestoreProgress(novelId = novel.id, paragraphs = paragraphs)
         }
     }
 
@@ -150,10 +160,14 @@ class NovelViewModel(
 
     private fun updateFontSize(size: Int) {
         updateState { copy(fontSize = size.coerceIn(10, 32)) }
+        val currentNovelId = uiState.value.novel?.id ?: return
+        requestRestoreProgress(novelId = currentNovelId, paragraphs = uiState.value.paragraphs)
     }
 
     private fun updateLineSpacing(spacing: Int) {
         updateState { copy(lineSpacingSp = spacing.coerceIn(-10, 10)) }
+        val currentNovelId = uiState.value.novel?.id ?: return
+        requestRestoreProgress(novelId = currentNovelId, paragraphs = uiState.value.paragraphs)
     }
 
     private fun toggleBottomSheet() {
@@ -182,5 +196,49 @@ class NovelViewModel(
                 }
             }
         }
+    }
+
+    fun saveProgress(novelId: Long, progress: NovelReadingProgress) {
+        latestProgress = progress
+        launchIO {
+            readingProgressRepository.saveProgress(novelId, progress)
+            Logger.d(tag = "NovelScreen") { "Saved progress for novel $progress" }
+        }
+    }
+
+    private fun requestRestoreProgress(
+        novelId: Long,
+        paragraphs: List<String>
+    ) {
+        launchIO {
+            if (paragraphs.isEmpty()) return@launchIO
+            val saved = latestProgress ?: readingProgressRepository.getProgress(novelId) ?: return@launchIO
+            val resolved = resolveProgress(saved, paragraphs)
+            latestProgress = resolved
+            updateState {
+                copy(
+                    restoreProgress = resolved,
+                    restoreVersion = restoreVersion + 1
+                )
+            }
+        }
+    }
+
+    private fun resolveProgress(
+        saved: NovelReadingProgress,
+        paragraphs: List<String>
+    ): NovelReadingProgress {
+        if (paragraphs.isEmpty()) return saved
+        val directIndex = saved.paragraphIndex.coerceIn(0, paragraphs.lastIndex)
+        if (paragraphs[directIndex].hashCode() == saved.paragraphHash) {
+            return saved.copy(paragraphIndex = directIndex)
+        }
+        val fallbackIndex = paragraphs.indexOfFirst { it.hashCode() == saved.paragraphHash }
+        val targetIndex = if (fallbackIndex >= 0) fallbackIndex else directIndex
+        val targetLength = paragraphs[targetIndex].length
+        return saved.copy(
+            paragraphIndex = targetIndex,
+            charIndex = saved.charIndex.coerceIn(0, targetLength)
+        )
     }
 }
