@@ -8,6 +8,7 @@ import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.ToastUtil
@@ -135,7 +136,7 @@ class NovelViewModel(
 
     private fun toggleBookmark() {
         val novel = uiState.value.novel ?: return
-        val currentBookmarkState = uiState.value.isBookmarked
+        val currentBookmarkState = novel.isBookmark
         if (currentBookmarkState) {
             BookmarkState.deleteBookmarkNovel(novel.id)
         } else {

@@ -79,6 +79,7 @@ import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
@@ -236,13 +237,14 @@ fun NovelScreen(
                                 IconButton(
                                     onClick = { viewModel.dispatch(NovelIntent.ToggleBookmark) }
                                 ) {
+                                    val isBookmark = state.novel.isBookmark
                                     Icon(
-                                        imageVector = if (state.isBookmarked) {
+                                        imageVector = if (isBookmark) {
                                             Icons.Rounded.Bookmark
                                         } else {
                                             Icons.Rounded.BookmarkBorder
                                         },
-                                        contentDescription = stringResource(if (state.isBookmarked) RStrings.bookmarked else RStrings.bookmark)
+                                        contentDescription = stringResource(if (isBookmark) RStrings.bookmarked else RStrings.bookmark)
                                     )
                                 }
                                 IconButton(
