@@ -33,6 +33,7 @@ data class AppExportDataV2(
     val blocking: BlockingData,
     val bookmarks: BookmarksData,
     val downloads: DownloadsData,
+    val novelHistory: NovelHistoryData = NovelHistoryData(),
 )
 
 @Serializable
@@ -65,4 +66,19 @@ data class BookmarksData(
 @Serializable
 data class DownloadsData(
     val downloads: List<DownloadEntity>,
+)
+
+@Serializable
+data class NovelHistoryData(
+    val userId: Long = 0L,
+    val histories: List<NovelHistoryItem> = emptyList(),
+)
+
+@Serializable
+data class NovelHistoryItem(
+    val novelId: Long,
+    val paragraphIndex: Int,
+    val charIndex: Int,
+    val paragraphHash: Int,
+    val updatedAtMillis: Long,
 )

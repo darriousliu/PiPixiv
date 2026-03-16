@@ -7,10 +7,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.mrl.pixiv.common.data.search.NovelSearch
 import com.mrl.pixiv.common.datasource.local.PixivDatabase
+import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.requireUserInfoValue
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.ZipUtil
@@ -31,7 +33,10 @@ import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.cacheDir
 import io.github.vinceglb.filekit.delete
 import io.github.vinceglb.filekit.writeString
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.StringResource
 import org.koin.android.annotation.KoinViewModel
@@ -49,6 +54,12 @@ data class AppDataState(
 
 private const val jsonDataFile = "data.json"
 
+data class ConfirmNovelHistoryImportEffect(
+    val requestId: Long,
+    val currentUserId: Long,
+    val importUserId: Long,
+) : SideEffect
+
 @KoinViewModel
 class AppDataViewModel(
     private val database: PixivDatabase,
@@ -56,6 +67,10 @@ class AppDataViewModel(
 ) : BaseMviViewModel<AppDataState, ViewIntent>(
     initialState = AppDataState(),
 ) {
+    private var novelHistoryImportRequestId = 0L
+    private val novelHistoryImportResultFlow =
+        MutableSharedFlow<NovelHistoryImportResult>(extraBufferCapacity = 1)
+
     var cacheDirSize by mutableStateOf(0L.adaptiveFileSize1())
 
     init {
@@ -78,6 +93,18 @@ class AppDataViewModel(
             updateState { copy(isLoading = true, loadingMessage = RStrings.exporting) }
             try {
                 val downloads = database.downloadDao().getAllDownloads().first()
+                val currentUserId = requireUserInfoValue.user.id
+                val novelHistories = database.novelReadingProgressDao()
+                    .getByUserId(currentUserId)
+                    .map {
+                        NovelHistoryItem(
+                            novelId = it.novelId,
+                            paragraphIndex = it.paragraphIndex,
+                            charIndex = it.charIndex,
+                            paragraphHash = it.paragraphHash,
+                            updatedAtMillis = it.updatedAtMillis,
+                        )
+                    }
 
                 val dataV2 = AppExportDataV2(
                     settings = SettingsData(
@@ -101,6 +128,10 @@ class AppDataViewModel(
                     ),
                     downloads = DownloadsData(
                         downloads = downloads,
+                    ),
+                    novelHistory = NovelHistoryData(
+                        userId = currentUserId,
+                        histories = novelHistories,
                     ),
                 )
 
@@ -184,6 +215,8 @@ class AppDataViewModel(
         if (data.downloads.downloads.isNotEmpty()) {
             database.downloadDao().insertAll(data.downloads.downloads)
         }
+
+        importNovelHistory(data.novelHistory)
     }
 
     private suspend fun importV1Data(data: AppExportData) {
@@ -216,6 +249,60 @@ class AppDataViewModel(
         }
     }
 
+    private suspend fun importNovelHistory(data: NovelHistoryData) {
+        if (data.histories.isEmpty()) return
+
+        val currentUserId = requireUserInfoValue.user.id
+        if (data.userId > 0L && data.userId != currentUserId) {
+            val confirmed = requestNovelHistoryImportConfirm(
+                currentUserId = currentUserId,
+                importUserId = data.userId
+            )
+            if (!confirmed) return
+        }
+
+        database.novelReadingProgressDao().upsertAll(
+            data.histories.map {
+                NovelReadingProgressEntity(
+                    novelId = it.novelId,
+                    userId = currentUserId,
+                    paragraphIndex = it.paragraphIndex,
+                    charIndex = it.charIndex,
+                    paragraphHash = it.paragraphHash,
+                    updatedAtMillis = it.updatedAtMillis,
+                )
+            }
+        )
+    }
+
+    private suspend fun requestNovelHistoryImportConfirm(
+        currentUserId: Long,
+        importUserId: Long,
+    ): Boolean {
+        novelHistoryImportRequestId += 1
+        val requestId = novelHistoryImportRequestId
+        sendEffect(
+            ConfirmNovelHistoryImportEffect(
+                requestId = requestId,
+                currentUserId = currentUserId,
+                importUserId = importUserId
+            )
+        )
+        return novelHistoryImportResultFlow
+            .filter { it.requestId == requestId }
+            .map { it.confirmed }
+            .first()
+    }
+
+    fun onNovelHistoryImportConfirm(requestId: Long, confirmed: Boolean) {
+        novelHistoryImportResultFlow.tryEmit(
+            NovelHistoryImportResult(
+                requestId = requestId,
+                confirmed = confirmed
+            )
+        )
+    }
+
     fun migrateData() {
         launchIO {
             androidMigrateData(
@@ -232,6 +319,11 @@ class AppDataViewModel(
         }
     }
 }
+
+private data class NovelHistoryImportResult(
+    val requestId: Long,
+    val confirmed: Boolean
+)
 
 expect fun androidCheckOldData(
     updateState: (AppDataState.() -> AppDataState) -> Unit,

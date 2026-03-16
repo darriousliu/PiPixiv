@@ -214,4 +214,6 @@
     <string name="default_private_bookmark">Default private bookmark</string>
     <string name="save_as">Save As</string>
     <string name="copy_link">Copy Link</string>
+    <string name="novel_history_import_user_mismatch_title">Novel history user mismatch</string>
+    <string name="novel_history_import_user_mismatch_desc">Current user ID: %1$d, imported data user ID: %2$d. Confirm to import novel history into current user, or cancel to skip this part.</string>
 </resources>

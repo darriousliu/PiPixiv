@@ -255,4 +255,6 @@
     <string name="font_size_value">字号: %1$dsp</string>
     <string name="line_spacing_value">行间距: %1$ssp</string>
     <string name="share_link">分享链接</string>
+    <string name="novel_history_import_user_mismatch_title">小说历史记录用户不一致</string>
+    <string name="novel_history_import_user_mismatch_desc">当前用户ID: %1$d，导入数据用户ID: %2$d。确认继续将把小说历史导入到当前用户，取消将跳过该部分导入。</string>
 </resources>
