@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -66,9 +67,6 @@ fun NovelItem(
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .clickable { onNovelClick(novel.id) },
         shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
         )
@@ -92,6 +90,7 @@ fun NovelItem(
                     .width(80.dp)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
+                contentScale = ContentScale.Crop
             )
 
             8.HSpacer

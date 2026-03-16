@@ -1,8 +1,10 @@
 package com.mrl.pixiv.novel
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,7 +60,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -66,6 +71,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.HSpacer
@@ -73,7 +79,6 @@ import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.bookmark
@@ -119,6 +124,7 @@ fun NovelScreen(
         }
     }
     var manuallyShowTopBar by remember { mutableStateOf(false) }
+    val showBar = !isContentVisible || manuallyShowTopBar
 
     LaunchedEffect(manuallyShowTopBar) {
         if (manuallyShowTopBar) {
@@ -131,7 +137,7 @@ fun NovelScreen(
         modifier = modifier.fillMaxSize(),
         floatingActionButton = {
             AnimatedVisibility(
-                visible = !isContentVisible || manuallyShowTopBar,
+                visible = showBar,
                 enter = slideInVertically(initialOffsetY = { it }),
                 exit = slideOutVertically(targetOffsetY = { it })
             ) {
@@ -201,12 +207,20 @@ fun NovelScreen(
                         }
                     )
                     AnimatedVisibility(
-                        visible = !isContentVisible || manuallyShowTopBar,
+                        visible = showBar,
                         enter = slideInVertically(initialOffsetY = { -it }),
                         exit = slideOutVertically(targetOffsetY = { -it })
                     ) {
+                        val topBarColor = MaterialTheme.colorScheme.surface
                         TopAppBar(
                             title = {},
+                            modifier = Modifier.dropShadow(RectangleShape) {
+                                radius = 2f
+                                color = topBarColor
+                                val isExit = transition.currentState == EnterExitState.Visible &&
+                                        transition.targetState == EnterExitState.PostExit
+                                alpha = if (isContentVisible && !isExit) 1f else 0f
+                            },
                             navigationIcon = {
                                 IconButton(onClick = navigationManager::popBackStack) {
                                     Icon(
@@ -238,7 +252,7 @@ fun NovelScreen(
                                 }
                             },
                             windowInsets = TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Top),
-                            colors = TopAppBarDefaults.topAppBarColors(containerColor = if (isContentVisible) Color.Unspecified else Color.Transparent)
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                         )
                     }
                 }
@@ -281,12 +295,15 @@ private fun NovelContent(
     ) {
         // 封面图
         item(key = KEY_COVER) {
+            val isWidthAtLeastMedium = currentWindowAdaptiveInfo().isWidthAtLeastMedium
             AsyncImage(
                 model = ImageRequest.Builder(LocalPlatformContext.current)
                     .data(novel.imageUrls.medium)
                     .build(),
                 contentDescription = stringResource(RStrings.cover),
-                modifier = Modifier.fillMaxWidth(0.4f),
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .fillMaxWidth(if (isWidthAtLeastMedium) 0.2f else 0.4f),
                 contentScale = ContentScale.FillWidth
             )
         }
@@ -429,7 +446,11 @@ private fun NovelContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .throttleClick(onClick = onContentClick)
+                    .combinedClickable(
+                        interactionSource = null,
+                        indication = null,
+                        onClick = onContentClick
+                    )
             )
         }
 
