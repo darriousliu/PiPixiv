@@ -35,6 +35,8 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.mrl.pixiv.common.compose.FavoriteDualColor
+import com.mrl.pixiv.common.compose.ui.illust.AIBadge
+import com.mrl.pixiv.common.data.AiType
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.HSpacer
@@ -60,6 +62,7 @@ fun NovelItem(
 ) {
     val context = LocalPlatformContext.current
     val isBookmarked = novel.isBookmark
+    val isAI = novel.novelAiType == AiType.AiGeneratedWorks
 
     Card(
         modifier = modifier
@@ -154,6 +157,10 @@ fun NovelItem(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    if (isAI) {
+                        8.HSpacer
+                        AIBadge()
+                    }
                 }
 
                 // 标签

@@ -601,7 +601,7 @@ fun BottomBookmarkSheet(
 }
 
 @Composable
-private fun AIBadge(
+internal fun AIBadge(
     modifier: Modifier = Modifier
 ) {
     Badge(

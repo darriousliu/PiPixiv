@@ -160,41 +160,40 @@ internal fun FilterBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (!isNovelMode) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            innerSearchFilter = innerSearchFilter.copy(
-                                searchAiType = if (innerSearchFilter.searchAiType == SearchAiType.SHOW_AI) {
-                                    SearchAiType.HIDE_AI
-                                } else {
-                                    SearchAiType.SHOW_AI
-                                }
-                            )
-                        }
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(RStrings.ai_generate),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Switch(
-                        checked = innerSearchFilter.searchAiType == SearchAiType.SHOW_AI,
-                        onCheckedChange = { checked ->
-                            innerSearchFilter = innerSearchFilter.copy(
-                                searchAiType = if (checked) SearchAiType.SHOW_AI else SearchAiType.HIDE_AI
-                            )
-                        }
-                    )
-                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .throttleClick(
+                        indication = ripple()
+                    ) {
+                        innerSearchFilter = innerSearchFilter.copy(
+                            searchAiType = if (innerSearchFilter.searchAiType == SearchAiType.SHOW_AI) {
+                                SearchAiType.HIDE_AI
+                            } else {
+                                SearchAiType.SHOW_AI
+                            }
+                        )
+                    }
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(RStrings.ai_generate),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Switch(
+                    checked = innerSearchFilter.searchAiType == SearchAiType.SHOW_AI,
+                    onCheckedChange = { checked ->
+                        innerSearchFilter = innerSearchFilter.copy(
+                            searchAiType = if (checked) SearchAiType.SHOW_AI else SearchAiType.HIDE_AI
+                        )
+                    }
+                )
             }
+
 
             Row(
                 modifier = Modifier
