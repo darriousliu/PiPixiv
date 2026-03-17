@@ -7,7 +7,7 @@ import com.mrl.pixiv.common.data.comment.CommentAddResp
 import com.mrl.pixiv.common.data.comment.EmojiResp
 import com.mrl.pixiv.common.data.comment.IllustCommentsResp
 import com.mrl.pixiv.common.data.comment.StampsResp
-import com.mrl.pixiv.common.data.illust.IllustBookmarkDetailResp
+import com.mrl.pixiv.common.data.illust.BookmarkDetailResp
 import com.mrl.pixiv.common.data.illust.IllustDetailResp
 import com.mrl.pixiv.common.data.illust.IllustRecommendedResp
 import com.mrl.pixiv.common.data.mute.MutedResp
@@ -98,7 +98,7 @@ interface PixivApi {
     @GET("v2/illust/bookmark/detail")
     suspend fun getIllustBookmarkDetail(
         @Query("illust_id") illustId: Long,
-    ): IllustBookmarkDetailResp
+    ): BookmarkDetailResp
 
     @GET("v1/search/illust")
     suspend fun searchIllust(
@@ -516,4 +516,9 @@ interface PixivApi {
     suspend fun getNovelContent(
         @Query("id") novelId: Long,
     ): String
+
+    @GET("v2/novel/bookmark/detail")
+    suspend fun getNovelBookmarkDetail(
+        @Query("novel_id") novelId: Long,
+    ): BookmarkDetailResp
 }

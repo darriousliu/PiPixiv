@@ -95,8 +95,8 @@ import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.BlockSurface
+import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.TagItem
-import com.mrl.pixiv.common.compose.ui.illust.BottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.AppViewMode
@@ -870,7 +870,7 @@ internal fun PictureScreen(
     }
 
     if (showAdvancedBookmark) {
-        BottomBookmarkSheet(
+        IllustBottomBookmarkSheet(
             hideBottomSheet = { showAdvancedBookmark = false },
             illust = illust,
             bottomSheetState = bottomSheetState,
@@ -881,7 +881,6 @@ internal fun PictureScreen(
                     BookmarkState.deleteBookmarkIllust(illust.id)
                 }
             },
-            isBookmarked = isBookmarked
         )
     }
 }

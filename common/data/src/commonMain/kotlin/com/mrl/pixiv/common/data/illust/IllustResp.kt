@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.data.illust
 
+import androidx.compose.runtime.Immutable
 import com.mrl.pixiv.common.data.Illust
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -35,7 +36,7 @@ data class IllustDetailResp(
 )
 
 @Serializable
-data class IllustBookmarkDetailResp(
+data class BookmarkDetailResp(
     @SerialName("bookmark_detail")
     val bookmarkDetail: BookmarkDetail
 )
@@ -49,6 +50,7 @@ data class BookmarkDetail(
 )
 
 @Serializable
+@Immutable
 data class BookmarkDetailTag(
     @SerialName("is_registered")
     val isRegistered: Boolean,

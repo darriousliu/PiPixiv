@@ -354,7 +354,7 @@ fun NovelScreen(
     if (state.showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { viewModel.dispatch(NovelIntent.ToggleBottomSheet) },
-            sheetState = rememberModalBottomSheetState()
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ) {
             NovelBottomSheetContent(
                 state = state,

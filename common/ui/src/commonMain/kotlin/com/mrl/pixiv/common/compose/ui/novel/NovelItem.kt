@@ -22,8 +22,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,12 +40,14 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.mrl.pixiv.common.compose.FavoriteDualColor
+import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.illust.AIBadge
 import com.mrl.pixiv.common.data.AiType
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.util.allowRgb565
 import kotlin.time.Duration.Companion.seconds
@@ -63,6 +70,7 @@ fun NovelItem(
     val context = LocalPlatformContext.current
     val isBookmarked = novel.isBookmark
     val isAI = novel.novelAiType == AiType.AiGeneratedWorks
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     Card(
         modifier = modifier
@@ -204,7 +212,8 @@ fun NovelItem(
                             Restrict.PUBLIC
                         }
                         onBookmarkClick(isBookmarked, restrict, null)
-                    }
+                    },
+                    onLongClick = { showBottomSheet = true }
                 ) {
                     Icon(
                         imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
@@ -220,5 +229,21 @@ fun NovelItem(
                 )
             }
         }
+    }
+
+    if (showBottomSheet) {
+        val bottomSheetState = rememberModalBottomSheetState(true)
+        NovelBottomBookmarkSheet(
+            hideBottomSheet = { showBottomSheet = false },
+            novel = novel,
+            bottomSheetState = bottomSheetState,
+            onBookmarkClick = { restrict, tags, isEdit ->
+                if (isEdit || !isBookmarked) {
+                    BookmarkState.bookmarkNovel(novel.id, restrict, tags)
+                } else {
+                    BookmarkState.deleteBookmarkNovel(novel.id)
+                }
+            }
+        )
     }
 }
