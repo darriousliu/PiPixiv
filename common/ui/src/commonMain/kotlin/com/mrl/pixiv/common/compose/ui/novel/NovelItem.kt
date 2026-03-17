@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.compose.ui.novel
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -200,9 +201,11 @@ fun NovelItem(
 
             // 右侧收藏按钮和收藏数
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(vertical = 8.dp, horizontal = 4.dp)
+                    .fillMaxHeight()
+                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 IconButton(
                     onClick = {
