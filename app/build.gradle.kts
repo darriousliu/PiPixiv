@@ -6,7 +6,6 @@ import org.gradle.internal.extensions.stdlib.capitalized
 plugins {
     id("pixiv.android.application")
 //    alias(androidx.plugins.baselineprofile)
-    alias(libs.plugins.sentry.android) apply false
 }
 if (project.findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.sentry.android.get().pluginId)
@@ -144,7 +143,7 @@ dependencies {
     implementation(libs.mmkv.kotlin)
 }
 
-pluginManager.withPlugin(libs.plugins.sentry.android.get().pluginId) {
+if (pluginManager.hasPlugin(libs.plugins.sentry.android.get().pluginId)) {
     configure<SentryPluginExtension> {
         debug.set(true)
         org.set("pipixiv")
