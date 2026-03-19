@@ -21,10 +21,11 @@ internal fun KotlinMultiplatformExtension.commonDependencies() {
     val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
     val kotlinx = project.extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
     val androidx = project.extensions.getByType<VersionCatalogsExtension>().named("androidx")
+    val compose = project.extensions.getByType<VersionCatalogsExtension>().named("composes")
     sourceSets.apply {
         commonMain.dependencies {
             // Lifecycle
-            implementation(libs.findBundle("lifecycle").get())
+            implementation(compose.findBundle("lifecycle").get())
             // Coroutines
             implementation(
                 project.dependencies.platform(

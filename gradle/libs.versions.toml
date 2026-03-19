@@ -21,7 +21,6 @@ mmkv-kotlin = "1.5.0"
 kotzilla = "2.0.9"
 gifkt = "0.3.3"
 sonner = "0.4.0"
-jetbrains-lifecycle = "2.10.0-beta01"
 konfig = "0.17.1"
 filekit = "0.13.0"
 htmlconverter = "1.1.0"
@@ -80,10 +79,6 @@ kotzilla-sdk = { group = "io.kotzilla", name = "kotzilla-sdk-compose", version.r
 gifkt = { module = "com.shakster:gifkt", version.ref = "gifkt" }
 sonner = { module = "io.github.brdominguez:compose-sonner", version.ref = "sonner" }
 
-lifecycle-common = { module = "org.jetbrains.androidx.lifecycle:lifecycle-common", version.ref = "jetbrains-lifecycle" }
-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-lifecycle" }
-
 filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
@@ -106,7 +101,6 @@ coil3 = ["coil3-core", "coil3-compose", "coil3-network-ktor3"]
 richtext = ["richtext-commonmark", "richtext-m3"]
 lottie = ["lottie", "lottie-compose"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]
-lifecycle = ["lifecycle-common", "lifecycle-runtime-compose", "lifecycle-viewmodel-compose"]
 filekit = ["filekit-core", "filekit-dialogs", "filekit-dialogs-compose", "filekit-coil"]
 
 [plugins]
