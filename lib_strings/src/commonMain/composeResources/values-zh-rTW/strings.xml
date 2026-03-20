@@ -24,7 +24,7 @@
     <string name="revoke_cancel_like">撤銷取消收藏</string>
     <string name="sign_in">登入</string>
     <string name="sign_up">註冊</string>
-    <string name="sign_with_token">使用 Token 登入</string>
+    <string name="sign_in_with_token">使用 Token 登入</string>
     <string name="download_with_size">下載 (%1$s)</string>
     <string name="followed">已追蹤</string>
     <string name="follow">追蹤</string>

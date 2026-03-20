@@ -24,7 +24,7 @@
     <string name="refresh_token_success">トークンの更新に成功しました</string>
     <string name="sign_up">新規登録</string>
     <string name="sign_in">ログイン</string>
-    <string name="sign_with_token">トークンでログイン</string>
+    <string name="sign_in_with_token">トークンでログイン</string>
     <string name="download_with_size">ダウンロード (%1$s)</string>
     <string name="followed">フォロー中</string>
     <string name="follow">フォロー</string>

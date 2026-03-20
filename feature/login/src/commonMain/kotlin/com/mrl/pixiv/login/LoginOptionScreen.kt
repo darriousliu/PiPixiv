@@ -27,8 +27,8 @@ import com.mrl.pixiv.common.util.RDrawables
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.ic_launcher
 import com.mrl.pixiv.strings.sign_in
+import com.mrl.pixiv.strings.sign_in_with_token
 import com.mrl.pixiv.strings.sign_up
-import com.mrl.pixiv.strings.sign_with_token
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -97,7 +97,7 @@ fun LoginOptionScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(RStrings.sign_with_token)
+                    text = stringResource(RStrings.sign_in_with_token)
                 )
             }
         }

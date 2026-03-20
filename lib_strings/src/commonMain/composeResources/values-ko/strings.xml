@@ -24,7 +24,7 @@
     <string name="revoke_cancel_like">즐겨찾기 취소 되돌리기</string>
     <string name="sign_in">로그인</string>
     <string name="sign_up">회원가입</string>
-    <string name="sign_with_token">토큰으로 로그인</string>
+    <string name="sign_in_with_token">토큰으로 로그인</string>
     <string name="download_with_size">다운로드 (%1$s)</string>
     <string name="followed">팔로우 중</string>
     <string name="follow">팔로우</string>

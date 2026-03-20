@@ -24,7 +24,7 @@
     <string name="refresh_token_success">टोकन सफलतापूर्वक रिफ्रेश किया गया</string>
     <string name="sign_up">साइन अप करें</string>
     <string name="sign_in">साइन इन करें</string>
-    <string name="sign_with_token">टोकन के साथ साइन इन करें</string>
+    <string name="sign_in_with_token">टोकन के साथ साइन इन करें</string>
     <string name="download_with_size">डाउनलोड करें (%1$s)</string>
     <string name="followed">फॉलो किया गया</string>
     <string name="follow">फॉलो करें</string>

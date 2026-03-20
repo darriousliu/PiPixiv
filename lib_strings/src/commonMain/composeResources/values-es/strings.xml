@@ -24,7 +24,7 @@
     <string name="refresh_token_success">Token actualizado exitosamente</string>
     <string name="sign_up">Registrarse</string>
     <string name="sign_in">Iniciar sesión</string>
-    <string name="sign_with_token">Iniciar sesión con Token</string>
+    <string name="sign_in_with_token">Iniciar sesión con Token</string>
     <string name="download_with_size">Descargar (%1$s)</string>
     <string name="followed">Siguiendo</string>
     <string name="follow">Seguir</string>

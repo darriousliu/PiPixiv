@@ -24,7 +24,7 @@
     <string name="refresh_token_success">Токен успешно обновлен</string>
     <string name="sign_up">Регистрация</string>
     <string name="sign_in">Войти</string>
-    <string name="sign_with_token">Войти с токеном</string>
+    <string name="sign_in_with_token">Войти с токеном</string>
     <string name="download_with_size">Скачать (%1$s)</string>
     <string name="followed">Подписан</string>
     <string name="follow">Подписаться</string>

@@ -24,7 +24,7 @@
     <string name="refresh_token_success">Refresh token successfully</string>
     <string name="sign_up">Sign up</string>
     <string name="sign_in">Sign in</string>
-    <string name="sign_with_token">Sign in with Token</string>
+    <string name="sign_in_with_token">Sign in with Token</string>
     <string name="download_with_size">Download (%1$s)</string>
     <string name="followed">Followed</string>
     <string name="follow">Follow</string>
