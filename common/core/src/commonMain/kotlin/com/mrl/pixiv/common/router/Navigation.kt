@@ -29,6 +29,9 @@ sealed class Destination : NavKey {
     data object OAuthLogin : Destination()
 
     @Serializable
+    data object WebCookieLogin: Destination()
+
+    @Serializable
     data object Main : Destination()
 
     @Serializable

@@ -257,4 +257,8 @@
     <string name="share_link">分享链接</string>
     <string name="novel_history_import_user_mismatch_title">小说历史记录用户不一致</string>
     <string name="novel_history_import_user_mismatch_desc">当前用户ID: %1$d，导入数据用户ID: %2$d。确认继续将把小说历史导入到当前用户，取消将跳过该部分导入。</string>
+    <string name="sign_in_with_cookie">使用Cookie登录</string>
+    <string name="cookies" translatable="false">Cookies</string>
+    <string name="cookies_parse_error">Cookie解析错误</string>
+    <string name="recommend_cookie_export_plugin">推荐使用Chrome插件商店Cookie导出插件 &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; 或 &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;，一定要以Json格式导出</string>
 </resources>

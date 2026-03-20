@@ -17,9 +17,9 @@ private fun getCodeVer(): String {
 }
 
 private fun getCodeChallenge(): String {
-    return Base64.UrlSafe.encode(
+    return Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).encode(
         getCodeVer().encodeToByteArray().toByteString().sha256().toByteArray(),
-    ).replace("=", "")
+    )
 }
 
 fun generateWebViewUrl(create: Boolean) =

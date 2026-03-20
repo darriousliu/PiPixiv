@@ -49,6 +49,7 @@ import com.mrl.pixiv.history.HistoryScreen
 import com.mrl.pixiv.login.LoginOptionScreen
 import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
+import com.mrl.pixiv.login.oauth.WebCookieLoginScreen
 import com.mrl.pixiv.novel.NovelScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
@@ -118,6 +119,10 @@ fun Navigation3MainGraph(
                     // OAuth token登陆
                     entry<Destination.OAuthLogin> {
                         OAuthLoginScreen()
+                    }
+
+                    entry<Destination.WebCookieLogin> {
+                        WebCookieLoginScreen()
                     }
 
                     entry<Destination.Main> {
