@@ -251,4 +251,8 @@
     <string name="share_link">Partager le lien</string>
     <string name="novel_history_import_user_mismatch_title">Incohérence d\'utilisateur pour l\'historique des romans</string>
     <string name="novel_history_import_user_mismatch_desc">ID de l\'utilisateur actuel : %1$d, ID de l\'utilisateur des données importées : %2$d. Confirmez pour continuer à importer l\'historique des romans pour l\'utilisateur actuel, ou annulez pour ignorer cette partie de l\'importation.</string>
+    <string name="sign_in_with_cookie">Se connecter avec un Cookie</string>
+    <string name="cookies" translatable="false">Cookies</string>
+    <string name="cookies_parse_error">Erreur d\'analyse du Cookie</string>
+    <string name="recommend_cookie_export_plugin">Il est recommandé d\'utiliser les extensions d\'exportation de cookies du Chrome Web Store &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; ou &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;. Assurez-vous que le Cookie contient le champ PHPSESSID, et il doit impérativement être exporté au format Json.</string>
 </resources>

@@ -251,4 +251,8 @@
     <string name="share_link">Поделиться ссылкой</string>
     <string name="novel_history_import_user_mismatch_title">Несоответствие пользователя в истории новелл</string>
     <string name="novel_history_import_user_mismatch_desc">Текущий ID пользователя: %1$d, ID пользователя импортируемых данных: %2$d. Подтвердите, чтобы продолжить импортировать историю новелл для текущего пользователя, или отмените, чтобы пропустить эту часть импорта.</string>
+    <string name="sign_in_with_cookie">Войти с помощью Cookie</string>
+    <string name="cookies" translatable="false">Cookies</string>
+    <string name="cookies_parse_error">Ошибка анализа Cookie</string>
+    <string name="recommend_cookie_export_plugin">Рекомендуется использовать расширения для экспорта файлов cookie из интернет-магазина Chrome &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; или &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;. Убедитесь, что в Cookie содержится поле PHPSESSID, и файл обязательно должен быть экспортирован в формате Json.</string>
 </resources>

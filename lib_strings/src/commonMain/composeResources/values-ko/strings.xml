@@ -251,4 +251,8 @@
     <string name="share_link">링크 공유</string>
     <string name="novel_history_import_user_mismatch_title">소설 기록 사용자 불일치</string>
     <string name="novel_history_import_user_mismatch_desc">현재 사용자 ID: %1$d, 가져오기 데이터 사용자 ID: %2$d. 계속하려면 확인을 눌러 소설 기록을 현재 사용자에게 가져오고, 이 부분의 가져오기를 건너뛰려면 취소하세요.</string>
+    <string name="sign_in_with_cookie">쿠키로 로그인</string>
+    <string name="cookies" translatable="false">Cookies</string>
+    <string name="cookies_parse_error">쿠키 파싱 오류</string>
+    <string name="recommend_cookie_export_plugin">Chrome 웹 스토어의 쿠키 내보내기 확장 프로그램인 &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; 또는 &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt; 사용을 권장합니다. 쿠키에 PHPSESSID 필드가 포함되어 있는지 확인하고 반드시 Json 형식으로 내보내야 합니다.</string>
 </resources>

@@ -251,4 +251,8 @@
     <string name="share_link">Share Link</string>
     <string name="novel_history_import_user_mismatch_title">Novel History User Mismatch</string>
     <string name="novel_history_import_user_mismatch_desc">Current user ID: %1$d, imported data user ID: %2$d. Confirm to continue importing the novel history to the current user, or cancel to skip this part of the import.</string>
+    <string name="sign_in_with_cookie">Sign in with Cookie</string>
+    <string name="cookies" translatable="false">Cookies</string>
+    <string name="cookies_parse_error">Cookie parse error</string>
+    <string name="recommend_cookie_export_plugin">It is recommended to use the Chrome Web Store cookie export extensions &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; or &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;. Ensure the cookie contains the PHPSESSID field, and it must be exported in JSON format.</string>
 </resources>

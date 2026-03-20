@@ -251,4 +251,8 @@
     <string name="share_link">लिंक साझा करें</string>
     <string name="novel_history_import_user_mismatch_title">उपन्यास इतिहास उपयोगकर्ता बेमेल</string>
     <string name="novel_history_import_user_mismatch_desc">वर्तमान उपयोगकर्ता आईडी: %1$d, आयातित डेटा उपयोगकर्ता आईडी: %2$d। वर्तमान उपयोगकर्ता में उपन्यास इतिहास आयात करने के लिए पुष्टि करें, या आयात के इस भाग को छोड़ने के लिए रद्द करें।</string>
+    <string name="sign_in_with_cookie">कुकी के साथ साइन इन करें</string>
+    <string name="cookies" translatable="false">Cookies</string>
+    <string name="cookies_parse_error">कुकी पार्स त्रुटि</string>
+    <string name="recommend_cookie_export_plugin">Chrome वेब स्टोर कुकी निर्यात एक्सटेंशन &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; या &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt; का उपयोग करने की अनुशंसा की जाती है। सुनिश्चित करें कि कुकी में PHPSESSID फ़ील्ड है, और इसे Json प्रारूप में निर्यात किया जाना चाहिए।</string>
 </resources>
