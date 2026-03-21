@@ -8,5 +8,7 @@
     <string>PHOTO_LIBRARY_ADD_USAGE</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>PHOTO_LIBRARY_USAGE</string>
+    <key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
+    <true/>
 </dict>
 </plist>

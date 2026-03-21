@@ -11,10 +11,18 @@ class IosPhotoUtil: PhotoUtil {
             try await callback.invoke(p1: nil)
             return
         }
-        // 2) 权限
-        let auth = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
-        guard auth == .authorized || auth == .limited else {
-            // limited 对“写入”是允许的，但如果你的业务需要读回相册内容，要额外处理。
+        // 2) 权限：只在首次（notDetermined）时触发系统授权弹窗
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        switch status {
+        case .authorized, .limited:
+            break
+        case .notDetermined:
+            let auth = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+            guard auth == .authorized || auth == .limited else {
+                try await callback.invoke(p1: nil)
+                return
+            }
+        default:
             try await callback.invoke(p1: nil)
             return
         }
