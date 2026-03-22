@@ -87,8 +87,10 @@ import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.util.Platform
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
+import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.bookmark
@@ -260,7 +262,12 @@ fun NovelScreen(
                 }
             }
         },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.systemBars)
+        contentWindowInsets = if (platform is Platform.Apple.IPhoneOS) {
+            // 适配横屏灵动岛
+            ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Horizontal)
+        } else {
+            ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.systemBars)
+        }
     ) { paddingValues ->
         when {
             state.loading -> {
