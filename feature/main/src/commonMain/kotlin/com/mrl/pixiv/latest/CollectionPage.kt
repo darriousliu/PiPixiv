@@ -331,7 +331,7 @@ private fun CollectionNovelPage(
                     FilterChip(
                         selected = state.restrict == restrict,
                         onClick = {
-                            viewModel.updateFilterTag(restrict, state.filterTag)
+                            viewModel.updateNovelFilterTag(restrict, state.filterTag)
                             userBookmarksNovels.refresh()
                         },
                         label = {
