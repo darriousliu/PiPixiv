@@ -231,8 +231,8 @@ private fun CollectionIllustPage(
     if (showFilterDialog) {
         FilterDialog(
             onDismissRequest = { showFilterDialog = false },
-            userBookmarkTagsIllust = state.userBookmarkTagsIllust,
-            privateBookmarkTagsIllust = state.privateBookmarkTagsIllust,
+            userBookmarkTags = state.userBookmarkTagsIllust,
+            privateBookmarkTags = state.privateBookmarkTagsIllust,
             restrict = state.restrict,
             filterTag = state.filterTag,
             onLoadUserBookmarksTags = {
@@ -259,6 +259,7 @@ private fun CollectionNovelPage(
     val pullRefreshState = rememberPullToRefreshState()
     val lazyListState = latestViewModel.collectionNovelLazyListState
     val state = viewModel.asState()
+    var showFilterDialog by rememberSaveable { mutableStateOf(false) }
     val isRefreshing = userBookmarksNovels.loadState.refresh is LoadState.Loading
     val controller = remember {
         keyboardScrollerController(lazyListState) {
@@ -345,5 +346,22 @@ private fun CollectionNovelPage(
                 }
             }
         }
+    }
+
+    if (showFilterDialog) {
+        FilterDialog(
+            onDismissRequest = { showFilterDialog = false },
+            userBookmarkTags = state.userBookmarkTagsNovel,
+            privateBookmarkTags = state.privateBookmarkTagsNovel,
+            restrict = state.restrict,
+            filterTag = state.filterTag,
+            onLoadUserBookmarksTags = {
+                viewModel.dispatch(CollectionAction.LoadUserBookmarksTagsNovel(it))
+            },
+            onSelected = { restrict, tag ->
+                viewModel.updateNovelFilterTag(restrict, tag)
+                userBookmarksNovels.refresh()
+            }
+        )
     }
 }

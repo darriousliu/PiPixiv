@@ -253,8 +253,8 @@ fun CollectionScreen(
             if (isIllustPage) {
                 FilterDialog(
                     onDismissRequest = { showFilterDialog = false },
-                    userBookmarkTagsIllust = state.userBookmarkTagsIllust,
-                    privateBookmarkTagsIllust = state.privateBookmarkTagsIllust,
+                    userBookmarkTags = state.userBookmarkTagsIllust,
+                    privateBookmarkTags = state.privateBookmarkTagsIllust,
                     restrict = state.restrict,
                     filterTag = state.filterTag,
                     onLoadUserBookmarksTags = {
@@ -268,8 +268,8 @@ fun CollectionScreen(
             } else {
                 FilterDialog(
                     onDismissRequest = { showFilterDialog = false },
-                    userBookmarkTagsIllust = state.userBookmarkTagsNovel,
-                    privateBookmarkTagsIllust = state.privateBookmarkTagsNovel,
+                    userBookmarkTags = state.userBookmarkTagsNovel,
+                    privateBookmarkTags = state.privateBookmarkTagsNovel,
                     restrict = state.novelRestrict,
                     filterTag = state.novelFilterTag,
                     onLoadUserBookmarksTags = {

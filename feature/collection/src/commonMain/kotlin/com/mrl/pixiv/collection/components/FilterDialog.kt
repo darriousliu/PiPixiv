@@ -46,8 +46,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun FilterDialog(
     onDismissRequest: () -> Unit,
-    userBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag>,
-    privateBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag>,
+    userBookmarkTags: ImmutableList<RestrictBookmarkTag>,
+    privateBookmarkTags: ImmutableList<RestrictBookmarkTag>,
     restrict: Restrict,
     filterTag: String?,
     onLoadUserBookmarksTags: (Restrict) -> Unit,
@@ -136,7 +136,7 @@ fun FilterDialog(
                             .height(300.dp)
                     ) {
                         items(
-                            if (currentPage == 0) userBookmarkTagsIllust else privateBookmarkTagsIllust,
+                            if (currentPage == 0) userBookmarkTags else privateBookmarkTags,
                             key = { it.name.toString() }
                         ) {
                             Row(
