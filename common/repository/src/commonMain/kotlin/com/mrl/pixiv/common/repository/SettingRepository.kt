@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.mmkv.MMKVUser
@@ -90,6 +91,10 @@ object SettingRepository : MMKVUser {
 
     fun setAppViewMode(mode: AppViewMode) = userPreference.update {
         it.copy(appViewMode = mode)
+    }
+
+    fun setAiTranslationConfig(config: AiTranslationConfig) = userPreference.update {
+        it.copy(aiTranslationConfig = config)
     }
 
     fun updateSettings(block: UserPreference.() -> UserPreference) {

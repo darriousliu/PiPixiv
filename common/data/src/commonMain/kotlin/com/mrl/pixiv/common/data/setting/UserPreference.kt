@@ -22,6 +22,7 @@ data class UserPreference(
     val fileNameFormat: String = DEFAULT_FILE_NAME_FORMAT,
     val defaultPrivateBookmark: Boolean = false,
     val appViewMode: AppViewMode = AppViewMode.ILLUST,
+    val aiTranslationConfig: AiTranslationConfig = AiTranslationConfig(),
 ) {
     companion object {
         const val TEMPLATE_ILLUST_ID = "{illust_id}"

@@ -94,7 +94,6 @@ sentry-bom = { module = "io.sentry:sentry-bom", version.ref = "sentry-bom" }
 sentry-android = { module = "io.sentry:sentry-android" }
 sentry-compose = { module = "io.sentry:sentry-compose-android" }
 
-
 [bundles]
 koin = ["koin", "koin-compose", "koin-annotations", "koin-compose-viewmodel"]
 coil3 = ["coil3-core", "coil3-compose", "coil3-network-ktor3"]

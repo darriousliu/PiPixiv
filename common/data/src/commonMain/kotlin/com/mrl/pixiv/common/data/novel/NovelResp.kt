@@ -4,8 +4,19 @@ import androidx.compose.runtime.Immutable
 import com.mrl.pixiv.common.data.AiType
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.User
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.mapSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
 
 /**
  * 小说系列详情响应
@@ -94,8 +105,143 @@ data class SearchNovelResp(
 @Serializable
 @Immutable
 data class NovelTextResp(
+    val id: String,
+    val title: String,
+    val seriesId: JsonElement? = null,
+    val seriesTitle: JsonElement? = null,
+    val seriesIsWatched: JsonElement? = null,
+    val userId: String,
+    val coverUrl: String,
+    val tags: List<String>,
+    val caption: String,
+    val cdate: String,
+    val rating: NovelRating,
     val text: String,
-    val seriesNavigation: SeriesNavigation? = null
+    val marker: JsonElement? = null,
+    val seriesNavigation: SeriesNavigation? = null,
+    val glossaryItems: List<JsonElement>? = null,
+    val replaceableItemIds: List<JsonElement>? = null,
+    @Serializable(with = IllustsSerializer::class)
+    val illusts: Map<String, NovelIllusts?>? = null,
+    @Serializable(with = ImagesSerializer::class)
+    val images: Map<String, NovelImage>? = null,
+    val aiType: Int? = null,
+    val isOriginal: Boolean? = null,
+)
+
+private class IllustsSerializer : KSerializer<Map<String, NovelIllusts?>?> {
+    override val descriptor = mapSerialDescriptor<String, NovelIllusts?>()
+
+    override fun deserialize(decoder: Decoder): Map<String, NovelIllusts?>? {
+        val jsonDecoder = decoder as? JsonDecoder ?: error("Only JSON supported")
+        // 空数组 [] 或任意 JsonArray → 返回 null
+        return when (val element = jsonDecoder.decodeJsonElement()) {
+            is JsonArray -> null
+            // null → 返回 null
+            is JsonNull -> null
+            // 正常 Map → 解析
+            is JsonObject -> element.mapValues { (_, v) ->
+                if (v is JsonNull || v is JsonObject && v["illust"] is JsonNull) {
+                    null
+                } else {
+                    Json.decodeFromJsonElement(NovelIllusts.serializer(), v)
+                }
+            }
+
+            else -> null
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: Map<String, NovelIllusts?>?) {
+        if (value == null) {
+            encoder.encodeNull()
+        } else {
+            val jsonEncoder = encoder as? JsonEncoder ?: error("Only JSON supported")
+            val obj = JsonObject(value.mapValues { (_, v) ->
+                if (v == null) JsonNull
+                else Json.encodeToJsonElement(NovelIllusts.serializer(), v)
+            })
+            jsonEncoder.encodeJsonElement(obj)
+        }
+    }
+}
+
+private class ImagesSerializer : KSerializer<Map<String, NovelImage>?> {
+    override val descriptor = mapSerialDescriptor<String, NovelImage>()
+
+    override fun deserialize(decoder: Decoder): Map<String, NovelImage>? {
+        val jsonDecoder = decoder as? JsonDecoder ?: error("Only JSON supported")
+        return when (val element = jsonDecoder.decodeJsonElement()) {
+            is JsonArray -> null
+            is JsonNull -> null
+            is JsonObject -> element.mapValues { (_, v) ->
+                Json.decodeFromJsonElement(NovelImage.serializer(), v)
+            }
+            else -> null
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: Map<String, NovelImage>?) {
+        if (value == null) {
+            encoder.encodeNull()
+        } else {
+            val jsonEncoder = encoder as? JsonEncoder ?: error("Only JSON supported")
+            val obj = JsonObject(value.mapValues { (_, v) ->
+                Json.encodeToJsonElement(NovelImage.serializer(), v)
+            })
+            jsonEncoder.encodeJsonElement(obj)
+        }
+    }
+}
+
+@Serializable
+@Immutable
+data class NovelIllusts(
+    val illust: NovelIllust,
+)
+
+@Serializable
+@Immutable
+data class NovelIllust(
+    val images: NovelIllustImages,
+)
+
+@Serializable
+@Immutable
+data class NovelIllustImages(
+    val small: String? = null,
+    val medium: String? = null,
+    val original: String? = null,
+)
+
+@Serializable
+@Immutable
+data class NovelRating(
+    val like: Int,
+    val bookmark: Int,
+    val view: Int,
+)
+
+@Serializable
+@Immutable
+data class NovelImage(
+    val novelImageId: String? = null,
+    val sl: String,
+    val urls: NovelUrls,
+)
+
+@Serializable
+@Immutable
+data class NovelUrls(
+    @SerialName("240mw")
+    val the240Mw: String? = null,
+    @SerialName("480mw")
+    val the480Mw: String? = null,
+    @SerialName("1200x1200")
+    val the1200X1200: String? = null,
+    @SerialName("128x128")
+    val the128X128: String? = null,
+    val original: String? = null,
 )
 
 @Serializable

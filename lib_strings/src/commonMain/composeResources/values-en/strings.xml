@@ -255,4 +255,22 @@
     <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">Cookie parse error</string>
     <string name="recommend_cookie_export_plugin">It is recommended to use the Chrome Web Store cookie export extensions &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; or &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;. Ensure the cookie contains the PHPSESSID field, and it must be exported in JSON format.</string>
+    <string name="ai_translation_setting">AI Translation Settings</string>
+    <string name="ai_provider">AI Provider</string>
+    <string name="ai_provider_openai">OpenAI</string>
+    <string name="ai_provider_claude">Claude</string>
+    <string name="ai_provider_gemini">Gemini</string>
+    <string name="ai_endpoint">Endpoint</string>
+    <string name="ai_endpoint_hint">For Claude/Gemini, use an available OpenAI-compatible endpoint (gateway/proxy).</string>
+    <string name="ai_api_key" translatable="false">API Key</string>
+    <string name="ai_model">Model</string>
+    <string name="ai_model_suggestions">Suggested Models</string>
+    <string name="translate_novel">Translate Novel</string>
+    <string name="regenerate_translation">Regenerate Translation</string>
+    <string name="delete_translation">Delete Translation</string>
+    <string name="ai_translation_config_required">Please complete AI translation settings first.</string>
+    <string name="ai_translation_failed">Translation failed: %1$s</string>
+    <string name="ai_translation_success">Translation completed</string>
+    <string name="ai_translation_cache_hit">Loaded translation from cache</string>
+    <string name="ai_translation_deleted">Translation deleted and original text restored</string>
 </resources>

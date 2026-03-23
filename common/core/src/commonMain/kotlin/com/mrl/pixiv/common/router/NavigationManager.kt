@@ -167,6 +167,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.FileNameFormat)
     }
 
+    fun navigateToAiTranslationSettingScreen() {
+        backStack.navigate(route = Destination.AiTranslationSetting)
+    }
+
     fun navigateToDownloadScreen() {
         backStack.navigate(route = Destination.Download)
     }

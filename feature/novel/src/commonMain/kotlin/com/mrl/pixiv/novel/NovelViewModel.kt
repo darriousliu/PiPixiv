@@ -1,13 +1,17 @@
 package com.mrl.pixiv.novel
 
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.text.intl.Locale
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.coroutine.withIOContext
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.novel.NovelTextResp
+import com.mrl.pixiv.common.data.setting.AiTranslationConfig
+import com.mrl.pixiv.common.repository.NovelAiTranslationService
 import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.NovelReadingProgressRepository
+import com.mrl.pixiv.common.repository.NovelTranslationRepository
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
@@ -17,6 +21,11 @@ import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import com.mrl.pixiv.strings.ai_translation_cache_hit
+import com.mrl.pixiv.strings.ai_translation_config_required
+import com.mrl.pixiv.strings.ai_translation_deleted
+import com.mrl.pixiv.strings.ai_translation_failed
+import com.mrl.pixiv.strings.ai_translation_success
 import com.mrl.pixiv.strings.load_failed
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.openFileSaver
@@ -25,6 +34,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.Json
+import okio.ByteString.Companion.toByteString
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 
@@ -32,6 +42,7 @@ import org.koin.core.component.KoinComponent
 data class NovelState(
     val loading: Boolean = true,
     val novel: Novel? = null,
+    val novelTextResp: NovelTextResp? = null,
     val novelText: String = "",
     val fontSize: Int = 16,
     val lineSpacingSp: Int = 0,
@@ -42,6 +53,8 @@ data class NovelState(
     val nextNovelId: Long? = null,
     val restoreProgress: NovelReadingProgress? = null,
     val restoreVersion: Long = 0L,
+    val isTranslating: Boolean = false,
+    val isTranslated: Boolean = false,
 )
 
 sealed class NovelIntent : ViewIntent {
@@ -53,16 +66,21 @@ sealed class NovelIntent : ViewIntent {
     data object ShareNovel : NovelIntent()
     data object ExportToTxt : NovelIntent()
     data class NavigateToChapter(val novelId: Long) : NovelIntent()
+    data class TranslateNovel(val forceRefresh: Boolean = false) : NovelIntent()
+    data object DeleteNovelTranslation : NovelIntent()
 }
 
 @KoinViewModel
 class NovelViewModel(
     novelId: Long,
-    private val readingProgressRepository: NovelReadingProgressRepository
+    private val readingProgressRepository: NovelReadingProgressRepository,
+    private val translationRepository: NovelTranslationRepository,
+    private val aiTranslationService: NovelAiTranslationService,
 ) : BaseMviViewModel<NovelState, NovelIntent>(
     initialState = NovelState()
 ), KoinComponent {
     private var latestProgress: NovelReadingProgress? = null
+    private var sourceNovelText: String = ""
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -83,35 +101,49 @@ class NovelViewModel(
             is NovelIntent.ShareNovel -> shareNovel()
             is NovelIntent.ExportToTxt -> exportToTxt()
             is NovelIntent.NavigateToChapter -> loadNovelDetail(intent.novelId)
+            is NovelIntent.TranslateNovel -> translateNovel(intent.forceRefresh)
+            is NovelIntent.DeleteNovelTranslation -> deleteNovelTranslation()
         }
     }
 
     private fun loadNovelDetail(novelId: Long) {
         launchIO(
             onError = { e ->
-                updateState { copy(loading = false) }
+                sourceNovelText = ""
+                updateState { copy(loading = false, isTranslating = false, isTranslated = false) }
                 handleError(e)
                 ToastUtil.safeShortToast(RStrings.load_failed, e.message)
             }
         ) {
-            updateState { copy(loading = true, restoreProgress = null) }
+            updateState {
+                copy(
+                    loading = true,
+                    restoreProgress = null,
+                    isTranslating = false,
+                    isTranslated = false,
+                )
+            }
             val response = PixivRepository.getNovelDetail(novelId)
             val novel = response.novel
 
             val novelHtml = PixivRepository.getNovelContent(novelId)
             val novelText = extractNovelData(novelHtml)
             val text = novelText?.text.orEmpty()
+            sourceNovelText = text
             val paragraphs = text.split("\n").toImmutableList()
 
             updateState {
                 copy(
                     loading = false,
                     novel = novel,
+                    novelTextResp = novelText,
                     novelText = text,
                     paragraphs = paragraphs,
                     isBookmarked = novel.isBookmarked,
                     prevNovelId = novelText?.seriesNavigation?.prevNovel?.id,
                     nextNovelId = novelText?.seriesNavigation?.nextNovel?.id,
+                    isTranslating = false,
+                    isTranslated = false,
                 )
             }
 
@@ -198,6 +230,121 @@ class NovelViewModel(
         }
     }
 
+    private fun translateNovel(forceRefresh: Boolean = false) {
+        if (uiState.value.isTranslating) return
+
+        val novel = uiState.value.novel ?: return
+        val sourceText = sourceNovelText.trim().ifBlank { uiState.value.novelText.trim() }
+        if (sourceText.isBlank()) return
+
+        val config = requireUserPreferenceValue.aiTranslationConfig.normalized()
+        if (!config.isReady()) {
+            ToastUtil.safeShortToast(RStrings.ai_translation_config_required)
+            return
+        }
+
+        val sourceMd5 = sourceText.toMd5Hex()
+        val targetLanguageTag = resolveTargetLanguageTag()
+
+        launchIO(
+            onError = { throwable ->
+                updateState { copy(isTranslating = false) }
+                handleError(throwable)
+                ToastUtil.safeShortToast(RStrings.ai_translation_failed, throwable.message.orEmpty())
+            }
+        ) {
+            updateState { copy(isTranslating = true) }
+
+            val cached = if (!forceRefresh) {
+                translationRepository.getTranslation(
+                    novelId = novel.id,
+                    targetLanguage = targetLanguageTag,
+                )
+            } else {
+                null
+            }
+
+            val translatedText = if (
+                cached != null &&
+                cached.provider == config.provider &&
+                cached.model == config.model &&
+                cached.sourceMd5 == sourceMd5 &&
+                cached.translatedText.isNotBlank()
+            ) {
+                ToastUtil.safeShortToast(RStrings.ai_translation_cache_hit)
+                cached.translatedText
+            } else {
+                val translated = aiTranslationService.translate(
+                    text = sourceText,
+                    targetLanguageTag = targetLanguageTag,
+                    config = config,
+                )
+                translationRepository.saveTranslation(
+                    novelId = novel.id,
+                    targetLanguage = targetLanguageTag,
+                    provider = config.provider,
+                    model = config.model,
+                    sourceMd5 = sourceMd5,
+                    translatedText = translated,
+                )
+                ToastUtil.safeShortToast(RStrings.ai_translation_success)
+                translated
+            }
+
+            val translatedParagraphs = translatedText.split("\n").toImmutableList()
+            updateState {
+                copy(
+                    novelText = translatedText,
+                    paragraphs = translatedParagraphs,
+                    isTranslating = false,
+                    isTranslated = true,
+                )
+            }
+
+            requestRestoreProgress(
+                novelId = novel.id,
+                paragraphs = translatedParagraphs,
+            )
+        }
+    }
+
+    private fun deleteNovelTranslation() {
+        if (uiState.value.isTranslating) return
+
+        val novel = uiState.value.novel ?: return
+        val sourceText = sourceNovelText.trim().ifBlank { uiState.value.novelText.trim() }
+        if (sourceText.isBlank()) return
+
+        val targetLanguageTag = resolveTargetLanguageTag()
+
+        launchIO(
+            onError = { throwable ->
+                handleError(throwable)
+                ToastUtil.safeShortToast(RStrings.ai_translation_failed, throwable.message.orEmpty())
+            }
+        ) {
+            translationRepository.deleteTranslation(
+                novelId = novel.id,
+                targetLanguage = targetLanguageTag,
+            )
+
+            val sourceParagraphs = sourceText.split("\n").toImmutableList()
+            updateState {
+                copy(
+                    novelText = sourceText,
+                    paragraphs = sourceParagraphs,
+                    isTranslated = false,
+                )
+            }
+
+            requestRestoreProgress(
+                novelId = novel.id,
+                paragraphs = sourceParagraphs,
+            )
+            ToastUtil.safeShortToast(RStrings.ai_translation_deleted)
+        }
+    }
+
     fun saveProgress(novelId: Long, progress: NovelReadingProgress) {
         latestProgress = progress
         launchIO {
@@ -241,4 +388,26 @@ class NovelViewModel(
             charIndex = saved.charIndex.coerceIn(0, targetLength)
         )
     }
+
+    private fun resolveTargetLanguageTag(): String {
+        return requireUserPreferenceValue.appLanguage
+            ?.takeIf { it.isNotBlank() }
+            ?: Locale.current.toLanguageTag().ifBlank { "en" }
+    }
+}
+
+private fun AiTranslationConfig.normalized(): AiTranslationConfig {
+    return copy(
+        endpoint = endpoint.trim(),
+        apiKey = apiKey.trim(),
+        model = model.trim(),
+    )
+}
+
+private fun AiTranslationConfig.isReady(): Boolean {
+    return endpoint.isNotBlank() && apiKey.isNotBlank() && model.isNotBlank()
+}
+
+private fun String.toMd5Hex(): String {
+    return encodeToByteArray().toByteString().md5().hex()
 }

@@ -22,6 +22,7 @@ kotlin {
             implementation(libs.bundles.coil3)
             implementation(kotlinx.serialization.json)
             implementation(libs.filekit.dialogs)
+            implementation(libs.okio)
         }
     }
 }

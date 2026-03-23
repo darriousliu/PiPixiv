@@ -1,0 +1,18 @@
+package com.mrl.pixiv.common.datasource.local.entity
+
+import androidx.room.Entity
+
+@Entity(
+    tableName = "novel_translation",
+    primaryKeys = ["novelId", "userId", "targetLanguage"]
+)
+data class NovelTranslationEntity(
+    val novelId: Long,
+    val userId: Long,
+    val targetLanguage: String,
+    val provider: String,
+    val model: String,
+    val sourceMd5: String,
+    val translatedText: String,
+    val updatedAtMillis: Long,
+)

@@ -71,6 +71,9 @@ sealed class Destination : NavKey {
     data object FileNameFormat : Destination()
 
     @Serializable
+    data object AiTranslationSetting : Destination()
+
+    @Serializable
     data object History : Destination()
 
     @Serializable

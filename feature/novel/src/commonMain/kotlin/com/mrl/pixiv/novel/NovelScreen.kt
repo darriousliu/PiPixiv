@@ -30,13 +30,17 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -70,9 +74,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.touchlab.kermit.Logger
@@ -82,6 +93,7 @@ import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.NovelReadingProgress
@@ -92,22 +104,25 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
 import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.bookmark
 import com.mrl.pixiv.strings.bookmarked
 import com.mrl.pixiv.strings.chapter_next
 import com.mrl.pixiv.strings.chapter_previous
 import com.mrl.pixiv.strings.cover
+import com.mrl.pixiv.strings.delete_translation
 import com.mrl.pixiv.strings.export_txt_button
 import com.mrl.pixiv.strings.font_size_value
 import com.mrl.pixiv.strings.line_spacing_value
 import com.mrl.pixiv.strings.more
+import com.mrl.pixiv.strings.regenerate_translation
 import com.mrl.pixiv.strings.share_link
+import com.mrl.pixiv.strings.translate_novel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -190,10 +205,18 @@ fun NovelScreen(
         paragraphLayouts.clear()
         listState.scrollToItem(targetItemIndex, 0)
 
-        // 等待目标段落的布局完成
-        val layout = snapshotFlow { paragraphLayouts[resolvedProgress.paragraphIndex] }
-            .filterNotNull()
-            .first()
+        // 等待目标段落的布局完成。包含图片标记的段落可能没有文本布局，这里做超时兜底。
+        val layout = withTimeoutOrNull(500L) {
+            while (paragraphLayouts[resolvedProgress.paragraphIndex] == null) {
+                delay(16)
+            }
+            paragraphLayouts[resolvedProgress.paragraphIndex]
+        } ?: run {
+            Logger.d(tag = "NovelScreen") {
+                "Restore: paragraphIndex=${resolvedProgress.paragraphIndex} has no text layout, keep item-top restore."
+            }
+            return@LaunchedEffect
+        }
 
         val targetParagraph = state.paragraphs[resolvedProgress.paragraphIndex]
         val targetCharIndex = resolvedProgress.charIndex.coerceIn(0, targetParagraph.length)
@@ -230,8 +253,49 @@ fun NovelScreen(
                 exit = slideOutVertically(targetOffsetY = { it })
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = 8.spaceBy
                 ) {
+                    FloatingActionButton(
+                        onClick = {
+                            if (!state.isTranslating) {
+                                viewModel.dispatch(NovelIntent.TranslateNovel(forceRefresh = state.isTranslated))
+                            }
+                        },
+                    ) {
+                        if (state.isTranslating) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = if (state.isTranslated) {
+                                    Icons.Rounded.Refresh
+                                } else {
+                                    Icons.Rounded.Translate
+                                },
+                                contentDescription = stringResource(
+                                    if (state.isTranslated) {
+                                        RStrings.regenerate_translation
+                                    } else {
+                                        RStrings.translate_novel
+                                    }
+                                )
+                            )
+                        }
+                    }
+
+                    if (state.isTranslated && !state.isTranslating) {
+                        FloatingActionButton(
+                            onClick = { viewModel.dispatch(NovelIntent.DeleteNovelTranslation) },
+                        ) {
+                            Icon(
+                                Icons.Rounded.Delete,
+                                contentDescription = stringResource(RStrings.delete_translation)
+                            )
+                        }
+                    }
+
                     // 上一章按钮
                     if (state.prevNovelId != null) {
                         FloatingActionButton(
@@ -300,7 +364,10 @@ fun NovelScreen(
                                 isIdSearch = false,
                                 searchMode = AppViewMode.NOVEL
                             )
-                        }
+                        },
+                        onPixivImageClick = { illustId ->
+                            navigationManager.navigateToSinglePictureScreen(illustId)
+                        },
                     )
                     AnimatedVisibility(
                         visible = showBar,
@@ -374,7 +441,11 @@ fun NovelScreen(
                     viewModel.dispatch(NovelIntent.UpdateLineSpacing(it))
                 },
                 onExport = { viewModel.dispatch(NovelIntent.ExportToTxt) },
-                onShare = { viewModel.dispatch(NovelIntent.ShareNovel) }
+                onShare = { viewModel.dispatch(NovelIntent.ShareNovel) },
+                onAiSetting = {
+                    viewModel.dispatch(NovelIntent.ToggleBottomSheet)
+                    navigationManager.navigateToAiTranslationSettingScreen()
+                },
             )
         }
     }
@@ -387,9 +458,11 @@ private fun NovelContent(
     modifier: Modifier = Modifier,
     onParagraphTextLayout: (Int, TextLayoutResult) -> Unit,
     onContentClick: () -> Unit = {},
-    onTagClick: (String) -> Unit
+    onTagClick: (String) -> Unit,
+    onPixivImageClick: (Long) -> Unit,
 ) {
     val novel = state.novel ?: return
+    val spanParser = remember { NovelSpanParser() }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -543,28 +616,212 @@ private fun NovelContent(
             key = { it }
         ) { index ->
             val paragraph = state.paragraphs[index]
-            Text(
-                text = paragraph,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = state.fontSize.sp,
-                    lineHeight = (state.fontSize + state.lineSpacingSp + 8).sp
-                ),
-                onTextLayout = { layoutResult ->
-                    onParagraphTextLayout(index, layoutResult)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .combinedClickable(
-                        interactionSource = null,
-                        indication = null,
-                        onClick = onContentClick
-                    )
+            NovelParagraph(
+                paragraph = paragraph,
+                paragraphIndex = index,
+                fontSize = state.fontSize,
+                lineSpacingSp = state.lineSpacingSp,
+                parser = spanParser,
+                novelTextResp = state.novelTextResp,
+                onParagraphTextLayout = onParagraphTextLayout,
+                onContentClick = onContentClick,
+                onPixivImageClick = onPixivImageClick,
             )
         }
 
         item(key = KEY_SPACER_END) { Spacer(modifier = Modifier.height(32.dp)) }
     }
+}
+
+private data class ParagraphRenderData(
+    val annotatedText: AnnotatedString,
+    val pixivImages: List<NovelSpanData.PixivImage>,
+    val uploadedImageUrls: List<String>,
+    val hasNewPage: Boolean,
+)
+
+@Composable
+private fun NovelParagraph(
+    paragraph: String,
+    paragraphIndex: Int,
+    fontSize: Int,
+    lineSpacingSp: Int,
+    parser: NovelSpanParser,
+    novelTextResp: NovelTextResp?,
+    onParagraphTextLayout: (Int, TextLayoutResult) -> Unit,
+    onContentClick: () -> Unit,
+    onPixivImageClick: (Long) -> Unit,
+) {
+    val uriHandler = LocalUriHandler.current
+    val linkColor = MaterialTheme.colorScheme.primary
+    val textStyle = MaterialTheme.typography.bodyLarge.copy(
+        fontSize = fontSize.sp,
+        lineHeight = (fontSize + lineSpacingSp + 8).sp
+    )
+
+    val spans = remember(paragraph, novelTextResp) {
+        parser.buildSpans(paragraph, novelTextResp)
+    }
+    val renderData = remember(spans, linkColor, uriHandler) {
+        buildParagraphRenderData(spans = spans, linkColor = linkColor, uriHandler = uriHandler)
+    }
+
+    val baseTextModifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp)
+        .combinedClickable(
+            interactionSource = null,
+            indication = null,
+            onClick = onContentClick
+        )
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (renderData.hasNewPage) {
+            Text(text = "\n")
+        }
+
+        if (renderData.annotatedText.text.isNotBlank()) {
+            Text(
+                text = renderData.annotatedText,
+                style = textStyle,
+                onTextLayout = { layoutResult ->
+                    onParagraphTextLayout(paragraphIndex, layoutResult)
+                },
+                modifier = baseTextModifier,
+            )
+        } else {
+            Text(
+                text = "\u200B",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 1.sp,
+                    lineHeight = 1.sp
+                ),
+                color = Color.Transparent,
+                onTextLayout = { layoutResult ->
+                    onParagraphTextLayout(paragraphIndex, layoutResult)
+                },
+                modifier = baseTextModifier
+            )
+        }
+
+        renderData.pixivImages.forEach { image ->
+            val imageUrl = image.imageUrl
+            if (imageUrl.isNullOrBlank()) {
+                Text(
+                    text = image.token,
+                    style = textStyle,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .combinedClickable(
+                            interactionSource = null,
+                            indication = null,
+                            onClick = onContentClick
+                        )
+                )
+            } else {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalPlatformContext.current)
+                        .data(imageUrl)
+                        .build(),
+                    contentDescription = image.token,
+                    contentScale = ContentScale.FillWidth,
+                    placeholder = rememberVectorPainter(Icons.Rounded.Refresh),
+                    error = rememberVectorPainter(Icons.Rounded.ErrorOutline),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .combinedClickable(
+                            interactionSource = null,
+                            indication = null,
+                            onClick = {
+                                onPixivImageClick(image.illustId)
+                            }
+                        ),
+                )
+            }
+        }
+
+        renderData.uploadedImageUrls.forEach { uploadedImageUrl ->
+            AsyncImage(
+                model = ImageRequest.Builder(LocalPlatformContext.current)
+                    .data(uploadedImageUrl)
+                    .build(),
+                contentDescription = uploadedImageUrl,
+                contentScale = ContentScale.FillWidth,
+                placeholder = rememberVectorPainter(Icons.Rounded.Refresh),
+                error = rememberVectorPainter(Icons.Rounded.ErrorOutline),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .combinedClickable(
+                        interactionSource = null,
+                        indication = null,
+                        onClick = {
+                            uriHandler.openUri(uploadedImageUrl)
+                        }
+                    ),
+            )
+        }
+    }
+}
+
+private fun buildParagraphRenderData(
+    spans: List<NovelSpanData>,
+    linkColor: Color,
+    uriHandler: UriHandler,
+): ParagraphRenderData {
+    val pixivImages = mutableListOf<NovelSpanData.PixivImage>()
+    val uploadedImageUrls = mutableListOf<String>()
+    var hasNewPage = false
+    val annotatedText = buildAnnotatedString {
+        spans.forEach { span ->
+            when (span) {
+                is NovelSpanData.Text -> append(span.value)
+                is NovelSpanData.JumpUri -> {
+                    val start = length
+                    append(span.value)
+                    addStyle(
+                        style = SpanStyle(
+                            color = linkColor,
+                            textDecoration = TextDecoration.Underline
+                        ),
+                        start = start,
+                        end = length
+                    )
+                    addLink(
+                        url = LinkAnnotation.Url(span.url) {
+                            uriHandler.openUri(span.url)
+                        },
+                        start = start,
+                        end = length
+                    )
+                }
+
+                is NovelSpanData.PixivImage -> {
+                    pixivImages += span
+                }
+
+                is NovelSpanData.UploadedImage -> {
+                    uploadedImageUrls += span.url
+                }
+
+                NovelSpanData.NewPage -> {
+                    hasNewPage = true
+                }
+            }
+        }
+    }
+
+    return ParagraphRenderData(
+        annotatedText = annotatedText,
+        pixivImages = pixivImages,
+        uploadedImageUrls = uploadedImageUrls,
+        hasNewPage = hasNewPage,
+    )
 }
 
 private fun paragraphStartItemIndex(
@@ -587,17 +844,23 @@ private fun buildVisibleReadingProgress(
     if (paragraphCount <= 0) return null
     val layoutInfo = listState.layoutInfo
     val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull() ?: return null
-    val firstVisibleIndex = firstVisibleItem.index
-    if (firstVisibleIndex !in paragraphStartIndex until (paragraphStartIndex + paragraphCount)) {
+    val contentRange = paragraphStartIndex until (paragraphStartIndex + paragraphCount)
+    if (firstVisibleItem.index !in contentRange) {
         return null
     }
 
-    val paragraphIndex = (firstVisibleIndex - paragraphStartIndex).coerceIn(0, paragraphCount - 1)
+    val textVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->
+        val paragraphIndex = itemInfo.index - paragraphStartIndex
+        paragraphIndex in 0 until paragraphCount && paragraphLayouts[paragraphIndex] != null
+    } ?: return null
+
+    val paragraphIndex =
+        (textVisibleItem.index - paragraphStartIndex).coerceIn(0, paragraphCount - 1)
     val paragraphLayout = paragraphLayouts[paragraphIndex] ?: return null
 
     // 计算视口顶部相对于段落的Y坐标
-    val yInParagraph = (layoutInfo.viewportStartOffset - firstVisibleItem.offset)
-        .coerceIn(0, firstVisibleItem.size - 1)
+    val yInParagraph = (layoutInfo.viewportStartOffset - textVisibleItem.offset)
+        .coerceIn(0, textVisibleItem.size - 1)
         .toFloat()
 
     // 获取视口顶部对应的字符位置
@@ -631,6 +894,7 @@ private fun NovelBottomSheetContent(
     onLineSpacingChange: (Int) -> Unit,
     onExport: () -> Unit,
     onShare: () -> Unit,
+    onAiSetting: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -692,6 +956,17 @@ private fun NovelBottomSheetContent(
             Icon(Icons.Rounded.Share, contentDescription = null)
             8.HSpacer
             Text(stringResource(RStrings.share_link))
+        }
+
+        HorizontalDivider()
+
+        TextButton(
+            onClick = onAiSetting,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Rounded.Settings, contentDescription = null)
+            8.HSpacer
+            Text(stringResource(RStrings.ai_translation_setting))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
