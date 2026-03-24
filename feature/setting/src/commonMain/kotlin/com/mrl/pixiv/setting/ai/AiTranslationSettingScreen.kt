@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Translate
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -46,6 +47,7 @@ import com.mrl.pixiv.strings.ai_api_key
 import com.mrl.pixiv.strings.ai_endpoint
 import com.mrl.pixiv.strings.ai_model
 import com.mrl.pixiv.strings.ai_model_suggestions
+import com.mrl.pixiv.strings.ai_openai_use_response_api
 import com.mrl.pixiv.strings.ai_provider
 import com.mrl.pixiv.strings.ai_provider_claude
 import com.mrl.pixiv.strings.ai_provider_gemini
@@ -67,12 +69,14 @@ fun AiTranslationSettingScreen(
     var endpoint by rememberSaveable { mutableStateOf(currentConfig.endpoint) }
     var apiKey by rememberSaveable { mutableStateOf(currentConfig.apiKey) }
     var model by rememberSaveable { mutableStateOf(currentConfig.model) }
+    var responseApi by rememberSaveable { mutableStateOf(currentConfig.responseApi) }
 
     LaunchedEffect(currentConfig) {
         providerName = currentConfig.provider.name
         endpoint = currentConfig.endpoint
         apiKey = currentConfig.apiKey
         model = currentConfig.model
+        responseApi = currentConfig.responseApi
     }
 
     val selectedProvider = remember(providerName) {
@@ -107,6 +111,7 @@ fun AiTranslationSettingScreen(
                                     model = model.trim().ifEmpty {
                                         AiTranslationConfig.defaultModel(selectedProvider).modelId
                                     },
+                                    responseApi = selectedProvider == AiProvider.OPENAI && responseApi,
                                 )
                             )
                             navigationManager.popBackStack()
@@ -161,6 +166,27 @@ fun AiTranslationSettingScreen(
                 label = { Text(stringResource(RStrings.ai_model)) },
                 singleLine = true,
             )
+
+            if (selectedProvider == AiProvider.OPENAI) {
+                ListItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .throttleClick {
+                            responseApi = !responseApi
+                        },
+                    headlineContent = {
+                        Text(text = stringResource(RStrings.ai_openai_use_response_api))
+                    },
+                    trailingContent = {
+                        Checkbox(
+                            checked = responseApi,
+                            onCheckedChange = { checked ->
+                                responseApi = checked
+                            }
+                        )
+                    }
+                )
+            }
 
             Text(
                 text = stringResource(RStrings.ai_model_suggestions),

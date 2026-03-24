@@ -262,6 +262,7 @@
     <string name="ai_endpoint">Endpoint</string>
     <string name="ai_api_key" translatable="false">API Key</string>
     <string name="ai_model">Model</string>
+    <string name="ai_openai_use_response_api">Use Response API</string>
     <string name="ai_model_suggestions">Suggested Models</string>
     <string name="ai_translation_config_required">Please complete AI translation settings first.</string>
     <string name="ai_translation_failed">Translation failed: %1$s</string>
