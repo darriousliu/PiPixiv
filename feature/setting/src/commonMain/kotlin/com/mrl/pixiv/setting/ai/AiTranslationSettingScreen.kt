@@ -3,6 +3,7 @@ package com.mrl.pixiv.setting.ai
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -111,7 +112,7 @@ fun AiTranslationSettingScreen(
                             navigationManager.popBackStack()
                         }
                     ) {
-                        Text(stringResource(RStrings.save))
+                        Text(text = stringResource(RStrings.save))
                     }
                 }
             )
@@ -121,24 +122,18 @@ fun AiTranslationSettingScreen(
             modifier = modifier
                 .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .imePadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ProviderItem(
                 provider = selectedProvider,
-                onProviderChange = { nextProvider ->
+                onProviderChange = change@{ nextProvider ->
+                    if (nextProvider == selectedProvider) return@change
                     providerName = nextProvider.name
-                    if (endpoint.isBlank() || endpoint == AiTranslationConfig.defaultEndpoint(
-                            selectedProvider
-                        )
-                    ) {
-                        endpoint = AiTranslationConfig.defaultEndpoint(nextProvider)
-                    }
-                    if (model.isBlank() || model == AiTranslationConfig.defaultModel(
-                            selectedProvider
-                        ).modelId) {
-                        model = AiTranslationConfig.defaultModel(nextProvider).modelId
-                    }
+                    endpoint = AiTranslationConfig.defaultEndpoint(nextProvider)
+                    model = AiTranslationConfig.defaultModel(nextProvider).modelId
+                    apiKey = ""
                 }
             )
 
@@ -146,7 +141,7 @@ fun AiTranslationSettingScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = endpoint,
                 onValueChange = { endpoint = it },
-                label = { Text(stringResource(RStrings.ai_endpoint)) },
+                label = { Text(text = stringResource(RStrings.ai_endpoint)) },
                 singleLine = true,
             )
 
@@ -154,7 +149,7 @@ fun AiTranslationSettingScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = apiKey,
                 onValueChange = { apiKey = it },
-                label = { Text(stringResource(RStrings.ai_api_key)) },
+                label = { Text(text = stringResource(RStrings.ai_api_key)) },
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine = true,
             )
