@@ -7,9 +7,10 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
-import com.mrl.pixiv.common.data.user.UserBookmarksIllustQuery
+import com.mrl.pixiv.common.data.user.UserBookmarksQuery
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.paging.CollectionIllustPagingSource
+import com.mrl.pixiv.common.repository.paging.CollectionNovelPagingSource
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
@@ -27,9 +28,13 @@ import org.koin.android.annotation.KoinViewModel
 data class CollectionState(
     val restrict: Restrict = Restrict.PUBLIC,
     val filterTag: String? = null,
+    val novelRestrict: Restrict = Restrict.PUBLIC,
+    val novelFilterTag: String? = null,
     val userBookmarksNovels: ImmutableList<Novel> = persistentListOf(),
     val userBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
     val privateBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
+    val userBookmarkTagsNovel: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
+    val privateBookmarkTagsNovel: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
 )
 
 @Stable
@@ -42,6 +47,7 @@ data class RestrictBookmarkTag(
 
 sealed class CollectionAction : ViewIntent {
     data class LoadUserBookmarksTagsIllust(val restrict: Restrict) : CollectionAction()
+    data class LoadUserBookmarksTagsNovel(val restrict: Restrict) : CollectionAction()
 }
 
 @KoinViewModel
@@ -52,7 +58,7 @@ class CollectionViewModel(
 ) {
     val userBookmarksIllusts = Pager(PagingConfig(pageSize = 20)) {
         CollectionIllustPagingSource(
-            uid, UserBookmarksIllustQuery(
+            uid, UserBookmarksQuery(
                 restrict = state.restrict,
                 userId = uid,
                 tag = state.filterTag
@@ -60,9 +66,20 @@ class CollectionViewModel(
         )
     }.flow.cachedIn(viewModelScope)
 
+    val userBookmarksNovels = Pager(PagingConfig(pageSize = 30)) {
+        CollectionNovelPagingSource(
+            UserBookmarksQuery(
+                restrict = state.novelRestrict,
+                userId = uid,
+                tag = state.novelFilterTag
+            )
+        )
+    }.flow.cachedIn(viewModelScope)
+
     override suspend fun handleIntent(intent: CollectionAction) {
         when (intent) {
             is CollectionAction.LoadUserBookmarksTagsIllust -> loadUserBookmarkTagsIllust(intent.restrict)
+            is CollectionAction.LoadUserBookmarksTagsNovel -> loadUserBookmarkTagsNovel(intent.restrict)
         }
     }
 
@@ -71,6 +88,15 @@ class CollectionViewModel(
             copy(
                 restrict = restrict,
                 filterTag = filterTag
+            )
+        }
+    }
+
+    fun updateNovelFilterTag(restrict: Restrict, filterTag: String?) {
+        updateState {
+            copy(
+                novelRestrict = restrict,
+                novelFilterTag = filterTag
             )
         }
     }
@@ -98,6 +124,43 @@ class CollectionViewModel(
                 } else {
                     copy(
                         privateBookmarkTagsIllust = (generateInitialTags(false) +
+                                resp.bookmarkTags.map {
+                                    RestrictBookmarkTag(
+                                        isPublic = false,
+                                        count = it.count,
+                                        displayName = it.name,
+                                        name = it.name
+                                    )
+                                }).toImmutableList()
+                    )
+                }
+            }
+        }
+    }
+
+    private fun loadUserBookmarkTagsNovel(restrict: Restrict) {
+        launchIO {
+            val resp = PixivRepository.getUserBookmarkTagsNovel(
+                userId = uid,
+                restrict = restrict.value
+            )
+            val isPublic = restrict == Restrict.PUBLIC
+            updateState {
+                if (isPublic) {
+                    copy(
+                        userBookmarkTagsNovel = (generateInitialTags(true) +
+                                resp.bookmarkTags.map {
+                                    RestrictBookmarkTag(
+                                        isPublic = true,
+                                        count = it.count,
+                                        displayName = it.name,
+                                        name = it.name
+                                    )
+                                }).toImmutableList()
+                    )
+                } else {
+                    copy(
+                        privateBookmarkTagsNovel = (generateInitialTags(false) +
                                 resp.bookmarkTags.map {
                                     RestrictBookmarkTag(
                                         isPublic = false,

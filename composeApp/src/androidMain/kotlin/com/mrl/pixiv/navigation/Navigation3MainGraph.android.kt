@@ -37,6 +37,14 @@ internal actual fun HandleDeeplink(
                         )
                     )
                 }
+
+                DestinationsDeepLink.novelRegex.matches(data.toString()) -> {
+                    navigationManager.navigate(
+                        Destination.NovelDetail(
+                            data.getQueryParameter("id")?.toLong() ?: 0
+                        )
+                    )
+                }
             }
         }
     }

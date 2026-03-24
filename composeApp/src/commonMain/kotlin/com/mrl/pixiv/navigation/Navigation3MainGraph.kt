@@ -36,6 +36,7 @@ import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.LocalToaster
+import com.mrl.pixiv.common.compose.listener.EscBackHandler
 import com.mrl.pixiv.common.repository.IllustCacheRepo
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
@@ -48,6 +49,8 @@ import com.mrl.pixiv.history.HistoryScreen
 import com.mrl.pixiv.login.LoginOptionScreen
 import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
+import com.mrl.pixiv.login.oauth.WebCookieLoginScreen
+import com.mrl.pixiv.novel.NovelScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
@@ -57,6 +60,7 @@ import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.FileNameFormatScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
+import com.mrl.pixiv.setting.ai.AiTranslationSettingScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
 import com.mrl.pixiv.setting.download.DownloadScreen
@@ -83,6 +87,10 @@ fun Navigation3MainGraph(
 
     HandleDeeplink(navigationManager)
     LogScreen(navigationManager)
+    EscBackHandler {
+        if (navigationManager.backStack.isEmpty()) return@EscBackHandler
+        navigationManager.popBackStack()
+    }
     SharedTransitionLayout {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,
@@ -114,14 +122,16 @@ fun Navigation3MainGraph(
                         OAuthLoginScreen()
                     }
 
+                    entry<Destination.WebCookieLogin> {
+                        WebCookieLoginScreen()
+                    }
+
                     entry<Destination.Main> {
                         MainScreen()
                     }
 
                     // 详情页
-                    entry<Destination.ProfileDetail>(
-                        metadata = ListDetailSceneStrategy.detailPane()
-                    ) {
+                    entry<Destination.ProfileDetail> {
                         ProfileDetailScreen(
                             uid = it.userId
                         )
@@ -153,11 +163,10 @@ fun Navigation3MainGraph(
                     entry<Destination.SearchResults>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
-                        val searchWord = it.searchWords
-                        val isIdSearch = it.isIdSearch
                         SearchResultsScreen(
-                            searchWords = searchWord,
-                            isIdSearch = isIdSearch,
+                            searchWords = it.searchWords,
+                            searchMode = it.searchMode,
+                            isIdSearch = it.isIdSearch,
                         )
                     }
 
@@ -180,6 +189,12 @@ fun Navigation3MainGraph(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
                         FileNameFormatScreen()
+                    }
+
+                    entry<Destination.AiTranslationSetting>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        AiTranslationSettingScreen()
                     }
 
                     // 历史记录
@@ -211,18 +226,17 @@ fun Navigation3MainGraph(
 
                     // 横向滑动作品详情页
                     entry<Destination.Picture>(
-                        metadata = ListDetailSceneStrategy.detailPane() +
-                                NavDisplay.transitionSpec {
-                                    scaleIn(
-                                        DefaultFloatAnimationSpec,
-                                        initialScale = 0.9f
-                                    ) + fadeIn(
-                                        DefaultFloatAnimationSpec
-                                    ) togetherWith scaleOut(
-                                        DefaultFloatAnimationSpec,
-                                        targetScale = 1.1f
-                                    ) + fadeOut(DefaultFloatAnimationSpec)
-                                } +
+                        metadata = NavDisplay.transitionSpec {
+                            scaleIn(
+                                DefaultFloatAnimationSpec,
+                                initialScale = 0.9f
+                            ) + fadeIn(
+                                DefaultFloatAnimationSpec
+                            ) togetherWith scaleOut(
+                                DefaultFloatAnimationSpec,
+                                targetScale = 1.1f
+                            ) + fadeOut(DefaultFloatAnimationSpec)
+                        } +
                                 NavDisplay.predictivePopTransitionSpec {
                                     scaleIn(
                                         DefaultFloatAnimationSpec,
@@ -278,6 +292,11 @@ fun Navigation3MainGraph(
                         ReportScreen(
                             id = it.id,
                             type = it.type,
+                        )
+                    }
+                    entry<Destination.NovelDetail> {
+                        NovelScreen(
+                            novelId = it.novelId
                         )
                     }
                 }

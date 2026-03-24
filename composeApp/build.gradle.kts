@@ -39,6 +39,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":lib_strings"))
+                implementation(project(":common:ai"))
                 implementation(project(":common:data"))
                 implementation(project(":common:datasource-local"))
                 implementation(project(":common:network"))

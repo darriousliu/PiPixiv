@@ -4,17 +4,17 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Restrict
-import com.mrl.pixiv.common.data.user.UserBookmarksIllustQuery
+import com.mrl.pixiv.common.data.user.UserBookmarksQuery
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
-import com.mrl.pixiv.common.repository.util.filterNormal
+import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
 
 class CollectionIllustPagingSource(
     private val userId: Long,
-    private val query: UserBookmarksIllustQuery
-) : PagingSource<UserBookmarksIllustQuery, Illust>() {
-    override suspend fun load(params: LoadParams<UserBookmarksIllustQuery>): LoadResult<UserBookmarksIllustQuery, Illust> {
+    private val query: UserBookmarksQuery
+) : PagingSource<UserBookmarksQuery, Illust>() {
+    override suspend fun load(params: LoadParams<UserBookmarksQuery>): LoadResult<UserBookmarksQuery, Illust> {
         return try {
             val resp = if (params.key == null) {
                 with(query) {
@@ -27,10 +27,10 @@ class CollectionIllustPagingSource(
             val illusts = if (requireUserPreferenceValue.isR18Enabled) {
                 resp.illusts.distinctBy { it.id }
             } else {
-                resp.illusts.distinctBy { it.id }.filterNormal()
+                resp.illusts.distinctBy { it.id }.filterNormalIllust()
             }
             if (query != null) {
-                val nextKey = UserBookmarksIllustQuery(
+                val nextKey = UserBookmarksQuery(
                     restrict = query["restrict"]?.let { Restrict.fromValue(it) } ?: Restrict.PUBLIC,
                     tag = query["tag"],
                     userId = query["user_id"]?.toLongOrNull() ?: userId,
@@ -53,7 +53,7 @@ class CollectionIllustPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<UserBookmarksIllustQuery, Illust>): UserBookmarksIllustQuery? {
+    override fun getRefreshKey(state: PagingState<UserBookmarksQuery, Illust>): UserBookmarksQuery? {
         return null
     }
 }

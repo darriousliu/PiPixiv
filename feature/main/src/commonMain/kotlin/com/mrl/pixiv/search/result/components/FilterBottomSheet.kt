@@ -58,6 +58,7 @@ internal fun FilterBottomSheet(
     onDismissRequest: () -> Unit,
     onUpdateFilter: (SearchFilter) -> Unit,
     modifier: Modifier = Modifier,
+    isNovelMode: Boolean = false,
 ) {
     var innerSearchFilter by remember { mutableStateOf(searchFilter) }
     val scope = rememberCoroutineScope()
@@ -68,21 +69,38 @@ internal fun FilterBottomSheet(
         sheetState = bottomSheetState,
         containerColor = MaterialTheme.colorScheme.background,
     ) {
-        val searchTargetMap = remember {
-            mapOf(
-                SearchTarget.PARTIAL_MATCH_FOR_TAGS to RStrings.tags_partially_match,
-                SearchTarget.EXACT_MATCH_FOR_TAGS to RStrings.tags_exact_match,
-                SearchTarget.TITLE_AND_CAPTION to RStrings.title_and_description,
-            )
+        val searchTargetMap = remember(isNovelMode) {
+            if (isNovelMode) {
+                mapOf(
+                    SearchTarget.PARTIAL_MATCH_FOR_TAGS to RStrings.tags_partially_match,
+                    SearchTarget.EXACT_MATCH_FOR_TAGS to RStrings.tags_exact_match,
+                    SearchTarget.TEXT to RStrings.title_and_description,
+                    SearchTarget.KEYWORD to RStrings.title_and_description,
+                )
+            } else {
+                mapOf(
+                    SearchTarget.PARTIAL_MATCH_FOR_TAGS to RStrings.tags_partially_match,
+                    SearchTarget.EXACT_MATCH_FOR_TAGS to RStrings.tags_exact_match,
+                    SearchTarget.TITLE_AND_CAPTION to RStrings.title_and_description,
+                )
+            }
         }
-        val searchSortMap = remember {
-            mapOf(
-                SearchSort.DATE_DESC to RStrings.date_desc,
-                SearchSort.DATE_ASC to RStrings.date_asc,
-                SearchSort.POPULAR_DESC to RStrings.popular_desc,
-                SearchSort.POPULAR_MALE_DESC to RStrings.popular_male,
-                SearchSort.POPULAR_FEMALE_DESC to RStrings.popular_female,
-            )
+        val searchSortMap = remember(isNovelMode) {
+            if (isNovelMode) {
+                mapOf(
+                    SearchSort.DATE_DESC to RStrings.date_desc,
+                    SearchSort.DATE_ASC to RStrings.date_asc,
+                    SearchSort.POPULAR_DESC to RStrings.popular_desc,
+                )
+            } else {
+                mapOf(
+                    SearchSort.DATE_DESC to RStrings.date_desc,
+                    SearchSort.DATE_ASC to RStrings.date_asc,
+                    SearchSort.POPULAR_DESC to RStrings.popular_desc,
+                    SearchSort.POPULAR_MALE_DESC to RStrings.popular_male,
+                    SearchSort.POPULAR_FEMALE_DESC to RStrings.popular_female,
+                )
+            }
         }
 
         Row(
@@ -175,6 +193,7 @@ internal fun FilterBottomSheet(
                     }
                 )
             }
+
 
             Row(
                 modifier = Modifier

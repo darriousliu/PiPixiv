@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home">الرئيسية</string>
     <string name="search">بحث</string>
@@ -17,13 +18,13 @@
     <string name="all">الكل</string>
     <string name="uncategorized">غير مصنف</string>
     <string name="search_by_title_author">البحث بالعنوان أو اسم الفنان</string>
-    <string name="refresh_token_success">تم تحديث الرمز بنجاح</string>
     <string name="unknown_error">خطأ غير معروف</string>
     <string name="revoke">إلغاء</string>
     <string name="revoke_cancel_like">التراجع عن إلغاء الإعجاب</string>
-    <string name="sign_in">تسجيل الدخول</string>
+    <string name="refresh_token_success">تم تحديث الرمز بنجاح</string>
     <string name="sign_up">التسجيل</string>
-    <string name="sign_with_token">تسجيل الدخول بالرمز</string>
+    <string name="sign_in">تسجيل الدخول</string>
+    <string name="sign_in_with_token">تسجيل الدخول بالرمز</string>
     <string name="download_with_size">تنزيل (%1$s)</string>
     <string name="followed">متابَع</string>
     <string name="follow">متابعة</string>
@@ -82,7 +83,6 @@
     <string name="self_defined_source">مصدر صورة مخصص</string>
     <string name="default_open">فتح الرابط الافتراضي</string>
     <string name="allow_open_link">السماح للتطبيق بفتح الرابط المقابل</string>
-    
     <string name="network_error">خطأ في الشبكة، يرجى التحقق من الاتصال</string>
     <string name="sign_out">تسجيل الخروج</string>
     <string name="copy_to_clipboard">نسخ إلى الحافظة</string>
@@ -214,4 +214,61 @@
     <string name="default_private_bookmark">إشارة مرجعية خاصة افتراضية</string>
     <string name="save_as">حفظ باسم</string>
     <string name="copy_link">نسخ الرابط</string>
+    <string name="novel">رواية</string>
+    <string name="illust">رسم توضيحي</string>
+    <string name="series">سلسلة</string>
+    <string name="word_count">عدد الكلمات</string>
+    <string name="export_txt">TXT تصدير كـ</string>
+    <string name="font_size">حجم الخط</string>
+    <string name="line_spacing">تباعد الأسطر</string>
+    <string name="chapter_previous">الفصل السابق</string>
+    <string name="chapter_next">الفصل التالي</string>
+    <string name="reading_progress">تقدم القراءة</string>
+    <string name="novels">روايات</string>
+    <string name="novel_recommended">روايات موصى بها</string>
+    <string name="novel_ranking">تصنيف الروايات</string>
+    <string name="novel_new">أحدث الروايات</string>
+    <string name="novel_follow">الروايات المتابعة</string>
+    <string name="switch_to_novel_mode">التبديل إلى وضع الرواية</string>
+    <string name="switch_to_illust_mode">التبديل إلى وضع الرسوم التوضيحية</string>
+    <string name="back">رجوع</string>
+    <string name="delete_content_description">حذف</string>
+    <string name="date_range">النطاق الزمني</string>
+    <string name="bookmark_range">نطاق الإشارات المرجعية</string>
+    <string name="more">المزيد</string>
+    <string name="cover">غلاف</string>
+    <string name="clear">مسح</string>
+    <string name="bookmark_cancelled">تم إلغاء الإشارة المرجعية</string>
+    <string name="operation_failed">فشلت العملية: %1$s</string>
+    <string name="link_copied">تم نسخ الرابط</string>
+    <string name="export_feature_in_development">ميزة التصدير قيد التطوير...</string>
+    <string name="load_failed">فشل التحميل: %1$s</string>
+    <string name="bookmarked">تمت الإضافة للإشارات</string>
+    <string name="bookmark">إشارة مرجعية</string>
+    <string name="export_txt_button">TXT تصدير</string>
+    <string name="font_size_value">حجم الخط: %1$dsp</string>
+    <string name="line_spacing_value">تباعد الأسطر: %1$ssp</string>
+    <string name="share_link">مشاركة الرابط</string>
+    <string name="novel_history_import_user_mismatch_title">عدم تطابق مستخدم سجل الروايات</string>
+    <string name="novel_history_import_user_mismatch_desc">معرف المستخدم الحالي: %1$d، معرف مستخدم بيانات الاستيراد: %2$d. سيؤدي التأكيد للمتابعة إلى استيراد سجل الروايات إلى المستخدم الحالي، وسيؤدي الإلغاء إلى تخطي هذا الجزء من الاستيراد.</string>
+    <string name="sign_in_with_cookie">تسجيل الدخول باستخدام Cookie</string>
+    <string name="cookies" translatable="false">Cookies</string>
+    <string name="cookies_parse_error">خطأ في تحليل Cookie</string>
+    <string name="recommend_cookie_export_plugin">يُوصى باستخدام إضافات تصدير ملفات تعريف الارتباط من متجر إضافات Chrome &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; أو &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;، وتأكد من أن ملف تعريف الارتباط يحتوي على حقل PHPSESSID، ويجب تصديره بتنسيق Json.</string>
+    <string name="translate_novel">ترجمة النص</string>
+    <string name="regenerate_translation">إعادة إنشاء الترجمة</string>
+    <string name="delete_translation">حذف الترجمة</string>
+    <string name="show_original_text">إظهار النص الأصلي</string>
+    <string name="show_translated_text">إظهار النص المترجم</string>
+    <string name="ai_translation_setting">إعدادات الترجمة بالذكاء الاصطناعي</string>
+    <string name="ai_provider">مزود الذكاء الاصطناعي</string>
+    <string name="ai_endpoint">عنوان الواجهة</string>
+    <string name="ai_model">النموذج</string>
+    <string name="ai_openai_use_response_api">استخدام Response API</string>
+    <string name="ai_model_suggestions">النماذج المقترحة</string>
+    <string name="ai_translation_config_required">يرجى إكمال إعدادات الترجمة بالذكاء الاصطناعي أولاً</string>
+    <string name="ai_translation_failed">فشلت الترجمة: %1$s</string>
+    <string name="ai_translation_success">اكتملت الترجمة</string>
+    <string name="ai_translation_cache_hit">تم تحميل الترجمة من ذاكرة التخزين المؤقت</string>
+    <string name="ai_translation_deleted">تم حذف الترجمة واستعادة النص الأصلي</string>
 </resources>

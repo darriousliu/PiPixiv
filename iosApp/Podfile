@@ -7,6 +7,6 @@ target 'PiPixiv' do
 
   pod 'composeApp', :path => '../composeApp'
   # Pods for PiPixiv
-  pod 'MMKV', '2.3.0'
+  pod 'MMKV', '2.4.0'
   pod 'ZIPFoundation', '~> 0.9'
 end

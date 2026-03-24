@@ -6,7 +6,7 @@ import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
-import com.mrl.pixiv.common.repository.util.filterNormal
+import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
 
 class IllustRankingPagingSource(
@@ -27,7 +27,7 @@ class IllustRankingPagingSource(
             val illusts = if (requireUserPreferenceValue.isR18Enabled) {
                 resp.illusts.distinctBy { it.id }
             } else {
-                resp.illusts.distinctBy { it.id }.filterNormal()
+                resp.illusts.distinctBy { it.id }.filterNormalIllust()
             }
             LoadResult.Page(
                 data = illusts,

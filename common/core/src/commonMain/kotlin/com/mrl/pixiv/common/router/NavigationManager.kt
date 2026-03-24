@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.repository.IllustCacheRepo
 import org.koin.core.annotation.Single
@@ -105,8 +106,12 @@ class NavigationManager(
         backStack.navigate(Destination.PictureDeeplink(illustId))
     }
 
-    fun navigateToSearchResultScreen(searchWord: String, isIdSearch: Boolean = false) {
-        backStack.navigate(route = Destination.SearchResults(searchWord, isIdSearch))
+    fun navigateToSearchResultScreen(
+        searchWord: String,
+        isIdSearch: Boolean = false,
+        searchMode: AppViewMode = AppViewMode.ILLUST
+    ) {
+        backStack.navigate(route = Destination.SearchResults(searchWord, isIdSearch, searchMode))
     }
 
     fun navigateToProfileDetailScreen(userId: Long) {
@@ -162,6 +167,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.FileNameFormat)
     }
 
+    fun navigateToAiTranslationSettingScreen() {
+        backStack.navigate(route = Destination.AiTranslationSetting)
+    }
+
     fun navigateToDownloadScreen() {
         backStack.navigate(route = Destination.Download)
     }
@@ -176,5 +185,9 @@ class NavigationManager(
 
     fun navigateToReportCommentScreen(commentId: Long, type: ReportType) {
         backStack.navigate(route = Destination.Report(commentId, type))
+    }
+
+    fun navigateToNovelDetailScreen(novelId: Long) {
+        backStack.navigate(route = Destination.NovelDetail(novelId))
     }
 }

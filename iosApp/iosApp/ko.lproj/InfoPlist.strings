@@ -1,0 +1,2 @@
+"NSPhotoLibraryAddUsageDescription" = "다운로드한 이미지를 사진에 저장하도록 허용합니다.";
+"NSPhotoLibraryUsageDescription" = "저장된 이미지를 관리하기 위해 사진 접근을 허용합니다.";

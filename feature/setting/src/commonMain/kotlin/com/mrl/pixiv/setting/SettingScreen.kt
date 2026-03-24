@@ -50,6 +50,7 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
+import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.app_language
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.confirm
@@ -71,6 +72,7 @@ import org.koin.compose.koinInject
 
 const val KEY_LANGUAGE = "language"
 const val KEY_NETWORK_SETTING = "network_setting"
+const val KEY_AI_TRANSLATION_SETTING = "ai_translation_setting"
 const val KEY_DEFAULT_OPEN_LINK = "default_open_link"
 const val KEY_DIVIDER_1 = "divider_1"
 const val KEY_PORTRAIT_SPAN_COUNT = "portrait_span_count"
@@ -193,6 +195,31 @@ fun SettingScreen(
                     }
                 )
             }
+            item(key = KEY_AI_TRANSLATION_SETTING) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RStrings.ai_translation_setting),
+                        )
+                    },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            navigationManager.navigateToAiTranslationSettingScreen()
+                        },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.Translate, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+            appLinkItem()
 
             item(key = KEY_DIVIDER_1) {
                 HorizontalDivider(modifier = Modifier.padding(8.dp))
@@ -434,5 +461,4 @@ expect fun triggerLocaleChange(
     labelDefault: String
 )
 
-@Composable
-expect fun LazyListScope.AppLinkItem()
+expect fun LazyListScope.appLinkItem()

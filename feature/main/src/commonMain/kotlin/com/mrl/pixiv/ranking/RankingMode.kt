@@ -24,6 +24,7 @@ enum class RankingMode(val value: String, val type: RankingType, val title: Stri
     WEEK_ORIGINAL("week_original", RankingType.GENERAL, RStrings.original),
     WEEK_ROOKIE("week_rookie", RankingType.GENERAL, RStrings.rookie),
     WEEK("week", RankingType.GENERAL, RStrings.every_week),
+    WEEK_AI("week_ai", RankingType.GENERAL, RStrings.ai_generate),
     MONTH("month", RankingType.GENERAL, RStrings.every_month),
     DAY_AI("day_ai", RankingType.GENERAL, (RStrings.ai_generate)),
     PAST("day", RankingType.GENERAL, (RStrings.past)),
@@ -32,5 +33,10 @@ enum class RankingMode(val value: String, val type: RankingType, val title: Stri
     DAY_FEMALE_R18("day_female_r18", RankingType.R18, RStrings.popular_female),
     DAY_R18_AI("day_r18_ai", RankingType.R18, RStrings.ai_generate),
     WEEK_R18("week_r18", RankingType.R18, RStrings.every_week),
+    WEEK_AI_R18("week_ai_r18", RankingType.R18, RStrings.ai_generate),
     WEEK_R18G("week_r18g", RankingType.R18G, RStrings.every_week_r18g);
+    //a aVar30 = new a("NOVEL_DAILY_R18", 29, contentType3, "day_r18", m2Var2, z14);
+    //        a aVar31 = new a("NOVEL_WEEKLY_R18", 30, contentType3, "week_r18", m2Var2, z14);
+    //        a aVar32 = new a("NOVEL_AI_R18", 31, contentType3, "week_ai_r18", m2Var2, false, "2022-11-01");
+
 }

@@ -3,6 +3,7 @@ package com.mrl.pixiv.search
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -51,13 +52,18 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.SearchRepository
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.DebounceUtil
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.main.components.ViewModeToggleButton
 import com.mrl.pixiv.strings.enter_keywords
 import com.mrl.pixiv.strings.find_for
 import com.mrl.pixiv.strings.id_search
@@ -75,9 +81,23 @@ fun SearchScreen(
 ) {
     val dispatch = viewModel::dispatch
     val state = viewModel.asState()
-    val searchHistory by SearchRepository.searchHistoryFlow.collectAsStateWithLifecycle()
-    val searchIdHistory by remember {
-        SearchRepository.searchIdHistoryFlow.map { it?.toList().orEmpty() }
+    val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
+    val searchHistory by remember(appViewMode) {
+        when (appViewMode) {
+            AppViewMode.ILLUST -> SearchRepository.searchHistoryFlow.map { it.searchHistoryList }
+            AppViewMode.NOVEL -> SearchRepository.novelSearchHistoryFlow.map { it.novelSearchHistory }
+        }
+    }.collectAsStateWithLifecycle(emptyList())
+    val searchIdHistory by remember(appViewMode) {
+        when (appViewMode) {
+            AppViewMode.ILLUST -> SearchRepository.searchIdHistoryFlow.map {
+                it?.toList().orEmpty()
+            }
+
+            AppViewMode.NOVEL -> SearchRepository.novelSearchIdHistoryFlow.map {
+                it?.toList().orEmpty()
+            }
+        }
     }.collectAsStateWithLifecycle(emptyList())
     var textState by remember { mutableStateOf(TextFieldValue(viewModel.searchWords)) }
     val focusRequester = remember { FocusRequester() }
@@ -122,20 +142,34 @@ fun SearchScreen(
                         dispatch(SearchAction.AddSearchHistory(textState.text))
                     }
                     focusRequester.freeFocus()
-                    navigationManager.navigateToSearchResultScreen(textState.text, state.isIdSearch)
+                    navigationManager.navigateToSearchResultScreen(
+                        searchWord = textState.text,
+                        isIdSearch = state.isIdSearch,
+                        searchMode = appViewMode
+                    )
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { dispatch(SearchAction.UpdateIsIdSearch(!state.isIdSearch)) },
+            Column(
                 modifier = Modifier.imePadding()
             ) {
-                Text(
-                    text = stringResource(RStrings.id_search),
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    textDecoration = if (state.isIdSearch) null else TextDecoration.LineThrough,
-                    style = MaterialTheme.typography.labelLarge,
+                FloatingActionButton(
+                    onClick = { dispatch(SearchAction.UpdateIsIdSearch(!state.isIdSearch)) }
+                ) {
+                    Text(
+                        text = stringResource(RStrings.id_search),
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        textDecoration = if (state.isIdSearch) null else TextDecoration.LineThrough,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+                8.VSpacer
+                ViewModeToggleButton(
+                    currentMode = appViewMode,
+                    onModeChange = { newMode ->
+                        viewModel.switchViewMode(newMode)
+                    }
                 )
             }
         }
@@ -179,7 +213,11 @@ fun SearchScreen(
                                 .throttleClick(indication = ripple()) {
                                     viewModel.addSearchIdHistory(it)
                                     focusRequester.freeFocus()
-                                    navigationManager.navigateToSearchResultScreen(it, true)
+                                    navigationManager.navigateToSearchResultScreen(
+                                        searchWord = it,
+                                        isIdSearch = true,
+                                        searchMode = appViewMode
+                                    )
                                 }
                                 .animateItem(),
                             trailingContent = {
@@ -197,22 +235,23 @@ fun SearchScreen(
                     }
                 } else {
                     items(
-                        items = searchHistory.searchHistoryList,
+                        items = searchHistory,
                         key = { it.keyword }
-                    ) {
+                    ) { item ->
                         ListItem(
                             headlineContent = {
                                 Text(
-                                    text = it.keyword,
+                                    text = item.keyword,
                                 )
                             },
                             modifier = Modifier.fillMaxWidth()
                                 .throttleClick(indication = ripple()) {
-                                    dispatch(SearchAction.AddSearchHistory(it.keyword))
+                                    dispatch(SearchAction.AddSearchHistory(item.keyword))
                                     focusRequester.freeFocus()
                                     navigationManager.navigateToSearchResultScreen(
-                                        it.keyword,
-                                        false
+                                        searchWord = item.keyword,
+                                        isIdSearch = false,
+                                        searchMode = appViewMode
                                     )
                                 }
                                 .animateItem(),
@@ -221,7 +260,7 @@ fun SearchScreen(
                                     modifier = Modifier
                                         .size(24.dp)
                                         .throttleClick(indication = ripple()) {
-                                            dispatch(SearchAction.DeleteSearchHistory(it.keyword))
+                                            dispatch(SearchAction.DeleteSearchHistory(item.keyword))
                                         },
                                     imageVector = Icons.Rounded.Close,
                                     contentDescription = "delete"
@@ -246,8 +285,9 @@ fun SearchScreen(
                                 dispatch(SearchAction.AddSearchHistory(word.name))
                                 focusRequester.freeFocus()
                                 navigationManager.navigateToSearchResultScreen(
-                                    word.name,
-                                    state.isIdSearch
+                                    searchWord = word.name,
+                                    isIdSearch = state.isIdSearch,
+                                    searchMode = appViewMode
                                 )
                             },
                         supportingContent = {

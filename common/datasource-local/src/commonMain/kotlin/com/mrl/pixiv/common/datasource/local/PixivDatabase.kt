@@ -8,12 +8,22 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
+import com.mrl.pixiv.common.datasource.local.dao.NovelReadingProgressDao
+import com.mrl.pixiv.common.datasource.local.dao.NovelTranslationDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
+import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
+import com.mrl.pixiv.common.datasource.local.entity.NovelTranslationEntity
 
-@Database(entities = [DownloadEntity::class], version = 3, exportSchema = false)
+@Database(
+    entities = [DownloadEntity::class, NovelReadingProgressEntity::class, NovelTranslationEntity::class],
+    version = 5,
+    exportSchema = false
+)
 @ConstructedBy(PixivDatabaseConstructor::class)
 abstract class PixivDatabase : RoomDatabase() {
     abstract fun downloadDao(): DownloadDao
+    abstract fun novelReadingProgressDao(): NovelReadingProgressDao
+    abstract fun novelTranslationDao(): NovelTranslationDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -25,6 +35,42 @@ abstract class PixivDatabase : RoomDatabase() {
         val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(connection: SQLiteConnection) {
                 connection.execSQL("ALTER TABLE download ADD COLUMN fileUri TEXT NOT NULL DEFAULT ''")
+            }
+        }
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS novel_reading_progress (
+                        novelId INTEGER NOT NULL,
+                        userId INTEGER NOT NULL,
+                        paragraphIndex INTEGER NOT NULL,
+                        charIndex INTEGER NOT NULL,
+                        paragraphHash INTEGER NOT NULL,
+                        updatedAtMillis INTEGER NOT NULL,
+                        PRIMARY KEY(novelId, userId)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS novel_translation (
+                        novelId INTEGER NOT NULL,
+                        userId INTEGER NOT NULL,
+                        targetLanguage TEXT NOT NULL,
+                        provider TEXT NOT NULL,
+                        model TEXT NOT NULL,
+                        sourceMd5 TEXT NOT NULL,
+                        translatedText TEXT NOT NULL,
+                        updatedAtMillis INTEGER NOT NULL,
+                        PRIMARY KEY(novelId, userId, targetLanguage)
+                    )
+                    """.trimIndent()
+                )
             }
         }
     }

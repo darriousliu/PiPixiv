@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -27,8 +29,9 @@ import com.mrl.pixiv.common.util.RDrawables
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.ic_launcher
 import com.mrl.pixiv.strings.sign_in
+import com.mrl.pixiv.strings.sign_in_with_cookie
+import com.mrl.pixiv.strings.sign_in_with_token
 import com.mrl.pixiv.strings.sign_up
-import com.mrl.pixiv.strings.sign_with_token
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -56,7 +59,8 @@ fun LoginOptionScreen(
         Column(
             modifier = Modifier
                 .padding(it)
-                .padding(start = 16.dp, top = 75.dp, end = 16.dp),
+                .padding(start = 16.dp, top = 75.dp, end = 16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = 10f.spaceBy,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -97,7 +101,18 @@ fun LoginOptionScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(RStrings.sign_with_token)
+                    text = stringResource(RStrings.sign_in_with_token)
+                )
+            }
+            OutlinedButton(
+                onClick = {
+                    navigationManager.navigate(Destination.WebCookieLogin)
+                },
+                shapes = ButtonDefaults.shapes(),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(RStrings.sign_in_with_cookie)
                 )
             }
         }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">PiPixiv</string>
     <string name="home">首页</string>
     <string name="search">搜索</string>
     <string name="my">我的</string>
@@ -19,14 +20,13 @@
     <string name="all">全部</string>
     <string name="uncategorized">未分类</string>
     <string name="search_by_title_author">搜索标题或画师名称</string>
-    <string name="app_name" translatable="false">PiPixiv</string>
-    <string name="refresh_token_success">刷新token成功</string>
     <string name="unknown_error">未知错误</string>
     <string name="revoke">撤销</string>
     <string name="revoke_cancel_like">撤销取消收藏</string>
-    <string name="sign_in">登录</string>
+    <string name="refresh_token_success">刷新token成功</string>
     <string name="sign_up">注册</string>
-    <string name="sign_with_token">使用Token登陆</string>
+    <string name="sign_in">登录</string>
+    <string name="sign_in_with_token">使用Token登录</string>
     <string name="download_with_size">下载 (%1$s)</string>
     <string name="followed">已关注</string>
     <string name="follow">关注</string>
@@ -220,4 +220,65 @@
     <string name="default_private_bookmark">默认私人收藏</string>
     <string name="save_as">另存为</string>
     <string name="copy_link">复制链接</string>
+    <string name="novel">小说</string>
+    <string name="illust">插画</string>
+    <string name="series">系列</string>
+    <string name="word_count">字数</string>
+    <string name="export_txt">导出为TXT</string>
+    <string name="font_size">字号</string>
+    <string name="line_spacing">行间距</string>
+    <string name="chapter_previous">上一章</string>
+    <string name="chapter_next">下一章</string>
+    <string name="reading_progress">阅读进度</string>
+    <string name="novels">小说</string>
+    <string name="novel_recommended">推荐小说</string>
+    <string name="novel_ranking">小说排行榜</string>
+    <string name="novel_new">最新小说</string>
+    <string name="novel_follow">关注的小说</string>
+    <string name="switch_to_novel_mode">切换到小说模式</string>
+    <string name="switch_to_illust_mode">切换到插画模式</string>
+    <string name="back">返回</string>
+    <string name="delete_content_description">删除</string>
+    <string name="date_range">日期范围</string>
+    <string name="bookmark_range">收藏范围</string>
+    <string name="more">更多</string>
+    <string name="cover">封面</string>
+    <string name="clear">清除</string>
+    <string name="bookmark_cancelled">已取消收藏</string>
+    <string name="operation_failed">操作失败: %1$s</string>
+    <string name="link_copied">已复制链接</string>
+    <string name="export_feature_in_development">导出功能开发中...</string>
+    <string name="load_failed">加载失败: %1$s</string>
+    <string name="bookmarked">已收藏</string>
+    <string name="bookmark">收藏</string>
+    <string name="export_txt_button">导出TXT</string>
+    <string name="font_size_value">字号: %1$dsp</string>
+    <string name="line_spacing_value">行间距: %1$ssp</string>
+    <string name="share_link">分享链接</string>
+    <string name="novel_history_import_user_mismatch_title">小说历史记录用户不一致</string>
+    <string name="novel_history_import_user_mismatch_desc">当前用户ID: %1$d，导入数据用户ID: %2$d。确认继续将把小说历史导入到当前用户，取消将跳过该部分导入。</string>
+    <string name="sign_in_with_cookie">使用Cookie登录</string>
+    <string name="cookies" translatable="false">Cookies</string>
+    <string name="cookies_parse_error">Cookie解析错误</string>
+    <string name="recommend_cookie_export_plugin">推荐使用Chrome插件商店Cookie导出插件 &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; 或 &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;，保证Cookie中含有 PHPSESSID 字段，一定要以Json格式导出</string>
+    <string name="translate_novel">翻译正文</string>
+    <string name="regenerate_translation">重新生成翻译</string>
+    <string name="delete_translation">删除翻译</string>
+    <string name="show_original_text">显示原文</string>
+    <string name="show_translated_text">显示译文</string>
+    <string name="ai_translation_setting">AI翻译设置</string>
+    <string name="ai_provider">AI提供商</string>
+    <string name="ai_provider_openai" translatable="false">OpenAI</string>
+    <string name="ai_provider_claude" translatable="false">Claude</string>
+    <string name="ai_provider_gemini" translatable="false">Gemini</string>
+    <string name="ai_endpoint">接口地址</string>
+    <string name="ai_api_key" translatable="false">API Key</string>
+    <string name="ai_model">模型</string>
+    <string name="ai_openai_use_response_api">使用 Response API</string>
+    <string name="ai_model_suggestions">推荐模型</string>
+    <string name="ai_translation_config_required">请先在设置中完成AI翻译配置</string>
+    <string name="ai_translation_failed">翻译失败: %1$s</string>
+    <string name="ai_translation_success">翻译完成</string>
+    <string name="ai_translation_cache_hit">已加载缓存翻译</string>
+    <string name="ai_translation_deleted">已删除翻译并恢复原文</string>
 </resources>

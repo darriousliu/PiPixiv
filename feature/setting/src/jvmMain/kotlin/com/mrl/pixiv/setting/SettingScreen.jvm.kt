@@ -1,7 +1,6 @@
 package com.mrl.pixiv.setting
 
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.runtime.Composable
 import com.mrl.pixiv.common.repository.SettingRepository
 import java.util.Locale
 
@@ -25,6 +24,5 @@ actual fun triggerLocaleChange(
     }
 }
 
-@Composable
-actual fun LazyListScope.AppLinkItem() {
+actual fun LazyListScope.appLinkItem() {
 }

@@ -62,6 +62,7 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
+import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RDrawables
@@ -403,7 +404,8 @@ private fun ProfileDetailAppBar(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false }
             ) {
-                if (!userInfo.user.isFollowing) {
+                val isSelf = userInfo.user.isSelf
+                if (!userInfo.user.isFollowing && !isSelf) {
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -416,28 +418,30 @@ private fun ProfileDetailAppBar(
                         }
                     )
                 }
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(RStrings.block_user),
-                        )
-                    },
-                    onClick = {
-                        onBlockUser(userInfo.user.id)
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(RStrings.report_user),
-                        )
-                    },
-                    onClick = {
-                        // todo report
-                        showMenu = false
-                    }
-                )
+                if (!isSelf) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(RStrings.block_user),
+                            )
+                        },
+                        onClick = {
+                            onBlockUser(userInfo.user.id)
+                            showMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(RStrings.report_user),
+                            )
+                        },
+                        onClick = {
+                            // todo report
+                            showMenu = false
+                        }
+                    )
+                }
             }
         },
         expandedHeight = expandedHeight,

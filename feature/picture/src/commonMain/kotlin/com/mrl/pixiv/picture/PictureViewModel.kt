@@ -426,7 +426,8 @@ class PictureViewModel(
                     url(imageUrl)
                 }
                 if (response.status.isSuccess()) {
-                    val bytes = response.bodyAsChannel().asSource().buffered().use { it.readByteArray() }
+                    val bytes =
+                        response.bodyAsChannel().asSource().buffered().use { it.readByteArray() }
                     file.write(bytes)
                     ToastUtil.safeShortToast(RStrings.download_success)
                 } else {

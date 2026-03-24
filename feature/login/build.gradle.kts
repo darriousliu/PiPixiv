@@ -19,7 +19,10 @@ kotlin {
             implementation(libs.compose.webview.multiplatform)
             implementation(libs.okio)
             implementation(kotlinx.ktor.client.core)
+            implementation(kotlinx.ktor.client.content.negotiation)
+            implementation(kotlinx.ktor.serialization.kotlinx.json)
             implementation(libs.mp.stools)
+            implementation(libs.html.converter)
         }
 
         jvmMain.dependencies {

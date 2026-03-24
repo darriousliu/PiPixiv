@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.navigation3.runtime.NavKey
+import com.mrl.pixiv.common.data.AppViewMode
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -26,6 +27,9 @@ sealed class Destination : NavKey {
 
     @Serializable
     data object OAuthLogin : Destination()
+
+    @Serializable
+    data object WebCookieLogin: Destination()
 
     @Serializable
     data object Main : Destination()
@@ -54,6 +58,7 @@ sealed class Destination : NavKey {
     data class SearchResults(
         val searchWords: String,
         val isIdSearch: Boolean = false,
+        val searchMode: AppViewMode = AppViewMode.ILLUST,
     ) : Destination()
 
     @Serializable
@@ -64,6 +69,9 @@ sealed class Destination : NavKey {
 
     @Serializable
     data object FileNameFormat : Destination()
+
+    @Serializable
+    data object AiTranslationSetting : Destination()
 
     @Serializable
     data object History : Destination()
@@ -106,6 +114,11 @@ sealed class Destination : NavKey {
 
     @Serializable
     data class Report(val id: Long, val type: ReportType) : Destination()
+
+    @Serializable
+    data class NovelDetail(
+        val novelId: Long,
+    ) : Destination()
 }
 
 @Serializable

@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import co.touchlab.kermit.Severity
-import coil3.Image
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
@@ -85,12 +84,8 @@ fun App(
 
 @Composable
 private fun SetUpImageLoaderFactory(imageLoaderBuilder: ImageLoader.Builder.() -> Unit) {
-    // todo
-//    val errorImage = getErrorImage()
-
     setSingletonImageLoaderFactory { context ->
         ImageLoader.Builder(context)
-//            .error(errorImage)
             .diskCache(CoilDiskCache.get())
             .memoryCache(CoilMemoryCache.get(context))
             // Coil spawns a new thread for every image load by default
@@ -124,9 +119,6 @@ private fun SetUpImageLoaderFactory(imageLoaderBuilder: ImageLoader.Builder.() -
             .build()
     }
 }
-
-@Composable
-expect fun getErrorImage(): Image
 
 internal object CoilDiskCache {
     private const val FOLDER_NAME = "image_cache"

@@ -4,7 +4,9 @@ import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -19,12 +21,11 @@ fun KeyEventListener(
 ) {
     val flow = LocalKeyEventFlow.current
     val scope = rememberCoroutineScope()
-    LaunchedEffect(
-        Unit
-    ) {
+    val updatedBlock by rememberUpdatedState(block)
+    LaunchedEffect(Unit) {
         flow.collect {
             scope.launch {
-                block(it)
+                updatedBlock(it)
             }
         }
     }
@@ -53,6 +54,18 @@ fun keyboardScrollerController(
             Key.PageUp -> {
                 scrollableState.animateScrollBy(-viewPortHeight)
             }
+        }
+    }
+}
+
+@Composable
+fun EscBackHandler(
+    onBack: () -> Unit,
+) {
+    val updatedOnBack by rememberUpdatedState(onBack)
+    KeyEventListener {
+        if (it.key == Key.Escape && it.type == KeyEventType.KeyUp) {
+            updatedOnBack()
         }
     }
 }
