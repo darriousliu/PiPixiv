@@ -317,6 +317,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
+          token: ${{ secrets.GH_TOKEN }}
           tag_name: ${{ env.VERSION_TAG }}
           name: PiPixiv ${{ env.VERSION_TAG }}
           body: |
