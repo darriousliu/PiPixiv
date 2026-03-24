@@ -122,6 +122,8 @@ import com.mrl.pixiv.strings.line_spacing_value
 import com.mrl.pixiv.strings.more
 import com.mrl.pixiv.strings.regenerate_translation
 import com.mrl.pixiv.strings.share_link
+import com.mrl.pixiv.strings.show_original_text
+import com.mrl.pixiv.strings.show_translated_text
 import com.mrl.pixiv.strings.translate_novel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -164,7 +166,7 @@ fun NovelScreen(
 
     LaunchedEffect(manuallyShowTopBar) {
         if (manuallyShowTopBar) {
-            delay(2000) // 2秒后自动隐藏
+            delay(3000) // 3秒后自动隐藏
             manuallyShowTopBar = false
         }
     }
@@ -259,47 +261,6 @@ fun NovelScreen(
                 Row(
                     horizontalArrangement = 8.spaceBy
                 ) {
-                    FloatingActionButton(
-                        onClick = {
-                            if (!state.isTranslating) {
-                                viewModel.dispatch(NovelIntent.TranslateNovel(forceRefresh = state.isTranslated))
-                            }
-                        },
-                    ) {
-                        if (state.isTranslating) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Icon(
-                                imageVector = if (state.isTranslated) {
-                                    Icons.Rounded.Refresh
-                                } else {
-                                    Icons.Rounded.Translate
-                                },
-                                contentDescription = stringResource(
-                                    if (state.isTranslated) {
-                                        RStrings.regenerate_translation
-                                    } else {
-                                        RStrings.translate_novel
-                                    }
-                                )
-                            )
-                        }
-                    }
-
-                    if (state.isTranslated && !state.isTranslating) {
-                        FloatingActionButton(
-                            onClick = { viewModel.dispatch(NovelIntent.DeleteNovelTranslation) },
-                        ) {
-                            Icon(
-                                Icons.Rounded.Delete,
-                                contentDescription = stringResource(RStrings.delete_translation)
-                            )
-                        }
-                    }
-
                     // 上一章按钮
                     if (state.prevNovelId != null) {
                         FloatingActionButton(
@@ -397,6 +358,65 @@ fun NovelScreen(
                                 }
                             },
                             actions = {
+                                IconButton(
+                                    onClick = {
+                                        if (!state.isTranslating) {
+                                            viewModel.dispatch(
+                                                NovelIntent.TranslateNovel(forceRefresh = state.isTranslated)
+                                            )
+                                        }
+                                    }
+                                ) {
+                                    if (state.isTranslating) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(20.dp),
+                                            strokeWidth = 2.dp
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = if (state.isTranslated) {
+                                                Icons.Rounded.Refresh
+                                            } else {
+                                                Icons.Rounded.Translate
+                                            },
+                                            contentDescription = stringResource(
+                                                if (state.isTranslated) {
+                                                    RStrings.regenerate_translation
+                                                } else {
+                                                    RStrings.translate_novel
+                                                }
+                                            )
+                                        )
+                                    }
+                                }
+                                if (state.isTranslated) {
+                                    IconButton(
+                                        onClick = { viewModel.dispatch(NovelIntent.ToggleDisplayOriginalText) }
+                                    ) {
+                                        Icon(
+                                            imageVector = if (state.isShowingOriginalText) {
+                                                Icons.Rounded.Translate
+                                            } else {
+                                                Icons.Rounded.Visibility
+                                            },
+                                            contentDescription = stringResource(
+                                                if (state.isShowingOriginalText) {
+                                                    RStrings.show_translated_text
+                                                } else {
+                                                    RStrings.show_original_text
+                                                }
+                                            )
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = { viewModel.dispatch(NovelIntent.DeleteNovelTranslation) }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Delete,
+                                            contentDescription = stringResource(RStrings.delete_translation)
+                                        )
+                                    }
+                                }
                                 IconButton(
                                     onClick = { viewModel.dispatch(NovelIntent.ToggleBookmark) }
                                 ) {

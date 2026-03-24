@@ -257,6 +257,8 @@
     <string name="translate_novel">Translate Novel</string>
     <string name="regenerate_translation">Regenerate Translation</string>
     <string name="delete_translation">Delete Translation</string>
+    <string name="show_original_text">Show Original</string>
+    <string name="show_translated_text">Show Translation</string>
     <string name="ai_translation_setting">AI Translation Settings</string>
     <string name="ai_provider">AI Provider</string>
     <string name="ai_endpoint">Endpoint</string>

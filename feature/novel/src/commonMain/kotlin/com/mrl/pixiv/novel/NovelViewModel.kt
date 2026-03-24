@@ -56,6 +56,7 @@ data class NovelState(
     val restoreVersion: Long = 0L,
     val isTranslating: Boolean = false,
     val isTranslated: Boolean = false,
+    val isShowingOriginalText: Boolean = false,
 )
 
 sealed class NovelIntent : ViewIntent {
@@ -69,6 +70,7 @@ sealed class NovelIntent : ViewIntent {
     data class NavigateToChapter(val novelId: Long) : NovelIntent()
     data class TranslateNovel(val forceRefresh: Boolean = false) : NovelIntent()
     data object DeleteNovelTranslation : NovelIntent()
+    data object ToggleDisplayOriginalText : NovelIntent()
 }
 
 @KoinViewModel
@@ -82,6 +84,7 @@ class NovelViewModel(
 ), KoinComponent {
     private var latestProgress: NovelReadingProgress? = null
     private var sourceNovelText: String = ""
+    private var translatedNovelText: String = ""
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -104,6 +107,7 @@ class NovelViewModel(
             is NovelIntent.NavigateToChapter -> loadNovelDetail(intent.novelId)
             is NovelIntent.TranslateNovel -> translateNovel(intent.forceRefresh)
             is NovelIntent.DeleteNovelTranslation -> deleteNovelTranslation()
+            is NovelIntent.ToggleDisplayOriginalText -> toggleDisplayOriginalText()
         }
     }
 
@@ -111,7 +115,15 @@ class NovelViewModel(
         launchIO(
             onError = { e ->
                 sourceNovelText = ""
-                updateState { copy(loading = false, isTranslating = false, isTranslated = false) }
+                translatedNovelText = ""
+                updateState {
+                    copy(
+                        loading = false,
+                        isTranslating = false,
+                        isTranslated = false,
+                        isShowingOriginalText = false,
+                    )
+                }
                 handleError(e)
                 ToastUtil.safeShortToast(RStrings.load_failed, e.message)
             }
@@ -122,6 +134,7 @@ class NovelViewModel(
                     restoreProgress = null,
                     isTranslating = false,
                     isTranslated = false,
+                    isShowingOriginalText = false,
                 )
             }
             val response = PixivRepository.getNovelDetail(novelId)
@@ -131,6 +144,7 @@ class NovelViewModel(
             val novelText = extractNovelData(novelHtml)
             val text = novelText?.text.orEmpty()
             sourceNovelText = text
+            translatedNovelText = ""
             val spans = NovelSpanParser.buildSpans(text, novelText).toImmutableList()
             val paragraphs = spans.toProgressParagraphs()
 
@@ -147,6 +161,7 @@ class NovelViewModel(
                     nextNovelId = novelText?.seriesNavigation?.nextNovel?.id,
                     isTranslating = false,
                     isTranslated = false,
+                    isShowingOriginalText = false,
                 )
             }
 
@@ -301,6 +316,7 @@ class NovelViewModel(
                 .buildSpans(translatedText, uiState.value.novelTextResp)
                 .toImmutableList()
             val translatedParagraphs = translatedSpans.toProgressParagraphs()
+            translatedNovelText = translatedText
             updateState {
                 copy(
                     novelText = translatedText,
@@ -308,6 +324,7 @@ class NovelViewModel(
                     paragraphSpans = translatedSpans,
                     isTranslating = false,
                     isTranslated = true,
+                    isShowingOriginalText = false,
                 )
             }
 
@@ -345,12 +362,14 @@ class NovelViewModel(
                 .buildSpans(sourceText, uiState.value.novelTextResp)
                 .toImmutableList()
             val sourceParagraphs = sourceSpans.toProgressParagraphs()
+            translatedNovelText = ""
             updateState {
                 copy(
                     novelText = sourceText,
                     paragraphs = sourceParagraphs,
                     paragraphSpans = sourceSpans,
                     isTranslated = false,
+                    isShowingOriginalText = false,
                 )
             }
 
@@ -360,6 +379,36 @@ class NovelViewModel(
             )
             ToastUtil.safeShortToast(RStrings.ai_translation_deleted)
         }
+    }
+
+    private fun toggleDisplayOriginalText() {
+        if (uiState.value.isTranslating || !uiState.value.isTranslated) return
+
+        val novel = uiState.value.novel ?: return
+        val sourceText = sourceNovelText.trim().ifBlank { uiState.value.novelText.trim() }
+        val translatedText = translatedNovelText.trim()
+        if (sourceText.isBlank() || translatedText.isBlank()) return
+
+        val shouldShowOriginal = !uiState.value.isShowingOriginalText
+        val targetText = if (shouldShowOriginal) sourceText else translatedText
+        val targetSpans = NovelSpanParser
+            .buildSpans(targetText, uiState.value.novelTextResp)
+            .toImmutableList()
+        val targetParagraphs = targetSpans.toProgressParagraphs()
+
+        updateState {
+            copy(
+                novelText = targetText,
+                paragraphs = targetParagraphs,
+                paragraphSpans = targetSpans,
+                isShowingOriginalText = shouldShowOriginal,
+            )
+        }
+
+        requestRestoreProgress(
+            novelId = novel.id,
+            paragraphs = targetParagraphs,
+        )
     }
 
     fun saveProgress(novelId: Long, progress: NovelReadingProgress) {

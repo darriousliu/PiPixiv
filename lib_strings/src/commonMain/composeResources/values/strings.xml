@@ -264,6 +264,8 @@
     <string name="translate_novel">翻译正文</string>
     <string name="regenerate_translation">重新生成翻译</string>
     <string name="delete_translation">删除翻译</string>
+    <string name="show_original_text">显示原文</string>
+    <string name="show_translated_text">显示译文</string>
     <string name="ai_translation_setting">AI翻译设置</string>
     <string name="ai_provider">AI提供商</string>
     <string name="ai_provider_openai" translatable="false">OpenAI</string>
