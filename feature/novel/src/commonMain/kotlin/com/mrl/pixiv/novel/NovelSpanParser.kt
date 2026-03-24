@@ -1,9 +1,11 @@
 package com.mrl.pixiv.novel
 
+import androidx.compose.runtime.Immutable
 import com.mrl.pixiv.common.data.novel.NovelIllusts
 import com.mrl.pixiv.common.data.novel.NovelTextResp
 
-internal sealed interface NovelSpanData {
+@Immutable
+sealed interface NovelSpanData {
     data class Text(val value: String) : NovelSpanData
 
     data object NewPage : NovelSpanData
@@ -25,7 +27,7 @@ internal sealed interface NovelSpanData {
     ) : NovelSpanData
 }
 
-internal class NovelSpanParser {
+internal object NovelSpanParser {
     private val linkRegex = Regex("https?://\\S+")
 
     fun buildSpans(source: String, webResponse: NovelTextResp?): List<NovelSpanData> {

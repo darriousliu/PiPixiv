@@ -49,6 +49,7 @@ data class NovelState(
     val isBookmarked: Boolean = false,
     val showBottomSheet: Boolean = false,
     val paragraphs: ImmutableList<String> = persistentListOf(),
+    val paragraphSpans: ImmutableList<NovelSpanData> = persistentListOf(),
     val prevNovelId: Long? = null,
     val nextNovelId: Long? = null,
     val restoreProgress: NovelReadingProgress? = null,
@@ -130,7 +131,8 @@ class NovelViewModel(
             val novelText = extractNovelData(novelHtml)
             val text = novelText?.text.orEmpty()
             sourceNovelText = text
-            val paragraphs = text.split("\n").toImmutableList()
+            val spans = NovelSpanParser.buildSpans(text, novelText).toImmutableList()
+            val paragraphs = spans.toProgressParagraphs()
 
             updateState {
                 copy(
@@ -139,6 +141,7 @@ class NovelViewModel(
                     novelTextResp = novelText,
                     novelText = text,
                     paragraphs = paragraphs,
+                    paragraphSpans = spans,
                     isBookmarked = novel.isBookmarked,
                     prevNovelId = novelText?.seriesNavigation?.prevNovel?.id,
                     nextNovelId = novelText?.seriesNavigation?.nextNovel?.id,
@@ -250,7 +253,10 @@ class NovelViewModel(
             onError = { throwable ->
                 updateState { copy(isTranslating = false) }
                 handleError(throwable)
-                ToastUtil.safeShortToast(RStrings.ai_translation_failed, throwable.message.orEmpty())
+                ToastUtil.safeShortToast(
+                    RStrings.ai_translation_failed,
+                    throwable.message.orEmpty()
+                )
             }
         ) {
             updateState { copy(isTranslating = true) }
@@ -291,11 +297,15 @@ class NovelViewModel(
                 translated
             }
 
-            val translatedParagraphs = translatedText.split("\n").toImmutableList()
+            val translatedSpans = NovelSpanParser
+                .buildSpans(translatedText, uiState.value.novelTextResp)
+                .toImmutableList()
+            val translatedParagraphs = translatedSpans.toProgressParagraphs()
             updateState {
                 copy(
                     novelText = translatedText,
                     paragraphs = translatedParagraphs,
+                    paragraphSpans = translatedSpans,
                     isTranslating = false,
                     isTranslated = true,
                 )
@@ -320,7 +330,10 @@ class NovelViewModel(
         launchIO(
             onError = { throwable ->
                 handleError(throwable)
-                ToastUtil.safeShortToast(RStrings.ai_translation_failed, throwable.message.orEmpty())
+                ToastUtil.safeShortToast(
+                    RStrings.ai_translation_failed,
+                    throwable.message.orEmpty()
+                )
             }
         ) {
             translationRepository.deleteTranslation(
@@ -328,11 +341,15 @@ class NovelViewModel(
                 targetLanguage = targetLanguageTag,
             )
 
-            val sourceParagraphs = sourceText.split("\n").toImmutableList()
+            val sourceSpans = NovelSpanParser
+                .buildSpans(sourceText, uiState.value.novelTextResp)
+                .toImmutableList()
+            val sourceParagraphs = sourceSpans.toProgressParagraphs()
             updateState {
                 copy(
                     novelText = sourceText,
                     paragraphs = sourceParagraphs,
+                    paragraphSpans = sourceSpans,
                     isTranslated = false,
                 )
             }
@@ -359,7 +376,8 @@ class NovelViewModel(
     ) {
         launchIO {
             if (paragraphs.isEmpty()) return@launchIO
-            val saved = latestProgress ?: readingProgressRepository.getProgress(novelId) ?: return@launchIO
+            val saved =
+                latestProgress ?: readingProgressRepository.getProgress(novelId) ?: return@launchIO
             val resolved = resolveProgress(saved, paragraphs)
             latestProgress = resolved
             updateState {
@@ -410,4 +428,17 @@ private fun AiTranslationConfig.isReady(): Boolean {
 
 private fun String.toMd5Hex(): String {
     return encodeToByteArray().toByteString().md5().hex()
+}
+
+private fun List<NovelSpanData>.toProgressParagraphs(): ImmutableList<String> {
+    if (isEmpty()) return persistentListOf("\u200B")
+    return map { span ->
+        when (span) {
+            is NovelSpanData.Text -> span.value
+            is NovelSpanData.JumpUri -> span.value
+            is NovelSpanData.PixivImage -> " "
+            is NovelSpanData.UploadedImage -> " "
+            NovelSpanData.NewPage -> "\n"
+        }
+    }.toImmutableList()
 }

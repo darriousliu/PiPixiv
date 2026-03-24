@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
@@ -78,8 +80,11 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -93,7 +98,6 @@ import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.data.AppViewMode
-import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.NovelReadingProgress
@@ -462,7 +466,6 @@ private fun NovelContent(
     onPixivImageClick: (Long) -> Unit,
 ) {
     val novel = state.novel ?: return
-    val spanParser = remember { NovelSpanParser() }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -611,18 +614,15 @@ private fun NovelContent(
 
         // 正文段落
         items(
-            count = state.paragraphs.size,
+            count = state.paragraphSpans.size,
             // 两个段落内容相同，hashcode也一样，这样就会导致列表状态异常，所以这里直接用index作为key
             key = { it }
         ) { index ->
-            val paragraph = state.paragraphs[index]
             NovelParagraph(
-                paragraph = paragraph,
                 paragraphIndex = index,
                 fontSize = state.fontSize,
                 lineSpacingSp = state.lineSpacingSp,
-                parser = spanParser,
-                novelTextResp = state.novelTextResp,
+                span = state.paragraphSpans[index],
                 onParagraphTextLayout = onParagraphTextLayout,
                 onContentClick = onContentClick,
                 onPixivImageClick = onPixivImageClick,
@@ -635,19 +635,15 @@ private fun NovelContent(
 
 private data class ParagraphRenderData(
     val annotatedText: AnnotatedString,
-    val pixivImages: List<NovelSpanData.PixivImage>,
-    val uploadedImageUrls: List<String>,
-    val hasNewPage: Boolean,
+    val inlineContent: Map<String, InlineTextContent>,
 )
 
 @Composable
 private fun NovelParagraph(
-    paragraph: String,
     paragraphIndex: Int,
     fontSize: Int,
     lineSpacingSp: Int,
-    parser: NovelSpanParser,
-    novelTextResp: NovelTextResp?,
+    span: NovelSpanData,
     onParagraphTextLayout: (Int, TextLayoutResult) -> Unit,
     onContentClick: () -> Unit,
     onPixivImageClick: (Long) -> Unit,
@@ -658,12 +654,15 @@ private fun NovelParagraph(
         fontSize = fontSize.sp,
         lineHeight = (fontSize + lineSpacingSp + 8).sp
     )
-
-    val spans = remember(paragraph, novelTextResp) {
-        parser.buildSpans(paragraph, novelTextResp)
-    }
-    val renderData = remember(spans, linkColor, uriHandler) {
-        buildParagraphRenderData(spans = spans, linkColor = linkColor, uriHandler = uriHandler)
+    val renderData = remember(span, linkColor, uriHandler, onPixivImageClick, paragraphIndex) {
+        buildParagraphRenderData(
+            span = span,
+            paragraphIndex = paragraphIndex,
+            linkColor = linkColor,
+            uriHandler = uriHandler,
+            onPixivImageClick = onPixivImageClick,
+            textStyle = textStyle,
+        )
     }
 
     val baseTextModifier = Modifier
@@ -675,152 +674,122 @@ private fun NovelParagraph(
             onClick = onContentClick
         )
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (renderData.hasNewPage) {
-            Text(text = "\n")
-        }
+    val hasVisibleText = renderData.annotatedText.text.isNotBlank() || renderData.inlineContent.isNotEmpty()
 
-        if (renderData.annotatedText.text.isNotBlank()) {
-            Text(
-                text = renderData.annotatedText,
-                style = textStyle,
-                onTextLayout = { layoutResult ->
-                    onParagraphTextLayout(paragraphIndex, layoutResult)
-                },
-                modifier = baseTextModifier,
-            )
-        } else {
-            Text(
-                text = "\u200B",
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = 1.sp,
-                    lineHeight = 1.sp
-                ),
-                color = Color.Transparent,
-                onTextLayout = { layoutResult ->
-                    onParagraphTextLayout(paragraphIndex, layoutResult)
-                },
-                modifier = baseTextModifier
-            )
-        }
-
-        renderData.pixivImages.forEach { image ->
-            val imageUrl = image.imageUrl
-            if (imageUrl.isNullOrBlank()) {
-                Text(
-                    text = image.token,
-                    style = textStyle,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .combinedClickable(
-                            interactionSource = null,
-                            indication = null,
-                            onClick = onContentClick
-                        )
-                )
-            } else {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalPlatformContext.current)
-                        .data(imageUrl)
-                        .build(),
-                    contentDescription = image.token,
-                    contentScale = ContentScale.FillWidth,
-                    placeholder = rememberVectorPainter(Icons.Rounded.Refresh),
-                    error = rememberVectorPainter(Icons.Rounded.ErrorOutline),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .combinedClickable(
-                            interactionSource = null,
-                            indication = null,
-                            onClick = {
-                                onPixivImageClick(image.illustId)
-                            }
-                        ),
-                )
-            }
-        }
-
-        renderData.uploadedImageUrls.forEach { uploadedImageUrl ->
-            AsyncImage(
-                model = ImageRequest.Builder(LocalPlatformContext.current)
-                    .data(uploadedImageUrl)
-                    .build(),
-                contentDescription = uploadedImageUrl,
-                contentScale = ContentScale.FillWidth,
-                placeholder = rememberVectorPainter(Icons.Rounded.Refresh),
-                error = rememberVectorPainter(Icons.Rounded.ErrorOutline),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .combinedClickable(
-                        interactionSource = null,
-                        indication = null,
-                        onClick = {
-                            uriHandler.openUri(uploadedImageUrl)
-                        }
-                    ),
-            )
-        }
-    }
+    Text(
+        text = if (hasVisibleText) renderData.annotatedText else AnnotatedString("\u200B"),
+        style = if (hasVisibleText) textStyle else TextStyle(fontSize = 1.sp, lineHeight = 1.sp),
+        color = if (hasVisibleText) Color.Unspecified else Color.Transparent,
+        inlineContent = renderData.inlineContent,
+        onTextLayout = { layoutResult ->
+            onParagraphTextLayout(paragraphIndex, layoutResult)
+        },
+        modifier = baseTextModifier,
+    )
 }
 
 private fun buildParagraphRenderData(
-    spans: List<NovelSpanData>,
+    span: NovelSpanData,
+    paragraphIndex: Int,
     linkColor: Color,
     uriHandler: UriHandler,
+    onPixivImageClick: (Long) -> Unit,
+    textStyle: TextStyle,
 ): ParagraphRenderData {
-    val pixivImages = mutableListOf<NovelSpanData.PixivImage>()
-    val uploadedImageUrls = mutableListOf<String>()
-    var hasNewPage = false
+    val inlineContentMap = mutableMapOf<String, InlineTextContent>()
     val annotatedText = buildAnnotatedString {
-        spans.forEach { span ->
-            when (span) {
-                is NovelSpanData.Text -> append(span.value)
-                is NovelSpanData.JumpUri -> {
-                    val start = length
-                    append(span.value)
-                    addStyle(
-                        style = SpanStyle(
-                            color = linkColor,
-                            textDecoration = TextDecoration.Underline
-                        ),
-                        start = start,
-                        end = length
+        when (span) {
+            is NovelSpanData.Text -> append(span.value)
+            is NovelSpanData.JumpUri -> {
+                val start = length
+                append(span.value)
+                addStyle(
+                    style = SpanStyle(
+                        color = linkColor,
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    start = start,
+                    end = length
+                )
+                addLink(
+                    url = LinkAnnotation.Url(span.url) {
+                        uriHandler.openUri(span.url)
+                    },
+                    start = start,
+                    end = length
+                )
+            }
+
+            is NovelSpanData.PixivImage -> {
+                val inlineId = "pixiv_image_${paragraphIndex}_${span.illustId}_${span.targetIndex}"
+                appendInlineContent(inlineId, "[pixivimage]")
+                inlineContentMap[inlineId] = InlineTextContent(
+                    placeholder = Placeholder(
+                        width = 220.sp,
+                        height = 180.sp,
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                     )
-                    addLink(
-                        url = LinkAnnotation.Url(span.url) {
-                            uriHandler.openUri(span.url)
-                        },
-                        start = start,
-                        end = length
-                    )
-                }
-
-                is NovelSpanData.PixivImage -> {
-                    pixivImages += span
-                }
-
-                is NovelSpanData.UploadedImage -> {
-                    uploadedImageUrls += span.url
-                }
-
-                NovelSpanData.NewPage -> {
-                    hasNewPage = true
+                ) {
+                    val imageUrl = span.imageUrl
+                    if (imageUrl.isNullOrBlank()) {
+                        Text(text = span.token, style = textStyle)
+                    } else {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalPlatformContext.current)
+                                .data(imageUrl)
+                                .build(),
+                            contentDescription = span.token,
+                            contentScale = ContentScale.FillBounds,
+                            placeholder = rememberVectorPainter(Icons.Rounded.Refresh),
+                            error = rememberVectorPainter(Icons.Rounded.ErrorOutline),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .combinedClickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = { onPixivImageClick(span.illustId) }
+                                ),
+                        )
+                    }
                 }
             }
+
+            is NovelSpanData.UploadedImage -> {
+                val inlineId = "uploaded_image_${paragraphIndex}"
+                appendInlineContent(inlineId, "[uploadedimage]")
+                inlineContentMap[inlineId] = InlineTextContent(
+                    placeholder = Placeholder(
+                        width = 220.sp,
+                        height = 180.sp,
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                    )
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalPlatformContext.current)
+                            .data(span.url)
+                            .build(),
+                        contentDescription = span.url,
+                        contentScale = ContentScale.FillBounds,
+                        placeholder = rememberVectorPainter(Icons.Rounded.Refresh),
+                        error = rememberVectorPainter(Icons.Rounded.ErrorOutline),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .combinedClickable(
+                                interactionSource = null,
+                                indication = null,
+                                onClick = { uriHandler.openUri(span.url) }
+                            ),
+                    )
+                }
+            }
+
+            NovelSpanData.NewPage -> append("\n")
         }
     }
 
     return ParagraphRenderData(
         annotatedText = annotatedText,
-        pixivImages = pixivImages,
-        uploadedImageUrls = uploadedImageUrls,
-        hasNewPage = hasNewPage,
+        inlineContent = inlineContentMap,
     )
 }
 
