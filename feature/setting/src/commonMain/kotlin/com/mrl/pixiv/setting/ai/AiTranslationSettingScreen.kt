@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Translate
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,7 +43,6 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.ai_api_key
 import com.mrl.pixiv.strings.ai_endpoint
-import com.mrl.pixiv.strings.ai_endpoint_hint
 import com.mrl.pixiv.strings.ai_model
 import com.mrl.pixiv.strings.ai_model_suggestions
 import com.mrl.pixiv.strings.ai_provider
@@ -186,12 +186,6 @@ fun AiTranslationSettingScreen(
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            Text(
-                text = stringResource(RStrings.ai_endpoint_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }
@@ -220,7 +214,7 @@ private fun ProviderItem(
                 current = provider.toDisplayName(),
             ) {
                 AiProvider.entries.forEach { item ->
-                    androidx.compose.material3.DropdownMenuItem(
+                    DropdownMenuItem(
                         text = {
                             Text(text = item.toDisplayName())
                         },

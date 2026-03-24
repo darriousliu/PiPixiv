@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">PiPixiv</string>
     <string name="home">首页</string>
     <string name="search">搜索</string>
     <string name="my">我的</string>
@@ -19,7 +20,6 @@
     <string name="all">全部</string>
     <string name="uncategorized">未分类</string>
     <string name="search_by_title_author">搜索标题或画师名称</string>
-    <string name="app_name" translatable="false">PiPixiv</string>
     <string name="refresh_token_success">刷新token成功</string>
     <string name="unknown_error">未知错误</string>
     <string name="revoke">撤销</string>
@@ -264,19 +264,18 @@
     <string name="translate_novel">翻译正文</string>
     <string name="regenerate_translation">重新生成翻译</string>
     <string name="delete_translation">删除翻译</string>
+    <string name="ai_translation_setting">AI翻译设置</string>
+    <string name="ai_provider">AI提供商</string>
+    <string name="ai_provider_openai" translatable="false">OpenAI</string>
+    <string name="ai_provider_claude" translatable="false">Claude</string>
+    <string name="ai_provider_gemini" translatable="false">Gemini</string>
+    <string name="ai_endpoint">接口地址</string>
+    <string name="ai_api_key" translatable="false">API Key</string>
+    <string name="ai_model">模型</string>
+    <string name="ai_model_suggestions">推荐模型</string>
     <string name="ai_translation_config_required">请先在设置中完成AI翻译配置</string>
     <string name="ai_translation_failed">翻译失败: %1$s</string>
     <string name="ai_translation_success">翻译完成</string>
     <string name="ai_translation_cache_hit">已加载缓存翻译</string>
     <string name="ai_translation_deleted">已删除翻译并恢复原文</string>
-    <string name="ai_translation_setting">AI翻译设置</string>
-    <string name="ai_provider">AI提供商</string>
-    <string name="ai_provider_openai">OpenAI</string>
-    <string name="ai_provider_claude">Claude</string>
-    <string name="ai_provider_gemini">Gemini</string>
-    <string name="ai_endpoint">接口地址</string>
-    <string name="ai_endpoint_hint">Claude/Gemini 请填写可用的 OpenAI 兼容接口地址（如网关或代理端点）。</string>
-    <string name="ai_api_key" translatable="false">API Key</string>
-    <string name="ai_model">模型</string>
-    <string name="ai_model_suggestions">推荐模型</string>
 </resources>
