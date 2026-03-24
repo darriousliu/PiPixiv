@@ -105,6 +105,6 @@ buildkonfig {
             properties["versionName"].toString(),
             const = true
         )
-        buildConfigField(FieldSpec.Type.STRING, "sentryDsn", sentryDsn, const = true)
+        buildConfigField(FieldSpec.Type.STRING, "sentryDsn", sentryDsn.orEmpty(), const = true)
     }
 }
