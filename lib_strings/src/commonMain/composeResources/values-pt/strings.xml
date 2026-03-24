@@ -255,4 +255,20 @@
     <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">Erro de análise de Cookie</string>
     <string name="recommend_cookie_export_plugin">Recomenda-se usar as extensões de exportação de cookies da Chrome Web Store &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; ou &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;. Certifique-se de que o Cookie contenha o campo PHPSESSID e ele deve ser exportado obrigatoriamente no formato Json.</string>
+    <string name="translate_novel">Traduzir texto principal</string>
+    <string name="regenerate_translation">Regenerar tradução</string>
+    <string name="delete_translation">Excluir tradução</string>
+    <string name="show_original_text">Mostrar texto original</string>
+    <string name="show_translated_text">Mostrar texto traduzido</string>
+    <string name="ai_translation_setting">Configurações de tradução por IA</string>
+    <string name="ai_provider">Provedor de IA</string>
+    <string name="ai_endpoint">Endereço do endpoint</string>
+    <string name="ai_model">Modelo</string>
+    <string name="ai_openai_use_response_api">Usar Response API</string>
+    <string name="ai_model_suggestions">Modelos recomendados</string>
+    <string name="ai_translation_config_required">Conclua primeiro a configuração de tradução por IA nas configurações</string>
+    <string name="ai_translation_failed">Falha na tradução: %1$s</string>
+    <string name="ai_translation_success">Tradução concluída</string>
+    <string name="ai_translation_cache_hit">Tradução em cache carregada</string>
+    <string name="ai_translation_deleted">Tradução excluída e texto original restaurado</string>
 </resources>

@@ -255,4 +255,20 @@
     <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">Cookie 解析錯誤</string>
     <string name="recommend_cookie_export_plugin">推薦使用 Chrome 擴充功能商店 Cookie 匯出擴充功能 &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; 或 &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;，保證 Cookie 中含有 PHPSESSID 欄位，一定要以 Json 格式匯出</string>
+    <string name="translate_novel">翻譯正文</string>
+    <string name="regenerate_translation">重新產生翻譯</string>
+    <string name="delete_translation">刪除翻譯</string>
+    <string name="show_original_text">顯示原文</string>
+    <string name="show_translated_text">顯示譯文</string>
+    <string name="ai_translation_setting">AI翻譯設定</string>
+    <string name="ai_provider">AI提供商</string>
+    <string name="ai_endpoint">介面位址</string>
+    <string name="ai_model">模型</string>
+    <string name="ai_openai_use_response_api">使用 Response API</string>
+    <string name="ai_model_suggestions">推薦模型</string>
+    <string name="ai_translation_config_required">請先在設定中完成AI翻譯配置</string>
+    <string name="ai_translation_failed">翻譯失敗: %1$s</string>
+    <string name="ai_translation_success">翻譯完成</string>
+    <string name="ai_translation_cache_hit">已載入快取翻譯</string>
+    <string name="ai_translation_deleted">已刪除翻譯並恢復原文</string>
 </resources>

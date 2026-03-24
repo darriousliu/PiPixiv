@@ -18,12 +18,12 @@
     <string name="all">All</string>
     <string name="uncategorized">Uncategorized</string>
     <string name="search_by_title_author">Search by title or author name</string>
-    <string name="refresh_token_success">Refresh token successfully</string>
     <string name="unknown_error">Unknown Error</string>
     <string name="revoke">Revoke</string>
     <string name="revoke_cancel_like">Revoke cancel like</string>
-    <string name="sign_in">Sign in</string>
+    <string name="refresh_token_success">Refresh token successfully</string>
     <string name="sign_up">Sign up</string>
+    <string name="sign_in">Sign in</string>
     <string name="sign_in_with_token">Sign in with Token</string>
     <string name="download_with_size">Download (%1$s)</string>
     <string name="followed">Followed</string>
@@ -262,7 +262,6 @@
     <string name="ai_translation_setting">AI Translation Settings</string>
     <string name="ai_provider">AI Provider</string>
     <string name="ai_endpoint">Endpoint</string>
-    <string name="ai_api_key" translatable="false">API Key</string>
     <string name="ai_model">Model</string>
     <string name="ai_openai_use_response_api">Use Response API</string>
     <string name="ai_model_suggestions">Suggested Models</string>

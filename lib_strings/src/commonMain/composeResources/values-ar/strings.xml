@@ -255,4 +255,20 @@
     <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">خطأ في تحليل Cookie</string>
     <string name="recommend_cookie_export_plugin">يُوصى باستخدام إضافات تصدير ملفات تعريف الارتباط من متجر إضافات Chrome &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; أو &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;، وتأكد من أن ملف تعريف الارتباط يحتوي على حقل PHPSESSID، ويجب تصديره بتنسيق Json.</string>
+    <string name="translate_novel">ترجمة النص</string>
+    <string name="regenerate_translation">إعادة إنشاء الترجمة</string>
+    <string name="delete_translation">حذف الترجمة</string>
+    <string name="show_original_text">إظهار النص الأصلي</string>
+    <string name="show_translated_text">إظهار النص المترجم</string>
+    <string name="ai_translation_setting">إعدادات الترجمة بالذكاء الاصطناعي</string>
+    <string name="ai_provider">مزود الذكاء الاصطناعي</string>
+    <string name="ai_endpoint">عنوان الواجهة</string>
+    <string name="ai_model">النموذج</string>
+    <string name="ai_openai_use_response_api">استخدام Response API</string>
+    <string name="ai_model_suggestions">النماذج المقترحة</string>
+    <string name="ai_translation_config_required">يرجى إكمال إعدادات الترجمة بالذكاء الاصطناعي أولاً</string>
+    <string name="ai_translation_failed">فشلت الترجمة: %1$s</string>
+    <string name="ai_translation_success">اكتملت الترجمة</string>
+    <string name="ai_translation_cache_hit">تم تحميل الترجمة من ذاكرة التخزين المؤقت</string>
+    <string name="ai_translation_deleted">تم حذف الترجمة واستعادة النص الأصلي</string>
 </resources>

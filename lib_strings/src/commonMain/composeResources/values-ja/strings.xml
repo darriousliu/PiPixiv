@@ -255,4 +255,20 @@
     <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">Cookie解析エラー</string>
     <string name="recommend_cookie_export_plugin">ChromeウェブストアのCookieエクスポート拡張機能である&lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt;または&lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;の使用をお勧めします。CookieにPHPSESSIDフィールドが含まれていることを確認し、必ずJson形式でエクスポートしてください。</string>
+    <string name="translate_novel">本文を翻訳</string>
+    <string name="regenerate_translation">翻訳を再生成</string>
+    <string name="delete_translation">翻訳を削除</string>
+    <string name="show_original_text">原文を表示</string>
+    <string name="show_translated_text">訳文を表示</string>
+    <string name="ai_translation_setting">AI翻訳設定</string>
+    <string name="ai_provider">AIプロバイダー</string>
+    <string name="ai_endpoint">エンドポイント</string>
+    <string name="ai_model">モデル</string>
+    <string name="ai_openai_use_response_api">Response APIを使用</string>
+    <string name="ai_model_suggestions">推奨モデル</string>
+    <string name="ai_translation_config_required">先に設定でAI翻訳の設定を完了してください</string>
+    <string name="ai_translation_failed">翻訳失敗: %1$s</string>
+    <string name="ai_translation_success">翻訳完了</string>
+    <string name="ai_translation_cache_hit">キャッシュから翻訳を読み込みました</string>
+    <string name="ai_translation_deleted">翻訳を削除し原文を復元しました</string>
 </resources>

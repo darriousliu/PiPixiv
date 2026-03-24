@@ -20,12 +20,12 @@
     <string name="all">全部</string>
     <string name="uncategorized">未分类</string>
     <string name="search_by_title_author">搜索标题或画师名称</string>
-    <string name="refresh_token_success">刷新token成功</string>
     <string name="unknown_error">未知错误</string>
     <string name="revoke">撤销</string>
     <string name="revoke_cancel_like">撤销取消收藏</string>
-    <string name="sign_in">登录</string>
+    <string name="refresh_token_success">刷新token成功</string>
     <string name="sign_up">注册</string>
+    <string name="sign_in">登录</string>
     <string name="sign_in_with_token">使用Token登录</string>
     <string name="download_with_size">下载 (%1$s)</string>
     <string name="followed">已关注</string>
