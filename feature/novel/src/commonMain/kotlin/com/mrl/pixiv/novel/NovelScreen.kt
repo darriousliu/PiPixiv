@@ -136,6 +136,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import kotlin.math.roundToInt
 
 private const val KEY_COVER = "cover"
 private const val KEY_TITLE = "title"
@@ -907,7 +908,7 @@ private fun NovelBottomSheetContent(
             supportingContent = {
                 Slider(
                     value = state.fontSize.toFloat(),
-                    onValueChange = { onFontSizeChange(it.toInt()) },
+                    onValueChange = { onFontSizeChange(it.roundToInt()) },
                     valueRange = 10f..32f,
                     steps = 21
                 )
@@ -929,7 +930,7 @@ private fun NovelBottomSheetContent(
             supportingContent = {
                 Slider(
                     value = state.lineSpacingSp.toFloat(),
-                    onValueChange = { onLineSpacingChange(it.toInt()) },
+                    onValueChange = { onLineSpacingChange(it.roundToInt()) },
                     valueRange = -10f..10f,
                     steps = 19
                 )
