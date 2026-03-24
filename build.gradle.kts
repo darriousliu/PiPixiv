@@ -21,4 +21,5 @@ plugins {
     alias(kotlinx.plugins.native.cocoapods) apply false
     alias(libs.plugins.sentry.android) apply false
     alias(libs.plugins.sentry.kmp) apply false
+    alias(libs.plugins.hotswan.compiler) apply false
 }

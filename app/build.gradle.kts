@@ -5,6 +5,7 @@ import org.gradle.internal.extensions.stdlib.capitalized
 
 plugins {
     id("pixiv.android.application")
+    alias(libs.plugins.hotswan.compiler)
 //    alias(androidx.plugins.baselineprofile)
 }
 if (project.findProperty("applyFirebasePlugins") == "true") {

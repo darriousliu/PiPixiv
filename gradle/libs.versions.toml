@@ -28,6 +28,7 @@ okhttp = "5.3.2"
 sentry-bom = "8.36.0"
 sentry-plugin = "6.2.0"
 sentry-kmp = "0.25.0"
+hotswan = "1.0.13"
 
 
 [libraries]
@@ -109,3 +110,4 @@ kotzilla = { id = "io.kotzilla.kotzilla-plugin", version.ref = "kotzilla" }
 build-konfig = { id = "com.codingfeline.buildkonfig", version.ref = "konfig" }
 sentry-android = { id = "io.sentry.android.gradle", version.ref = "sentry-plugin" }
 sentry-kmp = { id = "io.sentry.kotlin.multiplatform.gradle", version.ref = "sentry-kmp" }
+hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version.ref = "hotswan" }
