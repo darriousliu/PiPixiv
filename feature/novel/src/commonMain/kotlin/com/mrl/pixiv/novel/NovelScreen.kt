@@ -35,6 +35,7 @@ import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
@@ -48,13 +49,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -107,6 +109,7 @@ import com.mrl.pixiv.common.util.Platform
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
 import com.mrl.pixiv.common.util.platform
+import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.back
@@ -694,7 +697,8 @@ private fun NovelParagraph(
             onClick = onContentClick
         )
 
-    val hasVisibleText = renderData.annotatedText.text.isNotBlank() || renderData.inlineContent.isNotEmpty()
+    val hasVisibleText =
+        renderData.annotatedText.text.isNotBlank() || renderData.inlineContent.isNotEmpty()
 
     Text(
         text = if (hasVisibleText) renderData.annotatedText else AnnotatedString("\u200B"),
@@ -887,77 +891,94 @@ private fun NovelBottomSheetContent(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier.fillMaxWidth(),
     ) {
-        // 导出按钮
-        TextButton(
-            onClick = onExport,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(RStrings.export_txt_button))
-        }
-
-        HorizontalDivider()
+        val colors =
+            ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
 
         // 字号调整
-        Column {
-            Text(
-                text = stringResource(RStrings.font_size_value, state.fontSize),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Slider(
-                value = state.fontSize.toFloat(),
-                onValueChange = { onFontSizeChange(it.toInt()) },
-                valueRange = 10f..32f,
-                steps = 21
-            )
-        }
-
-        HorizontalDivider()
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = stringResource(RStrings.font_size_value, state.fontSize),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            },
+            supportingContent = {
+                Slider(
+                    value = state.fontSize.toFloat(),
+                    onValueChange = { onFontSizeChange(it.toInt()) },
+                    valueRange = 10f..32f,
+                    steps = 21
+                )
+            },
+            colors = colors
+        )
 
         // 行间距调整
-        Column {
-            Text(
-                text = stringResource(
-                    RStrings.line_spacing_value,
-                    if (state.lineSpacingSp >= 0) "+" else "" + state.lineSpacingSp.toString()
-                ),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Slider(
-                value = state.lineSpacingSp.toFloat(),
-                onValueChange = { onLineSpacingChange(it.toInt()) },
-                valueRange = -10f..10f,
-                steps = 19
-            )
-        }
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = stringResource(
+                        RStrings.line_spacing_value,
+                        (if (state.lineSpacingSp >= 0) "+" else "") + state.lineSpacingSp.toString()
+                    ),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            },
+            supportingContent = {
+                Slider(
+                    value = state.lineSpacingSp.toFloat(),
+                    onValueChange = { onLineSpacingChange(it.toInt()) },
+                    valueRange = -10f..10f,
+                    steps = 19
+                )
+            },
+            colors = colors
+        )
 
-        HorizontalDivider()
+        // 导出按钮
+        ListItem(
+            headlineContent = { Text(text = stringResource(RStrings.export_txt_button)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .throttleClick(onClick = onExport),
+            leadingContent = {
+                Icon(
+                    imageVector = Icons.Rounded.FileDownload,
+                    contentDescription = stringResource(RStrings.export_txt_button)
+                )
+            },
+            colors = colors
+        )
 
         // 分享按钮
-        TextButton(
-            onClick = onShare,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Rounded.Share, contentDescription = null)
-            8.HSpacer
-            Text(stringResource(RStrings.share_link))
-        }
+        ListItem(
+            headlineContent = { Text(text = stringResource(RStrings.share_link)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .throttleClick(onClick = onShare),
+            leadingContent = {
+                Icon(
+                    imageVector = Icons.Rounded.Share,
+                    contentDescription = stringResource(RStrings.share_link)
+                )
+            },
+            colors = colors
+        )
 
-        HorizontalDivider()
-
-        TextButton(
-            onClick = onAiSetting,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Rounded.Settings, contentDescription = null)
-            8.HSpacer
-            Text(stringResource(RStrings.ai_translation_setting))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
+        ListItem(
+            headlineContent = { Text(text = stringResource(RStrings.ai_translation_setting)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .throttleClick(onClick = onAiSetting),
+            leadingContent = {
+                Icon(
+                    imageVector = Icons.Rounded.Settings,
+                    contentDescription = stringResource(RStrings.ai_translation_setting)
+                )
+            },
+            colors = colors
+        )
     }
 }
