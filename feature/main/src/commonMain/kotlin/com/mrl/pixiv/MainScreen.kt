@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.repository.VersionManager
@@ -78,7 +79,7 @@ fun MainScreen(
                         }
                     },
                     label = {
-                        Text(text = stringResource(title))
+                        Text(text = stringResource(title), textAlign = TextAlign.Center)
                     }
                 )
             }
