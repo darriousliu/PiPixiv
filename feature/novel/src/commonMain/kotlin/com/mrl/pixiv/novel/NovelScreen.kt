@@ -99,6 +99,7 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.TagItem
+import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
@@ -141,6 +142,7 @@ import kotlin.math.roundToInt
 private const val KEY_COVER = "cover"
 private const val KEY_TITLE = "title"
 private const val KEY_SERIES_TITLE = "series_title"
+private const val KEY_AUTHOR = "author"
 private const val KEY_STATS = "stats"
 private const val KEY_CREATE_DATE = "create_date"
 private const val KEY_TAGS = "tags"
@@ -337,6 +339,9 @@ fun NovelScreen(
                         onPixivImageClick = { illustId ->
                             navigationManager.navigateToSinglePictureScreen(illustId)
                         },
+                        onAuthorClick = { userId ->
+                            navigationManager.navigateToProfileDetailScreen(userId)
+                        },
                     )
                     AnimatedVisibility(
                         visible = showBar,
@@ -488,6 +493,7 @@ private fun NovelContent(
     onContentClick: () -> Unit = {},
     onTagClick: (String) -> Unit,
     onPixivImageClick: (Long) -> Unit,
+    onAuthorClick: (Long) -> Unit,
 ) {
     val novel = state.novel ?: return
 
@@ -523,6 +529,29 @@ private fun NovelContent(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
             )
+        }
+
+        item(key = KEY_AUTHOR) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .throttleClick { onAuthorClick(novel.user.id) }
+            ) {
+                UserAvatar(
+                    url = novel.user.profileImageUrls.medium,
+                    modifier = Modifier.size(36.dp),
+                    onClick = { onAuthorClick(novel.user.id) }
+                )
+                8.HSpacer
+                Text(
+                    text = novel.user.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                )
+            }
         }
 
         // 系列标题
@@ -822,7 +851,7 @@ private fun paragraphStartItemIndex(
     hasSeriesTitle: Boolean,
     hasCaption: Boolean
 ): Int {
-    var itemCountBeforeParagraphs = 6 // cover + title + stats + create_date + tags + divider
+    var itemCountBeforeParagraphs = 7 // cover + title + author + stats + create_date + tags + divider
     if (hasSeriesTitle) itemCountBeforeParagraphs += 1
     if (hasCaption) itemCountBeforeParagraphs += 1
     return itemCountBeforeParagraphs
