@@ -62,7 +62,11 @@ import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
 import com.mrl.pixiv.setting.ai.AiTranslationSettingScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
+import com.mrl.pixiv.setting.block.BlockIllustScreen
+import com.mrl.pixiv.setting.block.BlockNovelScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
+import com.mrl.pixiv.setting.block.BlockTagScreen
+import com.mrl.pixiv.setting.block.BlockUserScreen
 import com.mrl.pixiv.setting.download.DownloadScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import kotlinx.collections.immutable.toImmutableList
@@ -269,6 +273,18 @@ fun Navigation3MainGraph(
                     }
                     entry<Destination.BlockSettings> {
                         BlockSettingsScreen()
+                    }
+                    entry<Destination.BlockIllust> {
+                        BlockIllustScreen()
+                    }
+                    entry<Destination.BlockNovel> {
+                        BlockNovelScreen()
+                    }
+                    entry<Destination.BlockUser> {
+                        BlockUserScreen()
+                    }
+                    entry<Destination.BlockTag> {
+                        BlockTagScreen()
                     }
                     entry<Destination.BlockComments> {
                         BlockCommentsScreen()

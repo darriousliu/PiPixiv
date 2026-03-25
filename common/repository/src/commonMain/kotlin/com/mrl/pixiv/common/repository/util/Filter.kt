@@ -13,8 +13,5 @@ inline fun List<Illust>.filterNormalIllust() = filter { it.xRestrict == XRestric
 inline fun List<Novel>.filterNormalNovel() = filter { it.xRestrict == XRestrict.Normal }
 
 inline fun List<Comment>.filterBlocked(): List<Comment> {
-    val blockComments = BlockingRepositoryV2.blockCommentsFlow.value
-    return filter { comment ->
-        blockComments.all { it.id != comment.id }
-    }
+    return filter { comment -> !BlockingRepositoryV2.isCommentBlocked(comment.id) }
 }

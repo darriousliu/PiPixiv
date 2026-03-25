@@ -271,4 +271,7 @@
     <string name="ai_translation_success">Übersetzung abgeschlossen</string>
     <string name="ai_translation_cache_hit">Zwischengespeicherte Übersetzung geladen</string>
     <string name="ai_translation_deleted">Übersetzung gelöscht und Originaltext wiederhergestellt</string>
+    <string name="block_illust">Illustrationen blockieren</string>
+    <string name="block_novel">Romane blockieren</string>
+    <string name="no_blocked_items">Keine blockierten Elemente</string>
 </resources>

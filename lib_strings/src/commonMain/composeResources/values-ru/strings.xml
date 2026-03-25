@@ -271,4 +271,7 @@
     <string name="ai_translation_success">Перевод завершен</string>
     <string name="ai_translation_cache_hit">Загружен перевод из кэша</string>
     <string name="ai_translation_deleted">Перевод удален, оригинал восстановлен</string>
+    <string name="block_illust">Блокировать иллюстрации</string>
+    <string name="block_novel">Блокировать новеллы</string>
+    <string name="no_blocked_items">Нет заблокированных элементов</string>
 </resources>

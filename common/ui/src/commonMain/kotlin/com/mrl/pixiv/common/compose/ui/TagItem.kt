@@ -24,11 +24,13 @@ import com.mrl.pixiv.common.compose.deepBlue
 import com.mrl.pixiv.common.data.Tag
 import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.copyToClipboard
 import com.mrl.pixiv.common.util.throttleClick
+import com.mrl.pixiv.strings.block_tags
 import com.mrl.pixiv.strings.bookmark_add_success
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.copy_to_clipboard
@@ -81,6 +83,16 @@ fun TagItem(
             },
             text = {
                 Column {
+                    Text(
+                        text = stringResource(RStrings.block_tags),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .throttleClick(indication = indication) {
+                                BlockingRepositoryV2.blockTag(tag.name)
+                                showCollectionDialog = false
+                            }
+                            .then(itemModifier)
+                    )
                     Text(
                         text = stringResource(RStrings.collection),
                         modifier = Modifier

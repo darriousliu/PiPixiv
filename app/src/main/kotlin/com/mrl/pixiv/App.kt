@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composer
 import androidx.compose.runtime.tooling.ComposeStackTraceMode
 import com.mrl.pixiv.common.analytics.FLAVOR
 import com.mrl.pixiv.common.analytics.initializeFirebase
-import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.deleteFiles
@@ -44,7 +43,6 @@ class App : Application() {
             androidContext(this@App)
         }
         migrateDataStoreToMMKV()
-        migrateBlockingToNewFile()
         setAppCompatDelegateThemeMode(SettingRepository.settingTheme)
     }
 
@@ -82,7 +80,4 @@ class App : Application() {
         }
     }
 
-    private fun migrateBlockingToNewFile() {
-        BlockingRepositoryV2.migrate()
-    }
 }

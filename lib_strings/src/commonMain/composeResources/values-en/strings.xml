@@ -270,4 +270,7 @@
     <string name="ai_translation_success">Translation completed</string>
     <string name="ai_translation_cache_hit">Loaded translation from cache</string>
     <string name="ai_translation_deleted">Translation deleted and original text restored</string>
+    <string name="block_illust">Block Illustration</string>
+    <string name="block_novel">Block Novel</string>
+    <string name="no_blocked_items">No blocked items</string>
 </resources>

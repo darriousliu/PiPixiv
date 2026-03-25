@@ -271,4 +271,7 @@
     <string name="ai_translation_success">翻訳完了</string>
     <string name="ai_translation_cache_hit">キャッシュから翻訳を読み込みました</string>
     <string name="ai_translation_deleted">翻訳を削除し原文を復元しました</string>
+    <string name="block_illust">イラストをブロック</string>
+    <string name="block_novel">小説をブロック</string>
+    <string name="no_blocked_items">ブロックされた項目はありません</string>
 </resources>

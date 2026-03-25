@@ -281,4 +281,7 @@
     <string name="ai_translation_success">翻译完成</string>
     <string name="ai_translation_cache_hit">已加载缓存翻译</string>
     <string name="ai_translation_deleted">已删除翻译并恢复原文</string>
+    <string name="block_illust">屏蔽插画</string>
+    <string name="block_novel">屏蔽小说</string>
+    <string name="no_blocked_items">暂无屏蔽内容</string>
 </resources>

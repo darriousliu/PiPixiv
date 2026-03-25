@@ -271,4 +271,7 @@
     <string name="ai_translation_success">Traducción completada</string>
     <string name="ai_translation_cache_hit">Se cargó la traducción desde la caché</string>
     <string name="ai_translation_deleted">Se eliminó la traducción y se restauró el texto original</string>
+    <string name="block_illust">Bloquear ilustraciones</string>
+    <string name="block_novel">Bloquear novelas</string>
+    <string name="no_blocked_items">No hay elementos bloqueados</string>
 </resources>

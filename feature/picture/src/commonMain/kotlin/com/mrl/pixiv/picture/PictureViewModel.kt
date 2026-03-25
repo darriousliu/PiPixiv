@@ -415,7 +415,8 @@ class PictureViewModel(
     }
 
     fun blockIllust() {
-        BlockingRepositoryV2.blockIllust(state.illust?.id ?: return)
+        val illust = state.illust ?: return
+        BlockingRepositoryV2.blockIllust(illustId = illust.id, title = illust.title)
     }
 
     fun saveAsImage(imageUrl: String, file: PlatformFile) {
@@ -454,9 +455,6 @@ class PictureViewModel(
 
     fun removeBlockUser() {
         val userId = state.illust?.user?.id ?: return
-        launchIO {
-            PixivRepository.postMuteSetting(deleteUserIds = listOf(userId))
-        }
         BlockingRepositoryV2.removeBlockUser(userId)
     }
 

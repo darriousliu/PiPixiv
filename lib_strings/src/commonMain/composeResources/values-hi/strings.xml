@@ -271,4 +271,7 @@
     <string name="ai_translation_success">अनुवाद पूरा हुआ</string>
     <string name="ai_translation_cache_hit">कैश से अनुवाद लोड किया गया</string>
     <string name="ai_translation_deleted">अनुवाद हटाया गया और मूल पाठ पुनर्स्थापित किया गया</string>
+    <string name="block_illust">चित्र ब्लॉक करें</string>
+    <string name="block_novel">उपन्यास ब्लॉक करें</string>
+    <string name="no_blocked_items">कोई ब्लॉक की गई सामग्री नहीं है</string>
 </resources>

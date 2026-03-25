@@ -271,4 +271,7 @@
     <string name="ai_translation_success">번역 완료</string>
     <string name="ai_translation_cache_hit">캐시된 번역을 불러왔습니다</string>
     <string name="ai_translation_deleted">번역을 삭제하고 원문을 복원했습니다</string>
+    <string name="block_illust">일러스트 차단</string>
+    <string name="block_novel">소설 차단</string>
+    <string name="no_blocked_items">차단된 항목이 없습니다</string>
 </resources>

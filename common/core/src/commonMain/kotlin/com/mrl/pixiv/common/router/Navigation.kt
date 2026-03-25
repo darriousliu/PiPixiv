@@ -98,6 +98,18 @@ sealed class Destination : NavKey {
     data object BlockSettings : Destination()
 
     @Serializable
+    data object BlockIllust : Destination()
+
+    @Serializable
+    data object BlockNovel : Destination()
+
+    @Serializable
+    data object BlockUser : Destination()
+
+    @Serializable
+    data object BlockTag : Destination()
+
+    @Serializable
     data object BlockComments : Destination()
 
     @Serializable

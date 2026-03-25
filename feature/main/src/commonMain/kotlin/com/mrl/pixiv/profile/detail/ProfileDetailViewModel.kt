@@ -97,16 +97,10 @@ class ProfileDetailViewModel(
     }
 
     fun blockUser(userId: Long) {
-        launchIO {
-            async { PixivRepository.postMuteSetting(addUserIds = listOf(userId)) }
-            async { BlockingRepositoryV2.blockUser(userId) }
-        }
+        BlockingRepositoryV2.blockUser(userId = userId, name = uiState.value.userInfo.user.name)
     }
 
     fun removeBlockUser(userId: Long) {
-        launchIO {
-            async { PixivRepository.postMuteSetting(deleteUserIds = listOf(userId)) }
-            async { BlockingRepositoryV2.removeBlockUser(userId) }
-        }
+        BlockingRepositoryV2.removeBlockUser(userId)
     }
 }
