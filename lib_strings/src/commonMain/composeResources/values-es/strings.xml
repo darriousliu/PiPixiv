@@ -252,7 +252,6 @@
     <string name="novel_history_import_user_mismatch_title">Discrepancia de usuario en el historial de novelas</string>
     <string name="novel_history_import_user_mismatch_desc">ID de usuario actual: %1$d, ID de usuario de los datos a importar: %2$d. Confirme para continuar importando el historial de novelas al usuario actual o cancele para omitir esta parte de la importación.</string>
     <string name="sign_in_with_cookie">Iniciar sesión con Cookie</string>
-    <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">Error de análisis de Cookie</string>
     <string name="recommend_cookie_export_plugin">Se recomienda utilizar las extensiones de exportación de cookies de la Chrome Web Store &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; o &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;. Asegúrese de que la cookie contenga el campo PHPSESSID y debe exportarse en formato Json.</string>
     <string name="translate_novel">Traducir texto principal</string>
@@ -273,5 +272,5 @@
     <string name="ai_translation_deleted">Se eliminó la traducción y se restauró el texto original</string>
     <string name="block_illust">Bloquear ilustraciones</string>
     <string name="block_novel">Bloquear novelas</string>
-    <string name="no_blocked_items">No hay elementos bloqueados</string>
+    <string name="no_blocked_items">No hay contenido bloqueado</string>
 </resources>

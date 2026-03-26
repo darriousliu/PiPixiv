@@ -270,4 +270,7 @@
     <string name="ai_translation_success">Çevirme işlemi başarılı</string>
     <string name="ai_translation_cache_hit">Çeviri önbellekten yüklendi</string>
     <string name="ai_translation_deleted">Çeviri silindi ve orijinal metin geri yüklendi</string>
+    <string name="block_illust">İllüstrasyonları engelle</string>
+    <string name="block_novel">Romanları engelle</string>
+    <string name="no_blocked_items">Engellenen içerik yok</string>
 </resources>

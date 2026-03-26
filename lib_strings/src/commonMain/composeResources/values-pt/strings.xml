@@ -252,7 +252,6 @@
     <string name="novel_history_import_user_mismatch_title">Incompatibilidade de usuário no histórico de romances</string>
     <string name="novel_history_import_user_mismatch_desc">ID do usuário atual: %1$d, ID do usuário dos dados importados: %2$d. Confirme para continuar importando o histórico de romances para o usuário atual ou cancele para pular esta parte da importação.</string>
     <string name="sign_in_with_cookie">Entrar com Cookie</string>
-    <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">Erro de análise de Cookie</string>
     <string name="recommend_cookie_export_plugin">Recomenda-se usar as extensões de exportação de cookies da Chrome Web Store &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; ou &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;. Certifique-se de que o Cookie contenha o campo PHPSESSID e ele deve ser exportado obrigatoriamente no formato Json.</string>
     <string name="translate_novel">Traduzir texto principal</string>
@@ -272,6 +271,6 @@
     <string name="ai_translation_cache_hit">Tradução em cache carregada</string>
     <string name="ai_translation_deleted">Tradução excluída e texto original restaurado</string>
     <string name="block_illust">Bloquear ilustrações</string>
-    <string name="block_novel">Bloquear romances</string>
-    <string name="no_blocked_items">Nenhum item bloqueado</string>
+    <string name="block_novel">Bloquear novels</string>
+    <string name="no_blocked_items">Nenhum conteúdo bloqueado</string>
 </resources>

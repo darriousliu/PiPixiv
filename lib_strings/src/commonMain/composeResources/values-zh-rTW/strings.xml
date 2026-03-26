@@ -252,7 +252,6 @@
     <string name="novel_history_import_user_mismatch_title">小說歷史紀錄用戶不一致</string>
     <string name="novel_history_import_user_mismatch_desc">當前用戶ID: %1$d，匯入資料用戶ID: %2$d。確認繼續將把小說歷史匯入到當前用戶，取消將跳過該部分匯入。</string>
     <string name="sign_in_with_cookie">使用 Cookie 登入</string>
-    <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">Cookie 解析錯誤</string>
     <string name="recommend_cookie_export_plugin">推薦使用 Chrome 擴充功能商店 Cookie 匯出擴充功能 &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; 或 &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;，保證 Cookie 中含有 PHPSESSID 欄位，一定要以 Json 格式匯出</string>
     <string name="translate_novel">翻譯正文</string>

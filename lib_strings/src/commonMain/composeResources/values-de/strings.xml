@@ -252,7 +252,6 @@
     <string name="novel_history_import_user_mismatch_title">Roman-Historie: Benutzer stimmt nicht überein</string>
     <string name="novel_history_import_user_mismatch_desc">Aktuelle Benutzer-ID: %1$d, Benutzer-ID der Importdaten: %2$d. Bestätigen, um den Romanverlauf für den aktuellen Benutzer zu importieren, oder abbrechen, um diesen Teil des Imports zu überspringen.</string>
     <string name="sign_in_with_cookie">Mit Cookie anmelden</string>
-    <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">Cookie-Analysefehler</string>
     <string name="recommend_cookie_export_plugin">Es wird empfohlen, die Cookie-Export-Erweiterungen aus dem Chrome Web Store &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; oder &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt; zu verwenden. Stellen Sie sicher, dass das Cookie das Feld PHPSESSID enthält, und es muss zwingend im JSON-Format exportiert werden.</string>
     <string name="translate_novel">Haupttext übersetzen</string>
@@ -273,5 +272,5 @@
     <string name="ai_translation_deleted">Übersetzung gelöscht und Originaltext wiederhergestellt</string>
     <string name="block_illust">Illustrationen blockieren</string>
     <string name="block_novel">Romane blockieren</string>
-    <string name="no_blocked_items">Keine blockierten Elemente</string>
+    <string name="no_blocked_items">Keine blockierten Inhalte</string>
 </resources>

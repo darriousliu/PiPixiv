@@ -252,7 +252,6 @@
     <string name="novel_history_import_user_mismatch_title">عدم تطابق مستخدم سجل الروايات</string>
     <string name="novel_history_import_user_mismatch_desc">معرف المستخدم الحالي: %1$d، معرف مستخدم بيانات الاستيراد: %2$d. سيؤدي التأكيد للمتابعة إلى استيراد سجل الروايات إلى المستخدم الحالي، وسيؤدي الإلغاء إلى تخطي هذا الجزء من الاستيراد.</string>
     <string name="sign_in_with_cookie">تسجيل الدخول باستخدام Cookie</string>
-    <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">خطأ في تحليل Cookie</string>
     <string name="recommend_cookie_export_plugin">يُوصى باستخدام إضافات تصدير ملفات تعريف الارتباط من متجر إضافات Chrome &lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt; أو &lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;، وتأكد من أن ملف تعريف الارتباط يحتوي على حقل PHPSESSID، ويجب تصديره بتنسيق Json.</string>
     <string name="translate_novel">ترجمة النص</string>
@@ -271,7 +270,7 @@
     <string name="ai_translation_success">اكتملت الترجمة</string>
     <string name="ai_translation_cache_hit">تم تحميل الترجمة من ذاكرة التخزين المؤقت</string>
     <string name="ai_translation_deleted">تم حذف الترجمة واستعادة النص الأصلي</string>
-    <string name="block_illust">حظر الرسوم</string>
+    <string name="block_illust">حظر الرسوم التوضيحية</string>
     <string name="block_novel">حظر الروايات</string>
-    <string name="no_blocked_items">لا توجد عناصر محظورة</string>
+    <string name="no_blocked_items">لا يوجد محتوى محظور</string>
 </resources>
