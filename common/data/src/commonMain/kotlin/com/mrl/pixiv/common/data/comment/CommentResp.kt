@@ -15,7 +15,7 @@ data class StampsResp(
 )
 
 @Serializable
-data class IllustCommentsResp(
+data class CommentsResp(
     val comments: List<Comment>,
     @SerialName("next_url")
     val nextUrl: String? = null

@@ -56,7 +56,7 @@ class CommentViewModel(
     val subCommentInput = TextFieldState()
 
     val commentList = Pager(PagingConfig(pageSize = 30)) {
-        CommentPagingSource(id)
+        CommentPagingSource(id, type)
     }.flow.cachedIn(viewModelScope)
 
     @OptIn(ExperimentalCoroutinesApi::class)

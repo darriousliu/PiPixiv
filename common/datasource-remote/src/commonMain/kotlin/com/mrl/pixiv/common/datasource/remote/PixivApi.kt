@@ -4,8 +4,8 @@ import com.mrl.pixiv.common.data.EmptyResp
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.comment.CommentAddResp
+import com.mrl.pixiv.common.data.comment.CommentsResp
 import com.mrl.pixiv.common.data.comment.EmojiResp
-import com.mrl.pixiv.common.data.comment.IllustCommentsResp
 import com.mrl.pixiv.common.data.comment.StampsResp
 import com.mrl.pixiv.common.data.illust.BookmarkDetailResp
 import com.mrl.pixiv.common.data.illust.IllustDetailResp
@@ -285,23 +285,45 @@ interface PixivApi {
     suspend fun getIllustComments(
         @Query("illust_id") illustId: Long,
         @Query("offset") offset: Int? = null,
-    ): IllustCommentsResp
+    ): CommentsResp
 
     @GET("v3/illust/comments")
     suspend fun loadMoreIllustComments(
         @QueryMap queryMap: Map<String, String>,
-    ): IllustCommentsResp
+    ): CommentsResp
 
     @GET("v2/illust/comment/replies")
     suspend fun getIllustCommentReplies(
         @Query("comment_id") commentId: Long,
         @Query("offset") offset: Int? = null,
-    ): IllustCommentsResp
+    ): CommentsResp
 
     @GET("v2/illust/comment/replies")
     suspend fun loadMoreIllustCommentReplies(
         @QueryMap queryMap: Map<String, String>,
-    ): IllustCommentsResp
+    ): CommentsResp
+
+    @GET("v3/novel/comments")
+    suspend fun getNovelComments(
+        @Query("novel_id") novelId: Long,
+        @Query("offset") offset: Int? = null,
+    ): CommentsResp
+
+    @GET("v3/novel/comments")
+    suspend fun loadMoreNovelComments(
+        @QueryMap queryMap: Map<String, String>,
+    ): CommentsResp
+
+    @GET("v2/novel/comment/replies")
+    suspend fun getNovelCommentReplies(
+        @Query("comment_id") commentId: Long,
+        @Query("offset") offset: Int? = null,
+    ): CommentsResp
+
+    @GET("v2/novel/comment/replies")
+    suspend fun loadMoreNovelCommentReplies(
+        @QueryMap queryMap: Map<String, String>,
+    ): CommentsResp
 
     @GET("v1/stamps")
     suspend fun getStamps(): StampsResp

@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Bookmark
@@ -61,6 +62,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -105,6 +107,7 @@ import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
+import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.Platform
 import com.mrl.pixiv.common.util.RStrings
@@ -129,6 +132,8 @@ import com.mrl.pixiv.strings.share_link
 import com.mrl.pixiv.strings.show_original_text
 import com.mrl.pixiv.strings.show_translated_text
 import com.mrl.pixiv.strings.translate_novel
+import com.mrl.pixiv.strings.view_comments
+import com.mrl.pixiv.strings.view_comments_count
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -148,6 +153,7 @@ private const val KEY_STATS = "stats"
 private const val KEY_CREATE_DATE = "create_date"
 private const val KEY_TAGS = "tags"
 private const val KEY_CAPTION = "caption"
+private const val KEY_VIEW_COMMENTS = "view_comments"
 private const val KEY_DIVIDER = "divider"
 private const val KEY_SPACER_END = "spacer_end"
 
@@ -186,7 +192,8 @@ fun NovelScreen(
                 paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
             val firstVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
                 ?: return@remember
-            val contentRange = paragraphStartIndex until (paragraphStartIndex + state.paragraphs.size)
+            val contentRange =
+                paragraphStartIndex until (paragraphStartIndex + state.paragraphs.size)
             if (firstVisibleItemIndex !in contentRange) {
                 viewModel.clearProgress(novelId = novel.id)
                 return@remember
@@ -351,6 +358,9 @@ fun NovelScreen(
                         onAuthorClick = { userId ->
                             navigationManager.navigateToProfileDetailScreen(userId)
                         },
+                        onCommentClick = {
+                            navigationManager.navigateToCommentScreen(novelId, CommentType.NOVEL)
+                        }
                     )
                     AnimatedVisibility(
                         visible = showBar,
@@ -503,6 +513,7 @@ private fun NovelContent(
     onTagClick: (String) -> Unit,
     onPixivImageClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onCommentClick: () -> Unit,
 ) {
     val novel = state.novel ?: return
 
@@ -659,6 +670,36 @@ private fun NovelContent(
                         modifier = Modifier.padding(16.dp)
                     )
                 }
+            }
+        }
+
+        item(key = KEY_VIEW_COMMENTS) {
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .fillMaxWidth()
+                    .throttleClick(indication = ripple()) {
+                        onCommentClick()
+                    },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Comment,
+                    contentDescription = stringResource(RStrings.view_comments)
+                )
+                5.HSpacer
+                Text(
+                    text = if (novel.totalComments != null) {
+                        stringResource(
+                            RStrings.view_comments_count,
+                            novel.totalComments!!
+                        )
+                    } else {
+                        stringResource(RStrings.view_comments)
+                    },
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
 
@@ -860,7 +901,8 @@ private fun paragraphStartItemIndex(
     hasSeriesTitle: Boolean,
     hasCaption: Boolean
 ): Int {
-    var itemCountBeforeParagraphs = 7 // cover + title + author + stats + create_date + tags + divider
+    // cover + title + author + stats + create_date + tags + comments + divider
+    var itemCountBeforeParagraphs = 8
     if (hasSeriesTitle) itemCountBeforeParagraphs += 1
     if (hasCaption) itemCountBeforeParagraphs += 1
     return itemCountBeforeParagraphs
