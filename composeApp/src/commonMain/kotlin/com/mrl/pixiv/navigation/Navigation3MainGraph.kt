@@ -85,7 +85,6 @@ fun Navigation3MainGraph(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager = koinInject { parametersOf(arrayOf(startDestination)) }
 ) {
-    val listDetailStrategy = rememberListDetailSceneStrategy<Any>()
     val toastState = rememberToasterState()
     val resultBus = remember { ResultEventBus() }
 
@@ -111,7 +110,7 @@ fun Navigation3MainGraph(
                     // Then add the view model store decorator
                     rememberViewModelStoreNavEntryDecorator()
                 ),
-                sceneStrategy = listDetailStrategy,
+                sceneStrategies = listOf(rememberListDetailSceneStrategy()),
                 entryProvider = entryProvider {
                     entry<Destination.LoginOption> {
                         LoginOptionScreen()
