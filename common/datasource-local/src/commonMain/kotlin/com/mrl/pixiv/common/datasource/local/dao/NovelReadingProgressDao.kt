@@ -19,4 +19,7 @@ interface NovelReadingProgressDao {
 
     @Query("SELECT * FROM novel_reading_progress WHERE userId = :userId")
     suspend fun getByUserId(userId: Long): List<NovelReadingProgressEntity>
+
+    @Query("DELETE FROM novel_reading_progress WHERE userId = :userId AND novelId = :novelId")
+    suspend fun deleteByNovelId(userId: Long, novelId: Long)
 }

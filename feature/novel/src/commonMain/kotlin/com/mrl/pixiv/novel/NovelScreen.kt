@@ -131,6 +131,7 @@ import com.mrl.pixiv.strings.show_translated_text
 import com.mrl.pixiv.strings.translate_novel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.stringResource
@@ -183,6 +184,13 @@ fun NovelScreen(
             if (state.paragraphs.isEmpty()) return@remember
             val paragraphStartIndex =
                 paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
+            val firstVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
+                ?: return@remember
+            val contentRange = paragraphStartIndex until (paragraphStartIndex + state.paragraphs.size)
+            if (firstVisibleItemIndex !in contentRange) {
+                viewModel.clearProgress(novelId = novel.id)
+                return@remember
+            }
             val progress = buildVisibleReadingProgress(
                 listState = listState,
                 paragraphStartIndex = paragraphStartIndex,
@@ -197,6 +205,7 @@ fun NovelScreen(
     LaunchedEffect(state.novel?.id, listState) {
         snapshotFlow { listState.isScrollInProgress }
             .distinctUntilChanged()
+            .drop(1)
             .filter { !it }
             .collect {
                 saveReadingProgress()

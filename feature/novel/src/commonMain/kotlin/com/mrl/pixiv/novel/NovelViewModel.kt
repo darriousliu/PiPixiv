@@ -419,6 +419,15 @@ class NovelViewModel(
         }
     }
 
+    fun clearProgress(novelId: Long) {
+        latestProgress = null
+        updateState { copy(restoreProgress = null) }
+        launchIO {
+            readingProgressRepository.clearProgress(novelId)
+            Logger.d(tag = "NovelScreen") { "Cleared progress for novelId=$novelId" }
+        }
+    }
+
     private fun requestRestoreProgress(
         novelId: Long,
         paragraphs: List<String>
