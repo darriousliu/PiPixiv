@@ -7,6 +7,7 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.user.UserBookmarksQuery
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.util.filterBlockedTags
 import com.mrl.pixiv.common.repository.util.filterNormalNovel
 import com.mrl.pixiv.common.repository.util.queryParams
 
@@ -27,7 +28,7 @@ class CollectionNovelPagingSource(
                 resp.novels.distinctBy { it.id }
             } else {
                 resp.novels.distinctBy { it.id }.filterNormalNovel()
-            }
+            }.filterBlockedTags()
             if (query != null) {
                 val nextKey = UserBookmarksQuery(
                     restrict = query["restrict"]?.let { Restrict.fromValue(it) } ?: Restrict.PUBLIC,

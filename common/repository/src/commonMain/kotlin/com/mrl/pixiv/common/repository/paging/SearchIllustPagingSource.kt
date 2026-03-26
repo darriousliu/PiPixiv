@@ -10,6 +10,7 @@ import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.util.filterBlockedTags
 import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
 
@@ -32,7 +33,7 @@ class SearchIllustPagingSource(
                 )
                 val resp = PixivRepository.getIllustDetail(illustId, Filter.ANDROID.value)
                 return LoadResult.Page(
-                    data = listOf(resp.illust),
+                    data = listOf(resp.illust).filterBlockedTags(),
                     prevKey = null,
                     nextKey = null
                 )
@@ -51,7 +52,7 @@ class SearchIllustPagingSource(
                 resp.illusts.distinctBy { it.id }
             } else {
                 resp.illusts.distinctBy { it.id }.filterNormalIllust()
-            }
+            }.filterBlockedTags()
             if (query != null) {
                 val nextKey = SearchIllustQuery(
                     word = query["word"] ?: "",

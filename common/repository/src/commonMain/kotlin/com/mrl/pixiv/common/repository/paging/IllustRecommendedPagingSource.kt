@@ -6,6 +6,7 @@ import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.util.filterBlockedTags
 import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
 
@@ -25,7 +26,7 @@ class IllustRecommendedPagingSource : PagingSource<String, Illust>() {
                 (resp.illusts + resp.rankingIllusts).distinctBy { it.id }
             } else {
                 (resp.illusts + resp.rankingIllusts).distinctBy { it.id }.filterNormalIllust()
-            }
+            }.filterBlockedTags()
             LoadResult.Page(
                 data = illusts,
                 prevKey = params.key,

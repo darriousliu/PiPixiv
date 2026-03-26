@@ -284,4 +284,8 @@
     <string name="block_illust">屏蔽插画</string>
     <string name="block_novel">屏蔽小说</string>
     <string name="no_blocked_items">暂无屏蔽内容</string>
+    <string name="hide_novel">隐藏该小说</string>
+    <string name="novel_hidden">该小说已被屏蔽</string>
+    <string name="show_novel">显示该小说</string>
+    <string name="block_tag_as_regex">按正则表达式匹配</string>
 </resources>

@@ -37,12 +37,15 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material.icons.rounded.HideImage
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -100,11 +103,13 @@ import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
+import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.CommentType
@@ -125,10 +130,13 @@ import com.mrl.pixiv.strings.cover
 import com.mrl.pixiv.strings.delete_translation
 import com.mrl.pixiv.strings.export_txt_button
 import com.mrl.pixiv.strings.font_size_value
+import com.mrl.pixiv.strings.hide_novel
 import com.mrl.pixiv.strings.line_spacing_value
 import com.mrl.pixiv.strings.more
+import com.mrl.pixiv.strings.novel_hidden
 import com.mrl.pixiv.strings.regenerate_translation
 import com.mrl.pixiv.strings.share_link
+import com.mrl.pixiv.strings.show_novel
 import com.mrl.pixiv.strings.show_original_text
 import com.mrl.pixiv.strings.show_translated_text
 import com.mrl.pixiv.strings.translate_novel
@@ -165,6 +173,8 @@ fun NovelScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
+    val currentNovelId = state.novel?.id ?: novelId
+    val isNovelBlocked = BlockingRepositoryV2.collectNovelBlockAsState(currentNovelId)
     val listState = rememberLazyListState()
     val paragraphLayouts = remember(state.novel?.id) { mutableStateMapOf<Int, TextLayoutResult>() }
 
@@ -336,32 +346,58 @@ fun NovelScreen(
                 Box(
                     modifier = Modifier.padding(paddingValues),
                 ) {
-                    NovelContent(
-                        state = state,
-                        listState = listState,
-                        onParagraphTextLayout = { paragraphIndex, layout ->
-                            paragraphLayouts[paragraphIndex] = layout
-                        },
-                        onContentClick = {
-                            manuallyShowTopBar = !manuallyShowTopBar
-                        },
-                        onTagClick = { tag ->
-                            navigationManager.navigateToSearchResultScreen(
-                                searchWord = tag,
-                                isIdSearch = false,
-                                searchMode = AppViewMode.NOVEL
-                            )
-                        },
-                        onPixivImageClick = { illustId ->
-                            navigationManager.navigateToSinglePictureScreen(illustId)
-                        },
-                        onAuthorClick = { userId ->
-                            navigationManager.navigateToProfileDetailScreen(userId)
-                        },
-                        onCommentClick = {
-                            navigationManager.navigateToCommentScreen(novelId, CommentType.NOVEL)
-                        }
-                    )
+                    if (isNovelBlocked) {
+                        BlockSurface(
+                            modifier = Modifier.fillMaxSize(),
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.HideImage,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(100.dp),
+                                )
+                            },
+                            title = {
+                                Text(
+                                    text = stringResource(RStrings.novel_hidden),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                            },
+                            button = {
+                                Button(
+                                    onClick = viewModel::removeBlockNovel
+                                ) {
+                                    Text(text = stringResource(RStrings.show_novel))
+                                }
+                            }
+                        )
+                    } else {
+                        NovelContent(
+                            state = state,
+                            listState = listState,
+                            onParagraphTextLayout = { paragraphIndex, layout ->
+                                paragraphLayouts[paragraphIndex] = layout
+                            },
+                            onContentClick = {
+                                manuallyShowTopBar = !manuallyShowTopBar
+                            },
+                            onTagClick = { tag ->
+                                navigationManager.navigateToSearchResultScreen(
+                                    searchWord = tag,
+                                    isIdSearch = false,
+                                    searchMode = AppViewMode.NOVEL
+                                )
+                            },
+                            onPixivImageClick = { illustId ->
+                                navigationManager.navigateToSinglePictureScreen(illustId)
+                            },
+                            onAuthorClick = { userId ->
+                                navigationManager.navigateToProfileDetailScreen(userId)
+                            },
+                            onCommentClick = {
+                                navigationManager.navigateToCommentScreen(novelId, CommentType.NOVEL)
+                            }
+                        )
+                    }
                     AnimatedVisibility(
                         visible = showBar,
                         enter = slideInVertically(initialOffsetY = { -it }),
@@ -386,85 +422,87 @@ fun NovelScreen(
                                 }
                             },
                             actions = {
-                                IconButton(
-                                    onClick = {
-                                        if (!state.isTranslating) {
-                                            viewModel.dispatch(
-                                                NovelIntent.TranslateNovel(forceRefresh = state.isTranslated)
+                                if (!isNovelBlocked) {
+                                    IconButton(
+                                        onClick = {
+                                            if (!state.isTranslating) {
+                                                viewModel.dispatch(
+                                                    NovelIntent.TranslateNovel(forceRefresh = state.isTranslated)
+                                                )
+                                            }
+                                        }
+                                    ) {
+                                        if (state.isTranslating) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(20.dp),
+                                                strokeWidth = 2.dp
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = if (state.isTranslated) {
+                                                    Icons.Rounded.Refresh
+                                                } else {
+                                                    Icons.Rounded.Translate
+                                                },
+                                                contentDescription = stringResource(
+                                                    if (state.isTranslated) {
+                                                        RStrings.regenerate_translation
+                                                    } else {
+                                                        RStrings.translate_novel
+                                                    }
+                                                )
                                             )
                                         }
                                     }
-                                ) {
-                                    if (state.isTranslating) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(20.dp),
-                                            strokeWidth = 2.dp
-                                        )
-                                    } else {
-                                        Icon(
-                                            imageVector = if (state.isTranslated) {
-                                                Icons.Rounded.Refresh
-                                            } else {
-                                                Icons.Rounded.Translate
-                                            },
-                                            contentDescription = stringResource(
-                                                if (state.isTranslated) {
-                                                    RStrings.regenerate_translation
+                                    if (state.isTranslated) {
+                                        IconButton(
+                                            onClick = { viewModel.dispatch(NovelIntent.ToggleDisplayOriginalText) }
+                                        ) {
+                                            Icon(
+                                                imageVector = if (state.isShowingOriginalText) {
+                                                    Icons.Rounded.Translate
                                                 } else {
-                                                    RStrings.translate_novel
-                                                }
+                                                    Icons.Rounded.Visibility
+                                                },
+                                                contentDescription = stringResource(
+                                                    if (state.isShowingOriginalText) {
+                                                        RStrings.show_translated_text
+                                                    } else {
+                                                        RStrings.show_original_text
+                                                    }
+                                                )
                                             )
-                                        )
-                                    }
-                                }
-                                if (state.isTranslated) {
-                                    IconButton(
-                                        onClick = { viewModel.dispatch(NovelIntent.ToggleDisplayOriginalText) }
-                                    ) {
-                                        Icon(
-                                            imageVector = if (state.isShowingOriginalText) {
-                                                Icons.Rounded.Translate
-                                            } else {
-                                                Icons.Rounded.Visibility
-                                            },
-                                            contentDescription = stringResource(
-                                                if (state.isShowingOriginalText) {
-                                                    RStrings.show_translated_text
-                                                } else {
-                                                    RStrings.show_original_text
-                                                }
+                                        }
+                                        IconButton(
+                                            onClick = { viewModel.dispatch(NovelIntent.DeleteNovelTranslation) }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Delete,
+                                                contentDescription = stringResource(RStrings.delete_translation)
                                             )
-                                        )
+                                        }
                                     }
                                     IconButton(
-                                        onClick = { viewModel.dispatch(NovelIntent.DeleteNovelTranslation) }
+                                        onClick = { viewModel.dispatch(NovelIntent.ToggleBookmark) }
                                     ) {
+                                        val isBookmark = state.novel.isBookmark
                                         Icon(
-                                            imageVector = Icons.Rounded.Delete,
-                                            contentDescription = stringResource(RStrings.delete_translation)
+                                            imageVector = if (isBookmark) {
+                                                Icons.Rounded.Bookmark
+                                            } else {
+                                                Icons.Rounded.BookmarkBorder
+                                            },
+                                            contentDescription = stringResource(if (isBookmark) RStrings.bookmarked else RStrings.bookmark)
                                         )
                                     }
-                                }
-                                IconButton(
-                                    onClick = { viewModel.dispatch(NovelIntent.ToggleBookmark) }
-                                ) {
-                                    val isBookmark = state.novel.isBookmark
-                                    Icon(
-                                        imageVector = if (isBookmark) {
-                                            Icons.Rounded.Bookmark
-                                        } else {
-                                            Icons.Rounded.BookmarkBorder
-                                        },
-                                        contentDescription = stringResource(if (isBookmark) RStrings.bookmarked else RStrings.bookmark)
-                                    )
-                                }
-                                IconButton(
-                                    onClick = { viewModel.dispatch(NovelIntent.ToggleBottomSheet) }
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.MoreVert,
-                                        contentDescription = stringResource(RStrings.more)
-                                    )
+                                    IconButton(
+                                        onClick = { viewModel.dispatch(NovelIntent.ToggleBottomSheet) }
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.MoreVert,
+                                            contentDescription = stringResource(RStrings.more)
+                                        )
+                                    }
                                 }
                             },
                             windowInsets = TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Top),
@@ -497,6 +535,15 @@ fun NovelScreen(
                 onAiSetting = {
                     viewModel.dispatch(NovelIntent.ToggleBottomSheet)
                     navigationManager.navigateToAiTranslationSettingScreen()
+                },
+                isNovelBlocked = isNovelBlocked,
+                onBlockNovel = {
+                    if (isNovelBlocked) {
+                        viewModel.removeBlockNovel()
+                    } else {
+                        viewModel.blockNovel()
+                    }
+                    viewModel.dispatch(NovelIntent.ToggleBottomSheet)
                 },
             )
         }
@@ -969,6 +1016,8 @@ private fun NovelBottomSheetContent(
     onExport: () -> Unit,
     onShare: () -> Unit,
     onAiSetting: () -> Unit,
+    isNovelBlocked: Boolean,
+    onBlockNovel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -1043,6 +1092,28 @@ private fun NovelBottomSheetContent(
                 Icon(
                     imageVector = Icons.Rounded.Share,
                     contentDescription = stringResource(RStrings.share_link)
+                )
+            },
+            colors = colors
+        )
+
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = stringResource(
+                        if (isNovelBlocked) RStrings.show_novel else RStrings.hide_novel
+                    )
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .throttleClick(onClick = onBlockNovel),
+            leadingContent = {
+                Icon(
+                    imageVector = if (isNovelBlocked) Icons.Rounded.Image else Icons.Rounded.HideImage,
+                    contentDescription = stringResource(
+                        if (isNovelBlocked) RStrings.show_novel else RStrings.hide_novel
+                    )
                 )
             },
             colors = colors
