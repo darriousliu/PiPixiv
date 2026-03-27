@@ -273,4 +273,8 @@
     <string name="block_illust">封鎖插畫</string>
     <string name="block_novel">封鎖小說</string>
     <string name="no_blocked_items">暫無封鎖內容</string>
+    <string name="hide_novel">隱藏這部小說</string>
+    <string name="novel_hidden">這部小說已被封鎖</string>
+    <string name="show_novel">顯示這部小說</string>
+    <string name="block_tag_as_regex">以正則表達式比對</string>
 </resources>

@@ -273,4 +273,8 @@
     <string name="block_illust">İllüstrasyonları engelle</string>
     <string name="block_novel">Romanları engelle</string>
     <string name="no_blocked_items">Engellenen içerik yok</string>
+    <string name="hide_novel">Bu romanı gizle</string>
+    <string name="novel_hidden">Bu roman engellendi</string>
+    <string name="show_novel">Bu romanı göster</string>
+    <string name="block_tag_as_regex">Düzenli ifadeyle eşleştir</string>
 </resources>

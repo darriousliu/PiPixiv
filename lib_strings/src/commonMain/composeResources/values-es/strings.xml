@@ -273,4 +273,8 @@
     <string name="block_illust">Bloquear ilustraciones</string>
     <string name="block_novel">Bloquear novelas</string>
     <string name="no_blocked_items">No hay contenido bloqueado</string>
+    <string name="hide_novel">Ocultar esta novela</string>
+    <string name="novel_hidden">Esta novela está bloqueada</string>
+    <string name="show_novel">Mostrar esta novela</string>
+    <string name="block_tag_as_regex">Coincidir mediante expresión regular</string>
 </resources>

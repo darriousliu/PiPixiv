@@ -273,4 +273,8 @@
     <string name="block_illust">イラストをブロック</string>
     <string name="block_novel">小説をブロック</string>
     <string name="no_blocked_items">ブロックされたコンテンツはありません</string>
+    <string name="hide_novel">この小説を非表示</string>
+    <string name="novel_hidden">この小説はブロックされています</string>
+    <string name="show_novel">この小説を表示</string>
+    <string name="block_tag_as_regex">正規表現でマッチ</string>
 </resources>

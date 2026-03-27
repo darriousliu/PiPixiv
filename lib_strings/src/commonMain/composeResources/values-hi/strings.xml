@@ -273,4 +273,8 @@
     <string name="block_illust">चित्र ब्लॉक करें</string>
     <string name="block_novel">उपन्यास ब्लॉक करें</string>
     <string name="no_blocked_items">कोई ब्लॉक की गई सामग्री नहीं</string>
+    <string name="hide_novel">इस उपन्यास को छिपाएँ</string>
+    <string name="novel_hidden">यह उपन्यास ब्लॉक कर दिया गया है</string>
+    <string name="show_novel">इस उपन्यास को दिखाएँ</string>
+    <string name="block_tag_as_regex">रेगुलर एक्सप्रेशन से मिलान करें</string>
 </resources>

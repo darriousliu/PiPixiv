@@ -273,4 +273,8 @@
     <string name="block_illust">Блокировать иллюстрации</string>
     <string name="block_novel">Блокировать новеллы</string>
     <string name="no_blocked_items">Нет заблокированного контента</string>
+    <string name="hide_novel">Скрыть эту новеллу</string>
+    <string name="novel_hidden">Эта новелла заблокирована</string>
+    <string name="show_novel">Показать эту новеллу</string>
+    <string name="block_tag_as_regex">Сопоставлять по регулярному выражению</string>
 </resources>

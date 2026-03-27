@@ -273,4 +273,8 @@
     <string name="block_illust">حظر الرسوم التوضيحية</string>
     <string name="block_novel">حظر الروايات</string>
     <string name="no_blocked_items">لا يوجد محتوى محظور</string>
+    <string name="hide_novel">إخفاء هذه الرواية</string>
+    <string name="novel_hidden">تم حظر هذه الرواية</string>
+    <string name="show_novel">إظهار هذه الرواية</string>
+    <string name="block_tag_as_regex">مطابقة باستخدام تعبير نمطي</string>
 </resources>

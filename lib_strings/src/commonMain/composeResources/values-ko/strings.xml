@@ -273,4 +273,8 @@
     <string name="block_illust">일러스트 차단</string>
     <string name="block_novel">소설 차단</string>
     <string name="no_blocked_items">차단된 콘텐츠가 없습니다</string>
+    <string name="hide_novel">이 소설 숨기기</string>
+    <string name="novel_hidden">이 소설은 차단되었습니다</string>
+    <string name="show_novel">이 소설 표시</string>
+    <string name="block_tag_as_regex">정규식으로 매칭</string>
 </resources>
