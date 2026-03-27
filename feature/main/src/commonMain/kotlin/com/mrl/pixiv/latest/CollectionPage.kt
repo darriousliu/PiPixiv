@@ -329,9 +329,9 @@ private fun CollectionNovelPage(
                 )
                 options.forEach { (label, restrict) ->
                     FilterChip(
-                        selected = state.restrict == restrict,
+                        selected = state.novelRestrict == restrict,
                         onClick = {
-                            viewModel.updateNovelFilterTag(restrict, state.filterTag)
+                            viewModel.updateNovelFilterTag(restrict, state.novelFilterTag)
                             userBookmarksNovels.refresh()
                         },
                         label = {
@@ -353,8 +353,8 @@ private fun CollectionNovelPage(
             onDismissRequest = { showFilterDialog = false },
             userBookmarkTags = state.userBookmarkTagsNovel,
             privateBookmarkTags = state.privateBookmarkTagsNovel,
-            restrict = state.restrict,
-            filterTag = state.filterTag,
+            restrict = state.novelRestrict,
+            filterTag = state.novelFilterTag,
             onLoadUserBookmarksTags = {
                 viewModel.dispatch(CollectionAction.LoadUserBookmarksTagsNovel(it))
             },
