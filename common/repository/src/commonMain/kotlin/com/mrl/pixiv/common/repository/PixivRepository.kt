@@ -218,6 +218,12 @@ object PixivRepository : KoinComponent {
     suspend fun addIllustBrowsingHistory(illustIds: List<Long>) =
         apiApi.addIllustBrowsingHistory(illustIds)
 
+    suspend fun addNovelBrowsingHistory(vararg novelIds: Long) =
+        apiApi.addNovelBrowsingHistory(novelIds.toList())
+
+    suspend fun addNovelBrowsingHistory(novelIds: List<Long>) =
+        apiApi.addNovelBrowsingHistory(novelIds)
+
     suspend fun searchPopularPreviewIllust(query: SearchIllustQuery) =
         apiApi.searchPopularPreviewIllust(
             query.filter.value,

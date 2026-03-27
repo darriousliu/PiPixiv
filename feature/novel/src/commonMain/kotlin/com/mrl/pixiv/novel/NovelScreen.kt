@@ -67,6 +67,7 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -104,6 +105,7 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.BlockSurface
+import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.AppViewMode
@@ -111,6 +113,7 @@ import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.NovelReadingProgress
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.router.NavigationManager
@@ -177,6 +180,7 @@ fun NovelScreen(
     val isNovelBlocked = BlockingRepositoryV2.collectNovelBlockAsState(currentNovelId)
     val listState = rememberLazyListState()
     val paragraphLayouts = remember(state.novel?.id) { mutableStateMapOf<Int, TextLayoutResult>() }
+    var showBookmarkBottomSheet by remember { mutableStateOf(false) }
 
     // 沉浸逻辑: 滚动到正文区域时隐藏TopBar和FAB
     val isContentVisible by remember {
@@ -280,6 +284,12 @@ fun NovelScreen(
 
         // 执行滚动，将目标行的顶部与视口顶部对齐
         listState.scrollToItem(targetItemIndex, offset)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.addHistory()
+        }
     }
 
     Scaffold(
@@ -483,7 +493,8 @@ fun NovelScreen(
                                         }
                                     }
                                     IconButton(
-                                        onClick = { viewModel.dispatch(NovelIntent.ToggleBookmark) }
+                                        onClick = { viewModel.dispatch(NovelIntent.ToggleBookmark) },
+                                        onLongClick = {showBookmarkBottomSheet=true}
                                     ) {
                                         val isBookmark = state.novel.isBookmark
                                         Icon(
@@ -512,6 +523,22 @@ fun NovelScreen(
                 }
             }
         }
+    }
+
+    if (showBookmarkBottomSheet && state.novel != null) {
+        val bottomSheetState = rememberModalBottomSheetState(true)
+        NovelBottomBookmarkSheet(
+            hideBottomSheet = { showBookmarkBottomSheet = false },
+            novel = state.novel,
+            bottomSheetState = bottomSheetState,
+            onBookmarkClick = { restrict, tags, isEdit ->
+                if (isEdit || !state.novel.isBookmarked) {
+                    BookmarkState.bookmarkNovel(state.novel.id, restrict, tags)
+                } else {
+                    BookmarkState.deleteBookmarkNovel(state.novel.id)
+                }
+            }
+        )
     }
 
     // BottomSheet

@@ -263,6 +263,12 @@ interface PixivApi {
         @Field("illust_ids[]") illustId: List<Long>,
     ): EmptyResp
 
+    @FormUrlEncoded
+    @POST("v2/user/browsing-history/novel/add")
+    suspend fun addNovelBrowsingHistory(
+        @Field("novel_ids[]") illustId: List<Long>,
+    ): EmptyResp
+
     @GET("v1/search/popular-preview/illust")
     suspend fun searchPopularPreviewIllust(
         @Query("filter") filter: String = Filter.ANDROID.value,
