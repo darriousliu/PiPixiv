@@ -404,7 +404,7 @@ fun NovelScreen(
                                 navigationManager.navigateToProfileDetailScreen(userId)
                             },
                             onCommentClick = {
-                                navigationManager.navigateToCommentScreen(novelId, CommentType.NOVEL)
+                                navigationManager.navigateToCommentScreen(state.novel.id, CommentType.NOVEL)
                             }
                         )
                     }
