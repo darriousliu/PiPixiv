@@ -42,31 +42,57 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 <div align="left">
 
+### 🔐 Authentication
+
 * 🔐 Log in with Pixiv account (OAuth authentication).
+* 🍪 Log in via web Cookie (PHPSESSID) without manually entering a token.
+
+### 🏠 Content Browsing
+
 * 🏠 Homepage recommended illustrations in waterfall layout.
 * 🆕 Browse latest content (Discover, Bookmarks, Following).
-* 🔍 Search illustrations/novels and users, sort by popularity, latest, etc.
 * 🏆 View rankings (Daily, Weekly, Monthly, Male/Female-oriented, AI-generated, R-18, etc.).
-* ❤️ Bookmark illustrations/novels / Follow or unfollow artists.
 * 📜 Browsing history with search and clear support.
+
+### 🖼️ Illustration
+
 * 🖼️ View illustration details (multi-page, UGOIRA animation, related artworks).
-* 💬 View and post comments.
+* ⬇️ Download original illustrations or GIFs, customize file naming, manage download queue.
+
+### 📖 Novel
+
+* 📖 Switch between illustration/novel view across Home, Feed, Collection, Ranking, and Search pages; preference is persisted.
+* 📝 Immersive novel reading interface with adjustable font size, line spacing, and chapter navigation (previous/next chapter).
+* 🤖 AI novel translation with OpenAI / Claude / Gemini; locally cached with toggle between original/translated text.
+* 💾 Reading progress is automatically saved and restored at paragraph level on next open.
+
+### 🔍 Search & Discovery
+
+* 🔍 Search illustrations/novels and users, sort by popularity, latest, etc.
+* 🏷️ Long-press a tag to collect it or copy it to clipboard.
+
+### 👤 User & Social
+
 * 👤 View user profiles and artwork lists.
 * 👥 View following and follower lists.
+* 💬 View and post comments.
+
+### ❤️ Bookmarks & Interactions
+
+* ❤️ Bookmark illustrations/novels, follow or unfollow artists.
 * 📁 Collection management (filter bookmarks by tag).
-* ⬇️ Download original illustrations or GIFs, customize file naming, manage download queue.
+
+### ⚙️ Settings & System
+
 * ⚙️ App settings (Language, Network proxy / SNI bypass, Image source, Grid columns, R-18 content, Private bookmarks, etc.).
 * 🚫 Block artworks, users and tags.
 * 🔗 Deep link support.
 * 📦 App data management (cache clearing, data export/import).
-* 🔄 Desktop application scrolling list supports `R` shortcut key to return to top or refresh and ⬆️⬇️ key to scroll
-* 📖 **Novel Mode**: Home, feed, collection, ranking, and search pages support switching between illustration/novel view; preference is persisted.
-* 📝 **Novel Reading**: Immersive reading interface with adjustable font size, line spacing, and chapter navigation (previous/next chapter).
-* 🤖 **AI Novel Translation**: Supports OpenAI / Claude / Gemini to translate novel content locally with toggle between original/translated text.
-* 💾 **Reading Progress Restore**: Novel reading progress is automatically saved and restored at paragraph level on next open.
-* 🍪 **Cookie Login**: Log in via web Cookie (PHPSESSID) without manually entering a token.
-* ⌨️ **ESC Back Navigation**: Desktop platforms now support pressing ESC to go back.
-* 🏷️ **Enhanced Tag Actions**: Long-press a tag to collect it or copy it to clipboard.
+
+### 🖥️ Desktop Platform
+
+* 🔄 Scrolling list supports `R` shortcut key to return to top or refresh, and ⬆️⬇️ arrow keys to scroll.
+* ⌨️ Press ESC to go back.
 
 ### 📋 To-do List
 
