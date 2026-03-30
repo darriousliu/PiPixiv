@@ -25,10 +25,10 @@ konfig = "0.17.1"
 filekit = "0.13.0"
 htmlconverter = "1.1.0"
 okhttp = "5.3.2"
-sentry-bom = "8.37.0"
-sentry-plugin = "6.2.0"
+sentry-bom = "8.37.1"
+sentry-plugin = "6.3.0"
 sentry-kmp = "0.25.0"
-hotswan = "1.0.17"
+hotswan = "1.1.0"
 
 
 [libraries]
