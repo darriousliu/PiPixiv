@@ -79,6 +79,7 @@ sealed class Destination : NavKey {
     @Serializable
     data class Collection(
         val userId: Long,
+        val isNovel: Boolean,
     ) : Destination()
 
     @Serializable

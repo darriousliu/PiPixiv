@@ -68,6 +68,7 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun CollectionScreen(
     uid: Long,
+    isNovel: Boolean,
     modifier: Modifier = Modifier,
     viewModel: CollectionViewModel = koinViewModel { parametersOf(uid) },
     navigationManager: NavigationManager = koinInject()
@@ -80,7 +81,7 @@ fun CollectionScreen(
     val lazyGridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState { 2 }
+    val pagerState = rememberPagerState(if (isNovel) 1 else 0) { 2 }
     val isIllustPage = pagerState.currentPage == 0
 
     val illustController = remember {

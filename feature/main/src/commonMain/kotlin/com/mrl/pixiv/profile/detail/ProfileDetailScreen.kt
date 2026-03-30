@@ -294,6 +294,9 @@ fun ProfileDetailScreen(
                         // 小说收藏网格组件
                         NovelBookmarkWidget(
                             novels = state.userBookmarksNovels,
+                            onAllClick = {
+                                navigationManager.navigateToCollectionScreen(uid, true)
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 20.dp)

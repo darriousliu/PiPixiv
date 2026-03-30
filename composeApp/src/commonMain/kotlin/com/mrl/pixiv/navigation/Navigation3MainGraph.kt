@@ -211,8 +211,7 @@ fun Navigation3MainGraph(
                     entry<Destination.Collection>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
-                        val userId = it.userId
-                        CollectionScreen(uid = userId)
+                        CollectionScreen(uid = it.userId, isNovel = it.isNovel)
                     }
 
                     // 收藏标签页

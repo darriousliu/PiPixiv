@@ -122,8 +122,8 @@ class NavigationManager(
         backStack.navigate(route = Destination.Following(userId))
     }
 
-    fun navigateToCollectionScreen(userId: Long) {
-        backStack.navigate(route = Destination.Collection(userId))
+    fun navigateToCollectionScreen(userId: Long, isNovel: Boolean = false) {
+        backStack.navigate(route = Destination.Collection(userId, isNovel))
     }
 
     fun navigateToBookmarkedTagsScreen() {
