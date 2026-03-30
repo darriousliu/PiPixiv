@@ -372,6 +372,10 @@ private fun LogScreen(
 
             // Add additional parameters for specific destinations
             when (currentDestination) {
+                is Destination.Login -> {
+                    put("start_url", currentDestination.startUrl)
+                }
+
                 is Destination.Main -> {
                     val screenName =
                         navigationManager.currentMainPage::class.serializer().descriptor.serialName
@@ -391,18 +395,20 @@ private fun LogScreen(
 
                 is Destination.SearchResults -> {
                     put("search_words", currentDestination.searchWords)
+                    put("is_id_search", currentDestination.isIdSearch.toString())
+                    put("search_mode", currentDestination.searchMode.name)
                 }
 
                 is Destination.Picture -> {
                     put("index", currentDestination.index.toString())
                     put("prefix", currentDestination.prefix)
+                    put("enable_transition", currentDestination.enableTransition.toString())
                 }
 
                 is Destination.Collection -> {
                     put("user_id", currentDestination.userId.toString())
+                    put("is_novel", currentDestination.isNovel.toString())
                 }
-
-                is Destination.BookmarkedTags -> Unit
 
                 is Destination.Following -> {
                     put("user_id", currentDestination.userId.toString())
@@ -420,6 +426,10 @@ private fun LogScreen(
                 is Destination.Report -> {
                     put("id", currentDestination.id.toString())
                     put("type", currentDestination.type.toString())
+                }
+
+                is Destination.NovelDetail -> {
+                    put("novel_id", currentDestination.novelId.toString())
                 }
 
                 else -> Unit
