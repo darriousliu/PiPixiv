@@ -277,4 +277,9 @@
     <string name="novel_hidden">Esta novela está bloqueada</string>
     <string name="show_novel">Mostrar esta novela</string>
     <string name="block_tag_as_regex">Coincidir mediante expresión regular</string>
+    <string name="jump_to_page">Ir a la página</string>
+    <string name="jump_to_page_hint">Introduce el número de página</string>
+    <string name="jump_to_page_out_of_range">Página fuera de rango</string>
+    <string name="jump_to_page_invalid_input">Por favor, introduce un número de página válido</string>
+    <string name="jump">Ir</string>
 </resources>

@@ -277,4 +277,9 @@
     <string name="novel_hidden">تم حظر هذه الرواية</string>
     <string name="show_novel">إظهار هذه الرواية</string>
     <string name="block_tag_as_regex">مطابقة باستخدام تعبير نمطي</string>
+    <string name="jump_to_page">الانتقال إلى الصفحة</string>
+    <string name="jump_to_page_hint">أدخل رقم الصفحة</string>
+    <string name="jump_to_page_out_of_range">رقم الصفحة خارج النطاق</string>
+    <string name="jump_to_page_invalid_input">يرجى إدخال رقم صفحة صالح</string>
+    <string name="jump">انتقال</string>
 </resources>

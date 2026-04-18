@@ -277,4 +277,9 @@
     <string name="novel_hidden">この小説はブロックされています</string>
     <string name="show_novel">この小説を表示</string>
     <string name="block_tag_as_regex">正規表現でマッチ</string>
+    <string name="jump_to_page">ページに移動</string>
+    <string name="jump_to_page_hint">ページ番号を入力</string>
+    <string name="jump_to_page_out_of_range">ページが範囲外です</string>
+    <string name="jump_to_page_invalid_input">有効なページ番号を入力してください</string>
+    <string name="jump">移動</string>
 </resources>

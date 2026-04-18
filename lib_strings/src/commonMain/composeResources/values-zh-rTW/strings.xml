@@ -277,4 +277,9 @@
     <string name="novel_hidden">這部小說已被封鎖</string>
     <string name="show_novel">顯示這部小說</string>
     <string name="block_tag_as_regex">以正則表達式比對</string>
+    <string name="jump_to_page">跳轉到頁碼</string>
+    <string name="jump_to_page_hint">輸入頁碼</string>
+    <string name="jump_to_page_out_of_range">頁碼超出範圍</string>
+    <string name="jump_to_page_invalid_input">請輸入有效頁碼</string>
+    <string name="jump">跳轉</string>
 </resources>
