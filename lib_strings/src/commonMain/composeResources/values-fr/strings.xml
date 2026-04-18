@@ -277,4 +277,9 @@
     <string name="novel_hidden">Ce roman est bloqué</string>
     <string name="show_novel">Afficher ce roman</string>
     <string name="block_tag_as_regex">Faire correspondre via une expression régulière</string>
+    <string name="jump_to_page">Aller à la page</string>
+    <string name="jump_to_page_hint">Entrer le numéro de page</string>
+    <string name="jump_to_page_out_of_range">Page hors plage</string>
+    <string name="jump_to_page_invalid_input">Veuillez entrer un numéro de page valide</string>
+    <string name="jump">Aller</string>
 </resources>

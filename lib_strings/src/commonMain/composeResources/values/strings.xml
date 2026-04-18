@@ -288,4 +288,9 @@
     <string name="novel_hidden">该小说已被屏蔽</string>
     <string name="show_novel">显示该小说</string>
     <string name="block_tag_as_regex">按正则表达式匹配</string>
+    <string name="jump_to_page">跳转到页码</string>
+    <string name="jump_to_page_hint">输入页码</string>
+    <string name="jump_to_page_out_of_range">页码超出范围</string>
+    <string name="jump_to_page_invalid_input">请输入有效页码</string>
+    <string name="jump">跳转</string>
 </resources>

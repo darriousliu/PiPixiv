@@ -277,4 +277,9 @@
     <string name="novel_hidden">이 소설은 차단되었습니다</string>
     <string name="show_novel">이 소설 표시</string>
     <string name="block_tag_as_regex">정규식으로 매칭</string>
+    <string name="jump_to_page">페이지로 이동</string>
+    <string name="jump_to_page_hint">페이지 번호 입력</string>
+    <string name="jump_to_page_out_of_range">페이지 범위 초과</string>
+    <string name="jump_to_page_invalid_input">유효한 페이지 번호를 입력해 주세요</string>
+    <string name="jump">이동</string>
 </resources>

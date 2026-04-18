@@ -277,4 +277,9 @@
     <string name="novel_hidden">Эта новелла заблокирована</string>
     <string name="show_novel">Показать эту новеллу</string>
     <string name="block_tag_as_regex">Сопоставлять по регулярному выражению</string>
+    <string name="jump_to_page">Перейти на страницу</string>
+    <string name="jump_to_page_hint">Введите номер страницы</string>
+    <string name="jump_to_page_out_of_range">Страница вне диапазона</string>
+    <string name="jump_to_page_invalid_input">Пожалуйста, введите допустимый номер страницы</string>
+    <string name="jump">Перейти</string>
 </resources>
