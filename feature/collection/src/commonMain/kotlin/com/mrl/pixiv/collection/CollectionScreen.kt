@@ -1,6 +1,6 @@
 package com.mrl.pixiv.collection
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -79,6 +79,7 @@ import com.mrl.pixiv.strings.jump
 import com.mrl.pixiv.strings.jump_to_page_hint
 import com.mrl.pixiv.strings.jump_to_page_invalid_input
 import com.mrl.pixiv.strings.jump_to_page_out_of_range
+import com.mrl.pixiv.strings.network_error
 import com.mrl.pixiv.strings.novels
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -351,11 +352,13 @@ private fun JumpToPageRow(
 
     val errorOutOfRange = stringResource(RStrings.jump_to_page_out_of_range)
     val errorInvalidInput = stringResource(RStrings.jump_to_page_invalid_input)
+    val errorNetworkError = stringResource(RStrings.network_error)
 
     val errorMessage = when {
         inputError -> errorInvalidInput
         error == JumpPageError.OUT_OF_RANGE -> errorOutOfRange
         error == JumpPageError.INVALID_INPUT -> errorInvalidInput
+        error == JumpPageError.NETWORK_ERROR -> errorNetworkError
         else -> null
     }
 
@@ -401,15 +404,16 @@ private fun JumpToPageRow(
             colors = OutlinedTextFieldDefaults.colors(),
         )
         Spacer(modifier = Modifier.width(8.dp))
-        AnimatedVisibility(visible = isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-        }
-        AnimatedVisibility(visible = !isLoading) {
-            Button(
-                onClick = { attemptJump() },
-                enabled = !isLoading,
-            ) {
-                Text(text = stringResource(RStrings.jump))
+        AnimatedContent(
+            targetState = isLoading,
+            label = "JumpButtonLoading",
+        ) { loading ->
+            if (loading) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+            } else {
+                Button(onClick = { attemptJump() }) {
+                    Text(text = stringResource(RStrings.jump))
+                }
             }
         }
     }

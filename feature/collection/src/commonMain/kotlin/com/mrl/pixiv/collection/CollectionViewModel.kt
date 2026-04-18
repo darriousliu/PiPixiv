@@ -47,6 +47,7 @@ data class CollectionState(
 enum class JumpPageError {
     INVALID_INPUT,
     OUT_OF_RANGE,
+    NETWORK_ERROR,
 }
 
 @Stable
@@ -77,7 +78,7 @@ class CollectionViewModel(
     private val _novelRefreshTrigger = MutableStateFlow(0)
     val novelRefreshTrigger = _novelRefreshTrigger.asStateFlow()
 
-    val userBookmarksIllusts = Pager(PagingConfig(pageSize = 30)) {
+    val userBookmarksIllusts = Pager(PagingConfig(pageSize = 20)) {
         CollectionIllustPagingSource(
             uid, UserBookmarksQuery(
                 restrict = state.restrict,
@@ -130,7 +131,11 @@ class CollectionViewModel(
     }
 
     private suspend fun jumpToPageIllust(targetPage: Int) {
-        if (targetPage <= 1) {
+        if (targetPage < 1) {
+            updateState { copy(isJumpingPage = false, jumpPageError = JumpPageError.INVALID_INPUT) }
+            return
+        }
+        if (targetPage == 1) {
             updateState { copy(illustMaxBookmarkId = null, isJumpingPage = false, jumpPageError = null) }
             _illustRefreshTrigger.value++
             return
@@ -177,12 +182,16 @@ class CollectionViewModel(
                 _illustRefreshTrigger.value++
             }
         } catch (e: Exception) {
-            updateState { copy(isJumpingPage = false, jumpPageError = JumpPageError.OUT_OF_RANGE) }
+            updateState { copy(isJumpingPage = false, jumpPageError = JumpPageError.NETWORK_ERROR) }
         }
     }
 
     private suspend fun jumpToPageNovel(targetPage: Int) {
-        if (targetPage <= 1) {
+        if (targetPage < 1) {
+            updateState { copy(isJumpingPage = false, jumpPageError = JumpPageError.INVALID_INPUT) }
+            return
+        }
+        if (targetPage == 1) {
             updateState { copy(novelMaxBookmarkId = null, isJumpingPage = false, jumpPageError = null) }
             _novelRefreshTrigger.value++
             return
@@ -229,7 +238,7 @@ class CollectionViewModel(
                 _novelRefreshTrigger.value++
             }
         } catch (e: Exception) {
-            updateState { copy(isJumpingPage = false, jumpPageError = JumpPageError.OUT_OF_RANGE) }
+            updateState { copy(isJumpingPage = false, jumpPageError = JumpPageError.NETWORK_ERROR) }
         }
     }
 
