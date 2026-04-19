@@ -10,6 +10,3 @@ annotation class AuthClient
 
 @Named
 annotation class ImageClient
-
-@Named
-annotation class CookieAuthClient

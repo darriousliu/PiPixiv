@@ -1,11 +1,14 @@
 package com.mrl.pixiv.login
 
-import com.mrl.pixiv.common.network.CookieAuthClient
 import com.mrl.pixiv.common.repository.AuthManager
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
+import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.cookies.get
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -17,14 +20,11 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okio.ByteString.Companion.toByteString
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import org.koin.core.parameter.parametersOf
-import org.koin.core.qualifier.named
 import kotlin.io.encoding.Base64
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -56,7 +56,7 @@ private const val VERIFIER_LENGTH = 128
  */
 class PixivCookieAuthHelper(
     engineConfig: HttpClientConfig<*>.() -> Unit = {}
-) : AutoCloseable, KoinComponent {
+) : AutoCloseable {
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -65,8 +65,21 @@ class PixivCookieAuthHelper(
 
     private val cookieStorage = AcceptAllCookiesStorage()
 
-    private val client by inject<HttpClient>(named<CookieAuthClient>()) {
-        parametersOf(json, cookieStorage, engineConfig)
+    private val client: HttpClient = HttpClient {
+        install(ContentNegotiation) { json(json) }
+        install(HttpCookies) { storage = cookieStorage }
+        install(HttpTimeout) {
+            connectTimeoutMillis = 30_000
+            socketTimeoutMillis = 30_000
+            requestTimeoutMillis = 60_000
+        }
+        // 不要让 Ktor 自动跟随 3xx，我们需要手动读取 Location
+        followRedirects = false
+        expectSuccess = false
+        defaultRequest {
+            header(HttpHeaders.CacheControl, "no-cache")
+        }
+        engineConfig()
     }
 
     // ── 公开入口 ──────────────────────────────────────────────────────────────
@@ -88,6 +101,7 @@ class PixivCookieAuthHelper(
             parameters.append("code_challenge", codeChallenge)
             parameters.append("code_challenge_method", "S256")
             parameters.append("client", "pixiv-android")
+            parameters.append("via", "login")
         }.build()
 
         // 3. 注入 Cookie

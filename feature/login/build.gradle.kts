@@ -10,7 +10,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":lib_strings"))
-            implementation(project(":common:network"))
             implementation(project(":common:repository"))
             implementation(project(":common:ui"))
             implementation(project(":common:core"))

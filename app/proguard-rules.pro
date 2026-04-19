@@ -36,4 +36,3 @@
 -keep class com.mrl.pixiv.common.network.ApiClient
 -keep class com.mrl.pixiv.common.network.AuthClient
 -keep class com.mrl.pixiv.common.network.ImageClient
--keep class com.mrl.pixiv.common.network.CookieAuthClient
