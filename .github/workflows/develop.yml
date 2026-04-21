@@ -25,10 +25,10 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Set up gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Decode Keystore
         env:
@@ -70,10 +70,10 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Set up gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Decode Keystore
         env:
@@ -127,7 +127,7 @@ jobs:
           cache: 'gradle'
 
       - name: Set up gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Add Kotzilla Sdk
         env:
@@ -168,7 +168,7 @@ jobs:
           cache: 'gradle'
 
       - name: Set up gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Add Kotzilla Sdk
         env:
@@ -205,7 +205,7 @@ jobs:
           cache: 'gradle'
 
       - name: Set up gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Add Kotzilla Sdk
         env:
@@ -241,7 +241,7 @@ jobs:
           cache: 'gradle'
 
       - name: Set up gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Add Kotzilla Sdk
         env:
@@ -305,7 +305,7 @@ jobs:
           mv artifacts/ios-artifacts/*.ipa artifacts/ios-artifacts/PiPixiv-${VERSION_TAG}.ipa
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
