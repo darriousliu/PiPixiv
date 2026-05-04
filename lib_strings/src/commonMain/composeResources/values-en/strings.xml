@@ -277,4 +277,9 @@
     <string name="novel_hidden">This novel is blocked</string>
     <string name="show_novel">Show this novel</string>
     <string name="block_tag_as_regex">Match using regex</string>
+    <string name="jump_to_page">Jump to page</string>
+    <string name="jump_to_page_hint">Enter page number</string>
+    <string name="jump_to_page_out_of_range">Page out of range</string>
+    <string name="jump_to_page_invalid_input">Please enter a valid page number</string>
+    <string name="jump">Jump</string>
 </resources>

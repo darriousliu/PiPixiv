@@ -277,4 +277,9 @@
     <string name="novel_hidden">यह उपन्यास ब्लॉक कर दिया गया है</string>
     <string name="show_novel">इस उपन्यास को दिखाएँ</string>
     <string name="block_tag_as_regex">रेगुलर एक्सप्रेशन से मिलान करें</string>
+    <string name="jump_to_page">पृष्ठ पर जाएं</string>
+    <string name="jump_to_page_hint">पृष्ठ संख्या दर्ज करें</string>
+    <string name="jump_to_page_out_of_range">पृष्ठ सीमा से बाहर</string>
+    <string name="jump_to_page_invalid_input">कृपया एक वैध पृष्ठ संख्या दर्ज करें</string>
+    <string name="jump">जाएं</string>
 </resources>
