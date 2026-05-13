@@ -9,7 +9,7 @@ plugins {
 
 android {
     defaultConfig {
-        targetSdk = 36
+        targetSdk = 37
     }
     configureKotlinAndroid(this)
     configureAndroidCompose(this)
