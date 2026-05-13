@@ -54,7 +54,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -234,7 +234,7 @@ internal fun PictureScreen(
     }
 
     val lazyListState = rememberLazyListState()
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
     val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
     val rightListState = rememberLazyListState()
     val currPage by remember {

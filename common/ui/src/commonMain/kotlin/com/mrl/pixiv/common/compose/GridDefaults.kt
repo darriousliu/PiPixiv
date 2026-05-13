@@ -5,7 +5,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -38,7 +38,7 @@ data class StaggeredGridLayoutParams(
 
 object RecommendGridDefaults {
     @Composable
-    fun coverLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): StaggeredGridLayoutParams {
+    fun coverLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfoV2()): StaggeredGridLayoutParams {
         val windowSizeClass = windowAdaptiveInfo.windowSizeClass
         val orientation = currentOrientation()
         val spanCountPortrait by requireUserPreferenceFlow.collectAsStateWithLifecycle { spanCountPortrait }
@@ -71,7 +71,7 @@ object RecommendGridDefaults {
 
 object IllustGridDefaults {
     @Composable
-    fun relatedLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
+    fun relatedLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfoV2()): GridLayoutParams {
         val windowSizeClass = windowAdaptiveInfo.windowSizeClass
         val orientation = currentOrientation()
         val spanCountPortrait by requireUserPreferenceFlow.collectAsStateWithLifecycle { spanCountPortrait }
@@ -101,7 +101,7 @@ object IllustGridDefaults {
     }
 
     @Composable
-    fun userLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
+    fun userLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfoV2()): GridLayoutParams {
         val windowSizeClass = windowAdaptiveInfo.windowSizeClass
         val horizontalArrangement = when {
             windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
@@ -120,7 +120,7 @@ object IllustGridDefaults {
     }
 
     @Composable
-    fun userFollowingParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
+    fun userFollowingParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfoV2()): GridLayoutParams {
         val windowSizeClass = windowAdaptiveInfo.windowSizeClass
         val horizontalArrangement = when {
             windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
@@ -143,7 +143,7 @@ object IllustGridDefaults {
 
 object BlockingGridDefaults {
     @Composable
-    fun blockingLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo()): GridLayoutParams {
+    fun blockingLayoutParameters(windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfoV2()): GridLayoutParams {
         val windowSizeClass = windowAdaptiveInfo.windowSizeClass
 
         val horizontalArrangement = when {

@@ -1,6 +1,6 @@
 package com.mrl.pixiv.latest
 
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +30,7 @@ fun FollowingPage(
     latestViewModel: LatestViewModel = koinViewModel()
 ) {
     val navigationManager = koinInject<NavigationManager>()
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
     val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
     val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
     val followingUsers = viewModel.publicFollowingPageSource.collectAsLazyPagingItems()

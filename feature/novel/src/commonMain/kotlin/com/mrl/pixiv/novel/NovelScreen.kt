@@ -63,7 +63,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -600,7 +600,7 @@ private fun NovelContent(
     ) {
         // 封面图
         item(key = KEY_COVER) {
-            val isWidthAtLeastMedium = currentWindowAdaptiveInfo().isWidthAtLeastMedium
+            val isWidthAtLeastMedium = currentWindowAdaptiveInfoV2().isWidthAtLeastMedium
             AsyncImage(
                 model = ImageRequest.Builder(LocalPlatformContext.current)
                     .data(novel.imageUrls.medium)

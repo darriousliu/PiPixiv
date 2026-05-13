@@ -15,7 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,7 +52,7 @@ fun LatestScreen(
     val pagerState = viewModel.pagerState
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
     val refreshFlow = remember { MutableSharedFlow<LatestPage>() }
     val page = pages[pagerState.currentPage]
     val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
