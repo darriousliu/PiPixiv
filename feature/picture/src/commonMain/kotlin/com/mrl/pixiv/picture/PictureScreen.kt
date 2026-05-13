@@ -364,7 +364,10 @@ internal fun PictureScreen(
                                             val (fileName, extension) = extractFileNameAndExtension(
                                                 url
                                             )
-                                            saveAsLauncher.launch(fileName, extension)
+                                            saveAsLauncher.launch(
+                                                suggestedName = fileName,
+                                                defaultExtension = extension
+                                            )
                                         },
                                         onCopyLink = { url -> copyToClipboard(url) }
                                     )
@@ -417,7 +420,10 @@ internal fun PictureScreen(
                                     onSaveAs = { url ->
                                         pendingSaveAsUrl = url
                                         val (fileName, extension) = extractFileNameAndExtension(url)
-                                        saveAsLauncher.launch(fileName, extension)
+                                        saveAsLauncher.launch(
+                                            suggestedName = fileName,
+                                            defaultExtension = extension
+                                        )
                                     },
                                     onCopyLink = { url -> copyToClipboard(url) }
                                 )
