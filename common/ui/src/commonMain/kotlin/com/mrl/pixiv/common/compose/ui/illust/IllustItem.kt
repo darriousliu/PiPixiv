@@ -74,6 +74,7 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.strings.long_click_to_edit_favorite
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -183,7 +184,7 @@ fun SquareIllustItem(
                     if (showPopupTip) {
                         LaunchedEffect(Unit) {
                             SettingRepository.setHasShowBookmarkTip(true)
-                            delay(3000)
+                            delay(3000.milliseconds)
                             showPopupTip = false
                         }
                         Popup(

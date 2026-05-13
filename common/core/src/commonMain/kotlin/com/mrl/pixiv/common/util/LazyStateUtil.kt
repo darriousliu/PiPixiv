@@ -12,6 +12,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
+import kotlin.time.Duration.Companion.milliseconds
 
 val LazyListState.isScrollToTop: Boolean
     @Composable
@@ -138,7 +139,7 @@ private fun ScrollToBottomEffect(
     }
     LaunchedEffect(Unit) {
         snapshotFlow { shouldLoadMore }
-            .debounce(debounceTime)
+            .debounce(debounceTime.milliseconds)
             .filter { it }
             .collect {
                 updatedBlock()

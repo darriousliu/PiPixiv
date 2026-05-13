@@ -155,6 +155,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val KEY_COVER = "cover"
 private const val KEY_TITLE = "title"
@@ -193,7 +194,7 @@ fun NovelScreen(
 
     LaunchedEffect(manuallyShowTopBar) {
         if (manuallyShowTopBar) {
-            delay(3000) // 3秒后自动隐藏
+            delay(3000.milliseconds) // 3秒后自动隐藏
             manuallyShowTopBar = false
         }
     }
@@ -248,9 +249,9 @@ fun NovelScreen(
         listState.scrollToItem(targetItemIndex, 0)
 
         // 等待目标段落的布局完成。包含图片标记的段落可能没有文本布局，这里做超时兜底。
-        val layout = withTimeoutOrNull(500L) {
+        val layout = withTimeoutOrNull(500L.milliseconds) {
             while (paragraphLayouts[resolvedProgress.paragraphIndex] == null) {
-                delay(16)
+                delay(16.milliseconds)
             }
             paragraphLayouts[resolvedProgress.paragraphIndex]
         } ?: run {
