@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 internal fun KotlinMultiplatformAndroidLibraryTarget.configureKotlinMultiplatform() {
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
     minSdk = 26
 

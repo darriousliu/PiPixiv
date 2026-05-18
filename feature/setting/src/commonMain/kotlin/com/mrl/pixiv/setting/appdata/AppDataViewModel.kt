@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.mrl.pixiv.common.data.search.NovelSearch
 import com.mrl.pixiv.common.datasource.local.PixivDatabase
+import com.mrl.pixiv.common.datasource.local.entity.BlockIllustEntity
+import com.mrl.pixiv.common.datasource.local.entity.BlockUserEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
@@ -33,11 +35,15 @@ import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.cacheDir
 import io.github.vinceglb.filekit.delete
 import io.github.vinceglb.filekit.writeString
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import org.jetbrains.compose.resources.StringResource
 import org.koin.android.annotation.KoinViewModel
 
@@ -67,6 +73,10 @@ class AppDataViewModel(
 ) : BaseMviViewModel<AppDataState, ViewIntent>(
     initialState = AppDataState(),
 ) {
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
     private var novelHistoryImportRequestId = 0L
     private val novelHistoryImportResultFlow =
         MutableSharedFlow<NovelHistoryImportResult>(extraBufferCapacity = 1)
@@ -92,21 +102,36 @@ class AppDataViewModel(
         launchIO {
             updateState { copy(isLoading = true, loadingMessage = RStrings.exporting) }
             try {
-                val downloads = database.downloadDao().getAllDownloads().first()
+                val downloadsDeferred = async { database.downloadDao().getAllDownloads().first() }
                 val currentUserId = requireUserInfoValue.user.id
-                val novelHistories = database.novelReadingProgressDao()
-                    .getByUserId(currentUserId)
-                    .map {
-                        NovelHistoryItem(
-                            novelId = it.novelId,
-                            paragraphIndex = it.paragraphIndex,
-                            charIndex = it.charIndex,
-                            paragraphHash = it.paragraphHash,
-                            updatedAtMillis = it.updatedAtMillis,
-                        )
-                    }
+                val novelHistoriesDeferred = async {
+                    database.novelReadingProgressDao()
+                        .getByUserId(currentUserId)
+                        .map {
+                            NovelHistoryItem(
+                                novelId = it.novelId,
+                                paragraphIndex = it.paragraphIndex,
+                                charIndex = it.charIndex,
+                                paragraphHash = it.paragraphHash,
+                                updatedAtMillis = it.updatedAtMillis,
+                            )
+                        }
+                }
+                val blockIllustsDeferred = async { database.blockContentDao().getAllIllusts() }
+                val blockNovelsDeferred = async { database.blockContentDao().getAllNovels() }
+                val blockUsersDeferred = async { database.blockContentDao().getAllUsers() }
+                val blockTagsDeferred = async { database.blockContentDao().getAllTags() }
+                val blockCommentsDeferred = async { database.blockContentDao().getAllComments() }
 
-                val dataV2 = AppExportDataV2(
+                val downloads = downloadsDeferred.await()
+                val novelHistories = novelHistoriesDeferred.await()
+                val blockIllusts = blockIllustsDeferred.await()
+                val blockNovels = blockNovelsDeferred.await()
+                val blockUsers = blockUsersDeferred.await()
+                val blockTags = blockTagsDeferred.await()
+                val blockComments = blockCommentsDeferred.await()
+
+                val dataV2 = AppExportDataV3(
                     settings = SettingsData(
                         userPreference = SettingRepository.userPreferenceFlow.value,
                     ),
@@ -118,10 +143,12 @@ class AppDataViewModel(
                         savedFilter = SearchRepository.savedSearchFilterValue,
                         rememberFilter = SearchRepository.rememberSearchFilterValue,
                     ),
-                    blocking = BlockingData(
-                        blockIllusts = BlockingRepositoryV2.blockIllustsFlow.value ?: emptySet(),
-                        blockUsers = BlockingRepositoryV2.blockUsersFlow.value ?: emptySet(),
-                        blockComments = BlockingRepositoryV2.blockCommentsFlow.value,
+                    blocking = BlockingDataV2(
+                        blockIllusts = blockIllusts,
+                        blockNovels = blockNovels,
+                        blockUsers = blockUsers,
+                        blockTags = blockTags,
+                        blockComments = blockComments.map { json.decodeFromString(it.commentJson) },
                     ),
                     bookmarks = BookmarksData(
                         bookmarkedTags = BookmarkedTagRepository.bookmarkedTags.value,
@@ -135,11 +162,8 @@ class AppDataViewModel(
                     ),
                 )
 
-                val json = Json {
-                    ignoreUnknownKeys = true
-                    encodeDefaults = true
-                }
-                val jsonString = json.encodeToString(AppExportDataV2.serializer(), dataV2)
+
+                val jsonString = json.encodeToString(AppExportDataV3.serializer(), dataV2)
                 val jsonFile = PlatformFile(FileKit.cacheDir, jsonDataFile)
                 jsonFile.writeString(jsonString)
 
@@ -163,17 +187,19 @@ class AppDataViewModel(
                 val jsonString = zipUtil.getZipEntryContent(path, jsonDataFile)?.decodeToString()
                     ?: throw Exception("No data.json in zip file")
                 val json = Json { ignoreUnknownKeys = true }
+                val rootObject = json.parseToJsonElement(jsonString).jsonObject
 
-                // Try to detect version and parse accordingly
-                val isV2 = jsonString.contains("\"version\"")
+                // V2 has grouped top-level keys; support both old/new blocking payload in parseV2ImportData.
+                val isV2OrV3Like = "version" in rootObject ||
+                        "settings" in rootObject ||
+                        "search" in rootObject ||
+                        "blocking" in rootObject
 
-                if (isV2) {
-                    // Import V2 format
-                    val dataV2 = json.decodeFromString<AppExportDataV2>(jsonString)
-                    importV2Data(dataV2)
+                if (isV2OrV3Like) {
+                    val dataV3 = parseV3ImportData(json, rootObject)
+                    importV3Data(dataV3)
                 } else {
-                    // Import V1 format (legacy)
-                    val dataV1 = json.decodeFromString<AppExportData>(jsonString)
+                    val dataV1 = json.decodeFromJsonElement<AppExportData>(rootObject)
                     importV1Data(dataV1)
                 }
 
@@ -187,7 +213,42 @@ class AppDataViewModel(
         }
     }
 
-    private suspend fun importV2Data(data: AppExportDataV2) {
+    private fun parseV3ImportData(json: Json, rootObject: JsonObject): AppExportDataV3 {
+        return runCatching {
+            json.decodeFromJsonElement<AppExportDataV3>(rootObject)
+        }.getOrElse {
+            val legacyData = json.decodeFromJsonElement<AppExportDataV2>(rootObject)
+            legacyData.toV3()
+        }
+    }
+
+    private fun AppExportDataV2.toV3(): AppExportDataV3 {
+        return AppExportDataV3(
+            version = version,
+            settings = settings,
+            search = search,
+            blocking = blocking.toV3(),
+            bookmarks = bookmarks,
+            downloads = downloads,
+            novelHistory = novelHistory,
+        )
+    }
+
+    private fun BlockingData.toV3(): BlockingDataV2 {
+        return BlockingDataV2(
+            blockIllusts = blockIllusts
+                .mapNotNull { it.toLongOrNull() }
+                .distinct()
+                .map { BlockIllustEntity(illustId = it) },
+            blockUsers = blockUsers
+                .mapNotNull { it.toLongOrNull() }
+                .distinct()
+                .map { BlockUserEntity(userId = it) },
+            blockComments = blockComments.distinctBy { it.id },
+        )
+    }
+
+    private suspend fun importV3Data(data: AppExportDataV3) {
         // Settings
         SettingRepository.restore(data.settings.userPreference)
 
@@ -205,7 +266,9 @@ class AppDataViewModel(
         BlockingRepositoryV2.restore(
             data.blocking.blockIllusts,
             data.blocking.blockUsers,
-            data.blocking.blockComments
+            data.blocking.blockComments,
+            data.blocking.blockNovels,
+            data.blocking.blockTags,
         )
 
         // Bookmarks

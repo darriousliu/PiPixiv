@@ -46,6 +46,7 @@ import com.mrl.pixiv.common.util.result.LocalResultEventBus
 import com.mrl.pixiv.common.util.result.ResultEventBus
 import com.mrl.pixiv.follow.FollowingScreen
 import com.mrl.pixiv.history.HistoryScreen
+import com.mrl.pixiv.image.preview.ImagePreviewScreen
 import com.mrl.pixiv.login.LoginOptionScreen
 import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
@@ -62,7 +63,11 @@ import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
 import com.mrl.pixiv.setting.ai.AiTranslationSettingScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
+import com.mrl.pixiv.setting.block.BlockIllustScreen
+import com.mrl.pixiv.setting.block.BlockNovelScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
+import com.mrl.pixiv.setting.block.BlockTagScreen
+import com.mrl.pixiv.setting.block.BlockUserScreen
 import com.mrl.pixiv.setting.download.DownloadScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import kotlinx.collections.immutable.toImmutableList
@@ -81,7 +86,6 @@ fun Navigation3MainGraph(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager = koinInject { parametersOf(arrayOf(startDestination)) }
 ) {
-    val listDetailStrategy = rememberListDetailSceneStrategy<Any>()
     val toastState = rememberToasterState()
     val resultBus = remember { ResultEventBus() }
 
@@ -107,7 +111,7 @@ fun Navigation3MainGraph(
                     // Then add the view model store decorator
                     rememberViewModelStoreNavEntryDecorator()
                 ),
-                sceneStrategy = listDetailStrategy,
+                sceneStrategies = listOf(rememberListDetailSceneStrategy()),
                 entryProvider = entryProvider {
                     entry<Destination.LoginOption> {
                         LoginOptionScreen()
@@ -151,6 +155,23 @@ fun Navigation3MainGraph(
                         val illustId = it.illustId
                         PictureDeeplinkScreen(
                             illustId = illustId,
+                        )
+                    }
+
+                    entry<Destination.ImagePreview>(
+                        metadata = NavDisplay.transitionSpec {
+                            fadeIn(DefaultFloatAnimationSpec) togetherWith
+                                    fadeOut(DefaultFloatAnimationSpec)
+                        } + NavDisplay.predictivePopTransitionSpec {
+                            fadeIn(DefaultFloatAnimationSpec) togetherWith
+                                    fadeOut(DefaultFloatAnimationSpec)
+                        },
+                    ) {
+                        ImagePreviewScreen(
+                            imageUrls = it.imageUrls,
+                            initialIndex = it.initialIndex,
+                            sharedElementKey = it.sharedElementKey,
+                            onBack = navigationManager::popBackStack,
                         )
                     }
 
@@ -208,8 +229,7 @@ fun Navigation3MainGraph(
                     entry<Destination.Collection>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
-                        val userId = it.userId
-                        CollectionScreen(uid = userId)
+                        CollectionScreen(uid = it.userId, isNovel = it.isNovel)
                     }
 
                     // 收藏标签页
@@ -269,6 +289,18 @@ fun Navigation3MainGraph(
                     }
                     entry<Destination.BlockSettings> {
                         BlockSettingsScreen()
+                    }
+                    entry<Destination.BlockIllust> {
+                        BlockIllustScreen()
+                    }
+                    entry<Destination.BlockNovel> {
+                        BlockNovelScreen()
+                    }
+                    entry<Destination.BlockUser> {
+                        BlockUserScreen()
+                    }
+                    entry<Destination.BlockTag> {
+                        BlockTagScreen()
                     }
                     entry<Destination.BlockComments> {
                         BlockCommentsScreen()
@@ -358,6 +390,10 @@ private fun LogScreen(
 
             // Add additional parameters for specific destinations
             when (currentDestination) {
+                is Destination.Login -> {
+                    put("start_url", currentDestination.startUrl)
+                }
+
                 is Destination.Main -> {
                     val screenName =
                         navigationManager.currentMainPage::class.serializer().descriptor.serialName
@@ -377,18 +413,20 @@ private fun LogScreen(
 
                 is Destination.SearchResults -> {
                     put("search_words", currentDestination.searchWords)
+                    put("is_id_search", currentDestination.isIdSearch.toString())
+                    put("search_mode", currentDestination.searchMode.name)
                 }
 
                 is Destination.Picture -> {
                     put("index", currentDestination.index.toString())
                     put("prefix", currentDestination.prefix)
+                    put("enable_transition", currentDestination.enableTransition.toString())
                 }
 
                 is Destination.Collection -> {
                     put("user_id", currentDestination.userId.toString())
+                    put("is_novel", currentDestination.isNovel.toString())
                 }
-
-                is Destination.BookmarkedTags -> Unit
 
                 is Destination.Following -> {
                     put("user_id", currentDestination.userId.toString())
@@ -406,6 +444,10 @@ private fun LogScreen(
                 is Destination.Report -> {
                     put("id", currentDestination.id.toString())
                     put("type", currentDestination.type.toString())
+                }
+
+                is Destination.NovelDetail -> {
+                    put("novel_id", currentDestination.novelId.toString())
                 }
 
                 else -> Unit

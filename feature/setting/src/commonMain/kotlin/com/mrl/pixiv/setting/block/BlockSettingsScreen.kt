@@ -1,91 +1,55 @@
 package com.mrl.pixiv.setting.block
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.rounded.Save
-import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.mrl.pixiv.common.compose.BlockingGridDefaults
-import com.mrl.pixiv.common.compose.listener.KeyEventListener
-import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
-import com.mrl.pixiv.common.compose.ui.BackToTopButton
-import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
-import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.strings.block_comments
+import com.mrl.pixiv.strings.block_illust
+import com.mrl.pixiv.strings.block_novel
 import com.mrl.pixiv.strings.block_settings
 import com.mrl.pixiv.strings.block_tags
 import com.mrl.pixiv.strings.block_user
-import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
 
-private const val KEY_TITLE_BLOCK_COMMENTS_ENTRY = "title_block_comments_entry"
-
-private const val KEY_TITLE_MUTE_USERS = "title_mute_users"
-private const val KEY_TITLE_MUTE_TAGS = "title_mute_tags"
-private const val KEY_DIVIDER = "divider"
+private const val KEY_BLOCK_ILLUST = "block_illust"
+private const val KEY_BLOCK_NOVEL = "block_novel"
+private const val KEY_BLOCK_USER = "block_user"
+private const val KEY_BLOCK_TAG = "block_tag"
+private const val KEY_BLOCK_COMMENTS = "block_comments"
 
 @Composable
 fun BlockSettingsScreen(
     modifier: Modifier = Modifier,
-    viewModel: BlockSettingsViewModel = koinViewModel(),
 ) {
     val navigationManager = koinInject<NavigationManager>()
-    val state = viewModel.asState()
-    val scope = rememberCoroutineScope()
-    val lazyGridState = rememberLazyGridState()
-    val controller = remember() {
-        keyboardScrollerController(lazyGridState) {
-            lazyGridState.layoutInfo.viewportSize.height.toFloat()
-        }
-    }
-
-    KeyEventListener(controller)
 
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = stringResource(RStrings.block_settings),
-                    )
+                    Text(text = stringResource(RStrings.block_settings))
                 },
                 navigationIcon = {
                     IconButton(
@@ -97,183 +61,69 @@ fun BlockSettingsScreen(
                             contentDescription = null
                         )
                     }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            viewModel.editMuteList {
-                                navigationManager.popBackStack()
-                            }
-                        },
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Save,
-                            contentDescription = null
-                        )
-                    }
                 }
-            )
-        },
-        floatingActionButton = {
-            BackToTopButton(
-                visibility = lazyGridState.canScrollBackward,
-                modifier = Modifier,
-                onBackToTop = {
-                    scope.launch {
-                        lazyGridState.scrollToItem(0)
-                    }
-                },
             )
         }
-    ) {
-        val layoutParams = BlockingGridDefaults.blockingLayoutParameters()
-        val userEmpty = state.allMutedUsers.isEmpty()
-        val tagEmpty = state.allMutedTags.isEmpty()
-
-        if (state.loading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularWavyProgressIndicator()
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+        ) {
+            item(key = KEY_BLOCK_ILLUST) {
+                BlockEntry(
+                    title = RStrings.block_illust,
+                    onClick = { navigationManager.navigate(Destination.BlockIllust) }
+                )
             }
-        } else {
-            Box(
-                modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize()
-            ) {
-                LazyVerticalGrid(
-                    state = lazyGridState,
-                    modifier = Modifier.fillMaxSize(),
-                    columns = layoutParams.gridCells,
-                    verticalArrangement = layoutParams.verticalArrangement,
-                    horizontalArrangement = layoutParams.horizontalArrangement,
-                    contentPadding = PaddingValues(
-                        start = 8.dp,
-                        top = 8.dp,
-                        end = 8.dp,
-                        bottom = WindowInsets.navigationBars.asPaddingValues()
-                            .calculateBottomPadding()
-                    ),
-                ) {
-                    item(
-                        key = KEY_TITLE_BLOCK_COMMENTS_ENTRY,
-                        span = { GridItemSpan(maxLineSpan) }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { navigationManager.navigate(Destination.BlockComments) }
-                                .padding(vertical = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(RStrings.block_comments),
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                    if (!userEmpty) {
-                        item(
-                            key = KEY_TITLE_MUTE_USERS,
-                            span = { GridItemSpan(maxLineSpan) },
-                        ) {
-                            Text(
-                                text = stringResource(RStrings.block_user),
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                        }
-                        items(
-                            items = state.allMutedUsers,
-                            key = { it.user.id }
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    UserAvatar(
-                                        url = it.user.profileImageUrls.medium,
-                                        modifier = Modifier.size(40.dp),
-                                    )
-                                    Text(
-                                        text = it.user.name,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                    )
-                                }
-                                Switch(
-                                    checked = it.user.id !in state.toEditBlockUser,
-                                    onCheckedChange = { checked ->
-                                        if (checked) {
-                                            viewModel.removeMutedUser(it.user.id)
-                                        } else {
-                                            viewModel.addMutedUser(it.user.id)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                        item(
-                            key = KEY_DIVIDER,
-                            span = { GridItemSpan(maxLineSpan) },
-                        ) {
-                            HorizontalDivider()
-                        }
-                    }
-                    if (!tagEmpty) {
-                        item(
-                            key = KEY_TITLE_MUTE_TAGS,
-                            span = { GridItemSpan(maxLineSpan) },
-                        ) {
-                            Text(
-                                text = stringResource(RStrings.block_tags),
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                        }
-                        items(
-                            items = state.allMutedTags,
-                            key = { it.tag.name }
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text = it.tag.name,
-                                    modifier = Modifier.weight(1f),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                                Switch(
-                                    checked = it.tag.name !in state.toEditBlockTag,
-                                    onCheckedChange = { checked ->
-                                        if (checked) {
-                                            viewModel.removeMutedTag(it.tag.name)
-                                        } else {
-                                            viewModel.addMutedTag(it.tag.name)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-                VerticalScrollbar(
-                    state = lazyGridState,
-                    modifier = Modifier.align(Alignment.CenterEnd)
+            item(key = KEY_BLOCK_NOVEL) {
+                BlockEntry(
+                    title = RStrings.block_novel,
+                    onClick = { navigationManager.navigate(Destination.BlockNovel) }
+                )
+            }
+            item(key = KEY_BLOCK_USER) {
+                BlockEntry(
+                    title = RStrings.block_user,
+                    onClick = { navigationManager.navigate(Destination.BlockUser) }
+                )
+            }
+            item(key = KEY_BLOCK_TAG) {
+                BlockEntry(
+                    title = RStrings.block_tags,
+                    onClick = { navigationManager.navigate(Destination.BlockTag) }
+                )
+            }
+            item(key = KEY_BLOCK_COMMENTS) {
+                BlockEntry(
+                    title = RStrings.block_comments,
+                    onClick = { navigationManager.navigate(Destination.BlockComments) }
                 )
             }
         }
     }
+}
+
+@Composable
+private fun BlockEntry(
+    title: StringResource,
+    onClick: () -> Unit,
+) {
+    ListItem(
+        headlineContent = {
+            Text(
+                text = stringResource(title),
+                style = MaterialTheme.typography.titleMedium,
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                contentDescription = null
+            )
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .throttleClick(indication = ripple(), onClick = onClick),
+    )
 }

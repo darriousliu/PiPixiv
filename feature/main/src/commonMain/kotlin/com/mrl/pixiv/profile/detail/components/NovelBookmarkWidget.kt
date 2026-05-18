@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.strings.novel_collection
 import com.mrl.pixiv.strings.novel_description
 import com.mrl.pixiv.strings.view_all
@@ -34,7 +35,8 @@ private const val MAX_SHOW_NOVEL_COUNT = 3
 @Composable
 fun NovelBookmarkWidget(
     novels: List<Novel>,
-    modifier: Modifier = Modifier
+    onAllClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
@@ -50,7 +52,11 @@ fun NovelBookmarkWidget(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterStart)
             )
-            Row(modifier = Modifier.align(Alignment.CenterEnd)) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .throttleClick(onClick = onAllClick)
+            ) {
                 Text(
                     text = stringResource(RStrings.view_all),
                     fontSize = 12.sp,

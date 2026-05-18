@@ -3,11 +3,13 @@ package com.mrl.pixiv.novel
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.intl.Locale
 import co.touchlab.kermit.Logger
+import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.coroutine.withIOContext
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.NovelAiTranslationService
 import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.NovelReadingProgressRepository
@@ -33,6 +35,8 @@ import io.github.vinceglb.filekit.writeString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.serialization.json.Json
 import okio.ByteString.Companion.toByteString
 import org.koin.android.annotation.KoinViewModel
@@ -82,6 +86,7 @@ class NovelViewModel(
 ) : BaseMviViewModel<NovelState, NovelIntent>(
     initialState = NovelState()
 ), KoinComponent {
+    private var lastHistoryNovelId: Long? = null
     private var latestProgress: NovelReadingProgress? = null
     private var sourceNovelText: String = ""
     private var translatedNovelText: String = ""
@@ -104,7 +109,10 @@ class NovelViewModel(
             is NovelIntent.ToggleBottomSheet -> toggleBottomSheet()
             is NovelIntent.ShareNovel -> shareNovel()
             is NovelIntent.ExportToTxt -> exportToTxt()
-            is NovelIntent.NavigateToChapter -> loadNovelDetail(intent.novelId)
+            is NovelIntent.NavigateToChapter -> {
+                addHistory()
+                loadNovelDetail(intent.novelId)
+            }
             is NovelIntent.TranslateNovel -> translateNovel(intent.forceRefresh)
             is NovelIntent.DeleteNovelTranslation -> deleteNovelTranslation()
             is NovelIntent.ToggleDisplayOriginalText -> toggleDisplayOriginalText()
@@ -205,6 +213,25 @@ class NovelViewModel(
                 novel.id,
                 if (privateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
             )
+        }
+    }
+
+    fun blockNovel() {
+        val novel = uiState.value.novel ?: return
+        BlockingRepositoryV2.blockNovel(novelId = novel.id, title = novel.title)
+    }
+
+    fun removeBlockNovel() {
+        val novel = uiState.value.novel ?: return
+        BlockingRepositoryV2.removeBlockNovel(novel.id)
+    }
+
+    fun addHistory() {
+        launchProcess(Dispatchers.IO) {
+            val novelId = uiState.value.novel?.id ?: return@launchProcess
+            if (lastHistoryNovelId == novelId) return@launchProcess
+            PixivRepository.addNovelBrowsingHistory(novelId)
+            lastHistoryNovelId = novelId
         }
     }
 
@@ -416,6 +443,15 @@ class NovelViewModel(
         launchIO {
             readingProgressRepository.saveProgress(novelId, progress)
             Logger.d(tag = "NovelScreen") { "Saved progress for novel $progress" }
+        }
+    }
+
+    fun clearProgress(novelId: Long) {
+        latestProgress = null
+        updateState { copy(restoreProgress = null) }
+        launchIO {
+            readingProgressRepository.clearProgress(novelId)
+            Logger.d(tag = "NovelScreen") { "Cleared progress for novelId=$novelId" }
         }
     }
 

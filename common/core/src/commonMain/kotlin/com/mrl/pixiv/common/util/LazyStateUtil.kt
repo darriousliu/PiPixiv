@@ -12,6 +12,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
+import kotlin.time.Duration.Companion.milliseconds
 
 val LazyListState.isScrollToTop: Boolean
     @Composable
@@ -91,21 +92,10 @@ fun LazyStaggeredGridState.OnScrollToBottom(
     debounceTime: Long = 300,
     block: () -> Unit = {},
 ) {
-    val updatedBlock by rememberUpdatedState(block)
-    val shouldLoadMore by remember {
-        derivedStateOf {
-            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                ?: return@derivedStateOf false
-            lastVisibleItem.index >= layoutInfo.totalItemsCount - 1 - loadingItemCount
-        }
-    }
-    LaunchedEffect(Unit) {
-        snapshotFlow { shouldLoadMore }
-            .debounce(debounceTime)
-            .filter { it }
-            .collect {
-                updatedBlock()
-            }
+    ScrollToBottomEffect(debounceTime, block) {
+        val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+            ?: return@ScrollToBottomEffect false
+        lastVisibleItem.index >= layoutInfo.totalItemsCount - 1 - loadingItemCount
     }
 }
 
@@ -115,21 +105,10 @@ fun LazyGridState.OnScrollToBottom(
     debounceTime: Long = 300,
     block: () -> Unit = {},
 ) {
-    val updatedBlock by rememberUpdatedState(block)
-    val shouldLoadMore by remember {
-        derivedStateOf {
-            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                ?: return@derivedStateOf false
-            lastVisibleItem.index >= layoutInfo.totalItemsCount - 1 - loadingItemCount
-        }
-    }
-    LaunchedEffect(Unit) {
-        snapshotFlow { shouldLoadMore }
-            .debounce(debounceTime)
-            .filter { it }
-            .collect {
-                updatedBlock()
-            }
+    ScrollToBottomEffect(debounceTime, block) {
+        val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+            ?: return@ScrollToBottomEffect false
+        lastVisibleItem.index >= layoutInfo.totalItemsCount - 1 - loadingItemCount
     }
 }
 
@@ -139,17 +118,28 @@ fun LazyListState.OnScrollToBottom(
     debounceTime: Long = 300,
     block: () -> Unit = {},
 ) {
+    ScrollToBottomEffect(debounceTime, block) {
+        val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+            ?: return@ScrollToBottomEffect false
+        lastVisibleItem.index >= layoutInfo.totalItemsCount - 1 - loadingItemCount
+    }
+}
+
+@Composable
+private fun ScrollToBottomEffect(
+    debounceTime: Long,
+    block: () -> Unit,
+    shouldLoadMoreBlock: () -> Boolean,
+) {
     val updatedBlock by rememberUpdatedState(block)
     val shouldLoadMore by remember {
         derivedStateOf {
-            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                ?: return@derivedStateOf false
-            lastVisibleItem.index >= layoutInfo.totalItemsCount - 1 - loadingItemCount
+            shouldLoadMoreBlock()
         }
     }
     LaunchedEffect(Unit) {
         snapshotFlow { shouldLoadMore }
-            .debounce(debounceTime)
+            .debounce(debounceTime.milliseconds)
             .filter { it }
             .collect {
                 updatedBlock()

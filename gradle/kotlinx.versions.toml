@@ -1,11 +1,11 @@
 [versions]
 kotlin = "2.3.20"
-ksp = "2.3.6"
-serialization = "1.10.0"
-coroutines = "1.10.2"
-ktor = "3.4.1"
-ktorfit = "2.7.2"
-datetime = "0.7.1"
+ksp = "2.3.7"
+serialization = "1.11.0"
+coroutines = "1.11.0"
+ktor = "3.5.0"
+ktorfit = "2.7.3"
+datetime = "0.8.0"
 collections-immutable = "0.4.0"
 
 [libraries]

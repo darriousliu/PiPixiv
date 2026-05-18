@@ -60,7 +60,7 @@ class OAuthLoginViewModel : BaseMviViewModel<OAuthLoginState, OAuthLoginAction>(
             }
         ) {
             updateState { copy(loading = true) }
-            val cookies = JSON.parseToJsonElement(cookieString).jsonArray.map {
+            val cookies = JSON.parseToJsonElement(cookieString.replace("\\_", "_")).jsonArray.map {
                 val obj = it.jsonObject
                 Cookie(
                     name = obj["name"]?.jsonPrimitive?.content.orEmpty(),

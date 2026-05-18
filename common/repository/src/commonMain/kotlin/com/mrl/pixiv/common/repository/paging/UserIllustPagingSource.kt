@@ -7,6 +7,7 @@ import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.util.filterBlockedTags
 import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
 
@@ -33,7 +34,7 @@ class UserIllustPagingSource(
                 resp.illusts.distinctBy { it.id }
             } else {
                 resp.illusts.distinctBy { it.id }.filterNormalIllust()
-            }
+            }.filterBlockedTags()
             LoadResult.Page(
                 data = illusts,
                 prevKey = params.key,

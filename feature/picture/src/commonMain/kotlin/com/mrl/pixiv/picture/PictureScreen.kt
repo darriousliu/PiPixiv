@@ -54,7 +54,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -234,7 +234,7 @@ internal fun PictureScreen(
     }
 
     val lazyListState = rememberLazyListState()
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
     val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
     val rightListState = rememberLazyListState()
     val currPage by remember {
@@ -279,6 +279,18 @@ internal fun PictureScreen(
             illust.metaSinglePage.originalImageURL
         }
     }
+    val openOriginalPreview: (Int, String?) -> Unit = openOriginalPreview@{ index, sharedElementKey ->
+        val selectedUrl = getOriginalUrl(index) ?: return@openOriginalPreview
+        val imageUrls = (0 until illust.pageCount.coerceAtLeast(1))
+            .mapNotNull(getOriginalUrl)
+        if (imageUrls.isNotEmpty()) {
+            navigationManager.navigateToImagePreviewScreen(
+                imageUrls = imageUrls,
+                initialIndex = imageUrls.indexOf(selectedUrl).coerceAtLeast(0),
+                sharedElementKey = sharedElementKey,
+            )
+        }
+    }
     val saveAsLauncher = rememberFileSaverLauncher(
         dialogSettings = FileKitDialogSettings.createDefault()
     ) { file ->
@@ -314,28 +326,35 @@ internal fun PictureScreen(
                     illust.pageCount,
                     key = { "${illust.id}_$it" },
                 ) { index ->
-                    val firstImageKey = "image-${illust.id}-0"
+                    val imageKey = "image-${illust.id}-$index"
+                    val sharedImageKey = "${prefix}-$imageKey"
                     if (illust.pageCount > 1) {
                         illust.metaPages?.get(index)?.let {
                             Box {
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalPlatformContext.current)
                                         .data(it.imageUrls?.medium)
-                                        .placeholderMemoryCacheKey("image-${illust.id}-$index")
+                                        .placeholderMemoryCacheKey(imageKey)
                                         .build(),
                                     contentDescription = null,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .conditionally(index == 0 && enableTransition) {
+                                        .conditionally(enableTransition) {
                                             sharedElement(
                                                 sharedTransitionScope.rememberSharedContentState(
-                                                    key = "${prefix}-$firstImageKey"
+                                                    key = sharedImageKey
                                                 ),
                                                 animatedVisibilityScope = animatedContentScope,
                                                 placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
                                             )
                                         }
                                         .throttleClick(
+                                            onClick = {
+                                                openOriginalPreview(
+                                                    index,
+                                                    sharedImageKey.takeIf { enableTransition }
+                                                )
+                                            },
                                             onLongClick = {
                                                 dispatch(PictureAction.GetPictureInfo(index))
                                             }
@@ -364,7 +383,10 @@ internal fun PictureScreen(
                                             val (fileName, extension) = extractFileNameAndExtension(
                                                 url
                                             )
-                                            saveAsLauncher.launch(fileName, extension)
+                                            saveAsLauncher.launch(
+                                                suggestedName = fileName,
+                                                defaultExtension = extension
+                                            )
                                         },
                                         onCopyLink = { url -> copyToClipboard(url) }
                                     )
@@ -376,21 +398,27 @@ internal fun PictureScreen(
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalPlatformContext.current)
                                     .data(illust.imageUrls.medium)
-                                    .placeholderMemoryCacheKey("image-${illust.id}-$index")
+                                    .placeholderMemoryCacheKey(imageKey)
                                     .build(),
                                 contentDescription = null,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .conditionally(index == 0 && enableTransition) {
+                                    .conditionally(enableTransition) {
                                         sharedElement(
                                             sharedTransitionScope.rememberSharedContentState(
-                                                key = "${prefix}-$firstImageKey"
+                                                key = sharedImageKey
                                             ),
                                             animatedVisibilityScope = animatedContentScope,
                                             placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
                                         )
                                     }
                                     .throttleClick(
+                                        onClick = {
+                                            openOriginalPreview(
+                                                0,
+                                                sharedImageKey.takeIf { enableTransition }
+                                            )
+                                        },
                                         onLongClick = {
                                             dispatch(PictureAction.GetPictureInfo(0))
                                         }
@@ -417,7 +445,10 @@ internal fun PictureScreen(
                                     onSaveAs = { url ->
                                         pendingSaveAsUrl = url
                                         val (fileName, extension) = extractFileNameAndExtension(url)
-                                        saveAsLauncher.launch(fileName, extension)
+                                        saveAsLauncher.launch(
+                                            suggestedName = fileName,
+                                            defaultExtension = extension
+                                        )
                                     },
                                     onCopyLink = { url -> copyToClipboard(url) }
                                 )

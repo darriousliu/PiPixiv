@@ -145,7 +145,7 @@ fun AppDataScreen(
                         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                             .format(LocalDateTime.Formats.ISO)
                     }"
-                    exportLauncher.launch(fileName, "zip")
+                    exportLauncher.launch(suggestedName = fileName, defaultExtension = "zip")
                 },
                 leadingContent = {
                     Icon(

@@ -52,6 +52,13 @@ sealed class Destination : NavKey {
     ) : Destination()
 
     @Serializable
+    data class ImagePreview(
+        val imageUrls: List<String>,
+        val initialIndex: Int,
+        val sharedElementKey: String? = null,
+    ) : Destination()
+
+    @Serializable
     data object Search : Destination()
 
     @Serializable
@@ -79,6 +86,7 @@ sealed class Destination : NavKey {
     @Serializable
     data class Collection(
         val userId: Long,
+        val isNovel: Boolean,
     ) : Destination()
 
     @Serializable
@@ -96,6 +104,18 @@ sealed class Destination : NavKey {
 
     @Serializable
     data object BlockSettings : Destination()
+
+    @Serializable
+    data object BlockIllust : Destination()
+
+    @Serializable
+    data object BlockNovel : Destination()
+
+    @Serializable
+    data object BlockUser : Destination()
+
+    @Serializable
+    data object BlockTag : Destination()
 
     @Serializable
     data object BlockComments : Destination()

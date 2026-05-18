@@ -6,6 +6,7 @@ import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.util.filterBlockedTags
 import com.mrl.pixiv.common.repository.util.filterNormalNovel
 import com.mrl.pixiv.common.repository.util.queryParams
 
@@ -29,7 +30,7 @@ class NovelRankingPagingSource(
                 resp.novels.distinctBy { it.id }
             } else {
                 resp.novels.distinctBy { it.id }.filterNormalNovel()
-            }
+            }.filterBlockedTags()
             LoadResult.Page(
                 data = novels,
                 prevKey = params.key,

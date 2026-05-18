@@ -7,6 +7,7 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.user.UserBookmarksQuery
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.util.filterBlockedTags
 import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
 
@@ -28,7 +29,7 @@ class CollectionIllustPagingSource(
                 resp.illusts.distinctBy { it.id }
             } else {
                 resp.illusts.distinctBy { it.id }.filterNormalIllust()
-            }
+            }.filterBlockedTags()
             if (query != null) {
                 val nextKey = UserBookmarksQuery(
                     restrict = query["restrict"]?.let { Restrict.fromValue(it) } ?: Restrict.PUBLIC,

@@ -101,6 +101,7 @@ class PixivCookieAuthHelper(
             parameters.append("code_challenge", codeChallenge)
             parameters.append("code_challenge_method", "S256")
             parameters.append("client", "pixiv-android")
+            parameters.append("via", "login")
         }.build()
 
         // 3. 注入 Cookie

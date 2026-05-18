@@ -23,7 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -74,6 +74,7 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.strings.long_click_to_edit_favorite
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
@@ -87,7 +88,7 @@ fun SquareIllustItem(
     elevation: Dp = 5.dp,
     shouldShowTip: Boolean = false,
     shape: Shape = MaterialTheme.shapes.medium,
-    enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
+    enableTransition: Boolean = !currentWindowAdaptiveInfoV2().isWidthAtLeastExpanded,
 ) {
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     var showPopupTip by rememberSaveable { mutableStateOf(false) }
@@ -183,7 +184,7 @@ fun SquareIllustItem(
                     if (showPopupTip) {
                         LaunchedEffect(Unit) {
                             SettingRepository.setHasShowBookmarkTip(true)
-                            delay(3000)
+                            delay(3000.milliseconds)
                             showPopupTip = false
                         }
                         Popup(
@@ -220,7 +221,7 @@ fun RectangleIllustItem(
     isBookmarked: Boolean,
     onBookmarkClick: (Restrict, List<String>?, Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    enableTransition: Boolean = !currentWindowAdaptiveInfo().isWidthAtLeastExpanded,
+    enableTransition: Boolean = !currentWindowAdaptiveInfoV2().isWidthAtLeastExpanded,
 ) {
     val scale = illust.width * 1.0f / illust.height
     val sharedTransitionScope = LocalSharedTransitionScope.current

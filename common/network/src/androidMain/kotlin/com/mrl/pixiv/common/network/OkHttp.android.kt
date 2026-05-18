@@ -81,7 +81,8 @@ private data class SNIReplaceDNS(
                     .header("Accept", "application/dns-json")
                     .build(),
             ).execute()
-            val json = JSON.decodeFromString<CloudFlareDNSResponse>(resp.body.string())
+            val jsonStr = resp.body.string()
+            val json = JSON.decodeFromString<CloudFlareDNSResponse>(jsonStr)
             json.Answer.map {
                 InetAddress.getByName(it.data)
             }

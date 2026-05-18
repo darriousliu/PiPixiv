@@ -37,6 +37,7 @@ import com.mrl.pixiv.common.util.currentTimeMillis
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 private fun ScrollbarImpl(
@@ -83,7 +84,7 @@ private fun ScrollbarImpl(
             val now = currentTimeMillis()
             val remaining = style.hideDelayMillis - (now - lastInteractionTime)
             if (remaining > 0L) {
-                delay(remaining)
+                delay(remaining.milliseconds)
             }
             isTimeOut = true
         }

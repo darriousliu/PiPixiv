@@ -37,6 +37,7 @@ public val com_mrl_pixiv_IosAppModule : Module get() = module {
     defineComMrlPixivCommonAiProviderOpenAiTextClient()
     defineComMrlPixivCommonDatasourceLocalgetDatabaseBuilder()
     defineComMrlPixivCommonDatasourceLocalprovideDatabase()
+    defineComMrlPixivCommonDatasourceLocalprovideBlockContentDao()
     defineComMrlPixivCommonDatasourceLocalprovideDownloadDao()
     defineComMrlPixivCommonDatasourceLocalprovideNovelReadingProgressDao()
     defineComMrlPixivCommonDatasourceLocalprovideNovelTranslationDao()

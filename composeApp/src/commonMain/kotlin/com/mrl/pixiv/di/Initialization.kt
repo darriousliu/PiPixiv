@@ -5,6 +5,7 @@ import co.touchlab.kermit.Severity
 import com.ctrip.flight.mmkv.MMKVLogLevel
 import com.mrl.pixiv.common.analytics.initKotzilla
 import com.mrl.pixiv.common.analytics.initializeSentry
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.DeviceInfo
 import com.mrl.pixiv.common.util.isDebug
@@ -21,6 +22,7 @@ object Initialization {
             initKotzilla(isDebug, AppUtil.versionName, DeviceInfo.DISPLAY_NAME)
             modules(allModule)
         }
+        BlockingRepositoryV2.migrate()
     }
 }
 

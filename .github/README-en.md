@@ -51,7 +51,7 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 * 🏠 Homepage recommended illustrations in waterfall layout.
 * 🆕 Browse latest content (Discover, Bookmarks, Following).
-* 🏆 View rankings (Daily, Weekly, Monthly, Male/Female-oriented, AI-generated, R-18, etc.).
+* 🏆 View rankings (Daily, Weekly, Monthly, Male/Female-oriented, AI-generated, etc.).
 * 📜 Browsing history with search and clear support.
 
 ### 🖼️ Illustration
@@ -84,7 +84,7 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 ### ⚙️ Settings & System
 
-* ⚙️ App settings (Language, Network proxy / SNI bypass, Image source, Grid columns, R-18 content, Private bookmarks, etc.).
+* ⚙️ App settings (Language, Network proxy / SNI bypass, Image source, Grid columns, Private bookmarks, etc.).
 * 🚫 Block artworks, users and tags.
 * 🔗 Deep link support.
 * 📦 App data management (cache clearing, data export/import).

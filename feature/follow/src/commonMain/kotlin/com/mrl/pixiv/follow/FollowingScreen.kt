@@ -31,7 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -97,7 +97,7 @@ fun FollowingScreen(
     val scope = rememberCoroutineScope()
     val pages = viewModel.pages
     val pagerState = viewModel.pagerState
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
     val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
     val lazyListStates = viewModel.lazyListState
     val lazyGridStates = viewModel.lazyGridState
@@ -224,7 +224,7 @@ fun FollowingScreenBody(
     showIllusts: Boolean = true,
 ) {
     val pullRefreshState = rememberPullToRefreshState()
-    val windowAdaptiveInfo = currentWindowAdaptiveInfo()
+    val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
 
     val isRefreshing = followingUsers.loadState.refresh is LoadState.Loading
     PullToRefreshBox(

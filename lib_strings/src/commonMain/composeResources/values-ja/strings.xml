@@ -252,7 +252,6 @@
     <string name="novel_history_import_user_mismatch_title">小説履歴ユーザーの不一致</string>
     <string name="novel_history_import_user_mismatch_desc">現在のユーザーID: %1$d、インポートデータのユーザーID: %2$d。続行を確認すると小説の履歴が現在のユーザーにインポートされ、キャンセルするとこの部分のインポートはスキップされます。</string>
     <string name="sign_in_with_cookie">Cookieでログイン</string>
-    <string name="cookies" translatable="false">Cookies</string>
     <string name="cookies_parse_error">Cookie解析エラー</string>
     <string name="recommend_cookie_export_plugin">ChromeウェブストアのCookieエクスポート拡張機能である&lt;a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm"&gt;EditThisCookie&lt;/a&gt;または&lt;a href="https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol"&gt;Cookie-Editor&lt;/a&gt;の使用をお勧めします。CookieにPHPSESSIDフィールドが含まれていることを確認し、必ずJson形式でエクスポートしてください。</string>
     <string name="translate_novel">本文を翻訳</string>
@@ -271,4 +270,11 @@
     <string name="ai_translation_success">翻訳完了</string>
     <string name="ai_translation_cache_hit">キャッシュから翻訳を読み込みました</string>
     <string name="ai_translation_deleted">翻訳を削除し原文を復元しました</string>
+    <string name="block_illust">イラストをブロック</string>
+    <string name="block_novel">小説をブロック</string>
+    <string name="no_blocked_items">ブロックされたコンテンツはありません</string>
+    <string name="hide_novel">この小説を非表示</string>
+    <string name="novel_hidden">この小説はブロックされています</string>
+    <string name="show_novel">この小説を表示</string>
+    <string name="block_tag_as_regex">正規表現でマッチ</string>
 </resources>

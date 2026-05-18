@@ -6,16 +6,24 @@ import com.mrl.pixiv.common.data.comment.Comment
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.util.filterBlocked
 import com.mrl.pixiv.common.repository.util.queryParams
+import com.mrl.pixiv.common.router.CommentType
 
 class CommentPagingSource(
-    private val illustId: Long
+    private val id: Long,
+    private val type: CommentType
 ) : PagingSource<String, Comment>() {
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Comment> {
         return try {
             val resp = if (params.key.isNullOrEmpty()) {
-                PixivRepository.getIllustComments(illustId)
+                when (type) {
+                    CommentType.ILLUST -> PixivRepository.getIllustComments(id)
+                    CommentType.NOVEL -> PixivRepository.getNovelComments(id)
+                }
             } else {
-                PixivRepository.loadMoreIllustComments(params.key!!.queryParams)
+                when (type) {
+                    CommentType.ILLUST -> PixivRepository.loadMoreIllustComments(params.key!!.queryParams)
+                    CommentType.NOVEL -> PixivRepository.loadMoreNovelComments(params.key!!.queryParams)
+                }
             }
             LoadResult.Page(
                 data = resp.comments.filterBlocked(),

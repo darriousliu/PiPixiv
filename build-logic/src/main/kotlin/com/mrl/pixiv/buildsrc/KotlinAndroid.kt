@@ -35,7 +35,7 @@ internal fun Project.configureKotlinAndroid(
 ) {
     commonExtension.apply {
         compileSdk {
-            version = release(36)
+            version = release(37)
         }
 
         defaultConfig.apply {

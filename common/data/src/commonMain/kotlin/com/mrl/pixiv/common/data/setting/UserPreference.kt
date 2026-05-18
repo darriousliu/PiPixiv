@@ -55,7 +55,7 @@ data class UserPreference(
         @Serializable
         @SerialName("sni")
         data class SNI(
-            val url: String = "https://77.88.8.8/dns-query",
+            val url: String = "https://doh.pub/dns-query",
             val fallback: Map<String, String> = Constants.hostMap,
             val nonStrictSSL: Boolean = true,
             val dohTimeout: Int = 5,

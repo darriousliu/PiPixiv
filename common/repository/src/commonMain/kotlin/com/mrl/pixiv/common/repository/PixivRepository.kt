@@ -218,6 +218,12 @@ object PixivRepository : KoinComponent {
     suspend fun addIllustBrowsingHistory(illustIds: List<Long>) =
         apiApi.addIllustBrowsingHistory(illustIds)
 
+    suspend fun addNovelBrowsingHistory(vararg novelIds: Long) =
+        apiApi.addNovelBrowsingHistory(novelIds.toList())
+
+    suspend fun addNovelBrowsingHistory(novelIds: List<Long>) =
+        apiApi.addNovelBrowsingHistory(novelIds)
+
     suspend fun searchPopularPreviewIllust(query: SearchIllustQuery) =
         apiApi.searchPopularPreviewIllust(
             query.filter.value,
@@ -247,6 +253,18 @@ object PixivRepository : KoinComponent {
 
     suspend fun loadMoreIllustCommentReplies(queryMap: Map<String, String>) =
         apiApi.loadMoreIllustCommentReplies(queryMap)
+
+    suspend fun getNovelComments(novelId: Long, offset: Int? = null) =
+        apiApi.getNovelComments(novelId, offset)
+
+    suspend fun loadMoreNovelComments(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelComments(queryMap)
+
+    suspend fun getNovelCommentReplies(commentId: Long, offset: Int? = null) =
+        apiApi.getNovelCommentReplies(commentId, offset)
+
+    suspend fun loadMoreNovelCommentReplies(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelCommentReplies(queryMap)
 
     suspend fun getEmojis() = apiApi.getEmojis()
 

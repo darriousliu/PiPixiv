@@ -36,6 +36,11 @@ class NovelReadingProgressRepository(
             )
         )
     }
+
+    suspend fun clearProgress(novelId: Long) {
+        val userId = requireUserInfoValue.user.id
+        dao.deleteByNovelId(userId = userId, novelId = novelId)
+    }
 }
 
 private fun NovelReadingProgressEntity.toDomain(): NovelReadingProgress {

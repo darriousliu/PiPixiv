@@ -106,6 +106,21 @@ class NavigationManager(
         backStack.navigate(Destination.PictureDeeplink(illustId))
     }
 
+    fun navigateToImagePreviewScreen(
+        imageUrls: List<String>,
+        initialIndex: Int,
+        sharedElementKey: String? = null,
+    ) {
+        if (imageUrls.isEmpty()) return
+        backStack.navigate(
+            Destination.ImagePreview(
+                imageUrls = imageUrls,
+                initialIndex = initialIndex.coerceIn(0, imageUrls.lastIndex),
+                sharedElementKey = sharedElementKey,
+            )
+        )
+    }
+
     fun navigateToSearchResultScreen(
         searchWord: String,
         isIdSearch: Boolean = false,
@@ -122,8 +137,8 @@ class NavigationManager(
         backStack.navigate(route = Destination.Following(userId))
     }
 
-    fun navigateToCollectionScreen(userId: Long) {
-        backStack.navigate(route = Destination.Collection(userId))
+    fun navigateToCollectionScreen(userId: Long, isNovel: Boolean = false) {
+        backStack.navigate(route = Destination.Collection(userId, isNovel))
     }
 
     fun navigateToBookmarkedTagsScreen() {

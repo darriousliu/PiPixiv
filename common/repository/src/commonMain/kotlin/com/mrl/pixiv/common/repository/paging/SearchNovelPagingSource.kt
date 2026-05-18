@@ -8,6 +8,7 @@ import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.util.filterBlockedTags
 import com.mrl.pixiv.common.repository.util.filterNormalNovel
 import com.mrl.pixiv.common.repository.util.queryParams
 
@@ -30,7 +31,7 @@ class SearchNovelPagingSource(
                 )
                 val resp = PixivRepository.getNovelDetail(novelId)
                 return LoadResult.Page(
-                    data = listOf(resp.novel),
+                    data = listOf(resp.novel).filterBlockedTags(),
                     prevKey = null,
                     nextKey = null
                 )
@@ -49,7 +50,7 @@ class SearchNovelPagingSource(
                 resp.novels.distinctBy { it.id }
             } else {
                 resp.novels.distinctBy { it.id }.filterNormalNovel()
-            }
+            }.filterBlockedTags()
             if (query != null) {
                 val nextKey = SearchNovelQuery(
                     word = query["word"] ?: "",
