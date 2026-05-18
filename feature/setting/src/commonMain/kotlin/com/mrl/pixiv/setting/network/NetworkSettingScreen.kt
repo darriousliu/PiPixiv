@@ -39,6 +39,8 @@ fun NetworkSettingScreen(
 ) {
     val userPreference by requireUserPreferenceFlow.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
+    LocalNetworkPermissionEffect(userPreference.bypassSetting)
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -82,7 +84,6 @@ fun NetworkSettingScreen(
         }
     }
 }
-
 
 
 
