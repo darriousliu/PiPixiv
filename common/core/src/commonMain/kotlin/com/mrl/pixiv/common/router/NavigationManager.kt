@@ -106,6 +106,21 @@ class NavigationManager(
         backStack.navigate(Destination.PictureDeeplink(illustId))
     }
 
+    fun navigateToImagePreviewScreen(
+        imageUrls: List<String>,
+        initialIndex: Int,
+        sharedElementKey: String? = null,
+    ) {
+        if (imageUrls.isEmpty()) return
+        backStack.navigate(
+            Destination.ImagePreview(
+                imageUrls = imageUrls,
+                initialIndex = initialIndex.coerceIn(0, imageUrls.lastIndex),
+                sharedElementKey = sharedElementKey,
+            )
+        )
+    }
+
     fun navigateToSearchResultScreen(
         searchWord: String,
         isIdSearch: Boolean = false,

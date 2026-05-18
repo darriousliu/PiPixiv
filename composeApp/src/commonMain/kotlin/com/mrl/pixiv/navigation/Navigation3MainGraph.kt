@@ -46,6 +46,7 @@ import com.mrl.pixiv.common.util.result.LocalResultEventBus
 import com.mrl.pixiv.common.util.result.ResultEventBus
 import com.mrl.pixiv.follow.FollowingScreen
 import com.mrl.pixiv.history.HistoryScreen
+import com.mrl.pixiv.image.preview.ImagePreviewScreen
 import com.mrl.pixiv.login.LoginOptionScreen
 import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
@@ -154,6 +155,23 @@ fun Navigation3MainGraph(
                         val illustId = it.illustId
                         PictureDeeplinkScreen(
                             illustId = illustId,
+                        )
+                    }
+
+                    entry<Destination.ImagePreview>(
+                        metadata = NavDisplay.transitionSpec {
+                            fadeIn(DefaultFloatAnimationSpec) togetherWith
+                                    fadeOut(DefaultFloatAnimationSpec)
+                        } + NavDisplay.predictivePopTransitionSpec {
+                            fadeIn(DefaultFloatAnimationSpec) togetherWith
+                                    fadeOut(DefaultFloatAnimationSpec)
+                        },
+                    ) {
+                        ImagePreviewScreen(
+                            imageUrls = it.imageUrls,
+                            initialIndex = it.initialIndex,
+                            sharedElementKey = it.sharedElementKey,
+                            onBack = navigationManager::popBackStack,
                         )
                     }
 

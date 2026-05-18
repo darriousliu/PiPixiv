@@ -1,6 +1,5 @@
 [versions]
-composeWebviewMultiplatform = "1.0.0-beta-02"
-material = "1.13.0"
+material = "1.14.0"
 mp_stools = "1.6.3"
 okio = "3.17.0"
 coil3 = "3.4.0"
@@ -29,10 +28,12 @@ sentry-bom = "8.41.0"
 sentry-plugin = "6.6.0"
 sentry-kmp = "0.26.0"
 hotswan = "1.3.2"
+webview = "1.0.0-beta-02"
+zoomimage = "1.4.0"
 
 
 [libraries]
-compose-webview-multiplatform = { module = "io.github.kdroidfilter:composewebview", version.ref = "composeWebviewMultiplatform" }
+compose-webview-multiplatform = { module = "io.github.kdroidfilter:composewebview", version.ref = "webview" }
 
 
 material = { module = "com.google.android.material:material", version.ref = "material" }
@@ -94,6 +95,7 @@ sentry-multiplatform = { module = "io.sentry:sentry-kotlin-multiplatform", versi
 sentry-bom = { module = "io.sentry:sentry-bom", version.ref = "sentry-bom" }
 sentry-android = { module = "io.sentry:sentry-android" }
 sentry-compose = { module = "io.sentry:sentry-compose-android" }
+zoomimage-compose-coil3 = { module = "io.github.panpf.zoomimage:zoomimage-compose-coil3", version.ref = "zoomimage" }
 
 [bundles]
 koin = ["koin", "koin-compose", "koin-annotations", "koin-compose-viewmodel"]

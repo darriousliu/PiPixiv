@@ -52,6 +52,13 @@ sealed class Destination : NavKey {
     ) : Destination()
 
     @Serializable
+    data class ImagePreview(
+        val imageUrls: List<String>,
+        val initialIndex: Int,
+        val sharedElementKey: String? = null,
+    ) : Destination()
+
+    @Serializable
     data object Search : Destination()
 
     @Serializable
