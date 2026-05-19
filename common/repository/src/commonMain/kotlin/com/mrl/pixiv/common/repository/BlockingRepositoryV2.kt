@@ -237,10 +237,14 @@ object BlockingRepositoryV2 : KoinComponent {
 
     fun isCommentBlocked(commentId: Long): Boolean = commentId in blockCommentIds.value
 
-    fun isTagBlocked(tag: String): Boolean {
+    fun isTagBlocked(tag: String, allowKeywordMatch: Boolean = false): Boolean {
         val value = tag.trim()
         if (value.isEmpty()) return false
-        if (value in blockTagExactValues.value) return true
+        val exactValues = blockTagExactValues.value
+        if (value in exactValues) return true
+        if (allowKeywordMatch && exactValues.any { value.contains(it, ignoreCase = true) }) {
+            return true
+        }
         return blockTagRegexValues.value.any { regex ->
             runCatching { regex.matches(value) }.getOrDefault(false)
         }

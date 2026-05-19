@@ -17,8 +17,10 @@ inline fun List<Novel>.filterNormalNovel() = filter { it.xRestrict == XRestrict.
 inline fun List<Illust>.filterBlockedTags(): List<Illust> {
     return filterNot { illust ->
         illust.tags.orEmpty().any { tag ->
-            BlockingRepositoryV2.isTagBlocked(tag.name) ||
-                    (tag.translatedName.isNotBlank() && BlockingRepositoryV2.isTagBlocked(tag.translatedName))
+            val isTagBlocked = BlockingRepositoryV2.isTagBlocked(tag.name)
+            val isTranslatedTagBlocked = tag.translatedName.isNotBlank() &&
+                    BlockingRepositoryV2.isTagBlocked(tag.translatedName)
+            isTagBlocked || isTranslatedTagBlocked
         }
     }
 }
@@ -27,8 +29,16 @@ inline fun List<Illust>.filterBlockedTags(): List<Illust> {
 inline fun List<Novel>.filterBlockedTags(): List<Novel> {
     return filterNot { novel ->
         novel.tags.any { tag ->
-            BlockingRepositoryV2.isTagBlocked(tag.name) ||
-                    (tag.translatedName.isNotBlank() && BlockingRepositoryV2.isTagBlocked(tag.translatedName))
+            val isTagBlocked = BlockingRepositoryV2.isTagBlocked(
+                tag.name,
+                allowKeywordMatch = true
+            )
+            val isTranslatedTagBlocked = tag.translatedName.isNotBlank() &&
+                    BlockingRepositoryV2.isTagBlocked(
+                        tag.translatedName,
+                        allowKeywordMatch = true
+                    )
+            isTagBlocked || isTranslatedTagBlocked
         }
     }
 }
