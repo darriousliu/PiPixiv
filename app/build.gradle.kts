@@ -5,9 +5,21 @@ import org.gradle.internal.extensions.stdlib.capitalized
 
 plugins {
     id("pixiv.android.application")
-    alias(libs.plugins.hotswan.compiler)
 //    alias(androidx.plugins.baselineprofile)
 }
+
+val hotSwanTaskNames = gradle.startParameter.taskNames.map { it.lowercase() }
+val enableHotSwanCompiler = hotSwanTaskNames.isEmpty() ||
+    hotSwanTaskNames.any { taskName ->
+        taskName.contains("debug") ||
+            taskName.contains("hotswan") ||
+            taskName.contains("captureallpreviews")
+    }
+
+if (enableHotSwanCompiler) {
+    pluginManager.apply(libs.plugins.hotswan.compiler.get().pluginId)
+}
+
 if (project.findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.sentry.android.get().pluginId)
     pluginManager.apply(libs.plugins.google.services.get().pluginId)
