@@ -90,7 +90,7 @@ fun getDownloadPath(
 }
 
 suspend fun saveToAlbum(
-    bytes: ByteArray,
+    file: File,
     fileName: String,
     mimeType: String?,
     subFolder: String? = null,
@@ -121,7 +121,9 @@ suspend fun saveToAlbum(
         )
         uri?.let {
             context.contentResolver.openOutputStream(it)?.use { out ->
-                out.write(bytes)
+                file.inputStream().use { input ->
+                    input.copyTo(out)
+                }
             }
             it.toString() to filePath
         }

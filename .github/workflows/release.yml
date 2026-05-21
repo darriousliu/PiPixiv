@@ -305,12 +305,14 @@ jobs:
       - name: Get tag name
         run: echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
 
-      - name: Rename desktop and iOS artifacts
+      - name: Rename release artifacts
         run: |
+          mv artifacts/android-foss-apk/*.apk artifacts/android-foss-apk/PiPixiv-${VERSION_TAG}-android-foss.apk
+          mv artifacts/android-default-apk/*.apk artifacts/android-default-apk/PiPixiv-${VERSION_TAG}-android-default.apk
           mv artifacts/linux-artifacts/PiPixiv-linux-x86_64.tar.gz artifacts/linux-artifacts/PiPixiv-${VERSION_TAG}-linux-x86_64.tar.gz
-          mv artifacts/windows-artifacts/*.msi artifacts/windows-artifacts/PiPixiv-${VERSION_TAG}-x86_64.msi
-          mv artifacts/macos-artifacts/*.dmg artifacts/macos-artifacts/PiPixiv-${VERSION_TAG}-arm64.dmg
-          mv artifacts/ios-artifacts/*.ipa artifacts/ios-artifacts/PiPixiv-${VERSION_TAG}.ipa
+          mv artifacts/windows-artifacts/*.msi artifacts/windows-artifacts/PiPixiv-${VERSION_TAG}-windows-x86_64.msi
+          mv artifacts/macos-artifacts/*.dmg artifacts/macos-artifacts/PiPixiv-${VERSION_TAG}-macos-arm64.dmg
+          mv artifacts/ios-artifacts/*.ipa artifacts/ios-artifacts/PiPixiv-${VERSION_TAG}-ios.ipa
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

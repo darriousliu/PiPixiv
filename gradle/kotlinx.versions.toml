@@ -1,6 +1,6 @@
 [versions]
-kotlin = "2.3.20"
-ksp = "2.3.7"
+kotlin = "2.3.21"
+ksp = "2.3.8"
 serialization = "1.11.0"
 coroutines = "1.11.0"
 ktor = "3.5.0"
