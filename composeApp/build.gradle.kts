@@ -111,7 +111,7 @@ compose.desktop {
         }
 
         buildTypes.release.proguard {
-            version = "7.8.2"
+            version = "7.9.1"
         }
 
         jvmArgs("--enable-native-access", "ALL-UNNAMED")

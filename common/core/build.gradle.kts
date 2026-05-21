@@ -108,7 +108,3 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.STRING, "sentryDsn", sentryDsn.orEmpty(), const = true)
     }
 }
-
-tasks.matching { it.name == "prepareAndroidMainArtProfile" }.configureEach {
-    dependsOn("generateBuildKonfig")
-}
