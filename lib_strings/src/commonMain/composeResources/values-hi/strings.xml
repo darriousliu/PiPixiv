@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">PiPixiv</string>
     <string name="home">होम</string>
     <string name="search">खोजें</string>
     <string name="my">मेरा</string>

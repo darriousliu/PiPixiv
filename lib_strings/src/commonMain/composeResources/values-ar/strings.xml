@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">PiPixiv</string>
     <string name="home">الرئيسية</string>
     <string name="search">بحث</string>
     <string name="my">لي</string>
