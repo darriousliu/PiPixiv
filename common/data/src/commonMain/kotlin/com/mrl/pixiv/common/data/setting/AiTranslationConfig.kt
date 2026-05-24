@@ -37,6 +37,7 @@ data class AiTranslationConfig(
     val apiKey: String = "",
     val model: String = defaultModel(AiProvider.OPENAI).modelId,
     val responseApi: Boolean = false,
+    val openAiExtraBody: String = "",
 ) {
     companion object {
         fun defaultEndpoint(provider: AiProvider): String = when (provider) {
@@ -70,4 +71,3 @@ data class AiTranslationConfig(
         }
     }
 }
-

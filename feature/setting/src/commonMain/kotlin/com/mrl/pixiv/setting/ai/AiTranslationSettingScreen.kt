@@ -47,6 +47,9 @@ import com.mrl.pixiv.strings.ai_api_key
 import com.mrl.pixiv.strings.ai_endpoint
 import com.mrl.pixiv.strings.ai_model
 import com.mrl.pixiv.strings.ai_model_suggestions
+import com.mrl.pixiv.strings.ai_openai_extra_body
+import com.mrl.pixiv.strings.ai_openai_extra_body_hint
+import com.mrl.pixiv.strings.ai_openai_extra_body_invalid
 import com.mrl.pixiv.strings.ai_openai_use_response_api
 import com.mrl.pixiv.strings.ai_provider
 import com.mrl.pixiv.strings.ai_provider_claude
@@ -54,6 +57,8 @@ import com.mrl.pixiv.strings.ai_provider_gemini
 import com.mrl.pixiv.strings.ai_provider_openai
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.save
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -70,6 +75,7 @@ fun AiTranslationSettingScreen(
     var apiKey by rememberSaveable { mutableStateOf(currentConfig.apiKey) }
     var model by rememberSaveable { mutableStateOf(currentConfig.model) }
     var responseApi by rememberSaveable { mutableStateOf(currentConfig.responseApi) }
+    var openAiExtraBody by rememberSaveable { mutableStateOf(currentConfig.openAiExtraBody) }
 
     LaunchedEffect(currentConfig) {
         providerName = currentConfig.provider.name
@@ -77,11 +83,17 @@ fun AiTranslationSettingScreen(
         apiKey = currentConfig.apiKey
         model = currentConfig.model
         responseApi = currentConfig.responseApi
+        openAiExtraBody = currentConfig.openAiExtraBody
     }
 
     val selectedProvider = remember(providerName) {
         runCatching { enumValueOf<AiProvider>(providerName) }
             .getOrDefault(AiProvider.OPENAI)
+    }
+    val openAiExtraBodyValid = remember(openAiExtraBody) {
+        openAiExtraBody.isBlank() || runCatching {
+            Json.parseToJsonElement(openAiExtraBody) is JsonObject
+        }.getOrDefault(false)
     }
 
     Scaffold(
@@ -112,6 +124,11 @@ fun AiTranslationSettingScreen(
                                         AiTranslationConfig.defaultModel(selectedProvider).modelId
                                     },
                                     responseApi = selectedProvider == AiProvider.OPENAI && responseApi,
+                                    openAiExtraBody = if (selectedProvider == AiProvider.OPENAI) {
+                                        openAiExtraBody.trim()
+                                    } else {
+                                        ""
+                                    },
                                 )
                             )
                             navigationManager.popBackStack()
@@ -168,6 +185,25 @@ fun AiTranslationSettingScreen(
             )
 
             if (selectedProvider == AiProvider.OPENAI) {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = openAiExtraBody,
+                    onValueChange = { openAiExtraBody = it },
+                    label = { Text(stringResource(RStrings.ai_openai_extra_body)) },
+                    isError = !openAiExtraBodyValid,
+                    supportingText = {
+                        Text(
+                            text = stringResource(
+                                if (openAiExtraBodyValid) {
+                                    RStrings.ai_openai_extra_body_hint
+                                } else {
+                                    RStrings.ai_openai_extra_body_invalid
+                                }
+                            )
+                        )
+                    },
+                )
+
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth()

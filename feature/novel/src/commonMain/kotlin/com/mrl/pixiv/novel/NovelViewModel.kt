@@ -504,6 +504,7 @@ private fun AiTranslationConfig.normalized(): AiTranslationConfig {
         endpoint = endpoint.trim(),
         apiKey = apiKey.trim(),
         model = model.trim(),
+        openAiExtraBody = openAiExtraBody.trim(),
     )
 }
 

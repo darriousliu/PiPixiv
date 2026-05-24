@@ -4,6 +4,7 @@ import com.mrl.pixiv.common.ai.AiMessageRole
 import com.mrl.pixiv.common.ai.AiTextRequest
 import com.mrl.pixiv.common.ai.AiTextResponse
 import com.mrl.pixiv.common.ai.internal.AiHttpClientHolder
+import com.mrl.pixiv.common.ai.internal.aiJson
 import com.mrl.pixiv.common.ai.internal.jsonArrayOrNull
 import com.mrl.pixiv.common.ai.internal.jsonObjectOrNull
 import com.mrl.pixiv.common.ai.internal.normalizeBaseUrl
@@ -88,7 +89,10 @@ class OpenAiTextClient(
                     )
                 }
             }
-        }
+        }.withExtraBody(
+            extraBody = request.extraBody,
+            protectedKeys = CHAT_COMPLETIONS_PROTECTED_KEYS
+        )
     }
 
     private fun buildResponsesBody(request: AiTextRequest): JsonObject {
@@ -117,7 +121,10 @@ class OpenAiTextClient(
                     }
                 }
             )
-        }
+        }.withExtraBody(
+            extraBody = request.extraBody,
+            protectedKeys = RESPONSES_PROTECTED_KEYS
+        )
     }
 
     private fun parseChatCompletionsText(payload: JsonObject): String {
@@ -168,6 +175,23 @@ class OpenAiTextClient(
 
             else -> ""
         }
+    }
+
+    private fun JsonObject.withExtraBody(extraBody: String, protectedKeys: Set<String>): JsonObject {
+        val parsedExtra = extraBody.parseExtraBodyOrNull() ?: return this
+        val sanitizedExtra = JsonObject(parsedExtra.filterKeys { key -> key !in protectedKeys })
+        if (sanitizedExtra.isEmpty()) return this
+        return JsonObject(this + sanitizedExtra)
+    }
+
+    private fun String.parseExtraBodyOrNull(): JsonObject? {
+        if (isBlank()) return null
+        return runCatching { aiJson.parseToJsonElement(this).jsonObjectOrNull() }.getOrNull()
+    }
+
+    private companion object {
+        val CHAT_COMPLETIONS_PROTECTED_KEYS = setOf("model", "messages")
+        val RESPONSES_PROTECTED_KEYS = setOf("model", "input")
     }
 }
 
