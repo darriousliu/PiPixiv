@@ -263,8 +263,8 @@
     <string name="ai_provider">AI 제공자</string>
     <string name="ai_endpoint">엔드포인트 주소</string>
     <string name="ai_model">모델</string>
-    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
-    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body" translatable="false">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint" translatable="false">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
     <string name="ai_openai_extra_body_invalid">JSON 형식이 잘못되었습니다. 요청 본문에 추가되지 않습니다.</string>
     <string name="ai_openai_use_response_api">Response API 사용</string>
     <string name="ai_model_suggestions">추천 모델</string>

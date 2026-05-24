@@ -263,8 +263,8 @@
     <string name="ai_provider">Fournisseur IA</string>
     <string name="ai_endpoint">Adresse du point de terminaison</string>
     <string name="ai_model">Modèle</string>
-    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
-    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body" translatable="false">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint" translatable="false">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
     <string name="ai_openai_extra_body_invalid">Format JSON invalide. Il ne sera pas ajouté au corps de la requête.</string>
     <string name="ai_openai_use_response_api">Utiliser Response API</string>
     <string name="ai_model_suggestions">Modèles recommandés</string>

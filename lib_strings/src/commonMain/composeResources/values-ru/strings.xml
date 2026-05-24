@@ -263,8 +263,8 @@
     <string name="ai_provider">Поставщик AI</string>
     <string name="ai_endpoint">Адрес эндпоинта</string>
     <string name="ai_model">Модель</string>
-    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
-    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body" translatable="false">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint" translatable="false">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
     <string name="ai_openai_extra_body_invalid">Неверный формат JSON. Он не будет прикреплён к телу запроса.</string>
     <string name="ai_openai_use_response_api">Использовать Response API</string>
     <string name="ai_model_suggestions">Рекомендуемые модели</string>

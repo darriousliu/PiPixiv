@@ -263,8 +263,8 @@
     <string name="ai_provider">AI प्रदाता</string>
     <string name="ai_endpoint">एंडपॉइंट पता</string>
     <string name="ai_model">मॉडल</string>
-    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
-    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body" translatable="false">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint" translatable="false">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
     <string name="ai_openai_extra_body_invalid">अमान्य JSON प्रारूप। यह अनुरोध बॉडी में संलग्न नहीं किया जाएगा।</string>
     <string name="ai_openai_use_response_api">Response API का उपयोग करें</string>
     <string name="ai_model_suggestions">सुझाए गए मॉडल</string>

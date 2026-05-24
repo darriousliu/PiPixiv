@@ -263,8 +263,8 @@
     <string name="ai_provider">AIプロバイダー</string>
     <string name="ai_endpoint">エンドポイント</string>
     <string name="ai_model">モデル</string>
-    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
-    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body" translatable="false">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint" translatable="false">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
     <string name="ai_openai_extra_body_invalid">無効なJSON形式です。リクエストボディに添付されません。</string>
     <string name="ai_openai_use_response_api">Response APIを使用</string>
     <string name="ai_model_suggestions">推奨モデル</string>

@@ -263,8 +263,8 @@
     <string name="ai_provider">مزود الذكاء الاصطناعي</string>
     <string name="ai_endpoint">عنوان الواجهة</string>
     <string name="ai_model">النموذج</string>
-    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
-    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body" translatable="false">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint" translatable="false">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
     <string name="ai_openai_extra_body_invalid">تنسيق JSON غير صالح. لن يتم إرفاقه بجسم الطلب.</string>
     <string name="ai_openai_use_response_api">استخدام Response API</string>
     <string name="ai_model_suggestions">النماذج المقترحة</string>
