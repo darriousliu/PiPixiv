@@ -265,7 +265,7 @@
     <string name="ai_model">Modelo</string>
     <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
     <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
-    <string name="ai_openai_extra_body_invalid">Invalid JSON format. It will not be attached to the request body.</string>
+    <string name="ai_openai_extra_body_invalid">Formato JSON inválido. No se adjuntará al cuerpo de la solicitud.</string>
     <string name="ai_openai_use_response_api">Usar Response API</string>
     <string name="ai_model_suggestions">Modelos recomendados</string>
     <string name="ai_translation_config_required">Completa primero la configuración de traducción con IA en Ajustes</string>

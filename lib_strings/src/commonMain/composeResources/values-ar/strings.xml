@@ -265,7 +265,7 @@
     <string name="ai_model">النموذج</string>
     <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
     <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
-    <string name="ai_openai_extra_body_invalid">Invalid JSON format. It will not be attached to the request body.</string>
+    <string name="ai_openai_extra_body_invalid">تنسيق JSON غير صالح. لن يتم إرفاقه بجسم الطلب.</string>
     <string name="ai_openai_use_response_api">استخدام Response API</string>
     <string name="ai_model_suggestions">النماذج المقترحة</string>
     <string name="ai_translation_config_required">يرجى إكمال إعدادات الترجمة بالذكاء الاصطناعي أولاً</string>

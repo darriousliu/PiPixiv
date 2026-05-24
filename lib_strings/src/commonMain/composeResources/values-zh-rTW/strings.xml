@@ -265,7 +265,7 @@
     <string name="ai_model">模型</string>
     <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
     <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
-    <string name="ai_openai_extra_body_invalid">Invalid JSON format. It will not be attached to the request body.</string>
+    <string name="ai_openai_extra_body_invalid">JSON 格式無效，將不會附加到請求體</string>
     <string name="ai_openai_use_response_api">使用 Response API</string>
     <string name="ai_model_suggestions">推薦模型</string>
     <string name="ai_translation_config_required">請先在設定中完成AI翻譯配置</string>
