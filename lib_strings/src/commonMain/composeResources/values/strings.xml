@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PiPixiv</string>
+    <string name="app_name" translatable="false">PiPixiv</string>
     <string name="home">首页</string>
     <string name="search">搜索</string>
     <string name="my">我的</string>
