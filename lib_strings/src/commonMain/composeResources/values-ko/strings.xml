@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PiPixiv</string>
     <string name="home">홈</string>
     <string name="search">검색</string>
     <string name="my">마이</string>
@@ -264,6 +263,9 @@
     <string name="ai_provider">AI 제공자</string>
     <string name="ai_endpoint">엔드포인트 주소</string>
     <string name="ai_model">모델</string>
+    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body_invalid">Invalid JSON format. It will not be attached to the request body.</string>
     <string name="ai_openai_use_response_api">Response API 사용</string>
     <string name="ai_model_suggestions">추천 모델</string>
     <string name="ai_translation_config_required">먼저 설정에서 AI 번역 구성을 완료해 주세요</string>

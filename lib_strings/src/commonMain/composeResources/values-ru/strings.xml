@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PiPixiv</string>
     <string name="home">Главная</string>
     <string name="search">Поиск</string>
     <string name="my">Мои</string>
@@ -264,6 +263,9 @@
     <string name="ai_provider">Поставщик AI</string>
     <string name="ai_endpoint">Адрес эндпоинта</string>
     <string name="ai_model">Модель</string>
+    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body_invalid">Invalid JSON format. It will not be attached to the request body.</string>
     <string name="ai_openai_use_response_api">Использовать Response API</string>
     <string name="ai_model_suggestions">Рекомендуемые модели</string>
     <string name="ai_translation_config_required">Сначала завершите настройку AI-перевода в настройках</string>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PiPixiv</string>
     <string name="home">الرئيسية</string>
     <string name="search">بحث</string>
     <string name="my">لي</string>
@@ -264,6 +263,9 @@
     <string name="ai_provider">مزود الذكاء الاصطناعي</string>
     <string name="ai_endpoint">عنوان الواجهة</string>
     <string name="ai_model">النموذج</string>
+    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body_invalid">Invalid JSON format. It will not be attached to the request body.</string>
     <string name="ai_openai_use_response_api">استخدام Response API</string>
     <string name="ai_model_suggestions">النماذج المقترحة</string>
     <string name="ai_translation_config_required">يرجى إكمال إعدادات الترجمة بالذكاء الاصطناعي أولاً</string>

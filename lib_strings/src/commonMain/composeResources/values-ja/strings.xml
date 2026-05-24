@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PiPixiv</string>
     <string name="home">ホーム</string>
     <string name="search">検索</string>
     <string name="my">マイ</string>
@@ -264,6 +263,9 @@
     <string name="ai_provider">AIプロバイダー</string>
     <string name="ai_endpoint">エンドポイント</string>
     <string name="ai_model">モデル</string>
+    <string name="ai_openai_extra_body">OpenAI Extra Body (JSON)</string>
+    <string name="ai_openai_extra_body_hint">Example: {&quot;thinking&quot;:{&quot;type&quot;:&quot;disabled&quot;}}</string>
+    <string name="ai_openai_extra_body_invalid">Invalid JSON format. It will not be attached to the request body.</string>
     <string name="ai_openai_use_response_api">Response APIを使用</string>
     <string name="ai_model_suggestions">推奨モデル</string>
     <string name="ai_translation_config_required">先に設定でAI翻訳の設定を完了してください</string>
