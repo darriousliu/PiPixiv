@@ -2,6 +2,7 @@ package com.mrl.pixiv.setting.ai
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -45,6 +46,10 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.ai_api_key
 import com.mrl.pixiv.strings.ai_endpoint
+import com.mrl.pixiv.strings.ai_extra_body
+import com.mrl.pixiv.strings.ai_extra_body_hint
+import com.mrl.pixiv.strings.ai_extra_body_invalid
+import com.mrl.pixiv.strings.ai_extra_body_presets
 import com.mrl.pixiv.strings.ai_model
 import com.mrl.pixiv.strings.ai_model_suggestions
 import com.mrl.pixiv.strings.ai_openai_use_response_api
@@ -54,6 +59,8 @@ import com.mrl.pixiv.strings.ai_provider_gemini
 import com.mrl.pixiv.strings.ai_provider_openai
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.save
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -70,6 +77,8 @@ fun AiTranslationSettingScreen(
     var apiKey by rememberSaveable { mutableStateOf(currentConfig.apiKey) }
     var model by rememberSaveable { mutableStateOf(currentConfig.model) }
     var responseApi by rememberSaveable { mutableStateOf(currentConfig.responseApi) }
+    var extraBody by rememberSaveable { mutableStateOf(currentConfig.extraBody) }
+    var extraBodyError by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(currentConfig) {
         providerName = currentConfig.provider.name
@@ -77,6 +86,8 @@ fun AiTranslationSettingScreen(
         apiKey = currentConfig.apiKey
         model = currentConfig.model
         responseApi = currentConfig.responseApi
+        extraBody = currentConfig.extraBody
+        extraBodyError = false
     }
 
     val selectedProvider = remember(providerName) {
@@ -101,6 +112,10 @@ fun AiTranslationSettingScreen(
                 actions = {
                     TextButton(
                         onClick = {
+                            if (!extraBody.isValidExtraBodyJson()) {
+                                extraBodyError = true
+                                return@TextButton
+                            }
                             SettingRepository.setAiTranslationConfig(
                                 AiTranslationConfig(
                                     provider = selectedProvider,
@@ -112,6 +127,7 @@ fun AiTranslationSettingScreen(
                                         AiTranslationConfig.defaultModel(selectedProvider).modelId
                                     },
                                     responseApi = selectedProvider == AiProvider.OPENAI && responseApi,
+                                    extraBody = extraBody.trim(),
                                 )
                             )
                             navigationManager.popBackStack()
@@ -188,13 +204,59 @@ fun AiTranslationSettingScreen(
                 )
             }
 
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = extraBody,
+                onValueChange = {
+                    extraBody = it
+                    extraBodyError = false
+                },
+                label = { Text(text = stringResource(RStrings.ai_extra_body)) },
+                placeholder = { Text(text = stringResource(RStrings.ai_extra_body_hint)) },
+                supportingText = {
+                    if (extraBodyError) {
+                        Text(text = stringResource(RStrings.ai_extra_body_invalid))
+                    }
+                },
+                isError = extraBodyError,
+                minLines = 6,
+                maxLines = 12,
+            )
+
+            Text(
+                text = stringResource(RStrings.ai_extra_body_presets),
+                style = MaterialTheme.typography.labelLarge,
+            )
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                extraBodyPresets.forEach { preset ->
+                    FilterChip(
+                        selected = false,
+                        onClick = {
+                            val merged = extraBody.mergeExtraBodyPreset(preset.json)
+                            if (merged == null) {
+                                extraBodyError = true
+                            } else {
+                                extraBody = merged
+                                extraBodyError = false
+                            }
+                        },
+                        label = { Text(text = preset.label) },
+                    )
+                }
+            }
+
             Text(
                 text = stringResource(RStrings.ai_model_suggestions),
                 style = MaterialTheme.typography.labelLarge,
             )
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 AiTranslationConfig.suggestedModels(selectedProvider).forEach { modelName ->
                     val modelId = modelName.modelId
@@ -209,6 +271,78 @@ fun AiTranslationSettingScreen(
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         }
     }
+}
+
+private data class ExtraBodyPreset(
+    val label: String,
+    val json: String,
+)
+
+private val extraBodyPresets = listOf(
+    ExtraBodyPreset(
+        label = "DeepSeek: Disable Thinking",
+        json = """{"thinking":{"type":"disabled"}}""",
+    ),
+    ExtraBodyPreset(
+        label = "Reasoning: high",
+        json = """{"reasoning_effort":"high"}""",
+    ),
+    ExtraBodyPreset(
+        label = "Reasoning: max",
+        json = """{"reasoning_effort":"max"}""",
+    ),
+    ExtraBodyPreset(
+        label = "Temperature: 0.2",
+        json = """{"temperature":0.2}""",
+    ),
+    ExtraBodyPreset(
+        label = "Top P: 0.9",
+        json = """{"top_p":0.9}""",
+    ),
+)
+
+private val extraBodyJson = Json {
+    ignoreUnknownKeys = true
+    isLenient = true
+    explicitNulls = false
+    prettyPrint = true
+}
+
+private fun String.isValidExtraBodyJson(): Boolean {
+    if (isBlank()) return true
+    return runCatching { extraBodyJson.parseToJsonElement(this) as? JsonObject }
+        .getOrNull() != null
+}
+
+private fun String.mergeExtraBodyPreset(preset: String): String? {
+    val current = if (isBlank()) {
+        JsonObject(emptyMap())
+    } else {
+        runCatching { extraBodyJson.parseToJsonElement(this) as? JsonObject }
+            .getOrNull()
+            ?: return null
+    }
+    val presetObject = runCatching { extraBodyJson.parseToJsonElement(preset) as? JsonObject }
+        .getOrNull()
+        ?: return null
+
+    return extraBodyJson.encodeToString(
+        JsonObject.serializer(),
+        current.mergeWith(presetObject),
+    )
+}
+
+private fun JsonObject.mergeWith(other: JsonObject): JsonObject {
+    val merged = toMutableMap()
+    other.forEach { (key, value) ->
+        val currentValue = merged[key]
+        merged[key] = if (currentValue is JsonObject && value is JsonObject) {
+            currentValue.mergeWith(value)
+        } else {
+            value
+        }
+    }
+    return JsonObject(merged)
 }
 
 @Composable

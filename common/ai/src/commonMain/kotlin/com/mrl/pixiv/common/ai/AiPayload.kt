@@ -20,7 +20,8 @@ data class AiTextRequest(
     val model: String,
     val messages: List<AiTextMessage>,
     val maxOutputTokens: Int? = null,
-    val responseApi: Boolean = false
+    val responseApi: Boolean = false,
+    val extraBody: String = "",
 )
 
 data class AiTextResponse(
@@ -39,4 +40,3 @@ data class AiImageResponse(
     val imageUrls: List<String> = emptyList(),
     val imageBase64List: List<String> = emptyList(),
 )
-

@@ -9,6 +9,7 @@ import com.mrl.pixiv.common.ai.internal.jsonObjectOrNull
 import com.mrl.pixiv.common.ai.internal.normalizeBaseUrl
 import com.mrl.pixiv.common.ai.internal.stringOrNull
 import com.mrl.pixiv.common.ai.internal.toJsonObject
+import com.mrl.pixiv.common.ai.internal.withExtraBody
 import com.mrl.pixiv.common.data.setting.AiProvider
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -84,7 +85,13 @@ class GeminiTextClient(
                             }
                         )
                     }
-                }.toString()
+                }
+                    .withExtraBody(
+                        extraBody = request.extraBody,
+                        reservedKeys = setOf("contents", "system_instruction"),
+                        providerName = provider.name,
+                    )
+                    .toString()
             )
         }
 

@@ -113,6 +113,7 @@ class NovelViewModel(
                 addHistory()
                 loadNovelDetail(intent.novelId)
             }
+
             is NovelIntent.TranslateNovel -> translateNovel(intent.forceRefresh)
             is NovelIntent.DeleteNovelTranslation -> deleteNovelTranslation()
             is NovelIntent.ToggleDisplayOriginalText -> toggleDisplayOriginalText()
@@ -265,7 +266,7 @@ class NovelViewModel(
         launchUI {
             val file = FileKit.openFileSaver(
                 suggestedName = novel.title,
-                extension = "txt"
+                defaultExtension = "txt",
             )
             if (file != null) {
                 withIOContext {
@@ -288,7 +289,10 @@ class NovelViewModel(
             return
         }
 
-        val sourceMd5 = sourceText.toMd5Hex()
+        val sourceMd5 = buildTranslationCacheKey(
+            sourceText = sourceText,
+            extraBody = config.extraBody,
+        )
         val targetLanguageTag = resolveTargetLanguageTag()
 
         launchIO(
@@ -504,6 +508,7 @@ private fun AiTranslationConfig.normalized(): AiTranslationConfig {
         endpoint = endpoint.trim(),
         apiKey = apiKey.trim(),
         model = model.trim(),
+        extraBody = extraBody.trim(),
     )
 }
 
@@ -513,6 +518,14 @@ private fun AiTranslationConfig.isReady(): Boolean {
 
 private fun String.toMd5Hex(): String {
     return encodeToByteArray().toByteString().md5().hex()
+}
+
+private fun buildTranslationCacheKey(
+    sourceText: String,
+    extraBody: String,
+): String {
+    if (extraBody.isBlank()) return sourceText.toMd5Hex()
+    return "$sourceText\n\n[ai_extra_body]\n${extraBody.trim()}".toMd5Hex()
 }
 
 private fun List<NovelSpanData>.toProgressParagraphs(): ImmutableList<String> {

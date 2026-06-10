@@ -85,6 +85,7 @@ class NovelAiTranslationService(
                     )
                 ),
                 responseApi = config.responseApi,
+                extraBody = config.extraBody,
             )
         ).text
 

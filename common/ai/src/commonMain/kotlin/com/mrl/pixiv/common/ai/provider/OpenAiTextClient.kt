@@ -9,6 +9,7 @@ import com.mrl.pixiv.common.ai.internal.jsonObjectOrNull
 import com.mrl.pixiv.common.ai.internal.normalizeBaseUrl
 import com.mrl.pixiv.common.ai.internal.stringOrNull
 import com.mrl.pixiv.common.ai.internal.toJsonObject
+import com.mrl.pixiv.common.ai.internal.withExtraBody
 import com.mrl.pixiv.common.ai.model.OpenAiApiType
 import com.mrl.pixiv.common.data.setting.AiProvider
 import io.ktor.client.request.header
@@ -45,8 +46,21 @@ class OpenAiTextClient(
             }
             setBody(
                 when (apiType) {
-                    OpenAiApiType.CHAT_COMPLETIONS -> buildChatCompletionsBody(request).toString()
-                    OpenAiApiType.RESPONSES -> buildResponsesBody(request).toString()
+                    OpenAiApiType.CHAT_COMPLETIONS -> buildChatCompletionsBody(request)
+                        .withExtraBody(
+                            extraBody = request.extraBody,
+                            reservedKeys = setOf("model", "messages"),
+                            providerName = provider.name,
+                        )
+                        .toString()
+
+                    OpenAiApiType.RESPONSES -> buildResponsesBody(request)
+                        .withExtraBody(
+                            extraBody = request.extraBody,
+                            reservedKeys = setOf("model", "input"),
+                            providerName = provider.name,
+                        )
+                        .toString()
                 }
             )
         }
