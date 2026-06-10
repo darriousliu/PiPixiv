@@ -21,6 +21,7 @@ import androidx.core.content.getSystemService
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import co.touchlab.kermit.Logger
 import coil3.gif.AnimatedImageDecoder
+import coil3.gif.GifDecoder
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.allowRgb565
 import com.mrl.pixiv.common.activity.BaseActivity
@@ -78,7 +79,11 @@ class MainActivity : BaseActivity() {
                 imageLoaderBuilder = {
                     this.allowRgb565(getSystemService<ActivityManager>()!!.isLowRamDevice)
                         .components {
-                            add(AnimatedImageDecoder.Factory())
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                add(AnimatedImageDecoder.Factory())
+                            } else {
+                                add(GifDecoder.Factory())
+                            }
                             add(KtorNetworkFetcherFactory(imageHttpClient))
                         }
                 },
