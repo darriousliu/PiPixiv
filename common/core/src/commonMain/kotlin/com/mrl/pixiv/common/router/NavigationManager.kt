@@ -178,6 +178,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.NetworkSetting)
     }
 
+    fun navigateToBrowsingSettingScreen() {
+        backStack.navigate(route = Destination.BrowsingSetting)
+    }
+
     fun navigateToFileNameFormatScreen() {
         backStack.navigate(route = Destination.FileNameFormat)
     }

@@ -291,4 +291,13 @@
     <string name="novel_hidden">Эта новелла заблокирована</string>
     <string name="show_novel">Показать эту новеллу</string>
     <string name="block_tag_as_regex">Сопоставлять по регулярному выражению</string>
+    <string name="browsing_setting">Настройки просмотра</string>
+    <string name="preview_image_quality">Качество изображения предпросмотра</string>
+    <string name="preview_image_quality_medium">Среднее</string>
+    <string name="preview_image_quality_high">Высокое</string>
+    <string name="preview_image_quality_original">Оригинал</string>
+    <string name="auto_hide_preview_controls">Автоматически скрывать элементы предпросмотра</string>
+    <string name="auto_hide_preview_controls_desc">Скрывает кнопки и индикатор страницы через несколько секунд в области изображения на странице работы</string>
+    <string name="tap_image_to_open_full_resolution_preview">Нажатие на изображение открывает предпросмотр в полном разрешении</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">Если отключено, нажатие на изображение на странице работы не откроет полноэкранный предпросмотр оригинала</string>
 </resources>

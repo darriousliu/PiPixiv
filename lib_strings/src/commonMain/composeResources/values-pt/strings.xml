@@ -291,4 +291,13 @@
     <string name="novel_hidden">Este romance foi bloqueado</string>
     <string name="show_novel">Mostrar este romance</string>
     <string name="block_tag_as_regex">Corresponder com expressão regular</string>
+    <string name="browsing_setting">Configurações de navegação</string>
+    <string name="preview_image_quality">Qualidade da imagem de pré-visualização</string>
+    <string name="preview_image_quality_medium">Média</string>
+    <string name="preview_image_quality_high">Alta</string>
+    <string name="preview_image_quality_original">Original</string>
+    <string name="auto_hide_preview_controls">Ocultar controles de pré-visualização automaticamente</string>
+    <string name="auto_hide_preview_controls_desc">Oculta os botões e o indicador de página após alguns segundos na área de imagem da página de detalhes</string>
+    <string name="tap_image_to_open_full_resolution_preview">Tocar na imagem para abrir pré-visualização em resolução completa</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">Quando desativado, tocar em uma imagem na página de detalhes não abrirá a pré-visualização original em tela cheia</string>
 </resources>

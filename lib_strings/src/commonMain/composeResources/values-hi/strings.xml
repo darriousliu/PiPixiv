@@ -291,4 +291,13 @@
     <string name="novel_hidden">यह उपन्यास ब्लॉक कर दिया गया है</string>
     <string name="show_novel">इस उपन्यास को दिखाएँ</string>
     <string name="block_tag_as_regex">रेगुलर एक्सप्रेशन से मिलान करें</string>
+    <string name="browsing_setting">ब्राउज़िंग सेटिंग्स</string>
+    <string name="preview_image_quality">पूर्वावलोकन छवि गुणवत्ता</string>
+    <string name="preview_image_quality_medium">मध्यम</string>
+    <string name="preview_image_quality_high">उच्च</string>
+    <string name="preview_image_quality_original">मूल</string>
+    <string name="auto_hide_preview_controls">पूर्वावलोकन नियंत्रण अपने आप छिपाएं</string>
+    <string name="auto_hide_preview_controls_desc">चित्र विवरण पेज के छवि क्षेत्र में कुछ सेकंड रहने के बाद बटन और पेज संकेतक छिपाएं</string>
+    <string name="tap_image_to_open_full_resolution_preview">पूर्ण रिज़ॉल्यूशन पूर्वावलोकन खोलने के लिए छवि पर टैप करें</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">बंद होने पर, चित्र विवरण पेज पर छवि टैप करने से पूर्ण-स्क्रीन मूल पूर्वावलोकन नहीं खुलेगा</string>
 </resources>

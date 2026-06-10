@@ -291,4 +291,13 @@
     <string name="novel_hidden">這部小說已被封鎖</string>
     <string name="show_novel">顯示這部小說</string>
     <string name="block_tag_as_regex">以正則表達式比對</string>
+    <string name="browsing_setting">瀏覽設定</string>
+    <string name="preview_image_quality">預覽圖片品質</string>
+    <string name="preview_image_quality_medium">中等</string>
+    <string name="preview_image_quality_high">高</string>
+    <string name="preview_image_quality_original">原圖</string>
+    <string name="auto_hide_preview_controls">自動隱藏預覽控制項</string>
+    <string name="auto_hide_preview_controls_desc">在作品詳情頁的圖片區域停留數秒後隱藏按鈕和頁碼</string>
+    <string name="tap_image_to_open_full_resolution_preview">點擊圖片開啟全解析度預覽</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">關閉後，在作品詳情頁點擊圖片不會開啟全螢幕原圖預覽</string>
 </resources>

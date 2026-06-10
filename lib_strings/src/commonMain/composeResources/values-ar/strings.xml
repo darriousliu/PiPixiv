@@ -291,4 +291,13 @@
     <string name="novel_hidden">تم حظر هذه الرواية</string>
     <string name="show_novel">إظهار هذه الرواية</string>
     <string name="block_tag_as_regex">مطابقة باستخدام تعبير نمطي</string>
+    <string name="browsing_setting">إعدادات التصفح</string>
+    <string name="preview_image_quality">جودة صورة المعاينة</string>
+    <string name="preview_image_quality_medium">متوسطة</string>
+    <string name="preview_image_quality_high">عالية</string>
+    <string name="preview_image_quality_original">أصلية</string>
+    <string name="auto_hide_preview_controls">إخفاء عناصر تحكم المعاينة تلقائيا</string>
+    <string name="auto_hide_preview_controls_desc">إخفاء الأزرار ومؤشر الصفحة بعد البقاء في منطقة الصورة في صفحة تفاصيل العمل لبضع ثوان</string>
+    <string name="tap_image_to_open_full_resolution_preview">انقر على الصورة لفتح معاينة بالدقة الكاملة</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">عند التعطيل، لن يؤدي النقر على صورة في صفحة تفاصيل العمل إلى فتح معاينة الأصل بملء الشاشة</string>
 </resources>

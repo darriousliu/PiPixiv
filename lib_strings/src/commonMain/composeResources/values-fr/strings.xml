@@ -291,4 +291,13 @@
     <string name="novel_hidden">Ce roman est bloqué</string>
     <string name="show_novel">Afficher ce roman</string>
     <string name="block_tag_as_regex">Faire correspondre via une expression régulière</string>
+    <string name="browsing_setting">Paramètres de navigation</string>
+    <string name="preview_image_quality">Qualité de l'image d'aperçu</string>
+    <string name="preview_image_quality_medium">Moyenne</string>
+    <string name="preview_image_quality_high">Élevée</string>
+    <string name="preview_image_quality_original">Originale</string>
+    <string name="auto_hide_preview_controls">Masquer automatiquement les contrôles d'aperçu</string>
+    <string name="auto_hide_preview_controls_desc">Masque les boutons et l'indicateur de page après quelques secondes sur la zone d'image de la page de détails</string>
+    <string name="tap_image_to_open_full_resolution_preview">Toucher l'image pour ouvrir l'aperçu en pleine résolution</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">Si désactivé, toucher une image sur la page de détails n'ouvrira pas l'aperçu original en plein écran</string>
 </resources>

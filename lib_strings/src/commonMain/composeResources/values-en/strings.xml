@@ -291,4 +291,13 @@
     <string name="novel_hidden">This novel is blocked</string>
     <string name="show_novel">Show this novel</string>
     <string name="block_tag_as_regex">Match using regex</string>
+    <string name="browsing_setting">Browsing Settings</string>
+    <string name="preview_image_quality">Preview Image Quality</string>
+    <string name="preview_image_quality_medium">Medium</string>
+    <string name="preview_image_quality_high">High</string>
+    <string name="preview_image_quality_original">Original</string>
+    <string name="auto_hide_preview_controls">Auto-hide preview controls</string>
+    <string name="auto_hide_preview_controls_desc">Hide buttons and the page indicator after staying on the image area of the artwork detail page for a few seconds</string>
+    <string name="tap_image_to_open_full_resolution_preview">Tap image to open full-resolution preview</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">When disabled, tapping an image on the artwork detail page will not open the full-screen original preview</string>
 </resources>

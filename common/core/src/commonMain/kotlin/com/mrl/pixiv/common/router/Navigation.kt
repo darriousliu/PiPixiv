@@ -75,6 +75,9 @@ sealed class Destination : NavKey {
     data object NetworkSetting : Destination()
 
     @Serializable
+    data object BrowsingSetting : Destination()
+
+    @Serializable
     data object FileNameFormat : Destination()
 
     @Serializable

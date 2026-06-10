@@ -58,6 +58,7 @@ import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.report.ReportScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
+import com.mrl.pixiv.setting.BrowsingSettingScreen
 import com.mrl.pixiv.setting.FileNameFormatScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
@@ -203,6 +204,12 @@ fun Navigation3MainGraph(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
                         NetworkSettingScreen()
+                    }
+
+                    entry<Destination.BrowsingSetting>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        BrowsingSettingScreen()
                     }
 
                     // 保存格式设置

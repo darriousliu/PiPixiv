@@ -302,4 +302,13 @@
     <string name="novel_hidden">该小说已被屏蔽</string>
     <string name="show_novel">显示该小说</string>
     <string name="block_tag_as_regex">按正则表达式匹配</string>
+    <string name="browsing_setting">浏览设置</string>
+    <string name="preview_image_quality">预览图片质量</string>
+    <string name="preview_image_quality_medium">中等</string>
+    <string name="preview_image_quality_high">高</string>
+    <string name="preview_image_quality_original">原图</string>
+    <string name="auto_hide_preview_controls">自动隐藏预览控件</string>
+    <string name="auto_hide_preview_controls_desc">在作品详情页的图片区域停留几秒后隐藏按钮和页码</string>
+    <string name="tap_image_to_open_full_resolution_preview">点击打开全分辨率预览</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">关闭后，在作品详情页点击图片不会进入全屏原图预览</string>
 </resources>

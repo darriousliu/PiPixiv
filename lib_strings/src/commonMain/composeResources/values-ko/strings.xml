@@ -291,4 +291,13 @@
     <string name="novel_hidden">이 소설은 차단되었습니다</string>
     <string name="show_novel">이 소설 표시</string>
     <string name="block_tag_as_regex">정규식으로 매칭</string>
+    <string name="browsing_setting">탐색 설정</string>
+    <string name="preview_image_quality">미리보기 이미지 품질</string>
+    <string name="preview_image_quality_medium">보통</string>
+    <string name="preview_image_quality_high">높음</string>
+    <string name="preview_image_quality_original">원본</string>
+    <string name="auto_hide_preview_controls">미리보기 컨트롤 자동 숨기기</string>
+    <string name="auto_hide_preview_controls_desc">작품 상세 페이지의 이미지 영역에 몇 초 머무르면 버튼과 페이지 표시를 숨깁니다</string>
+    <string name="tap_image_to_open_full_resolution_preview">이미지를 탭해 전체 해상도 미리보기 열기</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">끄면 작품 상세 페이지에서 이미지를 탭해도 전체 화면 원본 미리보기가 열리지 않습니다</string>
 </resources>

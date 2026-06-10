@@ -291,4 +291,13 @@
     <string name="novel_hidden">Bu roman engellendi</string>
     <string name="show_novel">Bu romanı göster</string>
     <string name="block_tag_as_regex">Düzenli ifadeyle eşleştir</string>
+    <string name="browsing_setting">Göz atma ayarları</string>
+    <string name="preview_image_quality">Önizleme görüntü kalitesi</string>
+    <string name="preview_image_quality_medium">Orta</string>
+    <string name="preview_image_quality_high">Yüksek</string>
+    <string name="preview_image_quality_original">Orijinal</string>
+    <string name="auto_hide_preview_controls">Önizleme denetimlerini otomatik gizle</string>
+    <string name="auto_hide_preview_controls_desc">Eser detay sayfasındaki görüntü alanında birkaç saniye kalınca düğmeleri ve sayfa göstergesini gizler</string>
+    <string name="tap_image_to_open_full_resolution_preview">Tam çözünürlük önizlemesini açmak için görüntüye dokun</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">Kapalıyken, eser detay sayfasındaki görüntüye dokunmak tam ekran orijinal önizlemeyi açmaz</string>
 </resources>

@@ -291,4 +291,13 @@
     <string name="novel_hidden">この小説はブロックされています</string>
     <string name="show_novel">この小説を表示</string>
     <string name="block_tag_as_regex">正規表現でマッチ</string>
+    <string name="browsing_setting">閲覧設定</string>
+    <string name="preview_image_quality">プレビュー画像品質</string>
+    <string name="preview_image_quality_medium">中</string>
+    <string name="preview_image_quality_high">高</string>
+    <string name="preview_image_quality_original">オリジナル</string>
+    <string name="auto_hide_preview_controls">プレビュー操作部を自動で隠す</string>
+    <string name="auto_hide_preview_controls_desc">作品詳細ページの画像エリアに数秒留まると、ボタンとページ表示を隠します</string>
+    <string name="tap_image_to_open_full_resolution_preview">画像タップでフル解像度プレビューを開く</string>
+    <string name="tap_image_to_open_full_resolution_preview_desc">オフにすると、作品詳細ページで画像をタップしても全画面のオリジナルプレビューを開きません</string>
 </resources>
