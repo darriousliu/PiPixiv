@@ -268,6 +268,16 @@
     <string name="ai_extra_body_hint">例如 {"thinking":{"type":"disabled"}}</string>
     <string name="ai_extra_body_invalid">請輸入有效的 JSON 物件</string>
     <string name="ai_extra_body_presets">常用擴充欄位</string>
+    <string name="ai_extra_preset_deepseek_disable_thinking">DeepSeek: 關閉思考</string>
+    <string name="ai_extra_preset_reasoning_effort">推理強度: %1$s</string>
+    <string name="ai_extra_preset_deepseek_reasoning_max">DeepSeek: 推理 max</string>
+    <string name="ai_extra_preset_temperature">溫度: %1$s</string>
+    <string name="ai_extra_preset_top_p" translatable="false">Top P: %1$s</string>
+    <string name="ai_extra_preset_claude_effort">Claude: 推理強度 %1$s</string>
+    <string name="ai_extra_preset_claude_adaptive_thinking">Claude: 自適應思考</string>
+    <string name="ai_extra_preset_gemini_disable_thinking">Gemini: 關閉思考</string>
+    <string name="ai_extra_preset_gemini_dynamic_thinking">Gemini: 動態思考</string>
+    <string name="ai_extra_preset_gemini_thinking_budget">Gemini: 思考預算 %1$s</string>
     <string name="ai_model_suggestions">推薦模型</string>
     <string name="ai_translation_config_required">請先在設定中完成AI翻譯配置</string>
     <string name="ai_translation_failed">翻譯失敗: %1$s</string>

@@ -268,6 +268,16 @@
     <string name="ai_extra_body_hint">예: {"thinking":{"type":"disabled"}}</string>
     <string name="ai_extra_body_invalid">올바른 JSON 객체를 입력하세요</string>
     <string name="ai_extra_body_presets">자주 쓰는 추가 필드</string>
+    <string name="ai_extra_preset_deepseek_disable_thinking">DeepSeek: 사고 끄기</string>
+    <string name="ai_extra_preset_reasoning_effort">추론 강도: %1$s</string>
+    <string name="ai_extra_preset_deepseek_reasoning_max">DeepSeek: 추론 max</string>
+    <string name="ai_extra_preset_temperature">온도: %1$s</string>
+    <string name="ai_extra_preset_top_p" translatable="false">Top P: %1$s</string>
+    <string name="ai_extra_preset_claude_effort">Claude: 추론 강도 %1$s</string>
+    <string name="ai_extra_preset_claude_adaptive_thinking">Claude: 적응형 사고</string>
+    <string name="ai_extra_preset_gemini_disable_thinking">Gemini: 사고 끄기</string>
+    <string name="ai_extra_preset_gemini_dynamic_thinking">Gemini: 동적 사고</string>
+    <string name="ai_extra_preset_gemini_thinking_budget">Gemini: 사고 예산 %1$s</string>
     <string name="ai_model_suggestions">추천 모델</string>
     <string name="ai_translation_config_required">먼저 설정에서 AI 번역 구성을 완료해 주세요</string>
     <string name="ai_translation_failed">번역 실패: %1$s</string>

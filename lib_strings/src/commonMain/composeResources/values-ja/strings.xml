@@ -268,6 +268,16 @@
     <string name="ai_extra_body_hint">例: {"thinking":{"type":"disabled"}}</string>
     <string name="ai_extra_body_invalid">有効なJSONオブジェクトを入力してください</string>
     <string name="ai_extra_body_presets">よく使う拡張フィールド</string>
+    <string name="ai_extra_preset_deepseek_disable_thinking">DeepSeek: 思考を無効化</string>
+    <string name="ai_extra_preset_reasoning_effort">推論強度: %1$s</string>
+    <string name="ai_extra_preset_deepseek_reasoning_max">DeepSeek: 推論 max</string>
+    <string name="ai_extra_preset_temperature">温度: %1$s</string>
+    <string name="ai_extra_preset_top_p" translatable="false">Top P: %1$s</string>
+    <string name="ai_extra_preset_claude_effort">Claude: 推論強度 %1$s</string>
+    <string name="ai_extra_preset_claude_adaptive_thinking">Claude: 適応型思考</string>
+    <string name="ai_extra_preset_gemini_disable_thinking">Gemini: 思考を無効化</string>
+    <string name="ai_extra_preset_gemini_dynamic_thinking">Gemini: 動的思考</string>
+    <string name="ai_extra_preset_gemini_thinking_budget">Gemini: 思考予算 %1$s</string>
     <string name="ai_model_suggestions">推奨モデル</string>
     <string name="ai_translation_config_required">先に設定でAI翻訳の設定を完了してください</string>
     <string name="ai_translation_failed">翻訳失敗: %1$s</string>

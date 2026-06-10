@@ -50,6 +50,16 @@ import com.mrl.pixiv.strings.ai_extra_body
 import com.mrl.pixiv.strings.ai_extra_body_hint
 import com.mrl.pixiv.strings.ai_extra_body_invalid
 import com.mrl.pixiv.strings.ai_extra_body_presets
+import com.mrl.pixiv.strings.ai_extra_preset_claude_adaptive_thinking
+import com.mrl.pixiv.strings.ai_extra_preset_claude_effort
+import com.mrl.pixiv.strings.ai_extra_preset_deepseek_disable_thinking
+import com.mrl.pixiv.strings.ai_extra_preset_deepseek_reasoning_max
+import com.mrl.pixiv.strings.ai_extra_preset_gemini_disable_thinking
+import com.mrl.pixiv.strings.ai_extra_preset_gemini_dynamic_thinking
+import com.mrl.pixiv.strings.ai_extra_preset_gemini_thinking_budget
+import com.mrl.pixiv.strings.ai_extra_preset_reasoning_effort
+import com.mrl.pixiv.strings.ai_extra_preset_temperature
+import com.mrl.pixiv.strings.ai_extra_preset_top_p
 import com.mrl.pixiv.strings.ai_model
 import com.mrl.pixiv.strings.ai_model_suggestions
 import com.mrl.pixiv.strings.ai_openai_use_response_api
@@ -155,6 +165,8 @@ fun AiTranslationSettingScreen(
                     endpoint = AiTranslationConfig.defaultEndpoint(nextProvider)
                     model = AiTranslationConfig.defaultModel(nextProvider).modelId
                     apiKey = ""
+                    extraBody = ""
+                    extraBodyError = false
                 }
             )
 
@@ -232,11 +244,14 @@ fun AiTranslationSettingScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                extraBodyPresets.forEach { preset ->
+                extraBodyPresets(
+                    provider = selectedProvider,
+                    responseApi = responseApi,
+                ).forEach { preset ->
                     FilterChip(
                         selected = false,
                         onClick = {
-                            val merged = extraBody.mergeExtraBodyPreset(preset.json)
+                            val merged = extraBody.mergeExtraBodyPreset(preset)
                             if (merged == null) {
                                 extraBodyError = true
                             } else {
@@ -244,7 +259,7 @@ fun AiTranslationSettingScreen(
                                 extraBodyError = false
                             }
                         },
-                        label = { Text(text = preset.label) },
+                        label = { Text(text = preset.label()) },
                     )
                 }
             }
@@ -274,30 +289,106 @@ fun AiTranslationSettingScreen(
 }
 
 private data class ExtraBodyPreset(
-    val label: String,
+    val label: @Composable () -> String,
     val json: String,
+    val replaceKeys: Set<String> = emptySet(),
 )
 
-private val extraBodyPresets = listOf(
+private fun extraBodyPresets(
+    provider: AiProvider,
+    responseApi: Boolean,
+): List<ExtraBodyPreset> = when (provider) {
+    AiProvider.OPENAI -> openAiExtraBodyPresets(responseApi)
+    AiProvider.CLAUDE -> claudeExtraBodyPresets
+    AiProvider.GEMINI -> geminiExtraBodyPresets
+}
+
+private fun openAiExtraBodyPresets(responseApi: Boolean): List<ExtraBodyPreset> {
+    val reasoningKey = if (responseApi) "reasoning" else "reasoning_effort"
+    fun reasoningPreset(effort: String) = ExtraBodyPreset(
+        label = { stringResource(RStrings.ai_extra_preset_reasoning_effort, effort) },
+        json = if (responseApi) {
+            """{"reasoning":{"effort":"$effort"}}"""
+        } else {
+            """{"reasoning_effort":"$effort"}"""
+        },
+        replaceKeys = setOf("thinking", reasoningKey),
+    )
+
+    return listOf(
+        ExtraBodyPreset(
+            label = { stringResource(RStrings.ai_extra_preset_deepseek_disable_thinking) },
+            json = """{"thinking":{"type":"disabled"}}""",
+            replaceKeys = setOf("reasoning", "reasoning_effort", "thinking"),
+        ),
+        reasoningPreset("low"),
+        reasoningPreset("medium"),
+        reasoningPreset("high"),
+        ExtraBodyPreset(
+            label = { stringResource(RStrings.ai_extra_preset_deepseek_reasoning_max) },
+            json = """{"reasoning_effort":"max"}""",
+            replaceKeys = setOf("thinking", "reasoning", "reasoning_effort"),
+        ),
+        ExtraBodyPreset(
+            label = { stringResource(RStrings.ai_extra_preset_temperature, "0.2") },
+            json = """{"temperature":0.2}""",
+            replaceKeys = setOf("temperature"),
+        ),
+        ExtraBodyPreset(
+            label = { stringResource(RStrings.ai_extra_preset_top_p, "0.9") },
+            json = """{"top_p":0.9}""",
+            replaceKeys = setOf("top_p"),
+        ),
+    )
+}
+
+private val claudeExtraBodyPresets = listOf(
     ExtraBodyPreset(
-        label = "DeepSeek: Disable Thinking",
-        json = """{"thinking":{"type":"disabled"}}""",
+        label = { stringResource(RStrings.ai_extra_preset_claude_effort, "low") },
+        json = """{"output_config":{"effort":"low"}}""",
     ),
     ExtraBodyPreset(
-        label = "Reasoning: high",
-        json = """{"reasoning_effort":"high"}""",
+        label = { stringResource(RStrings.ai_extra_preset_claude_effort, "medium") },
+        json = """{"output_config":{"effort":"medium"}}""",
     ),
     ExtraBodyPreset(
-        label = "Reasoning: max",
-        json = """{"reasoning_effort":"max"}""",
+        label = { stringResource(RStrings.ai_extra_preset_claude_effort, "high") },
+        json = """{"output_config":{"effort":"high"}}""",
     ),
     ExtraBodyPreset(
-        label = "Temperature: 0.2",
-        json = """{"temperature":0.2}""",
+        label = { stringResource(RStrings.ai_extra_preset_claude_effort, "xhigh") },
+        json = """{"output_config":{"effort":"xhigh"}}""",
     ),
     ExtraBodyPreset(
-        label = "Top P: 0.9",
-        json = """{"top_p":0.9}""",
+        label = { stringResource(RStrings.ai_extra_preset_claude_adaptive_thinking) },
+        json = """{"thinking":{"type":"adaptive"}}""",
+        replaceKeys = setOf("thinking", "reasoning", "reasoning_effort", "generationConfig"),
+    ),
+)
+
+private val geminiExtraBodyPresets = listOf(
+    ExtraBodyPreset(
+        label = { stringResource(RStrings.ai_extra_preset_gemini_disable_thinking) },
+        json = """{"generationConfig":{"thinkingConfig":{"thinkingBudget":0}}}""",
+        replaceKeys = setOf("thinking", "reasoning", "reasoning_effort"),
+    ),
+    ExtraBodyPreset(
+        label = { stringResource(RStrings.ai_extra_preset_gemini_dynamic_thinking) },
+        json = """{"generationConfig":{"thinkingConfig":{"thinkingBudget":-1}}}""",
+        replaceKeys = setOf("thinking", "reasoning", "reasoning_effort"),
+    ),
+    ExtraBodyPreset(
+        label = { stringResource(RStrings.ai_extra_preset_gemini_thinking_budget, "1024") },
+        json = """{"generationConfig":{"thinkingConfig":{"thinkingBudget":1024}}}""",
+        replaceKeys = setOf("thinking", "reasoning", "reasoning_effort"),
+    ),
+    ExtraBodyPreset(
+        label = { stringResource(RStrings.ai_extra_preset_temperature, "0.2") },
+        json = """{"generationConfig":{"temperature":0.2}}""",
+    ),
+    ExtraBodyPreset(
+        label = { stringResource(RStrings.ai_extra_preset_top_p, "0.9") },
+        json = """{"generationConfig":{"topP":0.9}}""",
     ),
 )
 
@@ -314,7 +405,7 @@ private fun String.isValidExtraBodyJson(): Boolean {
         .getOrNull() != null
 }
 
-private fun String.mergeExtraBodyPreset(preset: String): String? {
+private fun String.mergeExtraBodyPreset(preset: ExtraBodyPreset): String? {
     val current = if (isBlank()) {
         JsonObject(emptyMap())
     } else {
@@ -322,14 +413,19 @@ private fun String.mergeExtraBodyPreset(preset: String): String? {
             .getOrNull()
             ?: return null
     }
-    val presetObject = runCatching { extraBodyJson.parseToJsonElement(preset) as? JsonObject }
+    val presetObject = runCatching { extraBodyJson.parseToJsonElement(preset.json) as? JsonObject }
         .getOrNull()
         ?: return null
 
     return extraBodyJson.encodeToString(
         JsonObject.serializer(),
-        current.mergeWith(presetObject),
+        current.withoutKeys(preset.replaceKeys).mergeWith(presetObject),
     )
+}
+
+private fun JsonObject.withoutKeys(keys: Set<String>): JsonObject {
+    if (keys.isEmpty()) return this
+    return JsonObject(filterKeys { key -> key !in keys })
 }
 
 private fun JsonObject.mergeWith(other: JsonObject): JsonObject {

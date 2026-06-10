@@ -268,6 +268,16 @@
     <string name="ai_extra_body_hint">उदाहरण: {"thinking":{"type":"disabled"}}</string>
     <string name="ai_extra_body_invalid">एक मान्य JSON ऑब्जेक्ट दर्ज करें</string>
     <string name="ai_extra_body_presets">सामान्य अतिरिक्त फ़ील्ड</string>
+    <string name="ai_extra_preset_deepseek_disable_thinking">DeepSeek: सोच बंद करें</string>
+    <string name="ai_extra_preset_reasoning_effort">रीजनिंग प्रयास: %1$s</string>
+    <string name="ai_extra_preset_deepseek_reasoning_max">DeepSeek: रीजनिंग max</string>
+    <string name="ai_extra_preset_temperature">तापमान: %1$s</string>
+    <string name="ai_extra_preset_top_p" translatable="false">Top P: %1$s</string>
+    <string name="ai_extra_preset_claude_effort">Claude: प्रयास %1$s</string>
+    <string name="ai_extra_preset_claude_adaptive_thinking">Claude: अनुकूली सोच</string>
+    <string name="ai_extra_preset_gemini_disable_thinking">Gemini: सोच बंद करें</string>
+    <string name="ai_extra_preset_gemini_dynamic_thinking">Gemini: गतिशील सोच</string>
+    <string name="ai_extra_preset_gemini_thinking_budget">Gemini: सोच बजट %1$s</string>
     <string name="ai_model_suggestions">सुझाए गए मॉडल</string>
     <string name="ai_translation_config_required">कृपया पहले सेटिंग्स में AI अनुवाद कॉन्फ़िगरेशन पूरा करें</string>
     <string name="ai_translation_failed">अनुवाद विफल: %1$s</string>

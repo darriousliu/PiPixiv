@@ -268,6 +268,16 @@
     <string name="ai_extra_body_hint">مثال: {"thinking":{"type":"disabled"}}</string>
     <string name="ai_extra_body_invalid">أدخل كائن JSON صالحًا</string>
     <string name="ai_extra_body_presets">حقول إضافية شائعة</string>
+    <string name="ai_extra_preset_deepseek_disable_thinking">DeepSeek: تعطيل التفكير</string>
+    <string name="ai_extra_preset_reasoning_effort">جهد الاستدلال: %1$s</string>
+    <string name="ai_extra_preset_deepseek_reasoning_max">DeepSeek: الاستدلال max</string>
+    <string name="ai_extra_preset_temperature">درجة الحرارة: %1$s</string>
+    <string name="ai_extra_preset_top_p" translatable="false">Top P: %1$s</string>
+    <string name="ai_extra_preset_claude_effort">Claude: الجهد %1$s</string>
+    <string name="ai_extra_preset_claude_adaptive_thinking">Claude: تفكير تكيفي</string>
+    <string name="ai_extra_preset_gemini_disable_thinking">Gemini: تعطيل التفكير</string>
+    <string name="ai_extra_preset_gemini_dynamic_thinking">Gemini: تفكير ديناميكي</string>
+    <string name="ai_extra_preset_gemini_thinking_budget">Gemini: ميزانية التفكير %1$s</string>
     <string name="ai_model_suggestions">النماذج المقترحة</string>
     <string name="ai_translation_config_required">يرجى إكمال إعدادات الترجمة بالذكاء الاصطناعي أولاً</string>
     <string name="ai_translation_failed">فشلت الترجمة: %1$s</string>

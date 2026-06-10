@@ -268,6 +268,16 @@
     <string name="ai_extra_body_hint">Example: {"thinking":{"type":"disabled"}}</string>
     <string name="ai_extra_body_invalid">Enter a valid JSON object</string>
     <string name="ai_extra_body_presets">Common extra fields</string>
+    <string name="ai_extra_preset_deepseek_disable_thinking">DeepSeek: Disable Thinking</string>
+    <string name="ai_extra_preset_reasoning_effort">Reasoning effort: %1$s</string>
+    <string name="ai_extra_preset_deepseek_reasoning_max">DeepSeek: Reasoning max</string>
+    <string name="ai_extra_preset_temperature">Temperature: %1$s</string>
+    <string name="ai_extra_preset_top_p" translatable="false">Top P: %1$s</string>
+    <string name="ai_extra_preset_claude_effort">Claude: Effort %1$s</string>
+    <string name="ai_extra_preset_claude_adaptive_thinking">Claude: Adaptive Thinking</string>
+    <string name="ai_extra_preset_gemini_disable_thinking">Gemini: Disable Thinking</string>
+    <string name="ai_extra_preset_gemini_dynamic_thinking">Gemini: Dynamic Thinking</string>
+    <string name="ai_extra_preset_gemini_thinking_budget">Gemini: Thinking budget %1$s</string>
     <string name="ai_model_suggestions">Suggested Models</string>
     <string name="ai_translation_config_required">Please complete AI translation settings first.</string>
     <string name="ai_translation_failed">Translation failed: %1$s</string>
