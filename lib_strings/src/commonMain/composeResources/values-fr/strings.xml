@@ -264,6 +264,10 @@
     <string name="ai_endpoint">Adresse du point de terminaison</string>
     <string name="ai_model">Modèle</string>
     <string name="ai_openai_use_response_api">Utiliser Response API</string>
+    <string name="ai_extra_body" translatable="false">extra_body JSON</string>
+    <string name="ai_extra_body_hint">Exemple : {"thinking":{"type":"disabled"}}</string>
+    <string name="ai_extra_body_invalid">Saisissez un objet JSON valide</string>
+    <string name="ai_extra_body_presets">Champs supplémentaires courants</string>
     <string name="ai_model_suggestions">Modèles recommandés</string>
     <string name="ai_translation_config_required">Veuillez d'abord terminer la configuration de la traduction IA dans les paramètres</string>
     <string name="ai_translation_failed">Échec de la traduction : %1$s</string>

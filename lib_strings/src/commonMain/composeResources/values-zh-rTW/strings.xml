@@ -264,6 +264,10 @@
     <string name="ai_endpoint">介面位址</string>
     <string name="ai_model">模型</string>
     <string name="ai_openai_use_response_api">使用 Response API</string>
+    <string name="ai_extra_body" translatable="false">extra_body JSON</string>
+    <string name="ai_extra_body_hint">例如 {"thinking":{"type":"disabled"}}</string>
+    <string name="ai_extra_body_invalid">請輸入有效的 JSON 物件</string>
+    <string name="ai_extra_body_presets">常用擴充欄位</string>
     <string name="ai_model_suggestions">推薦模型</string>
     <string name="ai_translation_config_required">請先在設定中完成AI翻譯配置</string>
     <string name="ai_translation_failed">翻譯失敗: %1$s</string>

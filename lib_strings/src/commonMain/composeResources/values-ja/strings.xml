@@ -264,6 +264,10 @@
     <string name="ai_endpoint">エンドポイント</string>
     <string name="ai_model">モデル</string>
     <string name="ai_openai_use_response_api">Response APIを使用</string>
+    <string name="ai_extra_body" translatable="false">extra_body JSON</string>
+    <string name="ai_extra_body_hint">例: {"thinking":{"type":"disabled"}}</string>
+    <string name="ai_extra_body_invalid">有効なJSONオブジェクトを入力してください</string>
+    <string name="ai_extra_body_presets">よく使う拡張フィールド</string>
     <string name="ai_model_suggestions">推奨モデル</string>
     <string name="ai_translation_config_required">先に設定でAI翻訳の設定を完了してください</string>
     <string name="ai_translation_failed">翻訳失敗: %1$s</string>

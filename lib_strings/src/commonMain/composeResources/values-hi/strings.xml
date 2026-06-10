@@ -264,6 +264,10 @@
     <string name="ai_endpoint">एंडपॉइंट पता</string>
     <string name="ai_model">मॉडल</string>
     <string name="ai_openai_use_response_api">Response API का उपयोग करें</string>
+    <string name="ai_extra_body" translatable="false">extra_body JSON</string>
+    <string name="ai_extra_body_hint">उदाहरण: {"thinking":{"type":"disabled"}}</string>
+    <string name="ai_extra_body_invalid">एक मान्य JSON ऑब्जेक्ट दर्ज करें</string>
+    <string name="ai_extra_body_presets">सामान्य अतिरिक्त फ़ील्ड</string>
     <string name="ai_model_suggestions">सुझाए गए मॉडल</string>
     <string name="ai_translation_config_required">कृपया पहले सेटिंग्स में AI अनुवाद कॉन्फ़िगरेशन पूरा करें</string>
     <string name="ai_translation_failed">अनुवाद विफल: %1$s</string>

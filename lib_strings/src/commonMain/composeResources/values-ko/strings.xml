@@ -264,6 +264,10 @@
     <string name="ai_endpoint">엔드포인트 주소</string>
     <string name="ai_model">모델</string>
     <string name="ai_openai_use_response_api">Response API 사용</string>
+    <string name="ai_extra_body" translatable="false">extra_body JSON</string>
+    <string name="ai_extra_body_hint">예: {"thinking":{"type":"disabled"}}</string>
+    <string name="ai_extra_body_invalid">올바른 JSON 객체를 입력하세요</string>
+    <string name="ai_extra_body_presets">자주 쓰는 추가 필드</string>
     <string name="ai_model_suggestions">추천 모델</string>
     <string name="ai_translation_config_required">먼저 설정에서 AI 번역 구성을 완료해 주세요</string>
     <string name="ai_translation_failed">번역 실패: %1$s</string>

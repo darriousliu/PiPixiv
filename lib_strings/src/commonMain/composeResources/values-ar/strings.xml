@@ -264,6 +264,10 @@
     <string name="ai_endpoint">عنوان الواجهة</string>
     <string name="ai_model">النموذج</string>
     <string name="ai_openai_use_response_api">استخدام Response API</string>
+    <string name="ai_extra_body" translatable="false">extra_body JSON</string>
+    <string name="ai_extra_body_hint">مثال: {"thinking":{"type":"disabled"}}</string>
+    <string name="ai_extra_body_invalid">أدخل كائن JSON صالحًا</string>
+    <string name="ai_extra_body_presets">حقول إضافية شائعة</string>
     <string name="ai_model_suggestions">النماذج المقترحة</string>
     <string name="ai_translation_config_required">يرجى إكمال إعدادات الترجمة بالذكاء الاصطناعي أولاً</string>
     <string name="ai_translation_failed">فشلت الترجمة: %1$s</string>

@@ -264,6 +264,10 @@
     <string name="ai_endpoint">Dirección del endpoint</string>
     <string name="ai_model">Modelo</string>
     <string name="ai_openai_use_response_api">Usar Response API</string>
+    <string name="ai_extra_body" translatable="false">extra_body JSON</string>
+    <string name="ai_extra_body_hint">Ejemplo: {"thinking":{"type":"disabled"}}</string>
+    <string name="ai_extra_body_invalid">Introduce un objeto JSON válido</string>
+    <string name="ai_extra_body_presets">Campos extra comunes</string>
     <string name="ai_model_suggestions">Modelos recomendados</string>
     <string name="ai_translation_config_required">Completa primero la configuración de traducción con IA en Ajustes</string>
     <string name="ai_translation_failed">Error de traducción: %1$s</string>

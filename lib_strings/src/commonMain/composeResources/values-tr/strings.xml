@@ -264,6 +264,10 @@
     <string name="ai_endpoint">Endpoint</string>
     <string name="ai_model">Model</string>
     <string name="ai_openai_use_response_api">Response API Kullan</string>
+    <string name="ai_extra_body" translatable="false">extra_body JSON</string>
+    <string name="ai_extra_body_hint">Örnek: {"thinking":{"type":"disabled"}}</string>
+    <string name="ai_extra_body_invalid">Geçerli bir JSON nesnesi girin</string>
+    <string name="ai_extra_body_presets">Yaygın ek alanlar</string>
     <string name="ai_model_suggestions">Önerilen Modeller</string>
     <string name="ai_translation_config_required">Lütfen önce AI çeviri ayarlarını tamamla.</string>
     <string name="ai_translation_failed">Çeviri başarısız: %1$s</string>

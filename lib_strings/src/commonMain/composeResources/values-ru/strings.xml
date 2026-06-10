@@ -264,6 +264,10 @@
     <string name="ai_endpoint">Адрес эндпоинта</string>
     <string name="ai_model">Модель</string>
     <string name="ai_openai_use_response_api">Использовать Response API</string>
+    <string name="ai_extra_body" translatable="false">extra_body JSON</string>
+    <string name="ai_extra_body_hint">Пример: {"thinking":{"type":"disabled"}}</string>
+    <string name="ai_extra_body_invalid">Введите корректный JSON-объект</string>
+    <string name="ai_extra_body_presets">Популярные дополнительные поля</string>
     <string name="ai_model_suggestions">Рекомендуемые модели</string>
     <string name="ai_translation_config_required">Сначала завершите настройку AI-перевода в настройках</string>
     <string name="ai_translation_failed">Ошибка перевода: %1$s</string>
