@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - develop
-      - feature/cmp-migrate
+      - 'feature/**'
   workflow_dispatch:
     inputs:
       name:
