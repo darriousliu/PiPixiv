@@ -44,6 +44,8 @@
     <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
     <string name="illustration_works">插畫作品</string>
+    <string name="illustrations">插畫</string>
+    <string name="manga">漫畫</string>
     <string name="illustration_count">%1$d件作品</string>
     <string name="history">歷史紀錄</string>
     <string name="collection">收藏</string>

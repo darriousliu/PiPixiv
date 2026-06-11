@@ -44,6 +44,8 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="illustration_works">Illustration Works</string>
+    <string name="illustrations">Illustrations</string>
+    <string name="manga">Manga</string>
     <string name="illustration_count">%1$d illustration works</string>
     <string name="history">History</string>
     <string name="collection">Collection</string>

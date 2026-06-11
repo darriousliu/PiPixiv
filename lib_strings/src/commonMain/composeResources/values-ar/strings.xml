@@ -44,6 +44,8 @@
     <string name="theme_light">فاتح</string>
     <string name="theme_dark">داكن</string>
     <string name="illustration_works">أعمال توضيحية</string>
+    <string name="illustrations">رسوم توضيحية</string>
+    <string name="manga">مانغا</string>
     <string name="illustration_count">%1$d عمل</string>
     <string name="history">السجل</string>
     <string name="collection">المجموعة</string>

@@ -59,6 +59,7 @@ import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Restrict
+import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
@@ -80,6 +81,7 @@ import com.mrl.pixiv.strings.ic_profile_premium
 import com.mrl.pixiv.strings.illust_and_manga_liked
 import com.mrl.pixiv.strings.illustration_count
 import com.mrl.pixiv.strings.illustration_works
+import com.mrl.pixiv.strings.manga
 import com.mrl.pixiv.strings.private_follow
 import com.mrl.pixiv.strings.report_user
 import com.mrl.pixiv.strings.user_blocked
@@ -93,6 +95,7 @@ import kotlin.math.pow
 
 private const val KEY_USER_INFO = "user_info"
 private const val KEY_USER_ILLUSTS = "user_illusts"
+private const val KEY_USER_MANGAS = "user_mangas"
 private const val KEY_USER_BOOKMARKS_ILLUSTS = "user_bookmarks_illusts"
 private const val KEY_USER_BOOKMARKS_NOVELS = "user_bookmarks_novels"
 private const val KEY_SPACE = "space"
@@ -269,6 +272,21 @@ fun ProfileDetailScreen(
                             modifier = Modifier.fillMaxWidth(),
                             onAllClick = {
                                 navigationManager.navigateToUserIllustScreen(uid)
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
+                if (state.userMangas.isNotEmpty()) {
+                    item(key = KEY_USER_MANGAS) {
+                        IllustWidget(
+                            title = stringResource(RStrings.manga),
+                            endText = stringResource(RStrings.view_all),
+                            navToPictureScreen = navigationManager::navigateToPictureScreen,
+                            illusts = state.userMangas,
+                            modifier = Modifier.fillMaxWidth(),
+                            onAllClick = {
+                                navigationManager.navigateToUserIllustScreen(uid, Type.Manga)
                             }
                         )
                         Spacer(modifier = Modifier.height(20.dp))

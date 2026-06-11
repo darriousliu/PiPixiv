@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.navigation3.runtime.NavKey
 import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.data.Type
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -103,6 +104,7 @@ sealed class Destination : NavKey {
     @Serializable
     data class UserArtwork(
         val userId: Long,
+        val initialType: Type = Type.Illust,
     ) : Destination()
 
     @Serializable

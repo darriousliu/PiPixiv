@@ -44,6 +44,8 @@
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Темная</string>
     <string name="illustration_works">Работы иллюстрации</string>
+    <string name="illustrations">Иллюстрации</string>
+    <string name="manga">Манга</string>
     <string name="illustration_count">%1$d работ</string>
     <string name="history">История</string>
     <string name="collection">Коллекция</string>

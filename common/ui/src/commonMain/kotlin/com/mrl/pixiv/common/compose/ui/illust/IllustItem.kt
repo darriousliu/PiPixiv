@@ -72,6 +72,8 @@ import com.mrl.pixiv.common.util.allowRgb565
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.strings.long_click_to_edit_favorite
+import com.mrl.pixiv.strings.manga
+import com.mrl.pixiv.strings.series
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
@@ -155,6 +157,12 @@ fun SquareIllustItem(
                 }
                 if (illust.type == Type.Ugoira) {
                     GifBadge()
+                }
+                if (illust.type == Type.Manga) {
+                    TextBadge(text = stringResource(RStrings.manga))
+                }
+                if (illust.series != null) {
+                    TextBadge(text = stringResource(RStrings.series))
                 }
                 if (illust.pageCount > 1) {
                     PageBadge(
@@ -336,6 +344,12 @@ fun RectangleIllustItem(
                 if (illust.type == Type.Ugoira) {
                     GifBadge()
                 }
+                if (illust.type == Type.Manga) {
+                    TextBadge(text = stringResource(RStrings.manga))
+                }
+                if (illust.series != null) {
+                    TextBadge(text = stringResource(RStrings.series))
+                }
                 if (illust.pageCount > 1) {
                     PageBadge(
                         pageCount = illust.pageCount,
@@ -355,6 +369,24 @@ fun RectangleIllustItem(
     }
 }
 
+
+@Composable
+private fun TextBadge(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Badge(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+        )
+    }
+}
 
 @Composable
 internal fun AIBadge(

@@ -44,6 +44,8 @@
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Escuro</string>
     <string name="illustration_works">Obras de ilustração</string>
+    <string name="illustrations">Ilustrações</string>
+    <string name="manga">Mangá</string>
     <string name="illustration_count">%1$d obras</string>
     <string name="history">Histórico</string>
     <string name="collection">Coleção</string>

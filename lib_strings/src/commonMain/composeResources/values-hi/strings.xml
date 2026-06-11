@@ -44,6 +44,8 @@
     <string name="theme_light">हल्का</string>
     <string name="theme_dark">गहरा</string>
     <string name="illustration_works">चित्रण कार्य</string>
+    <string name="illustrations">चित्रण</string>
+    <string name="manga">मंगा</string>
     <string name="illustration_count">%1$d कार्य</string>
     <string name="history">इतिहास</string>
     <string name="collection">संग्रह</string>

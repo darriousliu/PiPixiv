@@ -292,6 +292,7 @@ fun Navigation3MainGraph(
                     entry<Destination.UserArtwork> {
                         ArtworkScreen(
                             userId = it.userId,
+                            initialType = it.initialType,
                         )
                     }
                     entry<Destination.BlockSettings> {

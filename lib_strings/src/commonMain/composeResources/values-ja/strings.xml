@@ -44,6 +44,8 @@
     <string name="theme_light">ライト</string>
     <string name="theme_dark">ダーク</string>
     <string name="illustration_works">イラスト作品</string>
+    <string name="illustrations">イラスト</string>
+    <string name="manga">マンガ</string>
     <string name="illustration_count">%1$d作品</string>
     <string name="history">履歴</string>
     <string name="collection">コレクション</string>

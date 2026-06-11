@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.repository.IllustCacheRepo
 import org.koin.core.annotation.Single
 import kotlin.time.measureTime
@@ -162,8 +163,8 @@ class NavigationManager(
         backStack.addSingleTop(route = Destination.LoginOption)
     }
 
-    fun navigateToUserIllustScreen(userId: Long) {
-        backStack.navigate(route = Destination.UserArtwork(userId))
+    fun navigateToUserIllustScreen(userId: Long, initialType: Type = Type.Illust) {
+        backStack.navigate(route = Destination.UserArtwork(userId, initialType))
     }
 
     fun navigateToBlockSettings() {

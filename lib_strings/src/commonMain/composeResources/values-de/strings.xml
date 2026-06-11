@@ -44,6 +44,8 @@
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
     <string name="illustration_works">Illustrationswerke</string>
+    <string name="illustrations">Illustrationen</string>
+    <string name="manga">Manga</string>
     <string name="illustration_count">%1$d Werke</string>
     <string name="history">Verlauf</string>
     <string name="collection">Sammlung</string>

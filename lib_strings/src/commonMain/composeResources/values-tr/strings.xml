@@ -44,6 +44,8 @@
     <string name="theme_light">Açık</string>
     <string name="theme_dark">Koyu</string>
     <string name="illustration_works">İllüstrasyon Eserleri</string>
+    <string name="illustrations">İllüstrasyonlar</string>
+    <string name="manga">Manga</string>
     <string name="illustration_count">%1$d illüstrasyon eseri</string>
     <string name="history">Geçmiş</string>
     <string name="collection">Koleksiyon</string>

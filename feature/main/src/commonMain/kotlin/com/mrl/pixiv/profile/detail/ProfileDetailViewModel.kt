@@ -26,6 +26,7 @@ import org.koin.android.annotation.KoinViewModel
 data class ProfileDetailState(
     val userTotalWorks: Int = 0,
     val userIllusts: ImmutableList<Illust> = persistentListOf(),
+    val userMangas: ImmutableList<Illust> = persistentListOf(),
     val userBookmarksIllusts: ImmutableList<Illust> = persistentListOf(),
     val userBookmarksNovels: ImmutableList<Novel> = persistentListOf(),
     val userInfo: UserDetailResp = UserDetailResp(),
@@ -62,6 +63,12 @@ class ProfileDetailViewModel(
                     )
                 },
                 async {
+                    PixivRepository.getUserIllusts(
+                        userId = userId,
+                        type = Type.Manga.value,
+                    )
+                },
+                async {
                     PixivRepository.getUserBookmarksNovels(
                         restrict = Restrict.PUBLIC,
                         userId = userId
@@ -78,12 +85,14 @@ class ProfileDetailViewModel(
                 }
             )
             val userIllusts = resp[0] as UserIllustsResp
-            val userBookmarksNovels = resp[1] as UserNovelsResp
-            val userBookmarksIllusts = resp[2] as IllustsWithNextUrl
-            val userInfo = resp[3] as UserDetailResp
+            val userMangas = resp[1] as UserIllustsResp
+            val userBookmarksNovels = resp[2] as UserNovelsResp
+            val userBookmarksIllusts = resp[3] as IllustsWithNextUrl
+            val userInfo = resp[4] as UserDetailResp
             updateState {
                 copy(
                     userIllusts = userIllusts.illusts.toImmutableList(),
+                    userMangas = userMangas.illusts.toImmutableList(),
                     userBookmarksNovels = userBookmarksNovels.novels.toImmutableList(),
                     userBookmarksIllusts = userBookmarksIllusts.illusts.toImmutableList(),
                     userInfo = userInfo

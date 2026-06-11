@@ -44,6 +44,8 @@
     <string name="theme_light">라이트</string>
     <string name="theme_dark">다크</string>
     <string name="illustration_works">일러스트 작품</string>
+    <string name="illustrations">일러스트</string>
+    <string name="manga">만화</string>
     <string name="illustration_count">%1$d개 작품</string>
     <string name="history">기록</string>
     <string name="collection">컬렉션</string>
