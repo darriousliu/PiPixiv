@@ -51,6 +51,18 @@ interface PixivApi {
         @QueryMap queryMap: Map<String, String>,
     ): IllustRecommendedResp
 
+    @GET("v1/manga/recommended")
+    suspend fun getMangaRecommended(
+        @Query("filter") filter: String,
+        @Query("include_ranking_illusts") includeRankingIllusts: Boolean,
+        @Query("include_privacy_policy") includePrivacyPolicy: Boolean,
+    ): IllustRecommendedResp
+
+    @GET("v1/manga/recommended")
+    suspend fun loadMoreMangaRecommended(
+        @QueryMap queryMap: Map<String, String>,
+    ): IllustRecommendedResp
+
     @GET("v1/illust/ranking")
     suspend fun getIllustRanking(
         @Query("mode") mode: String,

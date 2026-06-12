@@ -5,16 +5,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -46,6 +51,8 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.home.components.RecommendGrid
 import com.mrl.pixiv.main.components.ViewModeToggleButton
 import com.mrl.pixiv.strings.app_name
+import com.mrl.pixiv.strings.illustrations
+import com.mrl.pixiv.strings.manga
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -59,13 +66,19 @@ fun HomeScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val lazyStaggeredGridState = viewModel.lazyStaggeredGridState
+    val mangaLazyStaggeredGridState = viewModel.mangaLazyStaggeredGridState
     val lazyListState = viewModel.lazyListState
+    val imageFeedMode = viewModel.imageFeedMode
     val scope = rememberCoroutineScope()
-    val onRefresh = viewModel::refresh
     val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
+    val onRefresh = { viewModel.refresh(appViewMode) }
     val scrollToTop = suspend {
         when (appViewMode) {
-            AppViewMode.ILLUST -> lazyStaggeredGridState.scrollToItem(0)
+            AppViewMode.ILLUST -> when (imageFeedMode) {
+                HomeImageFeedMode.Illust -> lazyStaggeredGridState.scrollToItem(0)
+                HomeImageFeedMode.Manga -> mangaLazyStaggeredGridState.scrollToItem(0)
+            }
+
             AppViewMode.NOVEL -> lazyListState.scrollToItem(0)
         }
     }
@@ -94,7 +107,11 @@ fun HomeScreen(
             Column {
                 BackToTopButton(
                     visibility = when (appViewMode) {
-                        AppViewMode.ILLUST -> lazyStaggeredGridState.canScrollBackward
+                        AppViewMode.ILLUST -> when (imageFeedMode) {
+                            HomeImageFeedMode.Illust -> lazyStaggeredGridState.canScrollBackward
+                            HomeImageFeedMode.Manga -> mangaLazyStaggeredGridState.canScrollBackward
+                        }
+
                         AppViewMode.NOVEL -> lazyListState.canScrollBackward
                     },
                     modifier = Modifier,
@@ -116,6 +133,7 @@ fun HomeScreen(
                     navigateToPictureScreen = navigationManager::navigateToPictureScreen,
                     modifier = Modifier.padding(paddingValues),
                     viewModel = viewModel,
+                    imageFeedMode = imageFeedMode,
                 )
             }
 
@@ -135,13 +153,18 @@ private fun IllustMode(
     navigateToPictureScreen: NavigateToHorizontalPictureScreen,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
+    imageFeedMode: HomeImageFeedMode = viewModel.imageFeedMode,
 ) {
-    val recommendImageList = viewModel.recommendImageList.collectAsLazyPagingItems()
-    val lazyStaggeredGridState = viewModel.lazyStaggeredGridState
-    val pullRefreshState = rememberPullToRefreshState()
-    val onRefresh = recommendImageList::refresh
-    val isRefreshing = recommendImageList.loadState.refresh is LoadState.Loading
-    val controller = remember {
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(initialPage = imageFeedMode.ordinal) {
+        HomeImageFeedMode.entries.size
+    }
+    val currentImageFeedMode = HomeImageFeedMode.entries[pagerState.currentPage]
+    val lazyStaggeredGridState = when (currentImageFeedMode) {
+        HomeImageFeedMode.Illust -> viewModel.lazyStaggeredGridState
+        HomeImageFeedMode.Manga -> viewModel.mangaLazyStaggeredGridState
+    }
+    val controller = remember(currentImageFeedMode) {
         keyboardScrollerController(lazyStaggeredGridState) {
             lazyStaggeredGridState.layoutInfo.viewportSize.height.toFloat()
         }
@@ -149,18 +172,91 @@ private fun IllustMode(
 
     KeyEventListener(controller)
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(currentImageFeedMode) {
+        viewModel.switchImageFeedMode(currentImageFeedMode)
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .fillMaxWidth(),
+    ) {
+        PrimaryTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            HomeImageFeedMode.entries.forEachIndexed { index, mode ->
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(
+                                when (mode) {
+                                    HomeImageFeedMode.Illust -> RStrings.illustrations
+                                    HomeImageFeedMode.Manga -> RStrings.manga
+                                }
+                            )
+                        )
+                    }
+                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+        ) {
+            HomeImageFeedPage(
+                mode = HomeImageFeedMode.entries[it],
+                navigateToPictureScreen = navigateToPictureScreen,
+                viewModel = viewModel,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeImageFeedPage(
+    mode: HomeImageFeedMode,
+    navigateToPictureScreen: NavigateToHorizontalPictureScreen,
+    viewModel: HomeViewModel,
+) {
+    val recommendImageList = when (mode) {
+        HomeImageFeedMode.Illust -> viewModel.recommendImageList.collectAsLazyPagingItems()
+        HomeImageFeedMode.Manga -> viewModel.recommendMangaList.collectAsLazyPagingItems()
+    }
+    val lazyStaggeredGridState = when (mode) {
+        HomeImageFeedMode.Illust -> viewModel.lazyStaggeredGridState
+        HomeImageFeedMode.Manga -> viewModel.mangaLazyStaggeredGridState
+    }
+    val pullRefreshState = rememberPullToRefreshState()
+    val isRefreshing = recommendImageList.loadState.refresh is LoadState.Loading
+
+    LaunchedEffect(mode) {
         viewModel.sideEffect.collect { sideEffect ->
             when (sideEffect) {
-                is HomeSideEffect.Refresh -> recommendImageList.refresh()
+                is HomeSideEffect.RefreshImage -> {
+                    if (sideEffect.mode == mode) {
+                        recommendImageList.refresh()
+                    }
+                }
+
+                HomeSideEffect.RefreshNovel -> Unit
             }
         }
     }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
-        onRefresh = onRefresh,
-        modifier = modifier,
+        onRefresh = recommendImageList::refresh,
+        modifier = Modifier.fillMaxSize(),
         state = pullRefreshState,
         indicator = {
             PullToRefreshDefaults.LoadingIndicator(
@@ -171,7 +267,9 @@ private fun IllustMode(
         }
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .fillMaxWidth()
         ) {
             RecommendGrid(
                 recommendImageList = recommendImageList,
@@ -208,7 +306,8 @@ private fun NovelMode(
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { sideEffect ->
             when (sideEffect) {
-                is HomeSideEffect.Refresh -> recommendNovelList.refresh()
+                is HomeSideEffect.RefreshImage -> Unit
+                HomeSideEffect.RefreshNovel -> recommendNovelList.refresh()
             }
         }
     }

@@ -68,6 +68,15 @@ object PixivRepository : KoinComponent {
     suspend fun loadMoreIllustRecommended(queryMap: Map<String, String>) =
         apiApi.loadMoreIllustRecommended(queryMap)
 
+    suspend fun getMangaRecommended(
+        filter: String,
+        includeRankingIllusts: Boolean,
+        includePrivacyPolicy: Boolean,
+    ) = apiApi.getMangaRecommended(filter, includeRankingIllusts, includePrivacyPolicy)
+
+    suspend fun loadMoreMangaRecommended(queryMap: Map<String, String>) =
+        apiApi.loadMoreMangaRecommended(queryMap)
+
     suspend fun getIllustRanking(
         mode: String,
         filter: Filter = Filter.ANDROID,
