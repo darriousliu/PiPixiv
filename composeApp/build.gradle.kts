@@ -1,5 +1,3 @@
-
-import com.mrl.pixiv.buildsrc.configureRemoveKoinMeta
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
 
@@ -76,8 +74,11 @@ kotlin {
             }
         }
     }
+}
 
-    configureRemoveKoinMeta()
+koinCompiler {
+    compileSafety = false
+    strictSafety = false
 }
 
 compose.desktop {
@@ -277,5 +278,3 @@ tasks.register("buildReleaseIpa", BuildIpaTask::class) {
     outputIpa = layout.buildDirectory.file("archives/release/PiPixiv.ipa")
     dependsOn(buildReleaseArchive)
 }
-
-

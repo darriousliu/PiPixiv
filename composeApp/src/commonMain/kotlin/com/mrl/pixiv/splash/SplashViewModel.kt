@@ -6,7 +6,7 @@ import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 expect class Intent
 

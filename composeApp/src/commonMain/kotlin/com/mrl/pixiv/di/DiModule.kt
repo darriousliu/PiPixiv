@@ -1,5 +1,5 @@
 package com.mrl.pixiv.di
 
-import org.koin.core.module.Module
+import org.koin.dsl.KoinAppDeclaration
 
-expect val allModule: List<Module>
+expect fun startApplicationKoin(appDeclaration: KoinAppDeclaration)

@@ -24,15 +24,19 @@ typealias NavigateToHorizontalPictureScreen = (
 
 @Single
 @Stable
-class NavigationManager(
-    vararg initialBackStack: Destination
-) {
-    val backStack = mutableStateListOf(*initialBackStack)
+class NavigationManager {
+    val backStack = mutableStateListOf<Destination>()
 
     val currentDestination: NavKey
         get() = backStack.last()
 
     var currentMainPage by mutableStateOf<MainPage>(MainPage.Home)
+
+    fun initialize(startDestination: Destination) {
+        if (backStack.isEmpty()) {
+            backStack.add(startDestination)
+        }
+    }
 
     private fun <T : NavKey> SnapshotStateList<T>.addSingleTop(route: T): Boolean {
         val currentIndex = indexOfFirst { it == route }

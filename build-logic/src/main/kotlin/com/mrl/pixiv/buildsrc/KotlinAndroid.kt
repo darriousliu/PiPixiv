@@ -67,7 +67,6 @@ internal fun Project.configureKotlinAndroid(
         implementation(kotlinx.findBundle("coroutines").get())
         // Koin
         implementation(libs.findBundle("koin").get())
-        ksp(libs.findLibrary("koin-ksp-compiler").get())
         // Logger
         implementation(libs.findLibrary("kermit").get())
     }

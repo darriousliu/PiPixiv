@@ -2,7 +2,6 @@ package com.mrl.pixiv.buildsrc
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
@@ -50,17 +49,6 @@ internal fun KotlinMultiplatformExtension.commonDependencies() {
         jvmMain.dependencies {
             // Coroutines
             implementation(kotlinx.findLibrary("coroutines-swing").get())
-        }
-    }
-    project.dependencies {
-        kspAndroid(libs.findLibrary("koin-ksp-compiler").get())
-        kspIos(libs.findLibrary("koin-ksp-compiler").get())
-        kspJvm(libs.findLibrary("koin-ksp-compiler").get())
-        kspCommonMainMetadata(libs.findLibrary("koin-ksp-compiler").get())
-    }
-    project.tasks.configureEach {
-        if (name.startsWith("ksp") && name != "kspCommonMainKotlinMetadata") {
-            dependsOn("kspCommonMainKotlinMetadata")
         }
     }
 }

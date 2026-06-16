@@ -18,6 +18,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import platform.CoreGraphics.CGBitmapContextCreate
 import platform.CoreGraphics.CGContextDrawImage
@@ -43,8 +44,8 @@ import kotlin.time.Duration.Companion.milliseconds
 @Single
 class IosDownloadStrategy(
     private val downloadDao: DownloadDao,
-    zipUtil: ZipUtil,
-    photoUtil: PhotoUtil
+    @Provided zipUtil: ZipUtil,
+    @Provided photoUtil: PhotoUtil
 ) : DownloadStrategy {
     private val session: NSURLSession
     private val delegate: DownloadDelegate

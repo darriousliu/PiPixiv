@@ -39,7 +39,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.serialization.json.Json
 import okio.ByteString.Companion.toByteString
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 
 @Stable
@@ -79,7 +80,7 @@ sealed class NovelIntent : ViewIntent {
 
 @KoinViewModel
 class NovelViewModel(
-    novelId: Long,
+    @InjectedParam novelId: Long,
     private val readingProgressRepository: NovelReadingProgressRepository,
     private val translationRepository: NovelTranslationRepository,
     private val aiTranslationService: NovelAiTranslationService,

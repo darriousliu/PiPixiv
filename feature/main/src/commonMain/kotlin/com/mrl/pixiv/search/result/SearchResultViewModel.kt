@@ -24,7 +24,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateRange
 import kotlinx.datetime.format
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 
 
@@ -53,9 +54,9 @@ sealed class SearchResultAction : ViewIntent {
 
 @KoinViewModel
 class SearchResultViewModel(
-    searchWords: String,
-    private val searchMode: AppViewMode,
-    private val isIdSearch: Boolean,
+    @InjectedParam searchWords: String,
+    @InjectedParam private val searchMode: AppViewMode,
+    @InjectedParam private val isIdSearch: Boolean,
 ) : BaseMviViewModel<SearchResultState, SearchResultAction>(
     initialState = SearchResultState(
         searchWords = searchWords,

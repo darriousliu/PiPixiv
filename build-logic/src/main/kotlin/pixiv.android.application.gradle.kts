@@ -4,7 +4,7 @@ import com.mrl.pixiv.buildsrc.configureKotlinAndroid
 plugins {
     id("com.android.application")
     kotlin("plugin.compose")
-    id("com.google.devtools.ksp")
+    id("io.insert-koin.compiler.plugin")
 }
 
 android {

@@ -11,11 +11,12 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.repository.paging.FollowingPagingSource
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
 class FollowingViewModel(
-    private val uid: Long,
+    @InjectedParam private val uid: Long,
 ) : BaseMviViewModel<FollowingState, FollowingAction>(
     initialState = FollowingState
 ) {

@@ -20,7 +20,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 
 @Stable
 data class ProfileDetailState(
@@ -38,7 +39,7 @@ sealed class ProfileDetailAction : ViewIntent {
 
 @KoinViewModel
 class ProfileDetailViewModel(
-    private val uid: Long?,
+    @InjectedParam private val uid: Long?,
 ) : BaseMviViewModel<ProfileDetailState, ProfileDetailAction>(
     initialState = ProfileDetailState(),
 ) {

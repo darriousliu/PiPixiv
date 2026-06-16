@@ -1,6 +1,5 @@
 import com.mrl.pixiv.buildsrc.commonDependencies
 import com.mrl.pixiv.buildsrc.configureKotlinMultiplatform
-import com.mrl.pixiv.buildsrc.configureSortKoinKspGeneration
 import com.mrl.pixiv.buildsrc.optIns
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -8,6 +7,7 @@ plugins {
     `kotlin-multiplatform`
     com.android.kotlin.multiplatform.library
     id("com.google.devtools.ksp")
+    id("io.insert-koin.compiler.plugin")
 }
 
 kotlin {
@@ -29,7 +29,6 @@ kotlin {
         }
 
         configureKotlinMultiplatform()
-        configureSortKoinKspGeneration()
     }
 
     iosArm64()
@@ -39,10 +38,6 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_25)
         }
-    }
-
-    sourceSets.commonMain {
-        kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
     }
 
     commonDependencies()

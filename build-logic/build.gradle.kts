@@ -14,4 +14,5 @@ dependencies {
     implementation(kotlinx.ksp.gradlePlugin)
     implementation(kotlinx.compose.compiler.gradlePlugin)
     implementation(composes.compose.graldePlugin)
+    implementation(libs.koin.compiler.gradlePlugin)
 }

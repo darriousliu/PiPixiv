@@ -1,8 +1,15 @@
 package com.mrl.pixiv.di
 
 import com.mrl.pixiv.AndroidAppModule
-import org.koin.ksp.generated.module
+import org.koin.core.annotation.KoinApplication
+import org.koin.dsl.KoinAppDeclaration
+import org.koin.plugin.module.dsl.startKoin
 
-actual val allModule = listOf(
-    AndroidAppModule.module,
-)
+@KoinApplication(modules = [AndroidAppModule::class])
+private class AndroidKoinApplication
+
+actual fun startApplicationKoin(appDeclaration: KoinAppDeclaration) {
+    startKoin<AndroidKoinApplication> {
+        appDeclaration()
+    }
+}

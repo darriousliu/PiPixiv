@@ -2,6 +2,7 @@ package com.mrl.pixiv.common.repository
 
 import coil3.annotation.InternalCoilApi
 import coil3.util.MimeTypeMap
+import com.mrl.pixiv.common.coroutine.withIOContext
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.io.asSink
 import kotlinx.io.buffered
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -42,7 +44,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(InternalCoilApi::class)
 class JvmDownloadStrategy(
     private val downloadDao: DownloadDao,
-    @ImageClient private val httpClient: HttpClient
+    @param:Provided @param:ImageClient private val httpClient: HttpClient
 ) : DownloadStrategy {
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -86,7 +88,11 @@ class JvmDownloadStrategy(
         }
     }
 
-    private suspend fun handleImage(entity: DownloadEntity, url: String, subFolder: String?) {
+    private suspend fun handleImage(
+        entity: DownloadEntity,
+        url: String,
+        subFolder: String?
+    ) = withIOContext {
         val (bytes, mimeType) = downloadBytes(url, entity)
 
         val type = PictureType.fromMimeType(mimeType) ?: PictureType.JPG
@@ -114,7 +120,7 @@ class JvmDownloadStrategy(
         url: String,
         illustId: Long,
         subFolder: String?
-    ) {
+    ) = withIOContext {
         val (zipBytes, _) = downloadBytes(url, entity)
 
         val tempZip = File.createTempFile("ugoira_$illustId", ".zip")

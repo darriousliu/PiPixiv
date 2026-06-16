@@ -4,7 +4,7 @@ import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 data object SettingState
 

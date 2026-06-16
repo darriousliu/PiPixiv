@@ -12,7 +12,7 @@ import com.mrl.pixiv.common.util.setAppCompatDelegateThemeMode
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.strings.copy_to_clipboard
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 data object ProfileState
 

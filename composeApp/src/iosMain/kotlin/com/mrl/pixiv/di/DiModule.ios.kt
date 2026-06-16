@@ -4,15 +4,19 @@ import com.mrl.pixiv.IosAppModule
 import com.mrl.pixiv.common.util.PhotoUtil
 import com.mrl.pixiv.common.util.ZipUtil
 import org.koin.core.KoinApplication
-import org.koin.core.module.Module
-import org.koin.core.module.dsl.viewModel
-import org.koin.dsl.bind
+import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
-import org.koin.ksp.generated.*
+import org.koin.plugin.module.dsl.startKoin
+import org.koin.core.annotation.KoinApplication as KoinApp
 
-actual val allModule = listOf(
-    IosAppModule.module,
-)
+@KoinApp(modules = [IosAppModule::class])
+private class IosKoinApplication
+
+actual fun startApplicationKoin(appDeclaration: KoinAppDeclaration) {
+    startKoin<IosKoinApplication> {
+        appDeclaration()
+    }
+}
 
 fun KoinApplication.initIOSKoin(
     di: List<Any>,
@@ -26,52 +30,3 @@ fun KoinApplication.initIOSKoin(
         }
     )
 }
-
-public val com_mrl_pixiv_IosAppModule : Module get() = module {
-    defineComMrlPixivArtworkArtworkViewModel()
-    defineComMrlPixivCollectionCollectionViewModel()
-    defineComMrlPixivCommentCommentViewModel()
-    defineComMrlPixivCommonAiInternalAiHttpClientHolder()
-    defineComMrlPixivCommonAiProviderClaudeTextClient()
-    defineComMrlPixivCommonAiProviderGeminiTextClient()
-    defineComMrlPixivCommonAiProviderOpenAiTextClient()
-    defineComMrlPixivCommonDatasourceLocalgetDatabaseBuilder()
-    defineComMrlPixivCommonDatasourceLocalprovideDatabase()
-    defineComMrlPixivCommonDatasourceLocalprovideBlockContentDao()
-    defineComMrlPixivCommonDatasourceLocalprovideDownloadDao()
-    defineComMrlPixivCommonDatasourceLocalprovideNovelReadingProgressDao()
-    defineComMrlPixivCommonDatasourceLocalprovideNovelTranslationDao()
-    defineComMrlPixivCommonNetworkapiHttpClient()
-    defineComMrlPixivCommonNetworkauthHttpClient()
-    defineComMrlPixivCommonNetworkimageHttpClient()
-    defineComMrlPixivCommonRepositoryDownloadManager()
-    defineComMrlPixivCommonRepositoryIosDownloadStrategy()
-    defineComMrlPixivCommonRepositoryNetworkFeatureImpl()
-    defineComMrlPixivCommonRepositoryNovelAiTranslationService()
-    defineComMrlPixivCommonRepositoryNovelReadingProgressRepository()
-    defineComMrlPixivCommonRepositoryNovelTranslationRepository()
-    defineComMrlPixivCommonRepositoryPagingHistoryIllustPagingSource()
-    defineComMrlPixivCommonRouterNavigationManager()
-    defineComMrlPixivFollowFollowingViewModel()
-    defineComMrlPixivHistoryHistoryViewModel()
-    defineComMrlPixivHomeHomeViewModel()
-    defineComMrlPixivLatestLatestViewModel()
-    defineComMrlPixivLoginLoginViewModel()
-    defineComMrlPixivLoginOauthOAuthLoginViewModel()
-    defineComMrlPixivNovelNovelViewModel()
-    defineComMrlPixivPicturePictureViewModel()
-    defineComMrlPixivProfileDetailProfileDetailViewModel()
-    defineComMrlPixivProfileProfileViewModel()
-    defineComMrlPixivRankingRankingViewModel()
-    defineComMrlPixivReportReportCommentViewModel()
-    defineComMrlPixivSearchPreviewSearchPreviewViewModel()
-    defineComMrlPixivSearchResultSearchResultViewModel()
-    defineComMrlPixivSearchSearchViewModel()
-    defineComMrlPixivSettingAppdataAppDataViewModel()
-    defineComMrlPixivSettingBlockBlockSettingsViewModel()
-    defineComMrlPixivSettingDownloadDownloadViewModel()
-    defineComMrlPixivSettingSettingViewModel()
-    defineComMrlPixivSplashSplashViewModel()
-    viewModel() { _ -> com.mrl.pixiv.splash.SplashViewModel()} bind(com.mrl.pixiv.common.viewmodel.BaseMviViewModel::class)
-}
-public val com.mrl.pixiv.IosAppModule.module : org.koin.core.module.Module get() = com_mrl_pixiv_IosAppModule

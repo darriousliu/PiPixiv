@@ -13,7 +13,7 @@ import com.mrl.pixiv.common.viewmodel.ViewIntent
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 
 sealed class SearchPreviewAction : ViewIntent {

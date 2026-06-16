@@ -28,7 +28,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 
 internal const val MAX_COMMENT_LENGTH = 140
 
@@ -47,8 +48,8 @@ sealed class CommentSideEffect : SideEffect {
 
 @KoinViewModel
 class CommentViewModel(
-    private val id: Long,
-    private val type: CommentType
+    @InjectedParam private val id: Long,
+    @InjectedParam private val type: CommentType
 ) : BaseMviViewModel<CommentState, ViewIntent>(
     initialState = CommentState()
 ) {

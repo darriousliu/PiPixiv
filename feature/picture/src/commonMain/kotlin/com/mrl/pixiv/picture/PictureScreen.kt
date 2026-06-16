@@ -155,6 +155,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Composable
@@ -200,6 +201,7 @@ private const val KEY_ILLUST_RELATED_TITLE = "illust_related_title"
 private const val KEY_SPACER = "spacer"
 
 @Composable
+@OptIn(ExperimentalUuidApi::class)
 internal fun PictureScreen(
     illust: Illust,
     onBack: () -> Unit,

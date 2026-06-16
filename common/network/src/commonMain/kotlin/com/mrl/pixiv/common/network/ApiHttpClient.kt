@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.network
 
+import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
@@ -9,11 +10,8 @@ import io.ktor.client.plugins.plugin
 import io.ktor.client.request.accept
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import org.koin.core.annotation.Single
 
-@Single(createdAtStart = true)
-@ApiClient
-fun apiHttpClient() = baseHttpClient.apply {
+fun apiHttpClient(): HttpClient = baseHttpClient.apply {
     plugin(HttpSend).apply {
         intercept { request ->
             NetworkUtil.addAuthHeader(request)

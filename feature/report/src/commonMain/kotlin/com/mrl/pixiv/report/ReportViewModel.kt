@@ -11,7 +11,8 @@ import com.mrl.pixiv.common.viewmodel.state
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 
 @Stable
 data class ReportCommentState(
@@ -21,8 +22,8 @@ data class ReportCommentState(
 
 @KoinViewModel
 class ReportCommentViewModel(
-    private val id: Long,
-    private val type: ReportType,
+    @InjectedParam private val id: Long,
+    @InjectedParam private val type: ReportType,
 ) : BaseMviViewModel<ReportCommentState, ViewIntent>(
     initialState = ReportCommentState()
 ) {

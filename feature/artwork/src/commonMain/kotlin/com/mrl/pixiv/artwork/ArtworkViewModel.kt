@@ -9,11 +9,12 @@ import com.mrl.pixiv.common.repository.paging.UserIllustPagingSource
 import com.mrl.pixiv.common.repository.paging.UserNovelsPagingSource
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
 class ArtworkViewModel(
-    private val userId: Long,
+    @InjectedParam private val userId: Long,
 ) : BaseMviViewModel<Any, ViewIntent>(
     initialState = Any()
 ) {

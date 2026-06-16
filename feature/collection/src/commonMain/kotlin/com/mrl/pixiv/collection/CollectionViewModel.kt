@@ -22,7 +22,8 @@ import com.mrl.pixiv.strings.uncategorized
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 
 @Stable
 data class CollectionState(
@@ -52,7 +53,7 @@ sealed class CollectionAction : ViewIntent {
 
 @KoinViewModel
 class CollectionViewModel(
-    private val uid: Long,
+    @InjectedParam private val uid: Long,
 ) : BaseMviViewModel<CollectionState, CollectionAction>(
     initialState = CollectionState(),
 ) {

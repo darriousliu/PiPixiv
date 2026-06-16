@@ -45,14 +45,14 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 import org.jetbrains.compose.resources.StringResource
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 @Stable
 data class AppDataState(
     val oldImageCount: Int = 0,
     val isMigrating: Boolean = false,
     val progress: Float = 0f,
-    @IntRange(from = 0)
+    @field:IntRange(from = 0)
     val migratedCount: Int = 0,
     val isLoading: Boolean = false,
     val loadingMessage: StringResource? = null

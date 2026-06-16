@@ -78,9 +78,11 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Composable
+@OptIn(ExperimentalUuidApi::class)
 fun SquareIllustItem(
     illust: Illust,
     isBookmarked: Boolean,
@@ -223,6 +225,7 @@ fun SquareIllustItem(
 }
 
 @Composable
+@OptIn(ExperimentalUuidApi::class)
 fun RectangleIllustItem(
     navToPictureScreen: (String, Boolean) -> Unit,
     illust: Illust,

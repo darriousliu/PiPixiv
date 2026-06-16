@@ -15,7 +15,7 @@ import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.paging.FollowNovelPagingSource
 import com.mrl.pixiv.common.repository.paging.IllustFollowingPagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
 class LatestViewModel : ViewModel() {

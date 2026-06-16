@@ -7,7 +7,7 @@ import androidx.paging.cachedIn
 import com.mrl.pixiv.common.repository.paging.HistoryIllustPagingSource
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 

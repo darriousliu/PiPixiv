@@ -77,7 +77,6 @@ import kotlinx.serialization.serializer
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import org.koin.core.parameter.parametersOf
 
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -85,8 +84,9 @@ import org.koin.core.parameter.parametersOf
 fun Navigation3MainGraph(
     startDestination: Destination,
     modifier: Modifier = Modifier,
-    navigationManager: NavigationManager = koinInject { parametersOf(arrayOf(startDestination)) }
+    navigationManager: NavigationManager = koinInject()
 ) {
+    navigationManager.initialize(startDestination)
     val toastState = rememberToasterState()
     val resultBus = remember { ResultEventBus() }
 

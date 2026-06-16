@@ -30,3 +30,7 @@ kotlin {
     }
 }
 
+koinCompiler {
+    compileSafety = false
+    strictSafety = false
+}

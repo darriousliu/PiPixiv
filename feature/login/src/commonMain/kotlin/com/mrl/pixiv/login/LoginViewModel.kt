@@ -5,7 +5,7 @@ import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 @Stable
 data class LoginState(

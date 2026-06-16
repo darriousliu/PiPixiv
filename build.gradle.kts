@@ -22,4 +22,5 @@ plugins {
     alias(libs.plugins.sentry.android) apply false
     alias(libs.plugins.sentry.kmp) apply false
     alias(libs.plugins.hotswan.compiler) apply false
+    alias(libs.plugins.koin.compiler) apply false
 }
