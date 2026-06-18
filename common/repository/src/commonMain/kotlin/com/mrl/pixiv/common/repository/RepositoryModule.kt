@@ -7,6 +7,6 @@ import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.Module
 
 @Module(includes = [CommonAiModule::class, LocalDataSourceModule::class])
-@Configuration
+@Configuration("compileSafety")
 @ComponentScan
 object RepositoryModule
