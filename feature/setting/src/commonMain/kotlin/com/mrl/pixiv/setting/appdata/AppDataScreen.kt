@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.coroutine.launchCatch
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
@@ -54,7 +55,6 @@ import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
 import io.github.vinceglb.filekit.list
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -175,7 +175,7 @@ fun AppDataScreen(
                     Text(text = stringResource(RStrings.clear_cache, viewModel.cacheDirSize))
                 },
                 modifier = Modifier.clickable {
-                    scope.launch(Dispatchers.IO) {
+                    scope.launchCatch(Dispatchers.IO) {
                         val dirSize = FileKit.cacheDir.calculateSize().adaptiveFileSize1()
                         FileKit.cacheDir.list().forEach {
                             it.deleteRecursively()
