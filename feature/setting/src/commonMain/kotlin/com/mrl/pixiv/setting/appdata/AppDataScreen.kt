@@ -36,6 +36,7 @@ import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.adaptiveFileSize1
 import com.mrl.pixiv.common.util.calculateSize
 import com.mrl.pixiv.common.util.deleteRecursively
+import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.app_data
 import com.mrl.pixiv.strings.cache_cleared
@@ -174,7 +175,7 @@ fun AppDataScreen(
                 headlineContent = {
                     Text(text = stringResource(RStrings.clear_cache, viewModel.cacheDirSize))
                 },
-                modifier = Modifier.clickable {
+                modifier = Modifier.throttleClick {
                     scope.launchCatch(Dispatchers.IO) {
                         val dirSize = FileKit.cacheDir.calculateSize().adaptiveFileSize1()
                         FileKit.cacheDir.list().forEach {
