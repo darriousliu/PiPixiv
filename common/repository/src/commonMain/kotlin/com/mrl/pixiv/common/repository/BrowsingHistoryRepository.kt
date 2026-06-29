@@ -11,7 +11,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 
@@ -24,8 +23,7 @@ class BrowsingHistoryRepository(
         ignoreUnknownKeys = true
     }
 
-    val historyEnabledFlow: Flow<Boolean> =
-        requireUserPreferenceFlow.map { it.historySettings.enabled }.distinctUntilChanged()
+    val userPreferenceFlow = SettingRepository.userPreferenceFlow
 
     suspend fun recordIllust(illust: Illust) {
         recordIllusts(listOf(illust))

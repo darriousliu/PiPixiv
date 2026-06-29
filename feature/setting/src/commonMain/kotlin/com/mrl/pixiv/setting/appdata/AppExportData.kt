@@ -11,6 +11,8 @@ import com.mrl.pixiv.common.datasource.local.entity.BlockNovelEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockTagEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockUserEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
+import com.mrl.pixiv.common.datasource.local.entity.IllustHistoryEntity
+import com.mrl.pixiv.common.datasource.local.entity.NovelHistoryEntity
 import kotlinx.serialization.Serializable
 
 // V1 - Legacy format (deprecated, kept for backward compatibility)
@@ -49,6 +51,7 @@ data class AppExportDataV3(
     val bookmarks: BookmarksData = BookmarksData(),
     val downloads: DownloadsData = DownloadsData(),
     val novelHistory: NovelHistoryData = NovelHistoryData(),
+    val browsingHistory: BrowsingHistoryData = BrowsingHistoryData(),
 )
 
 @Serializable
@@ -96,6 +99,13 @@ data class DownloadsData(
 data class NovelHistoryData(
     val userId: Long = 0L,
     val histories: List<NovelHistoryItem> = emptyList(),
+)
+
+@Serializable
+data class BrowsingHistoryData(
+    val userId: Long = 0L,
+    val illusts: List<IllustHistoryEntity> = emptyList(),
+    val novels: List<NovelHistoryEntity> = emptyList(),
 )
 
 @Serializable

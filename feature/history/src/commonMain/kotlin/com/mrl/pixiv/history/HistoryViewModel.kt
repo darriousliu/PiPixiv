@@ -11,11 +11,14 @@ import com.mrl.pixiv.common.repository.paging.HistoryNovelPagingSource
 import com.mrl.pixiv.common.repository.paging.LocalHistoryIllustPagingSource
 import com.mrl.pixiv.common.repository.paging.LocalHistoryNovelPagingSource
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
+import com.mrl.pixiv.common.repository.requireUserInfoValue
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -36,11 +39,16 @@ class HistoryViewModel(
 ) : BaseMviViewModel<HistoryState, HistoryAction>(
     initialState = HistoryState(),
 ), KoinComponent {
-    val historyEnabledFlow = browsingHistoryRepository.historyEnabledFlow
+    val userPreferenceFlow = browsingHistoryRepository.userPreferenceFlow
 
     val isPremiumFlow = requireUserInfoFlow
         .map { it.profile.isPremium }
         .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = requireUserInfoValue.profile.isPremium,
+        )
 
     val localIllustCount = browsingHistoryRepository.observeLocalIllustCount()
 

@@ -26,6 +26,15 @@ interface BrowsingHistoryDao {
     )
     suspend fun getIllusts(userId: Long, limit: Int, offset: Int): List<IllustHistoryEntity>
 
+    @Query(
+        """
+        SELECT * FROM browsing_history_illust
+        WHERE userId = :userId
+        ORDER BY viewedAtMillis DESC
+        """
+    )
+    suspend fun getAllIllusts(userId: Long): List<IllustHistoryEntity>
+
     @Query("SELECT COUNT(*) FROM browsing_history_illust WHERE userId = :userId")
     suspend fun countIllusts(userId: Long): Int
 
@@ -64,6 +73,15 @@ interface BrowsingHistoryDao {
         """
     )
     suspend fun getNovels(userId: Long, limit: Int, offset: Int): List<NovelHistoryEntity>
+
+    @Query(
+        """
+        SELECT * FROM browsing_history_novel
+        WHERE userId = :userId
+        ORDER BY viewedAtMillis DESC
+        """
+    )
+    suspend fun getAllNovels(userId: Long): List<NovelHistoryEntity>
 
     @Query("SELECT COUNT(*) FROM browsing_history_novel WHERE userId = :userId")
     suspend fun countNovels(userId: Long): Int

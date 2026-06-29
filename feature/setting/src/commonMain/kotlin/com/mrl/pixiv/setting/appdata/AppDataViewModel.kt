@@ -63,7 +63,7 @@ data class AppDataState(
 
 private const val jsonDataFile = "data.json"
 
-data class ConfirmNovelHistoryImportEffect(
+data class ConfirmHistoryImportEffect(
     val requestId: Long,
     val currentUserId: Long,
     val importUserId: Long,
@@ -80,9 +80,10 @@ class AppDataViewModel(
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
-    private var novelHistoryImportRequestId = 0L
-    private val novelHistoryImportResultFlow =
-        MutableSharedFlow<NovelHistoryImportResult>(extraBufferCapacity = 1)
+    private var historyImportRequestId = 0L
+    private val historyImportResultFlow =
+        MutableSharedFlow<HistoryImportResult>(extraBufferCapacity = 1)
+    private val historyImportConfirmCache = mutableMapOf<Long, Boolean>()
 
     var cacheDirSize by mutableStateOf(0L.adaptiveFileSize1())
 
@@ -120,6 +121,14 @@ class AppDataViewModel(
                             )
                         }
                 }
+                val browsingHistoryDeferred = async {
+                    val browsingHistoryDao = database.browsingHistoryDao()
+                    BrowsingHistoryData(
+                        userId = currentUserId,
+                        illusts = browsingHistoryDao.getAllIllusts(currentUserId),
+                        novels = browsingHistoryDao.getAllNovels(currentUserId),
+                    )
+                }
                 val blockIllustsDeferred = async { database.blockContentDao().getAllIllusts() }
                 val blockNovelsDeferred = async { database.blockContentDao().getAllNovels() }
                 val blockUsersDeferred = async { database.blockContentDao().getAllUsers() }
@@ -133,8 +142,9 @@ class AppDataViewModel(
                 val blockUsers = blockUsersDeferred.await()
                 val blockTags = blockTagsDeferred.await()
                 val blockComments = blockCommentsDeferred.await()
+                val browsingHistory = browsingHistoryDeferred.await()
 
-                val dataV2 = AppExportDataV3(
+                val dataV3 = AppExportDataV3(
                     settings = SettingsData(
                         userPreference = SettingRepository.userPreferenceFlow.value,
                     ),
@@ -163,10 +173,11 @@ class AppDataViewModel(
                         userId = currentUserId,
                         histories = novelHistories,
                     ),
+                    browsingHistory = browsingHistory,
                 )
 
 
-                val jsonString = json.encodeToString(AppExportDataV3.serializer(), dataV2)
+                val jsonString = json.encodeToString(AppExportDataV3.serializer(), dataV3)
                 val jsonFile = PlatformFile(FileKit.cacheDir, jsonDataFile)
                 jsonFile.writeString(jsonString)
 
@@ -191,14 +202,15 @@ class AppDataViewModel(
                     ?: throw Exception("No data.json in zip file")
                 val json = Json { ignoreUnknownKeys = true }
                 val rootObject = json.parseToJsonElement(jsonString).jsonObject
+                historyImportConfirmCache.clear()
 
-                // V2 has grouped top-level keys; support both old/new blocking payload in parseV2ImportData.
-                val isV2OrV3Like = "version" in rootObject ||
+                // V2/V3 have grouped top-level keys; support old/new blocking payloads.
+                val isGroupedExport = "version" in rootObject ||
                         "settings" in rootObject ||
                         "search" in rootObject ||
                         "blocking" in rootObject
 
-                if (isV2OrV3Like) {
+                if (isGroupedExport) {
                     val dataV3 = parseV3ImportData(json, rootObject)
                     importV3Data(dataV3)
                 } else {
@@ -283,6 +295,7 @@ class AppDataViewModel(
         }
 
         importNovelHistory(data.novelHistory)
+        importBrowsingHistory(data.browsingHistory)
     }
 
     private suspend fun importV1Data(data: AppExportData) {
@@ -320,7 +333,7 @@ class AppDataViewModel(
 
         val currentUserId = requireUserInfoValue.user.id
         if (data.userId > 0L && data.userId != currentUserId) {
-            val confirmed = requestNovelHistoryImportConfirm(
+            val confirmed = requestHistoryImportConfirm(
                 currentUserId = currentUserId,
                 importUserId = data.userId
             )
@@ -341,28 +354,61 @@ class AppDataViewModel(
         )
     }
 
-    private suspend fun requestNovelHistoryImportConfirm(
+    private suspend fun importBrowsingHistory(data: BrowsingHistoryData) {
+        if (data.illusts.isEmpty() && data.novels.isEmpty()) return
+
+        val currentUserId = requireUserInfoValue.user.id
+        if (data.userId > 0L && data.userId != currentUserId) {
+            val confirmed = requestHistoryImportConfirm(
+                currentUserId = currentUserId,
+                importUserId = data.userId
+            )
+            if (!confirmed) return
+        }
+
+        val dao = database.browsingHistoryDao()
+        val illusts = data.illusts
+            .map { it.copy(userId = currentUserId) }
+            .sortedByDescending { it.viewedAtMillis }
+            .distinctBy { it.illustId }
+        val novels = data.novels
+            .map { it.copy(userId = currentUserId) }
+            .sortedByDescending { it.viewedAtMillis }
+            .distinctBy { it.novelId }
+
+        if (illusts.isNotEmpty()) {
+            dao.upsertIllusts(illusts)
+        }
+        if (novels.isNotEmpty()) {
+            dao.upsertNovels(novels)
+        }
+    }
+
+    private suspend fun requestHistoryImportConfirm(
         currentUserId: Long,
         importUserId: Long,
     ): Boolean {
-        novelHistoryImportRequestId += 1
-        val requestId = novelHistoryImportRequestId
+        historyImportConfirmCache[importUserId]?.let { return it }
+
+        historyImportRequestId += 1
+        val requestId = historyImportRequestId
         sendEffect(
-            ConfirmNovelHistoryImportEffect(
+            ConfirmHistoryImportEffect(
                 requestId = requestId,
                 currentUserId = currentUserId,
                 importUserId = importUserId
             )
         )
-        return novelHistoryImportResultFlow
+        return historyImportResultFlow
             .filter { it.requestId == requestId }
             .map { it.confirmed }
             .first()
+            .also { historyImportConfirmCache[importUserId] = it }
     }
 
-    fun onNovelHistoryImportConfirm(requestId: Long, confirmed: Boolean) {
-        novelHistoryImportResultFlow.tryEmit(
-            NovelHistoryImportResult(
+    fun onHistoryImportConfirm(requestId: Long, confirmed: Boolean) {
+        historyImportResultFlow.tryEmit(
+            HistoryImportResult(
                 requestId = requestId,
                 confirmed = confirmed
             )
@@ -397,7 +443,7 @@ class AppDataViewModel(
     }
 }
 
-private data class NovelHistoryImportResult(
+private data class HistoryImportResult(
     val requestId: Long,
     val confirmed: Boolean
 )

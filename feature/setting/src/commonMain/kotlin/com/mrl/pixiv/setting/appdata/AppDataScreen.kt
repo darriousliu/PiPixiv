@@ -37,9 +37,9 @@ import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.clear_cache
 import com.mrl.pixiv.strings.confirm
 import com.mrl.pixiv.strings.export_data
+import com.mrl.pixiv.strings.history_import_user_mismatch_desc
+import com.mrl.pixiv.strings.history_import_user_mismatch_title
 import com.mrl.pixiv.strings.import_data
-import com.mrl.pixiv.strings.novel_history_import_user_mismatch_desc
-import com.mrl.pixiv.strings.novel_history_import_user_mismatch_title
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
@@ -53,7 +53,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
 
-private data class NovelHistoryImportDialogData(
+private data class HistoryImportDialogData(
     val requestId: Long,
     val currentUserId: Long,
     val importUserId: Long,
@@ -66,12 +66,12 @@ fun AppDataScreen(
     viewModel: AppDataViewModel = koinViewModel(),
 ) {
     val state = viewModel.asState()
-    var dialogData by remember { mutableStateOf<NovelHistoryImportDialogData?>(null) }
+    var dialogData by remember { mutableStateOf<HistoryImportDialogData?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { effect ->
-            if (effect is ConfirmNovelHistoryImportEffect) {
-                dialogData = NovelHistoryImportDialogData(
+            if (effect is ConfirmHistoryImportEffect) {
+                dialogData = HistoryImportDialogData(
                     requestId = effect.requestId,
                     currentUserId = effect.currentUserId,
                     importUserId = effect.importUserId,
@@ -176,16 +176,16 @@ fun AppDataScreen(
     dialogData?.let { data ->
         AlertDialog(
             onDismissRequest = {
-                viewModel.onNovelHistoryImportConfirm(data.requestId, false)
+                viewModel.onHistoryImportConfirm(data.requestId, false)
                 dialogData = null
             },
             title = {
-                Text(text = stringResource(RStrings.novel_history_import_user_mismatch_title))
+                Text(text = stringResource(RStrings.history_import_user_mismatch_title))
             },
             text = {
                 Text(
                     text = stringResource(
-                        RStrings.novel_history_import_user_mismatch_desc,
+                        RStrings.history_import_user_mismatch_desc,
                         data.currentUserId,
                         data.importUserId
                     )
@@ -194,7 +194,7 @@ fun AppDataScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.onNovelHistoryImportConfirm(data.requestId, true)
+                        viewModel.onHistoryImportConfirm(data.requestId, true)
                         dialogData = null
                     }
                 ) {
@@ -204,7 +204,7 @@ fun AppDataScreen(
             dismissButton = {
                 TextButton(
                     onClick = {
-                        viewModel.onNovelHistoryImportConfirm(data.requestId, false)
+                        viewModel.onHistoryImportConfirm(data.requestId, false)
                         dialogData = null
                     }
                 ) {

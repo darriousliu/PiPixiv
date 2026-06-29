@@ -68,6 +68,7 @@ import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.kts.itemIndexKey
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -99,8 +100,8 @@ fun HistoryScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
-    val isPremium by viewModel.isPremiumFlow.collectAsStateWithLifecycle(false)
-    val historyEnabled by viewModel.historyEnabledFlow.collectAsStateWithLifecycle(true)
+    val isPremium by viewModel.isPremiumFlow.collectAsStateWithLifecycle()
+    val historyEnabled by viewModel.userPreferenceFlow.collectAsStateWithLifecycle { historySettings.enabled }
     val localIllustCount by viewModel.localIllustCount.collectAsStateWithLifecycle(0)
     val localNovelCount by viewModel.localNovelCount.collectAsStateWithLifecycle(0)
     var searchValue by remember { mutableStateOf(TextFieldValue(state.currentSearch)) }
@@ -109,6 +110,7 @@ fun HistoryScreen(
         if (isPremium) listOf(HistorySource.Local, HistorySource.Cloud) else listOf(HistorySource.Local)
     }
     val pagerState = rememberPagerState { sources.size }
+    val selectedTabIndex = pagerState.currentPage.coerceIn(0, sources.lastIndex)
 
     LaunchedEffect(sources.size) {
         if (pagerState.currentPage >= sources.size) {
@@ -128,10 +130,10 @@ fun HistoryScreen(
                     },
                     onBack = { navigationManager.popBackStack() }
                 )
-                PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
+                PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
                     sources.forEachIndexed { index, source ->
                         Tab(
-                            selected = pagerState.currentPage == index,
+                            selected = selectedTabIndex == index,
                             onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                             text = {
                                 Text(
@@ -160,7 +162,7 @@ fun HistoryScreen(
             state = pagerState,
             modifier = Modifier.fillMaxSize().padding(paddingValues),
         ) { page ->
-            when (sources[page]) {
+            when (sources.getOrElse(page) { sources.last() }) {
                 HistorySource.Local -> {
                     when (state.mode) {
                         AppViewMode.ILLUST -> {
