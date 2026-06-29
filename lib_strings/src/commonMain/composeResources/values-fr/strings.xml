@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">Masque les boutons et l'indicateur de page après quelques secondes sur la zone d'image de la page de détails</string>
     <string name="tap_image_to_open_full_resolution_preview">Toucher l'image pour ouvrir l'aperçu en pleine résolution</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">Si désactivé, toucher une image sur la page de détails n'ouvrira pas l'aperçu original en plein écran</string>
+    <string name="history_setting">Paramètres de l'historique</string>
+    <string name="enable_history">Activer l'historique</string>
+    <string name="enable_history_desc">Si désactivé, les vues d'illustrations et de romans ne seront pas enregistrées</string>
+    <string name="history_auto_clean">Nettoyer automatiquement les anciens enregistrements</string>
+    <string name="history_auto_clean_desc">Supprime les plus anciens enregistrements locaux lorsque la limite est atteinte</string>
+    <string name="history_unlimited">Aucune limite d'historique local</string>
+    <string name="history_unlimited_desc">Si désactivé, la limite ci-dessous est utilisée</string>
+    <string name="history_max_entries">Limite d'historique local</string>
+    <string name="history_max_entries_desc">Plage %1$d - %2$d</string>
+    <string name="clear_local_history">Effacer l'historique local</string>
+    <string name="clear_local_history_desc">Supprime l'historique local des illustrations et romans du compte actuel</string>
+    <string name="local_history_cleared">Historique local effacé</string>
+    <string name="local_history">Local</string>
+    <string name="cloud_history">Cloud</string>
+    <string name="history_disabled_empty_title">L'historique est désactivé</string>
+    <string name="history_disabled_empty_desc">Activez l'historique pour enregistrer localement les illustrations et romans consultés</string>
+    <string name="enable_history_now">Activer l'historique</string>
+    <string name="no_history_records">Aucun historique pour le moment</string>
 </resources>

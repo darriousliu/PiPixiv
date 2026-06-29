@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">Eser detay sayfasındaki görüntü alanında birkaç saniye kalınca düğmeleri ve sayfa göstergesini gizler</string>
     <string name="tap_image_to_open_full_resolution_preview">Tam çözünürlük önizlemesini açmak için görüntüye dokun</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">Kapalıyken, eser detay sayfasındaki görüntüye dokunmak tam ekran orijinal önizlemeyi açmaz</string>
+    <string name="history_setting">Geçmiş ayarları</string>
+    <string name="enable_history">Geçmişi etkinleştir</string>
+    <string name="enable_history_desc">Kapalıyken illüstrasyon ve roman görüntülemeleri kaydedilmez</string>
+    <string name="history_auto_clean">Eski kayıtları otomatik temizle</string>
+    <string name="history_auto_clean_desc">Sınıra ulaşıldığında en eski yerel kayıtları siler</string>
+    <string name="history_unlimited">Yerel geçmiş sınırı yok</string>
+    <string name="history_unlimited_desc">Kapalıyken aşağıdaki sınır kullanılır</string>
+    <string name="history_max_entries">Yerel geçmiş sınırı</string>
+    <string name="history_max_entries_desc">Aralık %1$d - %2$d</string>
+    <string name="clear_local_history">Yerel geçmişi temizle</string>
+    <string name="clear_local_history_desc">Geçerli hesabın yerel illüstrasyon ve roman geçmişini siler</string>
+    <string name="local_history_cleared">Yerel geçmiş temizlendi</string>
+    <string name="local_history">Yerel</string>
+    <string name="cloud_history">Bulut</string>
+    <string name="history_disabled_empty_title">Geçmiş devre dışı</string>
+    <string name="history_disabled_empty_desc">Görüntülenen illüstrasyonları ve romanları yerel olarak kaydetmek için geçmişi açın</string>
+    <string name="enable_history_now">Geçmişi aç</string>
+    <string name="no_history_records">Henüz geçmiş yok</string>
 </resources>

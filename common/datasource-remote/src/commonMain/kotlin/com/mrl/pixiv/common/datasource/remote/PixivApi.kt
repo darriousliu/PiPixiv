@@ -226,6 +226,14 @@ interface PixivApi {
         @QueryMap queryMap: Map<String, String>,
     ): IllustsWithNextUrl
 
+    @GET("v1/user/browsing-history/novels")
+    suspend fun getUserBrowsingHistoryNovels(): UserNovelsResp
+
+    @GET("v1/user/browsing-history/novels")
+    suspend fun loadMoreUserBrowsingHistoryNovels(
+        @QueryMap queryMap: Map<String, String>,
+    ): UserNovelsResp
+
     @GET("v1/user/bookmark-tags/illust")
     suspend fun getUserBookmarkTagsIllust(
         @Query("user_id") userId: Long,

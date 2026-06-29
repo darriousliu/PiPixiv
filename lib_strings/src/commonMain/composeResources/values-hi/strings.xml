@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">चित्र विवरण पेज के छवि क्षेत्र में कुछ सेकंड रहने के बाद बटन और पेज संकेतक छिपाएं</string>
     <string name="tap_image_to_open_full_resolution_preview">पूर्ण रिज़ॉल्यूशन पूर्वावलोकन खोलने के लिए छवि पर टैप करें</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">बंद होने पर, चित्र विवरण पेज पर छवि टैप करने से पूर्ण-स्क्रीन मूल पूर्वावलोकन नहीं खुलेगा</string>
+    <string name="history_setting">इतिहास सेटिंग्स</string>
+    <string name="enable_history">इतिहास चालू करें</string>
+    <string name="enable_history_desc">बंद होने पर, चित्र और उपन्यास देखने का इतिहास रिकॉर्ड नहीं होगा</string>
+    <string name="history_auto_clean">पुराने रिकॉर्ड अपने आप साफ करें</string>
+    <string name="history_auto_clean_desc">सीमा पूरी होने पर सबसे पुराने स्थानीय रिकॉर्ड हटाएं</string>
+    <string name="history_unlimited">स्थानीय इतिहास की कोई सीमा नहीं</string>
+    <string name="history_unlimited_desc">बंद होने पर नीचे दी गई सीमा उपयोग होगी</string>
+    <string name="history_max_entries">स्थानीय इतिहास सीमा</string>
+    <string name="history_max_entries_desc">सीमा %1$d - %2$d</string>
+    <string name="clear_local_history">स्थानीय इतिहास साफ करें</string>
+    <string name="clear_local_history_desc">वर्तमान खाते का स्थानीय चित्र और उपन्यास इतिहास हटाएं</string>
+    <string name="local_history_cleared">स्थानीय इतिहास साफ हो गया</string>
+    <string name="local_history">स्थानीय</string>
+    <string name="cloud_history">क्लाउड</string>
+    <string name="history_disabled_empty_title">इतिहास बंद है</string>
+    <string name="history_disabled_empty_desc">देखे गए चित्र और उपन्यास स्थानीय रूप से सहेजने के लिए इतिहास चालू करें</string>
+    <string name="enable_history_now">इतिहास चालू करें</string>
+    <string name="no_history_records">अभी कोई इतिहास नहीं</string>
 </resources>

@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">作品詳細ページの画像エリアに数秒留まると、ボタンとページ表示を隠します</string>
     <string name="tap_image_to_open_full_resolution_preview">画像タップでフル解像度プレビューを開く</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">オフにすると、作品詳細ページで画像をタップしても全画面のオリジナルプレビューを開きません</string>
+    <string name="history_setting">履歴設定</string>
+    <string name="enable_history">履歴を有効にする</string>
+    <string name="enable_history_desc">無効にすると、イラストや小説の閲覧履歴を記録しません</string>
+    <string name="history_auto_clean">古い履歴を自動削除</string>
+    <string name="history_auto_clean_desc">上限に達したら最も古いローカル履歴を削除します</string>
+    <string name="history_unlimited">ローカル履歴を無制限にする</string>
+    <string name="history_unlimited_desc">無効にすると下の上限を使用します</string>
+    <string name="history_max_entries">ローカル履歴の上限</string>
+    <string name="history_max_entries_desc">範囲 %1$d - %2$d</string>
+    <string name="clear_local_history">ローカル履歴を消去</string>
+    <string name="clear_local_history_desc">現在のアカウントのローカルイラスト履歴と小説履歴を削除します</string>
+    <string name="local_history_cleared">ローカル履歴を消去しました</string>
+    <string name="local_history">ローカル</string>
+    <string name="cloud_history">クラウド</string>
+    <string name="history_disabled_empty_title">履歴は無効です</string>
+    <string name="history_disabled_empty_desc">有効にすると閲覧したイラストと小説をローカルに保存します</string>
+    <string name="enable_history_now">履歴を有効にする</string>
+    <string name="no_history_records">履歴はまだありません</string>
 </resources>

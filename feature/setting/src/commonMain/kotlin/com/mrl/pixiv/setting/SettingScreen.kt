@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.NetworkWifi
 import androidx.compose.material.icons.rounded.Save
@@ -60,6 +61,7 @@ import com.mrl.pixiv.strings.default_private_bookmark
 import com.mrl.pixiv.strings.download_single_folder_by_user_desc
 import com.mrl.pixiv.strings.download_single_folder_by_user_title
 import com.mrl.pixiv.strings.file_name_format_title
+import com.mrl.pixiv.strings.history_setting
 import com.mrl.pixiv.strings.label_default
 import com.mrl.pixiv.strings.network_setting
 import com.mrl.pixiv.strings.r18
@@ -75,6 +77,7 @@ import org.koin.compose.koinInject
 const val KEY_LANGUAGE = "language"
 const val KEY_NETWORK_SETTING = "network_setting"
 const val KEY_BROWSING_SETTING = "browsing_setting"
+const val KEY_HISTORY_SETTING = "history_setting"
 const val KEY_AI_TRANSLATION_SETTING = "ai_translation_setting"
 const val KEY_DEFAULT_OPEN_LINK = "default_open_link"
 const val KEY_DIVIDER_1 = "divider_1"
@@ -213,6 +216,30 @@ fun SettingScreen(
                         },
                     leadingContent = {
                         Icon(imageVector = Icons.Rounded.Image, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+            item(key = KEY_HISTORY_SETTING) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RStrings.history_setting),
+                        )
+                    },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            navigationManager.navigateToHistorySettingScreen()
+                        },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.History, contentDescription = null)
                     },
                     trailingContent = {
                         Icon(

@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">在作品詳情頁的圖片區域停留數秒後隱藏按鈕和頁碼</string>
     <string name="tap_image_to_open_full_resolution_preview">點擊圖片開啟全解析度預覽</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">關閉後，在作品詳情頁點擊圖片不會開啟全螢幕原圖預覽</string>
+    <string name="history_setting">歷史記錄設定</string>
+    <string name="enable_history">啟用歷史記錄</string>
+    <string name="enable_history_desc">關閉後不會記錄插畫或小說瀏覽歷史</string>
+    <string name="history_auto_clean">自動清理舊記錄</string>
+    <string name="history_auto_clean_desc">超過上限時刪除最早的本地記錄</string>
+    <string name="history_unlimited">不限制本地記錄數量</string>
+    <string name="history_unlimited_desc">關閉後使用下方數量上限</string>
+    <string name="history_max_entries">本地記錄上限</string>
+    <string name="history_max_entries_desc">範圍 %1$d - %2$d</string>
+    <string name="clear_local_history">清除本地歷史記錄</string>
+    <string name="clear_local_history_desc">刪除目前帳號的本地插畫和小說歷史</string>
+    <string name="local_history_cleared">本地歷史已清除</string>
+    <string name="local_history">本地</string>
+    <string name="cloud_history">雲端</string>
+    <string name="history_disabled_empty_title">歷史記錄已關閉</string>
+    <string name="history_disabled_empty_desc">開啟後會在本地保存瀏覽過的插畫和小說</string>
+    <string name="enable_history_now">去開啟</string>
+    <string name="no_history_records">暫無歷史記錄</string>
 </resources>

@@ -16,6 +16,7 @@ import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
+import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.repository.DownloadManager
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
@@ -117,6 +118,7 @@ class PictureViewModel(
     illust: Illust?,
     illustId: Long?,
     private val zipUtil: ZipUtil,
+    private val browsingHistoryRepository: BrowsingHistoryRepository,
 ) : BaseMviViewModel<PictureState, PictureAction>(
     initialState = PictureState(illust = illust),
 ), KoinComponent {
@@ -449,7 +451,7 @@ class PictureViewModel(
 
     fun addHistory() {
         launchProcess(Dispatchers.IO) {
-            PixivRepository.addIllustBrowsingHistory(state.illust?.id ?: return@launchProcess)
+            browsingHistoryRepository.recordIllust(state.illust ?: return@launchProcess)
         }
     }
 

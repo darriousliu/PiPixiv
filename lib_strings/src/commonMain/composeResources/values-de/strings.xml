@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">Blendet Schaltflächen und Seitenanzeige aus, nachdem der Bildbereich der Werkdetailseite einige Sekunden angezeigt wurde</string>
     <string name="tap_image_to_open_full_resolution_preview">Bild antippen, um Vollauflösung zu öffnen</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">Wenn deaktiviert, öffnet Antippen eines Bildes auf der Werkdetailseite keine Vollbildvorschau des Originals</string>
+    <string name="history_setting">Verlaufseinstellungen</string>
+    <string name="enable_history">Verlauf aktivieren</string>
+    <string name="enable_history_desc">Wenn deaktiviert, werden Illustrationen und Romane nicht im Verlauf gespeichert</string>
+    <string name="history_auto_clean">Alte Einträge automatisch bereinigen</string>
+    <string name="history_auto_clean_desc">Entfernt die ältesten lokalen Einträge, wenn das Limit erreicht ist</string>
+    <string name="history_unlimited">Kein lokales Verlaufslimit</string>
+    <string name="history_unlimited_desc">Wenn deaktiviert, wird das unten stehende Limit verwendet</string>
+    <string name="history_max_entries">Lokales Verlaufslimit</string>
+    <string name="history_max_entries_desc">Bereich %1$d - %2$d</string>
+    <string name="clear_local_history">Lokalen Verlauf löschen</string>
+    <string name="clear_local_history_desc">Löscht den lokalen Illustrations- und Romanverlauf des aktuellen Kontos</string>
+    <string name="local_history_cleared">Lokaler Verlauf gelöscht</string>
+    <string name="local_history">Lokal</string>
+    <string name="cloud_history">Cloud</string>
+    <string name="history_disabled_empty_title">Verlauf ist deaktiviert</string>
+    <string name="history_disabled_empty_desc">Aktiviere den Verlauf, um angesehene Illustrationen und Romane lokal zu speichern</string>
+    <string name="enable_history_now">Verlauf aktivieren</string>
+    <string name="no_history_records">Noch kein Verlauf</string>
 </resources>

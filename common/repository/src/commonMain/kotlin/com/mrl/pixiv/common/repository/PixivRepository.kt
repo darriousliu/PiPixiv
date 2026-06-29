@@ -186,6 +186,11 @@ object PixivRepository : KoinComponent {
     suspend fun loadMoreUserBrowsingHistoryIllusts(queryMap: Map<String, String>) =
         apiApi.loadMoreUserBrowsingHistoryIllusts(queryMap)
 
+    suspend fun getUserBrowsingHistoryNovels() = apiApi.getUserBrowsingHistoryNovels()
+
+    suspend fun loadMoreUserBrowsingHistoryNovels(queryMap: Map<String, String>) =
+        apiApi.loadMoreUserBrowsingHistoryNovels(queryMap)
+
     suspend fun getUserBookmarkTagsIllust(
         userId: Long,
         restrict: String

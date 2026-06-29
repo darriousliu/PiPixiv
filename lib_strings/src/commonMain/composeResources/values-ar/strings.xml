@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">إخفاء الأزرار ومؤشر الصفحة بعد البقاء في منطقة الصورة في صفحة تفاصيل العمل لبضع ثوان</string>
     <string name="tap_image_to_open_full_resolution_preview">انقر على الصورة لفتح معاينة بالدقة الكاملة</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">عند التعطيل، لن يؤدي النقر على صورة في صفحة تفاصيل العمل إلى فتح معاينة الأصل بملء الشاشة</string>
+    <string name="history_setting">إعدادات السجل</string>
+    <string name="enable_history">تفعيل السجل</string>
+    <string name="enable_history_desc">عند التعطيل، لن يتم تسجيل مشاهدات الرسوم أو الروايات</string>
+    <string name="history_auto_clean">تنظيف السجلات القديمة تلقائيا</string>
+    <string name="history_auto_clean_desc">يحذف أقدم السجلات المحلية عند بلوغ الحد</string>
+    <string name="history_unlimited">بلا حد للسجل المحلي</string>
+    <string name="history_unlimited_desc">عند التعطيل، يتم استخدام الحد أدناه</string>
+    <string name="history_max_entries">حد السجل المحلي</string>
+    <string name="history_max_entries_desc">النطاق %1$d - %2$d</string>
+    <string name="clear_local_history">مسح السجل المحلي</string>
+    <string name="clear_local_history_desc">حذف سجل الرسوم والروايات المحلي للحساب الحالي</string>
+    <string name="local_history_cleared">تم مسح السجل المحلي</string>
+    <string name="local_history">محلي</string>
+    <string name="cloud_history">سحابي</string>
+    <string name="history_disabled_empty_title">السجل معطل</string>
+    <string name="history_disabled_empty_desc">فعّل السجل لحفظ الرسوم والروايات التي شاهدتها محليا</string>
+    <string name="enable_history_now">تفعيل السجل</string>
+    <string name="no_history_records">لا يوجد سجل بعد</string>
 </resources>

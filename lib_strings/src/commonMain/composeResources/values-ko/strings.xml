@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">작품 상세 페이지의 이미지 영역에 몇 초 머무르면 버튼과 페이지 표시를 숨깁니다</string>
     <string name="tap_image_to_open_full_resolution_preview">이미지를 탭해 전체 해상도 미리보기 열기</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">끄면 작품 상세 페이지에서 이미지를 탭해도 전체 화면 원본 미리보기가 열리지 않습니다</string>
+    <string name="history_setting">기록 설정</string>
+    <string name="enable_history">기록 사용</string>
+    <string name="enable_history_desc">끄면 일러스트와 소설 열람 기록을 저장하지 않습니다</string>
+    <string name="history_auto_clean">오래된 기록 자동 정리</string>
+    <string name="history_auto_clean_desc">한도에 도달하면 가장 오래된 로컬 기록을 삭제합니다</string>
+    <string name="history_unlimited">로컬 기록 수 제한 없음</string>
+    <string name="history_unlimited_desc">끄면 아래 한도를 사용합니다</string>
+    <string name="history_max_entries">로컬 기록 한도</string>
+    <string name="history_max_entries_desc">범위 %1$d - %2$d</string>
+    <string name="clear_local_history">로컬 기록 지우기</string>
+    <string name="clear_local_history_desc">현재 계정의 로컬 일러스트 및 소설 기록을 삭제합니다</string>
+    <string name="local_history_cleared">로컬 기록이 삭제되었습니다</string>
+    <string name="local_history">로컬</string>
+    <string name="cloud_history">클라우드</string>
+    <string name="history_disabled_empty_title">기록이 꺼져 있습니다</string>
+    <string name="history_disabled_empty_desc">켜면 본 일러스트와 소설을 로컬에 저장합니다</string>
+    <string name="enable_history_now">기록 켜기</string>
+    <string name="no_history_records">아직 기록이 없습니다</string>
 </resources>

@@ -183,6 +183,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.BrowsingSetting)
     }
 
+    fun navigateToHistorySettingScreen() {
+        backStack.navigate(route = Destination.HistorySetting)
+    }
+
     fun navigateToFileNameFormatScreen() {
         backStack.navigate(route = Destination.FileNameFormat)
     }

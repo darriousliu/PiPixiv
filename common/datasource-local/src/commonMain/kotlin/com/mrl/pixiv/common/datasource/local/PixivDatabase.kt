@@ -8,6 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import com.mrl.pixiv.common.datasource.local.dao.BlockContentDao
+import com.mrl.pixiv.common.datasource.local.dao.BrowsingHistoryDao
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelReadingProgressDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelTranslationDao
@@ -17,6 +18,8 @@ import com.mrl.pixiv.common.datasource.local.entity.BlockNovelEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockTagEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockUserEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
+import com.mrl.pixiv.common.datasource.local.entity.IllustHistoryEntity
+import com.mrl.pixiv.common.datasource.local.entity.NovelHistoryEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelTranslationEntity
 
@@ -29,9 +32,11 @@ import com.mrl.pixiv.common.datasource.local.entity.NovelTranslationEntity
         BlockNovelEntity::class,
         BlockTagEntity::class,
         BlockCommentEntity::class,
-        BlockUserEntity::class
+        BlockUserEntity::class,
+        IllustHistoryEntity::class,
+        NovelHistoryEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @ConstructedBy(PixivDatabaseConstructor::class)
@@ -40,6 +45,7 @@ abstract class PixivDatabase : RoomDatabase() {
     abstract fun novelReadingProgressDao(): NovelReadingProgressDao
     abstract fun novelTranslationDao(): NovelTranslationDao
     abstract fun blockContentDao(): BlockContentDao
+    abstract fun browsingHistoryDao(): BrowsingHistoryDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -134,6 +140,44 @@ abstract class PixivDatabase : RoomDatabase() {
                         name TEXT NOT NULL DEFAULT '',
                         PRIMARY KEY(userId)
                     )
+                    """.trimIndent()
+                )
+            }
+        }
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS browsing_history_illust (
+                        illustId INTEGER NOT NULL,
+                        userId INTEGER NOT NULL,
+                        viewedAtMillis INTEGER NOT NULL,
+                        illustJson TEXT NOT NULL,
+                        PRIMARY KEY(illustId, userId)
+                    )
+                    """.trimIndent()
+                )
+                connection.execSQL(
+                    """
+                    CREATE INDEX IF NOT EXISTS index_browsing_history_illust_userId_viewedAtMillis
+                    ON browsing_history_illust(userId, viewedAtMillis)
+                    """.trimIndent()
+                )
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS browsing_history_novel (
+                        novelId INTEGER NOT NULL,
+                        userId INTEGER NOT NULL,
+                        viewedAtMillis INTEGER NOT NULL,
+                        novelJson TEXT NOT NULL,
+                        PRIMARY KEY(novelId, userId)
+                    )
+                    """.trimIndent()
+                )
+                connection.execSQL(
+                    """
+                    CREATE INDEX IF NOT EXISTS index_browsing_history_novel_userId_viewedAtMillis
+                    ON browsing_history_novel(userId, viewedAtMillis)
                     """.trimIndent()
                 )
             }

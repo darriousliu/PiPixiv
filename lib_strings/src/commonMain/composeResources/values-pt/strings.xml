@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">Oculta os botões e o indicador de página após alguns segundos na área de imagem da página de detalhes</string>
     <string name="tap_image_to_open_full_resolution_preview">Tocar na imagem para abrir pré-visualização em resolução completa</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">Quando desativado, tocar em uma imagem na página de detalhes não abrirá a pré-visualização original em tela cheia</string>
+    <string name="history_setting">Configurações do histórico</string>
+    <string name="enable_history">Ativar histórico</string>
+    <string name="enable_history_desc">Quando desativado, visualizações de ilustrações e novels não serão registradas</string>
+    <string name="history_auto_clean">Limpar registros antigos automaticamente</string>
+    <string name="history_auto_clean_desc">Remove os registros locais mais antigos quando o limite é atingido</string>
+    <string name="history_unlimited">Sem limite de histórico local</string>
+    <string name="history_unlimited_desc">Quando desativado, o limite abaixo é usado</string>
+    <string name="history_max_entries">Limite de histórico local</string>
+    <string name="history_max_entries_desc">Intervalo %1$d - %2$d</string>
+    <string name="clear_local_history">Limpar histórico local</string>
+    <string name="clear_local_history_desc">Exclui o histórico local de ilustrações e novels da conta atual</string>
+    <string name="local_history_cleared">Histórico local limpo</string>
+    <string name="local_history">Local</string>
+    <string name="cloud_history">Nuvem</string>
+    <string name="history_disabled_empty_title">O histórico está desativado</string>
+    <string name="history_disabled_empty_desc">Ative o histórico para salvar localmente ilustrações e novels vistas</string>
+    <string name="enable_history_now">Ativar histórico</string>
+    <string name="no_history_records">Ainda não há histórico</string>
 </resources>

@@ -10,6 +10,7 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
+import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.repository.NovelAiTranslationService
 import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.NovelReadingProgressRepository
@@ -83,6 +84,7 @@ class NovelViewModel(
     private val readingProgressRepository: NovelReadingProgressRepository,
     private val translationRepository: NovelTranslationRepository,
     private val aiTranslationService: NovelAiTranslationService,
+    private val browsingHistoryRepository: BrowsingHistoryRepository,
 ) : BaseMviViewModel<NovelState, NovelIntent>(
     initialState = NovelState()
 ), KoinComponent {
@@ -229,9 +231,10 @@ class NovelViewModel(
 
     fun addHistory() {
         launchProcess(Dispatchers.IO) {
-            val novelId = uiState.value.novel?.id ?: return@launchProcess
+            val novel = uiState.value.novel ?: return@launchProcess
+            val novelId = novel.id
             if (lastHistoryNovelId == novelId) return@launchProcess
-            PixivRepository.addNovelBrowsingHistory(novelId)
+            browsingHistoryRepository.recordNovel(novel)
             lastHistoryNovelId = novelId
         }
     }

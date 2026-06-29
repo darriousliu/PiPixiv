@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">Hide buttons and the page indicator after staying on the image area of the artwork detail page for a few seconds</string>
     <string name="tap_image_to_open_full_resolution_preview">Tap image to open full-resolution preview</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">When disabled, tapping an image on the artwork detail page will not open the full-screen original preview</string>
+    <string name="history_setting">History Settings</string>
+    <string name="enable_history">Enable history</string>
+    <string name="enable_history_desc">When disabled, illustration and novel views will not be recorded</string>
+    <string name="history_auto_clean">Auto-clean old records</string>
+    <string name="history_auto_clean_desc">Remove the oldest local records when the limit is reached</string>
+    <string name="history_unlimited">No local history limit</string>
+    <string name="history_unlimited_desc">When disabled, the limit below is used</string>
+    <string name="history_max_entries">Local history limit</string>
+    <string name="history_max_entries_desc">Range %1$d - %2$d</string>
+    <string name="clear_local_history">Clear local history</string>
+    <string name="clear_local_history_desc">Delete local illustration and novel history for the current account</string>
+    <string name="local_history_cleared">Local history cleared</string>
+    <string name="local_history">Local</string>
+    <string name="cloud_history">Cloud</string>
+    <string name="history_disabled_empty_title">History is disabled</string>
+    <string name="history_disabled_empty_desc">Enable history to save viewed illustrations and novels locally</string>
+    <string name="enable_history_now">Enable history</string>
+    <string name="no_history_records">No history yet</string>
 </resources>

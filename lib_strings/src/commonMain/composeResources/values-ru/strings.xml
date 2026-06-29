@@ -302,4 +302,22 @@
     <string name="auto_hide_preview_controls_desc">Скрывает кнопки и индикатор страницы через несколько секунд в области изображения на странице работы</string>
     <string name="tap_image_to_open_full_resolution_preview">Нажатие на изображение открывает предпросмотр в полном разрешении</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">Если отключено, нажатие на изображение на странице работы не откроет полноэкранный предпросмотр оригинала</string>
+    <string name="history_setting">Настройки истории</string>
+    <string name="enable_history">Включить историю</string>
+    <string name="enable_history_desc">Если отключено, просмотры иллюстраций и новелл не будут записываться</string>
+    <string name="history_auto_clean">Автоматически очищать старые записи</string>
+    <string name="history_auto_clean_desc">Удаляет самые старые локальные записи при достижении лимита</string>
+    <string name="history_unlimited">Без лимита локальной истории</string>
+    <string name="history_unlimited_desc">Если отключено, используется лимит ниже</string>
+    <string name="history_max_entries">Лимит локальной истории</string>
+    <string name="history_max_entries_desc">Диапазон %1$d - %2$d</string>
+    <string name="clear_local_history">Очистить локальную историю</string>
+    <string name="clear_local_history_desc">Удаляет локальную историю иллюстраций и новелл текущего аккаунта</string>
+    <string name="local_history_cleared">Локальная история очищена</string>
+    <string name="local_history">Локально</string>
+    <string name="cloud_history">Облако</string>
+    <string name="history_disabled_empty_title">История отключена</string>
+    <string name="history_disabled_empty_desc">Включите историю, чтобы сохранять просмотренные иллюстрации и новеллы локально</string>
+    <string name="enable_history_now">Включить историю</string>
+    <string name="no_history_records">Истории пока нет</string>
 </resources>
