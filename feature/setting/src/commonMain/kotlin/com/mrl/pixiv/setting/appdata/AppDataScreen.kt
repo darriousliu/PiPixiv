@@ -25,21 +25,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.mrl.pixiv.common.coroutine.launchCatch
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.util.ToastUtil
-import com.mrl.pixiv.common.util.adaptiveFileSize1
-import com.mrl.pixiv.common.util.calculateSize
-import com.mrl.pixiv.common.util.deleteRecursively
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.app_data
-import com.mrl.pixiv.strings.cache_cleared
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.clear_cache
 import com.mrl.pixiv.strings.confirm
@@ -47,15 +40,10 @@ import com.mrl.pixiv.strings.export_data
 import com.mrl.pixiv.strings.import_data
 import com.mrl.pixiv.strings.novel_history_import_user_mismatch_desc
 import com.mrl.pixiv.strings.novel_history_import_user_mismatch_title
-import io.github.vinceglb.filekit.FileKit
-import io.github.vinceglb.filekit.cacheDir
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
-import io.github.vinceglb.filekit.list
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -77,7 +65,6 @@ fun AppDataScreen(
     navigationManager: NavigationManager = koinInject(),
     viewModel: AppDataViewModel = koinViewModel(),
 ) {
-    val scope = rememberCoroutineScope()
     val state = viewModel.asState()
     var dialogData by remember { mutableStateOf<NovelHistoryImportDialogData?>(null) }
 
@@ -175,16 +162,7 @@ fun AppDataScreen(
                 headlineContent = {
                     Text(text = stringResource(RStrings.clear_cache, viewModel.cacheDirSize))
                 },
-                modifier = Modifier.throttleClick {
-                    scope.launchCatch(Dispatchers.IO) {
-                        val dirSize = FileKit.cacheDir.calculateSize().adaptiveFileSize1()
-                        FileKit.cacheDir.list().forEach {
-                            it.deleteRecursively()
-                        }
-                        ToastUtil.safeShortToast(RStrings.cache_cleared, dirSize)
-                        viewModel.refreshCacheSize()
-                    }
-                },
+                modifier = Modifier.throttleClick { viewModel.clearCache() },
                 leadingContent = {
                     Icon(
                         imageVector = Icons.Rounded.Delete,

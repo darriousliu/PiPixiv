@@ -20,9 +20,11 @@ import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.ZipUtil
 import com.mrl.pixiv.common.util.adaptiveFileSize1
 import com.mrl.pixiv.common.util.calculateSize
+import com.mrl.pixiv.common.util.deleteRecursively
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import com.mrl.pixiv.strings.cache_cleared
 import com.mrl.pixiv.strings.export_failed
 import com.mrl.pixiv.strings.export_success
 import com.mrl.pixiv.strings.exporting
@@ -34,6 +36,7 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.cacheDir
 import io.github.vinceglb.filekit.delete
+import io.github.vinceglb.filekit.list
 import io.github.vinceglb.filekit.writeString
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -379,6 +382,17 @@ class AppDataViewModel(
     fun refreshCacheSize() {
         launchIO {
             cacheDirSize = FileKit.cacheDir.calculateSize().adaptiveFileSize1()
+        }
+    }
+
+    fun clearCache() {
+        launchIO {
+            val dirSize = FileKit.cacheDir.calculateSize().adaptiveFileSize1()
+            FileKit.cacheDir.list().forEach {
+                it.deleteRecursively()
+            }
+            ToastUtil.safeShortToast(RStrings.cache_cleared, dirSize)
+            refreshCacheSize()
         }
     }
 }
