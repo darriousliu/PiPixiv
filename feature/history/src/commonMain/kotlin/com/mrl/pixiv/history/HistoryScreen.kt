@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
@@ -56,7 +56,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.filter
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
@@ -82,7 +81,6 @@ import com.mrl.pixiv.strings.no_history_records
 import com.mrl.pixiv.strings.search_by_title_author
 import com.mrl.pixiv.strings.switch_to_illust_mode
 import com.mrl.pixiv.strings.switch_to_novel_mode
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -161,16 +159,18 @@ fun HistoryScreen(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize().padding(paddingValues),
+            beyondViewportPageCount = sources.lastIndex.coerceAtLeast(0),
         ) { page ->
+            val isActivePage = page == selectedTabIndex
             when (sources.getOrElse(page) { sources.last() }) {
                 HistorySource.Local -> {
                     when (state.mode) {
                         AppViewMode.ILLUST -> {
-                            val illusts = viewModel.localIllusts.map { pagingData ->
-                                pagingData.filter { it.matches(searchValue.text) }
-                            }.collectAsLazyPagingItems()
+                            val illusts = viewModel.localIllusts.collectAsLazyPagingItems()
                             IllustHistoryPage(
                                 illusts = illusts,
+                                lazyGridState = viewModel.localIllustGridState,
+                                isActive = isActivePage,
                                 showDisabledShortcut = !historyEnabled && localIllustCount == 0,
                                 onOpenHistorySettings = navigationManager::navigateToHistorySettingScreen,
                                 navToPictureScreen = navigationManager::navigateToPictureScreen,
@@ -178,11 +178,11 @@ fun HistoryScreen(
                         }
 
                         AppViewMode.NOVEL -> {
-                            val novels = viewModel.localNovels.map { pagingData ->
-                                pagingData.filter { it.matches(searchValue.text) }
-                            }.collectAsLazyPagingItems()
+                            val novels = viewModel.localNovels.collectAsLazyPagingItems()
                             NovelHistoryPage(
                                 novels = novels,
+                                lazyListState = viewModel.localNovelListState,
+                                isActive = isActivePage,
                                 showDisabledShortcut = !historyEnabled && localNovelCount == 0,
                                 onOpenHistorySettings = navigationManager::navigateToHistorySettingScreen,
                                 navToNovelDetailScreen = navigationManager::navigateToNovelDetailScreen,
@@ -199,11 +199,11 @@ fun HistoryScreen(
                     } else {
                         when (state.mode) {
                             AppViewMode.ILLUST -> {
-                                val illusts = viewModel.cloudIllusts.map { pagingData ->
-                                    pagingData.filter { it.matches(searchValue.text) }
-                                }.collectAsLazyPagingItems()
+                                val illusts = viewModel.cloudIllusts.collectAsLazyPagingItems()
                                 IllustHistoryPage(
                                     illusts = illusts,
+                                    lazyGridState = viewModel.cloudIllustGridState,
+                                    isActive = isActivePage,
                                     showDisabledShortcut = false,
                                     onOpenHistorySettings = navigationManager::navigateToHistorySettingScreen,
                                     navToPictureScreen = navigationManager::navigateToPictureScreen,
@@ -211,11 +211,11 @@ fun HistoryScreen(
                             }
 
                             AppViewMode.NOVEL -> {
-                                val novels = viewModel.cloudNovels.map { pagingData ->
-                                    pagingData.filter { it.matches(searchValue.text) }
-                                }.collectAsLazyPagingItems()
+                                val novels = viewModel.cloudNovels.collectAsLazyPagingItems()
                                 NovelHistoryPage(
                                     novels = novels,
+                                    lazyListState = viewModel.cloudNovelListState,
+                                    isActive = isActivePage,
                                     showDisabledShortcut = false,
                                     onOpenHistorySettings = navigationManager::navigateToHistorySettingScreen,
                                     navToNovelDetailScreen = navigationManager::navigateToNovelDetailScreen,
@@ -265,17 +265,20 @@ private fun HistoryViewModeToggleButton(
 @Composable
 private fun IllustHistoryPage(
     illusts: LazyPagingItems<Illust>,
+    lazyGridState: LazyGridState,
+    isActive: Boolean,
     showDisabledShortcut: Boolean,
     onOpenHistorySettings: () -> Unit,
     navToPictureScreen: (List<Illust>, Int, String, Boolean) -> Unit,
 ) {
-    val lazyGridState = rememberLazyGridState()
-    val controller = remember {
+    val controller = remember(lazyGridState) {
         keyboardScrollerController(lazyGridState) {
             lazyGridState.layoutInfo.viewportSize.height.toFloat()
         }
     }
-    KeyEventListener(controller)
+    if (isActive) {
+        KeyEventListener(controller)
+    }
 
     val layoutParams = IllustGridDefaults.relatedLayoutParameters()
     Box(modifier = Modifier.fillMaxSize()) {
@@ -314,17 +317,20 @@ private fun IllustHistoryPage(
 @Composable
 private fun NovelHistoryPage(
     novels: LazyPagingItems<Novel>,
+    lazyListState: LazyListState,
+    isActive: Boolean,
     showDisabledShortcut: Boolean,
     onOpenHistorySettings: () -> Unit,
     navToNovelDetailScreen: (Long) -> Unit,
 ) {
-    val lazyListState = rememberLazyListState()
-    val controller = remember {
+    val controller = remember(lazyListState) {
         keyboardScrollerController(lazyListState) {
             lazyListState.layoutInfo.viewportSize.height.toFloat()
         }
     }
-    KeyEventListener(controller)
+    if (isActive) {
+        KeyEventListener(controller)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -427,18 +433,6 @@ private fun DisabledHistoryShortcut(
             }
         }
     }
-}
-
-private fun Illust.matches(search: String): Boolean {
-    if (search.isBlank()) return true
-    return title.contains(search, ignoreCase = true) ||
-            user.name.contains(search, ignoreCase = true)
-}
-
-private fun Novel.matches(search: String): Boolean {
-    if (search.isBlank()) return true
-    return title.contains(search, ignoreCase = true) ||
-            user.name.contains(search, ignoreCase = true)
 }
 
 @Composable
