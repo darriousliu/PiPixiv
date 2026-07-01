@@ -49,7 +49,7 @@ class BrowsingHistoryRepository(
         )
         pruneIfNeeded(userId, settings)
 
-        if (userInfo.profile.isPremium) {
+        if (settings.cloudEnabled && userInfo.profile.isPremium) {
             runCatching {
                 PixivRepository.addIllustBrowsingHistory(uniqueIllusts.map { it.id })
             }
@@ -72,7 +72,7 @@ class BrowsingHistoryRepository(
         )
         pruneIfNeeded(userId, settings)
 
-        if (userInfo.profile.isPremium) {
+        if (settings.cloudEnabled && userInfo.profile.isPremium) {
             runCatching {
                 PixivRepository.addNovelBrowsingHistory(novel.id)
             }

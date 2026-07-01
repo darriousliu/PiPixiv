@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class HistorySettings(
     val enabled: Boolean = true,
+    val cloudEnabled: Boolean = true,
     val autoClean: Boolean = true,
     val unlimited: Boolean = false,
     val maxEntries: Int = DEFAULT_MAX_ENTRIES,

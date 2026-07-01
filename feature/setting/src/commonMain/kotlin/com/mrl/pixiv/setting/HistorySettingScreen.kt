@@ -54,6 +54,8 @@ import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.strings.clear_local_history
 import com.mrl.pixiv.strings.clear_local_history_desc
+import com.mrl.pixiv.strings.enable_cloud_history
+import com.mrl.pixiv.strings.enable_cloud_history_desc
 import com.mrl.pixiv.strings.enable_history
 import com.mrl.pixiv.strings.enable_history_desc
 import com.mrl.pixiv.strings.history_auto_clean
@@ -118,6 +120,14 @@ fun HistorySettingScreen(
                 exit = slideOutVertically { -it / 3 } + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
             ) {
                 Column {
+                    HistorySwitchItem(
+                        title = stringResource(RStrings.enable_cloud_history),
+                        description = stringResource(RStrings.enable_cloud_history_desc),
+                        checked = historySettings.cloudEnabled,
+                        onCheckedChange = { checked ->
+                            SettingRepository.setHistorySettings(historySettings.copy(cloudEnabled = checked))
+                        }
+                    )
                     HistorySwitchItem(
                         title = stringResource(RStrings.history_auto_clean),
                         description = stringResource(RStrings.history_auto_clean_desc),

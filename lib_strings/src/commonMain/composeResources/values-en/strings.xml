@@ -307,6 +307,8 @@
     <string name="history_setting">History Settings</string>
     <string name="enable_history">Enable history</string>
     <string name="enable_history_desc">When disabled, illustration and novel views will not be recorded</string>
+    <string name="enable_cloud_history">Enable cloud history</string>
+    <string name="enable_cloud_history_desc">When disabled, Pixiv cloud history will not be read or written; only local history is kept</string>
     <string name="history_auto_clean">Auto-clean old records</string>
     <string name="history_auto_clean_desc">Remove the oldest local records when the limit is reached</string>
     <string name="history_unlimited">No local history limit</string>

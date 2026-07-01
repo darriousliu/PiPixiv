@@ -307,6 +307,8 @@
     <string name="history_setting">Configuración del historial</string>
     <string name="enable_history">Activar historial</string>
     <string name="enable_history_desc">Si se desactiva, no se registrarán vistas de ilustraciones ni novelas</string>
+    <string name="enable_cloud_history">Activar historial en la nube</string>
+    <string name="enable_cloud_history_desc">Si se desactiva, el historial en la nube de Pixiv no se leerá ni se escribirá; solo se conservará el historial local</string>
     <string name="history_auto_clean">Limpiar registros antiguos automáticamente</string>
     <string name="history_auto_clean_desc">Elimina los registros locales más antiguos al alcanzar el límite</string>
     <string name="history_unlimited">Sin límite de historial local</string>

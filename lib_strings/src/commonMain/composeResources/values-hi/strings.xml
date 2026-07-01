@@ -307,6 +307,8 @@
     <string name="history_setting">इतिहास सेटिंग्स</string>
     <string name="enable_history">इतिहास चालू करें</string>
     <string name="enable_history_desc">बंद होने पर, चित्र और उपन्यास देखने का इतिहास रिकॉर्ड नहीं होगा</string>
+    <string name="enable_cloud_history">क्लाउड इतिहास चालू करें</string>
+    <string name="enable_cloud_history_desc">बंद होने पर, Pixiv क्लाउड इतिहास पढ़ा या लिखा नहीं जाएगा; केवल स्थानीय इतिहास रखा जाएगा</string>
     <string name="history_auto_clean">पुराने रिकॉर्ड अपने आप साफ करें</string>
     <string name="history_auto_clean_desc">सीमा पूरी होने पर सबसे पुराने स्थानीय रिकॉर्ड हटाएं</string>
     <string name="history_unlimited">स्थानीय इतिहास की कोई सीमा नहीं</string>

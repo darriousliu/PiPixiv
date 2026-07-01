@@ -307,6 +307,8 @@
     <string name="history_setting">Configurações do histórico</string>
     <string name="enable_history">Ativar histórico</string>
     <string name="enable_history_desc">Quando desativado, visualizações de ilustrações e novels não serão registradas</string>
+    <string name="enable_cloud_history">Ativar histórico na nuvem</string>
+    <string name="enable_cloud_history_desc">Quando desativado, o histórico na nuvem do Pixiv não será lido nem gravado; apenas o histórico local será mantido</string>
     <string name="history_auto_clean">Limpar registros antigos automaticamente</string>
     <string name="history_auto_clean_desc">Remove os registros locais mais antigos quando o limite é atingido</string>
     <string name="history_unlimited">Sem limite de histórico local</string>

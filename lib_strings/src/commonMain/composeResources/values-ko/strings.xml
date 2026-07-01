@@ -307,6 +307,8 @@
     <string name="history_setting">기록 설정</string>
     <string name="enable_history">기록 사용</string>
     <string name="enable_history_desc">끄면 일러스트와 소설 열람 기록을 저장하지 않습니다</string>
+    <string name="enable_cloud_history">클라우드 기록 사용</string>
+    <string name="enable_cloud_history_desc">끄면 Pixiv 클라우드 기록을 읽거나 쓰지 않고 로컬 기록만 유지합니다</string>
     <string name="history_auto_clean">오래된 기록 자동 정리</string>
     <string name="history_auto_clean_desc">한도에 도달하면 가장 오래된 로컬 기록을 삭제합니다</string>
     <string name="history_unlimited">로컬 기록 수 제한 없음</string>

@@ -307,6 +307,8 @@
     <string name="history_setting">履歴設定</string>
     <string name="enable_history">履歴を有効にする</string>
     <string name="enable_history_desc">無効にすると、イラストや小説の閲覧履歴を記録しません</string>
+    <string name="enable_cloud_history">クラウド履歴を有効にする</string>
+    <string name="enable_cloud_history_desc">無効にすると、Pixiv のクラウド履歴は読み書きされず、ローカル履歴のみ保持されます</string>
     <string name="history_auto_clean">古い履歴を自動削除</string>
     <string name="history_auto_clean_desc">上限に達したら最も古いローカル履歴を削除します</string>
     <string name="history_unlimited">ローカル履歴を無制限にする</string>

@@ -99,13 +99,19 @@ fun HistoryScreen(
 ) {
     val state = viewModel.asState()
     val isPremium by viewModel.isPremiumFlow.collectAsStateWithLifecycle()
-    val historyEnabled by viewModel.userPreferenceFlow.collectAsStateWithLifecycle { historySettings.enabled }
+    val historySettings by viewModel.userPreferenceFlow.collectAsStateWithLifecycle { historySettings }
+    val historyEnabled = historySettings.enabled
+    val cloudHistoryEnabled = historySettings.cloudEnabled
     val localIllustCount by viewModel.localIllustCount.collectAsStateWithLifecycle(0)
     val localNovelCount by viewModel.localNovelCount.collectAsStateWithLifecycle(0)
     var searchValue by remember { mutableStateOf(TextFieldValue(state.currentSearch)) }
     val scope = rememberCoroutineScope()
-    val sources = remember(isPremium) {
-        if (isPremium) listOf(HistorySource.Local, HistorySource.Cloud) else listOf(HistorySource.Local)
+    val sources = remember(isPremium, historyEnabled, cloudHistoryEnabled) {
+        if (isPremium && historyEnabled && cloudHistoryEnabled) {
+            listOf(HistorySource.Local, HistorySource.Cloud)
+        } else {
+            listOf(HistorySource.Local)
+        }
     }
     val pagerState = rememberPagerState { sources.size }
     val selectedTabIndex = pagerState.currentPage.coerceIn(0, sources.lastIndex)

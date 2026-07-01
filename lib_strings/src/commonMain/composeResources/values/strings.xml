@@ -318,6 +318,8 @@
     <string name="history_setting">历史记录设置</string>
     <string name="enable_history">启用历史记录</string>
     <string name="enable_history_desc">关闭后不会记录插画或小说浏览历史</string>
+    <string name="enable_cloud_history">启用云端历史记录</string>
+    <string name="enable_cloud_history_desc">关闭后不会读取或写入 Pixiv 云端历史，仅保留本地记录</string>
     <string name="history_auto_clean">自动清理旧记录</string>
     <string name="history_auto_clean_desc">超过上限时删除最早的本地记录</string>
     <string name="history_unlimited">不限制本地记录数量</string>
