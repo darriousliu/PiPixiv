@@ -29,8 +29,6 @@ import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.ErrorOutline
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.HideImage
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Image
@@ -97,6 +95,7 @@ import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.BlockSurface
+import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
@@ -114,6 +113,7 @@ import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isPrivateBookmark
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.CommentType
@@ -794,11 +794,11 @@ internal fun PictureScreen(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
                         )
                     ) {
-                        Icon(
-                            imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                            contentDescription = null,
+                        BookmarkIcon(
+                            isBookmarked = isBookmarked,
+                            isPrivate = illust.isPrivateBookmark,
+                            iconSize = 35.dp,
                             tint = if (isBookmarked) Color.Red else LocalContentColor.current,
-                            modifier = Modifier.size(35.dp)
                         )
                     }
                 }

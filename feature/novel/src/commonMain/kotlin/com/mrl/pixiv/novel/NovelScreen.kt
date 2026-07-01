@@ -57,6 +57,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -108,6 +109,7 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.BlockSurface
+import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
@@ -118,6 +120,7 @@ import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isPrivateBookmark
 import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.Platform
@@ -526,13 +529,15 @@ fun NovelScreen(
                                         onLongClick = { showBookmarkBottomSheet = true }
                                     ) {
                                         val isBookmark = state.novel.isBookmark
-                                        Icon(
-                                            imageVector = if (isBookmark) {
-                                                Icons.Rounded.Bookmark
-                                            } else {
-                                                Icons.Rounded.BookmarkBorder
-                                            },
-                                            contentDescription = stringResource(if (isBookmark) RStrings.bookmarked else RStrings.bookmark)
+                                        BookmarkIcon(
+                                            isBookmarked = isBookmark,
+                                            isPrivate = state.novel.isPrivateBookmark,
+                                            bookmarkedImageVector = Icons.Rounded.Bookmark,
+                                            unbookmarkedImageVector = Icons.Rounded.BookmarkBorder,
+                                            tint = LocalContentColor.current,
+                                            contentDescription = stringResource(
+                                                if (isBookmark) RStrings.bookmarked else RStrings.bookmark
+                                            )
                                         )
                                     }
                                     IconButton(

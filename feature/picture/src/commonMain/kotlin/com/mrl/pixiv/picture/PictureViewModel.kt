@@ -11,6 +11,7 @@ import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
@@ -293,7 +294,9 @@ class PictureViewModel(
     }
 
     private fun bookmark(illustId: Long) {
-        BookmarkState.bookmarkIllust(illustId)
+        val restrict =
+            if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+        BookmarkState.bookmarkIllust(illustId, restrict)
     }
 
     private fun getUserIllusts(userId: Long) {

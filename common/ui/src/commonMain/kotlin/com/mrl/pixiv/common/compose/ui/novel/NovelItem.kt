@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material3.Card
@@ -40,7 +38,7 @@ import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.mrl.pixiv.common.compose.FavoriteDualColor
+import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.illust.AIBadge
 import com.mrl.pixiv.common.data.AiType
@@ -50,6 +48,7 @@ import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isPrivateBookmark
 import com.mrl.pixiv.common.util.allowRgb565
 import kotlin.time.Duration.Companion.seconds
 
@@ -218,11 +217,10 @@ fun NovelItem(
                     },
                     onLongClick = { showBottomSheet = true }
                 ) {
-                    Icon(
-                        imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = null,
-                        tint = FavoriteDualColor(isBookmarked),
-                        modifier = Modifier.size(24.dp)
+                    BookmarkIcon(
+                        isBookmarked = isBookmarked,
+                        isPrivate = novel.isPrivateBookmark,
+                        iconSize = 24.dp,
                     )
                 }
                 Text(

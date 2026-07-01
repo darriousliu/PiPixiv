@@ -10,6 +10,7 @@ import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.util.filterBlockedTags
 import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 
 class CollectionIllustPagingSource(
     private val userId: Long,
@@ -24,12 +25,22 @@ class CollectionIllustPagingSource(
             } else {
                 PixivRepository.loadMoreUserBookmarksIllust(params.key?.toMap() ?: emptyMap())
             }
+            val currentRestrict = params.key?.restrict ?: query.restrict
             val query = resp.nextUrl?.queryParams
             val illusts = if (requireUserPreferenceValue.isR18Enabled) {
                 resp.illusts.distinctBy { it.id }
             } else {
                 resp.illusts.distinctBy { it.id }.filterNormalIllust()
             }.filterBlockedTags()
+            if (currentRestrict != Restrict.ALL) {
+                illusts.forEach {
+                    BookmarkState.updateIllustBookmarkDetail(
+                        illustId = it.id,
+                        isBookmarked = true,
+                        restrict = currentRestrict,
+                    )
+                }
+            }
             if (query != null) {
                 val nextKey = UserBookmarksQuery(
                     restrict = query["restrict"]?.let { Restrict.fromValue(it) } ?: Restrict.PUBLIC,
