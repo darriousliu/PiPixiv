@@ -183,9 +183,7 @@ fun Navigation3MainGraph(
                     }
 
                     // 搜索结果页
-                    entry<Destination.SearchResults>(
-                        metadata = ListDetailSceneStrategy.listPane()
-                    ) {
+                    entry<Destination.SearchResults> {
                         SearchResultsScreen(
                             searchWords = it.searchWords,
                             searchMode = it.searchMode,
