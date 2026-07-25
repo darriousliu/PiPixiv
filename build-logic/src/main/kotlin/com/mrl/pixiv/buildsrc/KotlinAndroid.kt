@@ -95,6 +95,7 @@ internal fun Project.configureKotlin() {
 
 internal val optIns = listOf(
     "-Xexpect-actual-classes",
+    "-Xexplicit-backing-fields",
     "-opt-in=kotlin.RequiresOptIn",
     // Enable experimental coroutines APIs, including Flow
     "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",

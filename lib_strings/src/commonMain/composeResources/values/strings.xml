@@ -315,6 +315,12 @@
     <string name="auto_hide_preview_controls_desc">在作品详情页的图片区域停留几秒后隐藏按钮和页码</string>
     <string name="tap_image_to_open_full_resolution_preview">点击打开全分辨率预览</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">关闭后，在作品详情页点击图片不会进入全屏原图预览</string>
+    <string name="feed_display_mode">列表加载方式</string>
+    <string name="feed_display_mode_infinite">无限滚动</string>
+    <string name="feed_display_mode_paged">手动分页</string>
+    <string name="previous_page">上一页</string>
+    <string name="next_page">下一页</string>
+    <string name="page_index">第 %1$d 页</string>
     <string name="history_setting">历史记录设置</string>
     <string name="enable_history">启用历史记录</string>
     <string name="enable_history_desc">关闭后不会记录插画或小说浏览历史</string>

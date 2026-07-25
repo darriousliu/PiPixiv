@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -36,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
@@ -47,8 +49,16 @@ import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.data.setting.FeedDisplayMode
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.paged.PageControls
+import com.mrl.pixiv.common.paged.PagedIllustGrid
+import com.mrl.pixiv.common.paged.PagedNovelList
+import com.mrl.pixiv.common.paged.PagedUserList
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.repository.feed.PagedFeedState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
@@ -84,22 +94,25 @@ fun SearchResultsScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
-    val searchResults = viewModel.searchResults.collectAsLazyPagingItems()
-    val novelSearchResults = viewModel.novelSearchResults.collectAsLazyPagingItems()
-    val userSearchResults = viewModel.userSearchResults.collectAsLazyPagingItems()
+    val feedDisplayMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle {
+        browsingSettings.feedDisplayMode
+    }
+    val usePagedFeed = feedDisplayMode == FeedDisplayMode.PAGED
+    val pagedControlsBottomPadding = 0.dp
+    val pagedControlsContentPadding = if (usePagedFeed) 80.dp else 0.dp
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(true)
     val layoutParams = IllustGridDefaults.relatedLayoutParameters()
     val pullRefreshState = rememberPullToRefreshState()
     val novelPullRefreshState = rememberPullToRefreshState()
     val userPullRefreshState = rememberPullToRefreshState()
-    val isRefreshing = searchResults.loadState.refresh is LoadState.Loading
-    val isNovelRefreshing = novelSearchResults.loadState.refresh is LoadState.Loading
-    val isUserRefreshing = userSearchResults.loadState.refresh is LoadState.Loading
 
     val illustsGridState = rememberLazyGridState()
     val novelsListState = rememberLazyListState()
     val usersListState = rememberLazyListState()
+    var refreshIllustResults by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var refreshNovelResults by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var refreshUserResults by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     val pages = remember { SearchResultsPage.entries }
     val pagerState = rememberPagerState { SearchResultsPage.entries.size }
@@ -123,6 +136,22 @@ fun SearchResultsScreen(
                 usersListState.layoutInfo.viewportSize.height.toFloat()
             }
         }
+    }
+
+    @Composable
+    fun ManualPagingToolbar(
+        state: PagedFeedState<*>,
+        page: SearchResultsPage,
+        modifier: Modifier = Modifier,
+    ) {
+        PageControls(
+            state = state,
+            onPreviousPage = { viewModel.loadPreviousManualPage(page) },
+            onNextPage = { viewModel.loadNextManualPage(page) },
+            onLoadPage = { viewModel.loadManualPage(page, it) },
+            onRetry = { viewModel.refreshManualPage(page) },
+            modifier = modifier,
+        )
     }
 
     KeyEventListener(controller)
@@ -179,7 +208,22 @@ fun SearchResultsScreen(
             }
         },
         floatingActionButton = {
-            val scrollState = when (pages[pagerState.currentPage]) {
+            val currentPage = pages[pagerState.currentPage]
+            val onRefresh: () -> Unit = if (usePagedFeed) {
+                { viewModel.refreshManualPage(currentPage) }
+            } else {
+                when (currentPage) {
+                    SearchResultsPage.IllustsOrNovel -> {
+                        when (searchMode) {
+                            AppViewMode.ILLUST -> refreshIllustResults ?: {}
+                            AppViewMode.NOVEL -> refreshNovelResults ?: {}
+                        }
+                    }
+
+                    SearchResultsPage.Users -> refreshUserResults ?: {}
+                }
+            }
+            val scrollState = when (currentPage) {
                 SearchResultsPage.IllustsOrNovel -> {
                     when (searchMode) {
                         AppViewMode.ILLUST -> illustsGridState
@@ -198,18 +242,7 @@ fun SearchResultsScreen(
                         is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
                     }
                 },
-                onRefresh = {
-                    when (pages[pagerState.currentPage]) {
-                        SearchResultsPage.IllustsOrNovel -> {
-                            when (searchMode) {
-                                AppViewMode.ILLUST -> searchResults.refresh()
-                                AppViewMode.NOVEL -> novelSearchResults.refresh()
-                            }
-                        }
-
-                        SearchResultsPage.Users -> userSearchResults.refresh()
-                    }
-                }
+                onRefresh = onRefresh,
             )
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
@@ -218,13 +251,52 @@ fun SearchResultsScreen(
             state = pagerState,
             modifier = modifier.padding(it),
         ) { index ->
+            val bottomContentPadding = WindowInsets.navigationBars.asPaddingValues()
+                .calculateBottomPadding() + pagedControlsContentPadding
+
             when (pages[index]) {
                 SearchResultsPage.IllustsOrNovel -> {
                     when (searchMode) {
                         AppViewMode.ILLUST -> {
+                            val manualIllustResults = if (usePagedFeed) {
+                                viewModel.manualIllustResults.collectAsStateWithLifecycle().value
+                            } else {
+                                null
+                            }
+                            val searchResults = if (usePagedFeed) {
+                                null
+                            } else {
+                                viewModel.searchResults.collectAsLazyPagingItems()
+                            }
+
+                            if (manualIllustResults != null) {
+                                LaunchedEffect(
+                                    state.searchFilter,
+                                    state.bookmarkNumRange,
+                                    state.bookmarkStringRange,
+                                    state.searchDateRange,
+                                ) {
+                                    viewModel.resetManualPage(SearchResultsPage.IllustsOrNovel)
+                                }
+                            }
+                            if (searchResults != null) {
+                                LaunchedEffect(searchResults) {
+                                    refreshIllustResults = { searchResults.refresh() }
+                                }
+                            }
+
+                            val isRefreshing = manualIllustResults?.isLoading
+                                ?: (searchResults?.loadState?.refresh is LoadState.Loading)
+
                             PullToRefreshBox(
                                 isRefreshing = isRefreshing,
-                                onRefresh = { searchResults.refresh() },
+                                onRefresh = {
+                                    if (manualIllustResults != null) {
+                                        viewModel.refreshManualPage(SearchResultsPage.IllustsOrNovel)
+                                    } else {
+                                        searchResults?.refresh()
+                                    }
+                                },
                                 state = pullRefreshState,
                                 indicator = {
                                     PullToRefreshDefaults.LoadingIndicator(
@@ -244,26 +316,77 @@ fun SearchResultsScreen(
                                         start = 8.dp,
                                         top = 8.dp,
                                         end = 8.dp,
-                                        bottom = WindowInsets.navigationBars.asPaddingValues()
-                                            .calculateBottomPadding()
+                                        bottom = bottomContentPadding,
                                     ),
                                 ) {
-                                    illustGrid(
-                                        illusts = searchResults,
-                                        navToPictureScreen = navigationManager::navigateToPictureScreen,
-                                    )
+                                    if (manualIllustResults != null) {
+                                        PagedIllustGrid(
+                                            state = manualIllustResults,
+                                            navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                        )
+                                    } else if (searchResults != null) {
+                                        illustGrid(
+                                            illusts = searchResults,
+                                            navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                        )
+                                    }
                                 }
                                 VerticalScrollbar(
                                     state = illustsGridState,
                                     modifier = Modifier.align(Alignment.CenterEnd)
                                 )
+                                if (manualIllustResults != null) {
+                                    ManualPagingToolbar(
+                                        state = manualIllustResults,
+                                        page = SearchResultsPage.IllustsOrNovel,
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .navigationBarsPadding()
+                                    )
+                                }
                             }
                         }
 
                         AppViewMode.NOVEL -> {
+                            val manualNovelResults = if (usePagedFeed) {
+                                viewModel.manualNovelResults.collectAsStateWithLifecycle().value
+                            } else {
+                                null
+                            }
+                            val novelSearchResults = if (usePagedFeed) {
+                                null
+                            } else {
+                                viewModel.novelSearchResults.collectAsLazyPagingItems()
+                            }
+
+                            if (manualNovelResults != null) {
+                                LaunchedEffect(
+                                    state.searchFilter,
+                                    state.bookmarkNumRange,
+                                    state.bookmarkStringRange,
+                                    state.searchDateRange,
+                                ) {
+                                    viewModel.resetManualPage(SearchResultsPage.IllustsOrNovel)
+                                }
+                            }
+                            if (novelSearchResults != null) {
+                                LaunchedEffect(novelSearchResults) {
+                                    refreshNovelResults = { novelSearchResults.refresh() }
+                                }
+                            }
+
+                            val isNovelRefreshing = manualNovelResults?.isLoading
+                                ?: (novelSearchResults?.loadState?.refresh is LoadState.Loading)
+
                             PullToRefreshBox(
                                 isRefreshing = isNovelRefreshing,
-                                onRefresh = { novelSearchResults.refresh() },
+                                onRefresh = {
+                                    if (manualNovelResults != null) {
+                                        viewModel.refreshManualPage(SearchResultsPage.IllustsOrNovel)
+                                    } else {
+                                        novelSearchResults?.refresh()
+                                    }
+                                },
                                 state = novelPullRefreshState,
                                 indicator = {
                                     PullToRefreshDefaults.LoadingIndicator(
@@ -280,34 +403,42 @@ fun SearchResultsScreen(
                                         start = 16.dp,
                                         top = 10.dp,
                                         end = 16.dp,
-                                        bottom = WindowInsets.navigationBars.asPaddingValues()
-                                            .calculateBottomPadding()
+                                        bottom = bottomContentPadding,
                                     ),
                                 ) {
-                                    items(
-                                        count = novelSearchResults.itemCount,
-                                        key = novelSearchResults.itemIndexKey { index, item -> "${index}_${item.id}" }
-                                    ) { index ->
-                                        novelSearchResults[index]?.let { novel ->
-                                            NovelItem(
-                                                novel = novel,
-                                                onNovelClick = { novelId ->
-                                                    navigationManager.navigateToNovelDetailScreen(
-                                                        novelId
-                                                    )
-                                                },
-                                                onBookmarkClick = { isBookmarked, restrict, tags ->
-                                                    if (isBookmarked) {
-                                                        BookmarkState.deleteBookmarkNovel(novel.id)
-                                                    } else {
-                                                        BookmarkState.bookmarkNovel(
-                                                            novel.id,
-                                                            restrict,
-                                                            tags
+                                    if (manualNovelResults != null) {
+                                        PagedNovelList(
+                                            state = manualNovelResults,
+                                            onNovelClick = navigationManager::navigateToNovelDetailScreen,
+                                        )
+                                    } else if (novelSearchResults != null) {
+                                        items(
+                                            count = novelSearchResults.itemCount,
+                                            key = novelSearchResults.itemIndexKey { index, item ->
+                                                "${index}_${item.id}"
+                                            }
+                                        ) { index ->
+                                            novelSearchResults[index]?.let { novel ->
+                                                NovelItem(
+                                                    novel = novel,
+                                                    onNovelClick = { novelId ->
+                                                        navigationManager.navigateToNovelDetailScreen(
+                                                            novelId
                                                         )
+                                                    },
+                                                    onBookmarkClick = { isBookmarked, restrict, tags ->
+                                                        if (isBookmarked) {
+                                                            BookmarkState.deleteBookmarkNovel(novel.id)
+                                                        } else {
+                                                            BookmarkState.bookmarkNovel(
+                                                                novel.id,
+                                                                restrict,
+                                                                tags
+                                                            )
+                                                        }
                                                     }
-                                                }
-                                            )
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -315,15 +446,55 @@ fun SearchResultsScreen(
                                     state = novelsListState,
                                     modifier = Modifier.align(Alignment.CenterEnd)
                                 )
+                                if (manualNovelResults != null) {
+                                    ManualPagingToolbar(
+                                        state = manualNovelResults,
+                                        page = SearchResultsPage.IllustsOrNovel,
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .navigationBarsPadding()
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
                 SearchResultsPage.Users -> {
+                    val manualUserResults = if (usePagedFeed) {
+                        viewModel.manualUserResults.collectAsStateWithLifecycle().value
+                    } else {
+                        null
+                    }
+                    val userSearchResults = if (usePagedFeed) {
+                        null
+                    } else {
+                        viewModel.userSearchResults.collectAsLazyPagingItems()
+                    }
+
+                    if (manualUserResults != null) {
+                        LaunchedEffect(state.searchWords) {
+                            viewModel.resetManualPage(SearchResultsPage.Users)
+                        }
+                    }
+                    if (userSearchResults != null) {
+                        LaunchedEffect(userSearchResults) {
+                            refreshUserResults = { userSearchResults.refresh() }
+                        }
+                    }
+
+                    val isUserRefreshing = manualUserResults?.isLoading
+                        ?: (userSearchResults?.loadState?.refresh is LoadState.Loading)
+
                     PullToRefreshBox(
                         isRefreshing = isUserRefreshing,
-                        onRefresh = { userSearchResults.refresh() },
+                        onRefresh = {
+                            if (manualUserResults != null) {
+                                viewModel.refreshManualPage(SearchResultsPage.Users)
+                            } else {
+                                userSearchResults?.refresh()
+                            }
+                        },
                         state = userPullRefreshState,
                         indicator = {
                             PullToRefreshDefaults.LoadingIndicator(
@@ -340,36 +511,56 @@ fun SearchResultsScreen(
                                 start = 16.dp,
                                 top = 10.dp,
                                 end = 16.dp,
-                                bottom = WindowInsets.navigationBars.asPaddingValues()
-                                    .calculateBottomPadding()
+                                bottom = bottomContentPadding,
                             ),
                             verticalArrangement = 10f.spaceBy,
                         ) {
-                            items(
-                                count = userSearchResults.itemCount,
-                                key = userSearchResults.itemIndexKey { index, item -> "${index}_${item.user.id}" }
-                            ) { index ->
-                                val userPreview = userSearchResults[index] ?: return@items
-                                FollowingUserCard(
-                                    illusts = when (searchMode) {
-                                        AppViewMode.ILLUST -> userPreview.illusts.toImmutableList()
-                                        AppViewMode.NOVEL -> persistentListOf()
-                                    },
-                                    userName = userPreview.user.name,
-                                    userId = userPreview.user.id,
-                                    userAvatar = userPreview.user.profileImageUrls.medium,
-                                    isFollowed = userPreview.user.isFollowing,
+                            if (manualUserResults != null) {
+                                PagedUserList(
+                                    state = manualUserResults,
                                     navToPictureScreen = navigationManager::navigateToPictureScreen,
-                                    navToUserProfile = {
-                                        navigationManager.navigateToProfileDetailScreen(userPreview.user.id)
-                                    }
+                                    navToUserProfile = navigationManager::navigateToProfileDetailScreen,
+                                    showIllusts = searchMode == AppViewMode.ILLUST,
                                 )
+                            } else if (userSearchResults != null) {
+                                items(
+                                    count = userSearchResults.itemCount,
+                                    key = userSearchResults.itemIndexKey { index, item ->
+                                        "${index}_${item.user.id}"
+                                    }
+                                ) { index ->
+                                    val userPreview = userSearchResults[index] ?: return@items
+                                    FollowingUserCard(
+                                        illusts = when (searchMode) {
+                                            AppViewMode.ILLUST -> userPreview.illusts.toImmutableList()
+                                            AppViewMode.NOVEL -> persistentListOf()
+                                        },
+                                        userName = userPreview.user.name,
+                                        userId = userPreview.user.id,
+                                        userAvatar = userPreview.user.profileImageUrls.medium,
+                                        isFollowed = userPreview.user.isFollowing,
+                                        navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                        navToUserProfile = {
+                                            navigationManager.navigateToProfileDetailScreen(userPreview.user.id)
+                                        }
+                                    )
+                                }
                             }
                         }
                         VerticalScrollbar(
                             state = usersListState,
                             modifier = Modifier.align(Alignment.CenterEnd)
                         )
+                        if (manualUserResults != null) {
+                            ManualPagingToolbar(
+                                state = manualUserResults,
+                                page = SearchResultsPage.Users,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .navigationBarsPadding()
+                                    .padding(bottom = pagedControlsBottomPadding),
+                            )
+                        }
                     }
                 }
             }

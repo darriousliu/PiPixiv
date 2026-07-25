@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.data.setting.FeedDisplayMode
 import com.mrl.pixiv.common.data.setting.PreviewImageQuality
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
@@ -43,6 +44,9 @@ import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.auto_hide_preview_controls
 import com.mrl.pixiv.strings.auto_hide_preview_controls_desc
 import com.mrl.pixiv.strings.browsing_setting
+import com.mrl.pixiv.strings.feed_display_mode
+import com.mrl.pixiv.strings.feed_display_mode_infinite
+import com.mrl.pixiv.strings.feed_display_mode_paged
 import com.mrl.pixiv.strings.preview_image_quality
 import com.mrl.pixiv.strings.preview_image_quality_high
 import com.mrl.pixiv.strings.preview_image_quality_medium
@@ -90,6 +94,14 @@ fun BrowsingSettingScreen(
                 onQualityChange = { quality ->
                     SettingRepository.setBrowsingSettings(
                         browsingSettings.copy(previewImageQuality = quality)
+                    )
+                }
+            )
+            FeedDisplayModeSetting(
+                selectedMode = browsingSettings.feedDisplayMode,
+                onModeChange = { mode ->
+                    SettingRepository.setBrowsingSettings(
+                        browsingSettings.copy(feedDisplayMode = mode)
                     )
                 }
             )
@@ -227,5 +239,54 @@ private fun PreviewImageQuality.label(): String {
         PreviewImageQuality.MEDIUM -> stringResource(RStrings.preview_image_quality_medium)
         PreviewImageQuality.HIGH -> stringResource(RStrings.preview_image_quality_high)
         PreviewImageQuality.ORIGINAL -> stringResource(RStrings.preview_image_quality_original)
+    }
+}
+
+@Composable
+private fun FeedDisplayModeSetting(
+    selectedMode: FeedDisplayMode,
+    onModeChange: (FeedDisplayMode) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val modes = remember { FeedDisplayMode.entries }
+
+    ListItem(
+        headlineContent = { Text(text = stringResource(RStrings.feed_display_mode)) },
+        modifier = modifier,
+        leadingContent = { Icon(Icons.Rounded.Image, contentDescription = null) },
+        trailingContent = {
+            DropDownSelector(
+                modifier = Modifier.throttleClick { expanded = !expanded },
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                current = selectedMode.label(),
+            ) {
+                modes.forEach { mode ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = mode.label())
+                        },
+                        trailingIcon = {
+                            if (mode == selectedMode) {
+                                Icon(Icons.Rounded.Check, contentDescription = null)
+                            }
+                        },
+                        onClick = {
+                            onModeChange(mode)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun FeedDisplayMode.label(): String {
+    return when (this) {
+        FeedDisplayMode.INFINITE_SCROLL -> stringResource(RStrings.feed_display_mode_infinite)
+        FeedDisplayMode.PAGED -> stringResource(RStrings.feed_display_mode_paged)
     }
 }

@@ -304,6 +304,12 @@
     <string name="auto_hide_preview_controls_desc">Hide buttons and the page indicator after staying on the image area of the artwork detail page for a few seconds</string>
     <string name="tap_image_to_open_full_resolution_preview">Tap image to open full-resolution preview</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">When disabled, tapping an image on the artwork detail page will not open the full-screen original preview</string>
+    <string name="feed_display_mode">Feed loading mode</string>
+    <string name="feed_display_mode_infinite">Infinite scroll</string>
+    <string name="feed_display_mode_paged">Manual paging</string>
+    <string name="previous_page">Previous</string>
+    <string name="next_page">Next</string>
+    <string name="page_index">Page %1$d</string>
     <string name="history_setting">History Settings</string>
     <string name="enable_history">Enable history</string>
     <string name="enable_history_desc">When disabled, illustration and novel views will not be recorded</string>

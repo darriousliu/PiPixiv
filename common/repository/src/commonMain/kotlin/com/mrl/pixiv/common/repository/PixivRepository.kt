@@ -127,7 +127,8 @@ object PixivRepository : KoinComponent {
     suspend fun searchIllustNext(queryMap: Map<String, String>) =
         apiApi.searchIllustNext(queryMap)
 
-    suspend fun searchUser(word: String) = apiApi.searchUser(word = word)
+    suspend fun searchUser(word: String, offset: Int? = null) =
+        apiApi.searchUser(word = word, offset = offset)
 
     suspend fun searchUserNext(queryMap: Map<String, String>) = apiApi.searchUserNext(queryMap)
 
