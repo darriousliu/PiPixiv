@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,6 +37,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Favorite
@@ -134,6 +137,7 @@ import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.bookmarked
+import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.chapter_next
 import com.mrl.pixiv.strings.chapter_previous
 import com.mrl.pixiv.strings.cover
@@ -512,7 +516,9 @@ fun NovelScreen(
                                 if (!isNovelBlocked) {
                                     IconButton(
                                         onClick = {
-                                            if (!state.isTranslating) {
+                                            if (state.isTranslating) {
+                                                viewModel.dispatch(NovelIntent.CancelTranslation)
+                                            } else {
                                                 viewModel.dispatch(
                                                     NovelIntent.TranslateNovel(forceRefresh = state.isTranslated)
                                                 )
@@ -520,9 +526,9 @@ fun NovelScreen(
                                         }
                                     ) {
                                         if (state.isTranslating) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(20.dp),
-                                                strokeWidth = 2.dp
+                                            Icon(
+                                                imageVector = Icons.Rounded.Close,
+                                                contentDescription = stringResource(RStrings.cancel)
                                             )
                                         } else {
                                             Icon(
@@ -947,6 +953,36 @@ private fun NovelContent(
             }
 
             item(key = KEY_SPACER_END) { Spacer(modifier = Modifier.height(32.dp)) }
+        }
+
+        if (state.translationPreviewSpans.isNotEmpty()) {
+            Card(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 16.dp, vertical = 40.dp)
+                    .fillMaxWidth()
+                    .heightIn(max = 180.dp),
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                ) {
+                    items(
+                        count = state.translationPreviewSpans.size,
+                        key = { it },
+                    ) { index ->
+                        NovelParagraph(
+                            paragraphIndex = index,
+                            fontSize = state.fontSize,
+                            lineSpacingSp = state.lineSpacingSp,
+                            span = state.translationPreviewSpans[index],
+                            onParagraphTextLayout = { _, _ -> },
+                            onContentClick = onContentClick,
+                            onPixivImageClick = onPixivImageClick,
+                        )
+                    }
+                }
+            }
         }
 
         ReadingProgressIndicator(

@@ -4,6 +4,7 @@ import com.mrl.pixiv.common.network.httpEngineFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.sse.SSE
 import org.koin.core.annotation.Single
 
 internal const val AI_GENERATION_TIMEOUT_MILLIS = 180_000L
@@ -23,4 +24,5 @@ internal fun HttpClientConfig<*>.configureAiHttpClient() {
         connectTimeoutMillis = AI_CONNECT_TIMEOUT_MILLIS
         socketTimeoutMillis = AI_GENERATION_TIMEOUT_MILLIS
     }
+    install(SSE)
 }

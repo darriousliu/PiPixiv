@@ -3,15 +3,28 @@ package com.mrl.pixiv.common.repository
 import com.mrl.pixiv.common.ai.AiMessageRole
 import com.mrl.pixiv.common.ai.AiTextMessage
 import com.mrl.pixiv.common.ai.AiTextRequest
+import com.mrl.pixiv.common.ai.provider.AiTextProviderClient
+import com.mrl.pixiv.common.ai.provider.AiTextStreamEvent
 import com.mrl.pixiv.common.ai.provider.ClaudeTextClient
 import com.mrl.pixiv.common.ai.provider.GeminiTextClient
 import com.mrl.pixiv.common.ai.provider.OpenAiTextClient
 import com.mrl.pixiv.common.data.setting.AiProvider
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.last
 import org.koin.core.annotation.Single
+
+data class NovelTranslationStreamProgress(
+    val text: String,
+    val completedChunks: Int,
+    val totalChunks: Int,
+    val isComplete: Boolean,
+)
 
 @Single
 class NovelAiTranslationService(
@@ -24,34 +37,68 @@ class NovelAiTranslationService(
         targetLanguageTag: String,
         config: AiTranslationConfig,
     ): String {
+        return translateStreaming(
+            text = text,
+            targetLanguageTag = targetLanguageTag,
+            config = config,
+        ).last().text
+    }
+
+    fun translateStreaming(
+        text: String,
+        targetLanguageTag: String,
+        config: AiTranslationConfig,
+    ): Flow<NovelTranslationStreamProgress> = flow {
         val sourceText = text.trim()
-        if (sourceText.isEmpty()) return sourceText
+        if (sourceText.isEmpty()) {
+            emit(
+                NovelTranslationStreamProgress(
+                    text = sourceText,
+                    completedChunks = 0,
+                    totalChunks = 0,
+                    isComplete = true,
+                )
+            )
+            return@flow
+        }
 
         val modelName = config.model.trim()
-
         val chunkPlan = splitChunks(sourceText)
         val chunks = chunkPlan.chunks
-        return coroutineScope {
-            chunks.mapIndexed { index, chunk ->
+        val client = clientFor(config.provider)
+
+        coroutineScope {
+            val requests = chunks.mapIndexed { index, chunk ->
+                buildRequest(
+                    config = config,
+                    model = modelName,
+                    targetLanguageTag = targetLanguageTag,
+                    chunk = chunk,
+                    chunkIndex = index + 1,
+                    totalChunks = chunks.size,
+                    maxParagraphCount = chunkPlan.maxParagraphCount,
+                )
+            }
+            val remainingTranslations = requests.drop(1).map { request ->
                 async {
-                    index to translateChunk(
-                        config = config,
-                        model = modelName,
-                        targetLanguageTag = targetLanguageTag,
-                        chunk = chunk,
-                        chunkIndex = index + 1,
-                        totalChunks = chunks.size,
-                        maxParagraphCount = chunkPlan.maxParagraphCount,
-                    )
+                    generateCompleteText(client, request)
                 }
             }
-                .awaitAll()
-                .sortedBy { it.first }
-                .joinToString(separator = "\n") { it.second }
+            combineTranslatedChunks(
+                firstChunk = client.generateTextStream(requests.first()),
+                remainingChunks = remainingTranslations,
+                totalChunks = chunks.size,
+            ).collect { emit(it) }
         }
     }
 
-    private suspend fun translateChunk(
+    private fun clientFor(provider: AiProvider): AiTextProviderClient = when (provider) {
+        AiProvider.OPENAI -> openAiTextClient
+        AiProvider.CLAUDE -> claudeTextClient
+        AiProvider.GEMINI -> geminiTextClient
+    }
+
+    private fun buildRequest(
         config: AiTranslationConfig,
         model: String,
         targetLanguageTag: String,
@@ -59,7 +106,7 @@ class NovelAiTranslationService(
         chunkIndex: Int,
         totalChunks: Int,
         maxParagraphCount: Int,
-    ): String {
+    ): AiTextRequest {
         val prompt = buildPrompt(
             chunk = chunk,
             targetLanguageTag = targetLanguageTag,
@@ -68,26 +115,27 @@ class NovelAiTranslationService(
             maxParagraphCount = maxParagraphCount,
         )
 
-        val translated = when (config.provider) {
-            AiProvider.OPENAI -> openAiTextClient
-            AiProvider.CLAUDE -> claudeTextClient
-            AiProvider.GEMINI -> geminiTextClient
-        }.generateText(
-            AiTextRequest(
-                provider = config.provider,
-                endpoint = config.endpoint.trim(),
-                apiKey = config.apiKey.trim(),
-                model = model.trim(),
-                messages = listOf(
-                    AiTextMessage(
-                        role = AiMessageRole.USER,
-                        content = prompt,
-                    )
-                ),
-                responseApi = config.responseApi,
-                extraBody = config.extraBody,
-            )
-        ).text
+        return AiTextRequest(
+            provider = config.provider,
+            endpoint = config.endpoint.trim(),
+            apiKey = config.apiKey.trim(),
+            model = model.trim(),
+            messages = listOf(
+                AiTextMessage(
+                    role = AiMessageRole.USER,
+                    content = prompt,
+                )
+            ),
+            responseApi = config.responseApi,
+            extraBody = config.extraBody,
+        )
+    }
+
+    private suspend fun generateCompleteText(
+        client: AiTextProviderClient,
+        request: AiTextRequest,
+    ): String {
+        val translated = client.generateText(request).text
 
         require(translated.isNotBlank()) {
             "AI returned empty translation."
@@ -202,3 +250,80 @@ private data class ChunkPlan(
     val chunks: List<String>,
     val maxParagraphCount: Int,
 )
+
+internal fun combineTranslatedChunks(
+    firstChunk: Flow<AiTextStreamEvent>,
+    remainingChunks: List<Deferred<String>>,
+    totalChunks: Int,
+): Flow<NovelTranslationStreamProgress> = flow {
+    val translated = StringBuilder()
+    var firstCompleted = false
+    var completedChunks = 0
+
+    try {
+        firstChunk.collect { event ->
+            when (event) {
+                is AiTextStreamEvent.Delta -> {
+                    if (!firstCompleted && event.text.isNotEmpty()) {
+                        translated.append(event.text)
+                        emit(
+                            NovelTranslationStreamProgress(
+                                text = translated.toString(),
+                                completedChunks = completedChunks,
+                                totalChunks = totalChunks,
+                                isComplete = false,
+                            )
+                        )
+                    }
+                }
+
+                is AiTextStreamEvent.Completed -> {
+                    check(!firstCompleted) {
+                        "AI emitted more than one completion event."
+                    }
+                    require(event.text.isNotBlank()) {
+                        "AI returned empty translation."
+                    }
+                    translated.clear()
+                    translated.append(event.text)
+                    firstCompleted = true
+                    completedChunks = 1
+                    emit(
+                        NovelTranslationStreamProgress(
+                            text = translated.toString(),
+                            completedChunks = completedChunks,
+                            totalChunks = totalChunks,
+                            isComplete = totalChunks == 1,
+                        )
+                    )
+                }
+            }
+        }
+
+        check(firstCompleted) {
+            "AI stream ended before a completion event."
+        }
+
+        remainingChunks.forEach { deferred ->
+            val next = deferred.await()
+            require(next.isNotBlank()) {
+                "AI returned empty translation."
+            }
+            if (translated.isNotEmpty()) translated.append('\n')
+            translated.append(next)
+            completedChunks += 1
+            emit(
+                NovelTranslationStreamProgress(
+                    text = translated.toString(),
+                    completedChunks = completedChunks,
+                    totalChunks = totalChunks,
+                    isComplete = completedChunks == totalChunks,
+                )
+            )
+        }
+    } finally {
+        remainingChunks.forEach { deferred ->
+            if (deferred.isActive) deferred.cancel()
+        }
+    }
+}
