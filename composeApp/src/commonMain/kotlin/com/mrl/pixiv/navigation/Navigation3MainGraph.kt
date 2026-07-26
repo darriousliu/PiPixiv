@@ -52,6 +52,7 @@ import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.login.oauth.WebCookieLoginScreen
 import com.mrl.pixiv.novel.NovelScreen
+import com.mrl.pixiv.novel.readlater.NovelReadLaterScreen
 import com.mrl.pixiv.novel.series.NovelSeriesScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
@@ -246,6 +247,12 @@ fun Navigation3MainGraph(
                         HistoryScreen()
                     }
 
+                    entry<Destination.NovelReadLater>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        NovelReadLaterScreen()
+                    }
+
                     // 本人收藏页
                     entry<Destination.Collection>(
                         metadata = ListDetailSceneStrategy.listPane()
@@ -358,6 +365,7 @@ fun Navigation3MainGraph(
                         NovelScreen(
                             novelId = it.novelId,
                             markerPage = it.markerPage,
+                            readLaterTargetLanguage = it.readLaterTargetLanguage,
                         )
                     }
                     entry<Destination.NovelSeries> {

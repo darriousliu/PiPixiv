@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">El endpoint no es válido. Introduce una dirección HTTP o HTTPS completa</string>
     <string name="ai_endpoint_credentials_not_allowed">La dirección del endpoint no puede incluir usuario ni contraseña</string>
     <string name="ai_endpoint_public_http_not_allowed">Los endpoints públicos deben usar HTTPS; HTTP solo se permite en la red local</string>
+    <string name="read_later">Leer más tarde</string>
+    <string name="add_to_read_later">Añadir a Leer más tarde</string>
+    <string name="remove_from_read_later">Quitar de Leer más tarde</string>
+    <string name="read_later_added">Añadido e iniciada la traducción previa</string>
+    <string name="read_later_removed">Eliminado de Leer más tarde</string>
+    <string name="read_later_empty">No hay novelas guardadas para después</string>
+    <string name="read_later_status_pending">Esperando traducción</string>
+    <string name="read_later_status_running">Traduciendo</string>
+    <string name="read_later_status_ready">Traducción lista</string>
+    <string name="read_later_status_failed">Error de traducción</string>
 </resources>

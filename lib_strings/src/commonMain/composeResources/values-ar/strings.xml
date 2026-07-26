@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">نقطة النهاية غير صالحة. أدخل عنوان HTTP أو HTTPS كاملا</string>
     <string name="ai_endpoint_credentials_not_allowed">لا يمكن تضمين اسم مستخدم أو كلمة مرور في عنوان نقطة النهاية</string>
     <string name="ai_endpoint_public_http_not_allowed">يجب أن تستخدم نقاط النهاية العامة HTTPS؛ يُسمح بـ HTTP للشبكة المحلية فقط</string>
+    <string name="read_later">القراءة لاحقًا</string>
+    <string name="add_to_read_later">إضافة إلى القراءة لاحقًا</string>
+    <string name="remove_from_read_later">إزالة من القراءة لاحقًا</string>
+    <string name="read_later_added">تمت الإضافة وبدأت الترجمة المسبقة</string>
+    <string name="read_later_removed">تمت الإزالة من القراءة لاحقًا</string>
+    <string name="read_later_empty">لا توجد روايات للقراءة لاحقًا</string>
+    <string name="read_later_status_pending">في انتظار الترجمة</string>
+    <string name="read_later_status_running">جارٍ الترجمة</string>
+    <string name="read_later_status_ready">الترجمة جاهزة</string>
+    <string name="read_later_status_failed">فشلت الترجمة</string>
 </resources>

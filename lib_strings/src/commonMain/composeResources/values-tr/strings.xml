@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">Uç nokta geçersiz. Tam bir HTTP veya HTTPS adresi girin</string>
     <string name="ai_endpoint_credentials_not_allowed">Uç nokta adresi kullanıcı adı veya parola içeremez</string>
     <string name="ai_endpoint_public_http_not_allowed">Genel uç noktalar HTTPS kullanmalıdır; HTTP yalnızca yerel ağda kullanılabilir</string>
+    <string name="read_later">Daha sonra oku</string>
+    <string name="add_to_read_later">Daha sonra oku listesine ekle</string>
+    <string name="remove_from_read_later">Daha sonra oku listesinden kaldır</string>
+    <string name="read_later_added">Eklendi ve ön çeviri başlatıldı</string>
+    <string name="read_later_removed">Daha sonra oku listesinden kaldırıldı</string>
+    <string name="read_later_empty">Daha sonra okunacak roman yok</string>
+    <string name="read_later_status_pending">Çeviri bekleniyor</string>
+    <string name="read_later_status_running">Çevriliyor</string>
+    <string name="read_later_status_ready">Çeviri hazır</string>
+    <string name="read_later_status_failed">Çeviri başarısız</string>
 </resources>

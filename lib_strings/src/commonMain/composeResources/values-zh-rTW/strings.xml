@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">端點無效，請輸入完整的 HTTP 或 HTTPS 位址</string>
     <string name="ai_endpoint_credentials_not_allowed">端點位址中不能包含使用者名稱或密碼</string>
     <string name="ai_endpoint_public_http_not_allowed">公網端點必須使用 HTTPS；HTTP 僅允許本地網路位址</string>
+    <string name="read_later">稍後閱讀</string>
+    <string name="add_to_read_later">加入稍後閱讀</string>
+    <string name="remove_from_read_later">從稍後閱讀移除</string>
+    <string name="read_later_added">已加入稍後閱讀並開始預先翻譯</string>
+    <string name="read_later_removed">已從稍後閱讀移除</string>
+    <string name="read_later_empty">暫無稍後閱讀小說</string>
+    <string name="read_later_status_pending">等待翻譯</string>
+    <string name="read_later_status_running">正在翻譯</string>
+    <string name="read_later_status_ready">翻譯已就緒</string>
+    <string name="read_later_status_failed">翻譯失敗</string>
 </resources>

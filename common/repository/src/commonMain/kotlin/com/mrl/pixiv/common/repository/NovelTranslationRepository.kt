@@ -10,6 +10,7 @@ data class NovelTranslationCache(
     val targetLanguage: String,
     val provider: AiProvider,
     val model: String,
+    val configFingerprint: String,
     val sourceMd5: String,
     val translatedText: String,
 )
@@ -23,6 +24,18 @@ class NovelTranslationRepository(
         targetLanguage: String
     ): NovelTranslationCache? {
         val userId = requireUserInfoValue.user.id
+        return getTranslationForUser(
+            userId = userId,
+            novelId = novelId,
+            targetLanguage = targetLanguage,
+        )
+    }
+
+    suspend fun getTranslationForUser(
+        userId: Long,
+        novelId: Long,
+        targetLanguage: String,
+    ): NovelTranslationCache? {
         return dao.getByNovelIdAndLanguage(
             userId = userId,
             novelId = novelId,
@@ -35,10 +48,33 @@ class NovelTranslationRepository(
         targetLanguage: String,
         provider: AiProvider,
         model: String,
+        configFingerprint: String,
         sourceMd5: String,
         translatedText: String,
     ) {
         val userId = requireUserInfoValue.user.id
+        saveTranslationForUser(
+            userId = userId,
+            novelId = novelId,
+            targetLanguage = targetLanguage,
+            provider = provider,
+            model = model,
+            configFingerprint = configFingerprint,
+            sourceMd5 = sourceMd5,
+            translatedText = translatedText,
+        )
+    }
+
+    suspend fun saveTranslationForUser(
+        userId: Long,
+        novelId: Long,
+        targetLanguage: String,
+        provider: AiProvider,
+        model: String,
+        configFingerprint: String,
+        sourceMd5: String,
+        translatedText: String,
+    ) {
         dao.upsert(
             NovelTranslationEntity(
                 novelId = novelId,
@@ -46,6 +82,7 @@ class NovelTranslationRepository(
                 targetLanguage = targetLanguage,
                 provider = provider.name,
                 model = model,
+                configFingerprint = configFingerprint,
                 sourceMd5 = sourceMd5,
                 translatedText = translatedText,
                 updatedAtMillis = currentTimeMillis(),
@@ -58,6 +95,18 @@ class NovelTranslationRepository(
         targetLanguage: String
     ) {
         val userId = requireUserInfoValue.user.id
+        deleteTranslationForUser(
+            userId = userId,
+            novelId = novelId,
+            targetLanguage = targetLanguage,
+        )
+    }
+
+    suspend fun deleteTranslationForUser(
+        userId: Long,
+        novelId: Long,
+        targetLanguage: String,
+    ) {
         dao.deleteByNovelIdAndLanguage(
             userId = userId,
             novelId = novelId,
@@ -72,6 +121,7 @@ private fun NovelTranslationEntity.toDomain(): NovelTranslationCache {
         provider = runCatching { enumValueOf<AiProvider>(provider) }
             .getOrDefault(AiProvider.OPENAI),
         model = model,
+        configFingerprint = configFingerprint,
         sourceMd5 = sourceMd5,
         translatedText = translatedText,
     )

@@ -6,6 +6,7 @@ import com.mrl.pixiv.common.datasource.local.dao.BlockContentDao
 import com.mrl.pixiv.common.datasource.local.dao.BrowsingHistoryDao
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelReadingProgressDao
+import com.mrl.pixiv.common.datasource.local.dao.NovelReadLaterDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelTranslationDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -23,6 +24,7 @@ fun provideDatabase(builder: RoomDatabase.Builder<PixivDatabase>): PixivDatabase
             PixivDatabase.MIGRATION_4_5,
             PixivDatabase.MIGRATION_5_6,
             PixivDatabase.MIGRATION_6_7,
+            PixivDatabase.MIGRATION_7_8,
         )
         .build()
 }
@@ -44,3 +46,7 @@ fun provideNovelReadingProgressDao(database: PixivDatabase): NovelReadingProgres
 @Single
 fun provideNovelTranslationDao(database: PixivDatabase): NovelTranslationDao =
     database.novelTranslationDao()
+
+@Single
+fun provideNovelReadLaterDao(database: PixivDatabase): NovelReadLaterDao =
+    database.novelReadLaterDao()

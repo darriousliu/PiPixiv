@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">Endpoint inválido. Introduza um endereço HTTP ou HTTPS completo</string>
     <string name="ai_endpoint_credentials_not_allowed">O endereço do endpoint não pode conter nome de utilizador nem palavra-passe</string>
     <string name="ai_endpoint_public_http_not_allowed">Endpoints públicos têm de usar HTTPS; HTTP só é permitido na rede local</string>
+    <string name="read_later">Ler mais tarde</string>
+    <string name="add_to_read_later">Adicionar a Ler mais tarde</string>
+    <string name="remove_from_read_later">Remover de Ler mais tarde</string>
+    <string name="read_later_added">Adicionado e pré-tradução iniciada</string>
+    <string name="read_later_removed">Removido de Ler mais tarde</string>
+    <string name="read_later_empty">Nenhuma novela guardada para depois</string>
+    <string name="read_later_status_pending">A aguardar tradução</string>
+    <string name="read_later_status_running">A traduzir</string>
+    <string name="read_later_status_ready">Tradução pronta</string>
+    <string name="read_later_status_failed">Falha na tradução</string>
 </resources>

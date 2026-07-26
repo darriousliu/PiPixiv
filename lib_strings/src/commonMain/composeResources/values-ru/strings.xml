@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">Некорректный адрес. Введите полный адрес HTTP или HTTPS</string>
     <string name="ai_endpoint_credentials_not_allowed">Адрес не может содержать имя пользователя или пароль</string>
     <string name="ai_endpoint_public_http_not_allowed">Публичные адреса должны использовать HTTPS; HTTP разрешён только в локальной сети</string>
+    <string name="read_later">Прочитать позже</string>
+    <string name="add_to_read_later">Добавить в «Прочитать позже»</string>
+    <string name="remove_from_read_later">Удалить из «Прочитать позже»</string>
+    <string name="read_later_added">Добавлено, предварительный перевод начат</string>
+    <string name="read_later_removed">Удалено из списка</string>
+    <string name="read_later_empty">Нет романов для чтения позже</string>
+    <string name="read_later_status_pending">Ожидает перевода</string>
+    <string name="read_later_status_running">Переводится</string>
+    <string name="read_later_status_ready">Перевод готов</string>
+    <string name="read_later_status_failed">Ошибка перевода</string>
 </resources>

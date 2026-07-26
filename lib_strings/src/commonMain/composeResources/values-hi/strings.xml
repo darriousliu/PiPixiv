@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">एंडपॉइंट अमान्य है। पूरा HTTP या HTTPS पता दर्ज करें</string>
     <string name="ai_endpoint_credentials_not_allowed">एंडपॉइंट पते में उपयोगकर्ता नाम या पासवर्ड नहीं हो सकता</string>
     <string name="ai_endpoint_public_http_not_allowed">सार्वजनिक एंडपॉइंट के लिए HTTPS आवश्यक है; HTTP केवल स्थानीय नेटवर्क पर अनुमत है</string>
+    <string name="read_later">बाद में पढ़ें</string>
+    <string name="add_to_read_later">बाद में पढ़ें में जोड़ें</string>
+    <string name="remove_from_read_later">बाद में पढ़ें से हटाएँ</string>
+    <string name="read_later_added">जोड़ा गया और पूर्व-अनुवाद शुरू हुआ</string>
+    <string name="read_later_removed">बाद में पढ़ें से हटा दिया गया</string>
+    <string name="read_later_empty">बाद में पढ़ने के लिए कोई उपन्यास नहीं</string>
+    <string name="read_later_status_pending">अनुवाद की प्रतीक्षा</string>
+    <string name="read_later_status_running">अनुवाद हो रहा है</string>
+    <string name="read_later_status_ready">अनुवाद तैयार है</string>
+    <string name="read_later_status_failed">अनुवाद विफल</string>
 </resources>

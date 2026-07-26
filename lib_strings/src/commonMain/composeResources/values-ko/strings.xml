@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">엔드포인트가 올바르지 않습니다. 전체 HTTP 또는 HTTPS 주소를 입력하세요</string>
     <string name="ai_endpoint_credentials_not_allowed">엔드포인트 주소에 사용자 이름이나 비밀번호를 포함할 수 없습니다</string>
     <string name="ai_endpoint_public_http_not_allowed">공개 엔드포인트는 HTTPS를 사용해야 하며 HTTP는 로컬 네트워크에서만 허용됩니다</string>
+    <string name="read_later">나중에 읽기</string>
+    <string name="add_to_read_later">나중에 읽기에 추가</string>
+    <string name="remove_from_read_later">나중에 읽기에서 삭제</string>
+    <string name="read_later_added">추가하고 사전 번역을 시작했습니다</string>
+    <string name="read_later_removed">나중에 읽기에서 삭제했습니다</string>
+    <string name="read_later_empty">나중에 읽을 소설이 없습니다</string>
+    <string name="read_later_status_pending">번역 대기 중</string>
+    <string name="read_later_status_running">번역 중</string>
+    <string name="read_later_status_ready">번역 준비 완료</string>
+    <string name="read_later_status_failed">번역 실패</string>
 </resources>

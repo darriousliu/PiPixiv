@@ -115,6 +115,7 @@ import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
+import com.mrl.pixiv.common.compose.ui.novel.NovelReadLaterButton
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.AppViewMode
@@ -187,6 +188,7 @@ private const val KEY_SPACER_END = "spacer_end"
 fun NovelScreen(
     novelId: Long,
     markerPage: Int? = null,
+    readLaterTargetLanguage: String? = null,
     modifier: Modifier = Modifier,
     viewModel: NovelViewModel = koinViewModel {
         parametersOf(novelId, markerPage ?: 0)
@@ -206,6 +208,17 @@ fun NovelScreen(
         markerPagesForSpans(state.paragraphSpans)
     }
     var showBookmarkBottomSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.loading, state.novel?.id, readLaterTargetLanguage) {
+        if (!state.loading &&
+            state.novel?.id == novelId &&
+            !readLaterTargetLanguage.isNullOrBlank()
+        ) {
+            viewModel.dispatch(
+                NovelIntent.ApplyReadLaterTranslation(readLaterTargetLanguage)
+            )
+        }
+    }
 
     // 沉浸逻辑: 滚动到正文区域时隐藏TopBar和FAB
     val isContentVisible by remember {
@@ -514,6 +527,10 @@ fun NovelScreen(
                             },
                             actions = {
                                 if (!isNovelBlocked) {
+                                    NovelReadLaterButton(
+                                        novel = state.novel,
+                                        tint = LocalContentColor.current,
+                                    )
                                     IconButton(
                                         onClick = {
                                             if (state.isTranslating) {

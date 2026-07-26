@@ -14,6 +14,7 @@ data class NovelTranslationEntity(
     val targetLanguage: String,
     val provider: String,
     val model: String,
+    val configFingerprint: String,
     val sourceMd5: String,
     val translatedText: String,
     val updatedAtMillis: Long,

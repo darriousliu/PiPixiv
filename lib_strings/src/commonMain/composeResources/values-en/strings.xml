@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">Invalid endpoint. Enter a complete HTTP or HTTPS address</string>
     <string name="ai_endpoint_credentials_not_allowed">The endpoint address cannot contain a username or password</string>
     <string name="ai_endpoint_public_http_not_allowed">Public endpoints must use HTTPS; HTTP is only allowed on the local network</string>
+    <string name="read_later">Read later</string>
+    <string name="add_to_read_later">Add to read later</string>
+    <string name="remove_from_read_later">Remove from read later</string>
+    <string name="read_later_added">Added and pre-translation started</string>
+    <string name="read_later_removed">Removed from read later</string>
+    <string name="read_later_empty">No novels saved for later</string>
+    <string name="read_later_status_pending">Waiting for translation</string>
+    <string name="read_later_status_running">Translating</string>
+    <string name="read_later_status_ready">Translation ready</string>
+    <string name="read_later_status_failed">Translation failed</string>
 </resources>

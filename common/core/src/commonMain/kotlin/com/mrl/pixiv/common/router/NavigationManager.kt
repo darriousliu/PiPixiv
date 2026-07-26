@@ -158,6 +158,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.History)
     }
 
+    fun navigateToNovelReadLaterScreen() {
+        backStack.navigate(route = Destination.NovelReadLater)
+    }
+
     fun navigateToSettingScreen() {
         backStack.navigate(route = Destination.Setting)
     }
@@ -219,8 +223,18 @@ class NavigationManager(
         backStack.navigate(route = Destination.Report(commentId, type))
     }
 
-    fun navigateToNovelDetailScreen(novelId: Long, markerPage: Int? = null) {
-        backStack.navigate(route = Destination.NovelDetail(novelId, markerPage))
+    fun navigateToNovelDetailScreen(
+        novelId: Long,
+        markerPage: Int? = null,
+        readLaterTargetLanguage: String? = null,
+    ) {
+        backStack.navigate(
+            route = Destination.NovelDetail(
+                novelId = novelId,
+                markerPage = markerPage,
+                readLaterTargetLanguage = readLaterTargetLanguage,
+            )
+        )
     }
 
     fun navigateToNovelSeriesScreen(seriesId: Long) {

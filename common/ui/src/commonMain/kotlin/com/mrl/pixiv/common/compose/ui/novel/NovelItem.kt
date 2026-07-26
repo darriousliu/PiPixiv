@@ -222,6 +222,7 @@ fun NovelItem(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                NovelReadLaterButton(novel = novel)
                 IconButton(
                     onClick = {
                         val restrict = if (requireUserPreferenceValue.defaultPrivateBookmark) {

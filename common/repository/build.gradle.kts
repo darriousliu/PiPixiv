@@ -31,12 +31,14 @@ kotlin {
             // GIF encoder
             implementation(libs.gifkt)
             implementation(libs.filekit.core)
+            implementation(libs.okio)
         }
 
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(project.dependencies.platform(kotlinx.coroutines.bom))
             implementation(kotlinx.coroutines.test)
+            implementation(kotlinx.ktor.client.mock)
         }
 
         androidMain.dependencies {

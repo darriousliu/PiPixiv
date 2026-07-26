@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">エンドポイントが無効です。完全な HTTP または HTTPS アドレスを入力してください</string>
     <string name="ai_endpoint_credentials_not_allowed">エンドポイントのアドレスにユーザー名やパスワードは含められません</string>
     <string name="ai_endpoint_public_http_not_allowed">公開エンドポイントには HTTPS が必要です。HTTP はローカルネットワークのみ使用できます</string>
+    <string name="read_later">あとで読む</string>
+    <string name="add_to_read_later">あとで読むに追加</string>
+    <string name="remove_from_read_later">あとで読むから削除</string>
+    <string name="read_later_added">追加して事前翻訳を開始しました</string>
+    <string name="read_later_removed">あとで読むから削除しました</string>
+    <string name="read_later_empty">あとで読む小説はありません</string>
+    <string name="read_later_status_pending">翻訳待ち</string>
+    <string name="read_later_status_running">翻訳中</string>
+    <string name="read_later_status_ready">翻訳準備完了</string>
+    <string name="read_later_status_failed">翻訳に失敗しました</string>
 </resources>

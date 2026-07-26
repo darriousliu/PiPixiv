@@ -14,12 +14,16 @@ import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.repository.NovelAiTranslationService
+import com.mrl.pixiv.common.repository.NovelContentParser
 import com.mrl.pixiv.common.repository.NovelMarkerChanges
+import com.mrl.pixiv.common.repository.NovelReadLaterRepository
 import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.NovelReadingProgressRepository
 import com.mrl.pixiv.common.repository.NovelTranslationStreamProgress
 import com.mrl.pixiv.common.repository.NovelTranslationRepository
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.repository.buildNovelAiConfigFingerprint
+import com.mrl.pixiv.common.repository.buildNovelTranslationSourceHash
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
@@ -97,6 +101,7 @@ sealed class NovelIntent : ViewIntent {
     data object CancelTranslation : NovelIntent()
     data object DeleteNovelTranslation : NovelIntent()
     data object ToggleDisplayOriginalText : NovelIntent()
+    data class ApplyReadLaterTranslation(val targetLanguage: String) : NovelIntent()
 }
 
 @KoinViewModel
@@ -106,6 +111,7 @@ class NovelViewModel(
     private val readingProgressRepository: NovelReadingProgressRepository,
     private val translationRepository: NovelTranslationRepository,
     private val aiTranslationService: NovelAiTranslationService,
+    private val readLaterRepository: NovelReadLaterRepository,
     private val browsingHistoryRepository: BrowsingHistoryRepository,
 ) : BaseMviViewModel<NovelState, NovelIntent>(
     initialState = NovelState()
@@ -120,11 +126,6 @@ class NovelViewModel(
     private var translationRunToken: Any? = null
     private var translationNovelId: Long? = null
     private var translationRestoreProgress: NovelReadingProgress? = null
-
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-    }
 
     init {
         dispatch(NovelIntent.LoadNovelDetail(novelId))
@@ -153,6 +154,8 @@ class NovelViewModel(
             is NovelIntent.CancelTranslation -> cancelTranslation()
             is NovelIntent.DeleteNovelTranslation -> deleteNovelTranslation()
             is NovelIntent.ToggleDisplayOriginalText -> toggleDisplayOriginalText()
+            is NovelIntent.ApplyReadLaterTranslation ->
+                applyReadLaterTranslation(intent.targetLanguage)
         }
     }
 
@@ -189,7 +192,7 @@ class NovelViewModel(
             val novel = response.novel
 
             val novelHtml = PixivRepository.getNovelContent(novelId)
-            val novelText = extractNovelData(novelHtml)
+            val novelText = NovelContentParser.extract(novelHtml)
             val text = novelText?.text.orEmpty()
             sourceNovelText = text
             translatedNovelText = ""
@@ -233,31 +236,6 @@ class NovelViewModel(
             }
         }
     }
-
-    private fun extractNovelData(html: String): NovelTextResp? {
-        // 正则解释：
-        // novel:\s* 匹配 `novel: `
-        // (\{.*?\}) 捕获组，非贪婪匹配花括号内的 JSON 内容
-        // \s*,\s*isOwnWork: 匹配结尾，确保截取到 `isOwnWork:` 前的逗号
-        // (?s) 即 DOT_MATCHES_ALL，让 . 能够匹配换行符
-        val regex = """novel:\s*(\{.*?\})\s*,\s*isOwnWork:""".toRegex()
-
-        val matchResult = regex.find(html)
-        val novelJsonString = matchResult?.groupValues?.get(1)
-
-        return if (!novelJsonString.isNullOrBlank()) {
-            try {
-                // 将截取到的 JSON 字符串反序列化为对象
-                json.decodeFromString<NovelTextResp>(novelJsonString)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        } else {
-            null
-        }
-    }
-
 
     private fun toggleBookmark() {
         val novel = uiState.value.novel ?: return
@@ -407,10 +385,11 @@ class NovelViewModel(
             return
         }
 
-        val sourceMd5 = buildTranslationCacheKey(
+        val sourceMd5 = buildNovelTranslationSourceHash(
             sourceText = sourceText,
             extraBody = config.extraBody,
         )
+        val configFingerprint = buildNovelAiConfigFingerprint(config)
         val targetLanguageTag = resolveTargetLanguageTag()
         val runToken = Any()
         val progressBeforeTranslation =
@@ -444,6 +423,7 @@ class NovelViewModel(
                     cached != null &&
                     cached.provider == config.provider &&
                     cached.model == config.model &&
+                    cached.configFingerprint == configFingerprint &&
                     cached.sourceMd5 == sourceMd5 &&
                     cached.translatedText.isNotBlank()
                 ) {
@@ -492,6 +472,7 @@ class NovelViewModel(
                             targetLanguage = targetLanguageTag,
                             provider = config.provider,
                             model = config.model,
+                            configFingerprint = configFingerprint,
                             sourceMd5 = sourceMd5,
                             translatedText = translatedText,
                         )
@@ -695,6 +676,41 @@ class NovelViewModel(
         )
     }
 
+    private fun applyReadLaterTranslation(targetLanguage: String) {
+        val novel = uiState.value.novel ?: return
+        val sourceText = sourceNovelText.trim().ifBlank { uiState.value.novelText.trim() }
+        if (sourceText.isBlank()) return
+
+        launchIO {
+            val cached = readLaterRepository.getReadyTranslation(
+                novelId = novel.id,
+                targetLanguage = targetLanguage,
+                sourceText = sourceText,
+            ) ?: return@launchIO
+            if (uiState.value.novel?.id != novel.id) return@launchIO
+
+            val translatedSpans = NovelSpanParser
+                .buildSpans(cached.translatedText, uiState.value.novelTextResp)
+                .toImmutableList()
+            val translatedParagraphs = translatedSpans.toProgressParagraphs()
+            translatedNovelText = cached.translatedText
+            updateState {
+                copy(
+                    novelText = cached.translatedText,
+                    paragraphs = translatedParagraphs,
+                    paragraphSpans = translatedSpans,
+                    isTranslated = true,
+                    isShowingOriginalText = false,
+                )
+            }
+            requestRestoreProgress(
+                novelId = novel.id,
+                paragraphs = translatedParagraphs,
+            )
+            ToastUtil.safeShortToast(RStrings.ai_translation_cache_hit)
+        }
+    }
+
     fun saveProgress(novelId: Long, progress: NovelReadingProgress) {
         progressSession.update(novelId, progress)
         launchIO {
@@ -856,18 +872,6 @@ private fun AiTranslationConfig.normalized(): AiTranslationConfig {
 
 private fun AiTranslationConfig.isReady(): Boolean {
     return isReadyForAiRequest()
-}
-
-private fun String.toMd5Hex(): String {
-    return encodeToByteArray().toByteString().md5().hex()
-}
-
-private fun buildTranslationCacheKey(
-    sourceText: String,
-    extraBody: String,
-): String {
-    if (extraBody.isBlank()) return sourceText.toMd5Hex()
-    return "$sourceText\n\n[ai_extra_body]\n${extraBody.trim()}".toMd5Hex()
 }
 
 private fun List<NovelSpanData>.toProgressParagraphs(): ImmutableList<String> {

@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.ai.internal
 
+import com.mrl.pixiv.common.ai.AiHttpStatusException
 import com.mrl.pixiv.common.ai.requireValidAiEndpoint
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -21,7 +22,10 @@ internal suspend fun HttpResponse.toJsonObject(providerName: String): JsonObject
     val raw = bodyAsText()
     if (!status.isSuccess()) {
         val errorMessage = extractErrorMessage(raw)
-        throw IllegalStateException("$providerName request failed (${status.value}): $errorMessage")
+        throw AiHttpStatusException(
+            statusCode = status.value,
+            message = "$providerName request failed (${status.value}): $errorMessage",
+        )
     }
 
     val element = try {

@@ -94,6 +94,9 @@ sealed class Destination : NavKey {
     data object History : Destination()
 
     @Serializable
+    data object NovelReadLater : Destination()
+
+    @Serializable
     data class Collection(
         val userId: Long,
         val isNovel: Boolean,
@@ -153,6 +156,7 @@ sealed class Destination : NavKey {
     data class NovelDetail(
         val novelId: Long,
         val markerPage: Int? = null,
+        val readLaterTargetLanguage: String? = null,
     ) : Destination()
 
     @Serializable

@@ -355,4 +355,14 @@
     <string name="ai_endpoint_invalid">Point de terminaison invalide. Saisissez une adresse HTTP ou HTTPS complète</string>
     <string name="ai_endpoint_credentials_not_allowed">L’adresse du point de terminaison ne peut pas contenir d’identifiant ni de mot de passe</string>
     <string name="ai_endpoint_public_http_not_allowed">Les points de terminaison publics doivent utiliser HTTPS ; HTTP est réservé au réseau local</string>
+    <string name="read_later">Lire plus tard</string>
+    <string name="add_to_read_later">Ajouter à Lire plus tard</string>
+    <string name="remove_from_read_later">Retirer de Lire plus tard</string>
+    <string name="read_later_added">Ajouté et prétraduction démarrée</string>
+    <string name="read_later_removed">Retiré de Lire plus tard</string>
+    <string name="read_later_empty">Aucun roman enregistré pour plus tard</string>
+    <string name="read_later_status_pending">En attente de traduction</string>
+    <string name="read_later_status_running">Traduction en cours</string>
+    <string name="read_later_status_ready">Traduction prête</string>
+    <string name="read_later_status_failed">Échec de la traduction</string>
 </resources>
