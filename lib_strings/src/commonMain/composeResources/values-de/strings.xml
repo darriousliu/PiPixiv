@@ -230,6 +230,11 @@
     <string name="novel_ranking">Roman-Ranking</string>
     <string name="novel_new">Neueste Romane</string>
     <string name="novel_follow">Gefolgte Romane</string>
+    <string name="novel_watchlist">Merkliste</string>
+    <string name="novel_watchlist_add">Zur Merkliste hinzufügen</string>
+    <string name="novel_watchlist_added">Auf der Merkliste</string>
+    <string name="novel_series_chapter_count">%1$d Kapitel</string>
+    <string name="novel_watchlist_empty">Noch keine verfolgten Romanserien</string>
     <string name="switch_to_novel_mode">Zum Romanmodus wechseln</string>
     <string name="switch_to_illust_mode">Zum Illustrationsmodus wechseln</string>
     <string name="back">Zurück</string>

@@ -52,6 +52,7 @@ import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.login.oauth.WebCookieLoginScreen
 import com.mrl.pixiv.novel.NovelScreen
+import com.mrl.pixiv.novel.series.NovelSeriesScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
@@ -351,6 +352,11 @@ fun Navigation3MainGraph(
                             novelId = it.novelId
                         )
                     }
+                    entry<Destination.NovelSeries> {
+                        NovelSeriesScreen(
+                            seriesId = it.seriesId,
+                        )
+                    }
                 }
             )
         }
@@ -468,6 +474,10 @@ private fun LogScreen(
 
                 is Destination.NovelDetail -> {
                     put("novel_id", currentDestination.novelId.toString())
+                }
+
+                is Destination.NovelSeries -> {
+                    put("series_id", currentDestination.seriesId.toString())
                 }
 
                 else -> Unit

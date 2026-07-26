@@ -230,6 +230,11 @@
     <string name="novel_ranking">Рейтинг романов</string>
     <string name="novel_new">Последние романы</string>
     <string name="novel_follow">Отслеживаемые романы</string>
+    <string name="novel_watchlist">Список отслеживания</string>
+    <string name="novel_watchlist_add">Добавить в список отслеживания</string>
+    <string name="novel_watchlist_added">В списке отслеживания</string>
+    <string name="novel_series_chapter_count">%1$d глав</string>
+    <string name="novel_watchlist_empty">Пока нет отслеживаемых серий романов</string>
     <string name="switch_to_novel_mode">Переключиться в режим романа</string>
     <string name="switch_to_illust_mode">Переключиться в режим иллюстрации</string>
     <string name="back">Назад</string>

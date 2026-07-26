@@ -66,10 +66,12 @@ fun NovelItem(
     onNovelClick: (Long) -> Unit,
     onBookmarkClick: (Boolean, Restrict, List<String>?) -> Unit,
     modifier: Modifier = Modifier,
+    onSeriesClick: ((Long) -> Unit)? = null,
 ) {
     val context = LocalPlatformContext.current
     val isBookmarked = novel.isBookmark
     val isAI = novel.novelAiType == AiType.AiGeneratedWorks
+    val seriesId = novel.series.id?.takeIf { it > 0L }
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     Card(
@@ -113,13 +115,22 @@ fun NovelItem(
                     .padding(vertical = 8.dp)
             ) {
                 // 系列
-                if (novel.series.id != null && !novel.series.title.isNullOrEmpty()) {
+                if (seriesId != null && !novel.series.title.isNullOrEmpty()) {
                     Text(
                         text = novel.series.title ?: "",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.then(
+                            if (onSeriesClick != null) {
+                                Modifier.clickable {
+                                    onSeriesClick(seriesId)
+                                }
+                            } else {
+                                Modifier
+                            }
+                        ),
                     )
                 }
 

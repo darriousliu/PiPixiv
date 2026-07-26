@@ -230,6 +230,11 @@
     <string name="novel_ranking">Novel Ranking</string>
     <string name="novel_new">Latest Novels</string>
     <string name="novel_follow">Followed Novels</string>
+    <string name="novel_watchlist">Watchlist</string>
+    <string name="novel_watchlist_add">Add to watchlist</string>
+    <string name="novel_watchlist_added">In watchlist</string>
+    <string name="novel_series_chapter_count">%1$d chapters</string>
+    <string name="novel_watchlist_empty">No followed novel series yet</string>
     <string name="switch_to_novel_mode">Switch to Novel Mode</string>
     <string name="switch_to_illust_mode">Switch to Illustration Mode</string>
     <string name="back">Back</string>

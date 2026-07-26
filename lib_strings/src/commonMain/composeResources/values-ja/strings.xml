@@ -230,6 +230,11 @@
     <string name="novel_ranking">小説ランキング</string>
     <string name="novel_new">最新小説</string>
     <string name="novel_follow">フォロー中の小説</string>
+    <string name="novel_watchlist">ウォッチリスト</string>
+    <string name="novel_watchlist_add">ウォッチリストに追加</string>
+    <string name="novel_watchlist_added">ウォッチリストに追加済み</string>
+    <string name="novel_series_chapter_count">%1$d話</string>
+    <string name="novel_watchlist_empty">フォロー中の小説シリーズはありません</string>
     <string name="switch_to_novel_mode">小説モードに切り替え</string>
     <string name="switch_to_illust_mode">イラストモードに切り替え</string>
     <string name="back">戻る</string>

@@ -230,6 +230,11 @@
     <string name="novel_ranking">Classificação de romances</string>
     <string name="novel_new">Romances mais recentes</string>
     <string name="novel_follow">Romances seguidos</string>
+    <string name="novel_watchlist">Lista de acompanhamento</string>
+    <string name="novel_watchlist_add">Adicionar à lista de acompanhamento</string>
+    <string name="novel_watchlist_added">Na lista de acompanhamento</string>
+    <string name="novel_series_chapter_count">%1$d capítulos</string>
+    <string name="novel_watchlist_empty">Ainda não há séries de romances seguidas</string>
     <string name="switch_to_novel_mode">Mudar para o modo romance</string>
     <string name="switch_to_illust_mode">Mudar para o modo ilustração</string>
     <string name="back">Voltar</string>

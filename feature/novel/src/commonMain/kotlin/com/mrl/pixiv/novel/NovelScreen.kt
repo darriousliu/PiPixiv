@@ -432,6 +432,9 @@ fun NovelScreen(
                             onAuthorClick = { userId ->
                                 navigationManager.navigateToProfileDetailScreen(userId)
                             },
+                            onSeriesClick = { seriesId ->
+                                navigationManager.navigateToNovelSeriesScreen(seriesId)
+                            },
                             onCommentClick = {
                                 navigationManager.navigateToCommentScreen(
                                     state.novel.id,
@@ -622,6 +625,7 @@ private fun NovelContent(
     onTagClick: (String) -> Unit,
     onPixivImageClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onSeriesClick: (Long) -> Unit,
     onCommentClick: () -> Unit,
 ) {
     val novel = state.novel ?: return
@@ -692,6 +696,7 @@ private fun NovelContent(
             }
 
             // 系列标题
+            val seriesId = novel.series.id?.takeIf { it > 0L }
             novel.series.title?.let { seriesTitle ->
                 item(key = KEY_SERIES_TITLE) {
                     Text(
@@ -699,7 +704,17 @@ private fun NovelContent(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .then(
+                                if (seriesId != null) {
+                                    Modifier.throttleClick {
+                                        onSeriesClick(seriesId)
+                                    }
+                                } else {
+                                    Modifier
+                                }
+                            )
                     )
                 }
             }

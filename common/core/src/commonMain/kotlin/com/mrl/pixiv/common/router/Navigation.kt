@@ -150,6 +150,11 @@ sealed class Destination : NavKey {
     data class NovelDetail(
         val novelId: Long,
     ) : Destination()
+
+    @Serializable
+    data class NovelSeries(
+        val seriesId: Long,
+    ) : Destination()
 }
 
 @Serializable

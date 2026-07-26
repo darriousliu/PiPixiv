@@ -230,6 +230,11 @@
     <string name="novel_ranking">Roman Sıralaması</string>
     <string name="novel_new">En Son Romanlar</string>
     <string name="novel_follow">Takip Edilen Romanlar</string>
+    <string name="novel_watchlist">Takip listesi</string>
+    <string name="novel_watchlist_add">Takip listesine ekle</string>
+    <string name="novel_watchlist_added">Takip listesinde</string>
+    <string name="novel_series_chapter_count">%1$d bölüm</string>
+    <string name="novel_watchlist_empty">Henüz takip edilen roman serisi yok</string>
     <string name="switch_to_novel_mode">Roman moduna geç</string>
     <string name="switch_to_illust_mode">İllüstrasyon moduna geç</string>
     <string name="back">Geri</string>

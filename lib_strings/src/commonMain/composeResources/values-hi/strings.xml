@@ -230,6 +230,11 @@
     <string name="novel_ranking">उपन्यास रैंकिंग</string>
     <string name="novel_new">नवीनतम उपन्यास</string>
     <string name="novel_follow">अनुसरण किए गए उपन्यास</string>
+    <string name="novel_watchlist">अनुसरण सूची</string>
+    <string name="novel_watchlist_add">अनुसरण सूची में जोड़ें</string>
+    <string name="novel_watchlist_added">अनुसरण सूची में है</string>
+    <string name="novel_series_chapter_count">%1$d अध्याय</string>
+    <string name="novel_watchlist_empty">अभी तक कोई अनुसरण की गई उपन्यास श्रृंखला नहीं</string>
     <string name="switch_to_novel_mode">उपन्यास मोड पर स्विच करें</string>
     <string name="switch_to_illust_mode">चित्रण मोड पर स्विच करें</string>
     <string name="back">वापस</string>

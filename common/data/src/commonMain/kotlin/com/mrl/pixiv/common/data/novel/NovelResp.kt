@@ -40,6 +40,50 @@ data class NovelSeriesResp(
 )
 
 /**
+ * 小说追更列表响应。
+ *
+ * 服务端可能在系列被屏蔽或下架时返回字段不完整的占位项，因此列表和字段均按可空数据解析。
+ */
+@Serializable
+@Immutable
+data class NovelWatchlistResp(
+    val series: List<NovelWatchlistSeries?>? = emptyList(),
+
+    @SerialName("next_url")
+    val nextUrl: String? = null,
+)
+
+/**
+ * 小说追更列表中的系列条目。
+ *
+ * [id] 是系列 ID；[latestContentId] 是最新小说的作品 ID。
+ */
+@Serializable
+@Immutable
+data class NovelWatchlistSeries(
+    val id: Long? = null,
+    val title: String? = null,
+    val url: String? = null,
+
+    @SerialName("mask_text")
+    val maskText: String? = null,
+
+    @SerialName("published_content_count")
+    val publishedContentCount: Int? = null,
+
+    @SerialName("last_published_content_datetime")
+    val lastPublishedContentDatetime: String? = null,
+
+    @SerialName("latest_content_id")
+    val latestContentId: Long? = null,
+
+    val user: User? = null,
+) {
+    val isMasked: Boolean
+        get() = !maskText.isNullOrBlank()
+}
+
+/**
  * 小说系列详情
  */
 @Serializable

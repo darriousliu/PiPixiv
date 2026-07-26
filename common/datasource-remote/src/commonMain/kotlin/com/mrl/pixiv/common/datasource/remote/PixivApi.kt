@@ -15,6 +15,7 @@ import com.mrl.pixiv.common.data.novel.NovelDetailResp
 import com.mrl.pixiv.common.data.novel.NovelRankingResp
 import com.mrl.pixiv.common.data.novel.NovelRecommendedResp
 import com.mrl.pixiv.common.data.novel.NovelSeriesResp
+import com.mrl.pixiv.common.data.novel.NovelWatchlistResp
 import com.mrl.pixiv.common.data.novel.SearchNovelResp
 import com.mrl.pixiv.common.data.report.ReportTopicListResp
 import com.mrl.pixiv.common.data.search.SearchAiType
@@ -469,6 +470,26 @@ interface PixivApi {
     suspend fun loadMoreNovelSeries(
         @QueryMap queryMap: Map<String, String>,
     ): NovelSeriesResp
+
+    @GET("v1/watchlist/novel")
+    suspend fun getNovelWatchlist(): NovelWatchlistResp
+
+    @GET("v1/watchlist/novel")
+    suspend fun loadMoreNovelWatchlist(
+        @QueryMap queryMap: Map<String, String>,
+    ): NovelWatchlistResp
+
+    @FormUrlEncoded
+    @POST("v1/watchlist/novel/add")
+    suspend fun addNovelSeriesToWatchlist(
+        @Field("series_id") seriesId: Long,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v1/watchlist/novel/delete")
+    suspend fun deleteNovelSeriesFromWatchlist(
+        @Field("series_id") seriesId: Long,
+    ): EmptyResp
 
     @GET("v2/novel/detail")
     suspend fun getNovelDetail(

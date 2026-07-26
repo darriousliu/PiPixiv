@@ -24,5 +24,9 @@ kotlin {
             implementation(libs.filekit.dialogs)
             implementation(libs.okio)
         }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

@@ -218,4 +218,8 @@ class NavigationManager(
     fun navigateToNovelDetailScreen(novelId: Long) {
         backStack.navigate(route = Destination.NovelDetail(novelId))
     }
+
+    fun navigateToNovelSeriesScreen(seriesId: Long) {
+        backStack.navigate(route = Destination.NovelSeries(seriesId))
+    }
 }

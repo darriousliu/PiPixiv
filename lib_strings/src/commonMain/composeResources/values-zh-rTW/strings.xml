@@ -230,6 +230,11 @@
     <string name="novel_ranking">小說排行榜</string>
     <string name="novel_new">最新小說</string>
     <string name="novel_follow">關注的小說</string>
+    <string name="novel_watchlist">追更</string>
+    <string name="novel_watchlist_add">追更</string>
+    <string name="novel_watchlist_added">已追更</string>
+    <string name="novel_series_chapter_count">%1$d 章</string>
+    <string name="novel_watchlist_empty">暫無關注中的小說系列</string>
     <string name="switch_to_novel_mode">切換到小說模式</string>
     <string name="switch_to_illust_mode">切換到插畫模式</string>
     <string name="back">返回</string>

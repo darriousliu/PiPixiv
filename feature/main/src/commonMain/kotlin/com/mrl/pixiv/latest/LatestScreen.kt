@@ -38,6 +38,9 @@ import com.mrl.pixiv.main.components.ViewModeToggleButton
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.latest_tab_following
 import com.mrl.pixiv.strings.latest_tab_trend
+import com.mrl.pixiv.strings.novel_new
+import com.mrl.pixiv.strings.novel_recommended
+import com.mrl.pixiv.strings.novel_watchlist
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -48,15 +51,15 @@ fun LatestScreen(
     modifier: Modifier = Modifier,
     viewModel: LatestViewModel = koinViewModel(),
 ) {
-    val pages = remember { LatestPage.entries }
     val pagerState = viewModel.pagerState
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val windowAdaptiveInfo = currentWindowAdaptiveInfoV2()
     val refreshFlow = remember { MutableSharedFlow<LatestPage>() }
-    val page = pages[pagerState.currentPage]
     val isWidthAtLeastMedium = windowAdaptiveInfo.isWidthAtLeastMedium
     val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
+    val pages = remember(appViewMode) { LatestPage.pagesFor(appViewMode) }
+    val page = pages[pagerState.currentPage.coerceIn(pages.indices)]
     val scrollState = when (page) {
         LatestPage.Trend -> when (appViewMode) {
             AppViewMode.ILLUST -> viewModel.trendingLazyGirdState
@@ -81,13 +84,17 @@ fun LatestScreen(
                 viewModel.followingLazyListState
             }
         }
+
+        LatestPage.NovelRecommended -> viewModel.recommendedNovelLazyListState
+        LatestPage.NovelNew -> viewModel.newNovelLazyListState
+        LatestPage.NovelWatchlist -> viewModel.watchlistNovelLazyListState
     }
 
 
-    LaunchedEffect(pagerState.currentPage) {
+    LaunchedEffect(pagerState.currentPage, pages) {
         logEvent("screen_view", buildMap {
             put("screen_name", "Latest")
-            put("page_name", pages[pagerState.currentPage].name)
+            put("page_name", page.name)
         })
     }
 
@@ -107,7 +114,7 @@ fun LatestScreen(
                     },
                     onRefresh = {
                         scope.launch {
-                            refreshFlow.emit(pages[pagerState.currentPage])
+                            refreshFlow.emit(page)
                         }
                     }
                 )
@@ -143,6 +150,9 @@ fun LatestScreen(
                                     LatestPage.Trend -> RStrings.latest_tab_trend
                                     LatestPage.Collection -> RStrings.collection
                                     LatestPage.Following -> RStrings.latest_tab_following
+                                    LatestPage.NovelRecommended -> RStrings.novel_recommended
+                                    LatestPage.NovelNew -> RStrings.novel_new
+                                    LatestPage.NovelWatchlist -> RStrings.novel_watchlist
                                 }
                             )
                         )
@@ -171,6 +181,18 @@ fun LatestScreen(
                             uid = userInfo.user.id,
                             refreshFlow = refreshFlow
                         )
+                    }
+
+                    LatestPage.NovelRecommended -> {
+                        RecommendedNovelPage(refreshFlow = refreshFlow)
+                    }
+
+                    LatestPage.NovelNew -> {
+                        NewNovelPage(refreshFlow = refreshFlow)
+                    }
+
+                    LatestPage.NovelWatchlist -> {
+                        NovelWatchlistPage(refreshFlow = refreshFlow)
                     }
                 }
             }

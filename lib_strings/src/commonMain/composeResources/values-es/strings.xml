@@ -230,6 +230,11 @@
     <string name="novel_ranking">Clasificación de novelas</string>
     <string name="novel_new">Últimas novelas</string>
     <string name="novel_follow">Novelas seguidas</string>
+    <string name="novel_watchlist">Lista de seguimiento</string>
+    <string name="novel_watchlist_add">Añadir a la lista de seguimiento</string>
+    <string name="novel_watchlist_added">En la lista de seguimiento</string>
+    <string name="novel_series_chapter_count">%1$d capítulos</string>
+    <string name="novel_watchlist_empty">Aún no hay series de novelas seguidas</string>
     <string name="switch_to_novel_mode">Cambiar al modo novela</string>
     <string name="switch_to_illust_mode">Cambiar al modo ilustración</string>
     <string name="back">Volver</string>

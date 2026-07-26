@@ -350,6 +350,17 @@ object PixivRepository : KoinComponent {
     suspend fun loadMoreNovelSeries(queryMap: Map<String, String>) =
         apiApi.loadMoreNovelSeries(queryMap)
 
+    suspend fun getNovelWatchlist() = apiApi.getNovelWatchlist()
+
+    suspend fun loadMoreNovelWatchlist(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelWatchlist(queryMap)
+
+    suspend fun addNovelSeriesToWatchlist(seriesId: Long) =
+        apiApi.addNovelSeriesToWatchlist(seriesId)
+
+    suspend fun deleteNovelSeriesFromWatchlist(seriesId: Long) =
+        apiApi.deleteNovelSeriesFromWatchlist(seriesId)
+
     suspend fun getNovelDetail(novelId: Long) = apiApi.getNovelDetail(novelId)
 
     suspend fun getTrendingNovelTags(filter: Filter = Filter.ANDROID) =

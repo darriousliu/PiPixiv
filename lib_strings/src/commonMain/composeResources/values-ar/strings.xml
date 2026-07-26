@@ -230,6 +230,11 @@
     <string name="novel_ranking">تصنيف الروايات</string>
     <string name="novel_new">أحدث الروايات</string>
     <string name="novel_follow">الروايات المتابعة</string>
+    <string name="novel_watchlist">قائمة المتابعة</string>
+    <string name="novel_watchlist_add">إضافة إلى قائمة المتابعة</string>
+    <string name="novel_watchlist_added">مضاف إلى قائمة المتابعة</string>
+    <string name="novel_series_chapter_count">%1$d فصل</string>
+    <string name="novel_watchlist_empty">لا توجد سلاسل روايات مُتابعة بعد</string>
     <string name="switch_to_novel_mode">التبديل إلى وضع الرواية</string>
     <string name="switch_to_illust_mode">التبديل إلى وضع الرسوم التوضيحية</string>
     <string name="back">رجوع</string>

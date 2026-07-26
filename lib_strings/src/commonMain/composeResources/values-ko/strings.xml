@@ -230,6 +230,11 @@
     <string name="novel_ranking">소설 랭킹</string>
     <string name="novel_new">최신 소설</string>
     <string name="novel_follow">팔로우하는 소설</string>
+    <string name="novel_watchlist">관심 목록</string>
+    <string name="novel_watchlist_add">관심 목록에 추가</string>
+    <string name="novel_watchlist_added">관심 목록에 추가됨</string>
+    <string name="novel_series_chapter_count">%1$d화</string>
+    <string name="novel_watchlist_empty">팔로우 중인 소설 시리즈가 없습니다</string>
     <string name="switch_to_novel_mode">소설 모드로 전환</string>
     <string name="switch_to_illust_mode">일러스트 모드로 전환</string>
     <string name="back">뒤로</string>

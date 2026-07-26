@@ -59,6 +59,7 @@ public val com_mrl_pixiv_IosAppModule : Module get() = module {
     defineComMrlPixivLoginLoginViewModel()
     defineComMrlPixivLoginOauthOAuthLoginViewModel()
     defineComMrlPixivNovelNovelViewModel()
+    defineComMrlPixivNovelSeriesNovelSeriesViewModel()
     defineComMrlPixivPicturePictureViewModel()
     defineComMrlPixivProfileDetailProfileDetailViewModel()
     defineComMrlPixivProfileProfileViewModel()
