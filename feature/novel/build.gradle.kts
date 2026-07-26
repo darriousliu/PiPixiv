@@ -23,6 +23,7 @@ kotlin {
             implementation(kotlinx.serialization.json)
             implementation(libs.filekit.dialogs)
             implementation(libs.okio)
+            implementation(libs.html.converter)
         }
 
         commonTest.dependencies {

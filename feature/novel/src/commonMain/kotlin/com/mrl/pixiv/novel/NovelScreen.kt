@@ -189,6 +189,7 @@ fun NovelScreen(
     },
     navigationManager: NavigationManager = koinInject(),
 ) {
+    val uriHandler = LocalUriHandler.current
     val state = viewModel.asState()
     val currentNovelId = state.novel?.id ?: novelId
     val isNovelBlocked = BlockingRepositoryV2.collectNovelBlockAsState(currentNovelId)
@@ -459,6 +460,23 @@ fun NovelScreen(
                             onSeriesClick = { seriesId ->
                                 navigationManager.navigateToNovelSeriesScreen(seriesId)
                             },
+                            onCaptionLinkClick = { url ->
+                                when (val target = resolveNovelCaptionLink(url)) {
+                                    is NovelCaptionLinkTarget.Illust ->
+                                        navigationManager.navigateToSinglePictureScreen(target.id)
+
+                                    is NovelCaptionLinkTarget.Novel ->
+                                        navigationManager.navigateToNovelDetailScreen(target.id)
+
+                                    is NovelCaptionLinkTarget.User ->
+                                        navigationManager.navigateToProfileDetailScreen(target.id)
+
+                                    is NovelCaptionLinkTarget.External ->
+                                        runCatching { uriHandler.openUri(target.url) }
+
+                                    null -> Unit
+                                }
+                            },
                             onCommentClick = {
                                 navigationManager.navigateToCommentScreen(
                                     state.novel.id,
@@ -681,6 +699,7 @@ private fun NovelContent(
     onPixivImageClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onSeriesClick: (Long) -> Unit,
+    onCaptionLinkClick: (String) -> Unit,
     onCommentClick: () -> Unit,
 ) {
     val novel = state.novel ?: return
@@ -843,13 +862,21 @@ private fun NovelContent(
             // Caption卡片(如果有内容)
             if (novel.caption.isNotEmpty()) {
                 item(key = KEY_CAPTION) {
+                    val linkColor = MaterialTheme.colorScheme.primary
+                    val caption = remember(novel.caption, linkColor, onCaptionLinkClick) {
+                        novelCaptionToAnnotatedString(
+                            html = novel.caption,
+                            linkColor = linkColor,
+                            onLinkClick = onCaptionLinkClick,
+                        )
+                    }
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = novel.caption,
+                            text = caption,
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontSize = state.fontSize.sp,
                                 lineHeight = (state.fontSize + state.lineSpacingSp + 8).sp
