@@ -104,7 +104,7 @@ fun SearchResultsScreen(
 ) {
     val state = viewModel.asState()
     val searchResultDisplayMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle {
-        browsingSettings.searchResultDisplayMode
+        searchSettings.searchResultDisplayMode
     }
     val isPremium by viewModel.isPremium.collectAsStateWithLifecycle()
     val usePagedSearchResults = searchResultDisplayMode == SearchResultDisplayMode.PAGED

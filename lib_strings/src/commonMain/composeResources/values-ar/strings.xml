@@ -296,6 +296,9 @@
     <string name="show_novel">إظهار هذه الرواية</string>
     <string name="block_tag_as_regex">مطابقة باستخدام تعبير نمطي</string>
     <string name="browsing_setting">إعدادات التصفح</string>
+    <string name="search_setting">إعدادات البحث</string>
+    <string name="default_search_sort">ترتيب البحث الافتراضي</string>
+    <string name="default_search_sort_desc">عند تفعيل تذكر الاختيار الحالي، تكون الأولوية للترتيب المحفوظ</string>
     <string name="preview_image_quality">جودة صورة المعاينة</string>
     <string name="preview_image_quality_medium">متوسطة</string>
     <string name="preview_image_quality_high">عالية</string>

@@ -296,6 +296,9 @@
     <string name="show_novel">この小説を表示</string>
     <string name="block_tag_as_regex">正規表現でマッチ</string>
     <string name="browsing_setting">閲覧設定</string>
+    <string name="search_setting">検索設定</string>
+    <string name="default_search_sort">デフォルトの検索順</string>
+    <string name="default_search_sort_desc">「現在の選択を記憶」が有効な場合は、記憶した並び順が優先されます</string>
     <string name="preview_image_quality">プレビュー画像品質</string>
     <string name="preview_image_quality_medium">中</string>
     <string name="preview_image_quality_high">高</string>

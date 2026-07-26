@@ -307,6 +307,9 @@
     <string name="show_novel">显示该小说</string>
     <string name="block_tag_as_regex">按正则表达式匹配</string>
     <string name="browsing_setting">浏览设置</string>
+    <string name="search_setting">搜索设置</string>
+    <string name="default_search_sort">默认搜索排序</string>
+    <string name="default_search_sort_desc">开启“记住当前选择”时，优先使用已记住的排序</string>
     <string name="preview_image_quality">预览图片质量</string>
     <string name="preview_image_quality_medium">中等</string>
     <string name="preview_image_quality_high">高</string>

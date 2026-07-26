@@ -79,6 +79,9 @@ sealed class Destination : NavKey {
     data object BrowsingSetting : Destination()
 
     @Serializable
+    data object SearchSetting : Destination()
+
+    @Serializable
     data object HistorySetting : Destination()
 
     @Serializable

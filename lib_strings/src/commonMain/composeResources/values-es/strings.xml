@@ -296,6 +296,9 @@
     <string name="show_novel">Mostrar esta novela</string>
     <string name="block_tag_as_regex">Coincidir mediante expresión regular</string>
     <string name="browsing_setting">Configuración de navegación</string>
+    <string name="search_setting">Configuración de búsqueda</string>
+    <string name="default_search_sort">Orden de búsqueda predeterminado</string>
+    <string name="default_search_sort_desc">La selección recordada tiene prioridad cuando está activada</string>
     <string name="preview_image_quality">Calidad de imagen de vista previa</string>
     <string name="preview_image_quality_medium">Media</string>
     <string name="preview_image_quality_high">Alta</string>

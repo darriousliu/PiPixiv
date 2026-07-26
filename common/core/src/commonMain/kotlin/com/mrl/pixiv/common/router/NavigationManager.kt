@@ -183,6 +183,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.BrowsingSetting)
     }
 
+    fun navigateToSearchSettingScreen() {
+        backStack.navigate(route = Destination.SearchSetting)
+    }
+
     fun navigateToHistorySettingScreen() {
         backStack.navigate(route = Destination.HistorySetting)
     }

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.NetworkWifi
 import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material.icons.rounded._18UpRating
@@ -66,6 +67,7 @@ import com.mrl.pixiv.strings.label_default
 import com.mrl.pixiv.strings.network_setting
 import com.mrl.pixiv.strings.r18
 import com.mrl.pixiv.strings.r18_alert_message
+import com.mrl.pixiv.strings.search_setting
 import com.mrl.pixiv.strings.setting
 import com.mrl.pixiv.strings.span_count_adaptive
 import com.mrl.pixiv.strings.span_count_landscape
@@ -77,6 +79,7 @@ import org.koin.compose.koinInject
 const val KEY_LANGUAGE = "language"
 const val KEY_NETWORK_SETTING = "network_setting"
 const val KEY_BROWSING_SETTING = "browsing_setting"
+const val KEY_SEARCH_SETTING = "search_setting"
 const val KEY_HISTORY_SETTING = "history_setting"
 const val KEY_AI_TRANSLATION_SETTING = "ai_translation_setting"
 const val KEY_DEFAULT_OPEN_LINK = "default_open_link"
@@ -216,6 +219,30 @@ fun SettingScreen(
                         },
                     leadingContent = {
                         Icon(imageVector = Icons.Rounded.Image, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+            item(key = KEY_SEARCH_SETTING) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RStrings.search_setting),
+                        )
+                    },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            navigationManager.navigateToSearchSettingScreen()
+                        },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.Search, contentDescription = null)
                     },
                     trailingContent = {
                         Icon(

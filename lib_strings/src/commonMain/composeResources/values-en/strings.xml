@@ -296,6 +296,9 @@
     <string name="show_novel">Show this novel</string>
     <string name="block_tag_as_regex">Match using regex</string>
     <string name="browsing_setting">Browsing Settings</string>
+    <string name="search_setting">Search Settings</string>
+    <string name="default_search_sort">Default Search Sort</string>
+    <string name="default_search_sort_desc">A remembered selection takes priority when enabled</string>
     <string name="preview_image_quality">Preview Image Quality</string>
     <string name="preview_image_quality_medium">Medium</string>
     <string name="preview_image_quality_high">High</string>

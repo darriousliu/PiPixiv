@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.data.setting.PreviewImageQuality
-import com.mrl.pixiv.common.data.setting.SearchResultDisplayMode
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
@@ -48,9 +47,6 @@ import com.mrl.pixiv.strings.preview_image_quality
 import com.mrl.pixiv.strings.preview_image_quality_high
 import com.mrl.pixiv.strings.preview_image_quality_medium
 import com.mrl.pixiv.strings.preview_image_quality_original
-import com.mrl.pixiv.strings.search_result_display_mode
-import com.mrl.pixiv.strings.search_result_display_mode_infinite
-import com.mrl.pixiv.strings.search_result_display_mode_paged
 import com.mrl.pixiv.strings.tap_image_to_open_full_resolution_preview
 import com.mrl.pixiv.strings.tap_image_to_open_full_resolution_preview_desc
 import org.jetbrains.compose.resources.stringResource
@@ -94,14 +90,6 @@ fun BrowsingSettingScreen(
                 onQualityChange = { quality ->
                     SettingRepository.setBrowsingSettings(
                         browsingSettings.copy(previewImageQuality = quality)
-                    )
-                }
-            )
-            SearchResultDisplayModeSetting(
-                selectedMode = browsingSettings.searchResultDisplayMode,
-                onModeChange = { mode ->
-                    SettingRepository.setBrowsingSettings(
-                        browsingSettings.copy(searchResultDisplayMode = mode)
                     )
                 }
             )
@@ -239,57 +227,5 @@ private fun PreviewImageQuality.label(): String {
         PreviewImageQuality.MEDIUM -> stringResource(RStrings.preview_image_quality_medium)
         PreviewImageQuality.HIGH -> stringResource(RStrings.preview_image_quality_high)
         PreviewImageQuality.ORIGINAL -> stringResource(RStrings.preview_image_quality_original)
-    }
-}
-
-@Composable
-private fun SearchResultDisplayModeSetting(
-    selectedMode: SearchResultDisplayMode,
-    onModeChange: (SearchResultDisplayMode) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val modes = remember { SearchResultDisplayMode.entries }
-
-    ListItem(
-        headlineContent = { Text(text = stringResource(RStrings.search_result_display_mode)) },
-        modifier = modifier,
-        leadingContent = { Icon(Icons.Rounded.Image, contentDescription = null) },
-        trailingContent = {
-            DropDownSelector(
-                modifier = Modifier.throttleClick { expanded = !expanded },
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                current = selectedMode.label(),
-            ) {
-                modes.forEach { mode ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(text = mode.label())
-                        },
-                        trailingIcon = {
-                            if (mode == selectedMode) {
-                                Icon(Icons.Rounded.Check, contentDescription = null)
-                            }
-                        },
-                        onClick = {
-                            onModeChange(mode)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
-private fun SearchResultDisplayMode.label(): String {
-    return when (this) {
-        SearchResultDisplayMode.INFINITE_SCROLL ->
-            stringResource(RStrings.search_result_display_mode_infinite)
-
-        SearchResultDisplayMode.PAGED ->
-            stringResource(RStrings.search_result_display_mode_paged)
     }
 }

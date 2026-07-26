@@ -76,7 +76,9 @@ class SearchResultViewModel(
                 searchAiType = saved.searchAiType,
             )
         } else {
-            SearchFilter()
+            SearchFilter(
+                sort = SettingRepository.userPreferenceFlow.value.searchSettings.defaultSearchSort
+            )
         }
     ),
 ), KoinComponent {

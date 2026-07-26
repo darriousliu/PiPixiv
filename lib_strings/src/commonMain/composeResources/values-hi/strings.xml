@@ -296,6 +296,9 @@
     <string name="show_novel">इस उपन्यास को दिखाएँ</string>
     <string name="block_tag_as_regex">रेगुलर एक्सप्रेशन से मिलान करें</string>
     <string name="browsing_setting">ब्राउज़िंग सेटिंग्स</string>
+    <string name="search_setting">खोज सेटिंग्स</string>
+    <string name="default_search_sort">डिफ़ॉल्ट खोज क्रम</string>
+    <string name="default_search_sort_desc">चालू होने पर याद रखा गया चयन प्राथमिकता लेता है</string>
     <string name="preview_image_quality">पूर्वावलोकन छवि गुणवत्ता</string>
     <string name="preview_image_quality_medium">मध्यम</string>
     <string name="preview_image_quality_high">उच्च</string>

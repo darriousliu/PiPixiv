@@ -24,6 +24,7 @@ data class UserPreference(
     val appViewMode: AppViewMode = AppViewMode.ILLUST,
     val aiTranslationConfig: AiTranslationConfig = AiTranslationConfig(),
     val browsingSettings: BrowsingSettings = BrowsingSettings(),
+    val searchSettings: SearchSettings = SearchSettings(),
     val historySettings: HistorySettings = HistorySettings(),
 ) {
     companion object {

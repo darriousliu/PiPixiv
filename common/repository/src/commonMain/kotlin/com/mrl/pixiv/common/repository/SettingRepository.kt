@@ -10,6 +10,7 @@ import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.data.setting.BrowsingSettings
 import com.mrl.pixiv.common.data.setting.HistorySettings
+import com.mrl.pixiv.common.data.setting.SearchSettings
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.mmkv.MMKVUser
@@ -101,6 +102,10 @@ object SettingRepository : MMKVUser {
 
     fun setBrowsingSettings(settings: BrowsingSettings) = userPreference.update {
         it.copy(browsingSettings = settings)
+    }
+
+    fun setSearchSettings(settings: SearchSettings) = userPreference.update {
+        it.copy(searchSettings = settings)
     }
 
     fun setHistorySettings(settings: HistorySettings) = userPreference.update {

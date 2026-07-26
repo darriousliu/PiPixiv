@@ -296,6 +296,9 @@
     <string name="show_novel">顯示這部小說</string>
     <string name="block_tag_as_regex">以正則表達式比對</string>
     <string name="browsing_setting">瀏覽設定</string>
+    <string name="search_setting">搜尋設定</string>
+    <string name="default_search_sort">預設搜尋排序</string>
+    <string name="default_search_sort_desc">開啟「記住目前選擇」時，優先使用已記住的排序</string>
     <string name="preview_image_quality">預覽圖片品質</string>
     <string name="preview_image_quality_medium">中等</string>
     <string name="preview_image_quality_high">高</string>

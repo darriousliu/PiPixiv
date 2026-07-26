@@ -296,6 +296,9 @@
     <string name="show_novel">Afficher ce roman</string>
     <string name="block_tag_as_regex">Faire correspondre via une expression régulière</string>
     <string name="browsing_setting">Paramètres de navigation</string>
+    <string name="search_setting">Paramètres de recherche</string>
+    <string name="default_search_sort">Tri de recherche par défaut</string>
+    <string name="default_search_sort_desc">La sélection mémorisée est prioritaire lorsqu’elle est activée</string>
     <string name="preview_image_quality">Qualité de l'image d'aperçu</string>
     <string name="preview_image_quality_medium">Moyenne</string>
     <string name="preview_image_quality_high">Élevée</string>

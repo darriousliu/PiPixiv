@@ -296,6 +296,9 @@
     <string name="show_novel">Bu romanı göster</string>
     <string name="block_tag_as_regex">Düzenli ifadeyle eşleştir</string>
     <string name="browsing_setting">Göz atma ayarları</string>
+    <string name="search_setting">Arama ayarları</string>
+    <string name="default_search_sort">Varsayılan arama sıralaması</string>
+    <string name="default_search_sort_desc">Etkinleştirildiğinde hatırlanan seçim önceliklidir</string>
     <string name="preview_image_quality">Önizleme görüntü kalitesi</string>
     <string name="preview_image_quality_medium">Orta</string>
     <string name="preview_image_quality_high">Yüksek</string>

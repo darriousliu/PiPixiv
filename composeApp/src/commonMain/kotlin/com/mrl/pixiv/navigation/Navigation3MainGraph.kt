@@ -61,6 +61,7 @@ import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.BrowsingSettingScreen
 import com.mrl.pixiv.setting.FileNameFormatScreen
 import com.mrl.pixiv.setting.HistorySettingScreen
+import com.mrl.pixiv.setting.SearchSettingScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
 import com.mrl.pixiv.setting.ai.AiTranslationSettingScreen
@@ -209,6 +210,12 @@ fun Navigation3MainGraph(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
                         BrowsingSettingScreen()
+                    }
+
+                    entry<Destination.SearchSetting>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        SearchSettingScreen()
                     }
 
                     entry<Destination.HistorySetting>(
