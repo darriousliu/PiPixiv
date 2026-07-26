@@ -218,7 +218,6 @@
     <string name="illusts">插画</string>
     <string name="id_search">ID搜索</string>
     <string name="max_bookmark_tags_reached">最多选择%1$d个标签</string>
-    <string name="remember_current_selection">记住当前选择</string>
     <string name="default_private_bookmark">默认私人收藏</string>
     <string name="save_as">另存为</string>
     <string name="copy_link">复制链接</string>
@@ -308,8 +307,8 @@
     <string name="block_tag_as_regex">按正则表达式匹配</string>
     <string name="browsing_setting">浏览设置</string>
     <string name="search_setting">搜索设置</string>
+    <string name="default_search_target">默认搜索范围</string>
     <string name="default_search_sort">默认搜索排序</string>
-    <string name="default_search_sort_desc">开启“记住当前选择”时，优先使用已记住的排序</string>
     <string name="preview_image_quality">预览图片质量</string>
     <string name="preview_image_quality_medium">中等</string>
     <string name="preview_image_quality_high">高</string>

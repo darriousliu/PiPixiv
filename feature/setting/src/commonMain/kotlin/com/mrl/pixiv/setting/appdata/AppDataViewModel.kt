@@ -153,8 +153,6 @@ class AppDataViewModel(
                         illustSearchIds = SearchRepository.searchIdHistoryFlow.value.orEmpty(),
                         novelSearch = SearchRepository.novelSearchHistoryFlow.value,
                         novelSearchIds = SearchRepository.novelSearchIdHistoryFlow.value.orEmpty(),
-                        savedFilter = SearchRepository.savedSearchFilterValue,
-                        rememberFilter = SearchRepository.rememberSearchFilterValue,
                     ),
                     blocking = BlockingDataV2(
                         blockIllusts = blockIllusts,
@@ -273,8 +271,6 @@ class AppDataViewModel(
             searchIds = data.search.illustSearchIds,
             novelSearch = data.search.novelSearch,
             novelSearchIds = data.search.novelSearchIds,
-            savedFilter = data.search.savedFilter,
-            rememberFilter = data.search.rememberFilter
         )
 
         // Blocking
@@ -308,8 +304,6 @@ class AppDataViewModel(
             searchIds = data.searchIdHistory,
             novelSearch = NovelSearch(),
             novelSearchIds = emptySet(),
-            savedFilter = data.savedSearchFilter,
-            rememberFilter = data.rememberSearchFilter
         )
 
         // Blocking

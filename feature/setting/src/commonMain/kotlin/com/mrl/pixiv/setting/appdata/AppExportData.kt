@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.mrl.pixiv.setting.appdata
 
 import com.mrl.pixiv.common.data.Tag
@@ -26,7 +28,9 @@ data class AppExportData(
     val blockComments: List<Comment>,
     val bookmarkedTags: List<Tag>,
     val downloads: List<DownloadEntity> = emptyList(),
+    @Deprecated("Persistent search filter defaults are stored in userPreference.searchSettings.")
     val savedSearchFilter: LocalSearchFilter = LocalSearchFilter(),
+    @Deprecated("Search filter changes are no longer remembered.")
     val rememberSearchFilter: Boolean = false,
 )
 
@@ -65,7 +69,9 @@ data class SearchData(
     val illustSearchIds: Set<String> = emptySet(),
     val novelSearch: NovelSearch = NovelSearch(),
     val novelSearchIds: Set<String> = emptySet(),
+    @Deprecated("Persistent search filter defaults are stored in SettingsData.userPreference.searchSettings.")
     val savedFilter: LocalSearchFilter = LocalSearchFilter(),
+    @Deprecated("Search filter changes are no longer remembered.")
     val rememberFilter: Boolean = false,
 )
 

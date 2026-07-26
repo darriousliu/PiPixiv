@@ -246,6 +246,7 @@ object PixivRepository : KoinComponent {
             query.mergePlainKeywordResults,
             query.word,
             query.searchTarget.value,
+            query.searchAiType.value,
         )
 
     suspend fun searchPopularPreviewNovel(query: SearchNovelQuery) =
@@ -255,6 +256,7 @@ object PixivRepository : KoinComponent {
             query.mergePlainKeywordResults,
             query.word,
             query.searchTarget.value,
+            query.searchAiType.value,
         )
 
     suspend fun getIllustComments(illustId: Long, offset: Int? = null) =
@@ -365,6 +367,7 @@ object PixivRepository : KoinComponent {
             query.bookmarkNumMax,
             query.startDate,
             query.endDate,
+            query.searchAiType.value,
             query.offset
         )
 

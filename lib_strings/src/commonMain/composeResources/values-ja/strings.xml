@@ -212,7 +212,6 @@
     <string name="illusts">イラスト</string>
     <string name="id_search">ID検索</string>
     <string name="max_bookmark_tags_reached">最大 %1$d 個のタグを選択できます</string>
-    <string name="remember_current_selection">現在の選択を記憶</string>
     <string name="default_private_bookmark">デフォルトのプライベートブックマーク</string>
     <string name="save_as">名前を付けて保存</string>
     <string name="copy_link">リンクをコピー</string>
@@ -297,8 +296,8 @@
     <string name="block_tag_as_regex">正規表現でマッチ</string>
     <string name="browsing_setting">閲覧設定</string>
     <string name="search_setting">検索設定</string>
+    <string name="default_search_target">デフォルトの検索対象</string>
     <string name="default_search_sort">デフォルトの検索順</string>
-    <string name="default_search_sort_desc">「現在の選択を記憶」が有効な場合は、記憶した並び順が優先されます</string>
     <string name="preview_image_quality">プレビュー画像品質</string>
     <string name="preview_image_quality_medium">中</string>
     <string name="preview_image_quality_high">高</string>

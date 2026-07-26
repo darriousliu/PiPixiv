@@ -6,11 +6,9 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.AppViewMode
-import com.mrl.pixiv.common.data.search.LocalSearchFilter
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.data.search.SearchNovelQuery
 import com.mrl.pixiv.common.data.search.SearchSort
-import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.feed.PagedFeedController
 import com.mrl.pixiv.common.repository.feed.SearchIllustFeedSource
@@ -68,18 +66,10 @@ class SearchResultViewModel(
 ) : BaseMviViewModel<SearchResultState, SearchResultAction>(
     initialState = SearchResultState(
         searchWords = searchWords,
-        searchFilter = if (SearchRepository.rememberSearchFilterValue) {
-            val saved = SearchRepository.savedSearchFilterValue
-            SearchFilter(
-                sort = saved.sort,
-                searchTarget = saved.searchTarget,
-                searchAiType = saved.searchAiType,
-            )
-        } else {
-            SearchFilter(
-                sort = SettingRepository.userPreferenceFlow.value.searchSettings.defaultSearchSort
-            )
-        }
+        searchFilter = resolveInitialSearchFilter(
+            searchSettings = SettingRepository.userPreferenceFlow.value.searchSettings,
+            searchMode = searchMode,
+        ),
     ),
 ), KoinComponent {
     private var manualIsPremium = requireUserInfoValue.profile.isPremium
@@ -183,6 +173,7 @@ class SearchResultViewModel(
                         bookmarkNumMax = state.bookmarkNumRange?.endInclusive?.takeIf { it != Int.MAX_VALUE },
                         startDate = startDate?.format(LocalDate.Formats.ISO),
                         endDate = endDate?.format(LocalDate.Formats.ISO),
+                        searchAiType = filter.searchAiType,
                     ),
                     isPremium = isPremium,
                     isIdSearch = isIdSearch
@@ -276,15 +267,6 @@ class SearchResultViewModel(
 
     fun switchToLatestSort() {
         val latestFilter = uiState.value.searchFilter.copy(sort = SearchSort.DATE_DESC)
-        if (SearchRepository.rememberSearchFilterValue) {
-            SearchRepository.setSavedSearchFilter(
-                LocalSearchFilter(
-                    sort = latestFilter.sort,
-                    searchTarget = latestFilter.searchTarget,
-                    searchAiType = latestFilter.searchAiType,
-                )
-            )
-        }
         dispatch(
             SearchResultAction.UpdateFilter(latestFilter)
         )
@@ -372,6 +354,7 @@ class SearchResultViewModel(
             bookmarkNumMax = state.bookmarkNumRange?.endInclusive?.takeIf { it != Int.MAX_VALUE },
             startDate = startDate?.format(LocalDate.Formats.ISO),
             endDate = endDate?.format(LocalDate.Formats.ISO),
+            searchAiType = filter.searchAiType,
         )
     }
 

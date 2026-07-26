@@ -45,21 +45,22 @@ class SearchNovelPagingSource(
             } else {
                 PixivRepository.searchNovelNext(params.key!!.toMap())
             }
-            val query = resp.nextUrl?.queryParams
+            val nextQueryParams = resp.nextUrl?.queryParams
             val novels = if (requireUserPreferenceValue.isR18Enabled) {
                 resp.novels.distinctBy { it.id }
             } else {
                 resp.novels.distinctBy { it.id }.filterNormalNovel()
             }.filterBlockedTags()
-            if (query != null) {
+            if (nextQueryParams != null) {
                 val nextKey = SearchNovelQuery(
-                    word = query["word"] ?: "",
-                    searchTarget = query["search_target"]
+                    word = nextQueryParams["word"] ?: "",
+                    searchTarget = nextQueryParams["search_target"]
                         ?.let { SearchTarget.valueOf(it.uppercase()) }
                         ?: SearchTarget.PARTIAL_MATCH_FOR_TAGS,
-                    sort = query["sort"]?.let { SearchSort.valueOf(it.uppercase()) }
+                    sort = nextQueryParams["sort"]?.let { SearchSort.valueOf(it.uppercase()) }
                         ?: SearchSort.POPULAR_DESC,
-                    offset = query["offset"]?.toInt() ?: 0,
+                    searchAiType = query.searchAiType,
+                    offset = nextQueryParams["offset"]?.toInt() ?: 0,
                 )
                 LoadResult.Page(
                     data = novels,

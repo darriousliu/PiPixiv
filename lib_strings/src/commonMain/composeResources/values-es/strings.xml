@@ -212,7 +212,6 @@
     <string name="illusts">Ilustraciones</string>
     <string name="id_search">Búsqueda por ID</string>
     <string name="max_bookmark_tags_reached">Selecciona hasta %1$d etiquetas</string>
-    <string name="remember_current_selection">Recordar selección actual</string>
     <string name="default_private_bookmark">Marcador privado predeterminado</string>
     <string name="save_as">Guardar como</string>
     <string name="copy_link">Copiar enlace</string>
@@ -297,8 +296,8 @@
     <string name="block_tag_as_regex">Coincidir mediante expresión regular</string>
     <string name="browsing_setting">Configuración de navegación</string>
     <string name="search_setting">Configuración de búsqueda</string>
+    <string name="default_search_target">Objetivo de búsqueda predeterminado</string>
     <string name="default_search_sort">Orden de búsqueda predeterminado</string>
-    <string name="default_search_sort_desc">La selección recordada tiene prioridad cuando está activada</string>
     <string name="preview_image_quality">Calidad de imagen de vista previa</string>
     <string name="preview_image_quality_medium">Media</string>
     <string name="preview_image_quality_high">Alta</string>

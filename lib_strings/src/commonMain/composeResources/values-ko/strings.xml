@@ -212,7 +212,6 @@
     <string name="illusts">일러스트</string>
     <string name="id_search">ID 검색</string>
     <string name="max_bookmark_tags_reached">태그를 최대 %1$d개까지 선택할 수 있습니다</string>
-    <string name="remember_current_selection">현재 선택 기억</string>
     <string name="default_private_bookmark">기본 비공개 북마크</string>
     <string name="save_as">다른 이름으로 저장</string>
     <string name="copy_link">링크 복사</string>
@@ -297,8 +296,8 @@
     <string name="block_tag_as_regex">정규식으로 매칭</string>
     <string name="browsing_setting">탐색 설정</string>
     <string name="search_setting">검색 설정</string>
+    <string name="default_search_target">기본 검색 대상</string>
     <string name="default_search_sort">기본 검색 정렬</string>
-    <string name="default_search_sort_desc">현재 선택 기억이 켜져 있으면 기억된 정렬이 우선됩니다</string>
     <string name="preview_image_quality">미리보기 이미지 품질</string>
     <string name="preview_image_quality_medium">보통</string>
     <string name="preview_image_quality_high">높음</string>

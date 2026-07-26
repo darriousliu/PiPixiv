@@ -296,6 +296,7 @@ interface PixivApi {
         @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
         @Query("word") word: String,
         @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
+        @Query("search_ai_type") searchAiType: Int = SearchAiType.HIDE_AI.value,
     ): SearchIllustResp
 
     @GET("v1/search/popular-preview/novel")
@@ -305,6 +306,7 @@ interface PixivApi {
         @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
         @Query("word") word: String,
         @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
+        @Query("search_ai_type") searchAiType: Int = SearchAiType.HIDE_AI.value,
     ): SearchNovelResp
 
     @GET("v3/illust/comments")
@@ -490,6 +492,7 @@ interface PixivApi {
         @Query("bookmark_num_max") bookmarkNumMax: Int? = null,
         @Query("start_date") startDate: String? = null,
         @Query("end_date") endDate: String? = null,
+        @Query("search_ai_type") searchAiType: Int = SearchAiType.HIDE_AI.value,
         @Query("offset") offset: Int = 0,
     ): SearchNovelResp
 

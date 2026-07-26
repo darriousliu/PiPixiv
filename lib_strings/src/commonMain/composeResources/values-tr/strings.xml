@@ -212,7 +212,6 @@
     <string name="illusts">İllüstrasyonlar</string>
     <string name="id_search">ID Arama</string>
     <string name="max_bookmark_tags_reached">%1$d etikete kadar seçebilirsin</string>
-    <string name="remember_current_selection">Mevcut seçimi hatırla</string>
     <string name="default_private_bookmark">Varsayılan gizli yer işareti</string>
     <string name="save_as">Farklı kaydet</string>
     <string name="copy_link">Bağlantıyı Kopyala</string>
@@ -297,8 +296,8 @@
     <string name="block_tag_as_regex">Düzenli ifadeyle eşleştir</string>
     <string name="browsing_setting">Göz atma ayarları</string>
     <string name="search_setting">Arama ayarları</string>
+    <string name="default_search_target">Varsayılan arama hedefi</string>
     <string name="default_search_sort">Varsayılan arama sıralaması</string>
-    <string name="default_search_sort_desc">Etkinleştirildiğinde hatırlanan seçim önceliklidir</string>
     <string name="preview_image_quality">Önizleme görüntü kalitesi</string>
     <string name="preview_image_quality_medium">Orta</string>
     <string name="preview_image_quality_high">Yüksek</string>
