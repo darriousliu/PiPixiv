@@ -222,7 +222,7 @@ private class IllustsSerializer : KSerializer<Map<String, NovelIllusts?>?> {
                 if (v is JsonNull || v is JsonObject && v["illust"] is JsonNull) {
                     null
                 } else {
-                    Json.decodeFromJsonElement(NovelIllusts.serializer(), v)
+                    jsonDecoder.json.decodeFromJsonElement(NovelIllusts.serializer(), v)
                 }
             }
 
@@ -253,7 +253,7 @@ private class ImagesSerializer : KSerializer<Map<String, NovelImage>?> {
             is JsonArray -> null
             is JsonNull -> null
             is JsonObject -> element.mapValues { (_, v) ->
-                Json.decodeFromJsonElement(NovelImage.serializer(), v)
+                jsonDecoder.json.decodeFromJsonElement(NovelImage.serializer(), v)
             }
             else -> null
         }
