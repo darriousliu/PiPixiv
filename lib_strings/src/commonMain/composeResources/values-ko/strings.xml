@@ -304,6 +304,14 @@
     <string name="auto_hide_preview_controls_desc">작품 상세 페이지의 이미지 영역에 몇 초 머무르면 버튼과 페이지 표시를 숨깁니다</string>
     <string name="tap_image_to_open_full_resolution_preview">이미지를 탭해 전체 해상도 미리보기 열기</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">끄면 작품 상세 페이지에서 이미지를 탭해도 전체 화면 원본 미리보기가 열리지 않습니다</string>
+    <string name="search_result_display_mode">검색 결과 표시 방식</string>
+    <string name="search_result_display_mode_infinite">무한 스크롤</string>
+    <string name="search_result_display_mode_paged">수동 페이지 이동</string>
+    <string name="popular_preview_paging_unavailable">Pixiv Premium 미가입 계정에서는 인기 내림차순 결과를 한 페이지만 미리 볼 수 있습니다</string>
+    <string name="switch_to_latest">날짜 내림차순으로 전환</string>
+    <string name="previous_page">이전 페이지</string>
+    <string name="next_page">다음 페이지</string>
+    <string name="page_index">%1$d페이지</string>
     <string name="history_setting">기록 설정</string>
     <string name="enable_history">기록 사용</string>
     <string name="enable_history_desc">끄면 일러스트와 소설 열람 기록을 저장하지 않습니다</string>

@@ -304,6 +304,14 @@
     <string name="auto_hide_preview_controls_desc">Oculta os botões e o indicador de página após alguns segundos na área de imagem da página de detalhes</string>
     <string name="tap_image_to_open_full_resolution_preview">Tocar na imagem para abrir pré-visualização em resolução completa</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">Quando desativado, tocar em uma imagem na página de detalhes não abrirá a pré-visualização original em tela cheia</string>
+    <string name="search_result_display_mode">Exibição dos resultados da pesquisa</string>
+    <string name="search_result_display_mode_infinite">Rolagem infinita</string>
+    <string name="search_result_display_mode_paged">Paginação manual</string>
+    <string name="popular_preview_paging_unavailable">Em contas sem Pixiv Premium, a opção “Popular” mostra apenas uma página de pré-visualização</string>
+    <string name="switch_to_latest">Mudar para “Mais recente”</string>
+    <string name="previous_page">Página anterior</string>
+    <string name="next_page">Próxima página</string>
+    <string name="page_index">Página %1$d</string>
     <string name="history_setting">Configurações do histórico</string>
     <string name="enable_history">Ativar histórico</string>
     <string name="enable_history_desc">Quando desativado, visualizações de ilustrações e novels não serão registradas</string>

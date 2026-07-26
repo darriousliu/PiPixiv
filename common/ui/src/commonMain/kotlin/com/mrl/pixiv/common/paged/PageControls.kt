@@ -80,7 +80,7 @@ fun PageControls(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(
-                enabled = state.currentPage > 1 && !state.isLoading,
+                enabled = state.hasPreviousPage && !state.isLoading,
                 onClick = onPreviousPage,
                 modifier = Modifier.size(40.dp),
             ) {

@@ -304,6 +304,14 @@
     <string name="auto_hide_preview_controls_desc">إخفاء الأزرار ومؤشر الصفحة بعد البقاء في منطقة الصورة في صفحة تفاصيل العمل لبضع ثوان</string>
     <string name="tap_image_to_open_full_resolution_preview">انقر على الصورة لفتح معاينة بالدقة الكاملة</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">عند التعطيل، لن يؤدي النقر على صورة في صفحة تفاصيل العمل إلى فتح معاينة الأصل بملء الشاشة</string>
+    <string name="search_result_display_mode">طريقة عرض نتائج البحث</string>
+    <string name="search_result_display_mode_infinite">التمرير اللانهائي</string>
+    <string name="search_result_display_mode_paged">التنقل اليدوي بين الصفحات</string>
+    <string name="popular_preview_paging_unavailable">يقتصر الترتيب حسب الشعبية على معاينة من صفحة واحدة للحسابات غير المشتركة في Pixiv Premium</string>
+    <string name="switch_to_latest">التبديل إلى الأحدث</string>
+    <string name="previous_page">الصفحة السابقة</string>
+    <string name="next_page">الصفحة التالية</string>
+    <string name="page_index">الصفحة %1$d</string>
     <string name="history_setting">إعدادات السجل</string>
     <string name="enable_history">تفعيل السجل</string>
     <string name="enable_history_desc">عند التعطيل، لن يتم تسجيل مشاهدات الرسوم أو الروايات</string>

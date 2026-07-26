@@ -304,6 +304,14 @@
     <string name="auto_hide_preview_controls_desc">Скрывает кнопки и индикатор страницы через несколько секунд в области изображения на странице работы</string>
     <string name="tap_image_to_open_full_resolution_preview">Нажатие на изображение открывает предпросмотр в полном разрешении</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">Если отключено, нажатие на изображение на странице работы не откроет полноэкранный предпросмотр оригинала</string>
+    <string name="search_result_display_mode">Отображение результатов поиска</string>
+    <string name="search_result_display_mode_infinite">Бесконечная прокрутка</string>
+    <string name="search_result_display_mode_paged">Постраничный просмотр</string>
+    <string name="popular_preview_paging_unavailable">Для аккаунтов без Pixiv Premium в сортировке «Популярное» доступна только одна страница предпросмотра</string>
+    <string name="switch_to_latest">Переключить на «Новее»</string>
+    <string name="previous_page">Предыдущая страница</string>
+    <string name="next_page">Следующая страница</string>
+    <string name="page_index">Страница %1$d</string>
     <string name="history_setting">Настройки истории</string>
     <string name="enable_history">Включить историю</string>
     <string name="enable_history_desc">Если отключено, просмотры иллюстраций и новелл не будут записываться</string>

@@ -2,10 +2,12 @@ package com.mrl.pixiv.search.result
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -17,11 +19,15 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -49,7 +55,7 @@ import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.AppViewMode
-import com.mrl.pixiv.common.data.setting.FeedDisplayMode
+import com.mrl.pixiv.common.data.setting.SearchResultDisplayMode
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.paged.PageControls
@@ -58,6 +64,7 @@ import com.mrl.pixiv.common.paged.PagedNovelList
 import com.mrl.pixiv.common.paged.PagedUserList
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.repository.feed.FeedCapability
 import com.mrl.pixiv.common.repository.feed.PagedFeedState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
@@ -69,6 +76,8 @@ import com.mrl.pixiv.search.result.components.FilterBottomSheet
 import com.mrl.pixiv.search.result.components.SearchResultAppBar
 import com.mrl.pixiv.strings.illusts
 import com.mrl.pixiv.strings.novels
+import com.mrl.pixiv.strings.popular_preview_paging_unavailable
+import com.mrl.pixiv.strings.switch_to_latest
 import com.mrl.pixiv.strings.users
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -94,12 +103,11 @@ fun SearchResultsScreen(
     navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
-    val feedDisplayMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle {
-        browsingSettings.feedDisplayMode
+    val searchResultDisplayMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle {
+        browsingSettings.searchResultDisplayMode
     }
-    val usePagedFeed = feedDisplayMode == FeedDisplayMode.PAGED
-    val pagedControlsBottomPadding = 0.dp
-    val pagedControlsContentPadding = if (usePagedFeed) 80.dp else 0.dp
+    val isPremium by viewModel.isPremium.collectAsStateWithLifecycle()
+    val usePagedSearchResults = searchResultDisplayMode == SearchResultDisplayMode.PAGED
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(true)
     val layoutParams = IllustGridDefaults.relatedLayoutParameters()
@@ -113,6 +121,9 @@ fun SearchResultsScreen(
     var refreshIllustResults by remember { mutableStateOf<(() -> Unit)?>(null) }
     var refreshNovelResults by remember { mutableStateOf<(() -> Unit)?>(null) }
     var refreshUserResults by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var lastConsumedIllustScrollEventId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var lastConsumedNovelScrollEventId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var lastConsumedUserScrollEventId by rememberSaveable { mutableStateOf<Long?>(null) }
 
     val pages = remember { SearchResultsPage.entries }
     val pagerState = rememberPagerState { SearchResultsPage.entries.size }
@@ -209,7 +220,7 @@ fun SearchResultsScreen(
         },
         floatingActionButton = {
             val currentPage = pages[pagerState.currentPage]
-            val onRefresh: () -> Unit = if (usePagedFeed) {
+            val onRefresh: () -> Unit = if (usePagedSearchResults) {
                 { viewModel.refreshManualPage(currentPage) }
             } else {
                 when (currentPage) {
@@ -251,19 +262,19 @@ fun SearchResultsScreen(
             state = pagerState,
             modifier = modifier.padding(it),
         ) { index ->
-            val bottomContentPadding = WindowInsets.navigationBars.asPaddingValues()
-                .calculateBottomPadding() + pagedControlsContentPadding
+            val navigationBarBottomPadding = WindowInsets.navigationBars.asPaddingValues()
+                .calculateBottomPadding()
 
             when (pages[index]) {
                 SearchResultsPage.IllustsOrNovel -> {
                     when (searchMode) {
                         AppViewMode.ILLUST -> {
-                            val manualIllustResults = if (usePagedFeed) {
+                            val manualIllustResults = if (usePagedSearchResults) {
                                 viewModel.manualIllustResults.collectAsStateWithLifecycle().value
                             } else {
                                 null
                             }
-                            val searchResults = if (usePagedFeed) {
+                            val searchResults = if (usePagedSearchResults) {
                                 null
                             } else {
                                 viewModel.searchResults.collectAsLazyPagingItems()
@@ -275,9 +286,19 @@ fun SearchResultsScreen(
                                     state.bookmarkNumRange,
                                     state.bookmarkStringRange,
                                     state.searchDateRange,
+                                    isPremium,
                                 ) {
-                                    viewModel.resetManualPage(SearchResultsPage.IllustsOrNovel)
+                                    viewModel.ensureManualPage(
+                                        page = SearchResultsPage.IllustsOrNovel,
+                                        isPremium = isPremium,
+                                    )
                                 }
+                                ScrollToTopOnPageChange(
+                                    eventId = manualIllustResults.scrollToTopEventId,
+                                    lastConsumedEventId = lastConsumedIllustScrollEventId,
+                                    onEventConsumed = { lastConsumedIllustScrollEventId = it },
+                                    onScrollToTop = { illustsGridState.scrollToItem(0) },
+                                )
                             }
                             if (searchResults != null) {
                                 LaunchedEffect(searchResults) {
@@ -287,6 +308,14 @@ fun SearchResultsScreen(
 
                             val isRefreshing = manualIllustResults?.isLoading
                                 ?: (searchResults?.loadState?.refresh is LoadState.Loading)
+                            val showPopularPreviewNotice =
+                                manualIllustResults != null &&
+                                    viewModel.isPopularPreview(isPremium)
+                            val showPagingControls =
+                                manualIllustResults?.capability != null &&
+                                    manualIllustResults.capability != FeedCapability.SINGLE_PAGE
+                            val bottomContentPadding = navigationBarBottomPadding +
+                                if (showPagingControls || showPopularPreviewNotice) 88.dp else 0.dp
 
                             PullToRefreshBox(
                                 isRefreshing = isRefreshing,
@@ -335,7 +364,7 @@ fun SearchResultsScreen(
                                     state = illustsGridState,
                                     modifier = Modifier.align(Alignment.CenterEnd)
                                 )
-                                if (manualIllustResults != null) {
+                                if (manualIllustResults != null && showPagingControls) {
                                     ManualPagingToolbar(
                                         state = manualIllustResults,
                                         page = SearchResultsPage.IllustsOrNovel,
@@ -343,17 +372,24 @@ fun SearchResultsScreen(
                                             .align(Alignment.BottomCenter)
                                             .navigationBarsPadding()
                                     )
+                                } else if (showPopularPreviewNotice) {
+                                    PopularPreviewNotice(
+                                        onSwitchToLatest = viewModel::switchToLatestSort,
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .navigationBarsPadding(),
+                                    )
                                 }
                             }
                         }
 
                         AppViewMode.NOVEL -> {
-                            val manualNovelResults = if (usePagedFeed) {
+                            val manualNovelResults = if (usePagedSearchResults) {
                                 viewModel.manualNovelResults.collectAsStateWithLifecycle().value
                             } else {
                                 null
                             }
-                            val novelSearchResults = if (usePagedFeed) {
+                            val novelSearchResults = if (usePagedSearchResults) {
                                 null
                             } else {
                                 viewModel.novelSearchResults.collectAsLazyPagingItems()
@@ -365,9 +401,19 @@ fun SearchResultsScreen(
                                     state.bookmarkNumRange,
                                     state.bookmarkStringRange,
                                     state.searchDateRange,
+                                    isPremium,
                                 ) {
-                                    viewModel.resetManualPage(SearchResultsPage.IllustsOrNovel)
+                                    viewModel.ensureManualPage(
+                                        page = SearchResultsPage.IllustsOrNovel,
+                                        isPremium = isPremium,
+                                    )
                                 }
+                                ScrollToTopOnPageChange(
+                                    eventId = manualNovelResults.scrollToTopEventId,
+                                    lastConsumedEventId = lastConsumedNovelScrollEventId,
+                                    onEventConsumed = { lastConsumedNovelScrollEventId = it },
+                                    onScrollToTop = { novelsListState.scrollToItem(0) },
+                                )
                             }
                             if (novelSearchResults != null) {
                                 LaunchedEffect(novelSearchResults) {
@@ -377,6 +423,14 @@ fun SearchResultsScreen(
 
                             val isNovelRefreshing = manualNovelResults?.isLoading
                                 ?: (novelSearchResults?.loadState?.refresh is LoadState.Loading)
+                            val showPopularPreviewNotice =
+                                manualNovelResults != null &&
+                                    viewModel.isPopularPreview(isPremium)
+                            val showPagingControls =
+                                manualNovelResults?.capability != null &&
+                                    manualNovelResults.capability != FeedCapability.SINGLE_PAGE
+                            val bottomContentPadding = navigationBarBottomPadding +
+                                if (showPagingControls || showPopularPreviewNotice) 88.dp else 0.dp
 
                             PullToRefreshBox(
                                 isRefreshing = isNovelRefreshing,
@@ -446,13 +500,20 @@ fun SearchResultsScreen(
                                     state = novelsListState,
                                     modifier = Modifier.align(Alignment.CenterEnd)
                                 )
-                                if (manualNovelResults != null) {
+                                if (manualNovelResults != null && showPagingControls) {
                                     ManualPagingToolbar(
                                         state = manualNovelResults,
                                         page = SearchResultsPage.IllustsOrNovel,
                                         modifier = Modifier
                                             .align(Alignment.BottomCenter)
                                             .navigationBarsPadding()
+                                    )
+                                } else if (showPopularPreviewNotice) {
+                                    PopularPreviewNotice(
+                                        onSwitchToLatest = viewModel::switchToLatestSort,
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .navigationBarsPadding(),
                                     )
                                 }
                             }
@@ -461,21 +522,30 @@ fun SearchResultsScreen(
                 }
 
                 SearchResultsPage.Users -> {
-                    val manualUserResults = if (usePagedFeed) {
+                    val manualUserResults = if (usePagedSearchResults) {
                         viewModel.manualUserResults.collectAsStateWithLifecycle().value
                     } else {
                         null
                     }
-                    val userSearchResults = if (usePagedFeed) {
+                    val userSearchResults = if (usePagedSearchResults) {
                         null
                     } else {
                         viewModel.userSearchResults.collectAsLazyPagingItems()
                     }
 
                     if (manualUserResults != null) {
-                        LaunchedEffect(state.searchWords) {
-                            viewModel.resetManualPage(SearchResultsPage.Users)
+                        LaunchedEffect(state.searchWords, isPremium) {
+                            viewModel.ensureManualPage(
+                                page = SearchResultsPage.Users,
+                                isPremium = isPremium,
+                            )
                         }
+                        ScrollToTopOnPageChange(
+                            eventId = manualUserResults.scrollToTopEventId,
+                            lastConsumedEventId = lastConsumedUserScrollEventId,
+                            onEventConsumed = { lastConsumedUserScrollEventId = it },
+                            onScrollToTop = { usersListState.scrollToItem(0) },
+                        )
                     }
                     if (userSearchResults != null) {
                         LaunchedEffect(userSearchResults) {
@@ -485,6 +555,11 @@ fun SearchResultsScreen(
 
                     val isUserRefreshing = manualUserResults?.isLoading
                         ?: (userSearchResults?.loadState?.refresh is LoadState.Loading)
+                    val showPagingControls =
+                        manualUserResults?.capability != null &&
+                            manualUserResults.capability != FeedCapability.SINGLE_PAGE
+                    val bottomContentPadding = navigationBarBottomPadding +
+                        if (showPagingControls) 88.dp else 0.dp
 
                     PullToRefreshBox(
                         isRefreshing = isUserRefreshing,
@@ -551,14 +626,13 @@ fun SearchResultsScreen(
                             state = usersListState,
                             modifier = Modifier.align(Alignment.CenterEnd)
                         )
-                        if (manualUserResults != null) {
+                        if (manualUserResults != null && showPagingControls) {
                             ManualPagingToolbar(
                                 state = manualUserResults,
                                 page = SearchResultsPage.Users,
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
-                                    .navigationBarsPadding()
-                                    .padding(bottom = pagedControlsBottomPadding),
+                                    .navigationBarsPadding(),
                             )
                         }
                     }
@@ -578,6 +652,53 @@ fun SearchResultsScreen(
                 },
                 isNovelMode = searchMode == AppViewMode.NOVEL
             )
+        }
+    }
+}
+
+@Composable
+private fun ScrollToTopOnPageChange(
+    eventId: Long,
+    lastConsumedEventId: Long?,
+    onEventConsumed: (Long) -> Unit,
+    onScrollToTop: suspend () -> Unit,
+) {
+    LaunchedEffect(eventId, lastConsumedEventId) {
+        when {
+            lastConsumedEventId == null || eventId == 0L -> onEventConsumed(eventId)
+            eventId != lastConsumedEventId -> {
+                onScrollToTop()
+                onEventConsumed(eventId)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PopularPreviewNotice(
+    onSwitchToLatest: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = 1.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(RStrings.popular_preview_paging_unavailable),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            TextButton(onClick = onSwitchToLatest) {
+                Text(text = stringResource(RStrings.switch_to_latest))
+            }
         }
     }
 }

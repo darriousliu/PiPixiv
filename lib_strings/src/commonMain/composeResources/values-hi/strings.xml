@@ -304,6 +304,14 @@
     <string name="auto_hide_preview_controls_desc">चित्र विवरण पेज के छवि क्षेत्र में कुछ सेकंड रहने के बाद बटन और पेज संकेतक छिपाएं</string>
     <string name="tap_image_to_open_full_resolution_preview">पूर्ण रिज़ॉल्यूशन पूर्वावलोकन खोलने के लिए छवि पर टैप करें</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">बंद होने पर, चित्र विवरण पेज पर छवि टैप करने से पूर्ण-स्क्रीन मूल पूर्वावलोकन नहीं खुलेगा</string>
+    <string name="search_result_display_mode">खोज परिणाम दिखाने का तरीका</string>
+    <string name="search_result_display_mode_infinite">अनंत स्क्रॉल</string>
+    <string name="search_result_display_mode_paged">मैन्युअल पेजिंग</string>
+    <string name="popular_preview_paging_unavailable">Pixiv Premium के बिना खातों में “लोकप्रिय” क्रम केवल एक पेज के पूर्वावलोकन तक सीमित है</string>
+    <string name="switch_to_latest">“नवीनतम” पर जाएँ</string>
+    <string name="previous_page">पिछला पेज</string>
+    <string name="next_page">अगला पेज</string>
+    <string name="page_index">पेज %1$d</string>
     <string name="history_setting">इतिहास सेटिंग्स</string>
     <string name="enable_history">इतिहास चालू करें</string>
     <string name="enable_history_desc">बंद होने पर, चित्र और उपन्यास देखने का इतिहास रिकॉर्ड नहीं होगा</string>

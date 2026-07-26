@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.data.setting
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -7,7 +8,8 @@ data class BrowsingSettings(
     val previewImageQuality: PreviewImageQuality = PreviewImageQuality.MEDIUM,
     val autoHidePreviewControls: Boolean = true,
     val tapImageToOpenFullResolutionPreview: Boolean = true,
-    val feedDisplayMode: FeedDisplayMode = FeedDisplayMode.INFINITE_SCROLL,
+    @SerialName("feedDisplayMode")
+    val searchResultDisplayMode: SearchResultDisplayMode = SearchResultDisplayMode.INFINITE_SCROLL,
 )
 
 @Serializable
@@ -18,7 +20,7 @@ enum class PreviewImageQuality {
 }
 
 @Serializable
-enum class FeedDisplayMode {
+enum class SearchResultDisplayMode {
     INFINITE_SCROLL,
     PAGED,
 }

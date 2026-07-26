@@ -304,6 +304,14 @@
     <string name="auto_hide_preview_controls_desc">作品詳細ページの画像エリアに数秒留まると、ボタンとページ表示を隠します</string>
     <string name="tap_image_to_open_full_resolution_preview">画像タップでフル解像度プレビューを開く</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">オフにすると、作品詳細ページで画像をタップしても全画面のオリジナルプレビューを開きません</string>
+    <string name="search_result_display_mode">検索結果の表示方法</string>
+    <string name="search_result_display_mode_infinite">無限スクロール</string>
+    <string name="search_result_display_mode_paged">手動ページ送り</string>
+    <string name="popular_preview_paging_unavailable">Pixiv Premium未加入の場合、人気順は1ページ分のプレビューのみ表示できます</string>
+    <string name="switch_to_latest">新しい順に切り替え</string>
+    <string name="previous_page">前のページ</string>
+    <string name="next_page">次のページ</string>
+    <string name="page_index">%1$dページ</string>
     <string name="history_setting">履歴設定</string>
     <string name="enable_history">履歴を有効にする</string>
     <string name="enable_history_desc">無効にすると、イラストや小説の閲覧履歴を記録しません</string>

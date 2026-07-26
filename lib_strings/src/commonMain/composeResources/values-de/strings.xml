@@ -304,6 +304,14 @@
     <string name="auto_hide_preview_controls_desc">Blendet Schaltflächen und Seitenanzeige aus, nachdem der Bildbereich der Werkdetailseite einige Sekunden angezeigt wurde</string>
     <string name="tap_image_to_open_full_resolution_preview">Bild antippen, um Vollauflösung zu öffnen</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">Wenn deaktiviert, öffnet Antippen eines Bildes auf der Werkdetailseite keine Vollbildvorschau des Originals</string>
+    <string name="search_result_display_mode">Darstellung der Suchergebnisse</string>
+    <string name="search_result_display_mode_infinite">Endloses Scrollen</string>
+    <string name="search_result_display_mode_paged">Manuelle Seitennavigation</string>
+    <string name="popular_preview_paging_unavailable">Für Konten ohne Pixiv Premium zeigt die Sortierung „Beliebt“ nur eine einzige Vorschauseite an</string>
+    <string name="switch_to_latest">Zu „Neuere“ wechseln</string>
+    <string name="previous_page">Vorherige Seite</string>
+    <string name="next_page">Nächste Seite</string>
+    <string name="page_index">Seite %1$d</string>
     <string name="history_setting">Verlaufseinstellungen</string>
     <string name="enable_history">Verlauf aktivieren</string>
     <string name="enable_history_desc">Wenn deaktiviert, werden Illustrationen und Romane nicht im Verlauf gespeichert</string>

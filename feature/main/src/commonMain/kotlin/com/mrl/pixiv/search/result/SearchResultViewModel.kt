@@ -6,8 +6,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.data.search.LocalSearchFilter
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.data.search.SearchNovelQuery
+import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.feed.PagedFeedController
@@ -22,10 +24,12 @@ import com.mrl.pixiv.common.repository.requireUserInfoValue
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.search.SearchState.SearchFilter
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateRange
 import kotlinx.datetime.format
@@ -76,11 +80,13 @@ class SearchResultViewModel(
         }
     ),
 ), KoinComponent {
+    private var manualIsPremium = requireUserInfoValue.profile.isPremium
+
     private val manualIllustController by lazy {
         PagedFeedController(viewModelScope) {
             SearchIllustFeedSource(
                 query = currentIllustQuery(),
-                isPremium = requireUserInfoValue.profile.isPremium,
+                isPremium = manualIsPremium,
                 isIdSearch = isIdSearch,
             )
         }
@@ -89,7 +95,7 @@ class SearchResultViewModel(
         PagedFeedController(viewModelScope) {
             SearchNovelFeedSource(
                 query = currentNovelQuery(),
-                isPremium = requireUserInfoValue.profile.isPremium,
+                isPremium = manualIsPremium,
                 isIdSearch = isIdSearch,
             )
         }
@@ -106,6 +112,15 @@ class SearchResultViewModel(
     val manualIllustResults by lazy { manualIllustController.state }
     val manualNovelResults by lazy { manualNovelController.state }
     val manualUserResults by lazy { manualUserController.state }
+
+    val isPremium = requireUserInfoFlow
+        .map { it.profile.isPremium }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = manualIsPremium,
+        )
 
     val searchResults by lazy {
         combine(
@@ -211,22 +226,66 @@ class SearchResultViewModel(
         SettingRepository.setAppViewMode(mode)
     }
 
-    fun resetManualResults() {
-        resetManualPage(SearchResultsPage.IllustsOrNovel)
-        resetManualPage(SearchResultsPage.Users)
-    }
-
-    fun resetManualPage(page: SearchResultsPage) {
+    fun ensureManualPage(page: SearchResultsPage, isPremium: Boolean) {
+        manualIsPremium = isPremium
         when (page) {
             SearchResultsPage.IllustsOrNovel -> {
                 when (searchMode) {
-                    AppViewMode.ILLUST -> manualIllustController.reset()
-                    AppViewMode.NOVEL -> manualNovelController.reset()
+                    AppViewMode.ILLUST -> {
+                        val query = currentIllustQuery()
+                        manualIllustController.ensureLoaded(
+                            ManualIllustQueryKey(
+                                query = query,
+                                isPremium = isPremium,
+                                isIdSearch = isIdSearch,
+                            )
+                        )
+                    }
+
+                    AppViewMode.NOVEL -> {
+                        val query = currentNovelQuery()
+                        manualNovelController.ensureLoaded(
+                            ManualNovelQueryKey(
+                                query = query,
+                                isPremium = isPremium,
+                                isIdSearch = isIdSearch,
+                            )
+                        )
+                    }
                 }
             }
 
-            SearchResultsPage.Users -> manualUserController.reset()
+            SearchResultsPage.Users -> {
+                manualUserController.ensureLoaded(
+                    ManualUserQueryKey(
+                        word = uiState.value.searchWords,
+                        isIdSearch = isIdSearch,
+                    )
+                )
+            }
         }
+    }
+
+    fun isPopularPreview(isPremium: Boolean): Boolean {
+        return !isIdSearch &&
+            !isPremium &&
+            uiState.value.searchFilter.sort == SearchSort.POPULAR_DESC
+    }
+
+    fun switchToLatestSort() {
+        val latestFilter = uiState.value.searchFilter.copy(sort = SearchSort.DATE_DESC)
+        if (SearchRepository.rememberSearchFilterValue) {
+            SearchRepository.setSavedSearchFilter(
+                LocalSearchFilter(
+                    sort = latestFilter.sort,
+                    searchTarget = latestFilter.searchTarget,
+                    searchAiType = latestFilter.searchAiType,
+                )
+            )
+        }
+        dispatch(
+            SearchResultAction.UpdateFilter(latestFilter)
+        )
     }
 
     fun refreshManualPage(page: SearchResultsPage) {
@@ -318,3 +377,20 @@ class SearchResultViewModel(
         return bookmarkStringRange?.let { "$searchWords $it" } ?: searchWords
     }
 }
+
+private data class ManualIllustQueryKey(
+    val query: SearchIllustQuery,
+    val isPremium: Boolean,
+    val isIdSearch: Boolean,
+)
+
+private data class ManualNovelQueryKey(
+    val query: SearchNovelQuery,
+    val isPremium: Boolean,
+    val isIdSearch: Boolean,
+)
+
+private data class ManualUserQueryKey(
+    val word: String,
+    val isIdSearch: Boolean,
+)

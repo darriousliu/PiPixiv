@@ -315,9 +315,11 @@
     <string name="auto_hide_preview_controls_desc">在作品详情页的图片区域停留几秒后隐藏按钮和页码</string>
     <string name="tap_image_to_open_full_resolution_preview">点击打开全分辨率预览</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">关闭后，在作品详情页点击图片不会进入全屏原图预览</string>
-    <string name="feed_display_mode">列表加载方式</string>
-    <string name="feed_display_mode_infinite">无限滚动</string>
-    <string name="feed_display_mode_paged">手动分页</string>
+    <string name="search_result_display_mode">搜索结果显示方式</string>
+    <string name="search_result_display_mode_infinite">无限滚动</string>
+    <string name="search_result_display_mode_paged">手动分页</string>
+    <string name="popular_preview_paging_unavailable">非会员的人气排序仅提供单页预览</string>
+    <string name="switch_to_latest">切换到最新</string>
     <string name="previous_page">上一页</string>
     <string name="next_page">下一页</string>
     <string name="page_index">第 %1$d 页</string>

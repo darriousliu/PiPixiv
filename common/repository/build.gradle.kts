@@ -33,6 +33,12 @@ kotlin {
             implementation(libs.filekit.core)
         }
 
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(project.dependencies.platform(kotlinx.coroutines.bom))
+            implementation(kotlinx.coroutines.test)
+        }
+
         androidMain.dependencies {
             // WorkManager
             implementation(androidx.bundles.workmanager)

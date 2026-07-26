@@ -33,8 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mrl.pixiv.common.data.setting.FeedDisplayMode
 import com.mrl.pixiv.common.data.setting.PreviewImageQuality
+import com.mrl.pixiv.common.data.setting.SearchResultDisplayMode
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
@@ -44,13 +44,13 @@ import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.auto_hide_preview_controls
 import com.mrl.pixiv.strings.auto_hide_preview_controls_desc
 import com.mrl.pixiv.strings.browsing_setting
-import com.mrl.pixiv.strings.feed_display_mode
-import com.mrl.pixiv.strings.feed_display_mode_infinite
-import com.mrl.pixiv.strings.feed_display_mode_paged
 import com.mrl.pixiv.strings.preview_image_quality
 import com.mrl.pixiv.strings.preview_image_quality_high
 import com.mrl.pixiv.strings.preview_image_quality_medium
 import com.mrl.pixiv.strings.preview_image_quality_original
+import com.mrl.pixiv.strings.search_result_display_mode
+import com.mrl.pixiv.strings.search_result_display_mode_infinite
+import com.mrl.pixiv.strings.search_result_display_mode_paged
 import com.mrl.pixiv.strings.tap_image_to_open_full_resolution_preview
 import com.mrl.pixiv.strings.tap_image_to_open_full_resolution_preview_desc
 import org.jetbrains.compose.resources.stringResource
@@ -97,11 +97,11 @@ fun BrowsingSettingScreen(
                     )
                 }
             )
-            FeedDisplayModeSetting(
-                selectedMode = browsingSettings.feedDisplayMode,
+            SearchResultDisplayModeSetting(
+                selectedMode = browsingSettings.searchResultDisplayMode,
                 onModeChange = { mode ->
                     SettingRepository.setBrowsingSettings(
-                        browsingSettings.copy(feedDisplayMode = mode)
+                        browsingSettings.copy(searchResultDisplayMode = mode)
                     )
                 }
             )
@@ -243,16 +243,16 @@ private fun PreviewImageQuality.label(): String {
 }
 
 @Composable
-private fun FeedDisplayModeSetting(
-    selectedMode: FeedDisplayMode,
-    onModeChange: (FeedDisplayMode) -> Unit,
+private fun SearchResultDisplayModeSetting(
+    selectedMode: SearchResultDisplayMode,
+    onModeChange: (SearchResultDisplayMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val modes = remember { FeedDisplayMode.entries }
+    val modes = remember { SearchResultDisplayMode.entries }
 
     ListItem(
-        headlineContent = { Text(text = stringResource(RStrings.feed_display_mode)) },
+        headlineContent = { Text(text = stringResource(RStrings.search_result_display_mode)) },
         modifier = modifier,
         leadingContent = { Icon(Icons.Rounded.Image, contentDescription = null) },
         trailingContent = {
@@ -284,9 +284,12 @@ private fun FeedDisplayModeSetting(
 }
 
 @Composable
-private fun FeedDisplayMode.label(): String {
+private fun SearchResultDisplayMode.label(): String {
     return when (this) {
-        FeedDisplayMode.INFINITE_SCROLL -> stringResource(RStrings.feed_display_mode_infinite)
-        FeedDisplayMode.PAGED -> stringResource(RStrings.feed_display_mode_paged)
+        SearchResultDisplayMode.INFINITE_SCROLL ->
+            stringResource(RStrings.search_result_display_mode_infinite)
+
+        SearchResultDisplayMode.PAGED ->
+            stringResource(RStrings.search_result_display_mode_paged)
     }
 }

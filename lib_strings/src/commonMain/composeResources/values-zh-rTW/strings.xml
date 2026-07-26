@@ -304,6 +304,14 @@
     <string name="auto_hide_preview_controls_desc">在作品詳情頁的圖片區域停留數秒後隱藏按鈕和頁碼</string>
     <string name="tap_image_to_open_full_resolution_preview">點擊圖片開啟全解析度預覽</string>
     <string name="tap_image_to_open_full_resolution_preview_desc">關閉後，在作品詳情頁點擊圖片不會開啟全螢幕原圖預覽</string>
+    <string name="search_result_display_mode">搜尋結果顯示方式</string>
+    <string name="search_result_display_mode_infinite">無限捲動</string>
+    <string name="search_result_display_mode_paged">手動分頁</string>
+    <string name="popular_preview_paging_unavailable">未訂閱 Pixiv Premium 的帳號僅能預覽單頁人氣降序結果</string>
+    <string name="switch_to_latest">切換到最新</string>
+    <string name="previous_page">上一頁</string>
+    <string name="next_page">下一頁</string>
+    <string name="page_index">第 %1$d 頁</string>
     <string name="history_setting">歷史記錄設定</string>
     <string name="enable_history">啟用歷史記錄</string>
     <string name="enable_history_desc">關閉後不會記錄插畫或小說瀏覽歷史</string>
