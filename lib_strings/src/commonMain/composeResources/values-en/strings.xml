@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">Enable history to save viewed illustrations and novels locally</string>
     <string name="enable_history_now">Enable history</string>
     <string name="no_history_records">No history yet</string>
+    <string name="filter_long_novel_tags">Filter long novel tags</string>
+    <string name="filter_long_novel_tags_desc">Hide novels containing tags that are too long or have too many segments</string>
+    <string name="max_novel_tag_length">Maximum tag length</string>
+    <string name="max_novel_tag_length_desc">Hide a novel when a tag exceeds this length</string>
+    <string name="max_novel_tag_segments">Maximum tag segments</string>
+    <string name="max_novel_tag_segments_desc">Hide a novel when a tag exceeds this segment count</string>
 </resources>

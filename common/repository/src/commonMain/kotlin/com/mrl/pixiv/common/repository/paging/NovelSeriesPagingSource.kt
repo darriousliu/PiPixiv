@@ -28,7 +28,13 @@ class NovelSeriesPagingSource(
     private val isR18Enabled: () -> Boolean = {
         requireUserPreferenceValue.isR18Enabled
     },
+    private val filterBlocked: (List<Novel>) -> List<Novel> = {
+        it.filterBlockedTags()
+    },
 ) : PagingSource<String, Novel>() {
+    init {
+        invalidateOnNovelFilterSettingsChanges()
+    }
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Novel> = try {
         val response = if (params.key.isNullOrBlank()) {
@@ -41,7 +47,7 @@ class NovelSeriesPagingSource(
             distinctNovels
         } else {
             distinctNovels.filterNormalNovel()
-        }.filterBlockedTags()
+        }.let(filterBlocked)
 
         LoadResult.Page(
             data = visibleNovels,

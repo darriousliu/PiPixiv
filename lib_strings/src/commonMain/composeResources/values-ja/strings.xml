@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">有効にすると閲覧したイラストと小説をローカルに保存します</string>
     <string name="enable_history_now">履歴を有効にする</string>
     <string name="no_history_records">履歴はまだありません</string>
+    <string name="filter_long_novel_tags">小説の長いタグを除外</string>
+    <string name="filter_long_novel_tags_desc">長すぎる、または区切りが多すぎるタグを含む小説を非表示にします</string>
+    <string name="max_novel_tag_length">タグの最大文字数</string>
+    <string name="max_novel_tag_length_desc">タグがこの文字数を超える小説を非表示にします</string>
+    <string name="max_novel_tag_segments">タグの最大区切り数</string>
+    <string name="max_novel_tag_segments_desc">タグの区切りがこの数を超える小説を非表示にします</string>
 </resources>

@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">켜면 본 일러스트와 소설을 로컬에 저장합니다</string>
     <string name="enable_history_now">기록 켜기</string>
     <string name="no_history_records">아직 기록이 없습니다</string>
+    <string name="filter_long_novel_tags">긴 소설 태그 필터링</string>
+    <string name="filter_long_novel_tags_desc">너무 길거나 구분이 많은 태그가 포함된 소설을 숨깁니다</string>
+    <string name="max_novel_tag_length">태그 최대 길이</string>
+    <string name="max_novel_tag_length_desc">태그가 이 길이를 초과하면 소설을 숨깁니다</string>
+    <string name="max_novel_tag_segments">태그 최대 구분 수</string>
+    <string name="max_novel_tag_segments_desc">태그 구분 수가 이 값을 초과하면 소설을 숨깁니다</string>
 </resources>

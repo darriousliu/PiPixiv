@@ -14,6 +14,7 @@ import com.mrl.pixiv.common.repository.feed.PagedFeedController
 import com.mrl.pixiv.common.repository.feed.SearchIllustFeedSource
 import com.mrl.pixiv.common.repository.feed.SearchNovelFeedSource
 import com.mrl.pixiv.common.repository.feed.SearchUserFeedSource
+import com.mrl.pixiv.common.repository.hasDifferentNovelFilterSettings
 import com.mrl.pixiv.common.repository.paging.SearchIllustPagingSource
 import com.mrl.pixiv.common.repository.paging.SearchNovelPagingSource
 import com.mrl.pixiv.common.repository.paging.SearchUserPagingSource
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateRange
 import kotlinx.datetime.format
@@ -83,7 +85,7 @@ class SearchResultViewModel(
             )
         }
     }
-    private val manualNovelController by lazy {
+    private val manualNovelControllerDelegate = lazy {
         PagedFeedController(viewModelScope) {
             SearchNovelFeedSource(
                 query = currentNovelQuery(),
@@ -92,6 +94,7 @@ class SearchResultViewModel(
             )
         }
     }
+    private val manualNovelController by manualNovelControllerDelegate
     private val manualUserController by lazy {
         PagedFeedController(viewModelScope) {
             SearchUserFeedSource(
@@ -104,6 +107,26 @@ class SearchResultViewModel(
     val manualIllustResults by lazy { manualIllustController.state }
     val manualNovelResults by lazy { manualNovelController.state }
     val manualUserResults by lazy { manualUserController.state }
+
+    private var observedNovelFilterSettings =
+        SettingRepository.userPreferenceFlow.value.browsingSettings
+
+    init {
+        if (searchMode == AppViewMode.NOVEL) {
+            viewModelScope.launch {
+                SettingRepository.userPreferenceFlow
+                    .map { it.browsingSettings }
+                    .collect { currentSettings ->
+                        val shouldRefresh = observedNovelFilterSettings
+                            .hasDifferentNovelFilterSettings(currentSettings)
+                        observedNovelFilterSettings = currentSettings
+                        if (shouldRefresh && manualNovelControllerDelegate.isInitialized()) {
+                            manualNovelController.refresh()
+                        }
+                    }
+            }
+        }
+    }
 
     val isPremium = requireUserInfoFlow
         .map { it.profile.isPremium }

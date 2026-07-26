@@ -17,6 +17,10 @@ class SearchNovelPagingSource(
     private val isPremium: Boolean,
     private val isIdSearch: Boolean
 ) : PagingSource<SearchNovelQuery, Novel>() {
+    init {
+        invalidateOnNovelFilterSettingsChanges()
+    }
+
     override fun getRefreshKey(state: PagingState<SearchNovelQuery, Novel>): SearchNovelQuery? {
         return null
     }

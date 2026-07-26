@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">فعّل السجل لحفظ الرسوم والروايات التي شاهدتها محليا</string>
     <string name="enable_history_now">تفعيل السجل</string>
     <string name="no_history_records">لا يوجد سجل بعد</string>
+    <string name="filter_long_novel_tags">تصفية وسوم الروايات الطويلة</string>
+    <string name="filter_long_novel_tags_desc">إخفاء الروايات ذات الوسوم الطويلة جدًا أو كثيرة المقاطع</string>
+    <string name="max_novel_tag_length">الحد الأقصى لطول الوسم</string>
+    <string name="max_novel_tag_length_desc">إخفاء الرواية عندما يتجاوز الوسم هذا الطول</string>
+    <string name="max_novel_tag_segments">الحد الأقصى لمقاطع الوسم</string>
+    <string name="max_novel_tag_segments_desc">إخفاء الرواية عندما تتجاوز المقاطع هذا العدد</string>
 </resources>

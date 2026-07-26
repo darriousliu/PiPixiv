@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">開啟後會在本地保存瀏覽過的插畫和小說</string>
     <string name="enable_history_now">去開啟</string>
     <string name="no_history_records">暫無歷史記錄</string>
+    <string name="filter_long_novel_tags">過濾小說長標籤</string>
+    <string name="filter_long_novel_tags_desc">隱藏包含過長或分段過多標籤的小說</string>
+    <string name="max_novel_tag_length">單個標籤最大長度</string>
+    <string name="max_novel_tag_length_desc">標籤超過此長度時隱藏小說</string>
+    <string name="max_novel_tag_segments">標籤最大分段數</string>
+    <string name="max_novel_tag_segments_desc">標籤分段超過此數量時隱藏小說</string>
 </resources>

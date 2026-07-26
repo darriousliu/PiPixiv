@@ -10,6 +10,10 @@ import com.mrl.pixiv.common.repository.util.filterNormalNovel
 import com.mrl.pixiv.common.repository.util.queryParams
 
 class HistoryNovelPagingSource : PagingSource<String, Novel>() {
+    init {
+        invalidateOnNovelFilterSettingsChanges()
+    }
+
     override fun getRefreshKey(state: PagingState<String, Novel>): String? {
         return null
     }

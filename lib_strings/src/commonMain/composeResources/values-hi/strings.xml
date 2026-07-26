@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">देखे गए चित्र और उपन्यास स्थानीय रूप से सहेजने के लिए इतिहास चालू करें</string>
     <string name="enable_history_now">इतिहास चालू करें</string>
     <string name="no_history_records">अभी कोई इतिहास नहीं</string>
+    <string name="filter_long_novel_tags">लंबे उपन्यास टैग फ़िल्टर करें</string>
+    <string name="filter_long_novel_tags_desc">बहुत लंबे या अधिक खंड वाले टैग वाली उपन्यास छिपाएँ</string>
+    <string name="max_novel_tag_length">टैग की अधिकतम लंबाई</string>
+    <string name="max_novel_tag_length_desc">टैग इस लंबाई से बड़ा होने पर उपन्यास छिपाएँ</string>
+    <string name="max_novel_tag_segments">टैग खंडों की अधिकतम संख्या</string>
+    <string name="max_novel_tag_segments_desc">टैग में इससे अधिक खंड होने पर उपन्यास छिपाएँ</string>
 </resources>

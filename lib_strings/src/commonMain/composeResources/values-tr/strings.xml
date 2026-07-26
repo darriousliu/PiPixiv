@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">Görüntülenen illüstrasyonları ve romanları yerel olarak kaydetmek için geçmişi açın</string>
     <string name="enable_history_now">Geçmişi aç</string>
     <string name="no_history_records">Henüz geçmiş yok</string>
+    <string name="filter_long_novel_tags">Uzun roman etiketlerini filtrele</string>
+    <string name="filter_long_novel_tags_desc">Çok uzun veya çok fazla bölümü olan etiketleri içeren romanları gizle</string>
+    <string name="max_novel_tag_length">En fazla etiket uzunluğu</string>
+    <string name="max_novel_tag_length_desc">Etiket bu uzunluğu aştığında romanı gizle</string>
+    <string name="max_novel_tag_segments">En fazla etiket bölümü</string>
+    <string name="max_novel_tag_segments_desc">Etiket bu bölüm sayısını aştığında romanı gizle</string>
 </resources>

@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">Aktiviere den Verlauf, um angesehene Illustrationen und Romane lokal zu speichern</string>
     <string name="enable_history_now">Verlauf aktivieren</string>
     <string name="no_history_records">Noch kein Verlauf</string>
+    <string name="filter_long_novel_tags">Lange Roman-Tags filtern</string>
+    <string name="filter_long_novel_tags_desc">Romane mit zu langen oder zu stark unterteilten Tags ausblenden</string>
+    <string name="max_novel_tag_length">Maximale Tag-Länge</string>
+    <string name="max_novel_tag_length_desc">Roman ausblenden, wenn ein Tag diese Länge überschreitet</string>
+    <string name="max_novel_tag_segments">Maximale Tag-Segmente</string>
+    <string name="max_novel_tag_segments_desc">Roman ausblenden, wenn ein Tag diese Segmentzahl überschreitet</string>
 </resources>

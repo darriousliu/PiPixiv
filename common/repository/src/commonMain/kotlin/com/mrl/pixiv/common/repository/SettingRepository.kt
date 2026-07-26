@@ -100,8 +100,15 @@ object SettingRepository : MMKVUser {
         it.copy(aiTranslationConfig = config)
     }
 
-    fun setBrowsingSettings(settings: BrowsingSettings) = userPreference.update {
-        it.copy(browsingSettings = settings)
+    fun setBrowsingSettings(settings: BrowsingSettings) {
+        val previous = userPreference.value.browsingSettings
+        userPreference.update {
+            it.copy(browsingSettings = settings)
+        }
+        NovelFilterSettingsChanges.notifyIfChanged(
+            previous = previous,
+            current = settings,
+        )
     }
 
     fun setSearchSettings(settings: SearchSettings) = userPreference.update {

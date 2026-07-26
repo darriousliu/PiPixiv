@@ -357,4 +357,10 @@
     <string name="history_disabled_empty_desc">开启后会在本地保存浏览过的插画和小说</string>
     <string name="enable_history_now">去开启</string>
     <string name="no_history_records">暂无历史记录</string>
+    <string name="filter_long_novel_tags">过滤小说长标签</string>
+    <string name="filter_long_novel_tags_desc">隐藏包含过长或分段过多标签的小说</string>
+    <string name="max_novel_tag_length">单个标签最大长度</string>
+    <string name="max_novel_tag_length_desc">标签超过此长度时隐藏小说</string>
+    <string name="max_novel_tag_segments">标签最大分段数</string>
+    <string name="max_novel_tag_segments_desc">标签分段超过此数量时隐藏小说</string>
 </resources>

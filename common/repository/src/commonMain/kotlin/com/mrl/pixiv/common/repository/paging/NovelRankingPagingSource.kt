@@ -14,6 +14,10 @@ class NovelRankingPagingSource(
     private val mode: String,
     private val date: String? = null
 ) : PagingSource<String, Novel>() {
+    init {
+        invalidateOnNovelFilterSettingsChanges()
+    }
+
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Novel> {
         return try {
             val resp = if (params.key.isNullOrEmpty()) {

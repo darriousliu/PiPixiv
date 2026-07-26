@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">Ative o histórico para salvar localmente ilustrações e novels vistas</string>
     <string name="enable_history_now">Ativar histórico</string>
     <string name="no_history_records">Ainda não há histórico</string>
+    <string name="filter_long_novel_tags">Filtrar tags longas de novels</string>
+    <string name="filter_long_novel_tags_desc">Ocultar novels com tags muito longas ou com demasiados segmentos</string>
+    <string name="max_novel_tag_length">Comprimento máximo da tag</string>
+    <string name="max_novel_tag_length_desc">Ocultar a novel quando uma tag exceder este comprimento</string>
+    <string name="max_novel_tag_segments">Máximo de segmentos da tag</string>
+    <string name="max_novel_tag_segments_desc">Ocultar a novel quando uma tag exceder este número de segmentos</string>
 </resources>

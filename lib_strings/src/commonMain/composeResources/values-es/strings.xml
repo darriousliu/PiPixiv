@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">Activa el historial para guardar localmente ilustraciones y novelas vistas</string>
     <string name="enable_history_now">Activar historial</string>
     <string name="no_history_records">Aún no hay historial</string>
+    <string name="filter_long_novel_tags">Filtrar etiquetas largas de novelas</string>
+    <string name="filter_long_novel_tags_desc">Ocultar novelas con etiquetas demasiado largas o con demasiados segmentos</string>
+    <string name="max_novel_tag_length">Longitud máxima de etiqueta</string>
+    <string name="max_novel_tag_length_desc">Ocultar la novela si una etiqueta supera esta longitud</string>
+    <string name="max_novel_tag_segments">Máximo de segmentos de etiqueta</string>
+    <string name="max_novel_tag_segments_desc">Ocultar la novela si una etiqueta supera este número de segmentos</string>
 </resources>

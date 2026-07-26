@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">Activez l'historique pour enregistrer localement les illustrations et romans consultés</string>
     <string name="enable_history_now">Activer l'historique</string>
     <string name="no_history_records">Aucun historique pour le moment</string>
+    <string name="filter_long_novel_tags">Filtrer les longs tags de romans</string>
+    <string name="filter_long_novel_tags_desc">Masquer les romans dont les tags sont trop longs ou trop segmentés</string>
+    <string name="max_novel_tag_length">Longueur maximale d’un tag</string>
+    <string name="max_novel_tag_length_desc">Masquer le roman lorsqu’un tag dépasse cette longueur</string>
+    <string name="max_novel_tag_segments">Nombre maximal de segments</string>
+    <string name="max_novel_tag_segments_desc">Masquer le roman lorsqu’un tag dépasse ce nombre de segments</string>
 </resources>

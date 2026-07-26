@@ -256,6 +256,37 @@ class PagedFeedControllerTest {
     }
 
     @Test
+    fun refreshReloadsCurrentPageWithLatestSourceState() = runTest {
+        var sourceVersion = 1
+        val requests = mutableListOf<FeedPageRequest>()
+        val controller = PagedFeedController(this) {
+            val version = sourceVersion
+            TestFeedSource { request ->
+                requests += request
+                FeedPage(
+                    items = listOf("version-$version-page-${request.page}"),
+                    nextKey = FeedKey.Offset(request.offset() + 30),
+                )
+            }
+        }
+
+        controller.ensureLoaded(queryKey = "novels")
+        advanceUntilIdle()
+        controller.nextPage()
+        advanceUntilIdle()
+        val scrollEventBeforeRefresh = controller.state.value.scrollToTopEventId
+
+        sourceVersion = 2
+        controller.refresh()
+        advanceUntilIdle()
+
+        assertEquals(2, controller.state.value.currentPage)
+        assertEquals(listOf("version-2-page-2"), controller.state.value.items)
+        assertEquals(FeedKey.Offset(30), requests.last().key)
+        assertEquals(scrollEventBeforeRefresh, controller.state.value.scrollToTopEventId)
+    }
+
+    @Test
     fun pendingOldQueryCannotOverwriteNewQuery() = runTest {
         val oldQueryGate = CompletableDeferred<Unit>()
         var activeQuery = "cats"

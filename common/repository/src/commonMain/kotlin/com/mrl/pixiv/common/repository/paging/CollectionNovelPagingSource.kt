@@ -15,6 +15,10 @@ import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 class CollectionNovelPagingSource(
     private val query: UserBookmarksQuery
 ) : PagingSource<UserBookmarksQuery, Novel>() {
+    init {
+        invalidateOnNovelFilterSettingsChanges()
+    }
+
     override suspend fun load(params: LoadParams<UserBookmarksQuery>): LoadResult<UserBookmarksQuery, Novel> {
         return try {
             val resp = if (params.key == null) {

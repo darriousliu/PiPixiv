@@ -33,6 +33,10 @@ class NovelMarkerPagingSource(
         markers.filter { it.novel.id in visibleNovelIds }
     },
 ) : PagingSource<String, MarkedNovel>() {
+    init {
+        invalidateOnNovelFilterSettingsChanges()
+    }
+
     override suspend fun load(params: LoadParams<String>): LoadResult<String, MarkedNovel> {
         return try {
             val response = if (params.key.isNullOrEmpty()) {

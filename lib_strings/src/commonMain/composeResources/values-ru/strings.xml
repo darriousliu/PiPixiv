@@ -346,4 +346,10 @@
     <string name="history_disabled_empty_desc">Включите историю, чтобы сохранять просмотренные иллюстрации и новеллы локально</string>
     <string name="enable_history_now">Включить историю</string>
     <string name="no_history_records">Истории пока нет</string>
+    <string name="filter_long_novel_tags">Фильтровать длинные теги новелл</string>
+    <string name="filter_long_novel_tags_desc">Скрывать новеллы со слишком длинными или разбитыми на множество частей тегами</string>
+    <string name="max_novel_tag_length">Максимальная длина тега</string>
+    <string name="max_novel_tag_length_desc">Скрывать новеллу, если тег превышает эту длину</string>
+    <string name="max_novel_tag_segments">Максимальное число частей тега</string>
+    <string name="max_novel_tag_segments_desc">Скрывать новеллу, если тег превышает это число частей</string>
 </resources>

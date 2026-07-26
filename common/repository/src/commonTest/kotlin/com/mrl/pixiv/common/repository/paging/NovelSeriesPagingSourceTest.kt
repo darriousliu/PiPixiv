@@ -38,6 +38,7 @@ class NovelSeriesPagingSourceTest {
                 response(detail = detail, novels = listOf(novel(id = 12)))
             },
             isR18Enabled = { true },
+            filterBlocked = { it },
         )
 
         val result = source.load(
