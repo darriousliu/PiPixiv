@@ -56,6 +56,7 @@ import com.mrl.pixiv.novel.series.NovelSeriesScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
+import com.mrl.pixiv.profile.marker.NovelMarkersScreen
 import com.mrl.pixiv.report.ReportScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
@@ -259,6 +260,12 @@ fun Navigation3MainGraph(
                         BookmarkedTagsScreen()
                     }
 
+                    entry<Destination.NovelMarkers>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        NovelMarkersScreen()
+                    }
+
                     entry<Destination.Following> {
                         val uid = it.userId
                         FollowingScreen(uid = uid)
@@ -349,7 +356,8 @@ fun Navigation3MainGraph(
                     }
                     entry<Destination.NovelDetail> {
                         NovelScreen(
-                            novelId = it.novelId
+                            novelId = it.novelId,
+                            markerPage = it.markerPage,
                         )
                     }
                     entry<Destination.NovelSeries> {

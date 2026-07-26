@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">일러스트·만화 북마크</string>
     <string name="view_all">전체 보기</string>
     <string name="novel_collection">소설 컬렉션</string>
+    <string name="novel_markers">소설 읽기 책갈피</string>
+    <string name="novel_marker">읽기 책갈피</string>
+    <string name="novel_marker_page">%1$d페이지</string>
+    <string name="novel_markers_empty">아직 소설 읽기 책갈피가 없습니다</string>
+    <string name="novel_marker_add_success">읽기 책갈피를 추가했습니다</string>
+    <string name="novel_marker_delete_success">읽기 책갈피를 삭제했습니다</string>
+    <string name="novel_marker_update_failed">읽기 책갈피를 업데이트하지 못했습니다: %1$s</string>
     <string name="novel_description">%1$s자 %2$s</string>
     <string name="theme_system">시스템 설정 따르기</string>
     <string name="theme_light">라이트</string>

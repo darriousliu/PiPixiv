@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">चित्रण और मंगा बुकमार्क</string>
     <string name="view_all">सभी देखें</string>
     <string name="novel_collection">उपन्यास संग्रह</string>
+    <string name="novel_markers">उपन्यास पढ़ने के चिह्न</string>
+    <string name="novel_marker">पढ़ने का चिह्न</string>
+    <string name="novel_marker_page">पृष्ठ %1$d</string>
+    <string name="novel_markers_empty">अभी कोई उपन्यास पढ़ने का चिह्न नहीं है</string>
+    <string name="novel_marker_add_success">पढ़ने का चिह्न जोड़ा गया</string>
+    <string name="novel_marker_delete_success">पढ़ने का चिह्न हटाया गया</string>
+    <string name="novel_marker_update_failed">पढ़ने का चिह्न अपडेट नहीं हो सका: %1$s</string>
     <string name="novel_description">%1$s शब्द %2$s</string>
     <string name="theme_system">सिस्टम का अनुसरण करें</string>
     <string name="theme_light">हल्का</string>

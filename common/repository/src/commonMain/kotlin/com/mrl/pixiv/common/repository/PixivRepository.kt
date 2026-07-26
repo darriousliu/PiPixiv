@@ -431,4 +431,15 @@ object PixivRepository : KoinComponent {
 
     suspend fun getNovelContent(novelId: Long) = apiApi.getNovelContent(novelId)
     suspend fun getNovelBookmarkDetail(novelId: Long) = apiApi.getNovelBookmarkDetail(novelId)
+
+    suspend fun getNovelMarkers() = apiApi.getNovelMarkers()
+
+    suspend fun loadMoreNovelMarkers(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelMarkers(queryMap)
+
+    suspend fun postNovelMarkerAdd(novelId: Long, page: Int) =
+        apiApi.postNovelMarkerAdd(novelId, page)
+
+    suspend fun postNovelMarkerDelete(novelId: Long) =
+        apiApi.postNovelMarkerDelete(novelId)
 }

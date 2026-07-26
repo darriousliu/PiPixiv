@@ -103,6 +103,9 @@ sealed class Destination : NavKey {
     data object BookmarkedTags : Destination()
 
     @Serializable
+    data object NovelMarkers : Destination()
+
+    @Serializable
     data class Following(
         val userId: Long,
     ) : Destination()
@@ -149,6 +152,7 @@ sealed class Destination : NavKey {
     @Serializable
     data class NovelDetail(
         val novelId: Long,
+        val markerPage: Int? = null,
     ) : Destination()
 
     @Serializable

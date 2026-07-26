@@ -12,6 +12,7 @@ import com.mrl.pixiv.common.data.illust.IllustDetailResp
 import com.mrl.pixiv.common.data.illust.IllustRecommendedResp
 import com.mrl.pixiv.common.data.mute.MutedResp
 import com.mrl.pixiv.common.data.novel.NovelDetailResp
+import com.mrl.pixiv.common.data.novel.NovelMarkersResp
 import com.mrl.pixiv.common.data.novel.NovelRankingResp
 import com.mrl.pixiv.common.data.novel.NovelRecommendedResp
 import com.mrl.pixiv.common.data.novel.NovelSeriesResp
@@ -593,4 +594,25 @@ interface PixivApi {
     suspend fun getNovelBookmarkDetail(
         @Query("novel_id") novelId: Long,
     ): BookmarkDetailResp
+
+    @GET("v2/novel/markers")
+    suspend fun getNovelMarkers(): NovelMarkersResp
+
+    @GET("v2/novel/markers")
+    suspend fun loadMoreNovelMarkers(
+        @QueryMap queryMap: Map<String, String>,
+    ): NovelMarkersResp
+
+    @FormUrlEncoded
+    @POST("v1/novel/marker/add")
+    suspend fun postNovelMarkerAdd(
+        @Field("novel_id") novelId: Long,
+        @Field("page") page: Int,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v1/novel/marker/delete")
+    suspend fun postNovelMarkerDelete(
+        @Field("novel_id") novelId: Long,
+    ): EmptyResp
 }

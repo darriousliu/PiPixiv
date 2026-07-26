@@ -12,6 +12,7 @@ import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.repository.NovelAiTranslationService
+import com.mrl.pixiv.common.repository.NovelMarkerChanges
 import com.mrl.pixiv.common.repository.NovelReadingProgress
 import com.mrl.pixiv.common.repository.NovelReadingProgressRepository
 import com.mrl.pixiv.common.repository.NovelTranslationRepository
@@ -30,6 +31,9 @@ import com.mrl.pixiv.strings.ai_translation_deleted
 import com.mrl.pixiv.strings.ai_translation_failed
 import com.mrl.pixiv.strings.ai_translation_success
 import com.mrl.pixiv.strings.load_failed
+import com.mrl.pixiv.strings.novel_marker_add_success
+import com.mrl.pixiv.strings.novel_marker_delete_success
+import com.mrl.pixiv.strings.novel_marker_update_failed
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.writeString
@@ -52,6 +56,8 @@ data class NovelState(
     val fontSize: Int = 16,
     val lineSpacingSp: Int = 0,
     val isBookmarked: Boolean = false,
+    val markerPage: Int? = null,
+    val markerUpdating: Boolean = false,
     val showBottomSheet: Boolean = false,
     val paragraphs: ImmutableList<String> = persistentListOf(),
     val paragraphSpans: ImmutableList<NovelSpanData> = persistentListOf(),
@@ -67,6 +73,7 @@ data class NovelState(
 sealed class NovelIntent : ViewIntent {
     data class LoadNovelDetail(val novelId: Long) : NovelIntent()
     data object ToggleBookmark : NovelIntent()
+    data class ToggleMarker(val page: Int) : NovelIntent()
     data class UpdateFontSize(val size: Int) : NovelIntent()
     data class UpdateLineSpacing(val spacing: Int) : NovelIntent()
     data object ToggleBottomSheet : NovelIntent()
@@ -81,6 +88,7 @@ sealed class NovelIntent : ViewIntent {
 @KoinViewModel
 class NovelViewModel(
     novelId: Long,
+    markerPage: Int,
     private val readingProgressRepository: NovelReadingProgressRepository,
     private val translationRepository: NovelTranslationRepository,
     private val aiTranslationService: NovelAiTranslationService,
@@ -89,9 +97,11 @@ class NovelViewModel(
     initialState = NovelState()
 ), KoinComponent {
     private var lastHistoryNovelId: Long? = null
-    private var latestProgress: NovelReadingProgress? = null
+    private val progressSession = NovelProgressSession()
     private var sourceNovelText: String = ""
     private var translatedNovelText: String = ""
+    private val initialNovelId = novelId
+    private var markerPageToRestore = markerPage.takeIf { it > 0 }
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -106,6 +116,7 @@ class NovelViewModel(
         when (intent) {
             is NovelIntent.LoadNovelDetail -> loadNovelDetail(intent.novelId)
             is NovelIntent.ToggleBookmark -> toggleBookmark()
+            is NovelIntent.ToggleMarker -> toggleMarker(intent.page)
             is NovelIntent.UpdateFontSize -> updateFontSize(intent.size)
             is NovelIntent.UpdateLineSpacing -> updateLineSpacing(intent.spacing)
             is NovelIntent.ToggleBottomSheet -> toggleBottomSheet()
@@ -143,6 +154,7 @@ class NovelViewModel(
                 copy(
                     loading = true,
                     restoreProgress = null,
+                    markerUpdating = false,
                     isTranslating = false,
                     isTranslated = false,
                     isShowingOriginalText = false,
@@ -168,6 +180,7 @@ class NovelViewModel(
                     paragraphs = paragraphs,
                     paragraphSpans = spans,
                     isBookmarked = novel.isBookmarked,
+                    markerPage = novelText?.marker?.page?.takeIf { it > 0 },
                     prevNovelId = novelText?.seriesNavigation?.prevNovel?.id,
                     nextNovelId = novelText?.seriesNavigation?.nextNovel?.id,
                     isTranslating = false,
@@ -176,7 +189,22 @@ class NovelViewModel(
                 )
             }
 
-            requestRestoreProgress(novelId = novel.id, paragraphs = paragraphs)
+            val initialMarkerPage = initialMarkerPageForNovel(
+                initialNovelId = initialNovelId,
+                loadedNovelId = novel.id,
+                requestedMarkerPage = markerPageToRestore,
+            )
+            markerPageToRestore = null
+            if (initialMarkerPage != null) {
+                requestMarkerRestoreProgress(
+                    novelId = novel.id,
+                    markerPage = initialMarkerPage,
+                    spans = spans,
+                    paragraphs = paragraphs,
+                )
+            } else {
+                requestRestoreProgress(novelId = novel.id, paragraphs = paragraphs)
+            }
         }
     }
 
@@ -216,6 +244,67 @@ class NovelViewModel(
                 novel.id,
                 if (privateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
             )
+        }
+    }
+
+    private fun toggleMarker(page: Int) {
+        val novel = uiState.value.novel ?: return
+        if (uiState.value.markerUpdating) return
+
+        val currentMarkerPage = uiState.value.markerPage
+        launchIO(
+            onError = { throwable ->
+                updateStateForNovel(novel.id) {
+                    copy(markerUpdating = false)
+                }
+                handleError(throwable)
+                ToastUtil.safeShortToast(
+                    RStrings.novel_marker_update_failed,
+                    throwable.message.orEmpty(),
+                )
+            }
+        ) {
+            updateStateForNovel(novel.id) {
+                copy(markerUpdating = true)
+            }
+            when (val mutation = resolveNovelMarkerMutation(currentMarkerPage, page)) {
+                NovelMarkerMutation.Delete -> {
+                    PixivRepository.postNovelMarkerDelete(novel.id)
+                    NovelMarkerChanges.notifyChanged(novel.id)
+                    updateStateForNovel(novel.id) {
+                        copy(
+                            markerPage = null,
+                            markerUpdating = false,
+                        )
+                    }
+                    ToastUtil.safeShortToast(RStrings.novel_marker_delete_success)
+                }
+
+                is NovelMarkerMutation.Save -> {
+                    PixivRepository.postNovelMarkerAdd(novel.id, mutation.page)
+                    NovelMarkerChanges.notifyChanged(novel.id)
+                    updateStateForNovel(novel.id) {
+                        copy(
+                            markerPage = mutation.page,
+                            markerUpdating = false,
+                        )
+                    }
+                    ToastUtil.safeShortToast(RStrings.novel_marker_add_success)
+                }
+            }
+        }
+    }
+
+    private fun updateStateForNovel(
+        novelId: Long,
+        transform: NovelState.() -> NovelState,
+    ) {
+        updateState {
+            if (shouldApplyNovelMarkerUpdate(novel?.id, novelId)) {
+                transform()
+            } else {
+                this
+            }
         }
     }
 
@@ -446,7 +535,7 @@ class NovelViewModel(
     }
 
     fun saveProgress(novelId: Long, progress: NovelReadingProgress) {
-        latestProgress = progress
+        progressSession.update(novelId, progress)
         launchIO {
             readingProgressRepository.saveProgress(novelId, progress)
             Logger.d(tag = "NovelScreen") { "Saved progress for novel $progress" }
@@ -454,7 +543,7 @@ class NovelViewModel(
     }
 
     fun clearProgress(novelId: Long) {
-        latestProgress = null
+        progressSession.clear(novelId)
         updateState { copy(restoreProgress = null) }
         launchIO {
             readingProgressRepository.clearProgress(novelId)
@@ -469,15 +558,42 @@ class NovelViewModel(
         launchIO {
             if (paragraphs.isEmpty()) return@launchIO
             val saved =
-                latestProgress ?: readingProgressRepository.getProgress(novelId) ?: return@launchIO
+                progressSession.get(novelId)
+                    ?: readingProgressRepository.getProgress(novelId)
+                    ?: return@launchIO
             val resolved = resolveProgress(saved, paragraphs)
-            latestProgress = resolved
+            progressSession.update(novelId, resolved)
             updateState {
                 copy(
                     restoreProgress = resolved,
                     restoreVersion = restoreVersion + 1
                 )
             }
+        }
+    }
+
+    private fun requestMarkerRestoreProgress(
+        novelId: Long,
+        markerPage: Int,
+        spans: List<NovelSpanData>,
+        paragraphs: List<String>,
+    ) {
+        if (paragraphs.isEmpty()) return
+        val paragraphIndex = paragraphIndexForMarkerPage(
+            spans = spans,
+            markerPage = markerPage,
+        ).coerceIn(0, paragraphs.lastIndex)
+        val markerProgress = NovelReadingProgress(
+            paragraphIndex = paragraphIndex,
+            charIndex = 0,
+            paragraphHash = paragraphs[paragraphIndex].hashCode(),
+        )
+        progressSession.update(novelId, markerProgress)
+        updateState {
+            copy(
+                restoreProgress = markerProgress,
+                restoreVersion = restoreVersion + 1,
+            )
         }
     }
 

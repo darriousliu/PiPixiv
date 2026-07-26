@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">插畫·漫畫收藏</string>
     <string name="view_all">查看全部</string>
     <string name="novel_collection">小說收藏</string>
+    <string name="novel_markers">小說閱讀書籤</string>
+    <string name="novel_marker">閱讀書籤</string>
+    <string name="novel_marker_page">第%1$d頁</string>
+    <string name="novel_markers_empty">暫無小說閱讀書籤</string>
+    <string name="novel_marker_add_success">已新增閱讀書籤</string>
+    <string name="novel_marker_delete_success">已刪除閱讀書籤</string>
+    <string name="novel_marker_update_failed">更新閱讀書籤失敗：%1$s</string>
     <string name="novel_description">%1$s字 %2$s</string>
     <string name="theme_system">跟隨系統</string>
     <string name="theme_light">淺色</string>

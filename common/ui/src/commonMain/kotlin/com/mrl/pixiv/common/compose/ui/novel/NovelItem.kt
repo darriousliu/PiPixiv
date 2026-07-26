@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material3.Card
@@ -59,6 +60,8 @@ import kotlin.time.Duration.Companion.seconds
  * @param onNovelClick 点击小说时的回调
  * @param onBookmarkClick 点击收藏按钮时的回调
  * @param modifier 修饰符
+ * @param markerPageLabel 阅读书签页码；为空时不展示书签操作
+ * @param onMarkerClick 点击阅读书签按钮时的回调
  */
 @Composable
 fun NovelItem(
@@ -67,6 +70,8 @@ fun NovelItem(
     onBookmarkClick: (Boolean, Restrict, List<String>?) -> Unit,
     modifier: Modifier = Modifier,
     onSeriesClick: ((Long) -> Unit)? = null,
+    markerPageLabel: String? = null,
+    onMarkerClick: (() -> Unit)? = null,
 ) {
     val context = LocalPlatformContext.current
     val isBookmarked = novel.isBookmark
@@ -239,6 +244,19 @@ fun NovelItem(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (markerPageLabel != null && onMarkerClick != null) {
+                    IconButton(onClick = onMarkerClick) {
+                        Icon(
+                            imageVector = Icons.Rounded.Bookmark,
+                            contentDescription = markerPageLabel,
+                        )
+                    }
+                    Text(
+                        text = markerPageLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }

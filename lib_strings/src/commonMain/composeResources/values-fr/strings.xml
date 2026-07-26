@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">Signets des illustrations et mangas</string>
     <string name="view_all">Tout voir</string>
     <string name="novel_collection">Collection de romans</string>
+    <string name="novel_markers">Repères de lecture des romans</string>
+    <string name="novel_marker">Repère de lecture</string>
+    <string name="novel_marker_page">Page %1$d</string>
+    <string name="novel_markers_empty">Aucun repère de lecture pour le moment</string>
+    <string name="novel_marker_add_success">Repère de lecture ajouté</string>
+    <string name="novel_marker_delete_success">Repère de lecture supprimé</string>
+    <string name="novel_marker_update_failed">Impossible de mettre à jour le repère : %1$s</string>
     <string name="novel_description">%1$s mots %2$s</string>
     <string name="theme_system">Suivre le système</string>
     <string name="theme_light">Clair</string>

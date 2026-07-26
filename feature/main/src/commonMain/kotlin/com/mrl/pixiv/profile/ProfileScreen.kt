@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.Block
+import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Download
@@ -65,6 +66,7 @@ import com.mrl.pixiv.strings.download_manager
 import com.mrl.pixiv.strings.export_token
 import com.mrl.pixiv.strings.history
 import com.mrl.pixiv.strings.new_version_available
+import com.mrl.pixiv.strings.novel_markers
 import com.mrl.pixiv.strings.preference
 import com.mrl.pixiv.strings.sign_out
 import com.mrl.pixiv.strings.theme_dark
@@ -86,6 +88,7 @@ private const val KEY_DIVIDER = "divider"
 private const val KEY_PREFERENCE = "preference"
 private const val KEY_HISTORY = "history"
 private const val KEY_COLLECTION = "collection"
+private const val KEY_NOVEL_MARKERS = "novel_markers"
 private const val KEY_BOOKMARK_TAGS = "bookmark_tags"
 private const val KEY_BLOCK_SETTINGS = "block_settings"
 private const val KEY_DOWNLOAD_MANAGER = "download_manager"
@@ -219,6 +222,30 @@ fun ProfileScreen(
                     leadingContent = {
                         Icon(
                             imageVector = Icons.Rounded.Bookmarks,
+                            contentDescription = null
+                        )
+                    },
+                )
+            }
+            // 小说阅读书签
+            item(key = KEY_NOVEL_MARKERS) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RStrings.novel_markers),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            navigationManager.navigateToNovelMarkersScreen()
+                        }
+                        .padding(horizontal = 8.dp),
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Rounded.Bookmark,
                             contentDescription = null
                         )
                     },

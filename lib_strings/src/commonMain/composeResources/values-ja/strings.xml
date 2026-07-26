@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">イラスト・マンガのブックマーク</string>
     <string name="view_all">すべて表示</string>
     <string name="novel_collection">小説コレクション</string>
+    <string name="novel_markers">小説のしおり</string>
+    <string name="novel_marker">しおり</string>
+    <string name="novel_marker_page">%1$dページ</string>
+    <string name="novel_markers_empty">小説のしおりはまだありません</string>
+    <string name="novel_marker_add_success">しおりを追加しました</string>
+    <string name="novel_marker_delete_success">しおりを削除しました</string>
+    <string name="novel_marker_update_failed">しおりを更新できませんでした：%1$s</string>
     <string name="novel_description">%1$s文字 %2$s</string>
     <string name="theme_system">システムに従う</string>
     <string name="theme_light">ライト</string>

@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">Illust &amp; Manga Bookmarks</string>
     <string name="view_all">View all</string>
     <string name="novel_collection">Novel Collection</string>
+    <string name="novel_markers">Novel Reading Bookmarks</string>
+    <string name="novel_marker">Reading bookmark</string>
+    <string name="novel_marker_page">Page %1$d</string>
+    <string name="novel_markers_empty">No novel reading bookmarks yet</string>
+    <string name="novel_marker_add_success">Reading bookmark added</string>
+    <string name="novel_marker_delete_success">Reading bookmark removed</string>
+    <string name="novel_marker_update_failed">Couldn’t update the reading bookmark: %1$s</string>
     <string name="novel_description">%1$s words %2$s</string>
     <string name="theme_system">Follow System</string>
     <string name="theme_light">Light</string>

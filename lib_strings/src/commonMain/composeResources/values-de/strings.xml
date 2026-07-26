@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">Illustrationen &amp; Manga-Lesezeichen</string>
     <string name="view_all">Alle anzeigen</string>
     <string name="novel_collection">Romansammlung</string>
+    <string name="novel_markers">Roman-Lesezeichen</string>
+    <string name="novel_marker">Lesezeichen</string>
+    <string name="novel_marker_page">Seite %1$d</string>
+    <string name="novel_markers_empty">Noch keine Roman-Lesezeichen</string>
+    <string name="novel_marker_add_success">Lesezeichen hinzugefügt</string>
+    <string name="novel_marker_delete_success">Lesezeichen entfernt</string>
+    <string name="novel_marker_update_failed">Lesezeichen konnte nicht aktualisiert werden: %1$s</string>
     <string name="novel_description">%1$s Wörter %2$s</string>
     <string name="theme_system">System folgen</string>
     <string name="theme_light">Hell</string>

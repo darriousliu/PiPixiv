@@ -127,6 +127,40 @@ data class NovelDetailResp(
 )
 
 /**
+ * 小说阅读书签。Pixiv 对每篇小说只保留一个书签，页码从 1 开始。
+ */
+@Serializable
+@Immutable
+data class NovelMarker(
+    val page: Int = 0,
+)
+
+/**
+ * 小说书签列表中的一项。
+ */
+@Serializable
+@Immutable
+data class MarkedNovel(
+    val novel: Novel,
+
+    @SerialName("novel_marker")
+    val novelMarker: NovelMarker? = null,
+)
+
+/**
+ * 小说书签列表响应。
+ */
+@Serializable
+@Immutable
+data class NovelMarkersResp(
+    @SerialName("marked_novels")
+    val markedNovels: List<MarkedNovel> = emptyList(),
+
+    @SerialName("next_url")
+    val nextUrl: String? = null,
+)
+
+/**
  * 搜索小说响应
  */
 @Serializable
@@ -161,7 +195,7 @@ data class NovelTextResp(
     val cdate: String,
     val rating: NovelRating,
     val text: String,
-    val marker: JsonElement? = null,
+    val marker: NovelMarker? = null,
     val seriesNavigation: SeriesNavigation? = null,
     val glossaryItems: List<JsonElement>? = null,
     val replaceableItemIds: List<JsonElement>? = null,

@@ -14,5 +14,9 @@ kotlin {
             implementation(kotlinx.bundles.serialization)
             implementation(kotlinx.datetime)
         }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

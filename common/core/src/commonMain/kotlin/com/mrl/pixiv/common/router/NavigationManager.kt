@@ -146,6 +146,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.BookmarkedTags)
     }
 
+    fun navigateToNovelMarkersScreen() {
+        backStack.navigate(route = Destination.NovelMarkers)
+    }
+
     fun navigateToSearchScreen() {
         backStack.addSingleTop(route = Destination.Search)
     }
@@ -215,8 +219,8 @@ class NavigationManager(
         backStack.navigate(route = Destination.Report(commentId, type))
     }
 
-    fun navigateToNovelDetailScreen(novelId: Long) {
-        backStack.navigate(route = Destination.NovelDetail(novelId))
+    fun navigateToNovelDetailScreen(novelId: Long, markerPage: Int? = null) {
+        backStack.navigate(route = Destination.NovelDetail(novelId, markerPage))
     }
 
     fun navigateToNovelSeriesScreen(seriesId: Long) {

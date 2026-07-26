@@ -38,6 +38,7 @@ import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material.icons.rounded.HideImage
 import androidx.compose.material.icons.rounded.Image
@@ -132,7 +133,6 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.back
-import com.mrl.pixiv.strings.bookmark
 import com.mrl.pixiv.strings.bookmarked
 import com.mrl.pixiv.strings.chapter_next
 import com.mrl.pixiv.strings.chapter_previous
@@ -144,6 +144,9 @@ import com.mrl.pixiv.strings.hide_novel
 import com.mrl.pixiv.strings.line_spacing_value
 import com.mrl.pixiv.strings.more
 import com.mrl.pixiv.strings.novel_hidden
+import com.mrl.pixiv.strings.novel_collection
+import com.mrl.pixiv.strings.novel_marker
+import com.mrl.pixiv.strings.novel_marker_page
 import com.mrl.pixiv.strings.regenerate_translation
 import com.mrl.pixiv.strings.share_link
 import com.mrl.pixiv.strings.show_novel
@@ -179,8 +182,11 @@ private const val KEY_SPACER_END = "spacer_end"
 @Composable
 fun NovelScreen(
     novelId: Long,
+    markerPage: Int? = null,
     modifier: Modifier = Modifier,
-    viewModel: NovelViewModel = koinViewModel { parametersOf(novelId) },
+    viewModel: NovelViewModel = koinViewModel {
+        parametersOf(novelId, markerPage ?: 0)
+    },
     navigationManager: NavigationManager = koinInject(),
 ) {
     val state = viewModel.asState()
@@ -190,6 +196,9 @@ fun NovelScreen(
     val paragraphLayouts = remember(state.novel?.id) { mutableStateMapOf<Int, TextLayoutResult>() }
     val cumulativeParagraphLengths = remember(state.paragraphs) {
         buildCumulativeParagraphLengths(state.paragraphs)
+    }
+    val markerPages = remember(state.paragraphSpans) {
+        markerPagesForSpans(state.paragraphSpans)
     }
     var showBookmarkBottomSheet by remember { mutableStateOf(false) }
 
@@ -214,6 +223,21 @@ fun NovelScreen(
                 paragraphs = state.paragraphs,
                 cumulativeParagraphLengths = cumulativeParagraphLengths,
             )
+        }
+    }
+    val currentMarkerPage by remember(state.novel?.id, state.paragraphSpans, listState) {
+        derivedStateOf {
+            val novel = state.novel ?: return@derivedStateOf 1
+            val paragraphStartIndex =
+                paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
+            val paragraphItem = listState.layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->
+                itemInfo.index in paragraphStartIndex until
+                        (paragraphStartIndex + state.paragraphSpans.size)
+            }
+            val paragraphIndex = paragraphItem
+                ?.let { it.index - paragraphStartIndex }
+                ?: 0
+            markerPages.getOrElse(paragraphIndex) { 1 }
         }
     }
 
@@ -535,13 +559,44 @@ fun NovelScreen(
                                         BookmarkIcon(
                                             isBookmarked = isBookmark,
                                             isPrivate = state.novel.isPrivateBookmark,
-                                            bookmarkedImageVector = Icons.Rounded.Bookmark,
-                                            unbookmarkedImageVector = Icons.Rounded.BookmarkBorder,
+                                            bookmarkedImageVector = Icons.Rounded.Favorite,
+                                            unbookmarkedImageVector = Icons.Rounded.FavoriteBorder,
                                             tint = LocalContentColor.current,
-                                            contentDescription = stringResource(
-                                                if (isBookmark) RStrings.bookmarked else RStrings.bookmark
-                                            )
+                                            contentDescription = stringResource(RStrings.novel_collection),
                                         )
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            viewModel.dispatch(
+                                                NovelIntent.ToggleMarker(currentMarkerPage)
+                                            )
+                                        },
+                                        enabled = !state.markerUpdating,
+                                    ) {
+                                        if (state.markerUpdating) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(20.dp),
+                                                strokeWidth = 2.dp,
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = if (
+                                                    state.markerPage == currentMarkerPage
+                                                ) {
+                                                    Icons.Rounded.Bookmark
+                                                } else {
+                                                    Icons.Rounded.BookmarkBorder
+                                                },
+                                                contentDescription = if (state.markerPage != null) {
+                                                    stringResource(
+                                                        RStrings.novel_marker_page,
+                                                        state.markerPage,
+                                                    )
+                                                } else {
+                                                    stringResource(RStrings.novel_marker)
+                                                },
+                                            )
+                                        }
                                     }
                                     IconButton(
                                         onClick = { viewModel.dispatch(NovelIntent.ToggleBottomSheet) }

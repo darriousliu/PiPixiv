@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">إشارات مرجعية للرسوم التوضيحية والمانجا</string>
     <string name="view_all">عرض الكل</string>
     <string name="novel_collection">مجموعة الروايات</string>
+    <string name="novel_markers">علامات قراءة الروايات</string>
+    <string name="novel_marker">علامة قراءة</string>
+    <string name="novel_marker_page">الصفحة %1$d</string>
+    <string name="novel_markers_empty">لا توجد علامات قراءة للروايات بعد</string>
+    <string name="novel_marker_add_success">تمت إضافة علامة القراءة</string>
+    <string name="novel_marker_delete_success">تمت إزالة علامة القراءة</string>
+    <string name="novel_marker_update_failed">تعذر تحديث علامة القراءة: %1$s</string>
     <string name="novel_description">%1$s كلمة %2$s</string>
     <string name="theme_system">متابعة النظام</string>
     <string name="theme_light">فاتح</string>

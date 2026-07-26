@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">Marcadores de ilustraciones y manga</string>
     <string name="view_all">Ver todo</string>
     <string name="novel_collection">Colección de novelas</string>
+    <string name="novel_markers">Marcadores de lectura de novelas</string>
+    <string name="novel_marker">Marcador de lectura</string>
+    <string name="novel_marker_page">Página %1$d</string>
+    <string name="novel_markers_empty">Aún no hay marcadores de lectura</string>
+    <string name="novel_marker_add_success">Marcador de lectura añadido</string>
+    <string name="novel_marker_delete_success">Marcador de lectura eliminado</string>
+    <string name="novel_marker_update_failed">No se pudo actualizar el marcador: %1$s</string>
     <string name="novel_description">%1$s palabras %2$s</string>
     <string name="theme_system">Seguir sistema</string>
     <string name="theme_light">Claro</string>

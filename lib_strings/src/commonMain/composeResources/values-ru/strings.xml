@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">Закладки иллюстраций и манги</string>
     <string name="view_all">Смотреть все</string>
     <string name="novel_collection">Коллекция новелл</string>
+    <string name="novel_markers">Закладки чтения новелл</string>
+    <string name="novel_marker">Закладка чтения</string>
+    <string name="novel_marker_page">Страница %1$d</string>
+    <string name="novel_markers_empty">Закладок чтения пока нет</string>
+    <string name="novel_marker_add_success">Закладка чтения добавлена</string>
+    <string name="novel_marker_delete_success">Закладка чтения удалена</string>
+    <string name="novel_marker_update_failed">Не удалось обновить закладку: %1$s</string>
     <string name="novel_description">%1$s слов %2$s</string>
     <string name="theme_system">Следовать системе</string>
     <string name="theme_light">Светлая</string>

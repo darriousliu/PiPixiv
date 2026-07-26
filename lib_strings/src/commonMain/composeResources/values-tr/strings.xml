@@ -39,6 +39,13 @@
     <string name="illust_and_manga_liked">İllüstrasyon ve manga yer işaretleri</string>
     <string name="view_all">Tümünü gör</string>
     <string name="novel_collection">Roman Koleksiyonu</string>
+    <string name="novel_markers">Roman okuma işaretleri</string>
+    <string name="novel_marker">Okuma işareti</string>
+    <string name="novel_marker_page">Sayfa %1$d</string>
+    <string name="novel_markers_empty">Henüz roman okuma işareti yok</string>
+    <string name="novel_marker_add_success">Okuma işareti eklendi</string>
+    <string name="novel_marker_delete_success">Okuma işareti kaldırıldı</string>
+    <string name="novel_marker_update_failed">Okuma işareti güncellenemedi: %1$s</string>
     <string name="novel_description">%1$s kelime %2$s</string>
     <string name="theme_system">Sisteme Uy</string>
     <string name="theme_light">Açık</string>
