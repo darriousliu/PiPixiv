@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">Roman ausblenden, wenn ein Tag diese Länge überschreitet</string>
     <string name="max_novel_tag_segments">Maximale Tag-Segmente</string>
     <string name="max_novel_tag_segments_desc">Roman ausblenden, wenn ein Tag diese Segmentzahl überschreitet</string>
+    <string name="ai_endpoint_invalid">Ungültiger Endpunkt. Gib eine vollständige HTTP- oder HTTPS-Adresse ein</string>
+    <string name="ai_endpoint_credentials_not_allowed">Die Endpunktadresse darf keinen Benutzernamen oder kein Passwort enthalten</string>
+    <string name="ai_endpoint_public_http_not_allowed">Öffentliche Endpunkte müssen HTTPS verwenden; HTTP ist nur im lokalen Netzwerk erlaubt</string>
 </resources>

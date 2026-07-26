@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">إخفاء الرواية عندما يتجاوز الوسم هذا الطول</string>
     <string name="max_novel_tag_segments">الحد الأقصى لمقاطع الوسم</string>
     <string name="max_novel_tag_segments_desc">إخفاء الرواية عندما تتجاوز المقاطع هذا العدد</string>
+    <string name="ai_endpoint_invalid">نقطة النهاية غير صالحة. أدخل عنوان HTTP أو HTTPS كاملا</string>
+    <string name="ai_endpoint_credentials_not_allowed">لا يمكن تضمين اسم مستخدم أو كلمة مرور في عنوان نقطة النهاية</string>
+    <string name="ai_endpoint_public_http_not_allowed">يجب أن تستخدم نقاط النهاية العامة HTTPS؛ يُسمح بـ HTTP للشبكة المحلية فقط</string>
 </resources>

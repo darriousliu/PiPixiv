@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">標籤超過此長度時隱藏小說</string>
     <string name="max_novel_tag_segments">標籤最大分段數</string>
     <string name="max_novel_tag_segments_desc">標籤分段超過此數量時隱藏小說</string>
+    <string name="ai_endpoint_invalid">端點無效，請輸入完整的 HTTP 或 HTTPS 位址</string>
+    <string name="ai_endpoint_credentials_not_allowed">端點位址中不能包含使用者名稱或密碼</string>
+    <string name="ai_endpoint_public_http_not_allowed">公網端點必須使用 HTTPS；HTTP 僅允許本地網路位址</string>
 </resources>

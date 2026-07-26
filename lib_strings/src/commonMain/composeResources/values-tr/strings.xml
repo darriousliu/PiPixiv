@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">Etiket bu uzunluğu aştığında romanı gizle</string>
     <string name="max_novel_tag_segments">En fazla etiket bölümü</string>
     <string name="max_novel_tag_segments_desc">Etiket bu bölüm sayısını aştığında romanı gizle</string>
+    <string name="ai_endpoint_invalid">Uç nokta geçersiz. Tam bir HTTP veya HTTPS adresi girin</string>
+    <string name="ai_endpoint_credentials_not_allowed">Uç nokta adresi kullanıcı adı veya parola içeremez</string>
+    <string name="ai_endpoint_public_http_not_allowed">Genel uç noktalar HTTPS kullanmalıdır; HTTP yalnızca yerel ağda kullanılabilir</string>
 </resources>

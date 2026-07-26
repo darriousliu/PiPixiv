@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">Скрывать новеллу, если тег превышает эту длину</string>
     <string name="max_novel_tag_segments">Максимальное число частей тега</string>
     <string name="max_novel_tag_segments_desc">Скрывать новеллу, если тег превышает это число частей</string>
+    <string name="ai_endpoint_invalid">Некорректный адрес. Введите полный адрес HTTP или HTTPS</string>
+    <string name="ai_endpoint_credentials_not_allowed">Адрес не может содержать имя пользователя или пароль</string>
+    <string name="ai_endpoint_public_http_not_allowed">Публичные адреса должны использовать HTTPS; HTTP разрешён только в локальной сети</string>
 </resources>

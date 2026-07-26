@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">Ocultar a novel quando uma tag exceder este comprimento</string>
     <string name="max_novel_tag_segments">Máximo de segmentos da tag</string>
     <string name="max_novel_tag_segments_desc">Ocultar a novel quando uma tag exceder este número de segmentos</string>
+    <string name="ai_endpoint_invalid">Endpoint inválido. Introduza um endereço HTTP ou HTTPS completo</string>
+    <string name="ai_endpoint_credentials_not_allowed">O endereço do endpoint não pode conter nome de utilizador nem palavra-passe</string>
+    <string name="ai_endpoint_public_http_not_allowed">Endpoints públicos têm de usar HTTPS; HTTP só é permitido na rede local</string>
 </resources>

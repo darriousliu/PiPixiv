@@ -3,6 +3,7 @@ package com.mrl.pixiv.novel
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.intl.Locale
 import co.touchlab.kermit.Logger
+import com.mrl.pixiv.common.ai.isReadyForAiRequest
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.coroutine.withIOContext
 import com.mrl.pixiv.common.data.Novel
@@ -632,7 +633,7 @@ private fun AiTranslationConfig.normalized(): AiTranslationConfig {
 }
 
 private fun AiTranslationConfig.isReady(): Boolean {
-    return endpoint.isNotBlank() && apiKey.isNotBlank() && model.isNotBlank()
+    return isReadyForAiRequest()
 }
 
 private fun String.toMd5Hex(): String {

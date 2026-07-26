@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">태그가 이 길이를 초과하면 소설을 숨깁니다</string>
     <string name="max_novel_tag_segments">태그 최대 구분 수</string>
     <string name="max_novel_tag_segments_desc">태그 구분 수가 이 값을 초과하면 소설을 숨깁니다</string>
+    <string name="ai_endpoint_invalid">엔드포인트가 올바르지 않습니다. 전체 HTTP 또는 HTTPS 주소를 입력하세요</string>
+    <string name="ai_endpoint_credentials_not_allowed">엔드포인트 주소에 사용자 이름이나 비밀번호를 포함할 수 없습니다</string>
+    <string name="ai_endpoint_public_http_not_allowed">공개 엔드포인트는 HTTPS를 사용해야 하며 HTTP는 로컬 네트워크에서만 허용됩니다</string>
 </resources>

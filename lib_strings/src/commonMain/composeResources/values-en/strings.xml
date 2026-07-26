@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">Hide a novel when a tag exceeds this length</string>
     <string name="max_novel_tag_segments">Maximum tag segments</string>
     <string name="max_novel_tag_segments_desc">Hide a novel when a tag exceeds this segment count</string>
+    <string name="ai_endpoint_invalid">Invalid endpoint. Enter a complete HTTP or HTTPS address</string>
+    <string name="ai_endpoint_credentials_not_allowed">The endpoint address cannot contain a username or password</string>
+    <string name="ai_endpoint_public_http_not_allowed">Public endpoints must use HTTPS; HTTP is only allowed on the local network</string>
 </resources>

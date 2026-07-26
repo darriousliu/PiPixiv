@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">タグがこの文字数を超える小説を非表示にします</string>
     <string name="max_novel_tag_segments">タグの最大区切り数</string>
     <string name="max_novel_tag_segments_desc">タグの区切りがこの数を超える小説を非表示にします</string>
+    <string name="ai_endpoint_invalid">エンドポイントが無効です。完全な HTTP または HTTPS アドレスを入力してください</string>
+    <string name="ai_endpoint_credentials_not_allowed">エンドポイントのアドレスにユーザー名やパスワードは含められません</string>
+    <string name="ai_endpoint_public_http_not_allowed">公開エンドポイントには HTTPS が必要です。HTTP はローカルネットワークのみ使用できます</string>
 </resources>

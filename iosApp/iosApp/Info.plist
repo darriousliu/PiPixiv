@@ -6,6 +6,13 @@
 	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>LOCAL_NETWORK_USAGE</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
     <string>PHOTO_LIBRARY_ADD_USAGE</string>
     <key>NSPhotoLibraryUsageDescription</key>

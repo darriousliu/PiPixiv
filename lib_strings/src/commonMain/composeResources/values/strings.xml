@@ -363,4 +363,7 @@
     <string name="max_novel_tag_length_desc">标签超过此长度时隐藏小说</string>
     <string name="max_novel_tag_segments">标签最大分段数</string>
     <string name="max_novel_tag_segments_desc">标签分段超过此数量时隐藏小说</string>
+    <string name="ai_endpoint_invalid">端点无效，请输入完整的 HTTP 或 HTTPS 地址</string>
+    <string name="ai_endpoint_credentials_not_allowed">端点地址中不能包含用户名或密码</string>
+    <string name="ai_endpoint_public_http_not_allowed">公网端点必须使用 HTTPS；HTTP 仅允许本地网络地址</string>
 </resources>

@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">Masquer le roman lorsqu’un tag dépasse cette longueur</string>
     <string name="max_novel_tag_segments">Nombre maximal de segments</string>
     <string name="max_novel_tag_segments_desc">Masquer le roman lorsqu’un tag dépasse ce nombre de segments</string>
+    <string name="ai_endpoint_invalid">Point de terminaison invalide. Saisissez une adresse HTTP ou HTTPS complète</string>
+    <string name="ai_endpoint_credentials_not_allowed">L’adresse du point de terminaison ne peut pas contenir d’identifiant ni de mot de passe</string>
+    <string name="ai_endpoint_public_http_not_allowed">Les points de terminaison publics doivent utiliser HTTPS ; HTTP est réservé au réseau local</string>
 </resources>

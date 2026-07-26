@@ -352,4 +352,7 @@
     <string name="max_novel_tag_length_desc">Ocultar la novela si una etiqueta supera esta longitud</string>
     <string name="max_novel_tag_segments">Máximo de segmentos de etiqueta</string>
     <string name="max_novel_tag_segments_desc">Ocultar la novela si una etiqueta supera este número de segmentos</string>
+    <string name="ai_endpoint_invalid">El endpoint no es válido. Introduce una dirección HTTP o HTTPS completa</string>
+    <string name="ai_endpoint_credentials_not_allowed">La dirección del endpoint no puede incluir usuario ni contraseña</string>
+    <string name="ai_endpoint_public_http_not_allowed">Los endpoints públicos deben usar HTTPS; HTTP solo se permite en la red local</string>
 </resources>

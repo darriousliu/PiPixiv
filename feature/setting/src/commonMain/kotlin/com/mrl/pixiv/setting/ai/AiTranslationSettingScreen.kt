@@ -37,6 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.ai.AiEndpointError
+import com.mrl.pixiv.common.ai.AiLocalNetworkAccessGate
+import com.mrl.pixiv.common.ai.validateAiEndpoint
 import com.mrl.pixiv.common.data.setting.AiProvider
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.repository.SettingRepository
@@ -46,6 +49,9 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.ai_api_key
 import com.mrl.pixiv.strings.ai_endpoint
+import com.mrl.pixiv.strings.ai_endpoint_credentials_not_allowed
+import com.mrl.pixiv.strings.ai_endpoint_invalid
+import com.mrl.pixiv.strings.ai_endpoint_public_http_not_allowed
 import com.mrl.pixiv.strings.ai_extra_body
 import com.mrl.pixiv.strings.ai_extra_body_hint
 import com.mrl.pixiv.strings.ai_extra_body_invalid
@@ -89,6 +95,7 @@ fun AiTranslationSettingScreen(
     var responseApi by rememberSaveable { mutableStateOf(currentConfig.responseApi) }
     var extraBody by rememberSaveable { mutableStateOf(currentConfig.extraBody) }
     var extraBodyError by rememberSaveable { mutableStateOf(false) }
+    var endpointError by remember { mutableStateOf<AiEndpointError?>(null) }
 
     LaunchedEffect(currentConfig) {
         providerName = currentConfig.provider.name
@@ -98,13 +105,13 @@ fun AiTranslationSettingScreen(
         responseApi = currentConfig.responseApi
         extraBody = currentConfig.extraBody
         extraBodyError = false
+        endpointError = null
     }
 
     val selectedProvider = remember(providerName) {
         runCatching { enumValueOf<AiProvider>(providerName) }
             .getOrDefault(AiProvider.OPENAI)
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -122,6 +129,11 @@ fun AiTranslationSettingScreen(
                 actions = {
                     TextButton(
                         onClick = {
+                            val endpointValidation = validateAiEndpoint(endpoint)
+                            if (!endpointValidation.isValid) {
+                                endpointError = endpointValidation.error
+                                return@TextButton
+                            }
                             if (!extraBody.isValidExtraBodyJson()) {
                                 extraBodyError = true
                                 return@TextButton
@@ -129,9 +141,9 @@ fun AiTranslationSettingScreen(
                             SettingRepository.setAiTranslationConfig(
                                 AiTranslationConfig(
                                     provider = selectedProvider,
-                                    endpoint = endpoint.trim().ifEmpty {
-                                        AiTranslationConfig.defaultEndpoint(selectedProvider)
-                                    },
+                                    endpoint = requireNotNull(
+                                        endpointValidation.normalizedEndpoint
+                                    ),
                                     apiKey = apiKey.trim(),
                                     model = model.trim().ifEmpty {
                                         AiTranslationConfig.defaultModel(selectedProvider).modelId
@@ -140,6 +152,9 @@ fun AiTranslationSettingScreen(
                                     extraBody = extraBody.trim(),
                                 )
                             )
+                            if (endpointValidation.isLocalNetwork) {
+                                AiLocalNetworkAccessGate.requestAccess(retryDenied = true)
+                            }
                             navigationManager.popBackStack()
                         }
                     ) {
@@ -173,8 +188,17 @@ fun AiTranslationSettingScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = endpoint,
-                onValueChange = { endpoint = it },
+                onValueChange = {
+                    endpoint = it
+                    endpointError = null
+                },
                 label = { Text(text = stringResource(RStrings.ai_endpoint)) },
+                supportingText = endpointError?.let { error ->
+                    {
+                        Text(text = error.label())
+                    }
+                },
+                isError = endpointError != null,
                 singleLine = true,
             )
 
@@ -286,6 +310,20 @@ fun AiTranslationSettingScreen(
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         }
     }
+}
+
+@Composable
+private fun AiEndpointError.label(): String = when (this) {
+    AiEndpointError.CREDENTIALS_NOT_ALLOWED ->
+        stringResource(RStrings.ai_endpoint_credentials_not_allowed)
+
+    AiEndpointError.PUBLIC_HTTP_NOT_ALLOWED ->
+        stringResource(RStrings.ai_endpoint_public_http_not_allowed)
+
+    AiEndpointError.EMPTY,
+    AiEndpointError.INVALID_URL,
+    AiEndpointError.UNSUPPORTED_SCHEME ->
+        stringResource(RStrings.ai_endpoint_invalid)
 }
 
 private data class ExtraBodyPreset(

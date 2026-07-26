@@ -1,2 +1,3 @@
 "NSPhotoLibraryAddUsageDescription" = "Erlaube das Speichern heruntergeladener Bilder in „Fotos“.";
 "NSPhotoLibraryUsageDescription" = "Erlaube den Zugriff auf „Fotos“, um gespeicherte Bilder zu verwalten.";
+"NSLocalNetworkUsageDescription" = "Erlaube die Verbindung mit KI-Diensten in deinem lokalen Netzwerk.";
