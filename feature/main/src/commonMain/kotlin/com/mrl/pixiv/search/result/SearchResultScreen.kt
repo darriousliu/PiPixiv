@@ -464,6 +464,7 @@ fun SearchResultsScreen(
                                         PagedNovelList(
                                             state = manualNovelResults,
                                             onNovelClick = navigationManager::navigateToNovelDetailScreen,
+                                            onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
                                         )
                                     } else if (novelSearchResults != null) {
                                         items(
@@ -480,6 +481,7 @@ fun SearchResultsScreen(
                                                             novelId
                                                         )
                                                     },
+                                                    onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
                                                     onBookmarkClick = { isBookmarked, restrict, tags ->
                                                         if (isBookmarked) {
                                                             BookmarkState.deleteBookmarkNovel(novel.id)

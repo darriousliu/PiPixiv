@@ -58,6 +58,7 @@ import kotlin.time.Duration.Companion.seconds
  *
  * @param novel 小说数据
  * @param onNovelClick 点击小说时的回调
+ * @param onSeriesClick 点击系列标题时的回调
  * @param onBookmarkClick 点击收藏按钮时的回调
  * @param modifier 修饰符
  * @param markerPageLabel 阅读书签页码；为空时不展示书签操作
@@ -67,9 +68,9 @@ import kotlin.time.Duration.Companion.seconds
 fun NovelItem(
     novel: Novel,
     onNovelClick: (Long) -> Unit,
+    onSeriesClick: (Long) -> Unit,
     onBookmarkClick: (Boolean, Restrict, List<String>?) -> Unit,
     modifier: Modifier = Modifier,
-    onSeriesClick: ((Long) -> Unit)? = null,
     markerPageLabel: String? = null,
     onMarkerClick: (() -> Unit)? = null,
 ) {
@@ -127,15 +128,9 @@ fun NovelItem(
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.then(
-                            if (onSeriesClick != null) {
-                                Modifier.clickable {
-                                    onSeriesClick(seriesId)
-                                }
-                            } else {
-                                Modifier
-                            }
-                        ),
+                        modifier = Modifier.clickable {
+                            onSeriesClick(seriesId)
+                        },
                     )
                 }
 

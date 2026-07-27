@@ -140,6 +140,7 @@ fun HomeScreen(
             AppViewMode.NOVEL -> {
                 NovelMode(
                     navigateToNovelDetailScreen = navigationManager::navigateToNovelDetailScreen,
+                    navigateToNovelSeriesScreen = navigationManager::navigateToNovelSeriesScreen,
                     modifier = Modifier.padding(paddingValues),
                     viewModel = viewModel,
                 )
@@ -287,6 +288,7 @@ private fun HomeImageFeedPage(
 @Composable
 private fun NovelMode(
     navigateToNovelDetailScreen: (Long) -> Unit,
+    navigateToNovelSeriesScreen: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
@@ -339,6 +341,7 @@ private fun NovelMode(
                         onNovelClick = { novelId ->
                             navigateToNovelDetailScreen(novelId)
                         },
+                        onSeriesClick = navigateToNovelSeriesScreen,
                         onBookmarkClick = { isBookmarked, restrict, tags ->
                             if (isBookmarked) {
                                 BookmarkState.deleteBookmarkNovel(novel.id)

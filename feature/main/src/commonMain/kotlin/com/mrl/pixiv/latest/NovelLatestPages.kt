@@ -76,7 +76,6 @@ fun RecommendedNovelPage(
         novels = viewModel.recommendedNovels,
         listState = viewModel.recommendedNovelLazyListState,
         refreshFlow = refreshFlow,
-        enableSeriesNavigation = false,
         modifier = modifier,
     )
 }
@@ -92,7 +91,6 @@ fun NewNovelPage(
         novels = viewModel.newNovels,
         listState = viewModel.newNovelLazyListState,
         refreshFlow = refreshFlow,
-        enableSeriesNavigation = true,
         modifier = modifier,
     )
 }
@@ -103,7 +101,6 @@ private fun NovelFeedPage(
     novels: Flow<PagingData<Novel>>,
     listState: LazyListState,
     refreshFlow: SharedFlow<LatestPage>,
-    enableSeriesNavigation: Boolean,
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager = koinInject(),
 ) {
@@ -172,17 +169,13 @@ private fun NovelFeedPage(
                     NovelItem(
                         novel = novel,
                         onNovelClick = navigationManager::navigateToNovelDetailScreen,
+                        onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
                         onBookmarkClick = { isBookmarked, restrict, tags ->
                             if (isBookmarked) {
                                 BookmarkState.deleteBookmarkNovel(novel.id)
                             } else {
                                 BookmarkState.bookmarkNovel(novel.id, restrict, tags)
                             }
-                        },
-                        onSeriesClick = if (enableSeriesNavigation) {
-                            navigationManager::navigateToNovelSeriesScreen
-                        } else {
-                            null
                         },
                     )
                 }

@@ -192,6 +192,7 @@ fun HistoryScreen(
                                 showDisabledShortcut = !historyEnabled && localNovelCount == 0,
                                 onOpenHistorySettings = navigationManager::navigateToHistorySettingScreen,
                                 navToNovelDetailScreen = navigationManager::navigateToNovelDetailScreen,
+                                navToNovelSeriesScreen = navigationManager::navigateToNovelSeriesScreen,
                             )
                         }
                     }
@@ -225,6 +226,7 @@ fun HistoryScreen(
                                     showDisabledShortcut = false,
                                     onOpenHistorySettings = navigationManager::navigateToHistorySettingScreen,
                                     navToNovelDetailScreen = navigationManager::navigateToNovelDetailScreen,
+                                    navToNovelSeriesScreen = navigationManager::navigateToNovelSeriesScreen,
                                 )
                             }
                         }
@@ -328,6 +330,7 @@ private fun NovelHistoryPage(
     showDisabledShortcut: Boolean,
     onOpenHistorySettings: () -> Unit,
     navToNovelDetailScreen: (Long) -> Unit,
+    navToNovelSeriesScreen: (Long) -> Unit,
 ) {
     val controller = remember(lazyListState) {
         keyboardScrollerController(lazyListState) {
@@ -355,6 +358,7 @@ private fun NovelHistoryPage(
                     NovelItem(
                         novel = novel,
                         onNovelClick = navToNovelDetailScreen,
+                        onSeriesClick = navToNovelSeriesScreen,
                         onBookmarkClick = { isBookmarked, restrict, tags ->
                             if (isBookmarked) {
                                 BookmarkState.deleteBookmarkNovel(novel.id)

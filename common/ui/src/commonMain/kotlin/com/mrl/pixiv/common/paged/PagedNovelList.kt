@@ -9,6 +9,7 @@ import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 fun LazyListScope.PagedNovelList(
     state: PagedFeedState<Novel>,
     onNovelClick: (Long) -> Unit,
+    onSeriesClick: (Long) -> Unit,
 ) {
     items(
         count = state.items.size,
@@ -18,6 +19,7 @@ fun LazyListScope.PagedNovelList(
         NovelItem(
             novel = novel,
             onNovelClick = onNovelClick,
+            onSeriesClick = onSeriesClick,
             onBookmarkClick = { isBookmarked, restrict, tags ->
                 if (isBookmarked) {
                     BookmarkState.deleteBookmarkNovel(novel.id)

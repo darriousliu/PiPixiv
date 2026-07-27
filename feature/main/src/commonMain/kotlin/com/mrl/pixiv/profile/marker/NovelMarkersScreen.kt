@@ -134,6 +134,7 @@ fun NovelMarkersScreen(
                                                 markerPage = markerPage,
                                             )
                                         },
+                                        onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
                                         onBookmarkClick = { isBookmarked, restrict, tags ->
                                             if (isBookmarked) {
                                                 BookmarkState.deleteBookmarkNovel(

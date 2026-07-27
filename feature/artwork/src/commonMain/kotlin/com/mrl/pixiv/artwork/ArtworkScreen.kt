@@ -172,6 +172,7 @@ fun ArtworkScreen(
                         novels = userNovels,
                         listState = novelListState,
                         navToNovelDetailScreen = navigationManager::navigateToNovelDetailScreen,
+                        navToNovelSeriesScreen = navigationManager::navigateToNovelSeriesScreen,
                     )
 
                     ArtworkPage.Manga -> UserIllustPage(
@@ -237,6 +238,7 @@ private fun UserNovelPage(
     novels: LazyPagingItems<Novel>,
     listState: androidx.compose.foundation.lazy.LazyListState,
     navToNovelDetailScreen: (Long) -> Unit,
+    navToNovelSeriesScreen: (Long) -> Unit,
 ) {
     val pullRefreshState = rememberPullToRefreshState()
     val isRefreshing = novels.loadState.refresh is LoadState.Loading
@@ -269,6 +271,7 @@ private fun UserNovelPage(
                     NovelItem(
                         novel = novel,
                         onNovelClick = navToNovelDetailScreen,
+                        onSeriesClick = navToNovelSeriesScreen,
                         onBookmarkClick = { isBookmarked, restrict, tags ->
                             if (isBookmarked) {
                                 BookmarkState.deleteBookmarkNovel(novel.id)

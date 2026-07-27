@@ -315,6 +315,7 @@ fun ProfileDetailScreen(
                             onAllClick = {
                                 navigationManager.navigateToCollectionScreen(uid, true)
                             },
+                            onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 20.dp)

@@ -254,6 +254,7 @@ private fun TrendingNovelPage(
                             onNovelClick = { novelId ->
                                 navigationManager.navigateToNovelDetailScreen(novelId)
                             },
+                            onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
                             onBookmarkClick = { isBookmarked, restrict, tags ->
                                 if (isBookmarked) {
                                     BookmarkState.deleteBookmarkNovel(novel.id)
