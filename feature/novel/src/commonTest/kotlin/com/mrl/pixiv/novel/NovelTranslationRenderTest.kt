@@ -42,7 +42,7 @@ class NovelTranslationRenderTest {
     }
 
     @Test
-    fun streamingPreviewKeepsOriginalReadingBodyUntilCompletion() {
+    fun translationPresentationMovesFromWaitingToStreamingToCompletedBody() {
         val originalSpans = persistentListOf<NovelSpanData>(
             NovelSpanData.Text("original body"),
         )
@@ -57,32 +57,150 @@ class NovelTranslationRenderTest {
             paragraphSpans = originalSpans,
         )
 
-        val streaming = original.withTranslationRender(
-            translatedText = "translated prefix",
-            translatedParagraphs = previewParagraphs,
+        val waiting = original.withTranslationWaiting()
+
+        assertTrue(waiting.translationPresentation is NovelTranslationPresentation.Waiting)
+        assertTrue(waiting.isTranslating)
+        assertSame(originalParagraphs, waiting.paragraphs)
+        assertSame(originalSpans, waiting.paragraphSpans)
+
+        val streaming = waiting.withStreamingTranslation(
             translatedSpans = previewSpans,
-            isComplete = false,
+            completedChunks = 1,
+            totalChunks = 3,
         )
 
         assertEquals("original body", streaming.novelText)
         assertSame(originalParagraphs, streaming.paragraphs)
         assertSame(originalSpans, streaming.paragraphSpans)
-        assertSame(previewSpans, streaming.translationPreviewSpans)
+        val presentation =
+            streaming.translationPresentation as NovelTranslationPresentation.Streaming
+        assertSame(previewSpans, presentation.spans)
+        assertEquals(1, presentation.completedChunks)
+        assertEquals(3, presentation.totalChunks)
         assertTrue(streaming.isTranslating)
 
-        val completed = streaming.withTranslationRender(
+        val completed = streaming.withCompletedTranslation(
             translatedText = "translated body",
             translatedParagraphs = previewParagraphs,
             translatedSpans = previewSpans,
-            isComplete = true,
         )
 
         assertEquals("translated body", completed.novelText)
         assertSame(previewParagraphs, completed.paragraphs)
         assertSame(previewSpans, completed.paragraphSpans)
-        assertTrue(completed.translationPreviewSpans.isEmpty())
+        assertTrue(completed.translationPresentation is NovelTranslationPresentation.Idle)
         assertFalse(completed.isTranslating)
         assertTrue(completed.isTranslated)
+    }
+
+    @Test
+    fun streamingSpansKeepTheEntirePrefixBeyondLegacyPreviewLimit() {
+        val prefix = "prefix-start-" + "x".repeat(1_300) + "-prefix-end"
+
+        val spans = buildNovelTranslationSpans(
+            text = prefix,
+            novelTextResp = null,
+        )
+
+        assertEquals(persistentListOf(NovelSpanData.Text(prefix)), spans)
+    }
+
+    @Test
+    fun streamingSpansPreserveImagesLinksAndPageBreaksInOrder() {
+        val spans = buildNovelTranslationSpans(
+            text = "A[pixivimage:123][[jumpuri:https://www.pixiv.net/novel/show.php?id=1]][newpage]B",
+            novelTextResp = null,
+        )
+
+        assertEquals(
+            listOf(
+                NovelSpanData.Text("A"),
+                NovelSpanData.PixivImage(
+                    illustId = 123L,
+                    targetIndex = 0,
+                    token = "[pixivimage:123]",
+                    imageUrl = null,
+                ),
+                NovelSpanData.JumpUri(
+                    value = "https://www.pixiv.net/novel/show.php?id=1",
+                    url = "https://www.pixiv.net/novel/show.php?id=1",
+                ),
+                NovelSpanData.NewPage,
+                NovelSpanData.Text("B"),
+            ),
+            spans,
+        )
+    }
+
+    @Test
+    fun onlyNonStreamingCompletionRestoresSavedReadingProgress() {
+        assertTrue(
+            shouldRestoreProgressAfterTranslation(renderedStreamingBody = false)
+        )
+        assertFalse(
+            shouldRestoreProgressAfterTranslation(renderedStreamingBody = true)
+        )
+    }
+
+    @Test
+    fun listAnchorRestoresOnlyWhenAnActiveTranslationEndsWithoutSuccess() {
+        assertTrue(
+            shouldRestoreNovelTranslationListAnchor(
+                wasTranslating = true,
+                isTranslating = false,
+                isTranslated = false,
+            )
+        )
+        assertFalse(
+            shouldRestoreNovelTranslationListAnchor(
+                wasTranslating = true,
+                isTranslating = false,
+                isTranslated = true,
+            )
+        )
+        assertFalse(
+            shouldRestoreNovelTranslationListAnchor(
+                wasTranslating = false,
+                isTranslating = false,
+                isTranslated = false,
+            )
+        )
+        assertFalse(
+            shouldRestoreNovelTranslationListAnchor(
+                wasTranslating = true,
+                isTranslating = true,
+                isTranslated = false,
+            )
+        )
+    }
+
+    @Test
+    fun listAnchorUsesRestoredBodyBoundsInsteadOfPreviousStreamingLayout() {
+        assertEquals(
+            42,
+            resolveNovelTranslationListAnchorItemIndex(
+                requestedItemIndex = 42,
+                paragraphStartItemIndex = 10,
+                paragraphCount = 100,
+            ),
+        )
+        assertEquals(
+            110,
+            resolveNovelTranslationListAnchorItemIndex(
+                requestedItemIndex = 999,
+                paragraphStartItemIndex = 10,
+                paragraphCount = 100,
+            ),
+        )
+        assertEquals(
+            0,
+            resolveNovelTranslationListAnchorItemIndex(
+                requestedItemIndex = -1,
+                paragraphStartItemIndex = 10,
+                paragraphCount = 100,
+            ),
+        )
     }
 
     @Test

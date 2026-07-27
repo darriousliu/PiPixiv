@@ -300,6 +300,7 @@
     <string name="ai_translation_config_required">Lütfen önce AI çeviri ayarlarını tamamla.</string>
     <string name="ai_translation_failed">Çeviri başarısız: %1$s</string>
     <string name="ai_translation_success">Çevirme işlemi başarılı</string>
+    <string name="ai_translation_in_progress">Yapay zekâ çevirisi sürüyor…</string>
     <string name="ai_translation_cache_hit">Çeviri önbellekten yüklendi</string>
     <string name="ai_translation_deleted">Çeviri silindi ve orijinal metin geri yüklendi</string>
     <string name="block_illust">İllüstrasyonları engelle</string>

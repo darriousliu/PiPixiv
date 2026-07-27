@@ -29,36 +29,46 @@ class NovelTranslationStreamingTest {
         val progress = combineTranslatedChunks(
             firstChunk = flowOf(
                 AiTextStreamEvent.Delta("A"),
-                AiTextStreamEvent.Delta("1"),
-                AiTextStreamEvent.Completed("A1"),
+                AiTextStreamEvent.Completed("A"),
             ),
             remainingChunks = listOf(second, third),
             totalChunks = 3,
         ).toList()
 
-        assertEquals("A1\nB\nC", progress.last().text)
+        assertEquals("A\nB\nC", progress.last().text)
         assertTrue(progress.last().isComplete)
-        progress.forEach { update ->
-            assertTrue("A1\nB\nC".startsWith(update.text))
-        }
+        assertEquals(
+            listOf("A", "A\nB", "A\nB\nC"),
+            progress.map { it.text }.distinct(),
+        )
     }
 
     @Test
     fun cancellationCancelsPendingChunkRequests() = runTest {
-        val pending = backgroundScope.async<String> {
+        var firstStreamCancelled = false
+        val second = backgroundScope.async<String> {
+            awaitCancellation()
+        }
+        val third = backgroundScope.async<String> {
             awaitCancellation()
         }
 
         combineTranslatedChunks(
             firstChunk = flow {
-                emit(AiTextStreamEvent.Delta("A"))
-                awaitCancellation()
+                try {
+                    emit(AiTextStreamEvent.Delta("A"))
+                    awaitCancellation()
+                } finally {
+                    firstStreamCancelled = true
+                }
             },
-            remainingChunks = listOf(pending),
-            totalChunks = 2,
+            remainingChunks = listOf(second, third),
+            totalChunks = 3,
         ).take(1).toList()
 
-        assertTrue(pending.isCancelled)
+        assertTrue(firstStreamCancelled)
+        assertTrue(second.isCancelled)
+        assertTrue(third.isCancelled)
     }
 
     @Test

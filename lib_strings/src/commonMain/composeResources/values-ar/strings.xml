@@ -300,6 +300,7 @@
     <string name="ai_translation_config_required">يرجى إكمال إعدادات الترجمة بالذكاء الاصطناعي أولاً</string>
     <string name="ai_translation_failed">فشلت الترجمة: %1$s</string>
     <string name="ai_translation_success">اكتملت الترجمة</string>
+    <string name="ai_translation_in_progress">جارٍ الترجمة بالذكاء الاصطناعي…</string>
     <string name="ai_translation_cache_hit">تم تحميل الترجمة من ذاكرة التخزين المؤقت</string>
     <string name="ai_translation_deleted">تم حذف الترجمة واستعادة النص الأصلي</string>
     <string name="block_illust">حظر الرسوم التوضيحية</string>

@@ -300,6 +300,7 @@
     <string name="ai_translation_config_required">請先在設定中完成AI翻譯配置</string>
     <string name="ai_translation_failed">翻譯失敗: %1$s</string>
     <string name="ai_translation_success">翻譯完成</string>
+    <string name="ai_translation_in_progress">AI 翻譯中…</string>
     <string name="ai_translation_cache_hit">已載入快取翻譯</string>
     <string name="ai_translation_deleted">已刪除翻譯並恢復原文</string>
     <string name="block_illust">封鎖插畫</string>

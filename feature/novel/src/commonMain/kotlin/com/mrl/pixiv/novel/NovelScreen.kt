@@ -62,6 +62,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -124,6 +125,27 @@ import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
+internal data class NovelTranslationListAnchor(
+    val novelId: Long,
+    val itemIndex: Int,
+    val scrollOffset: Int,
+)
+
+internal fun shouldRestoreNovelTranslationListAnchor(
+    wasTranslating: Boolean,
+    isTranslating: Boolean,
+    isTranslated: Boolean,
+): Boolean = wasTranslating && !isTranslating && !isTranslated
+
+internal fun resolveNovelTranslationListAnchorItemIndex(
+    requestedItemIndex: Int,
+    paragraphStartItemIndex: Int,
+    paragraphCount: Int,
+): Int = requestedItemIndex.coerceIn(
+    minimumValue = 0,
+    maximumValue = paragraphStartItemIndex + paragraphCount.coerceAtLeast(0),
+)
+
 @Composable
 fun NovelScreen(
     novelId: Long,
@@ -148,6 +170,10 @@ fun NovelScreen(
         markerPagesForSpans(state.paragraphSpans)
     }
     var showBookmarkBottomSheet by remember { mutableStateOf(false) }
+    var translationListAnchor by remember(state.novel?.id) {
+        mutableStateOf<NovelTranslationListAnchor?>(null)
+    }
+    var wasTranslating by remember(state.novel?.id) { mutableStateOf(false) }
 
     LaunchedEffect(state.loading, state.novel?.id, readLaterTargetLanguage) {
         if (!state.loading &&
@@ -168,8 +194,14 @@ fun NovelScreen(
     }
     var manuallyShowTopBar by remember { mutableStateOf(false) }
     val showBar = !isContentVisible || manuallyShowTopBar
-    val readingProgressFraction by remember(state.novel?.id, state.paragraphs, listState) {
+    val readingProgressFraction by remember(
+        state.novel?.id,
+        state.paragraphs,
+        state.isTranslating,
+        listState,
+    ) {
         derivedStateOf {
+            if (state.isTranslating) return@derivedStateOf 0f
             val novel = state.novel ?: return@derivedStateOf 0f
             val paragraphStartIndex =
                 paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
@@ -208,16 +240,21 @@ fun NovelScreen(
         }
     }
 
-    val saveReadingProgress = remember(state.novel?.id, listState) {
+    val latestState = rememberUpdatedState(state)
+    val latestParagraphLayouts = rememberUpdatedState(paragraphLayouts)
+    val saveReadingProgress = remember(listState, viewModel) {
         {
-            val novel = state.novel ?: return@remember
-            if (state.paragraphs.isEmpty()) return@remember
+            val currentState = latestState.value
+            val novel = currentState.novel ?: return@remember
+            if (currentState.isTranslating || currentState.paragraphs.isEmpty()) {
+                return@remember
+            }
             val paragraphStartIndex =
                 paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
             val firstVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.firstOrNull()?.index
                 ?: return@remember
             val contentRange =
-                paragraphStartIndex until (paragraphStartIndex + state.paragraphs.size)
+                paragraphStartIndex until (paragraphStartIndex + currentState.paragraphs.size)
             if (firstVisibleItemIndex !in contentRange) {
                 viewModel.clearProgress(novelId = novel.id)
                 return@remember
@@ -225,9 +262,9 @@ fun NovelScreen(
             val progress = buildVisibleReadingProgress(
                 listState = listState,
                 paragraphStartIndex = paragraphStartIndex,
-                paragraphCount = state.paragraphs.size,
-                paragraphLayouts = paragraphLayouts,
-                paragraphs = state.paragraphs
+                paragraphCount = currentState.paragraphs.size,
+                paragraphLayouts = latestParagraphLayouts.value,
+                paragraphs = currentState.paragraphs
             ) ?: return@remember
             viewModel.saveProgress(novelId = novel.id, progress = progress)
         }
@@ -243,7 +280,11 @@ fun NovelScreen(
             }
     }
 
-    LaunchedEffect(state.restoreVersion, state.novel?.id) {
+    var handledRestoreVersion by remember(state.novel?.id) { mutableStateOf(-1L) }
+    LaunchedEffect(state.restoreVersion, state.novel?.id, state.isTranslating) {
+        if (handledRestoreVersion == state.restoreVersion) return@LaunchedEffect
+        handledRestoreVersion = state.restoreVersion
+        if (state.isTranslating) return@LaunchedEffect
         val novel = state.novel ?: return@LaunchedEffect
         val resolvedProgress = state.restoreProgress ?: return@LaunchedEffect
         if (state.paragraphs.isEmpty()) return@LaunchedEffect
@@ -294,6 +335,53 @@ fun NovelScreen(
 
         // 执行滚动，将目标行的顶部与视口顶部对齐
         listState.scrollToItem(targetItemIndex, offset)
+    }
+
+    LaunchedEffect(state.novel?.id, state.isTranslating) {
+        val novel = state.novel ?: return@LaunchedEffect
+        val previouslyTranslating = wasTranslating
+        wasTranslating = state.isTranslating
+        if (!previouslyTranslating && state.isTranslating) {
+            val paragraphStartIndex =
+                paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
+            paragraphLayouts.clear()
+            listState.scrollToItem(paragraphStartIndex, 0)
+        } else if (
+            shouldRestoreNovelTranslationListAnchor(
+                wasTranslating = previouslyTranslating,
+                isTranslating = state.isTranslating,
+                isTranslated = state.isTranslated,
+            )
+        ) {
+            val anchorToRestore = translationListAnchor
+            translationListAnchor = null
+            anchorToRestore
+                ?.takeIf { it.novelId == novel.id }
+                ?.let { anchor ->
+                    val paragraphStartIndex =
+                        paragraphStartItemIndex(
+                            novel.series.title != null,
+                            novel.caption.isNotEmpty(),
+                        )
+                    val resolvedItemIndex = resolveNovelTranslationListAnchorItemIndex(
+                        requestedItemIndex = anchor.itemIndex,
+                        paragraphStartItemIndex = paragraphStartIndex,
+                        paragraphCount = state.paragraphSpans.size,
+                    )
+                    listState.scrollToItem(
+                        index = resolvedItemIndex,
+                        scrollOffset = if (resolvedItemIndex == anchor.itemIndex) {
+                            anchor.scrollOffset
+                        } else {
+                            0
+                        },
+                    )
+                }
+        }
+
+        if (previouslyTranslating && !state.isTranslating) {
+            translationListAnchor = null
+        }
     }
 
     DisposableEffect(Unit) {
@@ -476,6 +564,13 @@ fun NovelScreen(
                                             if (state.isTranslating) {
                                                 viewModel.dispatch(NovelIntent.CancelTranslation)
                                             } else {
+                                                translationListAnchor = NovelTranslationListAnchor(
+                                                    novelId = state.novel.id,
+                                                    itemIndex = listState.firstVisibleItemIndex,
+                                                    scrollOffset =
+                                                        listState.firstVisibleItemScrollOffset,
+                                                )
+                                                saveReadingProgress()
                                                 viewModel.dispatch(
                                                     NovelIntent.TranslateNovel(forceRefresh = state.isTranslated)
                                                 )
@@ -552,7 +647,7 @@ fun NovelScreen(
                                                 NovelIntent.ToggleMarker(currentMarkerPage)
                                             )
                                         },
-                                        enabled = !state.markerUpdating,
+                                        enabled = !state.markerUpdating && !state.isTranslating,
                                     ) {
                                         if (state.markerUpdating) {
                                             CircularProgressIndicator(

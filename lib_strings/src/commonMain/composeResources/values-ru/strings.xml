@@ -300,6 +300,7 @@
     <string name="ai_translation_config_required">Сначала завершите настройку AI-перевода в настройках</string>
     <string name="ai_translation_failed">Ошибка перевода: %1$s</string>
     <string name="ai_translation_success">Перевод завершен</string>
+    <string name="ai_translation_in_progress">Выполняется перевод с помощью ИИ…</string>
     <string name="ai_translation_cache_hit">Загружен перевод из кэша</string>
     <string name="ai_translation_deleted">Перевод удален, оригинал восстановлен</string>
     <string name="block_illust">Блокировать иллюстрации</string>

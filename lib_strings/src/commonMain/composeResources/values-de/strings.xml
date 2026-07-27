@@ -300,6 +300,7 @@
     <string name="ai_translation_config_required">Bitte schließen Sie zuerst die AI-Übersetzungseinstellungen in den Einstellungen ab</string>
     <string name="ai_translation_failed">Übersetzung fehlgeschlagen: %1$s</string>
     <string name="ai_translation_success">Übersetzung abgeschlossen</string>
+    <string name="ai_translation_in_progress">KI-Übersetzung läuft…</string>
     <string name="ai_translation_cache_hit">Zwischengespeicherte Übersetzung geladen</string>
     <string name="ai_translation_deleted">Übersetzung gelöscht und Originaltext wiederhergestellt</string>
     <string name="block_illust">Illustrationen blockieren</string>

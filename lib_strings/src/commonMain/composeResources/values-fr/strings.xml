@@ -300,6 +300,7 @@
     <string name="ai_translation_config_required">Veuillez d'abord terminer la configuration de la traduction IA dans les paramètres</string>
     <string name="ai_translation_failed">Échec de la traduction : %1$s</string>
     <string name="ai_translation_success">Traduction terminée</string>
+    <string name="ai_translation_in_progress">Traduction par IA en cours…</string>
     <string name="ai_translation_cache_hit">Traduction en cache chargée</string>
     <string name="ai_translation_deleted">Traduction supprimée et texte original restauré</string>
     <string name="block_illust">Bloquer les illustrations</string>

@@ -52,6 +52,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.collect
@@ -64,7 +65,8 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 
 @Stable
-data class NovelState(
+@ConsistentCopyVisibility
+data class NovelState internal constructor(
     val loading: Boolean = true,
     val novel: Novel? = null,
     val novelTextResp: NovelTextResp? = null,
@@ -77,15 +79,31 @@ data class NovelState(
     val showBottomSheet: Boolean = false,
     val paragraphs: ImmutableList<String> = persistentListOf(),
     val paragraphSpans: ImmutableList<NovelSpanData> = persistentListOf(),
-    val translationPreviewSpans: ImmutableList<NovelSpanData> = persistentListOf(),
+    internal val translationPresentation: NovelTranslationPresentation =
+        NovelTranslationPresentation.Idle,
     val prevNovelId: Long? = null,
     val nextNovelId: Long? = null,
     val restoreProgress: NovelReadingProgress? = null,
     val restoreVersion: Long = 0L,
-    val isTranslating: Boolean = false,
     val isTranslated: Boolean = false,
     val isShowingOriginalText: Boolean = false,
-)
+) {
+    val isTranslating: Boolean
+        get() = translationPresentation !is NovelTranslationPresentation.Idle
+}
+
+@Stable
+internal sealed interface NovelTranslationPresentation {
+    data object Idle : NovelTranslationPresentation
+
+    data object Waiting : NovelTranslationPresentation
+
+    data class Streaming(
+        val spans: ImmutableList<NovelSpanData>,
+        val completedChunks: Int,
+        val totalChunks: Int,
+    ) : NovelTranslationPresentation
+}
 
 sealed class NovelIntent : ViewIntent {
     data class LoadNovelDetail(val novelId: Long) : NovelIntent()
@@ -167,10 +185,9 @@ class NovelViewModel(
                 updateState {
                     copy(
                         loading = false,
-                        isTranslating = false,
                         isTranslated = false,
                         isShowingOriginalText = false,
-                        translationPreviewSpans = persistentListOf(),
+                        translationPresentation = NovelTranslationPresentation.Idle,
                     )
                 }
                 handleError(e)
@@ -182,10 +199,9 @@ class NovelViewModel(
                     loading = true,
                     restoreProgress = null,
                     markerUpdating = false,
-                    isTranslating = false,
                     isTranslated = false,
                     isShowingOriginalText = false,
-                    translationPreviewSpans = persistentListOf(),
+                    translationPresentation = NovelTranslationPresentation.Idle,
                 )
             }
             val response = PixivRepository.getNovelDetail(novelId)
@@ -211,10 +227,9 @@ class NovelViewModel(
                     markerPage = novelText?.marker?.page?.takeIf { it > 0 },
                     prevNovelId = novelText?.seriesNavigation?.prevNovel?.id,
                     nextNovelId = novelText?.seriesNavigation?.nextNovel?.id,
-                    isTranslating = false,
                     isTranslated = false,
                     isShowingOriginalText = false,
-                    translationPreviewSpans = persistentListOf(),
+                    translationPresentation = NovelTranslationPresentation.Idle,
                 )
             }
 
@@ -253,7 +268,7 @@ class NovelViewModel(
 
     private fun toggleMarker(page: Int) {
         val novel = uiState.value.novel ?: return
-        if (uiState.value.markerUpdating) return
+        if (uiState.value.markerUpdating || uiState.value.isTranslating) return
 
         val currentMarkerPage = uiState.value.markerPage
         launchIO(
@@ -334,12 +349,14 @@ class NovelViewModel(
 
     private fun updateFontSize(size: Int) {
         updateState { copy(fontSize = size.coerceIn(10, 32)) }
+        if (uiState.value.isTranslating) return
         val currentNovelId = uiState.value.novel?.id ?: return
         requestRestoreProgress(novelId = currentNovelId, paragraphs = uiState.value.paragraphs)
     }
 
     private fun updateLineSpacing(spacing: Int) {
         updateState { copy(lineSpacingSp = spacing.coerceIn(-10, 10)) }
+        if (uiState.value.isTranslating) return
         val currentNovelId = uiState.value.novel?.id ?: return
         requestRestoreProgress(novelId = currentNovelId, paragraphs = uiState.value.paragraphs)
     }
@@ -404,10 +421,7 @@ class NovelViewModel(
         ) {
             try {
                 updateState {
-                    copy(
-                        isTranslating = true,
-                        translationPreviewSpans = persistentListOf(),
-                    )
+                    withTranslationWaiting()
                 }
 
                 val cached = if (!forceRefresh) {
@@ -419,6 +433,7 @@ class NovelViewModel(
                     null
                 }
 
+                var renderedStreamingBody = false
                 val translatedText = if (
                     cached != null &&
                     cached.provider == config.provider &&
@@ -449,10 +464,8 @@ class NovelViewModel(
                                     lastRenderMark.elapsedNow() >= STREAM_RENDER_INTERVAL,
                             )
                             if (shouldRender && isCurrentTranslation(runToken, novel.id)) {
-                                renderTranslation(
-                                    text = progress.text,
-                                    isComplete = false,
-                                )
+                                renderStreamingTranslation(progress)
+                                renderedStreamingBody = true
                                 renderedFirstDelta = true
                                 lastRenderedCompletedChunks = progress.completedChunks
                                 lastRenderMark = TimeSource.Monotonic.markNow()
@@ -482,14 +495,13 @@ class NovelViewModel(
                 }
 
                 if (isCurrentTranslation(runToken, novel.id)) {
-                    val translatedParagraphs = renderTranslation(
-                        text = translatedText,
-                        isComplete = true,
-                    )
-                    requestRestoreProgress(
-                        novelId = novel.id,
-                        paragraphs = translatedParagraphs,
-                    )
+                    val translatedParagraphs = completeTranslation(translatedText)
+                    if (shouldRestoreProgressAfterTranslation(renderedStreamingBody)) {
+                        requestRestoreProgress(
+                            novelId = novel.id,
+                            paragraphs = translatedParagraphs,
+                        )
+                    }
                 }
             } catch (cancelled: CancellationException) {
                 if (isCurrentTranslation(runToken, novel.id)) {
@@ -526,7 +538,7 @@ class NovelViewModel(
         job.start()
     }
 
-    private fun cancelTranslation(restoreOriginal: Boolean = true) {
+    private suspend fun cancelTranslation(restoreOriginal: Boolean = true) {
         val job = translationJob ?: return
         val novelId = translationNovelId
         val progressToRestore = translationRestoreProgress
@@ -534,7 +546,7 @@ class NovelViewModel(
         translationRunToken = null
         translationNovelId = null
         translationRestoreProgress = null
-        job.cancel()
+        job.cancelAndJoin()
         if (!restoreOriginal) return
         novelId ?: return
         val sourceText = sourceNovelText.trim().ifBlank { uiState.value.novelText.trim() }
@@ -548,22 +560,32 @@ class NovelViewModel(
     private fun isCurrentTranslation(runToken: Any, novelId: Long): Boolean =
         translationRunToken === runToken && uiState.value.novel?.id == novelId
 
-    private fun renderTranslation(
-        text: String,
-        isComplete: Boolean,
-    ): ImmutableList<String> {
-        val displayText = if (isComplete) text else text.takeLast(STREAM_PREVIEW_CHAR_LIMIT)
-        val spans = NovelSpanParser
-            .buildSpans(displayText, uiState.value.novelTextResp)
-            .toImmutableList()
-        val paragraphs = spans.toProgressParagraphs()
-        if (isComplete) translatedNovelText = text
+    private fun renderStreamingTranslation(progress: NovelTranslationStreamProgress) {
+        val spans = buildNovelTranslationSpans(
+            text = progress.text,
+            novelTextResp = uiState.value.novelTextResp,
+        )
         updateState {
-            withTranslationRender(
+            withStreamingTranslation(
+                translatedSpans = spans,
+                completedChunks = progress.completedChunks,
+                totalChunks = progress.totalChunks,
+            )
+        }
+    }
+
+    private fun completeTranslation(text: String): ImmutableList<String> {
+        val spans = buildNovelTranslationSpans(
+            text = text,
+            novelTextResp = uiState.value.novelTextResp,
+        )
+        val paragraphs = spans.toProgressParagraphs()
+        translatedNovelText = text
+        updateState {
+            withCompletedTranslation(
                 translatedText = text,
                 translatedParagraphs = paragraphs,
                 translatedSpans = spans,
-                isComplete = isComplete,
             )
         }
         return paragraphs
@@ -588,16 +610,11 @@ class NovelViewModel(
                 novelText = sourceText,
                 paragraphs = paragraphs,
                 paragraphSpans = spans,
-                isTranslating = false,
                 isTranslated = false,
                 isShowingOriginalText = false,
-                translationPreviewSpans = persistentListOf(),
+                translationPresentation = NovelTranslationPresentation.Idle,
             )
         }
-        requestRestoreProgress(
-            novelId = novelId,
-            paragraphs = paragraphs,
-        )
     }
 
     private fun deleteNovelTranslation() {
@@ -804,7 +821,6 @@ class NovelViewModel(
 }
 
 private val STREAM_RENDER_INTERVAL = 50.milliseconds
-private const val STREAM_PREVIEW_CHAR_LIMIT = 1_200
 
 internal fun shouldRenderNovelTranslation(
     progress: NovelTranslationStreamProgress,
@@ -821,29 +837,49 @@ internal fun shouldApplyNovelScopedUpdate(
     requestedNovelId: Long,
 ): Boolean = currentNovelId == requestedNovelId
 
-internal fun NovelState.withTranslationRender(
+internal fun shouldRestoreProgressAfterTranslation(
+    renderedStreamingBody: Boolean,
+): Boolean = !renderedStreamingBody
+
+internal fun NovelState.withTranslationWaiting(): NovelState = copy(
+    translationPresentation = NovelTranslationPresentation.Waiting,
+    isTranslated = false,
+    isShowingOriginalText = false,
+)
+
+internal fun NovelState.withStreamingTranslation(
+    translatedSpans: ImmutableList<NovelSpanData>,
+    completedChunks: Int,
+    totalChunks: Int,
+): NovelState = copy(
+    translationPresentation = NovelTranslationPresentation.Streaming(
+        spans = translatedSpans,
+        completedChunks = completedChunks,
+        totalChunks = totalChunks,
+    ),
+    isTranslated = false,
+    isShowingOriginalText = false,
+)
+
+internal fun NovelState.withCompletedTranslation(
     translatedText: String,
     translatedParagraphs: ImmutableList<String>,
     translatedSpans: ImmutableList<NovelSpanData>,
-    isComplete: Boolean,
-): NovelState = if (isComplete) {
-    copy(
-        novelText = translatedText,
-        paragraphs = translatedParagraphs,
-        paragraphSpans = translatedSpans,
-        translationPreviewSpans = persistentListOf(),
-        isTranslating = false,
-        isTranslated = true,
-        isShowingOriginalText = false,
-    )
-} else {
-    copy(
-        translationPreviewSpans = translatedSpans,
-        isTranslating = true,
-        isTranslated = false,
-        isShowingOriginalText = false,
-    )
-}
+): NovelState = copy(
+    novelText = translatedText,
+    paragraphs = translatedParagraphs,
+    paragraphSpans = translatedSpans,
+    translationPresentation = NovelTranslationPresentation.Idle,
+    isTranslated = true,
+    isShowingOriginalText = false,
+)
+
+internal fun buildNovelTranslationSpans(
+    text: String,
+    novelTextResp: NovelTextResp?,
+): ImmutableList<NovelSpanData> = NovelSpanParser
+    .buildSpans(text, novelTextResp)
+    .toImmutableList()
 
 internal suspend fun commitCompletedNovelTranslation(
     completedText: String?,

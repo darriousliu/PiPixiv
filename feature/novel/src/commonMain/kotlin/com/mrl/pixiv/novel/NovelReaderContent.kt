@@ -3,7 +3,6 @@ package com.mrl.pixiv.novel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -71,6 +69,8 @@ private const val KEY_TAGS = "tags"
 private const val KEY_CAPTION = "caption"
 private const val KEY_VIEW_COMMENTS = "view_comments"
 private const val KEY_DIVIDER = "divider"
+private const val KEY_TRANSLATION_WAITING = "translation_waiting"
+private const val KEY_TRANSLATION_STREAMING_LOADING = "translation_streaming_loading"
 private const val KEY_SPACER_END = "spacer_end"
 
 @Composable
@@ -314,59 +314,66 @@ internal fun NovelReaderContent(
                 )
             }
 
-            // 正文段落
-            items(
-                count = state.paragraphSpans.size,
-                // 两个段落内容相同，hashcode也一样，这样就会导致列表状态异常，所以这里直接用index作为key
-                key = { it }
-            ) { index ->
-                NovelParagraph(
-                    paragraphIndex = index,
-                    fontSize = state.fontSize,
-                    lineSpacingSp = state.lineSpacingSp,
-                    span = state.paragraphSpans[index],
-                    onParagraphTextLayout = onParagraphTextLayout,
-                    onContentClick = onContentClick,
-                    onPixivImageClick = onPixivImageClick,
-                )
-            }
-
-            item(key = KEY_SPACER_END) { Spacer(modifier = Modifier.height(32.dp)) }
-        }
-
-        if (state.translationPreviewSpans.isNotEmpty()) {
-            Card(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = 16.dp, vertical = 40.dp)
-                    .fillMaxWidth()
-                    .heightIn(max = 180.dp),
-            ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                ) {
+            when (val presentation = state.translationPresentation) {
+                NovelTranslationPresentation.Idle -> {
                     items(
-                        count = state.translationPreviewSpans.size,
+                        count = state.paragraphSpans.size,
+                        // 两个段落内容相同，hashcode也一样，这样就会导致列表状态异常，所以这里直接用index作为key
                         key = { it },
                     ) { index ->
                         NovelParagraph(
                             paragraphIndex = index,
                             fontSize = state.fontSize,
                             lineSpacingSp = state.lineSpacingSp,
-                            span = state.translationPreviewSpans[index],
+                            span = state.paragraphSpans[index],
+                            onParagraphTextLayout = onParagraphTextLayout,
+                            onContentClick = onContentClick,
+                            onPixivImageClick = onPixivImageClick,
+                        )
+                    }
+
+                    item(key = KEY_SPACER_END) {
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
+                }
+
+                NovelTranslationPresentation.Waiting -> {
+                    item(key = KEY_TRANSLATION_WAITING) {
+                        NovelTranslationLoading(
+                            centered = true,
+                            modifier = Modifier.fillParentMaxHeight(),
+                        )
+                    }
+                }
+
+                is NovelTranslationPresentation.Streaming -> {
+                    items(
+                        count = presentation.spans.size,
+                        key = { it },
+                    ) { index ->
+                        NovelParagraph(
+                            paragraphIndex = index,
+                            fontSize = state.fontSize,
+                            lineSpacingSp = state.lineSpacingSp,
+                            span = presentation.spans[index],
                             onParagraphTextLayout = { _, _ -> },
                             onContentClick = onContentClick,
                             onPixivImageClick = onPixivImageClick,
                         )
                     }
+
+                    item(key = KEY_TRANSLATION_STREAMING_LOADING) {
+                        NovelTranslationLoading(centered = false)
+                    }
                 }
             }
         }
 
-        ReadingProgressIndicator(
-            progress = readingProgressFraction,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        if (!state.isTranslating) {
+            ReadingProgressIndicator(
+                progress = readingProgressFraction,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }

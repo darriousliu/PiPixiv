@@ -1,18 +1,24 @@
 package com.mrl.pixiv.novel
 
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -33,11 +39,41 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.strings.ai_translation_in_progress
+import org.jetbrains.compose.resources.stringResource
 
 private data class ParagraphRenderData(
     val annotatedText: AnnotatedString,
     val inlineContent: Map<String, InlineTextContent>,
 )
+
+@Composable
+internal fun NovelTranslationLoading(
+    centered: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (centered) {
+                    Modifier.heightIn(min = 240.dp)
+                } else {
+                    Modifier.padding(vertical = 24.dp)
+                }
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+    ) {
+        CircularWavyProgressIndicator(modifier = Modifier.size(32.dp))
+        Text(
+            text = stringResource(RStrings.ai_translation_in_progress),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
 
 @Composable
 internal fun NovelParagraph(

@@ -300,6 +300,7 @@
     <string name="ai_translation_config_required">कृपया पहले सेटिंग्स में AI अनुवाद कॉन्फ़िगरेशन पूरा करें</string>
     <string name="ai_translation_failed">अनुवाद विफल: %1$s</string>
     <string name="ai_translation_success">अनुवाद पूरा हुआ</string>
+    <string name="ai_translation_in_progress">AI अनुवाद जारी है…</string>
     <string name="ai_translation_cache_hit">कैश से अनुवाद लोड किया गया</string>
     <string name="ai_translation_deleted">अनुवाद हटाया गया और मूल पाठ पुनर्स्थापित किया गया</string>
     <string name="block_illust">चित्र ब्लॉक करें</string>
