@@ -1,7 +1,7 @@
 package com.mrl.pixiv.common.compose.ui.novel
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.outlined.WatchLater
 import androidx.compose.material.icons.rounded.WatchLater
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -86,9 +86,9 @@ fun NovelReadLaterButton(
     ) {
         Icon(
             imageVector = if (item == null) {
-                Icons.Rounded.WatchLater
+                Icons.Outlined.WatchLater
             } else {
-                Icons.Rounded.Schedule
+                Icons.Rounded.WatchLater
             },
             contentDescription = stringResource(
                 if (item == null) {
