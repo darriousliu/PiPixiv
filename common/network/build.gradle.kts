@@ -45,5 +45,9 @@ kotlin {
         jvmMain.dependencies {
             implementation(kotlinx.ktor.client.okhttp)
         }
+
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
