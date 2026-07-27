@@ -48,6 +48,8 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.okhttp.mockwebserver)
+            implementation(libs.okhttp.tls)
         }
     }
 }

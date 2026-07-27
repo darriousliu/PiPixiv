@@ -90,6 +90,8 @@ html-converter = { module = "be.digitalia.compose.htmlconverter:htmlconverter", 
 
 okhttp-bom = { module = "com.squareup.okhttp3:okhttp-bom", version.ref = "okhttp" }
 okhttp = { module = "com.squareup.okhttp3:okhttp" }
+okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver3" }
+okhttp-tls = { module = "com.squareup.okhttp3:okhttp-tls" }
 
 sentry-multiplatform = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sentry-kmp" }
 sentry-bom = { module = "io.sentry:sentry-bom", version.ref = "sentry-bom" }

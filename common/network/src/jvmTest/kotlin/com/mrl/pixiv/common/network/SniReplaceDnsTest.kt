@@ -1,87 +1,199 @@
 package com.mrl.pixiv.common.network
 
 import okhttp3.Dns
+import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.InetAddress
+import java.net.Proxy
 import java.net.UnknownHostException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class SniReplaceDnsTest {
     @Test
-    fun configuredFallbackIsTriedBeforeDohAndSystemDns() {
-        val fallbackAddress = ipv4("210.140.139.155")
-        val dohAddress = ipv4("172.64.145.76")
-        val systemAddress = ipv4("199.59.148.222")
+    fun bypassClientDoesNotInheritAProcessProxy() {
+        val client = OkHttpClient.Builder()
+            .bypassSNI(
+                queryUrl = "https://doh.example/dns-query",
+                nonStrictSSL = false,
+                fallback = emptyMap(),
+                dohTimeout = 5,
+            )
+            .build()
+
+        assertEquals(Proxy.NO_PROXY, client.proxy)
+    }
+
+    @Test
+    fun apiCombinesOriginDohWithOwnFallbackWithoutUsingSystemDns() {
+        val firstDohAddress = ipv4("210.140.139.152")
+        val secondDohAddress = ipv4("210.140.139.155")
+        val fallbackAddress = ipv4("210.140.139.158")
         var dohHostname: String? = null
         var fallbackValue: String? = null
+        var systemCalled = false
 
         val dns = SniReplaceDns(
-            fallback = mapOf(API_HOST to "configured-ip"),
-            dohLookup = { hostname ->
+            fallback = mapOf(API_HOST to "configured-pool"),
+            originLookup = { hostname ->
                 dohHostname = hostname
-                listOf(dohAddress, fallbackAddress)
+                DnsLookupResult(
+                    source = "DoH($hostname)",
+                    addresses = listOf(firstDohAddress, secondDohAddress),
+                )
             },
             systemDns = Dns {
-                listOf(systemAddress, fallbackAddress)
+                systemCalled = true
+                emptyList()
             },
             fallbackLookup = { value ->
                 fallbackValue = value
-                listOf(fallbackAddress)
+                listOf(secondDohAddress, fallbackAddress)
             },
         )
 
         assertEquals(
-            listOf(fallbackAddress, dohAddress, systemAddress),
+            listOf(firstDohAddress, secondDohAddress, fallbackAddress),
             dns.lookup(API_HOST),
         )
-        assertEquals(API_HOST, dohHostname)
-        assertEquals("configured-ip", fallbackValue)
+        assertEquals(PIXIV_ORIGIN_ALIAS, dohHostname)
+        assertEquals("configured-pool", fallbackValue)
+        assertFalse(systemCalled)
     }
 
     @Test
-    fun systemDnsFailureDoesNotDiscardFallback() {
+    fun oauthUsesOriginDohAliasAndItsOwnFallback() {
+        var dohHostname: String? = null
+        val dohAddress = ipv4("210.140.139.158")
+        val fallbackAddress = ipv4("210.140.139.161")
+        val dns = SniReplaceDns(
+            fallback = mapOf(AUTH_HOST to "210.140.139.161"),
+            originLookup = {
+                dohHostname = it
+                DnsLookupResult("DoH($it)", listOf(dohAddress))
+            },
+            systemDns = Dns { error("System DNS must not be used") },
+        )
+
+        assertEquals(listOf(dohAddress, fallbackAddress), dns.lookup(AUTH_HOST))
+        assertEquals(PIXIV_ORIGIN_ALIAS, dohHostname)
+    }
+
+    @Test
+    fun imageHostsUseOriginDohAliasesBeforeTheirFallback() {
+        val queriedHosts = mutableListOf<String>()
+        val dohAddress = ipv4("210.140.139.133")
+        val fallbackAddress = ipv4("210.140.139.134")
+        val dns = SniReplaceDns(
+            fallback = mapOf(
+                IMAGE_HOST to "210.140.139.134",
+                STATIC_IMAGE_HOST to "210.140.139.134",
+            ),
+            originLookup = {
+                queriedHosts += it
+                DnsLookupResult("DoH($it)", listOf(dohAddress))
+            },
+            systemDns = Dns { error("System DNS must not be used") },
+        )
+
+        assertEquals(listOf(dohAddress, fallbackAddress), dns.lookup(IMAGE_HOST))
+        assertEquals(listOf(dohAddress, fallbackAddress), dns.lookup(STATIC_IMAGE_HOST))
+        assertEquals(
+            listOf(
+                "$IMAGE_HOST.cdn.cloudflare.net",
+                "$STATIC_IMAGE_HOST.cdn.cloudflare.net",
+            ),
+            queriedHosts,
+        )
+    }
+
+    @Test
+    fun dohFailureFallsBackWithoutCallingSystemDns() {
         val fallbackAddress = ipv4("210.140.139.155")
+        var systemCalled = false
         val dns = SniReplaceDns(
             fallback = mapOf(API_HOST to "configured-ip"),
-            dohLookup = { throw IOException("DoH unavailable") },
-            systemDns = Dns { throw UnknownHostException(it) },
+            originLookup = { throw IOException("Origin DNS unavailable") },
+            systemDns = Dns {
+                systemCalled = true
+                throw UnknownHostException(it)
+            },
             fallbackLookup = { listOf(fallbackAddress) },
         )
 
         assertEquals(listOf(fallbackAddress), dns.lookup(API_HOST))
+        assertFalse(systemCalled)
     }
 
     @Test
-    fun failedFallbackDoesNotDiscardOtherSources() {
-        val dohAddress = ipv4("210.140.139.133")
-        val systemAddress = ipv4("210.140.139.134")
-        val dns = SniReplaceDns(
-            fallback = mapOf(IMAGE_HOST to "invalid"),
-            dohLookup = { listOf(dohAddress) },
-            systemDns = Dns { listOf(systemAddress) },
-            fallbackLookup = { throw UnknownHostException(it) },
-        )
-
-        assertEquals(
-            listOf(dohAddress, systemAddress),
-            dns.lookup(IMAGE_HOST),
-        )
-    }
-
-    @Test
-    fun emptySourcesThrowUnknownHostException() {
+    fun unknownHostUsesOnlySystemDns() {
+        val systemAddress = ipv4("192.0.2.10")
+        var originCalled = false
+        var fallbackCalled = false
         val dns = SniReplaceDns(
             fallback = emptyMap(),
-            dohLookup = { emptyList() },
-            systemDns = Dns { emptyList() },
+            originLookup = {
+                originCalled = true
+                null
+            },
+            systemDns = Dns { listOf(systemAddress) },
+            fallbackLookup = {
+                fallbackCalled = true
+                emptyList()
+            },
+        )
+
+        assertEquals(listOf(systemAddress), dns.lookup("example.com"))
+        assertFalse(originCalled)
+        assertFalse(fallbackCalled)
+    }
+
+    @Test
+    fun managedHostDoesNotFallThroughToSystemDns() {
+        var systemCalled = false
+        val dns = SniReplaceDns(
+            fallback = emptyMap(),
+            originLookup = { null },
+            systemDns = Dns {
+                systemCalled = true
+                listOf(ipv4("104.18.42.239"))
+            },
         )
 
         assertFailsWith<UnknownHostException> {
-            dns.lookup("unresolvable.example")
+            dns.lookup(API_HOST)
         }
+        assertFalse(systemCalled)
+    }
+
+    @Test
+    fun fallbackFailureKeepsDohAddressesWithoutCallingSystemDns() {
+        val dohAddress = ipv4("210.140.139.152")
+        var systemCalled = false
+        val dns = SniReplaceDns(
+            fallback = mapOf(API_HOST to "invalid fallback"),
+            originLookup = {
+                DnsLookupResult("DoH($it)", listOf(dohAddress))
+            },
+            systemDns = Dns {
+                systemCalled = true
+                emptyList()
+            },
+            fallbackLookup = { throw IOException("fallback unavailable") },
+        )
+
+        assertEquals(listOf(dohAddress), dns.lookup(API_HOST))
+        assertFalse(systemCalled)
     }
 
     @Test
@@ -92,14 +204,126 @@ class SniReplaceDnsTest {
             timeoutSeconds = -1,
             unsafeSSL = false,
         )
+        val originResolver = RacingOriginDnsResolver(
+            timeoutSeconds = 1,
+            dohLookup = resolver::lookup,
+            systemLookup = { throw UnknownHostException(it) },
+        )
         val dns = SniReplaceDns(
             fallback = mapOf(API_HOST to "configured-ip"),
-            dohLookup = resolver::lookup,
+            originLookup = originResolver::lookup,
             systemDns = Dns { throw UnknownHostException(it) },
             fallbackLookup = { listOf(fallbackAddress) },
         )
 
         assertEquals(listOf(fallbackAddress), dns.lookup(API_HOST))
+    }
+
+    @Test
+    fun racingOriginResolverWaitsForANonEmptyDynamicResult() {
+        val dohAddress = ipv4("210.140.139.152")
+        var dohHostname: String? = null
+        val resolver = RacingOriginDnsResolver(
+            timeoutSeconds = 1,
+            dohLookup = {
+                dohHostname = it
+                listOf(dohAddress)
+            },
+            systemLookup = { emptyList() },
+        )
+
+        assertEquals(
+            DnsLookupResult("DoH($PIXIV_ORIGIN_ALIAS)", listOf(dohAddress)),
+            resolver.lookup(PIXIV_ORIGIN_ALIAS),
+        )
+        assertEquals(PIXIV_ORIGIN_ALIAS, dohHostname)
+    }
+
+    @Test
+    fun racingOriginResolverUsesSystemAliasWhenDohFails() {
+        val systemAddress = ipv4("210.140.139.155")
+        val resolver = RacingOriginDnsResolver(
+            timeoutSeconds = 1,
+            dohLookup = { throw IOException("DoH unavailable") },
+            systemLookup = { listOf(systemAddress) },
+        )
+
+        assertEquals(
+            DnsLookupResult(
+                "system origin DNS($PIXIV_ORIGIN_ALIAS)",
+                listOf(systemAddress),
+            ),
+            resolver.lookup(PIXIV_ORIGIN_ALIAS),
+        )
+    }
+
+    @Test
+    fun interruptedOriginLookupStopsWithoutUsingFallback() {
+        val lookupStarted = CountDownLatch(1)
+        val releaseLookup = CountDownLatch(1)
+        val fallbackCalled = AtomicBoolean(false)
+        val failure = AtomicReference<Throwable>()
+        val executor = Executors.newFixedThreadPool(2)
+        val resolver = RacingOriginDnsResolver(
+            timeoutSeconds = 10,
+            dohLookup = {
+                lookupStarted.countDown()
+                releaseLookup.await()
+                emptyList()
+            },
+            systemLookup = {
+                lookupStarted.countDown()
+                releaseLookup.await()
+                emptyList()
+            },
+            executor = executor,
+        )
+        val dns = SniReplaceDns(
+            fallback = mapOf(API_HOST to "210.140.139.155"),
+            originLookup = resolver::lookup,
+            fallbackLookup = {
+                fallbackCalled.set(true)
+                listOf(ipv4(it))
+            },
+        )
+        val lookupThread = Thread {
+            try {
+                dns.lookup(API_HOST)
+            } catch (throwable: Throwable) {
+                failure.set(throwable)
+            }
+        }
+
+        try {
+            lookupThread.start()
+            assertTrue(lookupStarted.await(2, TimeUnit.SECONDS))
+            lookupThread.interrupt()
+            lookupThread.join(TimeUnit.SECONDS.toMillis(2))
+
+            assertFalse(lookupThread.isAlive)
+            assertIs<UnknownHostException>(failure.get())
+            assertFalse(fallbackCalled.get())
+        } finally {
+            releaseLookup.countDown()
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
+    fun resultsAreDeduplicatedInDohThenFallbackOrder() {
+        val first = ipv4("210.140.139.161")
+        val second = ipv4("210.140.139.152")
+        val third = ipv4("210.140.139.155")
+        val dns = SniReplaceDns(
+            fallback = mapOf(API_HOST to "configured-pool"),
+            originLookup = {
+                DnsLookupResult("DoH($it)", listOf(first, second, first))
+            },
+            systemDns = Dns { error("System DNS must not be used") },
+            fallbackLookup = { listOf(second, third, first) },
+        )
+
+        assertEquals(listOf(first, second, third), dns.lookup(API_HOST))
     }
 
     @Test
@@ -144,11 +368,32 @@ class SniReplaceDnsTest {
         assertNull(parseIpv4Address("1.2.3.example"))
     }
 
+    @Test
+    fun fallbackParserAcceptsSingleOrPooledIpv4WithoutResolvingNames() {
+        assertEquals(
+            listOf(ipv4("210.140.139.155")),
+            parseFallbackAddresses("210.140.139.155"),
+        )
+        assertEquals(
+            listOf(
+                ipv4("210.140.139.152"),
+                ipv4("210.140.139.155"),
+                ipv4("210.140.139.158"),
+            ),
+            parseFallbackAddresses(
+                "210.140.139.152, 210.140.139.155\n" +
+                        "invalid.example 210.140.139.158 210.140.139.152"
+            ),
+        )
+    }
+
     private fun ipv4(value: String): InetAddress =
         requireNotNull(parseIpv4Address(value))
 
     private companion object {
         const val API_HOST = "app-api.pixiv.net"
+        const val AUTH_HOST = "oauth.secure.pixiv.net"
         const val IMAGE_HOST = "i.pximg.net"
+        const val STATIC_IMAGE_HOST = "s.pximg.net"
     }
 }
