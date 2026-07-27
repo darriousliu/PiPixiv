@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,6 +68,9 @@ import com.mrl.pixiv.strings.ai_extra_preset_gemini_thinking_budget
 import com.mrl.pixiv.strings.ai_extra_preset_reasoning_effort
 import com.mrl.pixiv.strings.ai_extra_preset_temperature
 import com.mrl.pixiv.strings.ai_extra_preset_top_p
+import com.mrl.pixiv.strings.ai_generation_timeout_desc
+import com.mrl.pixiv.strings.ai_generation_timeout_invalid
+import com.mrl.pixiv.strings.ai_generation_timeout_seconds
 import com.mrl.pixiv.strings.ai_model
 import com.mrl.pixiv.strings.ai_model_suggestions
 import com.mrl.pixiv.strings.ai_openai_use_response_api
@@ -92,6 +97,9 @@ fun AiTranslationSettingScreen(
     var endpoint by rememberSaveable { mutableStateOf(currentConfig.endpoint) }
     var apiKey by rememberSaveable { mutableStateOf(currentConfig.apiKey) }
     var model by rememberSaveable { mutableStateOf(currentConfig.model) }
+    var generationTimeoutInput by rememberSaveable {
+        mutableStateOf(currentConfig.generationTimeoutSeconds.toString())
+    }
     var responseApi by rememberSaveable { mutableStateOf(currentConfig.responseApi) }
     var extraBody by rememberSaveable { mutableStateOf(currentConfig.extraBody) }
     var extraBodyError by rememberSaveable { mutableStateOf(false) }
@@ -102,6 +110,7 @@ fun AiTranslationSettingScreen(
         endpoint = currentConfig.endpoint
         apiKey = currentConfig.apiKey
         model = currentConfig.model
+        generationTimeoutInput = currentConfig.generationTimeoutSeconds.toString()
         responseApi = currentConfig.responseApi
         extraBody = currentConfig.extraBody
         extraBodyError = false
@@ -111,6 +120,9 @@ fun AiTranslationSettingScreen(
     val selectedProvider = remember(providerName) {
         runCatching { enumValueOf<AiProvider>(providerName) }
             .getOrDefault(AiProvider.OPENAI)
+    }
+    val generationTimeoutSeconds = remember(generationTimeoutInput) {
+        parseGenerationTimeoutSeconds(generationTimeoutInput)
     }
     Scaffold(
         topBar = {
@@ -129,6 +141,9 @@ fun AiTranslationSettingScreen(
                 actions = {
                     TextButton(
                         onClick = {
+                            if (generationTimeoutSeconds == null) {
+                                return@TextButton
+                            }
                             val endpointValidation = validateAiEndpoint(endpoint)
                             if (!endpointValidation.isValid) {
                                 endpointError = endpointValidation.error
@@ -150,6 +165,7 @@ fun AiTranslationSettingScreen(
                                     },
                                     responseApi = selectedProvider == AiProvider.OPENAI && responseApi,
                                     extraBody = extraBody.trim(),
+                                    generationTimeoutSeconds = generationTimeoutSeconds,
                                 )
                             )
                             if (endpointValidation.isLocalNetwork) {
@@ -216,6 +232,31 @@ fun AiTranslationSettingScreen(
                 value = model,
                 onValueChange = { model = it },
                 label = { Text(stringResource(RStrings.ai_model)) },
+                singleLine = true,
+            )
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = generationTimeoutInput,
+                onValueChange = { generationTimeoutInput = it },
+                label = {
+                    Text(text = stringResource(RStrings.ai_generation_timeout_seconds))
+                },
+                supportingText = {
+                    Text(
+                        text = stringResource(
+                            if (generationTimeoutSeconds == null) {
+                                RStrings.ai_generation_timeout_invalid
+                            } else {
+                                RStrings.ai_generation_timeout_desc
+                            },
+                            AiTranslationConfig.GENERATION_TIMEOUT_MIN_SECONDS,
+                            AiTranslationConfig.GENERATION_TIMEOUT_MAX_SECONDS,
+                        )
+                    )
+                },
+                isError = generationTimeoutSeconds == null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
             )
 

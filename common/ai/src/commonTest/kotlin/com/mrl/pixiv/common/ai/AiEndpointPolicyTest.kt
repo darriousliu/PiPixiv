@@ -120,6 +120,40 @@ class AiEndpointPolicyTest {
         )
     }
 
+    @Test
+    fun generationTimeoutMustBeWithinConfiguredRange() {
+        val readyConfig = config(
+            provider = AiProvider.OPENAI,
+            endpoint = "https://api.openai.com/v1",
+            apiKey = "secret",
+        )
+
+        assertFalse(
+            readyConfig.copy(
+                generationTimeoutSeconds =
+                    AiTranslationConfig.GENERATION_TIMEOUT_MIN_SECONDS - 1,
+            ).isReadyForAiRequest()
+        )
+        assertTrue(
+            readyConfig.copy(
+                generationTimeoutSeconds =
+                    AiTranslationConfig.GENERATION_TIMEOUT_MIN_SECONDS,
+            ).isReadyForAiRequest()
+        )
+        assertTrue(
+            readyConfig.copy(
+                generationTimeoutSeconds =
+                    AiTranslationConfig.GENERATION_TIMEOUT_MAX_SECONDS,
+            ).isReadyForAiRequest()
+        )
+        assertFalse(
+            readyConfig.copy(
+                generationTimeoutSeconds =
+                    AiTranslationConfig.GENERATION_TIMEOUT_MAX_SECONDS + 1,
+            ).isReadyForAiRequest()
+        )
+    }
+
     private fun config(
         provider: AiProvider,
         endpoint: String,

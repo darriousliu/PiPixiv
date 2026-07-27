@@ -3,9 +3,8 @@ package com.mrl.pixiv.common.ai.provider
 import com.mrl.pixiv.common.ai.AiMessageRole
 import com.mrl.pixiv.common.ai.AiTextRequest
 import com.mrl.pixiv.common.ai.AiTextResponse
-import com.mrl.pixiv.common.ai.internal.AI_CONNECT_TIMEOUT_MILLIS
-import com.mrl.pixiv.common.ai.internal.AI_GENERATION_TIMEOUT_MILLIS
 import com.mrl.pixiv.common.ai.internal.AiHttpClientHolder
+import com.mrl.pixiv.common.ai.internal.configureAiGenerationTimeout
 import com.mrl.pixiv.common.ai.internal.jsonArrayOrNull
 import com.mrl.pixiv.common.ai.internal.jsonObjectOrNull
 import com.mrl.pixiv.common.ai.internal.normalizeBaseUrl
@@ -18,9 +17,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
-import io.ktor.client.plugins.HttpTimeoutConfig
 import io.ktor.client.plugins.sse.serverSentEvents
-import io.ktor.client.plugins.timeout
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpHeaders
@@ -56,6 +53,7 @@ class OpenAiTextClient(
             if (request.apiKey.isNotBlank()) {
                 header(HttpHeaders.Authorization, "Bearer ${request.apiKey}")
             }
+            configureAiGenerationTimeout(request.generationTimeoutMillis)
             setBody(
                 when (apiType) {
                     OpenAiApiType.CHAT_COMPLETIONS -> buildChatCompletionsBody(request)
@@ -101,11 +99,10 @@ class OpenAiTextClient(
                 if (request.apiKey.isNotBlank()) {
                     header(HttpHeaders.Authorization, "Bearer ${request.apiKey}")
                 }
-                timeout {
-                    requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
-                    connectTimeoutMillis = AI_CONNECT_TIMEOUT_MILLIS
-                    socketTimeoutMillis = AI_GENERATION_TIMEOUT_MILLIS
-                }
+                configureAiGenerationTimeout(
+                    generationTimeoutMillis = request.generationTimeoutMillis,
+                    streaming = true,
+                )
                 setBody(buildStreamingBody(request, apiType).toString())
             }
         ) {

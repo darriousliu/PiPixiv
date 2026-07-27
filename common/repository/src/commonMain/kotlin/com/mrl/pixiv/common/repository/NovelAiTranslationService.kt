@@ -128,6 +128,7 @@ class NovelAiTranslationService(
             ),
             responseApi = config.responseApi,
             extraBody = config.extraBody,
+            generationTimeoutMillis = config.generationTimeoutSeconds.toLong() * MILLIS_PER_SECOND,
         )
     }
 
@@ -243,6 +244,7 @@ class NovelAiTranslationService(
 
     companion object {
         private const val MAX_CHARS_PER_CHUNK = 3000
+        private const val MILLIS_PER_SECOND = 1_000L
     }
 }
 

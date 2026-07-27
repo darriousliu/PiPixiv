@@ -278,6 +278,9 @@
     <string name="ai_provider">AI 제공자</string>
     <string name="ai_endpoint">엔드포인트 주소</string>
     <string name="ai_model">모델</string>
+    <string name="ai_generation_timeout_seconds">생성 시간 제한(초)</string>
+    <string name="ai_generation_timeout_desc">각 AI 생성 요청의 시간 제한입니다. 허용 범위: %1$d~%2$d초</string>
+    <string name="ai_generation_timeout_invalid">%1$d에서 %2$d 사이의 정수를 입력하세요</string>
     <string name="ai_openai_use_response_api">Response API 사용</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">예: {"thinking":{"type":"disabled"}}</string>

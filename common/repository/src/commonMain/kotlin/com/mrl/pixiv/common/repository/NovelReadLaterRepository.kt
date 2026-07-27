@@ -455,8 +455,8 @@ class NovelReadLaterRepository(
 
     private suspend fun processItem(item: NovelReadLaterEntity) {
         try {
-            val currentApiKey = requireUserPreferenceValue.aiTranslationConfig.apiKey.trim()
-            val config = item.toConfig(currentApiKey)
+            val currentConfig = requireUserPreferenceValue.aiTranslationConfig
+            val config = item.toExecutionConfig(currentConfig)
             require(item.configFingerprint == buildNovelAiConfigFingerprint(config)) {
                 "AI translation configuration changed. Retry the task to use the new configuration."
             }
@@ -566,15 +566,18 @@ private fun AiTranslationConfig.isReadyForQueue(): Boolean {
     return isReadyForAiRequest()
 }
 
-private fun NovelReadLaterEntity.toConfig(apiKey: String): AiTranslationConfig {
+internal fun NovelReadLaterEntity.toExecutionConfig(
+    currentConfig: AiTranslationConfig,
+): AiTranslationConfig {
     return AiTranslationConfig(
         provider = runCatching { enumValueOf<AiProvider>(provider) }
             .getOrDefault(AiProvider.OPENAI),
         endpoint = endpoint,
-        apiKey = apiKey,
+        apiKey = currentConfig.apiKey.trim(),
         model = model,
         responseApi = responseApi,
         extraBody = extraBody,
+        generationTimeoutSeconds = currentConfig.generationTimeoutSeconds,
     )
 }
 

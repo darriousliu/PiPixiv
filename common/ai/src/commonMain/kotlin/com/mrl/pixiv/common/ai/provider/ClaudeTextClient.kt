@@ -4,6 +4,7 @@ import com.mrl.pixiv.common.ai.AiMessageRole
 import com.mrl.pixiv.common.ai.AiTextRequest
 import com.mrl.pixiv.common.ai.AiTextResponse
 import com.mrl.pixiv.common.ai.internal.AiHttpClientHolder
+import com.mrl.pixiv.common.ai.internal.configureAiGenerationTimeout
 import com.mrl.pixiv.common.ai.internal.jsonArrayOrNull
 import com.mrl.pixiv.common.ai.internal.jsonObjectOrNull
 import com.mrl.pixiv.common.ai.internal.normalizeBaseUrl
@@ -47,6 +48,7 @@ class ClaudeTextClient(
             if (request.apiKey.isNotBlank()) {
                 header("x-api-key", request.apiKey)
             }
+            configureAiGenerationTimeout(request.generationTimeoutMillis)
             setBody(
                 buildJsonObject {
                     put("model", resolvedModel)

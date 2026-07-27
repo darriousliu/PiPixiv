@@ -278,6 +278,9 @@
     <string name="ai_provider">AI Sağlayıcı</string>
     <string name="ai_endpoint">Endpoint</string>
     <string name="ai_model">Model</string>
+    <string name="ai_generation_timeout_seconds">Oluşturma zaman aşımı (saniye)</string>
+    <string name="ai_generation_timeout_desc">Her AI oluşturma isteği için zaman aşımı. İzin verilen aralık: %1$d–%2$d saniye.</string>
+    <string name="ai_generation_timeout_invalid">%1$d ile %2$d arasında bir tam sayı girin.</string>
     <string name="ai_openai_use_response_api">Response API Kullan</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">Örnek: {"thinking":{"type":"disabled"}}</string>

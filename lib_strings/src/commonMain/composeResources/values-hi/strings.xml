@@ -278,6 +278,9 @@
     <string name="ai_provider">AI प्रदाता</string>
     <string name="ai_endpoint">एंडपॉइंट पता</string>
     <string name="ai_model">मॉडल</string>
+    <string name="ai_generation_timeout_seconds">जनरेशन टाइमआउट (सेकंड)</string>
+    <string name="ai_generation_timeout_desc">प्रत्येक AI जनरेशन अनुरोध की टाइमआउट अवधि। अनुमत सीमा: %1$d–%2$d सेकंड।</string>
+    <string name="ai_generation_timeout_invalid">%1$d से %2$d के बीच एक पूर्णांक दर्ज करें।</string>
     <string name="ai_openai_use_response_api">Response API का उपयोग करें</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">उदाहरण: {"thinking":{"type":"disabled"}}</string>

@@ -278,6 +278,9 @@
     <string name="ai_provider">AI Provider</string>
     <string name="ai_endpoint">Endpoint</string>
     <string name="ai_model">Model</string>
+    <string name="ai_generation_timeout_seconds">Generation timeout (seconds)</string>
+    <string name="ai_generation_timeout_desc">Timeout for each AI generation request. Allowed range: %1$d–%2$d seconds.</string>
+    <string name="ai_generation_timeout_invalid">Enter a whole number from %1$d to %2$d.</string>
     <string name="ai_openai_use_response_api">Use Response API</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">Example: {"thinking":{"type":"disabled"}}</string>

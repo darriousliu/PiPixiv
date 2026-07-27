@@ -278,6 +278,9 @@
     <string name="ai_provider">AIプロバイダー</string>
     <string name="ai_endpoint">エンドポイント</string>
     <string name="ai_model">モデル</string>
+    <string name="ai_generation_timeout_seconds">生成タイムアウト（秒）</string>
+    <string name="ai_generation_timeout_desc">AI生成リクエストごとのタイムアウト。設定範囲: %1$d～%2$d秒</string>
+    <string name="ai_generation_timeout_invalid">%1$d～%2$dの整数を入力してください</string>
     <string name="ai_openai_use_response_api">Response APIを使用</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">例: {"thinking":{"type":"disabled"}}</string>

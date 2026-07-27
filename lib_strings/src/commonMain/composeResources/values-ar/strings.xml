@@ -278,6 +278,9 @@
     <string name="ai_provider">مزود الذكاء الاصطناعي</string>
     <string name="ai_endpoint">عنوان الواجهة</string>
     <string name="ai_model">النموذج</string>
+    <string name="ai_generation_timeout_seconds">مهلة الإنشاء (بالثواني)</string>
+    <string name="ai_generation_timeout_desc">المهلة الزمنية لكل طلب إنشاء بالذكاء الاصطناعي. النطاق المسموح: %1$d–%2$d ثانية.</string>
+    <string name="ai_generation_timeout_invalid">أدخل عددًا صحيحًا من %1$d إلى %2$d.</string>
     <string name="ai_openai_use_response_api">استخدام Response API</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">مثال: {"thinking":{"type":"disabled"}}</string>

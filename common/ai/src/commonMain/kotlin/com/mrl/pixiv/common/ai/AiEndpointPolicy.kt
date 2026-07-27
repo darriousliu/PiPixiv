@@ -63,7 +63,13 @@ fun AiTranslationConfig.isReadyForAiRequest(): Boolean {
     val endpointValidation = validateAiEndpoint(endpoint)
     val hasCredentials = apiKey.isNotBlank() ||
             provider == AiProvider.OPENAI && endpointValidation.isLocalNetwork
-    return endpointValidation.isValid && model.isNotBlank() && hasCredentials
+    val hasValidGenerationTimeout =
+        generationTimeoutSeconds in AiTranslationConfig.GENERATION_TIMEOUT_MIN_SECONDS..
+            AiTranslationConfig.GENERATION_TIMEOUT_MAX_SECONDS
+    return endpointValidation.isValid &&
+            model.isNotBlank() &&
+            hasCredentials &&
+            hasValidGenerationTimeout
 }
 
 internal fun requireValidAiEndpoint(endpoint: String): String {

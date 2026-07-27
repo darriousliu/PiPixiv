@@ -309,6 +309,50 @@ class NovelReadLaterQueuePolicyTest {
     }
 
     @Test
+    fun `generation timeout does not change config fingerprint`() {
+        val config = config(apiKey = "secret")
+
+        assertEquals(
+            buildNovelAiConfigFingerprint(
+                config.copy(
+                    generationTimeoutSeconds =
+                        AiTranslationConfig.GENERATION_TIMEOUT_MIN_SECONDS,
+                )
+            ),
+            buildNovelAiConfigFingerprint(
+                config.copy(
+                    generationTimeoutSeconds =
+                        AiTranslationConfig.GENERATION_TIMEOUT_MAX_SECONDS,
+                )
+            ),
+        )
+    }
+
+    @Test
+    fun `read later execution uses latest timeout without changing queued config`() {
+        val queued = queueEntity(novelId = 1L, tags = emptyList())
+        val currentConfig = config(apiKey = " current-secret ").copy(
+            generationTimeoutSeconds = 720,
+        )
+
+        val executionConfig = queued.toExecutionConfig(currentConfig)
+
+        assertEquals(720, executionConfig.generationTimeoutSeconds)
+        assertEquals("current-secret", executionConfig.apiKey)
+        assertEquals(queued.endpoint, executionConfig.endpoint)
+        assertEquals(queued.model, executionConfig.model)
+        assertEquals(
+            buildNovelAiConfigFingerprint(
+                executionConfig.copy(
+                    generationTimeoutSeconds =
+                        AiTranslationConfig.GENERATION_TIMEOUT_DEFAULT_SECONDS,
+                )
+            ),
+            buildNovelAiConfigFingerprint(executionConfig),
+        )
+    }
+
+    @Test
     fun `source hash includes normalized extra body`() {
         val withoutExtra = buildNovelTranslationSourceHash("source", "")
         val withExtra = buildNovelTranslationSourceHash(

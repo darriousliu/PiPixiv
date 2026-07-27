@@ -28,5 +28,8 @@ kotlin {
             implementation(libs.html.converter)
             implementation(libs.bundles.filekit)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

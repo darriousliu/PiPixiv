@@ -278,6 +278,9 @@
     <string name="ai_provider">AI提供商</string>
     <string name="ai_endpoint">介面位址</string>
     <string name="ai_model">模型</string>
+    <string name="ai_generation_timeout_seconds">生成逾時（秒）</string>
+    <string name="ai_generation_timeout_desc">每次 AI 生成請求的逾時時間，可設定為 %1$d–%2$d 秒</string>
+    <string name="ai_generation_timeout_invalid">請輸入 %1$d 到 %2$d 之間的整數</string>
     <string name="ai_openai_use_response_api">使用 Response API</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">例如 {"thinking":{"type":"disabled"}}</string>

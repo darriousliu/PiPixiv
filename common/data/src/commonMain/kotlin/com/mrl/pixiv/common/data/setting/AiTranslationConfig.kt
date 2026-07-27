@@ -41,8 +41,13 @@ data class AiTranslationConfig(
     val model: String = defaultModel(AiProvider.OPENAI).modelId,
     val responseApi: Boolean = false,
     val extraBody: String = "",
+    val generationTimeoutSeconds: Int = GENERATION_TIMEOUT_DEFAULT_SECONDS,
 ) {
     companion object {
+        const val GENERATION_TIMEOUT_MIN_SECONDS = 30
+        const val GENERATION_TIMEOUT_DEFAULT_SECONDS = 180
+        const val GENERATION_TIMEOUT_MAX_SECONDS = 1800
+
         fun defaultEndpoint(provider: AiProvider): String = when (provider) {
             AiProvider.OPENAI -> "https://api.openai.com/v1"
             AiProvider.CLAUDE -> "https://api.anthropic.com"

@@ -278,6 +278,9 @@
     <string name="ai_provider">Поставщик AI</string>
     <string name="ai_endpoint">Адрес эндпоинта</string>
     <string name="ai_model">Модель</string>
+    <string name="ai_generation_timeout_seconds">Тайм-аут генерации (секунды)</string>
+    <string name="ai_generation_timeout_desc">Тайм-аут для каждого запроса генерации AI. Допустимый диапазон: %1$d–%2$d секунд.</string>
+    <string name="ai_generation_timeout_invalid">Введите целое число от %1$d до %2$d.</string>
     <string name="ai_openai_use_response_api">Использовать Response API</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">Пример: {"thinking":{"type":"disabled"}}</string>
