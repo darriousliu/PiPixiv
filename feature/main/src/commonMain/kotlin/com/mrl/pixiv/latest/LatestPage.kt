@@ -6,13 +6,12 @@ enum class LatestPage {
     Trend,
     Collection,
     Following,
-    NovelRecommended,
     NovelNew,
     NovelWatchlist;
 
     companion object {
         private val illustPages = listOf(Trend, Collection, Following)
-        private val novelPages = listOf(NovelRecommended, NovelNew, NovelWatchlist)
+        private val novelPages = listOf(NovelNew, NovelWatchlist)
 
         fun pagesFor(mode: AppViewMode): List<LatestPage> = when (mode) {
             AppViewMode.ILLUST -> illustPages

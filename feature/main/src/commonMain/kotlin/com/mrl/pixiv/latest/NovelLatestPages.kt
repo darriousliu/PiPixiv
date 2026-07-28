@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -49,7 +49,6 @@ import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.novel.NovelWatchlistSeries
-import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.router.NavigationManager
@@ -64,21 +63,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-
-@Composable
-fun RecommendedNovelPage(
-    refreshFlow: SharedFlow<LatestPage>,
-    modifier: Modifier = Modifier,
-    viewModel: LatestViewModel = koinViewModel(),
-) {
-    NovelFeedPage(
-        page = LatestPage.NovelRecommended,
-        novels = viewModel.recommendedNovels,
-        listState = viewModel.recommendedNovelLazyListState,
-        refreshFlow = refreshFlow,
-        modifier = modifier,
-    )
-}
 
 @Composable
 fun NewNovelPage(

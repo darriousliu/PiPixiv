@@ -16,17 +16,20 @@ import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.paging.FollowNovelPagingSource
 import com.mrl.pixiv.common.repository.paging.IllustFollowingPagingSource
 import com.mrl.pixiv.common.repository.paging.NovelNewPagingSource
-import com.mrl.pixiv.common.repository.paging.NovelRecommendedPagingSource
 import com.mrl.pixiv.common.repository.paging.NovelWatchlistPagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class LatestViewModel : ViewModel() {
     private var activeNovelWatchlistSource: NovelWatchlistPagingSource? = null
-    val pagerState = PagerState { 3 }
+    private val illustPagerState = PagerState {
+        LatestPage.pagesFor(AppViewMode.ILLUST).size
+    }
+    private val novelPagerState = PagerState {
+        LatestPage.pagesFor(AppViewMode.NOVEL).size
+    }
 
     // Illust states
     val trendingLazyGirdState = LazyStaggeredGridState()
@@ -36,7 +39,6 @@ class LatestViewModel : ViewModel() {
 
     // Novel states
     val trendingNovelLazyListState = LazyListState()
-    val recommendedNovelLazyListState = LazyListState()
     val newNovelLazyListState = LazyListState()
     val watchlistNovelLazyListState = LazyListState()
     val collectionNovelLazyListState = LazyListState()
@@ -49,10 +51,6 @@ class LatestViewModel : ViewModel() {
 
     val novelsFollowing = Pager(PagingConfig(pageSize = 30)) {
         FollowNovelPagingSource(restrict = trendingFilter.value)
-    }.flow.cachedIn(viewModelScope)
-
-    val recommendedNovels = Pager(PagingConfig(pageSize = 30)) {
-        NovelRecommendedPagingSource()
     }.flow.cachedIn(viewModelScope)
 
     val newNovels = Pager(PagingConfig(pageSize = 30)) {
@@ -73,6 +71,11 @@ class LatestViewModel : ViewModel() {
 
     fun updateRestrict(restrict: Restrict) {
         trendingFilter.value = restrict
+    }
+
+    fun pagerStateFor(mode: AppViewMode): PagerState = when (mode) {
+        AppViewMode.ILLUST -> illustPagerState
+        AppViewMode.NOVEL -> novelPagerState
     }
 
     fun switchViewMode(mode: AppViewMode) {

@@ -8,7 +8,7 @@ import kotlin.test.assertNotSame
 class LatestPageTest {
 
     @Test
-    fun illustrationAndNovelModesHaveIndependentThreePageSets() {
+    fun illustrationModeHasThreePagesAndNovelModeKeepsOnlyNewAndWatchlist() {
         assertEquals(
             listOf(
                 LatestPage.Trend,
@@ -19,7 +19,6 @@ class LatestPageTest {
         )
         assertEquals(
             listOf(
-                LatestPage.NovelRecommended,
                 LatestPage.NovelNew,
                 LatestPage.NovelWatchlist,
             ),
@@ -32,16 +31,19 @@ class LatestPageTest {
         val viewModel = LatestViewModel()
 
         assertNotSame(
-            viewModel.recommendedNovelLazyListState,
-            viewModel.newNovelLazyListState,
-        )
-        assertNotSame(
             viewModel.newNovelLazyListState,
             viewModel.watchlistNovelLazyListState,
         )
-        assertNotSame(
-            viewModel.recommendedNovelLazyListState,
-            viewModel.watchlistNovelLazyListState,
-        )
+    }
+
+    @Test
+    fun illustrationAndNovelModesUsePagerStatesWithMatchingPageCounts() {
+        val viewModel = LatestViewModel()
+        val illustPagerState = viewModel.pagerStateFor(AppViewMode.ILLUST)
+        val novelPagerState = viewModel.pagerStateFor(AppViewMode.NOVEL)
+
+        assertNotSame(illustPagerState, novelPagerState)
+        assertEquals(3, illustPagerState.pageCount)
+        assertEquals(2, novelPagerState.pageCount)
     }
 }
