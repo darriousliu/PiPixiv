@@ -20,7 +20,7 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     sourceSets {
-        val androidJvmMain by creating {
+        val androidJvmMain = create("androidJvmMain") {
             dependsOn(commonMain.get())
         }
         androidMain.get().dependsOn(androidJvmMain)
@@ -79,7 +79,7 @@ buildkonfig {
         val f = rootProject.file("local.properties")
         if (f.exists()) f.inputStream().use { load(it) }
     }
-    val sentryDsn = if (properties["applyFirebasePlugins"] == "true") {
+    val sentryDsn = if (findProperty("applyFirebasePlugins") == "true") {
         props.getProperty("sentryDsn") ?: System.getenv("SENTRY_DSN")
     } else {
         "unused"
@@ -90,19 +90,19 @@ buildkonfig {
         buildConfigField(
             FieldSpec.Type.BOOLEAN,
             "DEBUG",
-            properties["debug"].toString(),
+            findProperty("debug").toString(),
             const = true
         )
         buildConfigField(
             FieldSpec.Type.INT,
             "versionCode",
-            properties["versionCode"].toString(),
+            findProperty("versionCode").toString(),
             const = true
         )
         buildConfigField(
             FieldSpec.Type.STRING,
             "versionName",
-            properties["versionName"].toString(),
+            findProperty("versionName").toString(),
             const = true
         )
         buildConfigField(FieldSpec.Type.STRING, "sentryDsn", sentryDsn.orEmpty(), const = true)

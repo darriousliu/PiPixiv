@@ -30,7 +30,7 @@ kotlin {
 }
 
 kotzilla {
-    versionName = properties["versionName"]!!.toString()
+    versionName = findProperty("versionName")!!.toString()
     uploadMappingFile = false
     autoAddDependencies = false
 }
