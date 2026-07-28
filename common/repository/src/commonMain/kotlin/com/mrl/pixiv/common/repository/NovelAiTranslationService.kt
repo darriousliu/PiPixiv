@@ -14,7 +14,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
 import org.koin.core.annotation.Single
@@ -155,7 +154,7 @@ class NovelAiTranslationService(
         return """
             你是一名专业的文学翻译。请将以下小说正文翻译为 ${toDisplayLanguage(targetLanguageTag)}。
             这是第 ${chunkIndex}/${totalChunks} 段内容。
-            当前分片策略：每批最多 ${maxParagraphCount} 个段落。
+            当前分片策略：每批最多 $maxParagraphCount 个段落。
 
             约束：
             1. 只返回翻译后的正文，不要添加任何解释、标题、注释或额外内容。
