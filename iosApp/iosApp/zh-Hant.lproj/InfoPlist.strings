@@ -1,2 +1,3 @@
 "NSPhotoLibraryAddUsageDescription" = "用於將下載的圖片儲存到相簿。";
 "NSPhotoLibraryUsageDescription" = "用於存取相簿以管理已儲存的圖片。";
+"NSLocalNetworkUsageDescription" = "用於連線至本地網路中的 AI 服務。";

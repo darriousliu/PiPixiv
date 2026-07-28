@@ -13,8 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material3.Card
@@ -40,7 +39,7 @@ import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.mrl.pixiv.common.compose.FavoriteDualColor
+import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.illust.AIBadge
 import com.mrl.pixiv.common.data.AiType
@@ -50,6 +49,7 @@ import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isPrivateBookmark
 import com.mrl.pixiv.common.util.allowRgb565
 import kotlin.time.Duration.Companion.seconds
 
@@ -58,19 +58,26 @@ import kotlin.time.Duration.Companion.seconds
  *
  * @param novel 小说数据
  * @param onNovelClick 点击小说时的回调
+ * @param onSeriesClick 点击系列标题时的回调
  * @param onBookmarkClick 点击收藏按钮时的回调
  * @param modifier 修饰符
+ * @param markerPageLabel 阅读书签页码；为空时不展示书签操作
+ * @param onMarkerClick 点击阅读书签按钮时的回调
  */
 @Composable
 fun NovelItem(
     novel: Novel,
     onNovelClick: (Long) -> Unit,
+    onSeriesClick: (Long) -> Unit,
     onBookmarkClick: (Boolean, Restrict, List<String>?) -> Unit,
     modifier: Modifier = Modifier,
+    markerPageLabel: String? = null,
+    onMarkerClick: (() -> Unit)? = null,
 ) {
     val context = LocalPlatformContext.current
     val isBookmarked = novel.isBookmark
     val isAI = novel.novelAiType == AiType.AiGeneratedWorks
+    val seriesId = novel.series.id?.takeIf { it > 0L }
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     Card(
@@ -114,13 +121,16 @@ fun NovelItem(
                     .padding(vertical = 8.dp)
             ) {
                 // 系列
-                if (novel.series.id != null && !novel.series.title.isNullOrEmpty()) {
+                if (seriesId != null && !novel.series.title.isNullOrEmpty()) {
                     Text(
                         text = novel.series.title ?: "",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.clickable {
+                            onSeriesClick(seriesId)
+                        },
                     )
                 }
 
@@ -207,6 +217,7 @@ fun NovelItem(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                NovelReadLaterButton(novel = novel)
                 IconButton(
                     onClick = {
                         val restrict = if (requireUserPreferenceValue.defaultPrivateBookmark) {
@@ -218,11 +229,10 @@ fun NovelItem(
                     },
                     onLongClick = { showBottomSheet = true }
                 ) {
-                    Icon(
-                        imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = null,
-                        tint = FavoriteDualColor(isBookmarked),
-                        modifier = Modifier.size(24.dp)
+                    BookmarkIcon(
+                        isBookmarked = isBookmarked,
+                        isPrivate = novel.isPrivateBookmark,
+                        iconSize = 24.dp,
                     )
                 }
                 Text(
@@ -230,6 +240,19 @@ fun NovelItem(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (markerPageLabel != null && onMarkerClick != null) {
+                    IconButton(onClick = onMarkerClick) {
+                        Icon(
+                            imageVector = Icons.Rounded.Bookmark,
+                            contentDescription = markerPageLabel,
+                        )
+                    }
+                    Text(
+                        text = markerPageLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }

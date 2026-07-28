@@ -52,13 +52,19 @@ import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.login.oauth.WebCookieLoginScreen
 import com.mrl.pixiv.novel.NovelScreen
+import com.mrl.pixiv.novel.readlater.NovelReadLaterScreen
+import com.mrl.pixiv.novel.series.NovelSeriesScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
+import com.mrl.pixiv.profile.marker.NovelMarkersScreen
 import com.mrl.pixiv.report.ReportScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
+import com.mrl.pixiv.setting.BrowsingSettingScreen
 import com.mrl.pixiv.setting.FileNameFormatScreen
+import com.mrl.pixiv.setting.HistorySettingScreen
+import com.mrl.pixiv.setting.SearchSettingScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
 import com.mrl.pixiv.setting.ai.AiTranslationSettingScreen
@@ -181,9 +187,7 @@ fun Navigation3MainGraph(
                     }
 
                     // 搜索结果页
-                    entry<Destination.SearchResults>(
-                        metadata = ListDetailSceneStrategy.listPane()
-                    ) {
+                    entry<Destination.SearchResults> {
                         SearchResultsScreen(
                             searchWords = it.searchWords,
                             searchMode = it.searchMode,
@@ -203,6 +207,24 @@ fun Navigation3MainGraph(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
                         NetworkSettingScreen()
+                    }
+
+                    entry<Destination.BrowsingSetting>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        BrowsingSettingScreen()
+                    }
+
+                    entry<Destination.SearchSetting>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        SearchSettingScreen()
+                    }
+
+                    entry<Destination.HistorySetting>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        HistorySettingScreen()
                     }
 
                     // 保存格式设置
@@ -225,6 +247,12 @@ fun Navigation3MainGraph(
                         HistoryScreen()
                     }
 
+                    entry<Destination.NovelReadLater>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        NovelReadLaterScreen()
+                    }
+
                     // 本人收藏页
                     entry<Destination.Collection>(
                         metadata = ListDetailSceneStrategy.listPane()
@@ -237,6 +265,12 @@ fun Navigation3MainGraph(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) {
                         BookmarkedTagsScreen()
+                    }
+
+                    entry<Destination.NovelMarkers>(
+                        metadata = ListDetailSceneStrategy.listPane()
+                    ) {
+                        NovelMarkersScreen()
                     }
 
                     entry<Destination.Following> {
@@ -285,6 +319,7 @@ fun Navigation3MainGraph(
                     entry<Destination.UserArtwork> {
                         ArtworkScreen(
                             userId = it.userId,
+                            initialType = it.initialType,
                         )
                     }
                     entry<Destination.BlockSettings> {
@@ -328,7 +363,14 @@ fun Navigation3MainGraph(
                     }
                     entry<Destination.NovelDetail> {
                         NovelScreen(
-                            novelId = it.novelId
+                            novelId = it.novelId,
+                            markerPage = it.markerPage,
+                            readLaterTargetLanguage = it.readLaterTargetLanguage,
+                        )
+                    }
+                    entry<Destination.NovelSeries> {
+                        NovelSeriesScreen(
+                            seriesId = it.seriesId,
                         )
                     }
                 }
@@ -448,6 +490,10 @@ private fun LogScreen(
 
                 is Destination.NovelDetail -> {
                     put("novel_id", currentDestination.novelId.toString())
+                }
+
+                is Destination.NovelSeries -> {
+                    put("series_id", currentDestination.seriesId.toString())
                 }
 
                 else -> Unit

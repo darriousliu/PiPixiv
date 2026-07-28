@@ -12,10 +12,12 @@ import androidx.navigationevent.compose.NavigationEventHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.repository.IllustCacheRepo
-import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import org.koin.compose.koinInject
 
 @Composable
@@ -26,8 +28,9 @@ fun HorizontalSwipePictureScreen(
     enableTransition: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val browsedIllusts = remember { mutableSetOf<Long>() }
+    val browsedIllusts = remember { mutableMapOf<Long, Illust>() }
     val navigationManager = koinInject<NavigationManager>()
+    val browsingHistoryRepository = koinInject<BrowsingHistoryRepository>()
     val onBack: () -> Unit = {
         IllustCacheRepo.removeList(prefix)
         navigationManager.popBackStack()
@@ -42,12 +45,12 @@ fun HorizontalSwipePictureScreen(
     val pagerState = rememberPagerState(safeIndex) { illusts.size }
     LaunchedEffect(pagerState.currentPage, illusts) {
         val current = illusts.getOrNull(pagerState.currentPage) ?: return@LaunchedEffect
-        browsedIllusts.add(current.id)
+        browsedIllusts[current.id] = current
     }
     DisposableEffect(Unit) {
         onDispose {
-            launchProcess {
-                PixivRepository.addIllustBrowsingHistory(browsedIllusts.toList())
+            launchProcess(Dispatchers.IO) {
+                browsingHistoryRepository.recordIllusts(browsedIllusts.values.toList())
             }
         }
     }

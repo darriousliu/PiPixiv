@@ -13,7 +13,6 @@ internal actual val baseHttpClient: HttpClient
         config {
             followRedirects(true)
             retryOnConnectionFailure(true)
-            hostnameVerifier(hostnameVerifier)
         }
         configureProxyOrSNI()
     }
@@ -22,7 +21,6 @@ internal actual val baseImageHttpClient: HttpClient
         config {
             followRedirects(true)
             retryOnConnectionFailure(true)
-            hostnameVerifier(hostnameVerifier)
         }
         configureProxyOrSNI()
     }
@@ -46,7 +44,7 @@ private fun OkHttpConfig.configureProxyOrSNI() {
                     bypassSetting.url,
                     bypassSetting.nonStrictSSL,
                     bypassSetting.fallback,
-                    bypassSetting.dohTimeout
+                    bypassSetting.dohTimeout,
                 )
             }
         }

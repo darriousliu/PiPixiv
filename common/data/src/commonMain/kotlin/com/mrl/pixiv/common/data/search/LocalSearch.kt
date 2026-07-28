@@ -19,6 +19,9 @@ data class SearchHistory(
 )
 
 @Serializable
+@Deprecated(
+    message = "Persistent search filter defaults are stored in SearchSettings.",
+)
 data class LocalSearchFilter(
     val sort: SearchSort = SearchSort.POPULAR_DESC,
     val searchTarget: SearchTarget = SearchTarget.PARTIAL_MATCH_FOR_TAGS,

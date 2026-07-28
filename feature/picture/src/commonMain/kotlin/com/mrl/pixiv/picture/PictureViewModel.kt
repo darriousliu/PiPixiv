@@ -11,11 +11,13 @@ import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
+import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.repository.DownloadManager
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SearchRepository
@@ -117,6 +119,7 @@ class PictureViewModel(
     illust: Illust?,
     illustId: Long?,
     private val zipUtil: ZipUtil,
+    private val browsingHistoryRepository: BrowsingHistoryRepository,
 ) : BaseMviViewModel<PictureState, PictureAction>(
     initialState = PictureState(illust = illust),
 ), KoinComponent {
@@ -291,7 +294,9 @@ class PictureViewModel(
     }
 
     private fun bookmark(illustId: Long) {
-        BookmarkState.bookmarkIllust(illustId)
+        val restrict =
+            if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+        BookmarkState.bookmarkIllust(illustId, restrict)
     }
 
     private fun getUserIllusts(userId: Long) {
@@ -449,7 +454,7 @@ class PictureViewModel(
 
     fun addHistory() {
         launchProcess(Dispatchers.IO) {
-            PixivRepository.addIllustBrowsingHistory(state.illust?.id ?: return@launchProcess)
+            browsingHistoryRepository.recordIllust(state.illust ?: return@launchProcess)
         }
     }
 

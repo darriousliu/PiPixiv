@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.mrl.pixiv.setting.appdata
 
 import com.mrl.pixiv.common.data.Tag
@@ -11,6 +13,8 @@ import com.mrl.pixiv.common.datasource.local.entity.BlockNovelEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockTagEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockUserEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
+import com.mrl.pixiv.common.datasource.local.entity.IllustHistoryEntity
+import com.mrl.pixiv.common.datasource.local.entity.NovelHistoryEntity
 import kotlinx.serialization.Serializable
 
 // V1 - Legacy format (deprecated, kept for backward compatibility)
@@ -24,7 +28,9 @@ data class AppExportData(
     val blockComments: List<Comment>,
     val bookmarkedTags: List<Tag>,
     val downloads: List<DownloadEntity> = emptyList(),
+    @Deprecated("Persistent search filter defaults are stored in userPreference.searchSettings.")
     val savedSearchFilter: LocalSearchFilter = LocalSearchFilter(),
+    @Deprecated("Search filter changes are no longer remembered.")
     val rememberSearchFilter: Boolean = false,
 )
 
@@ -49,6 +55,7 @@ data class AppExportDataV3(
     val bookmarks: BookmarksData = BookmarksData(),
     val downloads: DownloadsData = DownloadsData(),
     val novelHistory: NovelHistoryData = NovelHistoryData(),
+    val browsingHistory: BrowsingHistoryData = BrowsingHistoryData(),
 )
 
 @Serializable
@@ -62,7 +69,9 @@ data class SearchData(
     val illustSearchIds: Set<String> = emptySet(),
     val novelSearch: NovelSearch = NovelSearch(),
     val novelSearchIds: Set<String> = emptySet(),
+    @Deprecated("Persistent search filter defaults are stored in SettingsData.userPreference.searchSettings.")
     val savedFilter: LocalSearchFilter = LocalSearchFilter(),
+    @Deprecated("Search filter changes are no longer remembered.")
     val rememberFilter: Boolean = false,
 )
 
@@ -96,6 +105,13 @@ data class DownloadsData(
 data class NovelHistoryData(
     val userId: Long = 0L,
     val histories: List<NovelHistoryItem> = emptyList(),
+)
+
+@Serializable
+data class BrowsingHistoryData(
+    val userId: Long = 0L,
+    val illusts: List<IllustHistoryEntity> = emptyList(),
+    val novels: List<NovelHistoryEntity> = emptyList(),
 )
 
 @Serializable

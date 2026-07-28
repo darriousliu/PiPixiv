@@ -12,7 +12,8 @@ import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.queryParams
 
 class UserIllustPagingSource(
-    private val userId: Long
+    private val userId: Long,
+    private val type: Type = Type.Illust,
 ) : PagingSource<String, Illust>() {
     override fun getRefreshKey(state: PagingState<String, Illust>): String? = null
 
@@ -22,7 +23,7 @@ class UserIllustPagingSource(
                 PixivRepository.getUserIllusts(
                     filter = Filter.ANDROID,
                     userId = userId,
-                    type = Type.Illust.value
+                    type = type.value
                 )
             } else {
                 PixivRepository.loadMoreUserIllusts(

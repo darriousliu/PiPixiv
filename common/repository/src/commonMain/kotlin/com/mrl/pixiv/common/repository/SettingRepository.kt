@@ -8,6 +8,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
+import com.mrl.pixiv.common.data.setting.BrowsingSettings
+import com.mrl.pixiv.common.data.setting.HistorySettings
+import com.mrl.pixiv.common.data.setting.SearchSettings
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.mmkv.MMKVUser
@@ -95,6 +98,25 @@ object SettingRepository : MMKVUser {
 
     fun setAiTranslationConfig(config: AiTranslationConfig) = userPreference.update {
         it.copy(aiTranslationConfig = config)
+    }
+
+    fun setBrowsingSettings(settings: BrowsingSettings) {
+        val previous = userPreference.value.browsingSettings
+        userPreference.update {
+            it.copy(browsingSettings = settings)
+        }
+        NovelFilterSettingsChanges.notifyIfChanged(
+            previous = previous,
+            current = settings,
+        )
+    }
+
+    fun setSearchSettings(settings: SearchSettings) = userPreference.update {
+        it.copy(searchSettings = settings)
+    }
+
+    fun setHistorySettings(settings: HistorySettings) = userPreference.update {
+        it.copy(historySettings = settings.normalized())
     }
 
     fun updateSettings(block: UserPreference.() -> UserPreference) {

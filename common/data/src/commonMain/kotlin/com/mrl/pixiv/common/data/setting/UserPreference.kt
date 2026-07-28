@@ -23,6 +23,9 @@ data class UserPreference(
     val defaultPrivateBookmark: Boolean = false,
     val appViewMode: AppViewMode = AppViewMode.ILLUST,
     val aiTranslationConfig: AiTranslationConfig = AiTranslationConfig(),
+    val browsingSettings: BrowsingSettings = BrowsingSettings(),
+    val searchSettings: SearchSettings = SearchSettings(),
+    val historySettings: HistorySettings = HistorySettings(),
 ) {
     companion object {
         const val TEMPLATE_ILLUST_ID = "{illust_id}"

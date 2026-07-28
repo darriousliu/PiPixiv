@@ -18,5 +18,10 @@ kotlin {
             // Ktor
             implementation(kotlinx.bundles.ktor)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(kotlinx.coroutines.test)
+            implementation(kotlinx.ktor.client.mock)
+        }
     }
 }

@@ -36,6 +36,7 @@ private const val MAX_SHOW_NOVEL_COUNT = 3
 fun NovelBookmarkWidget(
     novels: List<Novel>,
     onAllClick: () -> Unit,
+    onSeriesClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -77,6 +78,7 @@ fun NovelBookmarkWidget(
         novels.take(MAX_SHOW_NOVEL_COUNT).forEach {
             NovelItem(
                 novel = it,
+                onSeriesClick = onSeriesClick,
                 modifier = Modifier.padding(top = 10.dp)
             )
         }
@@ -86,8 +88,12 @@ fun NovelBookmarkWidget(
 @Composable
 private fun NovelItem(
     novel: Novel,
+    onSeriesClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val seriesId = novel.series.id?.takeIf { it > 0L }
+    val seriesTitle = novel.series.title?.takeIf { it.isNotEmpty() }
+
     Column(modifier = modifier) {
         Row {
             Column(
@@ -122,19 +128,22 @@ private fun NovelItem(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
             ) {
-                novel.series.title?.let {
+                if (seriesId != null && seriesTitle != null) {
                     Text(
-                        text = it,
+                        text = seriesTitle,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = LocalContentColor.current.copy(alpha = 0.7f),
+                        modifier = Modifier.throttleClick {
+                            onSeriesClick(seriesId)
+                        },
                     )
                 }
                 Text(
                     text = novel.title,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = if (novel.series.title == null) 0.dp else 5.dp)
+                    modifier = Modifier.padding(top = if (seriesTitle == null) 0.dp else 5.dp)
                 )
                 //author
                 Text(

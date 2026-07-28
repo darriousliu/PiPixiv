@@ -40,6 +40,50 @@ data class NovelSeriesResp(
 )
 
 /**
+ * 小说追更列表响应。
+ *
+ * 服务端可能在系列被屏蔽或下架时返回字段不完整的占位项，因此列表和字段均按可空数据解析。
+ */
+@Serializable
+@Immutable
+data class NovelWatchlistResp(
+    val series: List<NovelWatchlistSeries?>? = emptyList(),
+
+    @SerialName("next_url")
+    val nextUrl: String? = null,
+)
+
+/**
+ * 小说追更列表中的系列条目。
+ *
+ * [id] 是系列 ID；[latestContentId] 是最新小说的作品 ID。
+ */
+@Serializable
+@Immutable
+data class NovelWatchlistSeries(
+    val id: Long? = null,
+    val title: String? = null,
+    val url: String? = null,
+
+    @SerialName("mask_text")
+    val maskText: String? = null,
+
+    @SerialName("published_content_count")
+    val publishedContentCount: Int? = null,
+
+    @SerialName("last_published_content_datetime")
+    val lastPublishedContentDatetime: String? = null,
+
+    @SerialName("latest_content_id")
+    val latestContentId: Long? = null,
+
+    val user: User? = null,
+) {
+    val isMasked: Boolean
+        get() = !maskText.isNullOrBlank()
+}
+
+/**
  * 小说系列详情
  */
 @Serializable
@@ -83,6 +127,40 @@ data class NovelDetailResp(
 )
 
 /**
+ * 小说阅读书签。Pixiv 对每篇小说只保留一个书签，页码从 1 开始。
+ */
+@Serializable
+@Immutable
+data class NovelMarker(
+    val page: Int = 0,
+)
+
+/**
+ * 小说书签列表中的一项。
+ */
+@Serializable
+@Immutable
+data class MarkedNovel(
+    val novel: Novel,
+
+    @SerialName("novel_marker")
+    val novelMarker: NovelMarker? = null,
+)
+
+/**
+ * 小说书签列表响应。
+ */
+@Serializable
+@Immutable
+data class NovelMarkersResp(
+    @SerialName("marked_novels")
+    val markedNovels: List<MarkedNovel> = emptyList(),
+
+    @SerialName("next_url")
+    val nextUrl: String? = null,
+)
+
+/**
  * 搜索小说响应
  */
 @Serializable
@@ -117,7 +195,7 @@ data class NovelTextResp(
     val cdate: String,
     val rating: NovelRating,
     val text: String,
-    val marker: JsonElement? = null,
+    val marker: NovelMarker? = null,
     val seriesNavigation: SeriesNavigation? = null,
     val glossaryItems: List<JsonElement>? = null,
     val replaceableItemIds: List<JsonElement>? = null,
@@ -144,7 +222,7 @@ private class IllustsSerializer : KSerializer<Map<String, NovelIllusts?>?> {
                 if (v is JsonNull || v is JsonObject && v["illust"] is JsonNull) {
                     null
                 } else {
-                    Json.decodeFromJsonElement(NovelIllusts.serializer(), v)
+                    jsonDecoder.json.decodeFromJsonElement(NovelIllusts.serializer(), v)
                 }
             }
 
@@ -175,7 +253,7 @@ private class ImagesSerializer : KSerializer<Map<String, NovelImage>?> {
             is JsonArray -> null
             is JsonNull -> null
             is JsonObject -> element.mapValues { (_, v) ->
-                Json.decodeFromJsonElement(NovelImage.serializer(), v)
+                jsonDecoder.json.decodeFromJsonElement(NovelImage.serializer(), v)
             }
             else -> null
         }

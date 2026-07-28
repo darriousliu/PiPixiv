@@ -72,6 +72,7 @@ data class SearchNovelQuery(
     val bookmarkNumMax: Int? = null,
     val startDate: String? = null,
     val endDate: String? = null,
+    val searchAiType: SearchAiType = SearchAiType.HIDE_AI,
     val offset: Int = 0,
 ) {
     fun toMap(): Map<String, String> {
@@ -86,6 +87,7 @@ data class SearchNovelQuery(
         bookmarkNumMax?.let { map["bookmark_num_max"] = it.toString() }
         startDate?.let { map["start_date"] = it }
         endDate?.let { map["end_date"] = it }
+        map["search_ai_type"] = searchAiType.value.toString()
         map["offset"] = offset.toString()
         return map
     }

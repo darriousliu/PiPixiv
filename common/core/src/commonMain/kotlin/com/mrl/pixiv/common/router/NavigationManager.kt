@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.repository.IllustCacheRepo
 import org.koin.core.annotation.Single
 import kotlin.time.measureTime
@@ -145,12 +146,20 @@ class NavigationManager(
         backStack.navigate(route = Destination.BookmarkedTags)
     }
 
+    fun navigateToNovelMarkersScreen() {
+        backStack.navigate(route = Destination.NovelMarkers)
+    }
+
     fun navigateToSearchScreen() {
         backStack.addSingleTop(route = Destination.Search)
     }
 
     fun navigateToHistoryScreen() {
         backStack.navigate(route = Destination.History)
+    }
+
+    fun navigateToNovelReadLaterScreen() {
+        backStack.navigate(route = Destination.NovelReadLater)
     }
 
     fun navigateToSettingScreen() {
@@ -162,8 +171,8 @@ class NavigationManager(
         backStack.addSingleTop(route = Destination.LoginOption)
     }
 
-    fun navigateToUserIllustScreen(userId: Long) {
-        backStack.navigate(route = Destination.UserArtwork(userId))
+    fun navigateToUserIllustScreen(userId: Long, initialType: Type = Type.Illust) {
+        backStack.navigate(route = Destination.UserArtwork(userId, initialType))
     }
 
     fun navigateToBlockSettings() {
@@ -176,6 +185,18 @@ class NavigationManager(
 
     fun navigateToNetworkSettingScreen() {
         backStack.navigate(route = Destination.NetworkSetting)
+    }
+
+    fun navigateToBrowsingSettingScreen() {
+        backStack.navigate(route = Destination.BrowsingSetting)
+    }
+
+    fun navigateToSearchSettingScreen() {
+        backStack.navigate(route = Destination.SearchSetting)
+    }
+
+    fun navigateToHistorySettingScreen() {
+        backStack.navigate(route = Destination.HistorySetting)
     }
 
     fun navigateToFileNameFormatScreen() {
@@ -202,7 +223,21 @@ class NavigationManager(
         backStack.navigate(route = Destination.Report(commentId, type))
     }
 
-    fun navigateToNovelDetailScreen(novelId: Long) {
-        backStack.navigate(route = Destination.NovelDetail(novelId))
+    fun navigateToNovelDetailScreen(
+        novelId: Long,
+        markerPage: Int? = null,
+        readLaterTargetLanguage: String? = null,
+    ) {
+        backStack.navigate(
+            route = Destination.NovelDetail(
+                novelId = novelId,
+                markerPage = markerPage,
+                readLaterTargetLanguage = readLaterTargetLanguage,
+            )
+        )
+    }
+
+    fun navigateToNovelSeriesScreen(seriesId: Long) {
+        backStack.navigate(route = Destination.NovelSeries(seriesId))
     }
 }

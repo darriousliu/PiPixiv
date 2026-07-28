@@ -291,6 +291,7 @@ fun RankingScreen(
                     NovelMode(
                         mode = mode,
                         navigateToNovelDetailScreen = navigationManager::navigateToNovelDetailScreen,
+                        navigateToNovelSeriesScreen = navigationManager::navigateToNovelSeriesScreen,
                         viewModel = viewModel,
                     )
                 }
@@ -369,6 +370,7 @@ private fun IllustMode(
 private fun NovelMode(
     mode: RankingMode,
     navigateToNovelDetailScreen: (Long) -> Unit,
+    navigateToNovelSeriesScreen: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RankingViewModel = koinViewModel(),
 ) {
@@ -424,6 +426,7 @@ private fun NovelMode(
                         onNovelClick = { novelId ->
                             navigateToNovelDetailScreen(novelId)
                         },
+                        onSeriesClick = navigateToNovelSeriesScreen,
                         onBookmarkClick = { isBookmarked, restrict, tags ->
                             if (isBookmarked) {
                                 BookmarkState.deleteBookmarkNovel(novel.id)

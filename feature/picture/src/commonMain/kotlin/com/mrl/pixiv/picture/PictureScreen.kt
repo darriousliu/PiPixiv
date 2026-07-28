@@ -29,8 +29,6 @@ import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.ErrorOutline
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.HideImage
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Image
@@ -60,8 +58,10 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -95,6 +95,7 @@ import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.BlockSurface
+import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
@@ -103,12 +104,16 @@ import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
+import com.mrl.pixiv.common.data.setting.PreviewImageQuality
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isPrivateBookmark
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.CommentType
@@ -144,10 +149,12 @@ import com.mrl.pixiv.strings.view_comments_count
 import com.mrl.pixiv.strings.viewed
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 @Composable
@@ -250,6 +257,11 @@ internal fun PictureScreen(
     else lazyListState.isItemFullyVisible(KEY_ILLUST_TITLE)
 
     val isBookmarked = illust.isBookmark
+    val browsingSettings by requireUserPreferenceFlow.collectAsStateWithLifecycle {
+        browsingSettings
+    }
+    var arePreviewControlsVisible by remember { mutableStateOf(true) }
+    var previewControlsInteractionVersion by remember { mutableIntStateOf(0) }
     val onBookmarkClick = { restrict: Restrict, tags: List<String>? ->
         if (isBookmarked) {
             BookmarkState.deleteBookmarkIllust(illust.id)
@@ -272,6 +284,35 @@ internal fun PictureScreen(
     var contextMenuImageIndex by remember { mutableStateOf<Int?>(null) }
     var contextMenuOffset by remember { mutableStateOf(Offset.Zero) }
     var pendingSaveAsUrl by remember { mutableStateOf<String?>(null) }
+    val showPreviewControls = !browsingSettings.autoHidePreviewControls ||
+            !isBarVisible ||
+            arePreviewControlsVisible
+    fun revealPreviewControls() {
+        if (browsingSettings.autoHidePreviewControls) {
+            arePreviewControlsVisible = true
+            previewControlsInteractionVersion++
+        }
+    }
+    LaunchedEffect(
+        browsingSettings.autoHidePreviewControls,
+        isBarVisible,
+        arePreviewControlsVisible,
+        currPage,
+        previewControlsInteractionVersion,
+    ) {
+        if (!browsingSettings.autoHidePreviewControls) {
+            arePreviewControlsVisible = true
+            return@LaunchedEffect
+        }
+        if (!isBarVisible) {
+            arePreviewControlsVisible = true
+            return@LaunchedEffect
+        }
+        if (arePreviewControlsVisible) {
+            delay(PREVIEW_CONTROLS_HIDE_DELAY_MS)
+            arePreviewControlsVisible = false
+        }
+    }
     val getOriginalUrl: (Int) -> String? = { index ->
         if (illust.pageCount > 1) {
             illust.metaPages?.get(index)?.imageUrls?.original
@@ -279,7 +320,40 @@ internal fun PictureScreen(
             illust.metaSinglePage.originalImageURL
         }
     }
+    val getPreviewUrl: (Int) -> String? = { index ->
+        val imageUrls = if (illust.pageCount > 1) {
+            illust.metaPages?.get(index)?.imageUrls
+        } else {
+            illust.imageUrls
+        }
+        val originalUrl = getOriginalUrl(index)
+
+        when (browsingSettings.previewImageQuality) {
+            PreviewImageQuality.MEDIUM -> listOf(
+                imageUrls?.medium,
+                imageUrls?.large,
+                originalUrl,
+            )
+
+            PreviewImageQuality.HIGH -> listOf(
+                imageUrls?.large,
+                imageUrls?.medium,
+                originalUrl,
+            )
+
+            PreviewImageQuality.ORIGINAL -> listOf(
+                originalUrl,
+                imageUrls?.large,
+                imageUrls?.medium,
+            )
+        }.firstOrNull { !it.isNullOrBlank() }
+    }
     val openOriginalPreview: (Int, String?) -> Unit = openOriginalPreview@{ index, sharedElementKey ->
+        if (browsingSettings.autoHidePreviewControls && !arePreviewControlsVisible) {
+            revealPreviewControls()
+            return@openOriginalPreview
+        }
+        if (!browsingSettings.tapImageToOpenFullResolutionPreview) return@openOriginalPreview
         val selectedUrl = getOriginalUrl(index) ?: return@openOriginalPreview
         val imageUrls = (0 until illust.pageCount.coerceAtLeast(1))
             .mapNotNull(getOriginalUrl)
@@ -333,7 +407,7 @@ internal fun PictureScreen(
                             Box {
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalPlatformContext.current)
-                                        .data(it.imageUrls?.medium)
+                                        .data(getPreviewUrl(index))
                                         .placeholderMemoryCacheKey(imageKey)
                                         .build(),
                                     contentDescription = null,
@@ -397,7 +471,7 @@ internal fun PictureScreen(
                         Box {
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalPlatformContext.current)
-                                    .data(illust.imageUrls.medium)
+                                    .data(getPreviewUrl(0))
                                     .placeholderMemoryCacheKey(imageKey)
                                     .build(),
                                 contentDescription = null,
@@ -686,22 +760,28 @@ internal fun PictureScreen(
                 },
             topBar = {
                 if (!isWidthAtLeastMedium) {
-                    PictureTopBar(
-                        illust = illust,
-                        currPage = currPage,
-                        isBarVisible = isBarVisible,
-                        isIllustBlocked = isIllustBlocked,
-                        isUserBlocked = isUserBlocked,
-                        onBack = onBack,
-                        popBackToHomeScreen = popBackToHomeScreen,
-                        navToUserDetailScreen = navToUserDetailScreen,
-                        onBlock = pictureViewModel::blockIllust,
-                        onRemoveBlock = pictureViewModel::removeBlockIllust
-                    )
+                    AnimatedVisibility(
+                        visible = showPreviewControls,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                    ) {
+                        PictureTopBar(
+                            illust = illust,
+                            currPage = currPage,
+                            isBarVisible = isBarVisible,
+                            isIllustBlocked = isIllustBlocked,
+                            isUserBlocked = isUserBlocked,
+                            onBack = onBack,
+                            popBackToHomeScreen = popBackToHomeScreen,
+                            navToUserDetailScreen = navToUserDetailScreen,
+                            onBlock = pictureViewModel::blockIllust,
+                            onRemoveBlock = pictureViewModel::removeBlockIllust
+                        )
+                    }
                 }
             },
             floatingActionButton = {
-                if (!isAnyBlocked) {
+                if (!isAnyBlocked && showPreviewControls) {
                     IconButton(
                         onClick = throttleClick {
                             val restrict =
@@ -714,11 +794,11 @@ internal fun PictureScreen(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
                         )
                     ) {
-                        Icon(
-                            imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                            contentDescription = null,
+                        BookmarkIcon(
+                            isBookmarked = isBookmarked,
+                            isPrivate = illust.isPrivateBookmark,
+                            iconSize = 35.dp,
                             tint = if (isBookmarked) Color.Red else LocalContentColor.current,
-                            modifier = Modifier.size(35.dp)
                         )
                     }
                 }
@@ -768,18 +848,24 @@ internal fun PictureScreen(
                         ) {
                             illustImageItems()
                         }
-                        PictureTopBar(
-                            illust = illust,
-                            currPage = currPage,
-                            isBarVisible = isBarVisible,
-                            isIllustBlocked = isIllustBlocked,
-                            isUserBlocked = isUserBlocked,
-                            onBack = onBack,
-                            popBackToHomeScreen = popBackToHomeScreen,
-                            navToUserDetailScreen = navToUserDetailScreen,
-                            onBlock = pictureViewModel::blockIllust,
-                            onRemoveBlock = pictureViewModel::removeBlockIllust
-                        )
+                        this@Row.AnimatedVisibility(
+                            visible = showPreviewControls,
+                            enter = fadeIn(),
+                            exit = fadeOut(),
+                        ) {
+                            PictureTopBar(
+                                illust = illust,
+                                currPage = currPage,
+                                isBarVisible = isBarVisible,
+                                isIllustBlocked = isIllustBlocked,
+                                isUserBlocked = isUserBlocked,
+                                onBack = onBack,
+                                popBackToHomeScreen = popBackToHomeScreen,
+                                navToUserDetailScreen = navToUserDetailScreen,
+                                onBlock = pictureViewModel::blockIllust,
+                                onRemoveBlock = pictureViewModel::removeBlockIllust
+                            )
+                        }
                     }
                     // Right pane: details and related works
                     BoxWithConstraints(
@@ -981,6 +1067,8 @@ private fun extractFileNameAndExtension(url: String): Pair<String, String> {
         lastSegment to "jpg"
     }
 }
+
+private val PREVIEW_CONTROLS_HIDE_DELAY_MS = 3.seconds
 
 @Composable
 internal expect fun Modifier.clickWithPermission(

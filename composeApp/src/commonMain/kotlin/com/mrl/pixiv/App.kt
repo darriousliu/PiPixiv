@@ -27,6 +27,7 @@ import com.mrl.pixiv.common.util.isDesktop
 import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.navigation.Navigation3MainGraph
+import com.mrl.pixiv.setting.network.AiLocalNetworkPermissionEffect
 import com.mrl.pixiv.splash.SplashViewModel
 import com.mrl.pixiv.theme.PiPixivTheme
 import io.github.vinceglb.filekit.FileKit
@@ -51,6 +52,9 @@ fun App(
     splashViewModel: SplashViewModel = koinViewModel()
 ) {
     val appLanguage by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appLanguage }
+    val aiEndpoint by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle {
+        aiTranslationConfig.endpoint
+    }
     val scrollbarStyle = remember(colorScheme) {
         defaultScrollbarStyle().copy(
             unhoverColor = if (platform.isDesktop()) colorScheme.primary.copy(alpha = 0.364f) else Color.Transparent,
@@ -59,6 +63,7 @@ fun App(
     }
 
     SetUpImageLoaderFactory(imageLoaderBuilder)
+    AiLocalNetworkPermissionEffect(aiEndpoint)
 
     LaunchedEffect(Unit) {
         VersionManager.checkUpdate()

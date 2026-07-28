@@ -10,6 +10,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":lib_strings"))
+            implementation(project(":common:ai"))
             implementation(project(":common:data"))
             implementation(project(":common:repository"))
             implementation(project(":common:ui"))
@@ -23,6 +24,12 @@ kotlin {
             implementation(kotlinx.serialization.json)
             implementation(libs.filekit.dialogs)
             implementation(libs.okio)
+            implementation(libs.html.converter)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(kotlinx.coroutines.test)
         }
     }
 }

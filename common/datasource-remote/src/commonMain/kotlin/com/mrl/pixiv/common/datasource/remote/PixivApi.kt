@@ -12,9 +12,11 @@ import com.mrl.pixiv.common.data.illust.IllustDetailResp
 import com.mrl.pixiv.common.data.illust.IllustRecommendedResp
 import com.mrl.pixiv.common.data.mute.MutedResp
 import com.mrl.pixiv.common.data.novel.NovelDetailResp
+import com.mrl.pixiv.common.data.novel.NovelMarkersResp
 import com.mrl.pixiv.common.data.novel.NovelRankingResp
 import com.mrl.pixiv.common.data.novel.NovelRecommendedResp
 import com.mrl.pixiv.common.data.novel.NovelSeriesResp
+import com.mrl.pixiv.common.data.novel.NovelWatchlistResp
 import com.mrl.pixiv.common.data.novel.SearchNovelResp
 import com.mrl.pixiv.common.data.report.ReportTopicListResp
 import com.mrl.pixiv.common.data.search.SearchAiType
@@ -48,6 +50,18 @@ interface PixivApi {
 
     @GET("v1/illust/recommended")
     suspend fun loadMoreIllustRecommended(
+        @QueryMap queryMap: Map<String, String>,
+    ): IllustRecommendedResp
+
+    @GET("v1/manga/recommended")
+    suspend fun getMangaRecommended(
+        @Query("filter") filter: String,
+        @Query("include_ranking_illusts") includeRankingIllusts: Boolean,
+        @Query("include_privacy_policy") includePrivacyPolicy: Boolean,
+    ): IllustRecommendedResp
+
+    @GET("v1/manga/recommended")
+    suspend fun loadMoreMangaRecommended(
         @QueryMap queryMap: Map<String, String>,
     ): IllustRecommendedResp
 
@@ -214,6 +228,14 @@ interface PixivApi {
         @QueryMap queryMap: Map<String, String>,
     ): IllustsWithNextUrl
 
+    @GET("v1/user/browsing-history/novels")
+    suspend fun getUserBrowsingHistoryNovels(): UserNovelsResp
+
+    @GET("v1/user/browsing-history/novels")
+    suspend fun loadMoreUserBrowsingHistoryNovels(
+        @QueryMap queryMap: Map<String, String>,
+    ): UserNovelsResp
+
     @GET("v1/user/bookmark-tags/illust")
     suspend fun getUserBookmarkTagsIllust(
         @Query("user_id") userId: Long,
@@ -276,6 +298,7 @@ interface PixivApi {
         @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
         @Query("word") word: String,
         @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
+        @Query("search_ai_type") searchAiType: Int = SearchAiType.HIDE_AI.value,
     ): SearchIllustResp
 
     @GET("v1/search/popular-preview/novel")
@@ -285,6 +308,7 @@ interface PixivApi {
         @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
         @Query("word") word: String,
         @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
+        @Query("search_ai_type") searchAiType: Int = SearchAiType.HIDE_AI.value,
     ): SearchNovelResp
 
     @GET("v3/illust/comments")
@@ -448,6 +472,26 @@ interface PixivApi {
         @QueryMap queryMap: Map<String, String>,
     ): NovelSeriesResp
 
+    @GET("v1/watchlist/novel")
+    suspend fun getNovelWatchlist(): NovelWatchlistResp
+
+    @GET("v1/watchlist/novel")
+    suspend fun loadMoreNovelWatchlist(
+        @QueryMap queryMap: Map<String, String>,
+    ): NovelWatchlistResp
+
+    @FormUrlEncoded
+    @POST("v1/watchlist/novel/add")
+    suspend fun addNovelSeriesToWatchlist(
+        @Field("series_id") seriesId: Long,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v1/watchlist/novel/delete")
+    suspend fun deleteNovelSeriesFromWatchlist(
+        @Field("series_id") seriesId: Long,
+    ): EmptyResp
+
     @GET("v2/novel/detail")
     suspend fun getNovelDetail(
         @Query("novel_id") novelId: Long,
@@ -470,6 +514,7 @@ interface PixivApi {
         @Query("bookmark_num_max") bookmarkNumMax: Int? = null,
         @Query("start_date") startDate: String? = null,
         @Query("end_date") endDate: String? = null,
+        @Query("search_ai_type") searchAiType: Int = SearchAiType.HIDE_AI.value,
         @Query("offset") offset: Int = 0,
     ): SearchNovelResp
 
@@ -549,4 +594,25 @@ interface PixivApi {
     suspend fun getNovelBookmarkDetail(
         @Query("novel_id") novelId: Long,
     ): BookmarkDetailResp
+
+    @GET("v2/novel/markers")
+    suspend fun getNovelMarkers(): NovelMarkersResp
+
+    @GET("v2/novel/markers")
+    suspend fun loadMoreNovelMarkers(
+        @QueryMap queryMap: Map<String, String>,
+    ): NovelMarkersResp
+
+    @FormUrlEncoded
+    @POST("v1/novel/marker/add")
+    suspend fun postNovelMarkerAdd(
+        @Field("novel_id") novelId: Long,
+        @Field("page") page: Int,
+    ): EmptyResp
+
+    @FormUrlEncoded
+    @POST("v1/novel/marker/delete")
+    suspend fun postNovelMarkerDelete(
+        @Field("novel_id") novelId: Long,
+    ): EmptyResp
 }

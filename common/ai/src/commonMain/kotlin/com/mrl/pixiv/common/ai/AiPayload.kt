@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.ai
 
+import com.mrl.pixiv.common.ai.internal.AI_GENERATION_TIMEOUT_MILLIS
 import com.mrl.pixiv.common.data.setting.AiProvider
 
 enum class AiMessageRole {
@@ -20,7 +21,9 @@ data class AiTextRequest(
     val model: String,
     val messages: List<AiTextMessage>,
     val maxOutputTokens: Int? = null,
-    val responseApi: Boolean = false
+    val responseApi: Boolean = false,
+    val extraBody: String = "",
+    val generationTimeoutMillis: Long = AI_GENERATION_TIMEOUT_MILLIS,
 )
 
 data class AiTextResponse(
@@ -39,4 +42,3 @@ data class AiImageResponse(
     val imageUrls: List<String> = emptyList(),
     val imageBase64List: List<String> = emptyList(),
 )
-

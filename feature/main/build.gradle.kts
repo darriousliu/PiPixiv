@@ -24,5 +24,9 @@ kotlin {
             implementation(libs.bundles.coil3)
             implementation(kotlinx.datetime)
         }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

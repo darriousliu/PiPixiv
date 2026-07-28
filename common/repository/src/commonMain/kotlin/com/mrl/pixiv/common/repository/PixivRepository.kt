@@ -68,6 +68,15 @@ object PixivRepository : KoinComponent {
     suspend fun loadMoreIllustRecommended(queryMap: Map<String, String>) =
         apiApi.loadMoreIllustRecommended(queryMap)
 
+    suspend fun getMangaRecommended(
+        filter: String,
+        includeRankingIllusts: Boolean,
+        includePrivacyPolicy: Boolean,
+    ) = apiApi.getMangaRecommended(filter, includeRankingIllusts, includePrivacyPolicy)
+
+    suspend fun loadMoreMangaRecommended(queryMap: Map<String, String>) =
+        apiApi.loadMoreMangaRecommended(queryMap)
+
     suspend fun getIllustRanking(
         mode: String,
         filter: Filter = Filter.ANDROID,
@@ -118,7 +127,8 @@ object PixivRepository : KoinComponent {
     suspend fun searchIllustNext(queryMap: Map<String, String>) =
         apiApi.searchIllustNext(queryMap)
 
-    suspend fun searchUser(word: String) = apiApi.searchUser(word = word)
+    suspend fun searchUser(word: String, offset: Int? = null) =
+        apiApi.searchUser(word = word, offset = offset)
 
     suspend fun searchUserNext(queryMap: Map<String, String>) = apiApi.searchUserNext(queryMap)
 
@@ -177,6 +187,11 @@ object PixivRepository : KoinComponent {
     suspend fun loadMoreUserBrowsingHistoryIllusts(queryMap: Map<String, String>) =
         apiApi.loadMoreUserBrowsingHistoryIllusts(queryMap)
 
+    suspend fun getUserBrowsingHistoryNovels() = apiApi.getUserBrowsingHistoryNovels()
+
+    suspend fun loadMoreUserBrowsingHistoryNovels(queryMap: Map<String, String>) =
+        apiApi.loadMoreUserBrowsingHistoryNovels(queryMap)
+
     suspend fun getUserBookmarkTagsIllust(
         userId: Long,
         restrict: String
@@ -231,6 +246,7 @@ object PixivRepository : KoinComponent {
             query.mergePlainKeywordResults,
             query.word,
             query.searchTarget.value,
+            query.searchAiType.value,
         )
 
     suspend fun searchPopularPreviewNovel(query: SearchNovelQuery) =
@@ -240,6 +256,7 @@ object PixivRepository : KoinComponent {
             query.mergePlainKeywordResults,
             query.word,
             query.searchTarget.value,
+            query.searchAiType.value,
         )
 
     suspend fun getIllustComments(illustId: Long, offset: Int? = null) =
@@ -333,6 +350,17 @@ object PixivRepository : KoinComponent {
     suspend fun loadMoreNovelSeries(queryMap: Map<String, String>) =
         apiApi.loadMoreNovelSeries(queryMap)
 
+    suspend fun getNovelWatchlist() = apiApi.getNovelWatchlist()
+
+    suspend fun loadMoreNovelWatchlist(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelWatchlist(queryMap)
+
+    suspend fun addNovelSeriesToWatchlist(seriesId: Long) =
+        apiApi.addNovelSeriesToWatchlist(seriesId)
+
+    suspend fun deleteNovelSeriesFromWatchlist(seriesId: Long) =
+        apiApi.deleteNovelSeriesFromWatchlist(seriesId)
+
     suspend fun getNovelDetail(novelId: Long) = apiApi.getNovelDetail(novelId)
 
     suspend fun getTrendingNovelTags(filter: Filter = Filter.ANDROID) =
@@ -350,6 +378,7 @@ object PixivRepository : KoinComponent {
             query.bookmarkNumMax,
             query.startDate,
             query.endDate,
+            query.searchAiType.value,
             query.offset
         )
 
@@ -402,4 +431,15 @@ object PixivRepository : KoinComponent {
 
     suspend fun getNovelContent(novelId: Long) = apiApi.getNovelContent(novelId)
     suspend fun getNovelBookmarkDetail(novelId: Long) = apiApi.getNovelBookmarkDetail(novelId)
+
+    suspend fun getNovelMarkers() = apiApi.getNovelMarkers()
+
+    suspend fun loadMoreNovelMarkers(queryMap: Map<String, String>) =
+        apiApi.loadMoreNovelMarkers(queryMap)
+
+    suspend fun postNovelMarkerAdd(novelId: Long, page: Int) =
+        apiApi.postNovelMarkerAdd(novelId, page)
+
+    suspend fun postNovelMarkerDelete(novelId: Long) =
+        apiApi.postNovelMarkerDelete(novelId)
 }

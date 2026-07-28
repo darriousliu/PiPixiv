@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.navigation3.runtime.NavKey
 import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.data.Type
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -75,6 +76,15 @@ sealed class Destination : NavKey {
     data object NetworkSetting : Destination()
 
     @Serializable
+    data object BrowsingSetting : Destination()
+
+    @Serializable
+    data object SearchSetting : Destination()
+
+    @Serializable
+    data object HistorySetting : Destination()
+
+    @Serializable
     data object FileNameFormat : Destination()
 
     @Serializable
@@ -82,6 +92,9 @@ sealed class Destination : NavKey {
 
     @Serializable
     data object History : Destination()
+
+    @Serializable
+    data object NovelReadLater : Destination()
 
     @Serializable
     data class Collection(
@@ -93,6 +106,9 @@ sealed class Destination : NavKey {
     data object BookmarkedTags : Destination()
 
     @Serializable
+    data object NovelMarkers : Destination()
+
+    @Serializable
     data class Following(
         val userId: Long,
     ) : Destination()
@@ -100,6 +116,7 @@ sealed class Destination : NavKey {
     @Serializable
     data class UserArtwork(
         val userId: Long,
+        val initialType: Type = Type.Illust,
     ) : Destination()
 
     @Serializable
@@ -138,6 +155,13 @@ sealed class Destination : NavKey {
     @Serializable
     data class NovelDetail(
         val novelId: Long,
+        val markerPage: Int? = null,
+        val readLaterTargetLanguage: String? = null,
+    ) : Destination()
+
+    @Serializable
+    data class NovelSeries(
+        val seriesId: Long,
     ) : Destination()
 }
 

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.mrl.pixiv.common.repository
 
 import com.mrl.pixiv.common.data.search.IllustSearch
@@ -28,22 +30,34 @@ object SearchRepository : MMKVUser {
     private val novelSearchIdHistory by mmkvStringSet(emptySet()).asMutableStateFlow()
     val novelSearchIdHistoryFlow = novelSearchIdHistory.asStateFlow()
 
+    @Deprecated("Persistent search filter defaults are stored in UserPreference.searchSettings.")
     private val _savedSearchFilter by mmkvSerializable(LocalSearchFilter()).asMutableStateFlow()
-    val savedSearchFilterFlow = _savedSearchFilter.asStateFlow()
 
+    @Deprecated("Use SettingRepository.userPreferenceFlow and SearchSettings.")
+    val savedSearchFilterFlow
+        get() = _savedSearchFilter.asStateFlow()
+
+    @Deprecated("Persistent search filter defaults are stored in UserPreference.searchSettings.")
     private val _rememberSearchFilter by mmkvBool(false).asMutableStateFlow()
-    val rememberSearchFilterFlow = _rememberSearchFilter.asStateFlow()
 
+    @Deprecated("Search filter changes are no longer remembered.")
+    val rememberSearchFilterFlow
+        get() = _rememberSearchFilter.asStateFlow()
+
+    @Deprecated("Search filter changes are no longer remembered.")
     val rememberSearchFilterValue: Boolean
         get() = _rememberSearchFilter.value
 
+    @Deprecated("Use SettingRepository.userPreferenceFlow and SearchSettings.")
     val savedSearchFilterValue: LocalSearchFilter
         get() = _savedSearchFilter.value
 
+    @Deprecated("Search filter changes are no longer remembered.")
     fun setRememberSearchFilter(remember: Boolean) {
         _rememberSearchFilter.value = remember
     }
 
+    @Deprecated("Use SettingRepository.setSearchSettings instead.")
     fun setSavedSearchFilter(filter: LocalSearchFilter) {
         _savedSearchFilter.value = filter
     }
@@ -154,18 +168,10 @@ object SearchRepository : MMKVUser {
         searchIds: Set<String>,
         novelSearch: NovelSearch,
         novelSearchIds: Set<String>,
-        savedFilter: LocalSearchFilter? = null,
-        rememberFilter: Boolean? = null
     ) {
         searchHistory.value = illustSearch
         searchIdHistory.value = searchIds
         novelSearchHistory.value = novelSearch
         novelSearchIdHistory.value = novelSearchIds
-        if (savedFilter != null) {
-            _savedSearchFilter.value = savedFilter
-        }
-        if (rememberFilter != null) {
-            _rememberSearchFilter.value = rememberFilter
-        }
     }
 }

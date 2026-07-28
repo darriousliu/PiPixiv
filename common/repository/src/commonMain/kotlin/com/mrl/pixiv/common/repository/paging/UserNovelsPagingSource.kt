@@ -13,6 +13,10 @@ import com.mrl.pixiv.common.repository.util.queryParams
 class UserNovelsPagingSource(
     private val userId: Long
 ) : PagingSource<String, Novel>() {
+    init {
+        invalidateOnNovelFilterSettingsChanges()
+    }
+
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Novel> {
         return try {
             val resp = if (params.key.isNullOrEmpty()) {

@@ -9,7 +9,7 @@ plugins {
     alias(kotlinx.plugins.native.cocoapods)
 }
 
-if (properties["applyFirebasePlugins"] == "true") {
+if (findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.sentry.kmp.get().pluginId)
 }
 
@@ -94,12 +94,12 @@ compose.desktop {
                 ).toTypedArray()
             )
             packageName = rootProject.name
-            packageVersion = properties["versionName"]?.toString()
+            packageVersion = findProperty("versionName")?.toString()
             windows {
                 iconFile.set(file("icons/pipixiv.ico"))
                 shortcut = true
                 perUserInstall = true
-                msiPackageVersion = properties["versionName"]?.toString()
+                msiPackageVersion = findProperty("versionName")?.toString()
                 upgradeUuid = "650ae9c7-32ad-400e-93f3-6b0874eccc1c"
                 menuGroup = rootProject.name
             }
@@ -118,9 +118,9 @@ compose.desktop {
     }
 }
 
-logger.quiet("debug: ${properties["debug"]}")
+logger.quiet("debug: ${findProperty("debug")}")
 
-if (properties["debug"] != "true") {
+if (findProperty("debug") != "true") {
     gradle.projectsEvaluated {
         tasks.named("proguardReleaseJars").configure {
             doFirst {

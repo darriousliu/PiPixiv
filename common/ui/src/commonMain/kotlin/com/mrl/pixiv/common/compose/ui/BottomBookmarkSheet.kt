@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -19,8 +19,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.ripple
@@ -36,9 +36,9 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.mrl.pixiv.common.compose.FavoriteDualColor
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.coroutine.withIOContext
@@ -49,6 +49,7 @@ import com.mrl.pixiv.common.data.illust.BookmarkDetailTag
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
@@ -72,19 +73,25 @@ fun IllustBottomBookmarkSheet(
     bottomSheetState: SheetState,
     onBookmarkClick: (Restrict, List<String>?, Boolean) -> Unit,
 ) {
-    var publicSwitch by remember { mutableStateOf(true) }
+    var selectedRestrict by remember { mutableStateOf(Restrict.PUBLIC) }
     val illustBookmarkDetailTags = remember { mutableStateListOf<BookmarkDetailTag>() }
     LaunchedEffect(Unit) {
         launchProcess {
             val resp = withIOContext { PixivRepository.getIllustBookmarkDetail(illust.id) }
-            publicSwitch = resp.bookmarkDetail.restrict == Restrict.PUBLIC.value
+            val restrict = Restrict.fromValue(resp.bookmarkDetail.restrict)
+            selectedRestrict = restrict
+            BookmarkState.updateIllustBookmarkDetail(
+                illustId = illust.id,
+                isBookmarked = resp.bookmarkDetail.isBookmarked,
+                restrict = restrict,
+            )
             illustBookmarkDetailTags.clear()
             illustBookmarkDetailTags.addAll(resp.bookmarkDetail.tags)
         }
     }
     BottomBookmarkSheet(
-        publicSwitch = publicSwitch,
-        onPublicSwitch = { publicSwitch = it },
+        selectedRestrict = selectedRestrict,
+        onRestrictChange = { selectedRestrict = it },
         tags = illustBookmarkDetailTags,
         hideBottomSheet = hideBottomSheet,
         bottomSheetState = bottomSheetState,
@@ -100,19 +107,25 @@ fun NovelBottomBookmarkSheet(
     bottomSheetState: SheetState,
     onBookmarkClick: (Restrict, List<String>?, Boolean) -> Unit,
 ) {
-    var publicSwitch by remember { mutableStateOf(true) }
+    var selectedRestrict by remember { mutableStateOf(Restrict.PUBLIC) }
     val novelBookmarkDetailTags = remember { mutableStateListOf<BookmarkDetailTag>() }
     LaunchedEffect(Unit) {
         launchProcess {
             val resp = withIOContext { PixivRepository.getNovelBookmarkDetail(novel.id) }
-            publicSwitch = resp.bookmarkDetail.restrict == Restrict.PUBLIC.value
+            val restrict = Restrict.fromValue(resp.bookmarkDetail.restrict)
+            selectedRestrict = restrict
+            BookmarkState.updateNovelBookmarkDetail(
+                novelId = novel.id,
+                isBookmarked = resp.bookmarkDetail.isBookmarked,
+                restrict = restrict,
+            )
             novelBookmarkDetailTags.clear()
             novelBookmarkDetailTags.addAll(resp.bookmarkDetail.tags)
         }
     }
     BottomBookmarkSheet(
-        publicSwitch = publicSwitch,
-        onPublicSwitch = { publicSwitch = it },
+        selectedRestrict = selectedRestrict,
+        onRestrictChange = { selectedRestrict = it },
         tags = novelBookmarkDetailTags,
         hideBottomSheet = hideBottomSheet,
         bottomSheetState = bottomSheetState,
@@ -123,8 +136,8 @@ fun NovelBottomBookmarkSheet(
 
 @Composable
 private fun BottomBookmarkSheet(
-    publicSwitch: Boolean,
-    onPublicSwitch: (Boolean) -> Unit,
+    selectedRestrict: Restrict,
+    onRestrictChange: (Restrict) -> Unit,
     tags: SnapshotStateList<BookmarkDetailTag>,
     hideBottomSheet: () -> Unit,
     bottomSheetState: SheetState,
@@ -152,15 +165,23 @@ private fun BottomBookmarkSheet(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(8.dp)
+                .selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = if (publicSwitch) stringResource(RStrings.word_public)
-                else stringResource(RStrings.word_private)
+            RestrictRadioItem(
+                restrict = Restrict.PUBLIC,
+                selectedRestrict = selectedRestrict,
+                onRestrictChange = onRestrictChange,
+                modifier = Modifier.weight(1f),
             )
-            Switch(checked = publicSwitch, onCheckedChange = onPublicSwitch)
+            RestrictRadioItem(
+                restrict = Restrict.PRIVATE,
+                selectedRestrict = selectedRestrict,
+                onRestrictChange = onRestrictChange,
+                modifier = Modifier.weight(1f),
+            )
         }
         Row(
             modifier = Modifier
@@ -290,7 +311,7 @@ private fun BottomBookmarkSheet(
             Button(
                 onClick = throttleClick {
                     onBookmarkClick(
-                        if (publicSwitch) Restrict.PUBLIC else Restrict.PRIVATE,
+                        selectedRestrict,
                         selectedTagsIndex.map { allTags[it].first },
                         isBookmarked
                     )
@@ -298,10 +319,10 @@ private fun BottomBookmarkSheet(
                 },
                 modifier = Modifier
             ) {
-                Icon(
-                    imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                    contentDescription = null,
-                    tint = FavoriteDualColor(isBookmarked)
+                BookmarkIcon(
+                    isBookmarked = isBookmarked,
+                    isPrivate = selectedRestrict == Restrict.PRIVATE,
+                    iconSize = 24.dp,
                 )
                 8f.HSpacer
                 Text(
@@ -323,6 +344,38 @@ private fun BottomBookmarkSheet(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RestrictRadioItem(
+    restrict: Restrict,
+    selectedRestrict: Restrict,
+    onRestrictChange: (Restrict) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .selectable(
+                selected = selectedRestrict == restrict,
+                role = Role.RadioButton,
+            ) {
+                onRestrictChange(restrict)
+            }
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(
+            selected = selectedRestrict == restrict,
+            onClick = null,
+        )
+        8f.HSpacer
+        Text(
+            text = stringResource(
+                if (restrict == Restrict.PUBLIC) RStrings.word_public else RStrings.word_private
+            ),
+            style = MaterialTheme.typography.bodyLarge,
+        )
     }
 }
 

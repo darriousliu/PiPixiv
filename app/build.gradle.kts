@@ -8,13 +8,9 @@ plugins {
 //    alias(androidx.plugins.baselineprofile)
 }
 
-val hotSwanTaskNames = gradle.startParameter.taskNames.map { it.lowercase() }
-val enableHotSwanCompiler = hotSwanTaskNames.isEmpty() ||
-    hotSwanTaskNames.any { taskName ->
-        taskName.contains("debug") ||
-            taskName.contains("hotswan") ||
-            taskName.contains("captureallpreviews")
-    }
+val enableHotSwanCompiler = providers.gradleProperty("hotswan.enabled")
+    .map(String::toBoolean)
+    .getOrElse(false)
 
 if (enableHotSwanCompiler) {
     pluginManager.apply(libs.plugins.hotswan.compiler.get().pluginId)
@@ -36,8 +32,8 @@ android {
 
     defaultConfig {
         applicationId = "com.mrl.pixiv"
-        versionCode = properties["versionCode"].toString().toInt()
-        versionName = properties["versionName"].toString()
+        versionCode = findProperty("versionCode").toString().toInt()
+        versionName = findProperty("versionName").toString()
 
         vectorDrawables {
             useSupportLibrary = true

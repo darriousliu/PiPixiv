@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FileCopy
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
@@ -53,10 +51,10 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
-import com.mrl.pixiv.common.compose.FavoriteDualColor
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.lightBlue
+import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.data.AiType
 import com.mrl.pixiv.common.data.Illust
@@ -67,11 +65,14 @@ import com.mrl.pixiv.common.kts.round
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isPrivateBookmark
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.allowRgb565
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.strings.long_click_to_edit_favorite
+import com.mrl.pixiv.strings.manga
+import com.mrl.pixiv.strings.series
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
@@ -156,6 +157,12 @@ fun SquareIllustItem(
                 if (illust.type == Type.Ugoira) {
                     GifBadge()
                 }
+                if (illust.type == Type.Manga) {
+                    TextBadge(text = stringResource(RStrings.manga))
+                }
+                if (illust.series != null) {
+                    TextBadge(text = stringResource(RStrings.series))
+                }
                 if (illust.pageCount > 1) {
                     PageBadge(
                         pageCount = illust.pageCount,
@@ -174,11 +181,11 @@ fun SquareIllustItem(
                         },
                         onLongClick = { showBottomSheet = true },
                     ) {
-                        Icon(
-                            imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                        BookmarkIcon(
+                            isBookmarked = isBookmarked,
+                            isPrivate = illust.isPrivateBookmark,
+                            iconSize = 24.dp,
                             contentDescription = "",
-                            modifier = Modifier.size(24.dp),
-                            tint = FavoriteDualColor(isBookmarked)
                         )
                     }
                     if (showPopupTip) {
@@ -314,11 +321,11 @@ fun RectangleIllustItem(
                         },
                         onLongClick = onBookmarkLongClick,
                     ) {
-                        Icon(
-                            imageVector = if (isBookmarked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                        BookmarkIcon(
+                            isBookmarked = isBookmarked,
+                            isPrivate = illust.isPrivateBookmark,
+                            iconSize = 24.dp,
                             contentDescription = "",
-                            modifier = Modifier.size(24.dp),
-                            tint = FavoriteDualColor(isBookmarked)
                         )
                     }
                 }
@@ -335,6 +342,12 @@ fun RectangleIllustItem(
                 }
                 if (illust.type == Type.Ugoira) {
                     GifBadge()
+                }
+                if (illust.type == Type.Manga) {
+                    TextBadge(text = stringResource(RStrings.manga))
+                }
+                if (illust.series != null) {
+                    TextBadge(text = stringResource(RStrings.series))
                 }
                 if (illust.pageCount > 1) {
                     PageBadge(
@@ -355,6 +368,24 @@ fun RectangleIllustItem(
     }
 }
 
+
+@Composable
+private fun TextBadge(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Badge(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+        )
+    }
+}
 
 @Composable
 internal fun AIBadge(

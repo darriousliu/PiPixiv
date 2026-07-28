@@ -15,8 +15,11 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.NetworkWifi
 import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material.icons.rounded._18UpRating
@@ -52,16 +55,19 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.app_language
+import com.mrl.pixiv.strings.browsing_setting
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.confirm
 import com.mrl.pixiv.strings.default_private_bookmark
 import com.mrl.pixiv.strings.download_single_folder_by_user_desc
 import com.mrl.pixiv.strings.download_single_folder_by_user_title
 import com.mrl.pixiv.strings.file_name_format_title
+import com.mrl.pixiv.strings.history_setting
 import com.mrl.pixiv.strings.label_default
 import com.mrl.pixiv.strings.network_setting
 import com.mrl.pixiv.strings.r18
 import com.mrl.pixiv.strings.r18_alert_message
+import com.mrl.pixiv.strings.search_setting
 import com.mrl.pixiv.strings.setting
 import com.mrl.pixiv.strings.span_count_adaptive
 import com.mrl.pixiv.strings.span_count_landscape
@@ -72,6 +78,9 @@ import org.koin.compose.koinInject
 
 const val KEY_LANGUAGE = "language"
 const val KEY_NETWORK_SETTING = "network_setting"
+const val KEY_BROWSING_SETTING = "browsing_setting"
+const val KEY_SEARCH_SETTING = "search_setting"
+const val KEY_HISTORY_SETTING = "history_setting"
 const val KEY_AI_TRANSLATION_SETTING = "ai_translation_setting"
 const val KEY_DEFAULT_OPEN_LINK = "default_open_link"
 const val KEY_DIVIDER_1 = "divider_1"
@@ -142,17 +151,17 @@ fun SettingScreen(
                             onDismissRequest = { expanded = false },
                             current = currentLanguage,
                         ) {
-                            languages.forEach {
+                            languages.forEach { language ->
                                 DropdownMenuItem(
                                     text = {
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = it.displayName,
+                                                text = language.displayName,
                                                 modifier = Modifier.padding(16.dp),
                                             )
-                                            if (currentLanguage == it.langTag) {
+                                            if (currentLanguage == language.langTag) {
                                                 Icon(
                                                     imageVector = Icons.Rounded.Check,
                                                     contentDescription = null
@@ -161,7 +170,7 @@ fun SettingScreen(
                                         }
                                     },
                                     onClick = {
-                                        currentLanguage = it.langTag
+                                        currentLanguage = language.langTag
                                         expanded = false
                                     }
                                 )
@@ -186,6 +195,78 @@ fun SettingScreen(
                         },
                     leadingContent = {
                         Icon(imageVector = Icons.Rounded.NetworkWifi, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+            item(key = KEY_BROWSING_SETTING) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RStrings.browsing_setting),
+                        )
+                    },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            navigationManager.navigateToBrowsingSettingScreen()
+                        },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.Image, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+            item(key = KEY_SEARCH_SETTING) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RStrings.search_setting),
+                        )
+                    },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            navigationManager.navigateToSearchSettingScreen()
+                        },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.Search, contentDescription = null)
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+            item(key = KEY_HISTORY_SETTING) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(RStrings.history_setting),
+                        )
+                    },
+                    modifier = Modifier
+                        .throttleClick(
+                            indication = ripple()
+                        ) {
+                            navigationManager.navigateToHistorySettingScreen()
+                        },
+                    leadingContent = {
+                        Icon(imageVector = Icons.Rounded.History, contentDescription = null)
                     },
                     trailingContent = {
                         Icon(
@@ -275,7 +356,9 @@ fun SettingScreen(
                         ) {
                             Switch(
                                 checked = userPreference.downloadSubFolderByUser,
-                                onCheckedChange = { SettingRepository.setDownloadSubFolderByUser(it) }
+                                onCheckedChange = { checked ->
+                                    SettingRepository.setDownloadSubFolderByUser(checked)
+                                }
                             )
                         }
                     }
@@ -354,8 +437,8 @@ fun SettingScreen(
                     trailingContent = {
                         Switch(
                             checked = userPreference.isR18Enabled,
-                            onCheckedChange = {
-                                if (it) {
+                            onCheckedChange = { checked ->
+                                if (checked) {
                                     showWarningDialog = true
                                 } else {
                                     SettingRepository.setIsR18Enabled(false)
@@ -384,7 +467,9 @@ fun SettingScreen(
                     trailingContent = {
                         Switch(
                             checked = userPreference.defaultPrivateBookmark,
-                            onCheckedChange = { SettingRepository.setDefaultPrivateBookmark(it) }
+                            onCheckedChange = { checked ->
+                                SettingRepository.setDefaultPrivateBookmark(checked)
+                            }
                         )
                     }
                 )

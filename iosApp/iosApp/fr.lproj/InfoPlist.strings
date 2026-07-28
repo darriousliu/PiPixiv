@@ -1,2 +1,3 @@
 "NSPhotoLibraryAddUsageDescription" = "Autoriser l’enregistrement des images téléchargées dans Photos.";
 "NSPhotoLibraryUsageDescription" = "Autoriser l’accès à Photos pour gérer les images enregistrées.";
+"NSLocalNetworkUsageDescription" = "Autoriser la connexion aux services d’IA de votre réseau local.";

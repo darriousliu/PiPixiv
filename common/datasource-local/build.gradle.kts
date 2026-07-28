@@ -19,6 +19,11 @@ kotlin {
             // FileKit
             implementation(libs.filekit.core)
         }
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(project.dependencies.platform(kotlinx.coroutines.bom))
+            implementation(kotlinx.coroutines.test)
+        }
     }
 
 }
