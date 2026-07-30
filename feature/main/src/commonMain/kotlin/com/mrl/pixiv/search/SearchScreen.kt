@@ -64,6 +64,7 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.main.components.ViewModeToggleButton
+import com.mrl.pixiv.strings.clear
 import com.mrl.pixiv.strings.enter_keywords
 import com.mrl.pixiv.strings.find_for
 import com.mrl.pixiv.strings.id_search
@@ -360,10 +361,27 @@ private fun SearchScreenAppBar(
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(
                             onSearch = { onSearch() }
-                        )
+                        ),
+                        trailingIcon = if (shouldShowSearchInputClearIcon(textState.text)) {
+                            {
+                                IconButton(
+                                    onClick = { onValueChange(TextFieldValue()) },
+                                    shapes = IconButtonDefaults.shapes(),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Close,
+                                        contentDescription = stringResource(RStrings.clear),
+                                    )
+                                }
+                            }
+                        } else {
+                            null
+                        },
                     )
                 }
             }
         }
     )
 }
+
+internal fun shouldShowSearchInputClearIcon(input: String): Boolean = input.isNotEmpty()
