@@ -9,6 +9,69 @@ plugins {
     alias(kotlinx.plugins.native.cocoapods)
 }
 
+val desktopOsName = System.getProperty("os.name").toString()
+val (desktopOsResourceDirectory, mmkvNativeLibraryName, mmkvNativeLibraryDependency) = when {
+    desktopOsName == "Mac OS X" ->
+        Triple("macos", "libmmkvc.dylib", libs.mmkv.kotlin.nativelib.macos)
+
+    desktopOsName.startsWith("Windows") ->
+        Triple("windows", "mmkvc.dll", libs.mmkv.kotlin.nativelib.windows)
+
+    desktopOsName.startsWith("Linux") ->
+        Triple("linux", "libmmkvc.so", libs.mmkv.kotlin.nativelib.linux)
+
+    else -> error("Unsupported desktop OS: $desktopOsName")
+}
+
+val mmkvNativeLibrary = configurations.create("mmkvNativeLibrary") {
+    description = "MMKV native library used only as an input to the Compose app resources task"
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isTransitive = false
+}
+
+dependencies {
+    add(mmkvNativeLibrary.name, mmkvNativeLibraryDependency)
+}
+
+val composeResourcesDirectory =
+    layout.projectDirectory.dir("src/commonMain/composeResources/files")
+val mmkvComposeResourcesDirectory = composeResourcesDirectory.dir("mmkv")
+val desktopAppResourcesDirectory =
+    layout.buildDirectory.dir("generated/desktopAppResources")
+
+val copyMMKVNativeLibraryToComposeResources =
+    tasks.register("copyMMKVNativeLibraryToComposeResources", Copy::class) {
+        group = "build"
+        description = "Copies the current platform's MMKV native library into Compose app resources"
+
+        val nativeLibraryArchives = mmkvNativeLibrary.incoming.files.elements.map { artifacts ->
+            artifacts.map { zipTree(it.asFile) }
+        }
+        from(nativeLibraryArchives) {
+            include(mmkvNativeLibraryName)
+        }
+        into(mmkvComposeResourcesDirectory)
+
+        doLast {
+            val copiedLibrary = destinationDir.resolve(mmkvNativeLibraryName)
+            check(copiedLibrary.isFile) {
+                "MMKV native library $mmkvNativeLibraryName was not found in ${mmkvNativeLibrary.files}"
+            }
+        }
+    }
+
+val stageMMKVNativeLibraryForPackaging =
+    tasks.register("stageMMKVNativeLibraryForPackaging", Sync::class) {
+        dependsOn(copyMMKVNativeLibraryToComposeResources)
+        from(mmkvComposeResourcesDirectory.file(mmkvNativeLibraryName))
+        into(
+            desktopAppResourcesDirectory.map {
+                it.dir(desktopOsResourceDirectory).dir("mmkv")
+            },
+        )
+    }
+
 if (findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.sentry.kmp.get().pluginId)
 }
@@ -85,6 +148,7 @@ compose.desktop {
         mainClass = "com.mrl.pixiv.MainKt"
 
         nativeDistributions {
+            appResourcesRootDir.set(desktopAppResourcesDirectory)
             includeAllModules = true
             targetFormats(
                 *listOfNotNull(
@@ -116,6 +180,29 @@ compose.desktop {
 
         jvmArgs("--enable-native-access", "ALL-UNNAMED")
     }
+}
+
+tasks.matching { it.name == "prepareAppResources" }.configureEach {
+    dependsOn(stageMMKVNativeLibraryForPackaging)
+}
+
+tasks.matching { it.name == "copyNonXmlValueResourcesForCommonMain" }.configureEach {
+    dependsOn(copyMMKVNativeLibraryToComposeResources)
+}
+
+val directJvmRunTasks = setOf("jvmRun", "hotRunJvm", "hotDevJvm")
+tasks.withType(JavaExec::class.java).configureEach {
+    if (name in directJvmRunTasks) {
+        dependsOn(copyMMKVNativeLibraryToComposeResources)
+        systemProperty(
+            "compose.application.resources.dir",
+            composeResourcesDirectory.asFile.absolutePath,
+        )
+    }
+}
+
+tasks.matching { it.name == "hotRunJvmAsync" || it.name == "hotDevJvmAsync" }.configureEach {
+    dependsOn(copyMMKVNativeLibraryToComposeResources)
 }
 
 logger.quiet("debug: ${findProperty("debug")}")
@@ -277,5 +364,3 @@ tasks.register("buildReleaseIpa", BuildIpaTask::class) {
     outputIpa = layout.buildDirectory.file("archives/release/PiPixiv.ipa")
     dependsOn(buildReleaseArchive)
 }
-
-
