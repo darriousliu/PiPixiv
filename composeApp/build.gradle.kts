@@ -37,8 +37,6 @@ dependencies {
 val composeResourcesDirectory =
     layout.projectDirectory.dir("src/commonMain/composeResources/files")
 val mmkvComposeResourcesDirectory = composeResourcesDirectory.dir("mmkv")
-val desktopAppResourcesDirectory =
-    layout.buildDirectory.dir("generated/desktopAppResources")
 
 val copyMMKVNativeLibraryToComposeResources =
     tasks.register("copyMMKVNativeLibraryToComposeResources", Copy::class) {
@@ -59,17 +57,6 @@ val copyMMKVNativeLibraryToComposeResources =
                 "MMKV native library $mmkvNativeLibraryName was not found in ${mmkvNativeLibrary.files}"
             }
         }
-    }
-
-val stageMMKVNativeLibraryForPackaging =
-    tasks.register("stageMMKVNativeLibraryForPackaging", Sync::class) {
-        dependsOn(copyMMKVNativeLibraryToComposeResources)
-        from(mmkvComposeResourcesDirectory.file(mmkvNativeLibraryName))
-        into(
-            desktopAppResourcesDirectory.map {
-                it.dir(desktopOsResourceDirectory).dir("mmkv")
-            },
-        )
     }
 
 if (findProperty("applyFirebasePlugins") == "true") {
@@ -148,7 +135,6 @@ compose.desktop {
         mainClass = "com.mrl.pixiv.MainKt"
 
         nativeDistributions {
-            appResourcesRootDir.set(desktopAppResourcesDirectory)
             includeAllModules = true
             targetFormats(
                 *listOfNotNull(
@@ -180,10 +166,6 @@ compose.desktop {
 
         jvmArgs("--enable-native-access", "ALL-UNNAMED")
     }
-}
-
-tasks.matching { it.name == "prepareAppResources" }.configureEach {
-    dependsOn(stageMMKVNativeLibraryForPackaging)
 }
 
 tasks.matching { it.name == "copyNonXmlValueResourcesForCommonMain" }.configureEach {
