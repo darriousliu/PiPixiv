@@ -26,6 +26,7 @@ data class UserPreference(
     val browsingSettings: BrowsingSettings = BrowsingSettings(),
     val searchSettings: SearchSettings = SearchSettings(),
     val historySettings: HistorySettings = HistorySettings(),
+    val novelReaderSettings: NovelReaderSettings = NovelReaderSettings(),
 ) {
     companion object {
         const val TEMPLATE_ILLUST_ID = "{illust_id}"

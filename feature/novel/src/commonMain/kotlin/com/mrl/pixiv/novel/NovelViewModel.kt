@@ -11,6 +11,7 @@ import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
+import com.mrl.pixiv.common.data.setting.NovelReaderSettings
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.repository.NovelAiTranslationService
@@ -22,6 +23,7 @@ import com.mrl.pixiv.common.repository.NovelReadingProgressRepository
 import com.mrl.pixiv.common.repository.NovelTranslationStreamProgress
 import com.mrl.pixiv.common.repository.NovelTranslationRepository
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.buildNovelAiConfigFingerprint
 import com.mrl.pixiv.common.repository.buildNovelTranslationSourceHash
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
@@ -71,8 +73,8 @@ data class NovelState internal constructor(
     val novel: Novel? = null,
     val novelTextResp: NovelTextResp? = null,
     val novelText: String = "",
-    val fontSize: Int = 16,
-    val lineSpacingSp: Int = 0,
+    val fontSize: Int = NovelReaderSettings.DEFAULT_FONT_SIZE,
+    val lineSpacingSp: Int = NovelReaderSettings.DEFAULT_LINE_SPACING_SP,
     val isBookmarked: Boolean = false,
     val markerPage: Int? = null,
     val markerUpdating: Boolean = false,
@@ -90,6 +92,14 @@ data class NovelState internal constructor(
 ) {
     val isTranslating: Boolean
         get() = translationPresentation !is NovelTranslationPresentation.Idle
+}
+
+private fun initialNovelState(): NovelState {
+    val settings = requireUserPreferenceValue.novelReaderSettings.normalized()
+    return NovelState(
+        fontSize = settings.fontSize,
+        lineSpacingSp = settings.lineSpacingSp,
+    )
 }
 
 @Stable
@@ -132,7 +142,7 @@ class NovelViewModel(
     private val readLaterRepository: NovelReadLaterRepository,
     private val browsingHistoryRepository: BrowsingHistoryRepository,
 ) : BaseMviViewModel<NovelState, NovelIntent>(
-    initialState = NovelState()
+    initialState = initialNovelState()
 ), KoinComponent {
     private var lastHistoryNovelId: Long? = null
     private val progressSession = NovelProgressSession()
@@ -348,17 +358,38 @@ class NovelViewModel(
     }
 
     private fun updateFontSize(size: Int) {
-        updateState { copy(fontSize = size.coerceIn(10, 32)) }
+        val normalizedSize = size.coerceIn(
+            NovelReaderSettings.MIN_FONT_SIZE,
+            NovelReaderSettings.MAX_FONT_SIZE,
+        )
+        if (normalizedSize == uiState.value.fontSize) return
+        updateState { copy(fontSize = normalizedSize) }
+        persistNovelReaderSettings()
         if (uiState.value.isTranslating) return
         val currentNovelId = uiState.value.novel?.id ?: return
         requestRestoreProgress(novelId = currentNovelId, paragraphs = uiState.value.paragraphs)
     }
 
     private fun updateLineSpacing(spacing: Int) {
-        updateState { copy(lineSpacingSp = spacing.coerceIn(-10, 10)) }
+        val normalizedSpacing = spacing.coerceIn(
+            NovelReaderSettings.MIN_LINE_SPACING_SP,
+            NovelReaderSettings.MAX_LINE_SPACING_SP,
+        )
+        if (normalizedSpacing == uiState.value.lineSpacingSp) return
+        updateState { copy(lineSpacingSp = normalizedSpacing) }
+        persistNovelReaderSettings()
         if (uiState.value.isTranslating) return
         val currentNovelId = uiState.value.novel?.id ?: return
         requestRestoreProgress(novelId = currentNovelId, paragraphs = uiState.value.paragraphs)
+    }
+
+    private fun persistNovelReaderSettings() {
+        SettingRepository.setNovelReaderSettings(
+            NovelReaderSettings(
+                fontSize = uiState.value.fontSize,
+                lineSpacingSp = uiState.value.lineSpacingSp,
+            )
+        )
     }
 
     private fun toggleBottomSheet() {
