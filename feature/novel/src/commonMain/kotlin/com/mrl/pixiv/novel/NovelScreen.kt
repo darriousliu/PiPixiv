@@ -162,7 +162,10 @@ fun NovelScreen(
     val currentNovelId = state.novel?.id ?: novelId
     val isNovelBlocked = BlockingRepositoryV2.collectNovelBlockAsState(currentNovelId)
     val listState = rememberLazyListState()
-    val paragraphLayouts = remember(state.novel?.id) { mutableStateMapOf<Int, TextLayoutResult>() }
+    val paragraphLayoutCacheKey = state.paragraphLayoutCacheKey()
+    val paragraphLayouts = remember(paragraphLayoutCacheKey) {
+        mutableStateMapOf<Int, TextLayoutResult>()
+    }
     val cumulativeParagraphLengths = remember(state.paragraphs) {
         buildCumulativeParagraphLengths(state.paragraphs)
     }
@@ -294,8 +297,7 @@ fun NovelScreen(
         val targetItemIndex = paragraphStartIndex + resolvedProgress.paragraphIndex
         Logger.d(tag = "NovelScreen") { "Restore: paragraphStartIndex=$paragraphStartIndex, targetItemIndex=$targetItemIndex" }
 
-        // 清空布局缓存并滚动到目标段落
-        paragraphLayouts.clear()
+        // 先滚动到目标段落；布局缓存已按正文和排版参数隔离，只会包含当前布局结果。
         listState.scrollToItem(targetItemIndex, 0)
 
         // 等待目标段落的布局完成。包含图片标记的段落可能没有文本布局，这里做超时兜底。
