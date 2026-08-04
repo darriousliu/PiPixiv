@@ -7,12 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		78A14EC27E1CA0C8D462602E /* Pods_PiPixiv.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAB683D5A5B2ABB5AD0AA125 /* Pods_PiPixiv.framework */; };
+		A9F01D010000000000000001 /* MMKV in Frameworks */ = {isa = PBXBuildFile; productRef = C9F01D010000000000000001 /* MMKV */; };
+		A9F01D010000000000000002 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = C9F01D010000000000000002 /* ZIPFoundation */; };
+		A9F01D010000000000000003 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = C9F01D010000000000000003 /* Sentry */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1AC48DF89C56FF002CE5A60C /* PiPixiv.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PiPixiv.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		397C61C4FA01D881152B08E7 /* Pods-PiPixiv.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PiPixiv.debug.xcconfig"; path = "Target Support Files/Pods-PiPixiv/Pods-PiPixiv.debug.xcconfig"; sourceTree = "<group>"; };
 		C01A0AAB2F0257EE00B7AE17 /* AnimationDefaults.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = AnimationDefaults.kt; sourceTree = "<group>"; };
 		C01A0AAD2F0257EE00B7AE17 /* CancelException.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CancelException.kt; sourceTree = "<group>"; };
 		C01A0AAE2F0257EE00B7AE17 /* CoroutineExt.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CoroutineExt.kt; sourceTree = "<group>"; };
@@ -41,14 +42,14 @@
 		C01A0ACB2F0257EE00B7AE17 /* ShareUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ShareUtil.kt; sourceTree = "<group>"; };
 		C01A0ACC2F0257EE00B7AE17 /* TimeUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = TimeUtil.kt; sourceTree = "<group>"; };
 		C01A0ACD2F0257EE00B7AE17 /* ToastUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ToastUtil.kt; sourceTree = "<group>"; };
-		C01A0ACE2F0257EE00B7AE17 /* ZipUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ZipUtil.kt; sourceTree = "<group>"; };
+		C01A0ACE2F0257EE00B7AE17 /* ../common/platform-api/src/commonMain/kotlin/com/mrl/pixiv/common/util/ZipUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "../common/platform-api/src/commonMain/kotlin/com/mrl/pixiv/common/util/ZipUtil.kt"; sourceTree = SOURCE_ROOT; };
 		C01A0AD02F0257EE00B7AE17 /* BaseMviViewModel.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BaseMviViewModel.kt; sourceTree = "<group>"; };
 		C01A0AD82F0257EE00B7AE17 /* CoroutineExt.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CoroutineExt.ios.kt; sourceTree = "<group>"; };
 		C01A0ADA2F0257EE00B7AE17 /* BitmapUtil.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = BitmapUtil.ios.kt; sourceTree = "<group>"; };
 		C01A0ADB2F0257EE00B7AE17 /* CopyUtil.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CopyUtil.ios.kt; sourceTree = "<group>"; };
 		C01A0ADC2F0257EE00B7AE17 /* DeviceInfo.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = DeviceInfo.ios.kt; sourceTree = "<group>"; };
 		C01A0ADD2F0257EE00B7AE17 /* LocaleHelper.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LocaleHelper.ios.kt; sourceTree = "<group>"; };
-		C01A0ADE2F0257EE00B7AE17 /* PhotoUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PhotoUtil.kt; sourceTree = "<group>"; };
+		C01A0ADE2F0257EE00B7AE17 /* ../common/platform-api/src/iosMain/kotlin/com/mrl/pixiv/common/util/PhotoUtil.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "../common/platform-api/src/iosMain/kotlin/com/mrl/pixiv/common/util/PhotoUtil.kt"; sourceTree = SOURCE_ROOT; };
 		C01A0ADF2F0257EE00B7AE17 /* ShareUtil.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ShareUtil.ios.kt; sourceTree = "<group>"; };
 		C01A0B5B2F02585100B7AE17 /* CollectionIllustPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CollectionIllustPagingSource.kt; sourceTree = "<group>"; };
 		C01A0B5C2F02585100B7AE17 /* CommentPagingSource.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CommentPagingSource.kt; sourceTree = "<group>"; };
@@ -85,8 +86,6 @@
 		C01A0BAD2F02591900B7AE17 /* PictureScreen.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureScreen.kt; sourceTree = "<group>"; };
 		C01A0BAE2F02591900B7AE17 /* PictureViewModel.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureViewModel.kt; sourceTree = "<group>"; };
 		C01A0BB52F02591900B7AE17 /* PictureScreen.ios.kt */ = {isa = PBXFileReference; lastKnownFileType = text; path = PictureScreen.ios.kt; sourceTree = "<group>"; };
-		EAB683D5A5B2ABB5AD0AA125 /* Pods_PiPixiv.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PiPixiv.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F4B6C839C2B68F70A6BE7B25 /* Pods-PiPixiv.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PiPixiv.release.xcconfig"; path = "Target Support Files/Pods-PiPixiv/Pods-PiPixiv.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -120,7 +119,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				78A14EC27E1CA0C8D462602E /* Pods_PiPixiv.framework in Frameworks */,
+				A9F01D010000000000000001 /* MMKV in Frameworks */,
+				A9F01D010000000000000002 /* ZIPFoundation in Frameworks */,
+				A9F01D010000000000000003 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,26 +135,7 @@
 				ED62C2B061C4347F8C06C2D7 /* Configuration */,
 				3F4C35825AB99DE17A5B0D16 /* iosApp */,
 				82B5335CC846DD695CF9A3C7 /* Products */,
-				2D12737CF1E984537BD9783C /* Pods */,
-				3FDED1B73117747DF4C8684C /* Frameworks */,
 			);
-			sourceTree = "<group>";
-		};
-		2D12737CF1E984537BD9783C /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				397C61C4FA01D881152B08E7 /* Pods-PiPixiv.debug.xcconfig */,
-				F4B6C839C2B68F70A6BE7B25 /* Pods-PiPixiv.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		3FDED1B73117747DF4C8684C /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				EAB683D5A5B2ABB5AD0AA125 /* Pods_PiPixiv.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		82B5335CC846DD695CF9A3C7 /* Products */ = {
@@ -257,7 +239,7 @@
 				C01A0ACB2F0257EE00B7AE17 /* ShareUtil.kt */,
 				C01A0ACC2F0257EE00B7AE17 /* TimeUtil.kt */,
 				C01A0ACD2F0257EE00B7AE17 /* ToastUtil.kt */,
-				C01A0ACE2F0257EE00B7AE17 /* ZipUtil.kt */,
+				C01A0ACE2F0257EE00B7AE17 /* ../common/platform-api/src/commonMain/kotlin/com/mrl/pixiv/common/util/ZipUtil.kt */,
 			);
 			path = util;
 			sourceTree = "<group>";
@@ -342,7 +324,7 @@
 				C01A0ADB2F0257EE00B7AE17 /* CopyUtil.ios.kt */,
 				C01A0ADC2F0257EE00B7AE17 /* DeviceInfo.ios.kt */,
 				C01A0ADD2F0257EE00B7AE17 /* LocaleHelper.ios.kt */,
-				C01A0ADE2F0257EE00B7AE17 /* PhotoUtil.kt */,
+				C01A0ADE2F0257EE00B7AE17 /* ../common/platform-api/src/iosMain/kotlin/com/mrl/pixiv/common/util/PhotoUtil.kt */,
 				C01A0ADF2F0257EE00B7AE17 /* ShareUtil.ios.kt */,
 			);
 			path = util;
@@ -696,13 +678,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B318C7DF8D91F57AAC6D575B /* Build configuration list for PBXNativeTarget "PiPixiv" */;
 			buildPhases = (
-				CA900429C41C014157108DC9 /* [CP] Check Pods Manifest.lock */,
+				00263CD53D7D91F22EB07F6C /* Embed Swift Export */,
 				ACB848C9BFCA9510147D6DBD /* Sources */,
 				A77EDA681E5C6E56DBEFFB68 /* Frameworks */,
 				24F94AA9C94BB9A21AE42529 /* Resources */,
-				C92FA5578BDA7EF5A40B2B40 /* [CP] Embed Pods Frameworks */,
-				8C7ED8E2DAAC34B8B13C28B9 /* [CP] Copy Pods Resources */,
 				C0962F912F161D1800594D9A /* Upload DSYM */,
+				34EAF2DA025B484D94F258C5 /* Kotzilla Dsym */,
 			);
 			buildRules = (
 			);
@@ -712,6 +693,11 @@
 				3F4C35825AB99DE17A5B0D16 /* iosApp */,
 			);
 			name = PiPixiv;
+			packageProductDependencies = (
+				C9F01D010000000000000001 /* MMKV */,
+				C9F01D010000000000000002 /* ZIPFoundation */,
+				C9F01D010000000000000003 /* Sentry */,
+			);
 			productName = PiPixiv;
 			productReference = 1AC48DF89C56FF002CE5A60C /* PiPixiv.app */;
 			productType = "com.apple.product-type.application";
@@ -752,6 +738,11 @@
 			);
 			mainGroup = 13FB1504F13FA0729B060EA4;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B9F01D010000000000000001 /* XCRemoteSwiftPackageReference "MMKV" */,
+				B9F01D010000000000000002 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				B9F01D010000000000000003 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 82B5335CC846DD695CF9A3C7 /* Products */;
 			projectDirPath = "";
@@ -773,26 +764,42 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		8C7ED8E2DAAC34B8B13C28B9 /* [CP] Copy Pods Resources */ = {
+		00263CD53D7D91F22EB07F6C /* Embed Swift Export */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PiPixiv/Pods-PiPixiv-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			inputPaths = (
 			);
-			name = "[CP] Copy Pods Resources";
+			name = "Embed Swift Export";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PiPixiv/Pods-PiPixiv-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PiPixiv/Pods-PiPixiv-resources.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\nexport JAVA_TOOL_OPTIONS=\"${JAVA_TOOL_OPTIONS:-} -Dide.propagate.context=false\"\ncd \"$SRCROOT/..\"\n./gradlew --no-daemon -Dide.propagate.context=false :iosExport:embedSwiftExportForXcode -i\n";
+		};
+		34EAF2DA025B484D94F258C5 /* Kotzilla Dsym */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Kotzilla Dsym";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# KOTZILLA_SCRIPT_VERSION=10\nset -e\nM=$BUILT_PRODUCTS_DIR/$PRODUCT_NAME.app/kotzilla-debug\n[ \"$CONFIGURATION\" = Release ] && rm -f \"$M\" 2>/dev/null || touch \"$M\" 2>/dev/null\n[ -z \"$DWARF_DSYM_FOLDER_PATH\" ] && exit 0\ncd \"$SRCROOT/..\"\nif [ ! -x \"./gradlew\" ]; then\n  echo \"[Kotzilla] Expected executable gradlew at $(pwd)/gradlew. Re-run ./gradlew setupKotzillaXcode after moving the Xcode project.\"\n  exit 0\nfi\n./gradlew ':common:analytics-default:uploadDsymFile' --dsymPath=\"$DWARF_DSYM_FOLDER_PATH\"\n";
 		};
 		C0962F912F161D1800594D9A /* Upload DSYM */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -813,49 +820,6 @@
 			shellPath = /bin/sh;
 			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\nif which sentry-cli >/dev/null; then\nexport SENTRY_ORG=pipixiv\nexport SENTRY_PROJECT=pipixiv\n\nERROR=$(sentry-cli debug-files upload \\\n\"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\nif [ ! $? -eq 0 ]; then\necho \"warning: sentry-cli - $ERROR\"\nfi\nelse\necho \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
 		};
-		C92FA5578BDA7EF5A40B2B40 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PiPixiv/Pods-PiPixiv-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PiPixiv/Pods-PiPixiv-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PiPixiv/Pods-PiPixiv-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		CA900429C41C014157108DC9 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-PiPixiv-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -871,7 +835,6 @@
 /* Begin XCBuildConfiguration section */
 		519592D01D29DC3818146A6B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F4B6C839C2B68F70A6BE7B25 /* Pods-PiPixiv.release.xcconfig */;
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -890,7 +853,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -951,7 +914,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -1016,7 +979,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -1029,7 +992,6 @@
 		};
 		C510B83DF99DF05F94B59688 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 397C61C4FA01D881152B08E7 /* Pods-PiPixiv.debug.xcconfig */;
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1048,7 +1010,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1082,6 +1044,51 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B9F01D010000000000000001 /* XCRemoteSwiftPackageReference "MMKV" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Tencent/MMKV.git";
+			requirement = {
+				kind = exactVersion;
+				version = 2.4.1;
+			};
+		};
+		B9F01D010000000000000002 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+		};
+		B9F01D010000000000000003 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
+			requirement = {
+				kind = exactVersion;
+				version = 8.58.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C9F01D010000000000000001 /* MMKV */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B9F01D010000000000000001 /* XCRemoteSwiftPackageReference "MMKV" */;
+			productName = MMKV;
+		};
+		C9F01D010000000000000002 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B9F01D010000000000000002 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+		C9F01D010000000000000003 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B9F01D010000000000000003 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4A5E5E1D683F7C51CAF044AC /* Project object */;
 }

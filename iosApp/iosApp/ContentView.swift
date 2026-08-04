@@ -1,10 +1,10 @@
 import UIKit
 import SwiftUI
-import ComposeApp
+import PiPixivKit
 
 struct ComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController()
+        PiPixiv.shared.makeMainViewController()
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
@@ -16,6 +16,4 @@ struct ContentView: View {
             .ignoresSafeArea()
     }
 }
-
-
 

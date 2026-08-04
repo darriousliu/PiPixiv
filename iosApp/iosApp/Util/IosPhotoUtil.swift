@@ -1,15 +1,16 @@
 import Foundation
-import ComposeApp
+import KotlinRuntime
+import PiPixivPlatform
 import Photos
 
-class IosPhotoUtil: PhotoUtil {
+final class IosPhotoUtil: util.PhotoUtilBridge {
     static let shared = IosPhotoUtil()
-    let albumName = "PiPixiv"
+    private let albumName = "PiPixiv"
 
-    func saveToAlbum(fileUri: URL, callback: any KotlinSuspendFunction1) async throws {
-        if !(fileUri.isFileURL && FileManager.default.fileExists(atPath: fileUri.path)) {
-            try await callback.invoke(p1: nil)
-            return
+    override func saveToAlbumInSwift(fileUri: NSURL) async throws -> String? {
+        let fileURL = fileUri as URL
+        if !(fileURL.isFileURL && FileManager.default.fileExists(atPath: fileURL.path)) {
+            return nil
         }
         // 2) 权限：只在首次（notDetermined）时触发系统授权弹窗
         let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
@@ -19,25 +20,20 @@ class IosPhotoUtil: PhotoUtil {
         case .notDetermined:
             let auth = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
             guard auth == .authorized || auth == .limited else {
-                try await callback.invoke(p1: nil)
-                return
+                return nil
             }
         default:
-            try await callback.invoke(p1: nil)
-            return
+            return nil
         }
         // 3) 执行保存事务：创建 Asset + 创建/获取 Album + 加入 Album
         do {
             if let albumId = try await getOrCreateAlbumLocalIdentifier(named: self.albumName) {
-                let localId = try await performSave(fileURL: fileUri, albumLocalIdentifier: albumId)
-                try await callback.invoke(p1: localId)
+                return try await performSave(fileURL: fileURL, albumLocalIdentifier: albumId)
             } else {
-                try await callback.invoke(p1: nil)
+                return nil
             }
-            return
         } catch {
-            try await callback.invoke(p1: nil)
-            return
+            return nil
         }
     }
 

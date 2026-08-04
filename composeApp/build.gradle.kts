@@ -6,7 +6,6 @@ import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
 plugins {
     id("pixiv.multiplatform.compose")
     alias(composes.plugins.composeHotReload)
-    alias(kotlinx.plugins.native.cocoapods)
 }
 
 val desktopOsName = System.getProperty("os.name").toString()
@@ -71,18 +70,6 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
-    cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        version = "1.0"
-        ios.deploymentTarget = "17.0"
-        framework {
-            baseName = "ComposeApp"
-            isStatic = true
-            export(project(":common:core"))
-        }
-    }
-
     jvm()
 
     sourceSets {
@@ -95,7 +82,7 @@ kotlin {
                 implementation(project(":common:network"))
                 implementation(project(":common:repository"))
                 implementation(project(":common:ui"))
-                api(project(":common:core"))
+                implementation(project(":common:core"))
                 rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
                     implementation(project(":feature:${it.name}"))
                 }
@@ -242,7 +229,7 @@ fun ipaArguments(
 ): Array<String> {
     return arrayOf(
         "xcodebuild",
-        "-workspace", "PiPixiv.xcworkspace",
+        "-project", "PiPixiv.xcodeproj",
         "-scheme", "PiPixiv",
         "-destination", destination,
         "-sdk", sdk,
@@ -253,10 +240,9 @@ fun ipaArguments(
 
 val buildReleaseArchive = tasks.register("buildReleaseArchive", Exec::class) {
     group = "build"
-    description = "Builds the iOS framework for Release"
+    description = "Archives the iOS app with the Swift Export package"
     workingDir(rootDir.resolve("iosApp"))
 
-    dependsOn(":composeApp:linkPodReleaseFrameworkIosArm64")
     val output = layout.buildDirectory.dir("archives/release/PiPixiv.xcarchive")
     outputs.dir(output)
     commandLine(

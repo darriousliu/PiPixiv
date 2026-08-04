@@ -27,6 +27,7 @@ kotlin {
         jvmMain.get().dependsOn(androidJvmMain)
 
         commonMain.dependencies {
+            api(project(":common:platform-api"))
             if (project.findProperty("applyFirebasePlugins") == "true") {
                 api(project(":common:analytics-default"))
             } else {

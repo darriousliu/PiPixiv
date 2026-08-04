@@ -1,15 +1,13 @@
 import SwiftUI
-import ComposeApp
+import PiPixivKit
 
 @main
 struct iOSApp: App {
     init() {
-        Initialization.shared.doInitKoin { app in
-            app.doInitIOSKoin(di: [
-                IosZipUtil.shared,
-                IosPhotoUtil.shared
-            ])
-        }
+        PiPixiv.shared.initialize(
+            zipUtil: IosZipUtil.shared,
+            photoUtil: IosPhotoUtil.shared
+        )
     }
 
     var body: some Scene {

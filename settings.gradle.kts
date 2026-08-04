@@ -49,6 +49,7 @@ plugins {
 rootProject.name = "PiPixiv"
 include(":app")
 include(":composeApp")
+include(":iosExport")
 include(":lib_strings")
 include(":baselineprofile")
 
