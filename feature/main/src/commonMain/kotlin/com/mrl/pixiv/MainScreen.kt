@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -72,10 +73,16 @@ fun MainScreen(
                             BadgedBox(
                                 badge = { Badge() }
                             ) {
-                                screen.icon()
+                                Icon(
+                                    imageVector = screen.icon,
+                                    contentDescription = null
+                                )
                             }
                         } else {
-                            screen.icon()
+                            Icon(
+                                imageVector = screen.icon,
+                                contentDescription = null
+                            )
                         }
                     },
                     label = {

@@ -6,9 +6,8 @@ import androidx.compose.material.icons.rounded.Equalizer
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Type
@@ -168,56 +167,31 @@ sealed class Destination : NavKey {
 @Serializable
 sealed class MainPage(
     @Transient
-    val icon: @Composable (() -> Unit) = {},
+    val icon: ImageVector = Icons.Rounded.Home,
 ) {
     @Serializable
     data object Home : MainPage(
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Home,
-                contentDescription = null,
-            )
-        }
+        icon = Icons.Rounded.Home
     )
 
     @Serializable
     data object Ranking : MainPage(
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Equalizer,
-                contentDescription = null,
-            )
-        }
+        icon = Icons.Rounded.Equalizer
     )
 
     @Serializable
     data object Latest : MainPage(
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Favorite,
-                contentDescription = null,
-            )
-        }
+        icon = Icons.Rounded.Favorite
     )
 
     @Serializable
     data object Search : MainPage(
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.Search,
-                contentDescription = null,
-            )
-        }
+        icon = Icons.Rounded.Search
     )
 
     @Serializable
     data object Profile : MainPage(
-        icon = {
-            Icon(
-                imageVector = Icons.Rounded.AccountCircle,
-                contentDescription = null,
-            )
-        }
+        icon = Icons.Rounded.AccountCircle
     )
 }
 
