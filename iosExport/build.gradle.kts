@@ -5,6 +5,8 @@
 
 plugins {
     alias(kotlinx.plugins.kotlinMultiplatform)
+    alias(kotlinx.plugins.compose.compiler)
+    alias(composes.plugins.composeMultiplatform)
 }
 
 kotlin {
