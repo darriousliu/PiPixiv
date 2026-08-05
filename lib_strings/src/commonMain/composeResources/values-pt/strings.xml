@@ -311,6 +311,10 @@
     <string name="show_novel">Mostrar este romance</string>
     <string name="block_tag_as_regex">Corresponder com expressão regular</string>
     <string name="browsing_setting">Configurações de navegação</string>
+    <string name="privacy_setting">Configurações de privacidade</string>
+    <string name="read_clipboard_on_search">Ler a área de transferência ao abrir a busca</string>
+    <string name="read_clipboard_on_search_desc">Quando ativado, a tela de busca lê a área de transferência e detecta links do Pixiv</string>
+    <string name="select_pixiv_link">Escolha um link do Pixiv para abrir</string>
     <string name="search_setting">Configurações de pesquisa</string>
     <string name="default_search_target">Alvo de pesquisa padrão</string>
     <string name="default_search_sort">Ordenação de pesquisa padrão</string>

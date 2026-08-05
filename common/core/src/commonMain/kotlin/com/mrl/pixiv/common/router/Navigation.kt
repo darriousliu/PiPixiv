@@ -84,6 +84,9 @@ sealed class Destination : NavKey {
     data object HistorySetting : Destination()
 
     @Serializable
+    data object PrivacySetting : Destination()
+
+    @Serializable
     data object FileNameFormat : Destination()
 
     @Serializable

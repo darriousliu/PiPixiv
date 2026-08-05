@@ -311,6 +311,10 @@
     <string name="show_novel">顯示這部小說</string>
     <string name="block_tag_as_regex">以正則表達式比對</string>
     <string name="browsing_setting">瀏覽設定</string>
+    <string name="privacy_setting">隱私設定</string>
+    <string name="read_clipboard_on_search">進入搜尋時讀取剪貼簿</string>
+    <string name="read_clipboard_on_search_desc">開啟後，進入搜尋頁面時讀取剪貼簿並辨識其中的 Pixiv 連結</string>
+    <string name="select_pixiv_link">選擇要開啟的 Pixiv 連結</string>
     <string name="search_setting">搜尋設定</string>
     <string name="default_search_target">預設搜尋範圍</string>
     <string name="default_search_sort">預設搜尋排序</string>

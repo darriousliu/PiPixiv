@@ -10,16 +10,20 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -58,17 +63,25 @@ import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.router.DestinationsDeepLink
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.router.PixivLinkTarget
 import com.mrl.pixiv.common.util.DebounceUtil
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.readTextFromClipboard
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.main.components.ViewModeToggleButton
+import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.clear
 import com.mrl.pixiv.strings.enter_keywords
 import com.mrl.pixiv.strings.find_for
 import com.mrl.pixiv.strings.id_search
+import com.mrl.pixiv.strings.illust
+import com.mrl.pixiv.strings.novel
 import com.mrl.pixiv.strings.search_history
+import com.mrl.pixiv.strings.select_pixiv_link
+import com.mrl.pixiv.strings.users
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -83,6 +96,8 @@ fun SearchScreen(
     val dispatch = viewModel::dispatch
     val state = viewModel.asState()
     val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
+    val readClipboardOnSearch by SettingRepository.userPreferenceFlow
+        .collectAsStateWithLifecycle { readClipboardOnSearch }
     val searchHistory by remember(appViewMode) {
         when (appViewMode) {
             AppViewMode.ILLUST -> SearchRepository.searchHistoryFlow.map { it.searchHistoryList }
@@ -101,17 +116,59 @@ fun SearchScreen(
         }
     }.collectAsStateWithLifecycle(emptyList())
     var textState by remember { mutableStateOf(TextFieldValue(viewModel.searchWords)) }
-    val focusRequester = remember { FocusRequester() }
-    LifecycleResumeEffect(Unit) {
-        try {
-            focusRequester.requestFocus()
-        } catch (_: Exception) {
+    var pendingLinks by remember { mutableStateOf<List<PixivLinkTarget>>(emptyList()) }
+    fun handlePixivLinks(
+        text: String,
+        alwaysShowSelection: Boolean = false,
+    ): Boolean {
+        return when (val action = resolvePixivLinkSearchAction(text, alwaysShowSelection)) {
+            PixivLinkSearchAction.NoMatch -> false
+            is PixivLinkSearchAction.Open -> {
+                navigationManager.navigate(action.link.toDestination())
+                true
+            }
+
+            is PixivLinkSearchAction.ShowSelection -> {
+                pendingLinks = action.links
+                true
+            }
         }
-        textState = textState.copy(selection = TextRange(textState.text.length))
+    }
+
+    val focusRequester = remember { FocusRequester() }
+    LifecycleResumeEffect(readClipboardOnSearch) {
+        val handledClipboardLink = if (readClipboardOnSearch) {
+            val clipboardText = readTextFromClipboard().orEmpty()
+            viewModel.isClipboardTextChanged(clipboardText) && handlePixivLinks(
+                text = clipboardText,
+                alwaysShowSelection = true,
+            )
+        } else {
+            false
+        }
+        if (!handledClipboardLink) {
+            try {
+                focusRequester.requestFocus()
+            } catch (_: Exception) {
+            }
+            textState = textState.copy(selection = TextRange(textState.text.length))
+        }
         onPauseOrDispose { }
     }
     val softwareKeyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+
+    if (pendingLinks.isNotEmpty()) {
+        PixivLinkSelectionDialog(
+            links = pendingLinks,
+            onSelect = { link ->
+                pendingLinks = emptyList()
+                navigationManager.navigate(link.toDestination())
+            },
+            onDismiss = { pendingLinks = emptyList() },
+        )
+    }
+
     Scaffold(
         modifier = modifier.clickable(
             interactionSource = remember { MutableInteractionSource() },
@@ -136,7 +193,11 @@ fun SearchScreen(
                     }
                 },
                 onBack = { navigationManager.popBackStack() },
-                onSearch = {
+                onSearch = search@{
+                    if (handlePixivLinks(textState.text)) {
+                        focusRequester.freeFocus()
+                        return@search
+                    }
                     if (state.isIdSearch) {
                         viewModel.addSearchIdHistory(textState.text)
                     } else {
@@ -307,6 +368,45 @@ fun SearchScreen(
 }
 
 @Composable
+private fun PixivLinkSelectionDialog(
+    links: List<PixivLinkTarget>,
+    onSelect: (PixivLinkTarget) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(RStrings.select_pixiv_link)) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 400.dp)
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                links.forEach { link ->
+                    val type = when (link) {
+                        is PixivLinkTarget.Illust -> stringResource(RStrings.illust)
+                        is PixivLinkTarget.Novel -> stringResource(RStrings.novel)
+                        is PixivLinkTarget.User -> stringResource(RStrings.users)
+                    }
+                    ListItem(
+                        headlineContent = { Text(text = "$type #${link.id}") },
+                        supportingContent = { Text(text = link.url) },
+                        modifier = Modifier.throttleClick(indication = ripple()) {
+                            onSelect(link)
+                        },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(RStrings.cancel))
+            }
+        },
+    )
+}
+
+@Composable
 private fun SearchScreenAppBar(
     textState: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
@@ -385,3 +485,21 @@ private fun SearchScreenAppBar(
 }
 
 internal fun shouldShowSearchInputClearIcon(input: String): Boolean = input.isNotEmpty()
+
+internal fun resolvePixivLinkSearchAction(
+    text: String,
+    alwaysShowSelection: Boolean,
+): PixivLinkSearchAction {
+    val links = DestinationsDeepLink.findLinks(text)
+    return when {
+        links.isEmpty() -> PixivLinkSearchAction.NoMatch
+        alwaysShowSelection || links.size > 1 -> PixivLinkSearchAction.ShowSelection(links)
+        else -> PixivLinkSearchAction.Open(links.single())
+    }
+}
+
+internal sealed interface PixivLinkSearchAction {
+    data object NoMatch : PixivLinkSearchAction
+    data class Open(val link: PixivLinkTarget) : PixivLinkSearchAction
+    data class ShowSelection(val links: List<PixivLinkTarget>) : PixivLinkSearchAction
+}

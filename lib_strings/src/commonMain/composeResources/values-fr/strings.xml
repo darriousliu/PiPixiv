@@ -311,6 +311,10 @@
     <string name="show_novel">Afficher ce roman</string>
     <string name="block_tag_as_regex">Faire correspondre via une expression régulière</string>
     <string name="browsing_setting">Paramètres de navigation</string>
+    <string name="privacy_setting">Paramètres de confidentialité</string>
+    <string name="read_clipboard_on_search">Lire le presse-papiers à l’ouverture de la recherche</string>
+    <string name="read_clipboard_on_search_desc">Lorsque cette option est activée, l’écran de recherche lit le presse-papiers et y détecte les liens Pixiv</string>
+    <string name="select_pixiv_link">Choisir un lien Pixiv à ouvrir</string>
     <string name="search_setting">Paramètres de recherche</string>
     <string name="default_search_target">Cible de recherche par défaut</string>
     <string name="default_search_sort">Tri de recherche par défaut</string>

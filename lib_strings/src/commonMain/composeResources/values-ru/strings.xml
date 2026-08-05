@@ -311,6 +311,10 @@
     <string name="show_novel">Показать эту новеллу</string>
     <string name="block_tag_as_regex">Сопоставлять по регулярному выражению</string>
     <string name="browsing_setting">Настройки просмотра</string>
+    <string name="privacy_setting">Настройки конфиденциальности</string>
+    <string name="read_clipboard_on_search">Читать буфер обмена при открытии поиска</string>
+    <string name="read_clipboard_on_search_desc">Если включено, экран поиска читает буфер обмена и находит в нём ссылки Pixiv</string>
+    <string name="select_pixiv_link">Выберите ссылку Pixiv для открытия</string>
     <string name="search_setting">Настройки поиска</string>
     <string name="default_search_target">Область поиска по умолчанию</string>
     <string name="default_search_sort">Сортировка поиска по умолчанию</string>

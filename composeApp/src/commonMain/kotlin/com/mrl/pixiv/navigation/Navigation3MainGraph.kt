@@ -64,6 +64,7 @@ import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.BrowsingSettingScreen
 import com.mrl.pixiv.setting.FileNameFormatScreen
 import com.mrl.pixiv.setting.HistorySettingScreen
+import com.mrl.pixiv.setting.PrivacySettingScreen
 import com.mrl.pixiv.setting.SearchSettingScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
@@ -225,6 +226,12 @@ fun Navigation3MainGraph(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
                         HistorySettingScreen()
+                    }
+
+                    entry<Destination.PrivacySetting>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        PrivacySettingScreen()
                     }
 
                     // 保存格式设置

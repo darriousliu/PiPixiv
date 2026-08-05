@@ -311,6 +311,10 @@
     <string name="show_novel">Show this novel</string>
     <string name="block_tag_as_regex">Match using regex</string>
     <string name="browsing_setting">Browsing Settings</string>
+    <string name="privacy_setting">Privacy Settings</string>
+    <string name="read_clipboard_on_search">Read clipboard when opening search</string>
+    <string name="read_clipboard_on_search_desc">When enabled, the search screen reads the clipboard and detects Pixiv links in it</string>
+    <string name="select_pixiv_link">Choose a Pixiv link to open</string>
     <string name="search_setting">Search Settings</string>
     <string name="default_search_target">Default Search Target</string>
     <string name="default_search_sort">Default Search Sort</string>

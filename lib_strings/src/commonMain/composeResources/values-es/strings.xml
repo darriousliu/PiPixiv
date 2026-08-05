@@ -311,6 +311,10 @@
     <string name="show_novel">Mostrar esta novela</string>
     <string name="block_tag_as_regex">Coincidir mediante expresión regular</string>
     <string name="browsing_setting">Configuración de navegación</string>
+    <string name="privacy_setting">Ajustes de privacidad</string>
+    <string name="read_clipboard_on_search">Leer el portapapeles al abrir la búsqueda</string>
+    <string name="read_clipboard_on_search_desc">Al activarlo, la pantalla de búsqueda lee el portapapeles y detecta los enlaces de Pixiv</string>
+    <string name="select_pixiv_link">Elige un enlace de Pixiv para abrir</string>
     <string name="search_setting">Configuración de búsqueda</string>
     <string name="default_search_target">Objetivo de búsqueda predeterminado</string>
     <string name="default_search_sort">Orden de búsqueda predeterminado</string>

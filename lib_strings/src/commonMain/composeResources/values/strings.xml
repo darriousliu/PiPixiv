@@ -322,6 +322,10 @@
     <string name="show_novel">显示该小说</string>
     <string name="block_tag_as_regex">按正则表达式匹配</string>
     <string name="browsing_setting">浏览设置</string>
+    <string name="privacy_setting">隐私设置</string>
+    <string name="read_clipboard_on_search">进入搜索时读取剪切板</string>
+    <string name="read_clipboard_on_search_desc">开启后，进入搜索页时读取剪切板并识别其中的 Pixiv 链接</string>
+    <string name="select_pixiv_link">选择要打开的 Pixiv 链接</string>
     <string name="search_setting">搜索设置</string>
     <string name="default_search_target">默认搜索范围</string>
     <string name="default_search_sort">默认搜索排序</string>

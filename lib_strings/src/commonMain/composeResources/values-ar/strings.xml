@@ -311,6 +311,10 @@
     <string name="show_novel">إظهار هذه الرواية</string>
     <string name="block_tag_as_regex">مطابقة باستخدام تعبير نمطي</string>
     <string name="browsing_setting">إعدادات التصفح</string>
+    <string name="privacy_setting">إعدادات الخصوصية</string>
+    <string name="read_clipboard_on_search">قراءة الحافظة عند فتح البحث</string>
+    <string name="read_clipboard_on_search_desc">عند التفعيل، تقرأ شاشة البحث الحافظة وتكتشف روابط Pixiv الموجودة فيها</string>
+    <string name="select_pixiv_link">اختر رابط Pixiv لفتحه</string>
     <string name="search_setting">إعدادات البحث</string>
     <string name="default_search_target">هدف البحث الافتراضي</string>
     <string name="default_search_sort">ترتيب البحث الافتراضي</string>

@@ -311,6 +311,10 @@
     <string name="show_novel">この小説を表示</string>
     <string name="block_tag_as_regex">正規表現でマッチ</string>
     <string name="browsing_setting">閲覧設定</string>
+    <string name="privacy_setting">プライバシー設定</string>
+    <string name="read_clipboard_on_search">検索画面を開くときにクリップボードを読み取る</string>
+    <string name="read_clipboard_on_search_desc">有効にすると、検索画面を開いたときにクリップボード内の Pixiv リンクを検出します</string>
+    <string name="select_pixiv_link">開く Pixiv リンクを選択</string>
     <string name="search_setting">検索設定</string>
     <string name="default_search_target">デフォルトの検索対象</string>
     <string name="default_search_sort">デフォルトの検索順</string>

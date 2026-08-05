@@ -199,6 +199,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.HistorySetting)
     }
 
+    fun navigateToPrivacySettingScreen() {
+        backStack.navigate(route = Destination.PrivacySetting)
+    }
+
     fun navigateToFileNameFormatScreen() {
         backStack.navigate(route = Destination.FileNameFormat)
     }

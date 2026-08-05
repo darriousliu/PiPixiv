@@ -3,6 +3,7 @@ package com.mrl.pixiv.setting
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.rounded.FilterAlt
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Tag
 import androidx.compose.material.icons.rounded.TouchApp
+import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -35,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -60,6 +63,9 @@ import com.mrl.pixiv.strings.preview_image_quality
 import com.mrl.pixiv.strings.preview_image_quality_high
 import com.mrl.pixiv.strings.preview_image_quality_medium
 import com.mrl.pixiv.strings.preview_image_quality_original
+import com.mrl.pixiv.strings.span_count_adaptive
+import com.mrl.pixiv.strings.span_count_landscape
+import com.mrl.pixiv.strings.span_count_portrait
 import com.mrl.pixiv.strings.tap_image_to_open_full_resolution_preview
 import com.mrl.pixiv.strings.tap_image_to_open_full_resolution_preview_desc
 import org.jetbrains.compose.resources.stringResource
@@ -98,6 +104,16 @@ fun BrowsingSettingScreen(
                 .imePadding()
                 .padding(horizontal = 8.dp)
         ) {
+            SpanCountSetting(
+                title = stringResource(RStrings.span_count_portrait),
+                currentSpanCount = userPreference.spanCountPortrait,
+                onSpanCountChange = SettingRepository::setSpanCountPortrait,
+            )
+            SpanCountSetting(
+                title = stringResource(RStrings.span_count_landscape),
+                currentSpanCount = userPreference.spanCountLandscape,
+                onSpanCountChange = SettingRepository::setSpanCountLandscape,
+            )
             PreviewImageQualitySetting(
                 selectedQuality = browsingSettings.previewImageQuality,
                 onQualityChange = { quality ->
@@ -253,6 +269,55 @@ fun BrowsingSettingScreen(
             }
         }
     }
+}
+
+@Composable
+private fun SpanCountSetting(
+    title: String,
+    currentSpanCount: Int,
+    onSpanCountChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val options = listOf(
+        2 to "2",
+        3 to "3",
+        4 to "4",
+        -1 to stringResource(RStrings.span_count_adaptive),
+    )
+    val currentLabel = options.firstOrNull { it.first == currentSpanCount }?.second
+        ?: options.last().second
+    var expanded by remember { mutableStateOf(false) }
+
+    ListItem(
+        headlineContent = { Text(text = title) },
+        modifier = modifier,
+        leadingContent = { Icon(Icons.Rounded.ViewModule, contentDescription = null) },
+        trailingContent = {
+            DropDownSelector(
+                modifier = Modifier.throttleClick { expanded = !expanded },
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                current = currentLabel,
+            ) {
+                options.forEach { (count, label) ->
+                    DropdownMenuItem(
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = label, modifier = Modifier.padding(16.dp))
+                                if (currentSpanCount == count) {
+                                    Icon(Icons.Rounded.Check, contentDescription = null)
+                                }
+                            }
+                        },
+                        onClick = {
+                            onSpanCountChange(count)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        },
+    )
 }
 
 @Composable

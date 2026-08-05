@@ -311,6 +311,10 @@
     <string name="show_novel">इस उपन्यास को दिखाएँ</string>
     <string name="block_tag_as_regex">रेगुलर एक्सप्रेशन से मिलान करें</string>
     <string name="browsing_setting">ब्राउज़िंग सेटिंग्स</string>
+    <string name="privacy_setting">गोपनीयता सेटिंग</string>
+    <string name="read_clipboard_on_search">खोज खोलते समय क्लिपबोर्ड पढ़ें</string>
+    <string name="read_clipboard_on_search_desc">सक्षम होने पर, खोज स्क्रीन क्लिपबोर्ड पढ़ती है और उसमें मौजूद Pixiv लिंक पहचानती है</string>
+    <string name="select_pixiv_link">खोलने के लिए Pixiv लिंक चुनें</string>
     <string name="search_setting">खोज सेटिंग्स</string>
     <string name="default_search_target">डिफ़ॉल्ट खोज लक्ष्य</string>
     <string name="default_search_sort">डिफ़ॉल्ट खोज क्रम</string>

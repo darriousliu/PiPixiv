@@ -93,6 +93,10 @@ object SettingRepository : MMKVUser {
         it.copy(defaultPrivateBookmark = enable)
     }
 
+    fun setReadClipboardOnSearch(enable: Boolean) = userPreference.update {
+        it.copy(readClipboardOnSearch = enable)
+    }
+
     fun setAppViewMode(mode: AppViewMode) = userPreference.update {
         it.copy(appViewMode = mode)
     }
