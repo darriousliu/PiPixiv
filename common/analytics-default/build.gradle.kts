@@ -33,6 +33,7 @@ kotzilla {
     versionName = findProperty("versionName")!!.toString()
     uploadMappingFile = false
     autoAddDependencies = false
+    autoInjectXcodeScript = false
 }
 
 tasks.matching { it.name == "kspCommonMainKotlinMetadata" }.configureEach {
