@@ -259,29 +259,15 @@ jobs:
           echo "$KOTZILLA_SDK_JSON" > common/analytics-default/kotzilla.json
           sed -i '' "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
-      - name: Setup CocoaPods
-        uses: maxim-lobanov/setup-cocoapods@v1
-        with:
-          version: 1.16.1
-
-      - name: Link Dependencies
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: |
-          ./gradlew :composeApp:generateDummyFramework
-          ./gradlew :composeApp:podspec
+      - name: Resolve SwiftPM Dependencies
+        working-directory: iosApp
+        run: xcodebuild -resolvePackageDependencies -project PiPixiv.xcodeproj -scheme PiPixiv
 
       - name: Build iOS IPA
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: |
-          cd iosApp
-          pod install --repo-update
-          cd ..
-          ./gradlew :composeApp:buildReleaseIpa
-          echo "PiPixiv.ipa path: $(pwd)/PiPixiv.ipa"
+        run: ./gradlew :composeApp:buildReleaseIpa
 
       - name: Upload iOS Artifacts
         uses: actions/upload-artifact@v7
