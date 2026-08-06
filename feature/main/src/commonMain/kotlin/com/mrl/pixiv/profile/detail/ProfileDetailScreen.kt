@@ -1,6 +1,7 @@
 package com.mrl.pixiv.profile.detail
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +26,8 @@ import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -48,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -81,6 +85,7 @@ import com.mrl.pixiv.profile.detail.components.IllustWidget
 import com.mrl.pixiv.profile.detail.components.NovelBookmarkWidget
 import com.mrl.pixiv.strings.block_user
 import com.mrl.pixiv.strings.cancel_user_blocked
+import com.mrl.pixiv.strings.copy_to_clipboard
 import com.mrl.pixiv.strings.followed
 import com.mrl.pixiv.strings.ic_profile_premium
 import com.mrl.pixiv.strings.illust_and_manga_liked
@@ -223,10 +228,8 @@ fun ProfileDetailScreen(
                             SelectionContainer {
                                 Text(
                                     text = userInfo.user.name,
-                                    style = TextStyle(
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Medium,
-                                    ),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.SemiBold,
                                 )
                             }
                             if (userInfo.profile.isPremium) {
@@ -249,10 +252,8 @@ fun ProfileDetailScreen(
                                 modifier = Modifier.throttleClick {
                                     navigationManager.navigateToFollowingScreen(userInfo.user.id)
                                 },
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium,
-                                )
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
                         //id点击可复制
@@ -263,21 +264,20 @@ fun ProfileDetailScreen(
                             SelectionContainer {
                                 Text(
                                     text = "ID: ${userInfo.user.id}",
-                                    style = TextStyle(
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium,
-                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             Icon(
                                 imageVector = Icons.Rounded.ContentCopy,
-                                contentDescription = null,
+                                contentDescription = stringResource(RStrings.copy_to_clipboard),
                                 modifier = Modifier
-                                    .size(30.dp)
-                                    .throttleClick(indication = ripple(radius = 15.dp)) {
+                                    .size(40.dp)
+                                    .throttleClick(indication = ripple(radius = 20.dp)) {
                                         copyToClipboard(userInfo.user.id.toString())
                                     }
-                                    .padding(5.dp)
+                                    .padding(10.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         // 个人简介
@@ -291,10 +291,8 @@ fun ProfileDetailScreen(
                             SelectionContainer {
                                 Text(
                                     text = comment,
-                                    style = TextStyle(
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium,
-                                    ),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
@@ -379,166 +377,153 @@ fun ProfileDetailScreen(
     }
 }
 
+private data class ProfileDetailItem(
+    val label: String,
+    val value: String,
+)
+
 @Composable
 private fun ProfileDetails(
     userInfo: UserDetailResp,
     modifier: Modifier = Modifier,
 ) {
     val profile = userInfo.profile
-    val hasProfileDetails = userInfo.user.account.isNotEmpty() ||
-            profile.webpage.isNotEmpty() ||
-            profile.birth.isNotEmpty() ||
-            profile.region.isNotEmpty() ||
-            profile.job.isNotEmpty() ||
-            profile.twitterAccount.isNotEmpty() ||
-            profile.twitterURL.isNotEmpty() ||
-            profile.pawooURL.isNotEmpty()
-    val workspace = userInfo.workspace?.takeIf {
-        it.workspaceImageURL.isNotEmpty() ||
-                it.pc.isNotEmpty() ||
-                it.monitor.isNotEmpty() ||
-                it.tool.isNotEmpty() ||
-                it.scanner.isNotEmpty() ||
-                it.tablet.isNotEmpty() ||
-                it.mouse.isNotEmpty() ||
-                it.printer.isNotEmpty() ||
-                it.desktop.isNotEmpty() ||
-                it.music.isNotEmpty() ||
-                it.desk.isNotEmpty() ||
-                it.chair.isNotEmpty() ||
-                it.comment.isNotEmpty()
+    val workspace = userInfo.workspace
+    val profileDetails = listOf(
+        ProfileDetailItem(stringResource(RStrings.profile_account), userInfo.user.account),
+        ProfileDetailItem(stringResource(RStrings.profile_webpage), profile.webpage),
+        ProfileDetailItem(stringResource(RStrings.profile_birthday), profile.birth),
+        ProfileDetailItem(stringResource(RStrings.profile_region), profile.region),
+        ProfileDetailItem(stringResource(RStrings.profile_job), profile.job),
+        ProfileDetailItem(stringResource(RStrings.profile_twitter), profile.twitterAccount),
+        ProfileDetailItem(stringResource(RStrings.profile_twitter_url), profile.twitterURL),
+        ProfileDetailItem(stringResource(RStrings.profile_pawoo), profile.pawooURL),
+    ).filter { it.value.isNotEmpty() }
+    val workspaceDetails = if (workspace == null) {
+        emptyList()
+    } else {
+        listOf(
+            ProfileDetailItem(stringResource(RStrings.profile_pc), workspace.pc),
+            ProfileDetailItem(stringResource(RStrings.profile_monitor), workspace.monitor),
+            ProfileDetailItem(stringResource(RStrings.profile_tool), workspace.tool),
+            ProfileDetailItem(stringResource(RStrings.profile_scanner), workspace.scanner),
+            ProfileDetailItem(stringResource(RStrings.profile_tablet), workspace.tablet),
+            ProfileDetailItem(stringResource(RStrings.profile_mouse), workspace.mouse),
+            ProfileDetailItem(stringResource(RStrings.profile_printer), workspace.printer),
+            ProfileDetailItem(stringResource(RStrings.profile_desktop), workspace.desktop),
+            ProfileDetailItem(stringResource(RStrings.profile_music), workspace.music),
+            ProfileDetailItem(stringResource(RStrings.profile_desk), workspace.desk),
+            ProfileDetailItem(stringResource(RStrings.profile_chair), workspace.chair),
+            ProfileDetailItem(
+                stringResource(RStrings.profile_workspace_comment),
+                workspace.comment,
+            ),
+        ).filter { it.value.isNotEmpty() }
     }
-    val hasWorkspaceDetails = workspace != null
+    val workspaceImageUrl = workspace?.workspaceImageURL.orEmpty()
 
-    if (!hasProfileDetails && !hasWorkspaceDetails) return
+    if (profileDetails.isEmpty() && workspaceDetails.isEmpty() && workspaceImageUrl.isEmpty()) return
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(top = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        if (hasProfileDetails) {
-            SelectionContainer {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        text = stringResource(RStrings.profile_details),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                    )
-                    if (userInfo.user.account.isNotEmpty()) {
-                        ProfileDetailRow(
-                            label = stringResource(RStrings.profile_account),
-                            value = userInfo.user.account,
-                        )
-                    }
-                    if (profile.webpage.isNotEmpty()) {
-                        ProfileDetailRow(
-                            label = stringResource(RStrings.profile_webpage),
-                            value = profile.webpage,
-                        )
-                    }
-                    if (profile.birth.isNotEmpty()) {
-                        ProfileDetailRow(
-                            label = stringResource(RStrings.profile_birthday),
-                            value = profile.birth,
-                        )
-                    }
-                    if (profile.region.isNotEmpty()) {
-                        ProfileDetailRow(
-                            label = stringResource(RStrings.profile_region),
-                            value = profile.region,
-                        )
-                    }
-                    if (profile.job.isNotEmpty()) {
-                        ProfileDetailRow(
-                            label = stringResource(RStrings.profile_job),
-                            value = profile.job,
-                        )
-                    }
-                    if (profile.twitterAccount.isNotEmpty()) {
-                        ProfileDetailRow(
-                            label = stringResource(RStrings.profile_twitter),
-                            value = profile.twitterAccount,
-                        )
-                    }
-                    if (profile.twitterURL.isNotEmpty()) {
-                        ProfileDetailRow(
-                            label = stringResource(RStrings.profile_twitter_url),
-                            value = profile.twitterURL,
-                        )
-                    }
-                    if (profile.pawooURL.isNotEmpty()) {
-                        ProfileDetailRow(
-                            label = stringResource(RStrings.profile_pawoo),
-                            value = profile.pawooURL,
-                        )
-                    }
-                }
-            }
+        if (profileDetails.isNotEmpty()) {
+            ProfileDetailSection(
+                title = stringResource(RStrings.profile_details),
+                details = profileDetails,
+            )
         }
 
-        if (workspace != null) {
-            if (hasProfileDetails) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            }
-            Text(
-                text = stringResource(RStrings.profile_workspace),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
+        if (workspaceDetails.isNotEmpty() || workspaceImageUrl.isNotEmpty()) {
+            ProfileDetailSection(
+                title = stringResource(RStrings.profile_workspace),
+                details = workspaceDetails,
+                imageUrl = workspaceImageUrl,
             )
-            if (workspace.workspaceImageURL.isNotEmpty()) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalPlatformContext.current)
-                        .data(workspace.workspaceImageURL)
-                        .allowRgb565(true)
-                        .build(),
-                    contentDescription = stringResource(RStrings.profile_workspace),
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 320.dp),
-                )
-            }
-            SelectionContainer {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_pc), workspace.pc)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_monitor), workspace.monitor)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_tool), workspace.tool)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_scanner), workspace.scanner)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_tablet), workspace.tablet)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_mouse), workspace.mouse)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_printer), workspace.printer)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_desktop), workspace.desktop)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_music), workspace.music)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_desk), workspace.desk)
-                    ProfileDetailRowIfNotEmpty(stringResource(RStrings.profile_chair), workspace.chair)
-                    ProfileDetailRowIfNotEmpty(
-                        stringResource(RStrings.profile_workspace_comment),
-                        workspace.comment,
-                    )
-                }
-            }
         }
     }
 }
 
 @Composable
-private fun ProfileDetailRowIfNotEmpty(label: String, value: String) {
-    if (value.isNotEmpty()) {
-        ProfileDetailRow(label = label, value = value)
+private fun ProfileDetailSection(
+    title: String,
+    details: List<ProfileDetailItem>,
+    modifier: Modifier = Modifier,
+    imageUrl: String = "",
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = title,
+            modifier = Modifier.padding(horizontal = 4.dp),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            ),
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                if (imageUrl.isNotEmpty()) {
+                    val imageShape = MaterialTheme.shapes.medium
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalPlatformContext.current)
+                            .data(imageUrl)
+                            .allowRgb565(true)
+                            .build(),
+                        contentDescription = title,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 320.dp)
+                            .clip(imageShape)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = imageShape,
+                            ),
+                    )
+                }
+                if (imageUrl.isNotEmpty() && details.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                if (details.isNotEmpty()) {
+                    SelectionContainer {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            details.forEachIndexed { index, detail ->
+                                ProfileDetailRow(
+                                    label = detail.label,
+                                    value = detail.value,
+                                )
+                                if (index < details.lastIndex) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(vertical = 12.dp),
+                                        color = MaterialTheme.colorScheme.outlineVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
 private fun ProfileDetailRow(label: String, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
