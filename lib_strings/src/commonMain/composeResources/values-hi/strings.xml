@@ -373,4 +373,26 @@
     <string name="read_later_status_running">अनुवाद हो रहा है</string>
     <string name="read_later_status_ready">अनुवाद तैयार है</string>
     <string name="read_later_status_failed">अनुवाद विफल</string>
+    <string name="profile_details">प्रोफ़ाइल विवरण</string>
+    <string name="profile_account">खाता</string>
+    <string name="profile_webpage">वेबसाइट</string>
+    <string name="profile_birthday">जन्मदिन</string>
+    <string name="profile_region">क्षेत्र</string>
+    <string name="profile_job">पेशा</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitter लिंक</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">कार्यस्थान</string>
+    <string name="profile_pc">कंप्यूटर</string>
+    <string name="profile_monitor">मॉनिटर</string>
+    <string name="profile_tool">उपकरण</string>
+    <string name="profile_scanner">स्कैनर</string>
+    <string name="profile_tablet">ड्रॉइंग टैबलेट</string>
+    <string name="profile_mouse">माउस</string>
+    <string name="profile_printer">प्रिंटर</string>
+    <string name="profile_desktop">डेस्कटॉप</string>
+    <string name="profile_music">संगीत</string>
+    <string name="profile_desk">मेज़</string>
+    <string name="profile_chair">कुर्सी</string>
+    <string name="profile_workspace_comment">टिप्पणियाँ</string>
 </resources>

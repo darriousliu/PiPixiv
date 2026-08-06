@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -85,6 +86,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.paging.compose.collectAsLazyPagingItems
+import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -191,6 +193,7 @@ fun PictureDeeplinkScreen(
 private const val KEY_UGOIRA = "ugoira"
 private const val KEY_ILLUST_TITLE = "illust_title"
 private const val KEY_ILLUST_DATA = "illust_data"
+private const val KEY_ILLUST_CAPTION = "illust_caption"
 private const val KEY_ILLUST_TAGS = "illust_tags"
 private const val KEY_ILLUST_DIVIDER_1 = "illust_divider_1"
 private const val KEY_ILLUST_AUTHOR = "illust_author"
@@ -546,28 +549,47 @@ internal fun PictureScreen(
             )
         }
         item(key = KEY_ILLUST_DATA) {
-            Row(
-                Modifier.padding(top = 10.dp)
-            ) {
-                Text(
-                    text = convertUtcStringToLocalDateTime(illust.createDate),
-                    modifier = Modifier.padding(start = 20.dp),
-                    style = TextStyle(fontSize = 12.sp),
-                )
-                Text(
-                    text = illust.totalView.toString() + " ${stringResource(RStrings.viewed)}",
-                    Modifier.padding(start = 10.dp),
-                    style = TextStyle(fontSize = 12.sp),
-                )
-                Text(
-                    text = illust.totalBookmarks.toString() + " ${
-                        stringResource(
-                            RStrings.liked
-                        )
-                    }",
-                    Modifier.padding(start = 10.dp),
-                    style = TextStyle(fontSize = 12.sp),
-                )
+            SelectionContainer {
+                Row(
+                    Modifier.padding(top = 10.dp)
+                ) {
+                    Text(
+                        text = convertUtcStringToLocalDateTime(illust.createDate),
+                        modifier = Modifier.padding(start = 20.dp),
+                        style = TextStyle(fontSize = 12.sp),
+                    )
+                    Text(
+                        text = illust.totalView.toString() + " ${stringResource(RStrings.viewed)}",
+                        Modifier.padding(start = 10.dp),
+                        style = TextStyle(fontSize = 12.sp),
+                    )
+                    Text(
+                        text = illust.totalBookmarks.toString() + " ${
+                            stringResource(
+                                RStrings.liked
+                            )
+                        }",
+                        Modifier.padding(start = 10.dp),
+                        style = TextStyle(fontSize = 12.sp),
+                    )
+                }
+            }
+        }
+        if (illust.caption.isNotEmpty()) {
+            item(key = KEY_ILLUST_CAPTION) {
+                val caption = remember(illust.caption) {
+                    htmlToAnnotatedString(
+                        html = illust.caption,
+                        compactMode = true,
+                    )
+                }
+                SelectionContainer {
+                    Text(
+                        text = caption,
+                        modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
         }
         // tag
@@ -1148,25 +1170,27 @@ private fun UserFollowInfo(
                 navToUserDetailScreen(illust.user.id)
             },
         )
-        Column(
+        SelectionContainer(
             modifier = Modifier
                 .padding(start = 10.dp)
                 .align(Alignment.CenterVertically)
         ) {
-            Text(
-                text = illust.user.name,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                ),
-            )
-            Text(
-                text = "ID: ${illust.user.id}",
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                ),
-            )
+            Column {
+                Text(
+                    text = illust.user.name,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                )
+                Text(
+                    text = "ID: ${illust.user.id}",
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                )
+            }
         }
         Spacer(modifier = Modifier.weight(1f))
         if (isFollowed) {
@@ -1358,25 +1382,26 @@ private fun UserInfo(
                 navToUserDetailScreen(illust.user.id)
             },
         )
-        Column(
-            modifier = Modifier.padding(start = 10.dp)
-        ) {
-            Text(
-                text = illust.title,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                maxLines = 1,
-            )
-            Text(
-                text = illust.user.name,
-                modifier = Modifier,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                ),
-                maxLines = 1,
-            )
+        SelectionContainer {
+            Column(
+                modifier = Modifier.padding(start = 10.dp)
+            ) {
+                Text(
+                    text = illust.title,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                )
+                Text(
+                    text = illust.user.name,
+                    modifier = Modifier,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                    ),
+                    maxLines = 1,
+                )
+            }
         }
     }
 }

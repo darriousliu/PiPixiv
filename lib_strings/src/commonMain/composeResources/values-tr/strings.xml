@@ -373,4 +373,26 @@
     <string name="read_later_status_running">Çevriliyor</string>
     <string name="read_later_status_ready">Çeviri hazır</string>
     <string name="read_later_status_failed">Çeviri başarısız</string>
+    <string name="profile_details">Profil ayrıntıları</string>
+    <string name="profile_account">Hesap</string>
+    <string name="profile_webpage">Web sitesi</string>
+    <string name="profile_birthday">Doğum günü</string>
+    <string name="profile_region">Bölge</string>
+    <string name="profile_job">Meslek</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitter bağlantısı</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">Çalışma alanı</string>
+    <string name="profile_pc">Bilgisayar</string>
+    <string name="profile_monitor">Monitör</string>
+    <string name="profile_tool">Araçlar</string>
+    <string name="profile_scanner">Tarayıcı</string>
+    <string name="profile_tablet">Çizim tableti</string>
+    <string name="profile_mouse">Fare</string>
+    <string name="profile_printer">Yazıcı</string>
+    <string name="profile_desktop">Masaüstü</string>
+    <string name="profile_music">Müzik</string>
+    <string name="profile_desk">Masa</string>
+    <string name="profile_chair">Sandalye</string>
+    <string name="profile_workspace_comment">Notlar</string>
 </resources>

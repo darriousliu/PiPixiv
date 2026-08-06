@@ -373,4 +373,26 @@
     <string name="read_later_status_running">번역 중</string>
     <string name="read_later_status_ready">번역 준비 완료</string>
     <string name="read_later_status_failed">번역 실패</string>
+    <string name="profile_details">프로필 정보</string>
+    <string name="profile_account">계정</string>
+    <string name="profile_webpage">웹사이트</string>
+    <string name="profile_birthday">생일</string>
+    <string name="profile_region">지역</string>
+    <string name="profile_job">직업</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitter 링크</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">작업 환경</string>
+    <string name="profile_pc">컴퓨터</string>
+    <string name="profile_monitor">모니터</string>
+    <string name="profile_tool">도구</string>
+    <string name="profile_scanner">스캐너</string>
+    <string name="profile_tablet">그래픽 태블릿</string>
+    <string name="profile_mouse">마우스</string>
+    <string name="profile_printer">프린터</string>
+    <string name="profile_desktop">데스크톱</string>
+    <string name="profile_music">음악</string>
+    <string name="profile_desk">책상</string>
+    <string name="profile_chair">의자</string>
+    <string name="profile_workspace_comment">메모</string>
 </resources>

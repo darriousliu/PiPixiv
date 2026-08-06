@@ -373,4 +373,26 @@
     <string name="read_later_status_running">翻訳中</string>
     <string name="read_later_status_ready">翻訳準備完了</string>
     <string name="read_later_status_failed">翻訳に失敗しました</string>
+    <string name="profile_details">プロフィール</string>
+    <string name="profile_account">アカウント</string>
+    <string name="profile_webpage">ウェブサイト</string>
+    <string name="profile_birthday">誕生日</string>
+    <string name="profile_region">地域</string>
+    <string name="profile_job">職業</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitterリンク</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">作業環境</string>
+    <string name="profile_pc">パソコン</string>
+    <string name="profile_monitor">モニター</string>
+    <string name="profile_tool">ツール</string>
+    <string name="profile_scanner">スキャナー</string>
+    <string name="profile_tablet">ペンタブレット</string>
+    <string name="profile_mouse">マウス</string>
+    <string name="profile_printer">プリンター</string>
+    <string name="profile_desktop">デスクトップ</string>
+    <string name="profile_music">音楽</string>
+    <string name="profile_desk">机</string>
+    <string name="profile_chair">椅子</string>
+    <string name="profile_workspace_comment">備考</string>
 </resources>

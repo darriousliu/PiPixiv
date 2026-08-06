@@ -384,4 +384,26 @@
     <string name="read_later_status_running">正在翻译</string>
     <string name="read_later_status_ready">翻译已就绪</string>
     <string name="read_later_status_failed">翻译失败</string>
+    <string name="profile_details">个人资料</string>
+    <string name="profile_account">账号</string>
+    <string name="profile_webpage">网站</string>
+    <string name="profile_birthday">生日</string>
+    <string name="profile_region">地区</string>
+    <string name="profile_job">职业</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitter 链接</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">工作环境</string>
+    <string name="profile_pc">电脑</string>
+    <string name="profile_monitor">显示器</string>
+    <string name="profile_tool">工具</string>
+    <string name="profile_scanner">扫描仪</string>
+    <string name="profile_tablet">数位板</string>
+    <string name="profile_mouse">鼠标</string>
+    <string name="profile_printer">打印机</string>
+    <string name="profile_desktop">桌面</string>
+    <string name="profile_music">音乐</string>
+    <string name="profile_desk">书桌</string>
+    <string name="profile_chair">椅子</string>
+    <string name="profile_workspace_comment">备注</string>
 </resources>

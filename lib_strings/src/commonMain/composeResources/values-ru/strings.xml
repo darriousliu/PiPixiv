@@ -373,4 +373,26 @@
     <string name="read_later_status_running">Переводится</string>
     <string name="read_later_status_ready">Перевод готов</string>
     <string name="read_later_status_failed">Ошибка перевода</string>
+    <string name="profile_details">Данные профиля</string>
+    <string name="profile_account">Аккаунт</string>
+    <string name="profile_webpage">Веб-сайт</string>
+    <string name="profile_birthday">День рождения</string>
+    <string name="profile_region">Регион</string>
+    <string name="profile_job">Профессия</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Ссылка на Twitter</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">Рабочее место</string>
+    <string name="profile_pc">Компьютер</string>
+    <string name="profile_monitor">Монитор</string>
+    <string name="profile_tool">Инструменты</string>
+    <string name="profile_scanner">Сканер</string>
+    <string name="profile_tablet">Графический планшет</string>
+    <string name="profile_mouse">Мышь</string>
+    <string name="profile_printer">Принтер</string>
+    <string name="profile_desktop">Рабочий стол</string>
+    <string name="profile_music">Музыка</string>
+    <string name="profile_desk">Стол</string>
+    <string name="profile_chair">Кресло</string>
+    <string name="profile_workspace_comment">Примечания</string>
 </resources>

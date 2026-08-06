@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Refresh
@@ -114,16 +115,24 @@ internal fun NovelParagraph(
     val hasVisibleText =
         renderData.annotatedText.text.isNotBlank() || renderData.inlineContent.isNotEmpty()
 
-    Text(
-        text = if (hasVisibleText) renderData.annotatedText else AnnotatedString("\u200B"),
-        style = if (hasVisibleText) textStyle else TextStyle(fontSize = 1.sp, lineHeight = 1.sp),
-        color = if (hasVisibleText) Color.Unspecified else Color.Transparent,
-        inlineContent = renderData.inlineContent,
-        onTextLayout = { layoutResult ->
-            onParagraphTextLayout(paragraphIndex, layoutResult)
-        },
-        modifier = baseTextModifier,
-    )
+    val paragraphContent: @Composable () -> Unit = {
+        Text(
+            text = if (hasVisibleText) renderData.annotatedText else AnnotatedString("\u200B"),
+            style = if (hasVisibleText) textStyle else TextStyle(fontSize = 1.sp, lineHeight = 1.sp),
+            color = if (hasVisibleText) Color.Unspecified else Color.Transparent,
+            inlineContent = renderData.inlineContent,
+            onTextLayout = { layoutResult ->
+                onParagraphTextLayout(paragraphIndex, layoutResult)
+            },
+            modifier = baseTextModifier,
+        )
+    }
+
+    if (span is NovelSpanData.Text || span is NovelSpanData.JumpUri) {
+        SelectionContainer(content = paragraphContent)
+    } else {
+        paragraphContent()
+    }
 }
 
 private fun buildParagraphRenderData(

@@ -373,4 +373,26 @@
     <string name="read_later_status_running">Wird übersetzt</string>
     <string name="read_later_status_ready">Übersetzung bereit</string>
     <string name="read_later_status_failed">Übersetzung fehlgeschlagen</string>
+    <string name="profile_details">Profildetails</string>
+    <string name="profile_account">Konto</string>
+    <string name="profile_webpage">Webseite</string>
+    <string name="profile_birthday">Geburtstag</string>
+    <string name="profile_region">Region</string>
+    <string name="profile_job">Beruf</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitter-Link</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">Arbeitsplatz</string>
+    <string name="profile_pc">Computer</string>
+    <string name="profile_monitor">Monitor</string>
+    <string name="profile_tool">Werkzeuge</string>
+    <string name="profile_scanner">Scanner</string>
+    <string name="profile_tablet">Grafiktablett</string>
+    <string name="profile_mouse">Maus</string>
+    <string name="profile_printer">Drucker</string>
+    <string name="profile_desktop">Desktop</string>
+    <string name="profile_music">Musik</string>
+    <string name="profile_desk">Schreibtisch</string>
+    <string name="profile_chair">Stuhl</string>
+    <string name="profile_workspace_comment">Notizen</string>
 </resources>
