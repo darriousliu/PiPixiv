@@ -613,34 +613,6 @@ fun NovelScreen(
                                             )
                                         }
                                     }
-                                    if (state.isTranslated) {
-                                        IconButton(
-                                            onClick = { viewModel.dispatch(NovelIntent.ToggleDisplayOriginalText) }
-                                        ) {
-                                            Icon(
-                                                imageVector = if (state.isShowingOriginalText) {
-                                                    Icons.Rounded.Translate
-                                                } else {
-                                                    Icons.Rounded.Visibility
-                                                },
-                                                contentDescription = stringResource(
-                                                    if (state.isShowingOriginalText) {
-                                                        RStrings.show_translated_text
-                                                    } else {
-                                                        RStrings.show_original_text
-                                                    }
-                                                )
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = { viewModel.dispatch(NovelIntent.DeleteNovelTranslation) }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Rounded.Delete,
-                                                contentDescription = stringResource(RStrings.delete_translation)
-                                            )
-                                        }
-                                    }
                                     IconButton(
                                         onClick = { viewModel.dispatch(NovelIntent.ToggleBookmark) },
                                         onLongClick = { showBookmarkBottomSheet = true }
@@ -799,6 +771,12 @@ fun NovelScreen(
                 },
                 onExport = { viewModel.dispatch(NovelIntent.ExportToTxt) },
                 onShare = { viewModel.dispatch(NovelIntent.ShareNovel) },
+                onToggleDisplayedText = {
+                    viewModel.dispatch(NovelIntent.ToggleDisplayOriginalText)
+                },
+                onDeleteTranslation = {
+                    viewModel.dispatch(NovelIntent.DeleteNovelTranslation)
+                },
                 onAiSetting = {
                     viewModel.dispatch(NovelIntent.ToggleBottomSheet)
                     navigationManager.navigateToAiTranslationSettingScreen()
@@ -824,6 +802,8 @@ private fun NovelBottomSheetContent(
     onLineSpacingChange: (Int) -> Unit,
     onExport: () -> Unit,
     onShare: () -> Unit,
+    onToggleDisplayedText: () -> Unit,
+    onDeleteTranslation: () -> Unit,
     onAiSetting: () -> Unit,
     isNovelBlocked: Boolean,
     onBlockNovel: () -> Unit,
@@ -905,6 +885,58 @@ private fun NovelBottomSheetContent(
             },
             colors = colors
         )
+
+        if (state.isTranslated) {
+            ListItem(
+                headlineContent = {
+                    Text(
+                        text = stringResource(
+                            if (state.isShowingOriginalText) {
+                                RStrings.show_translated_text
+                            } else {
+                                RStrings.show_original_text
+                            }
+                        )
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .throttleClick(onClick = onToggleDisplayedText),
+                leadingContent = {
+                    Icon(
+                        imageVector = if (state.isShowingOriginalText) {
+                            Icons.Rounded.Translate
+                        } else {
+                            Icons.Rounded.Visibility
+                        },
+                        contentDescription = stringResource(
+                            if (state.isShowingOriginalText) {
+                                RStrings.show_translated_text
+                            } else {
+                                RStrings.show_original_text
+                            }
+                        )
+                    )
+                },
+                colors = colors
+            )
+
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(RStrings.delete_translation))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .throttleClick(onClick = onDeleteTranslation),
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = stringResource(RStrings.delete_translation)
+                    )
+                },
+                colors = colors
+            )
+        }
 
         ListItem(
             headlineContent = {
