@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.data.setting.BrowsingSettings
 import com.mrl.pixiv.common.data.setting.PreviewImageQuality
+import com.mrl.pixiv.common.data.setting.SearchResultIllustLayout
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
@@ -63,6 +64,9 @@ import com.mrl.pixiv.strings.preview_image_quality
 import com.mrl.pixiv.strings.preview_image_quality_high
 import com.mrl.pixiv.strings.preview_image_quality_medium
 import com.mrl.pixiv.strings.preview_image_quality_original
+import com.mrl.pixiv.strings.search_result_illust_layout
+import com.mrl.pixiv.strings.search_result_illust_layout_original_aspect_ratio
+import com.mrl.pixiv.strings.search_result_illust_layout_square
 import com.mrl.pixiv.strings.span_count_adaptive
 import com.mrl.pixiv.strings.span_count_landscape
 import com.mrl.pixiv.strings.span_count_portrait
@@ -113,6 +117,14 @@ fun BrowsingSettingScreen(
                 title = stringResource(RStrings.span_count_landscape),
                 currentSpanCount = userPreference.spanCountLandscape,
                 onSpanCountChange = SettingRepository::setSpanCountLandscape,
+            )
+            SearchResultIllustLayoutSetting(
+                selectedLayout = browsingSettings.searchResultIllustLayout,
+                onLayoutChange = { layout ->
+                    SettingRepository.setBrowsingSettings(
+                        browsingSettings.copy(searchResultIllustLayout = layout)
+                    )
+                },
             )
             PreviewImageQualitySetting(
                 selectedQuality = browsingSettings.previewImageQuality,
@@ -269,6 +281,54 @@ fun BrowsingSettingScreen(
             }
         }
     }
+}
+
+@Composable
+private fun SearchResultIllustLayoutSetting(
+    selectedLayout: SearchResultIllustLayout,
+    onLayoutChange: (SearchResultIllustLayout) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val layouts = remember { SearchResultIllustLayout.entries }
+
+    ListItem(
+        headlineContent = { Text(text = stringResource(RStrings.search_result_illust_layout)) },
+        modifier = modifier,
+        leadingContent = { Icon(Icons.Rounded.ViewModule, contentDescription = null) },
+        trailingContent = {
+            DropDownSelector(
+                modifier = Modifier.throttleClick { expanded = !expanded },
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                current = selectedLayout.label(),
+            ) {
+                layouts.forEach { layout ->
+                    DropdownMenuItem(
+                        text = { Text(text = layout.label()) },
+                        trailingIcon = {
+                            if (layout == selectedLayout) {
+                                Icon(Icons.Rounded.Check, contentDescription = null)
+                            }
+                        },
+                        onClick = {
+                            onLayoutChange(layout)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun SearchResultIllustLayout.label(): String = when (this) {
+    SearchResultIllustLayout.SQUARE ->
+        stringResource(RStrings.search_result_illust_layout_square)
+
+    SearchResultIllustLayout.ORIGINAL_ASPECT_RATIO ->
+        stringResource(RStrings.search_result_illust_layout_original_aspect_ratio)
 }
 
 @Composable

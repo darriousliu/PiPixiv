@@ -338,6 +338,9 @@
     <string name="preview_image_quality_medium">中等</string>
     <string name="preview_image_quality_high">高</string>
     <string name="preview_image_quality_original">原图</string>
+    <string name="search_result_illust_layout">插画搜索结果布局</string>
+    <string name="search_result_illust_layout_square">方形网格</string>
+    <string name="search_result_illust_layout_original_aspect_ratio">原始比例瀑布流</string>
     <string name="auto_hide_preview_controls">自动隐藏预览控件</string>
     <string name="auto_hide_preview_controls_desc">在作品详情页的图片区域停留几秒后隐藏按钮和页码</string>
     <string name="tap_image_to_open_full_resolution_preview">点击打开全分辨率预览</string>
