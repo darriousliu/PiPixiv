@@ -102,6 +102,7 @@ import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.TagItem
+import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.AppViewMode
@@ -751,7 +752,7 @@ internal fun PictureScreen(
                 horizontalArrangement = relatedLayoutParams.horizontalArrangement
             ) {
                 illustsPair.forEach { (illust, isBookmarked, index) ->
-                    SquareIllustItem(
+                    RectangleIllustItem(
                         illust = illust,
                         isBookmarked = isBookmarked,
                         onBookmarkClick = { restrict, tags, isEdit ->

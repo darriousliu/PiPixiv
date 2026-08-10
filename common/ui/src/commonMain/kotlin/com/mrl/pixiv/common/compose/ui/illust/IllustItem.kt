@@ -17,12 +17,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FileCopy
 import androidx.compose.material3.Badge
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,9 +47,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
@@ -53,7 +57,6 @@ import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
-import com.mrl.pixiv.common.compose.lightBlue
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.data.AiType
@@ -74,6 +77,7 @@ import com.mrl.pixiv.strings.long_click_to_edit_favorite
 import com.mrl.pixiv.strings.manga
 import com.mrl.pixiv.strings.series
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -92,17 +96,12 @@ fun SquareIllustItem(
     enableTransition: Boolean = !currentWindowAdaptiveInfoV2().isWidthAtLeastExpanded,
 ) {
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
-    var showPopupTip by rememberSaveable { mutableStateOf(false) }
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     val isIllustBlocked = BlockingRepositoryV2.collectIllustBlockAsState(illust.id)
     val isUserBlocked = BlockingRepositoryV2.collectUserBlockAsState(illust.user.id)
     val enableTransition = enableTransition && !isIllustBlocked && !isUserBlocked
     val onClick = {
         navToPictureScreen(prefix, enableTransition)
-    }
-    LaunchedEffect(Unit) {
-        showPopupTip =
-            shouldShowTip && !SettingRepository.userPreferenceFlow.value.hasShowBookmarkTip
     }
     val animatedContentScope = LocalNavAnimatedContentScope.current
 
@@ -170,8 +169,9 @@ fun SquareIllustItem(
                 }
             }
             if (!isUserBlocked && !isIllustBlocked) {
-                Box(
-                    modifier = Modifier.align(Alignment.BottomEnd)
+                BookmarkTooltipBox(
+                    shouldShowTip = shouldShowTip,
+                    modifier = Modifier.align(Alignment.BottomEnd),
                 ) {
                     IconButton(
                         onClick = throttleClick {
@@ -187,24 +187,6 @@ fun SquareIllustItem(
                             iconSize = 24.dp,
                             contentDescription = "",
                         )
-                    }
-                    if (showPopupTip) {
-                        LaunchedEffect(Unit) {
-                            SettingRepository.setHasShowBookmarkTip(true)
-                            delay(3000.milliseconds)
-                            showPopupTip = false
-                        }
-                        Popup(
-                            alignment = Alignment.TopCenter,
-                            offset = IntOffset(x = 0, y = -100)
-                        ) {
-                            Text(
-                                text = stringResource(RStrings.long_click_to_edit_favorite),
-                                modifier = Modifier
-                                    .background(lightBlue, MaterialTheme.shapes.small)
-                                    .padding(8.dp)
-                            )
-                        }
                     }
                 }
             }
@@ -229,8 +211,9 @@ fun RectangleIllustItem(
     onBookmarkClick: (Restrict, List<String>?, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enableTransition: Boolean = !currentWindowAdaptiveInfoV2().isWidthAtLeastExpanded,
+    shouldShowTip: Boolean = false,
 ) {
-    val scale = illust.width * 1.0f / illust.height
+    val scale = calculateIllustAspectRatio(illust.width, illust.height)
     val sharedTransitionScope = LocalSharedTransitionScope.current
     val animatedContentScope = LocalNavAnimatedContentScope.current
     val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
@@ -313,20 +296,24 @@ fun RectangleIllustItem(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    IconButton(
-                        onClick = throttleClick {
-                            val restrict =
-                                if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
-                            onBookmarkClick(restrict, null, false)
-                        },
-                        onLongClick = onBookmarkLongClick,
+                    BookmarkTooltipBox(
+                        shouldShowTip = shouldShowTip,
                     ) {
-                        BookmarkIcon(
-                            isBookmarked = isBookmarked,
-                            isPrivate = illust.isPrivateBookmark,
-                            iconSize = 24.dp,
-                            contentDescription = "",
-                        )
+                        IconButton(
+                            onClick = throttleClick {
+                                val restrict =
+                                    if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+                                onBookmarkClick(restrict, null, false)
+                            },
+                            onLongClick = onBookmarkLongClick,
+                        ) {
+                            BookmarkIcon(
+                                isBookmarked = isBookmarked,
+                                isPrivate = illust.isPrivateBookmark,
+                                iconSize = 24.dp,
+                                contentDescription = "",
+                            )
+                        }
                     }
                 }
             }
@@ -368,6 +355,44 @@ fun RectangleIllustItem(
     }
 }
 
+internal fun calculateIllustAspectRatio(width: Int, height: Int): Float {
+    return width.toFloat() / height
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BookmarkTooltipBox(
+    shouldShowTip: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val tooltipState = rememberTooltipState(isPersistent = true)
+
+    LaunchedEffect(shouldShowTip) {
+        if (shouldShowTip && !SettingRepository.userPreferenceFlow.value.hasShowBookmarkTip) {
+            SettingRepository.setHasShowBookmarkTip(true)
+            launch { tooltipState.show() }
+            delay(3000.milliseconds)
+            tooltipState.dismiss()
+        }
+    }
+
+    Box(modifier = modifier) {
+        TooltipBox(
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+                positioning = TooltipAnchorPosition.Above,
+            ),
+            tooltip = {
+                PlainTooltip {
+                    Text(text = stringResource(RStrings.long_click_to_edit_favorite))
+                }
+            },
+            state = tooltipState,
+            enableUserInput = false,
+            content = content,
+        )
+    }
+}
 
 @Composable
 private fun TextBadge(

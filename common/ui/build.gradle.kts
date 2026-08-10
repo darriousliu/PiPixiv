@@ -25,6 +25,10 @@ kotlin {
             implementation(libs.sonner)
         }
 
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
         androidMain.dependencies {
             // Navigation3
             implementation(composes.bundles.navigation3.android)

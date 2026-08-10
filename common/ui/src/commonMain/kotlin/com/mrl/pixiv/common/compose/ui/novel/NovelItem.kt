@@ -63,6 +63,7 @@ import kotlin.time.Duration.Companion.seconds
  * @param modifier 修饰符
  * @param markerPageLabel 阅读书签页码；为空时不展示书签操作
  * @param onMarkerClick 点击阅读书签按钮时的回调
+ * @param compactTitle 是否使用紧凑标题字号
  */
 @Composable
 fun NovelItem(
@@ -73,6 +74,7 @@ fun NovelItem(
     modifier: Modifier = Modifier,
     markerPageLabel: String? = null,
     onMarkerClick: (() -> Unit)? = null,
+    compactTitle: Boolean = false,
 ) {
     val context = LocalPlatformContext.current
     val isBookmarked = novel.isBookmark
@@ -137,7 +139,11 @@ fun NovelItem(
                 // 标题
                 Text(
                     text = novel.title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = if (compactTitle) {
+                        MaterialTheme.typography.titleSmall
+                    } else {
+                        MaterialTheme.typography.titleMedium
+                    },
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 4.dp)
