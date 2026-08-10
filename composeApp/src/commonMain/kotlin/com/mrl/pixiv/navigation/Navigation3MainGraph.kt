@@ -329,6 +329,12 @@ fun Navigation3MainGraph(
                             initialType = it.initialType,
                         )
                     }
+                    entry<Destination.UserNovels> {
+                        ArtworkScreen(
+                            userId = it.userId,
+                            initialNovel = true,
+                        )
+                    }
                     entry<Destination.BlockSettings> {
                         BlockSettingsScreen()
                     }
@@ -482,6 +488,10 @@ private fun LogScreen(
                 }
 
                 is Destination.UserArtwork -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.UserNovels -> {
                     put("user_id", currentDestination.userId.toString())
                 }
 

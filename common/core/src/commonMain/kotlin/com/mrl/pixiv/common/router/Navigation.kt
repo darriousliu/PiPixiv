@@ -122,6 +122,11 @@ sealed class Destination : NavKey {
     ) : Destination()
 
     @Serializable
+    data class UserNovels(
+        val userId: Long,
+    ) : Destination()
+
+    @Serializable
     data object BlockSettings : Destination()
 
     @Serializable

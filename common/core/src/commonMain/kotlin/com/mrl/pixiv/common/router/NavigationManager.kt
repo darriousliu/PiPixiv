@@ -175,6 +175,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.UserArtwork(userId, initialType))
     }
 
+    fun navigateToUserNovelsScreen(userId: Long) {
+        backStack.navigate(route = Destination.UserNovels(userId))
+    }
+
     fun navigateToBlockSettings() {
         backStack.navigate(route = Destination.BlockSettings)
     }

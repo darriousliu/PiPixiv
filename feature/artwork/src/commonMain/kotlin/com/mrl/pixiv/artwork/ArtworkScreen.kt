@@ -73,6 +73,15 @@ private enum class ArtworkPage(
     Manga(Type.Manga, RStrings.manga);
 }
 
+internal fun resolveArtworkInitialPage(
+    initialType: Type,
+    initialNovel: Boolean,
+): Int = when {
+    initialNovel -> 1
+    initialType == Type.Manga -> 2
+    else -> 0
+}
+
 @Composable
 fun ArtworkScreen(
     userId: Long,
@@ -80,13 +89,14 @@ fun ArtworkScreen(
     modifier: Modifier = Modifier,
     viewModel: ArtworkViewModel = koinViewModel { parametersOf(userId) },
     navigationManager: NavigationManager = koinInject(),
+    initialNovel: Boolean = false,
 ) {
     val userIllusts = viewModel.userIllusts.collectAsLazyPagingItems()
     val userNovels = viewModel.userNovels.collectAsLazyPagingItems()
     val userMangas = viewModel.userMangas.collectAsLazyPagingItems()
     val pages = remember { ArtworkPage.entries }
-    val initialPage = remember(initialType) {
-        pages.indexOfFirst { it.type == initialType }.takeIf { it >= 0 } ?: 0
+    val initialPage = remember(initialType, initialNovel) {
+        resolveArtworkInitialPage(initialType, initialNovel)
     }
     val pagerState = rememberPagerState(initialPage = initialPage) { pages.size }
     val scope = rememberCoroutineScope()

@@ -18,5 +18,9 @@ kotlin {
             // Paging
             implementation(androidx.bundles.paging)
         }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

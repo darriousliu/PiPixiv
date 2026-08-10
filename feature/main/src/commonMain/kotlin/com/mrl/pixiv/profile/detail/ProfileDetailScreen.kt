@@ -83,6 +83,8 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.profile.detail.components.IllustWidget
 import com.mrl.pixiv.profile.detail.components.NovelBookmarkWidget
+import com.mrl.pixiv.profile.detail.components.NovelWorksWidget
+import com.mrl.pixiv.profile.detail.components.shouldShowNovelWorks
 import com.mrl.pixiv.strings.block_user
 import com.mrl.pixiv.strings.cancel_user_blocked
 import com.mrl.pixiv.strings.copy_to_clipboard
@@ -129,6 +131,7 @@ private const val KEY_USER_INFO = "user_info"
 private const val KEY_USER_DETAILS = "user_details"
 private const val KEY_USER_ILLUSTS = "user_illusts"
 private const val KEY_USER_MANGAS = "user_mangas"
+private const val KEY_USER_NOVELS = "user_novels"
 private const val KEY_USER_BOOKMARKS_ILLUSTS = "user_bookmarks_illusts"
 private const val KEY_USER_BOOKMARKS_NOVELS = "user_bookmarks_novels"
 private const val KEY_SPACE = "space"
@@ -331,6 +334,20 @@ fun ProfileDetailScreen(
                             onAllClick = {
                                 navigationManager.navigateToUserIllustScreen(uid, Type.Manga)
                             }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
+                if (shouldShowNovelWorks(state.userNovels)) {
+                    item(key = KEY_USER_NOVELS) {
+                        NovelWorksWidget(
+                            novels = state.userNovels,
+                            onAllClick = {
+                                navigationManager.navigateToUserNovelsScreen(uid)
+                            },
+                            onNovelClick = navigationManager::navigateToNovelDetailScreen,
+                            onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
+                            modifier = Modifier.fillMaxWidth(),
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                     }

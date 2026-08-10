@@ -15,7 +15,9 @@ import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.hasDifferentNovelFilterSettings
 import com.mrl.pixiv.common.repository.requireUserInfoValue
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.util.filterBlockedTags
+import com.mrl.pixiv.common.repository.util.filterNormalNovel
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -37,6 +39,7 @@ data class ProfileDetailState(
     val userTotalWorks: Int = 0,
     val userIllusts: ImmutableList<Illust> = persistentListOf(),
     val userMangas: ImmutableList<Illust> = persistentListOf(),
+    val userNovels: ImmutableList<Novel> = persistentListOf(),
     val userBookmarksIllusts: ImmutableList<Illust> = persistentListOf(),
     val userBookmarksNovels: ImmutableList<Novel> = persistentListOf(),
     val userInfo: UserDetailResp = UserDetailResp(),
@@ -113,6 +116,16 @@ class ProfileDetailViewModel(
                 )
             }
             originalUserBookmarksNovels.value = userBookmarksNovels.novels
+
+            val userNovels = PixivRepository.getUserNovels(userId = userId)
+            val initialFilteredUserNovels = if (requireUserPreferenceValue.isR18Enabled) {
+                userNovels.novels.distinctBy { it.id }
+            } else {
+                userNovels.novels.distinctBy { it.id }.filterNormalNovel()
+            }.filterBlockedTags()
+            updateState {
+                copy(userNovels = initialFilteredUserNovels.toImmutableList())
+            }
         }
     }
 
