@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material.icons.rounded.HideImage
 import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
@@ -108,6 +109,7 @@ import com.mrl.pixiv.strings.novel_collection
 import com.mrl.pixiv.strings.novel_hidden
 import com.mrl.pixiv.strings.novel_marker
 import com.mrl.pixiv.strings.novel_marker_page
+import com.mrl.pixiv.strings.novel_work_information
 import com.mrl.pixiv.strings.regenerate_translation
 import com.mrl.pixiv.strings.share_link
 import com.mrl.pixiv.strings.show_novel
@@ -180,6 +182,7 @@ fun NovelScreen(
         markerPagesForSpans(state.paragraphSpans)
     }
     var showBookmarkBottomSheet by remember { mutableStateOf(false) }
+    var showMetadataBottomSheet by remember(state.novel?.id) { mutableStateOf(false) }
     var translationListAnchor by remember(state.novel?.id) {
         mutableStateOf<NovelTranslationListAnchor?>(null)
     }
@@ -686,6 +689,16 @@ fun NovelScreen(
                                         }
                                     }
                                     IconButton(
+                                        onClick = { showMetadataBottomSheet = true }
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.Info,
+                                            contentDescription = stringResource(
+                                                RStrings.novel_work_information
+                                            )
+                                        )
+                                    }
+                                    IconButton(
                                         onClick = { viewModel.dispatch(NovelIntent.ToggleBottomSheet) }
                                     ) {
                                         Icon(
@@ -717,6 +730,54 @@ fun NovelScreen(
                     BookmarkState.deleteBookmarkNovel(state.novel.id)
                 }
             }
+        )
+    }
+
+    if (showMetadataBottomSheet && state.novel != null && !isNovelBlocked) {
+        NovelMetadataBottomSheet(
+            novel = state.novel,
+            onDismissRequest = { showMetadataBottomSheet = false },
+            onAuthorClick = { userId ->
+                showMetadataBottomSheet = false
+                navigationManager.navigateToProfileDetailScreen(userId)
+            },
+            onSeriesClick = { seriesId ->
+                showMetadataBottomSheet = false
+                navigationManager.navigateToNovelSeriesScreen(seriesId)
+            },
+            onTagClick = { tag ->
+                showMetadataBottomSheet = false
+                navigationManager.navigateToSearchResultScreen(
+                    searchWord = tag,
+                    isIdSearch = false,
+                    searchMode = AppViewMode.NOVEL
+                )
+            },
+            onCaptionLinkClick = { url ->
+                showMetadataBottomSheet = false
+                when (val target = resolveNovelCaptionLink(url)) {
+                    is NovelCaptionLinkTarget.Illust ->
+                        navigationManager.navigateToSinglePictureScreen(target.id)
+
+                    is NovelCaptionLinkTarget.Novel ->
+                        navigationManager.navigateToNovelDetailScreen(target.id)
+
+                    is NovelCaptionLinkTarget.User ->
+                        navigationManager.navigateToProfileDetailScreen(target.id)
+
+                    is NovelCaptionLinkTarget.External ->
+                        runCatching { uriHandler.openUri(target.url) }
+
+                    null -> Unit
+                }
+            },
+            onCommentClick = {
+                showMetadataBottomSheet = false
+                navigationManager.navigateToCommentScreen(
+                    state.novel.id,
+                    CommentType.NOVEL
+                )
+            },
         )
     }
 

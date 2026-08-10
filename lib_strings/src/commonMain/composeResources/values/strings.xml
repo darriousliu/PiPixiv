@@ -229,6 +229,7 @@
     <string name="save_as">另存为</string>
     <string name="copy_link">复制链接</string>
     <string name="novel">小说</string>
+    <string name="novel_work_information">作品信息</string>
     <string name="illust">插画</string>
     <string name="series">系列</string>
     <string name="word_count">字数</string>
