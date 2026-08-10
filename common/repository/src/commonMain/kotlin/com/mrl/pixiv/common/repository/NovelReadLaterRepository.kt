@@ -23,6 +23,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -467,22 +468,84 @@ class NovelReadLaterRepository(
                 sourceText = sourceText,
                 extraBody = config.extraBody,
             )
-            val translatedText = translationService.translate(
-                text = sourceText,
-                targetLanguageTag = item.targetLanguage,
-                config = config,
+            val metadataSourceMd5 = buildNovelTranslationMetadataSourceHash(
+                title = sourceContent.novel.title,
+                caption = sourceContent.novel.caption,
+                extraBody = config.extraBody,
             )
-            coroutineContext.ensureActive()
-            translationRepository.saveTranslationForUser(
+            val cached = translationRepository.getTranslationForUser(
                 userId = item.userId,
                 novelId = item.novelId,
                 targetLanguage = item.targetLanguage,
-                provider = config.provider,
-                model = config.model,
-                configFingerprint = item.configFingerprint,
-                sourceMd5 = sourceMd5,
-                translatedText = translatedText,
             )
+            val matchingConfiguration = cached != null &&
+                    cached.provider == config.provider &&
+                    cached.model == config.model &&
+                    cached.configFingerprint == item.configFingerprint
+            val bodyCacheHit = cached != null &&
+                    matchingConfiguration &&
+                    cached.sourceMd5 == sourceMd5 &&
+                    cached.translatedText.isNotBlank()
+            val metadataCacheHit = cached != null &&
+                    matchingConfiguration &&
+                    cached.metadataSourceMd5 == metadataSourceMd5 &&
+                    cached.translatedTitle.isNotBlank()
+
+            coroutineScope {
+                val body = async {
+                    if (bodyCacheHit) {
+                        requireNotNull(cached).translatedText
+                    } else {
+                        translationService.translate(
+                            text = sourceText,
+                            targetLanguageTag = item.targetLanguage,
+                            config = config,
+                        ).also { translatedText ->
+                            translationRepository.saveTranslationForUser(
+                                userId = item.userId,
+                                novelId = item.novelId,
+                                targetLanguage = item.targetLanguage,
+                                provider = config.provider,
+                                model = config.model,
+                                configFingerprint = item.configFingerprint,
+                                sourceMd5 = sourceMd5,
+                                translatedText = translatedText,
+                            )
+                        }
+                    }
+                }
+                val metadata = async {
+                    if (metadataCacheHit) {
+                        val cachedMetadata = requireNotNull(cached)
+                        NovelMetadataTranslation(
+                            title = cachedMetadata.translatedTitle,
+                            caption = cachedMetadata.translatedCaption,
+                        )
+                    } else {
+                        translationService.translateMetadata(
+                            title = sourceContent.novel.title,
+                            caption = sourceContent.novel.caption,
+                            targetLanguageTag = item.targetLanguage,
+                            config = config,
+                        ).also { translatedMetadata ->
+                            translationRepository.saveMetadataTranslationForUser(
+                                userId = item.userId,
+                                novelId = item.novelId,
+                                targetLanguage = item.targetLanguage,
+                                provider = config.provider,
+                                model = config.model,
+                                configFingerprint = item.configFingerprint,
+                                metadataSourceMd5 = metadataSourceMd5,
+                                translatedTitle = translatedMetadata.title,
+                                translatedCaption = translatedMetadata.caption,
+                            )
+                        }
+                    }
+                }
+                body.await()
+                metadata.await()
+            }
+            coroutineContext.ensureActive()
             dao.updateResult(
                 userId = item.userId,
                 novelId = item.novelId,
@@ -553,6 +616,25 @@ fun buildNovelTranslationSourceHash(
     return cacheInput.encodeToByteArray().toByteString().md5().hex()
 }
 
+fun buildNovelTranslationMetadataSourceHash(
+    title: String,
+    caption: String,
+    extraBody: String,
+): String {
+    val metadataSource = buildString {
+        append(title.length)
+        append(':')
+        append(title)
+        append(caption.length)
+        append(':')
+        append(caption)
+    }
+    return buildNovelTranslationSourceHash(
+        sourceText = metadataSource,
+        extraBody = extraBody,
+    )
+}
+
 private fun AiTranslationConfig.normalizedForQueue(): AiTranslationConfig {
     return copy(
         endpoint = endpoint.trim().trimEnd('/'),
@@ -578,6 +660,7 @@ internal fun NovelReadLaterEntity.toExecutionConfig(
         responseApi = responseApi,
         extraBody = extraBody,
         generationTimeoutSeconds = currentConfig.generationTimeoutSeconds,
+        maxConcurrentRequests = currentConfig.maxConcurrentRequests,
     )
 }
 

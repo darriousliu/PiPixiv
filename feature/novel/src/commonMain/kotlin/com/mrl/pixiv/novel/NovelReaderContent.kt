@@ -90,6 +90,18 @@ internal fun NovelReaderContent(
     onCommentClick: () -> Unit,
 ) {
     val novel = state.novel ?: return
+    val displayedTitle = resolveNovelMetadataText(
+        original = novel.title,
+        translated = state.translatedTitle,
+        isTranslated = state.isTranslated,
+        isShowingOriginalText = state.isShowingOriginalText,
+    )
+    val displayedCaption = resolveNovelMetadataText(
+        original = novel.caption,
+        translated = state.translatedCaption,
+        isTranslated = state.isTranslated,
+        isShowingOriginalText = state.isShowingOriginalText,
+    )
     val isBookmarked = novel.isBookmark
     val totalBookmarks = (novel.totalBookmarks + when {
         isBookmarked && !novel.isBookmarked -> 1L
@@ -126,7 +138,7 @@ internal fun NovelReaderContent(
             item(key = KEY_TITLE) {
                 SelectionContainer {
                     Text(
-                        text = novel.title,
+                        text = displayedTitle,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -257,12 +269,12 @@ internal fun NovelReaderContent(
             }
 
             // Caption卡片(如果有内容)
-            if (novel.caption.isNotEmpty()) {
+            if (displayedCaption.isNotEmpty()) {
                 item(key = KEY_CAPTION) {
                     val linkColor = MaterialTheme.colorScheme.primary
-                    val caption = remember(novel.caption, linkColor, onCaptionLinkClick) {
+                    val caption = remember(displayedCaption, linkColor, onCaptionLinkClick) {
                         novelCaptionToAnnotatedString(
-                            html = novel.caption,
+                            html = displayedCaption,
                             linkColor = linkColor,
                             onLinkClick = onCaptionLinkClick,
                         )
@@ -390,3 +402,12 @@ internal fun NovelReaderContent(
         }
     }
 }
+
+internal fun resolveNovelMetadataText(
+    original: String,
+    translated: String,
+    isTranslated: Boolean,
+    isShowingOriginalText: Boolean,
+): String = translated.takeIf {
+    isTranslated && !isShowingOriginalText && it.isNotBlank()
+} ?: original

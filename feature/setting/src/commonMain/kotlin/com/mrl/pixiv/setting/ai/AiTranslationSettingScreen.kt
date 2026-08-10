@@ -3,17 +3,21 @@ package com.mrl.pixiv.setting.ai
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -32,8 +36,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -41,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.ai.AiEndpointError
 import com.mrl.pixiv.common.ai.AiLocalNetworkAccessGate
+import com.mrl.pixiv.common.ai.AiModelCatalogService
 import com.mrl.pixiv.common.ai.validateAiEndpoint
 import com.mrl.pixiv.common.data.setting.AiProvider
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
@@ -71,6 +78,9 @@ import com.mrl.pixiv.strings.ai_extra_preset_top_p
 import com.mrl.pixiv.strings.ai_generation_timeout_desc
 import com.mrl.pixiv.strings.ai_generation_timeout_invalid
 import com.mrl.pixiv.strings.ai_generation_timeout_seconds
+import com.mrl.pixiv.strings.ai_max_concurrent_requests
+import com.mrl.pixiv.strings.ai_max_concurrent_requests_desc
+import com.mrl.pixiv.strings.ai_max_concurrent_requests_invalid
 import com.mrl.pixiv.strings.ai_model
 import com.mrl.pixiv.strings.ai_model_suggestions
 import com.mrl.pixiv.strings.ai_openai_use_response_api
@@ -78,8 +88,13 @@ import com.mrl.pixiv.strings.ai_provider
 import com.mrl.pixiv.strings.ai_provider_claude
 import com.mrl.pixiv.strings.ai_provider_gemini
 import com.mrl.pixiv.strings.ai_provider_openai
+import com.mrl.pixiv.strings.ai_refresh_models
 import com.mrl.pixiv.strings.ai_translation_setting
+import com.mrl.pixiv.strings.load_failed
 import com.mrl.pixiv.strings.save
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import org.jetbrains.compose.resources.stringResource
@@ -89,6 +104,7 @@ import org.koin.compose.koinInject
 fun AiTranslationSettingScreen(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager = koinInject(),
+    modelCatalogService: AiModelCatalogService = koinInject(),
 ) {
     val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
     val currentConfig = userPreference.aiTranslationConfig
@@ -100,17 +116,37 @@ fun AiTranslationSettingScreen(
     var generationTimeoutInput by rememberSaveable {
         mutableStateOf(currentConfig.generationTimeoutSeconds.toString())
     }
+    var maxConcurrentRequestsInput by rememberSaveable {
+        mutableStateOf(currentConfig.maxConcurrentRequests.toString())
+    }
     var responseApi by rememberSaveable { mutableStateOf(currentConfig.responseApi) }
     var extraBody by rememberSaveable { mutableStateOf(currentConfig.extraBody) }
     var extraBodyError by rememberSaveable { mutableStateOf(false) }
     var endpointError by remember { mutableStateOf<AiEndpointError?>(null) }
+    var fetchedModels by remember { mutableStateOf<List<String>?>(null) }
+    var modelRefreshError by remember { mutableStateOf<String?>(null) }
+    var isRefreshingModels by remember { mutableStateOf(false) }
+    var modelRefreshJob by remember { mutableStateOf<Job?>(null) }
+    var modelRefreshVersion by remember { mutableStateOf(0L) }
+    val coroutineScope = rememberCoroutineScope()
+
+    fun resetModelCatalog() {
+        modelRefreshVersion += 1L
+        modelRefreshJob?.cancel()
+        modelRefreshJob = null
+        fetchedModels = null
+        modelRefreshError = null
+        isRefreshingModels = false
+    }
 
     LaunchedEffect(currentConfig) {
+        resetModelCatalog()
         providerName = currentConfig.provider.name
         endpoint = currentConfig.endpoint
         apiKey = currentConfig.apiKey
         model = currentConfig.model
         generationTimeoutInput = currentConfig.generationTimeoutSeconds.toString()
+        maxConcurrentRequestsInput = currentConfig.maxConcurrentRequests.toString()
         responseApi = currentConfig.responseApi
         extraBody = currentConfig.extraBody
         extraBodyError = false
@@ -123,6 +159,12 @@ fun AiTranslationSettingScreen(
     }
     val generationTimeoutSeconds = remember(generationTimeoutInput) {
         parseGenerationTimeoutSeconds(generationTimeoutInput)
+    }
+    val maxConcurrentRequests = remember(maxConcurrentRequestsInput) {
+        maxConcurrentRequestsInput.toIntOrNull()?.takeIf {
+            it in AiTranslationConfig.MAX_CONCURRENT_REQUESTS_MIN..
+                AiTranslationConfig.MAX_CONCURRENT_REQUESTS_MAX
+        }
     }
     Scaffold(
         topBar = {
@@ -141,7 +183,10 @@ fun AiTranslationSettingScreen(
                 actions = {
                     TextButton(
                         onClick = {
-                            if (generationTimeoutSeconds == null) {
+                            if (
+                                generationTimeoutSeconds == null ||
+                                maxConcurrentRequests == null
+                            ) {
                                 return@TextButton
                             }
                             val endpointValidation = validateAiEndpoint(endpoint)
@@ -166,6 +211,7 @@ fun AiTranslationSettingScreen(
                                     responseApi = selectedProvider == AiProvider.OPENAI && responseApi,
                                     extraBody = extraBody.trim(),
                                     generationTimeoutSeconds = generationTimeoutSeconds,
+                                    maxConcurrentRequests = maxConcurrentRequests,
                                 )
                             )
                             if (endpointValidation.isLocalNetwork) {
@@ -192,6 +238,7 @@ fun AiTranslationSettingScreen(
                 provider = selectedProvider,
                 onProviderChange = change@{ nextProvider ->
                     if (nextProvider == selectedProvider) return@change
+                    resetModelCatalog()
                     providerName = nextProvider.name
                     endpoint = AiTranslationConfig.defaultEndpoint(nextProvider)
                     model = AiTranslationConfig.defaultModel(nextProvider).modelId
@@ -205,6 +252,7 @@ fun AiTranslationSettingScreen(
                 modifier = Modifier.fillMaxWidth(),
                 value = endpoint,
                 onValueChange = {
+                    resetModelCatalog()
                     endpoint = it
                     endpointError = null
                 },
@@ -221,7 +269,10 @@ fun AiTranslationSettingScreen(
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = apiKey,
-                onValueChange = { apiKey = it },
+                onValueChange = {
+                    resetModelCatalog()
+                    apiKey = it
+                },
                 label = { Text(text = stringResource(RStrings.ai_api_key)) },
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine = true,
@@ -256,6 +307,31 @@ fun AiTranslationSettingScreen(
                     )
                 },
                 isError = generationTimeoutSeconds == null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+            )
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = maxConcurrentRequestsInput,
+                onValueChange = { maxConcurrentRequestsInput = it },
+                label = {
+                    Text(text = stringResource(RStrings.ai_max_concurrent_requests))
+                },
+                supportingText = {
+                    Text(
+                        text = stringResource(
+                            if (maxConcurrentRequests == null) {
+                                RStrings.ai_max_concurrent_requests_invalid
+                            } else {
+                                RStrings.ai_max_concurrent_requests_desc
+                            },
+                            AiTranslationConfig.MAX_CONCURRENT_REQUESTS_MIN,
+                            AiTranslationConfig.MAX_CONCURRENT_REQUESTS_MAX,
+                        )
+                    )
+                },
+                isError = maxConcurrentRequests == null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
             )
@@ -329,17 +405,85 @@ fun AiTranslationSettingScreen(
                 }
             }
 
-            Text(
-                text = stringResource(RStrings.ai_model_suggestions),
-                style = MaterialTheme.typography.labelLarge,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(RStrings.ai_model_suggestions),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                TextButton(
+                    enabled = !isRefreshingModels,
+                    onClick = {
+                        val endpointValidation = validateAiEndpoint(endpoint)
+                        if (!endpointValidation.isValid) {
+                            endpointError = endpointValidation.error
+                            return@TextButton
+                        }
+                        endpointError = null
+                        modelRefreshError = null
+                        isRefreshingModels = true
+                        modelRefreshVersion += 1L
+                        val refreshVersion = modelRefreshVersion
+                        val refreshConfig = AiTranslationConfig(
+                            provider = selectedProvider,
+                            endpoint = requireNotNull(endpointValidation.normalizedEndpoint),
+                            apiKey = apiKey.trim(),
+                        )
+                        modelRefreshJob?.cancel()
+                        modelRefreshJob = coroutineScope.launch {
+                            try {
+                                val models = modelCatalogService.fetchModels(refreshConfig)
+                                if (modelRefreshVersion == refreshVersion) {
+                                    fetchedModels = models
+                                }
+                            } catch (cancelled: CancellationException) {
+                                throw cancelled
+                            } catch (error: Throwable) {
+                                if (modelRefreshVersion == refreshVersion) {
+                                    modelRefreshError = error.message ?: error.toString()
+                                }
+                            } finally {
+                                if (modelRefreshVersion == refreshVersion) {
+                                    isRefreshingModels = false
+                                    modelRefreshJob = null
+                                }
+                            }
+                        }
+                    },
+                ) {
+                    if (isRefreshingModels) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Rounded.Refresh,
+                            contentDescription = null,
+                        )
+                    }
+                    Text(text = stringResource(RStrings.ai_refresh_models))
+                }
+            }
+
+            modelRefreshError?.let { error ->
+                Text(
+                    text = stringResource(RStrings.load_failed, error),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
 
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                AiTranslationConfig.suggestedModels(selectedProvider).forEach { modelName ->
-                    val modelId = modelName.modelId
+                val modelSuggestions = fetchedModels
+                    ?: AiTranslationConfig.suggestedModels(selectedProvider).map { it.modelId }
+                modelSuggestions.forEach { modelId ->
                     FilterChip(
                         selected = modelId == model,
                         onClick = { model = modelId },

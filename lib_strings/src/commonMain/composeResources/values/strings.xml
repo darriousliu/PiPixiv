@@ -293,6 +293,10 @@
     <string name="ai_generation_timeout_seconds">生成超时（秒）</string>
     <string name="ai_generation_timeout_desc">每次 AI 生成请求的超时时间，可设置为 %1$d–%2$d 秒</string>
     <string name="ai_generation_timeout_invalid">请输入 %1$d 到 %2$d 之间的整数</string>
+    <string name="ai_max_concurrent_requests">最大并发请求数</string>
+    <string name="ai_max_concurrent_requests_desc">即时翻译与稍后阅读共用的并发上限，可设置为 %1$d–%2$d</string>
+    <string name="ai_max_concurrent_requests_invalid">请输入 %1$d 到 %2$d 之间的整数</string>
+    <string name="ai_refresh_models">刷新模型</string>
     <string name="ai_openai_use_response_api">使用 Response API</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">例如 {"thinking":{"type":"disabled"}}</string>

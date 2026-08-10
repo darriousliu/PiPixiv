@@ -84,6 +84,8 @@ class NovelTranslationRenderTest {
             translatedText = "translated body",
             translatedParagraphs = previewParagraphs,
             translatedSpans = previewSpans,
+            translatedTitle = "translated title",
+            translatedCaption = "translated caption",
         )
 
         assertEquals("translated body", completed.novelText)
@@ -92,6 +94,48 @@ class NovelTranslationRenderTest {
         assertTrue(completed.translationPresentation is NovelTranslationPresentation.Idle)
         assertFalse(completed.isTranslating)
         assertTrue(completed.isTranslated)
+        assertEquals("translated title", completed.translatedTitle)
+        assertEquals("translated caption", completed.translatedCaption)
+    }
+
+    @Test
+    fun translatedMetadataFollowsOriginalTextToggleAndFallsBackIndependently() {
+        assertEquals(
+            "translated title",
+            resolveNovelMetadataText(
+                original = "original title",
+                translated = "translated title",
+                isTranslated = true,
+                isShowingOriginalText = false,
+            ),
+        )
+        assertEquals(
+            "original title",
+            resolveNovelMetadataText(
+                original = "original title",
+                translated = "translated title",
+                isTranslated = true,
+                isShowingOriginalText = true,
+            ),
+        )
+        assertEquals(
+            "original caption",
+            resolveNovelMetadataText(
+                original = "original caption",
+                translated = "",
+                isTranslated = true,
+                isShowingOriginalText = false,
+            ),
+        )
+        assertEquals(
+            "original title",
+            resolveNovelMetadataText(
+                original = "original title",
+                translated = "translated title",
+                isTranslated = false,
+                isShowingOriginalText = false,
+            ),
+        )
     }
 
     @Test
