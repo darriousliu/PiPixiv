@@ -499,7 +499,7 @@ typealias RXml = com.mrl.pixiv.strings.R.xml
 ```
 src/
 ├── main/          # 通用代码
-├── foss/          # FOSS 变体（空实现 Firebase、Kotzilla 等）
+├── foss/          # FOSS 变体（空实现 Firebase、Sentry 等）
 └── google/        # Google Play 变体（含 Firebase Analytics）
 ```
 

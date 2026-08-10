@@ -89,14 +89,6 @@ jobs:
         run: |
           echo $GOOGLE_SERVICE_JSON > app/google-services.json
 
-      - name: Add Kotzilla Sdk
-        env:
-          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
-          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
-        run: |
-          echo $KOTZILLA_SDK_JSON > common/analytics-default/kotzilla.json
-          sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
-
       - name: Build Default Release apk
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
@@ -137,14 +129,6 @@ jobs:
       - name: Set up gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Add Kotzilla Sdk
-        env:
-          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
-          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
-        run: |
-          echo $KOTZILLA_SDK_JSON > common/analytics-default/kotzilla.json
-          sed -i "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
-
       - name: Build Linux Distributions
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -178,15 +162,6 @@ jobs:
       - name: Set up gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Add Kotzilla Sdk
-        env:
-          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
-          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
-        run: |
-          $env:KOTZILLA_SDK_JSON | Out-File -FilePath common/analytics-default/kotzilla.json -Encoding utf8
-          $path = "common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt"
-          (Get-Content $path) -replace 'setApiKey.*', "setApiKey(`"$env:KOTZILLA_SDK_API_KEY`")" | Set-Content $path
-
       - name: Build Windows Distribution
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -215,14 +190,6 @@ jobs:
       - name: Set up gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Add Kotzilla Sdk
-        env:
-          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
-          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
-        run: |
-          echo "$KOTZILLA_SDK_JSON" > common/analytics-default/kotzilla.json
-          sed -i '' "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
-
       - name: Build MacOS Distribution
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -250,14 +217,6 @@ jobs:
 
       - name: Set up gradle
         uses: gradle/actions/setup-gradle@v5
-
-      - name: Add Kotzilla Sdk
-        env:
-          KOTZILLA_SDK_JSON: ${{ secrets.KOTZILLA_SDK_JSON }}
-          KOTZILLA_SDK_API_KEY: ${{ secrets.KOTZILLA_SDK_API_KEY }}
-        run: |
-          echo "$KOTZILLA_SDK_JSON" > common/analytics-default/kotzilla.json
-          sed -i '' "s/setApiKey.*/setApiKey(\"$KOTZILLA_SDK_API_KEY\")/" common/analytics-default/src/commonMain/kotlin/com/mrl/pixiv/common/analytics/Kotzilla.kt
 
       - name: Resolve SwiftPM Dependencies
         working-directory: iosApp
