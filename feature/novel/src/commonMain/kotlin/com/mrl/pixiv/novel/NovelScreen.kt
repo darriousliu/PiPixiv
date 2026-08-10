@@ -59,6 +59,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -159,9 +160,15 @@ fun NovelScreen(
 ) {
     val uriHandler = LocalUriHandler.current
     val state = viewModel.asState()
-    val currentNovelId = state.novel?.id ?: novelId
+    val chapterStateKey = novelChapterStateKey(
+        entryNovelId = novelId,
+        loadedNovelId = state.novel?.id,
+    )
+    val currentNovelId = chapterStateKey
     val isNovelBlocked = BlockingRepositoryV2.collectNovelBlockAsState(currentNovelId)
-    val listState = rememberLazyListState()
+    val listState = key(chapterStateKey) {
+        rememberLazyListState()
+    }
     val paragraphLayoutCacheKey = state.paragraphLayoutCacheKey()
     val paragraphLayouts = remember(paragraphLayoutCacheKey) {
         mutableStateMapOf<Int, TextLayoutResult>()
@@ -407,6 +414,7 @@ fun NovelScreen(
                     if (state.prevNovelId != null) {
                         FloatingActionButton(
                             onClick = {
+                                saveReadingProgress()
                                 viewModel.dispatch(NovelIntent.NavigateToChapter(state.prevNovelId))
                             }
                         ) {
@@ -421,6 +429,7 @@ fun NovelScreen(
                     if (state.nextNovelId != null) {
                         FloatingActionButton(
                             onClick = {
+                                saveReadingProgress()
                                 viewModel.dispatch(NovelIntent.NavigateToChapter(state.nextNovelId))
                             }
                         ) {
