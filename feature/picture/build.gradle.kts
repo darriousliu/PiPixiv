@@ -30,6 +30,7 @@ kotlin {
             implementation(libs.filekit.dialogs)
             implementation(libs.filekit.dialogs.compose)
             implementation(libs.html.converter)
+            implementation(composes.navigationevent.compose)
         }
         androidMain.dependencies {
             // Navigation3
