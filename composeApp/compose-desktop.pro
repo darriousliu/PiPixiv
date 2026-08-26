@@ -26,6 +26,10 @@
 -keep class * extends com.sun.jna.* { *; }
 -keepclassmembers class * extends com.sun.jna.* { public *; }
 
+-assumevalues public class androidx.compose.runtime.ComposeRuntimeFlags {
+    static boolean isLinkBufferComposerEnabled return true;
+}
+
 # -printmapping mappings-desktop-currentOS.txt
 
 -printconfiguration build/compose/binaries/main-release/proguard/configuration.txt
