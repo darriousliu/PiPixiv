@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,6 +27,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mikepenz.markdown.m3.Markdown
 import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.repository.VersionManager.getCurrentFlavorAsset
@@ -192,6 +195,9 @@ fun AboutScreen(
     if (showUpdateDialog && latestVersionInfo != null) {
         val latestVersionInfo = latestVersionInfo!!
         val asset = latestVersionInfo.getCurrentFlavorAsset()
+        val releaseNotes = remember(latestVersionInfo.body) {
+            normalizeReleaseNotesLineEndings(latestVersionInfo.body.orEmpty())
+        }
         AlertDialog(
             onDismissRequest = { showUpdateDialog = false },
             confirmButton = {
@@ -219,12 +225,13 @@ fun AboutScreen(
                 }
             },
             title = {
-                Text(text = asset?.name.orEmpty())
+                Text(text = asset?.name ?: latestVersionInfo.tagName)
             },
             text = {
-                Text(
-                    text = latestVersionInfo.body.orEmpty(),
+                Markdown(
+                    content = releaseNotes,
                     modifier = Modifier
+                        .fillMaxWidth()
                         .heightIn(max = 400.dp)
                         .verticalScroll(rememberScrollState())
                 )
@@ -232,3 +239,7 @@ fun AboutScreen(
         )
     }
 }
+
+// The Markdown parser requires LF line endings for tables and thematic breaks.
+internal fun normalizeReleaseNotesLineEndings(content: String): String =
+    content.replace("\r\n", "\n").replace('\r', '\n')
