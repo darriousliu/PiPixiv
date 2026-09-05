@@ -1,6 +1,6 @@
 plugins {
     id("pixiv.multiplatform")
-    alias(kotlinx.plugins.serialization)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -14,14 +14,14 @@ kotlin {
             implementation(project(":common:network"))
 
             // Serialization
-            implementation(kotlinx.bundles.serialization)
+            implementation(libs.bundles.kotlinx.serialization)
             // Ktor
-            implementation(kotlinx.bundles.ktor)
+            implementation(libs.bundles.kotlinx.ktor)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation(kotlinx.coroutines.test)
-            implementation(kotlinx.ktor.client.mock)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.kotlinx.ktor.client.mock)
         }
     }
 }

@@ -5,7 +5,7 @@ import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
 
 plugins {
     id("pixiv.multiplatform.compose")
-    alias(composes.plugins.composeHotReload)
+    alias(libs.plugins.composeHotReload)
 }
 
 val desktopOsName = System.getProperty("os.name").toString()
@@ -86,7 +86,7 @@ kotlin {
                 rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
                     implementation(project(":feature:${it.name}"))
                 }
-                implementation(composes.bundles.navigation3)
+                implementation(libs.bundles.compose.navigation3)
                 // Coil3
                 implementation(project.dependencies.platform(libs.coil3.bom))
                 implementation(libs.bundles.coil3)
@@ -99,7 +99,7 @@ kotlin {
         androidMain {
             dependencies {
                 // Navigation3
-                implementation(composes.bundles.navigation3.android)
+                implementation(libs.bundles.compose.navigation3.android)
             }
         }
         iosMain {

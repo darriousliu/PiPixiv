@@ -4,9 +4,9 @@
 )
 
 plugins {
-    alias(kotlinx.plugins.kotlinMultiplatform)
-    alias(kotlinx.plugins.compose.compiler)
-    alias(composes.plugins.composeMultiplatform)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.composeMultiplatform)
 }
 
 kotlin {

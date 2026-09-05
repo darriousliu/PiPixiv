@@ -9,9 +9,9 @@ repositories {
 }
 
 dependencies {
-    implementation(androidx.android.gradlePlugin)
-    implementation(kotlinx.kotlin.gradlePlugin)
-    implementation(kotlinx.ksp.gradlePlugin)
-    implementation(kotlinx.compose.compiler.gradlePlugin)
-    implementation(composes.compose.graldePlugin)
+    implementation(libs.android.gradlePlugin)
+    implementation(libs.kotlin.gradlePlugin)
+    implementation(libs.ksp.gradlePlugin)
+    implementation(libs.compose.compiler.gradlePlugin)
+    implementation(libs.compose.gradlePlugin)
 }

@@ -1,7 +1,7 @@
 plugins {
     id("pixiv.multiplatform.compose")
-    alias(kotlinx.plugins.serialization)
-    alias(kotlinx.plugins.ktorfit)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ktorfit)
 }
 
 kotlin {
@@ -14,9 +14,9 @@ kotlin {
             implementation(project(":common:data"))
 
             // Serialization
-            implementation(kotlinx.bundles.serialization)
+            implementation(libs.bundles.kotlinx.serialization)
             // Ktorfit
-            implementation(kotlinx.ktorfit.lite)
+            implementation(libs.kotlinx.ktorfit.lite)
         }
     }
 }

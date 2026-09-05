@@ -19,20 +19,17 @@ internal fun KotlinMultiplatformAndroidLibraryTarget.configureKotlinMultiplatfor
 
 internal fun KotlinMultiplatformExtension.commonDependencies() {
     val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
-    val kotlinx = project.extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
-    val androidx = project.extensions.getByType<VersionCatalogsExtension>().named("androidx")
-    val compose = project.extensions.getByType<VersionCatalogsExtension>().named("composes")
     sourceSets.apply {
         commonMain.dependencies {
             // Lifecycle
-            implementation(compose.findBundle("lifecycle").get())
+            implementation(libs.findBundle("compose-lifecycle").get())
             // Coroutines
             implementation(
                 project.dependencies.platform(
-                    kotlinx.findLibrary("coroutines-bom").get()
+                    libs.findLibrary("kotlinx-coroutines-bom").get()
                 )
             )
-            implementation(kotlinx.findLibrary("coroutines-core").get())
+            implementation(libs.findLibrary("kotlinx-coroutines-core").get())
             // Koin
             implementation(libs.findBundle("koin").get())
 
@@ -40,16 +37,16 @@ internal fun KotlinMultiplatformExtension.commonDependencies() {
             implementation(libs.findLibrary("kermit").get())
         }
         androidMain.dependencies {
-            implementation(androidx.findBundle("androidx").get())
+            implementation(libs.findBundle("androidx").get())
             // Coroutines
-            implementation(kotlinx.findLibrary("coroutines-android").get())
+            implementation(libs.findLibrary("kotlinx-coroutines-android").get())
         }
         iosMain.dependencies {
 
         }
         jvmMain.dependencies {
             // Coroutines
-            implementation(kotlinx.findLibrary("coroutines-swing").get())
+            implementation(libs.findLibrary("kotlinx-coroutines-swing").get())
         }
     }
     project.dependencies {
@@ -66,22 +63,20 @@ internal fun KotlinMultiplatformExtension.commonDependencies() {
 }
 
 internal fun KotlinMultiplatformExtension.composeDependencies() {
-    val compose = project.extensions.getByType<VersionCatalogsExtension>().named("composes")
-    val kotlinx = project.extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
     val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
     sourceSets.apply {
         commonMain.dependencies {
             // Compose
-            implementation(compose.findBundle("baselibs").get())
-            implementation(compose.findLibrary("jetbrains-compose-resources").get())
-            implementation(compose.findLibrary("jetbrains-ui-tooling-preview").get())
+            implementation(libs.findBundle("compose-baselibs").get())
+            implementation(libs.findLibrary("compose-jetbrains-compose-resources").get())
+            implementation(libs.findLibrary("compose-jetbrains-ui-tooling-preview").get())
             // KotlinX Collections Immutable
-            implementation(kotlinx.findLibrary("collections-immutable").get())
+            implementation(libs.findLibrary("kotlinx-collections-immutable").get())
             // Toast
             implementation(libs.findLibrary("sonner").get())
         }
         androidMain.dependencies {
-            implementation(compose.findBundle("baselibs-android").get())
+            implementation(libs.findBundle("compose-baselibs-android").get())
         }
         iosMain.dependencies {
 

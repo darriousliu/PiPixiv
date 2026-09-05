@@ -18,10 +18,10 @@ kotlin {
             implementation(project(":common:core"))
 
             // Paging
-            implementation(androidx.bundles.paging)
+            implementation(libs.bundles.androidx.paging)
 
             // Navigation3
-            implementation(composes.bundles.navigation3)
+            implementation(libs.bundles.compose.navigation3)
             // Coil3
             implementation(project.dependencies.platform(libs.coil3.bom))
             implementation(libs.bundles.coil3)
@@ -30,13 +30,13 @@ kotlin {
             implementation(libs.filekit.dialogs)
             implementation(libs.filekit.dialogs.compose)
             implementation(libs.html.converter)
-            implementation(composes.navigationevent.compose)
+            implementation(libs.compose.navigationevent.compose)
         }
         androidMain.dependencies {
             // Navigation3
-            implementation(composes.bundles.navigation3.android)
+            implementation(libs.bundles.compose.navigation3.android)
             // Permission
-            implementation(composes.accompanist.permissions)
+            implementation(libs.compose.accompanist.permissions)
         }
     }
 }

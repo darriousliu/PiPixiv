@@ -1,6 +1,6 @@
 plugins {
     id("pixiv.multiplatform.compose")
-    alias(kotlinx.plugins.serialization)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -10,10 +10,10 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // Serialization
-            implementation(kotlinx.bundles.serialization)
+            implementation(libs.bundles.kotlinx.serialization)
             // Room
-            implementation(androidx.room.runtime)
-            implementation(androidx.sqlite.bundled)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
             // Koin
             implementation(libs.bundles.koin)
             // FileKit
@@ -21,16 +21,16 @@ kotlin {
         }
         jvmTest.dependencies {
             implementation(kotlin("test"))
-            implementation(project.dependencies.platform(kotlinx.coroutines.bom))
-            implementation(kotlinx.coroutines.test)
+            implementation(project.dependencies.platform(libs.kotlinx.coroutines.bom))
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 
 }
 
 dependencies {
-    kspAndroid(androidx.room.compiler)
-    kspIosArm64(androidx.room.compiler)
-    kspIosSimulatorArm64(androidx.room.compiler)
-    kspJvm(androidx.room.compiler)
+    kspAndroid(libs.androidx.room.compiler)
+    kspIosArm64(libs.androidx.room.compiler)
+    kspIosSimulatorArm64(libs.androidx.room.compiler)
+    kspJvm(libs.androidx.room.compiler)
 }

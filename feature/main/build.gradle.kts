@@ -18,11 +18,11 @@ kotlin {
             implementation(project(":feature:follow"))
 
             // Paging
-            implementation(androidx.bundles.paging)
+            implementation(libs.bundles.androidx.paging)
             // Coil3
             implementation(project.dependencies.platform(libs.coil3.bom))
             implementation(libs.bundles.coil3)
-            implementation(kotlinx.datetime)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.html.converter)
         }
 

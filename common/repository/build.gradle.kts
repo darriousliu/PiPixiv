@@ -1,6 +1,6 @@
 plugins {
     id("pixiv.multiplatform.compose")
-    alias(kotlinx.plugins.serialization)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -19,11 +19,11 @@ kotlin {
             implementation(project(":common:core"))
 
             // Paging
-            implementation(androidx.bundles.paging)
+            implementation(libs.bundles.androidx.paging)
             // Serialization
-            implementation(kotlinx.bundles.serialization)
+            implementation(libs.bundles.kotlinx.serialization)
             // Ktor
-            implementation(kotlinx.bundles.ktor)
+            implementation(libs.bundles.kotlinx.ktor)
 
             // Coil
             implementation(project.dependencies.platform(libs.coil3.bom))
@@ -36,14 +36,14 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation(project.dependencies.platform(kotlinx.coroutines.bom))
-            implementation(kotlinx.coroutines.test)
-            implementation(kotlinx.ktor.client.mock)
+            implementation(project.dependencies.platform(libs.kotlinx.coroutines.bom))
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.kotlinx.ktor.client.mock)
         }
 
         androidMain.dependencies {
             // WorkManager
-            implementation(androidx.bundles.workmanager)
+            implementation(libs.bundles.androidx.workmanager)
         }
     }
 }

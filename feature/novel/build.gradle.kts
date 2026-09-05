@@ -17,11 +17,11 @@ kotlin {
             implementation(project(":common:core"))
 
             // Paging
-            implementation(androidx.bundles.paging)
+            implementation(libs.bundles.androidx.paging)
             // Coil3
             implementation(project.dependencies.platform(libs.coil3.bom))
             implementation(libs.bundles.coil3)
-            implementation(kotlinx.serialization.json)
+            implementation(libs.kotlinx.serialization.json)
             implementation(libs.filekit.dialogs)
             implementation(libs.okio)
             implementation(libs.html.converter)
@@ -29,7 +29,7 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation(kotlinx.coroutines.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }

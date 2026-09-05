@@ -3,8 +3,8 @@ import java.util.Properties
 
 plugins {
     id("pixiv.multiplatform.compose")
-    alias(kotlinx.plugins.serialization)
-    alias(kotlinx.plugins.parcelize)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.build.konfig)
 }
 
@@ -34,15 +34,15 @@ kotlin {
                 api(project(":common:analytics-foss"))
             }
             implementation(project(":common:data"))
-            implementation(composes.jetbrains.compose.resources)
-            implementation(androidx.annotation)
-            implementation(composes.bundles.navigation3)
+            implementation(libs.compose.jetbrains.compose.resources)
+            implementation(libs.androidx.annotation)
+            implementation(libs.bundles.compose.navigation3)
             // Ktor
-            implementation(kotlinx.bundles.ktor)
+            implementation(libs.bundles.kotlinx.ktor)
             // Serialization
-            implementation(kotlinx.bundles.serialization)
+            implementation(libs.bundles.kotlinx.serialization)
             // DateTime
-            implementation(kotlinx.datetime)
+            implementation(libs.kotlinx.datetime)
             // Coil3
             implementation(project.dependencies.platform(libs.coil3.bom))
             implementation(libs.bundles.coil3)
@@ -56,9 +56,9 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.material)
-            implementation(androidx.lifecycle.process)
-            implementation(composes.bundles.navigation3.android)
-            implementation(kotlinx.ktor.client.okhttp)
+            implementation(libs.androidx.lifecycle.process)
+            implementation(libs.bundles.compose.navigation3.android)
+            implementation(libs.kotlinx.ktor.client.okhttp)
             implementation(libs.coil3.gif)
             implementation(libs.mmkv)
         }
