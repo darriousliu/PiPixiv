@@ -203,7 +203,7 @@ fun NovelScreen(
     }
 
     // 沉浸逻辑: 滚动到正文区域时隐藏TopBar和FAB
-    val isContentVisible by remember {
+    val isContentVisible by remember(listState) {
         derivedStateOf {
             listState.layoutInfo.visibleItemsInfo.firstOrNull()?.key is Int // index
         }
