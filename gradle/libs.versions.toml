@@ -70,7 +70,7 @@ serialization = "1.11.0"
 coroutines = "1.11.0"
 ktor = "3.5.2"
 ktorfit = "2.7.5"
-datetime = "0.8.0"
+datetime = "0.8.0-0.6.x-compat"
 collections-immutable = "0.5.2"
 
 [libraries]
