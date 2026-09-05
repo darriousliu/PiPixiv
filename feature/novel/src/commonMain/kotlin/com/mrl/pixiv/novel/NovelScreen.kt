@@ -215,6 +215,7 @@ fun NovelScreen(
         state.paragraphs,
         state.isTranslating,
         listState,
+        paragraphLayoutCacheKey,
     ) {
         derivedStateOf {
             if (state.isTranslating) return@derivedStateOf 0f
