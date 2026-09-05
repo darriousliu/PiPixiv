@@ -226,7 +226,7 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: ./gradlew :composeApp:buildReleaseIpa
+        run: ./gradlew :composeApp:buildReleaseIpa -Pdebug=false
 
       - name: Upload iOS Artifacts
         uses: actions/upload-artifact@v7
