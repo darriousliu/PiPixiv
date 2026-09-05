@@ -311,6 +311,10 @@
     <string name="show_novel">이 소설 표시</string>
     <string name="block_tag_as_regex">정규식으로 매칭</string>
     <string name="browsing_setting">탐색 설정</string>
+    <string name="privacy_setting">개인정보 설정</string>
+    <string name="read_clipboard_on_search">검색 화면을 열 때 클립보드 읽기</string>
+    <string name="read_clipboard_on_search_desc">활성화하면 검색 화면을 열 때 클립보드에서 Pixiv 링크를 감지합니다</string>
+    <string name="select_pixiv_link">열 Pixiv 링크 선택</string>
     <string name="search_setting">검색 설정</string>
     <string name="default_search_target">기본 검색 대상</string>
     <string name="default_search_sort">기본 검색 정렬</string>
@@ -369,4 +373,26 @@
     <string name="read_later_status_running">번역 중</string>
     <string name="read_later_status_ready">번역 준비 완료</string>
     <string name="read_later_status_failed">번역 실패</string>
+    <string name="profile_details">프로필 정보</string>
+    <string name="profile_account">계정</string>
+    <string name="profile_webpage">웹사이트</string>
+    <string name="profile_birthday">생일</string>
+    <string name="profile_region">지역</string>
+    <string name="profile_job">직업</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitter 링크</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">작업 환경</string>
+    <string name="profile_pc">컴퓨터</string>
+    <string name="profile_monitor">모니터</string>
+    <string name="profile_tool">도구</string>
+    <string name="profile_scanner">스캐너</string>
+    <string name="profile_tablet">그래픽 태블릿</string>
+    <string name="profile_mouse">마우스</string>
+    <string name="profile_printer">프린터</string>
+    <string name="profile_desktop">데스크톱</string>
+    <string name="profile_music">음악</string>
+    <string name="profile_desk">책상</string>
+    <string name="profile_chair">의자</string>
+    <string name="profile_workspace_comment">메모</string>
 </resources>

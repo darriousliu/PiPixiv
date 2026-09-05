@@ -117,4 +117,22 @@ class SearchViewModel : BaseMviViewModel<SearchState, SearchAction>(
     fun switchViewMode(mode: AppViewMode) {
         SettingRepository.setAppViewMode(mode)
     }
+
+    fun isClipboardTextChanged(text: String): Boolean = clipboardTextTracker.hasChanged(text)
+
+    private companion object {
+        val clipboardTextTracker = ClipboardTextChangeTracker()
+    }
+}
+
+internal class ClipboardTextChangeTracker {
+    private var initialized = false
+    private var lastText = ""
+
+    fun hasChanged(text: String): Boolean {
+        if (initialized && text == lastText) return false
+        initialized = true
+        lastText = text
+        return true
+    }
 }

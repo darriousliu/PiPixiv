@@ -311,6 +311,10 @@
     <string name="show_novel">顯示這部小說</string>
     <string name="block_tag_as_regex">以正則表達式比對</string>
     <string name="browsing_setting">瀏覽設定</string>
+    <string name="privacy_setting">隱私設定</string>
+    <string name="read_clipboard_on_search">進入搜尋時讀取剪貼簿</string>
+    <string name="read_clipboard_on_search_desc">開啟後，進入搜尋頁面時讀取剪貼簿並辨識其中的 Pixiv 連結</string>
+    <string name="select_pixiv_link">選擇要開啟的 Pixiv 連結</string>
     <string name="search_setting">搜尋設定</string>
     <string name="default_search_target">預設搜尋範圍</string>
     <string name="default_search_sort">預設搜尋排序</string>
@@ -369,4 +373,26 @@
     <string name="read_later_status_running">正在翻譯</string>
     <string name="read_later_status_ready">翻譯已就緒</string>
     <string name="read_later_status_failed">翻譯失敗</string>
+    <string name="profile_details">個人資料</string>
+    <string name="profile_account">帳號</string>
+    <string name="profile_webpage">網站</string>
+    <string name="profile_birthday">生日</string>
+    <string name="profile_region">地區</string>
+    <string name="profile_job">職業</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitter 連結</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">工作環境</string>
+    <string name="profile_pc">電腦</string>
+    <string name="profile_monitor">顯示器</string>
+    <string name="profile_tool">工具</string>
+    <string name="profile_scanner">掃描器</string>
+    <string name="profile_tablet">數位板</string>
+    <string name="profile_mouse">滑鼠</string>
+    <string name="profile_printer">印表機</string>
+    <string name="profile_desktop">桌面</string>
+    <string name="profile_music">音樂</string>
+    <string name="profile_desk">書桌</string>
+    <string name="profile_chair">椅子</string>
+    <string name="profile_workspace_comment">備註</string>
 </resources>

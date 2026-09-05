@@ -17,10 +17,13 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Close
@@ -59,6 +62,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -107,6 +111,8 @@ import com.mrl.pixiv.strings.novel_collection
 import com.mrl.pixiv.strings.novel_hidden
 import com.mrl.pixiv.strings.novel_marker
 import com.mrl.pixiv.strings.novel_marker_page
+import com.mrl.pixiv.strings.novel_work_information
+import com.mrl.pixiv.strings.read_later
 import com.mrl.pixiv.strings.regenerate_translation
 import com.mrl.pixiv.strings.share_link
 import com.mrl.pixiv.strings.show_novel
@@ -159,10 +165,19 @@ fun NovelScreen(
 ) {
     val uriHandler = LocalUriHandler.current
     val state = viewModel.asState()
-    val currentNovelId = state.novel?.id ?: novelId
+    val chapterStateKey = novelChapterStateKey(
+        entryNovelId = novelId,
+        loadedNovelId = state.novel?.id,
+    )
+    val currentNovelId = chapterStateKey
     val isNovelBlocked = BlockingRepositoryV2.collectNovelBlockAsState(currentNovelId)
-    val listState = rememberLazyListState()
-    val paragraphLayouts = remember(state.novel?.id) { mutableStateMapOf<Int, TextLayoutResult>() }
+    val listState = key(chapterStateKey) {
+        rememberLazyListState()
+    }
+    val paragraphLayoutCacheKey = state.paragraphLayoutCacheKey()
+    val paragraphLayouts = remember(paragraphLayoutCacheKey) {
+        mutableStateMapOf<Int, TextLayoutResult>()
+    }
     val cumulativeParagraphLengths = remember(state.paragraphs) {
         buildCumulativeParagraphLengths(state.paragraphs)
     }
@@ -170,6 +185,7 @@ fun NovelScreen(
         markerPagesForSpans(state.paragraphSpans)
     }
     var showBookmarkBottomSheet by remember { mutableStateOf(false) }
+    var showMetadataBottomSheet by remember(state.novel?.id) { mutableStateOf(false) }
     var translationListAnchor by remember(state.novel?.id) {
         mutableStateOf<NovelTranslationListAnchor?>(null)
     }
@@ -187,7 +203,7 @@ fun NovelScreen(
     }
 
     // 沉浸逻辑: 滚动到正文区域时隐藏TopBar和FAB
-    val isContentVisible by remember {
+    val isContentVisible by remember(listState) {
         derivedStateOf {
             listState.layoutInfo.visibleItemsInfo.firstOrNull()?.key is Int // index
         }
@@ -199,6 +215,7 @@ fun NovelScreen(
         state.paragraphs,
         state.isTranslating,
         listState,
+        paragraphLayoutCacheKey,
     ) {
         derivedStateOf {
             if (state.isTranslating) return@derivedStateOf 0f
@@ -294,8 +311,7 @@ fun NovelScreen(
         val targetItemIndex = paragraphStartIndex + resolvedProgress.paragraphIndex
         Logger.d(tag = "NovelScreen") { "Restore: paragraphStartIndex=$paragraphStartIndex, targetItemIndex=$targetItemIndex" }
 
-        // 清空布局缓存并滚动到目标段落
-        paragraphLayouts.clear()
+        // 先滚动到目标段落；布局缓存已按正文和排版参数隔离，只会包含当前布局结果。
         listState.scrollToItem(targetItemIndex, 0)
 
         // 等待目标段落的布局完成。包含图片标记的段落可能没有文本布局，这里做超时兜底。
@@ -390,6 +406,19 @@ fun NovelScreen(
         }
     }
 
+    val requestTranslation: () -> Unit = request@{
+        val novel = state.novel ?: return@request
+        translationListAnchor = NovelTranslationListAnchor(
+            novelId = novel.id,
+            itemIndex = listState.firstVisibleItemIndex,
+            scrollOffset = listState.firstVisibleItemScrollOffset,
+        )
+        saveReadingProgress()
+        viewModel.dispatch(
+            NovelIntent.TranslateNovel(forceRefresh = state.isTranslated)
+        )
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         floatingActionButton = {
@@ -405,6 +434,7 @@ fun NovelScreen(
                     if (state.prevNovelId != null) {
                         FloatingActionButton(
                             onClick = {
+                                saveReadingProgress()
                                 viewModel.dispatch(NovelIntent.NavigateToChapter(state.prevNovelId))
                             }
                         ) {
@@ -419,6 +449,7 @@ fun NovelScreen(
                     if (state.nextNovelId != null) {
                         FloatingActionButton(
                             onClick = {
+                                saveReadingProgress()
                                 viewModel.dispatch(NovelIntent.NavigateToChapter(state.nextNovelId))
                             }
                         ) {
@@ -555,75 +586,24 @@ fun NovelScreen(
                             },
                             actions = {
                                 if (!isNovelBlocked) {
-                                    NovelReadLaterButton(
-                                        novel = state.novel,
-                                        tint = LocalContentColor.current,
-                                    )
-                                    IconButton(
-                                        onClick = {
-                                            if (state.isTranslating) {
+                                    if (state.isTranslating) {
+                                        IconButton(
+                                            onClick = {
                                                 viewModel.dispatch(NovelIntent.CancelTranslation)
-                                            } else {
-                                                translationListAnchor = NovelTranslationListAnchor(
-                                                    novelId = state.novel.id,
-                                                    itemIndex = listState.firstVisibleItemIndex,
-                                                    scrollOffset =
-                                                        listState.firstVisibleItemScrollOffset,
-                                                )
-                                                saveReadingProgress()
-                                                viewModel.dispatch(
-                                                    NovelIntent.TranslateNovel(forceRefresh = state.isTranslated)
-                                                )
                                             }
-                                        }
-                                    ) {
-                                        if (state.isTranslating) {
+                                        ) {
                                             Icon(
                                                 imageVector = Icons.Rounded.Close,
                                                 contentDescription = stringResource(RStrings.cancel)
                                             )
-                                        } else {
-                                            Icon(
-                                                imageVector = if (state.isTranslated) {
-                                                    Icons.Rounded.Refresh
-                                                } else {
-                                                    Icons.Rounded.Translate
-                                                },
-                                                contentDescription = stringResource(
-                                                    if (state.isTranslated) {
-                                                        RStrings.regenerate_translation
-                                                    } else {
-                                                        RStrings.translate_novel
-                                                    }
-                                                )
-                                            )
                                         }
-                                    }
-                                    if (state.isTranslated) {
-                                        IconButton(
-                                            onClick = { viewModel.dispatch(NovelIntent.ToggleDisplayOriginalText) }
-                                        ) {
+                                    } else if (!state.isTranslated) {
+                                        IconButton(onClick = requestTranslation) {
                                             Icon(
-                                                imageVector = if (state.isShowingOriginalText) {
-                                                    Icons.Rounded.Translate
-                                                } else {
-                                                    Icons.Rounded.Visibility
-                                                },
+                                                imageVector = Icons.Rounded.Translate,
                                                 contentDescription = stringResource(
-                                                    if (state.isShowingOriginalText) {
-                                                        RStrings.show_translated_text
-                                                    } else {
-                                                        RStrings.show_original_text
-                                                    }
+                                                    RStrings.translate_novel
                                                 )
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = { viewModel.dispatch(NovelIntent.DeleteNovelTranslation) }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Rounded.Delete,
-                                                contentDescription = stringResource(RStrings.delete_translation)
                                             )
                                         }
                                     }
@@ -675,6 +655,16 @@ fun NovelScreen(
                                         }
                                     }
                                     IconButton(
+                                        onClick = { showMetadataBottomSheet = true }
+                                    ) {
+                                        Icon(
+                                            Icons.Outlined.Info,
+                                            contentDescription = stringResource(
+                                                RStrings.novel_work_information
+                                            )
+                                        )
+                                    }
+                                    IconButton(
                                         onClick = { viewModel.dispatch(NovelIntent.ToggleBottomSheet) }
                                     ) {
                                         Icon(
@@ -709,6 +699,54 @@ fun NovelScreen(
         )
     }
 
+    if (showMetadataBottomSheet && state.novel != null && !isNovelBlocked) {
+        NovelMetadataBottomSheet(
+            novel = state.novel,
+            onDismissRequest = { showMetadataBottomSheet = false },
+            onAuthorClick = { userId ->
+                showMetadataBottomSheet = false
+                navigationManager.navigateToProfileDetailScreen(userId)
+            },
+            onSeriesClick = { seriesId ->
+                showMetadataBottomSheet = false
+                navigationManager.navigateToNovelSeriesScreen(seriesId)
+            },
+            onTagClick = { tag ->
+                showMetadataBottomSheet = false
+                navigationManager.navigateToSearchResultScreen(
+                    searchWord = tag,
+                    isIdSearch = false,
+                    searchMode = AppViewMode.NOVEL
+                )
+            },
+            onCaptionLinkClick = { url ->
+                showMetadataBottomSheet = false
+                when (val target = resolveNovelCaptionLink(url)) {
+                    is NovelCaptionLinkTarget.Illust ->
+                        navigationManager.navigateToSinglePictureScreen(target.id)
+
+                    is NovelCaptionLinkTarget.Novel ->
+                        navigationManager.navigateToNovelDetailScreen(target.id)
+
+                    is NovelCaptionLinkTarget.User ->
+                        navigationManager.navigateToProfileDetailScreen(target.id)
+
+                    is NovelCaptionLinkTarget.External ->
+                        runCatching { uriHandler.openUri(target.url) }
+
+                    null -> Unit
+                }
+            },
+            onCommentClick = {
+                showMetadataBottomSheet = false
+                navigationManager.navigateToCommentScreen(
+                    state.novel.id,
+                    CommentType.NOVEL
+                )
+            },
+        )
+    }
+
     // BottomSheet
     if (state.showBottomSheet) {
         ModalBottomSheet(
@@ -727,6 +765,16 @@ fun NovelScreen(
                 },
                 onExport = { viewModel.dispatch(NovelIntent.ExportToTxt) },
                 onShare = { viewModel.dispatch(NovelIntent.ShareNovel) },
+                onToggleDisplayedText = {
+                    viewModel.dispatch(NovelIntent.ToggleDisplayOriginalText)
+                },
+                onDeleteTranslation = {
+                    viewModel.dispatch(NovelIntent.DeleteNovelTranslation)
+                },
+                onRegenerateTranslation = {
+                    viewModel.dispatch(NovelIntent.ToggleBottomSheet)
+                    requestTranslation()
+                },
                 onAiSetting = {
                     viewModel.dispatch(NovelIntent.ToggleBottomSheet)
                     navigationManager.navigateToAiTranslationSettingScreen()
@@ -752,13 +800,18 @@ private fun NovelBottomSheetContent(
     onLineSpacingChange: (Int) -> Unit,
     onExport: () -> Unit,
     onShare: () -> Unit,
+    onToggleDisplayedText: () -> Unit,
+    onDeleteTranslation: () -> Unit,
+    onRegenerateTranslation: () -> Unit,
     onAiSetting: () -> Unit,
     isNovelBlocked: Boolean,
     onBlockNovel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
     ) {
         val colors =
             ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
@@ -833,6 +886,87 @@ private fun NovelBottomSheetContent(
             },
             colors = colors
         )
+
+        state.novel?.let { novel ->
+            ListItem(
+                headlineContent = { Text(text = stringResource(RStrings.read_later)) },
+                trailingContent = {
+                    NovelReadLaterButton(
+                        novel = novel,
+                        tint = LocalContentColor.current,
+                    )
+                },
+                colors = colors
+            )
+        }
+
+        if (state.isTranslated && !state.isTranslating) {
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(RStrings.regenerate_translation))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .throttleClick(onClick = onRegenerateTranslation),
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Rounded.Refresh,
+                        contentDescription = stringResource(RStrings.regenerate_translation)
+                    )
+                },
+                colors = colors
+            )
+
+            ListItem(
+                headlineContent = {
+                    Text(
+                        text = stringResource(
+                            if (state.isShowingOriginalText) {
+                                RStrings.show_translated_text
+                            } else {
+                                RStrings.show_original_text
+                            }
+                        )
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .throttleClick(onClick = onToggleDisplayedText),
+                leadingContent = {
+                    Icon(
+                        imageVector = if (state.isShowingOriginalText) {
+                            Icons.Rounded.Translate
+                        } else {
+                            Icons.Rounded.Visibility
+                        },
+                        contentDescription = stringResource(
+                            if (state.isShowingOriginalText) {
+                                RStrings.show_translated_text
+                            } else {
+                                RStrings.show_original_text
+                            }
+                        )
+                    )
+                },
+                colors = colors
+            )
+
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(RStrings.delete_translation))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .throttleClick(onClick = onDeleteTranslation),
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = stringResource(RStrings.delete_translation)
+                    )
+                },
+                colors = colors
+            )
+        }
 
         ListItem(
             headlineContent = {

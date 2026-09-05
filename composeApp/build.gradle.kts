@@ -5,9 +5,58 @@ import org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask
 
 plugins {
     id("pixiv.multiplatform.compose")
-    alias(composes.plugins.composeHotReload)
-    alias(kotlinx.plugins.native.cocoapods)
+    alias(libs.plugins.composeHotReload)
 }
+
+val desktopOsName = System.getProperty("os.name").toString()
+val (desktopOsResourceDirectory, mmkvNativeLibraryName, mmkvNativeLibraryDependency) = when {
+    desktopOsName == "Mac OS X" ->
+        Triple("macos", "libmmkvc.dylib", libs.mmkv.kotlin.nativelib.macos)
+
+    desktopOsName.startsWith("Windows") ->
+        Triple("windows", "mmkvc.dll", libs.mmkv.kotlin.nativelib.windows)
+
+    desktopOsName.startsWith("Linux") ->
+        Triple("linux", "libmmkvc.so", libs.mmkv.kotlin.nativelib.linux)
+
+    else -> error("Unsupported desktop OS: $desktopOsName")
+}
+
+val mmkvNativeLibrary = configurations.create("mmkvNativeLibrary") {
+    description = "MMKV native library used only as an input to the Compose app resources task"
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isTransitive = false
+}
+
+dependencies {
+    add(mmkvNativeLibrary.name, mmkvNativeLibraryDependency)
+}
+
+val composeResourcesDirectory =
+    layout.projectDirectory.dir("src/commonMain/composeResources/files")
+val mmkvComposeResourcesDirectory = composeResourcesDirectory.dir("mmkv")
+
+val copyMMKVNativeLibraryToComposeResources =
+    tasks.register("copyMMKVNativeLibraryToComposeResources", Copy::class) {
+        group = "build"
+        description = "Copies the current platform's MMKV native library into Compose app resources"
+
+        val nativeLibraryArchives = mmkvNativeLibrary.incoming.files.elements.map { artifacts ->
+            artifacts.map { zipTree(it.asFile) }
+        }
+        from(nativeLibraryArchives) {
+            include(mmkvNativeLibraryName)
+        }
+        into(mmkvComposeResourcesDirectory)
+
+        doLast {
+            val copiedLibrary = destinationDir.resolve(mmkvNativeLibraryName)
+            check(copiedLibrary.isFile) {
+                "MMKV native library $mmkvNativeLibraryName was not found in ${mmkvNativeLibrary.files}"
+            }
+        }
+    }
 
 if (findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.sentry.kmp.get().pluginId)
@@ -21,18 +70,6 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
-    cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        version = "1.0"
-        ios.deploymentTarget = "17.0"
-        framework {
-            baseName = "ComposeApp"
-            isStatic = true
-            export(project(":common:core"))
-        }
-    }
-
     jvm()
 
     sourceSets {
@@ -45,11 +82,11 @@ kotlin {
                 implementation(project(":common:network"))
                 implementation(project(":common:repository"))
                 implementation(project(":common:ui"))
-                api(project(":common:core"))
+                implementation(project(":common:core"))
                 rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
                     implementation(project(":feature:${it.name}"))
                 }
-                implementation(composes.bundles.navigation3)
+                implementation(libs.bundles.compose.navigation3)
                 // Coil3
                 implementation(project.dependencies.platform(libs.coil3.bom))
                 implementation(libs.bundles.coil3)
@@ -62,7 +99,7 @@ kotlin {
         androidMain {
             dependencies {
                 // Navigation3
-                implementation(composes.bundles.navigation3.android)
+                implementation(libs.bundles.compose.navigation3.android)
             }
         }
         iosMain {
@@ -116,6 +153,25 @@ compose.desktop {
 
         jvmArgs("--enable-native-access", "ALL-UNNAMED")
     }
+}
+
+tasks.matching { it.name == "copyNonXmlValueResourcesForCommonMain" }.configureEach {
+    dependsOn(copyMMKVNativeLibraryToComposeResources)
+}
+
+val directJvmRunTasks = setOf("jvmRun", "hotRunJvm", "hotDevJvm")
+tasks.withType(JavaExec::class.java).configureEach {
+    if (name in directJvmRunTasks) {
+        dependsOn(copyMMKVNativeLibraryToComposeResources)
+        systemProperty(
+            "compose.application.resources.dir",
+            composeResourcesDirectory.asFile.absolutePath,
+        )
+    }
+}
+
+tasks.matching { it.name == "hotRunJvmAsync" || it.name == "hotDevJvmAsync" }.configureEach {
+    dependsOn(copyMMKVNativeLibraryToComposeResources)
 }
 
 logger.quiet("debug: ${findProperty("debug")}")
@@ -173,7 +229,7 @@ fun ipaArguments(
 ): Array<String> {
     return arrayOf(
         "xcodebuild",
-        "-workspace", "PiPixiv.xcworkspace",
+        "-project", "PiPixiv.xcodeproj",
         "-scheme", "PiPixiv",
         "-destination", destination,
         "-sdk", sdk,
@@ -184,10 +240,9 @@ fun ipaArguments(
 
 val buildReleaseArchive = tasks.register("buildReleaseArchive", Exec::class) {
     group = "build"
-    description = "Builds the iOS framework for Release"
+    description = "Archives the iOS app with the Swift Export package"
     workingDir(rootDir.resolve("iosApp"))
 
-    dependsOn(":composeApp:linkPodReleaseFrameworkIosArm64")
     val output = layout.buildDirectory.dir("archives/release/PiPixiv.xcarchive")
     outputs.dir(output)
     commandLine(
@@ -277,5 +332,3 @@ tasks.register("buildReleaseIpa", BuildIpaTask::class) {
     outputIpa = layout.buildDirectory.file("archives/release/PiPixiv.ipa")
     dependsOn(buildReleaseArchive)
 }
-
-

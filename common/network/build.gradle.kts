@@ -1,6 +1,6 @@
 plugins {
     id("pixiv.multiplatform")
-    alias(kotlinx.plugins.serialization)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -21,12 +21,12 @@ kotlin {
             implementation(project(":common:core"))
 
             // Serialization
-            implementation(kotlinx.bundles.serialization)
+            implementation(libs.bundles.kotlinx.serialization)
             // Ktor
-            implementation(kotlinx.bundles.ktor)
+            implementation(libs.bundles.kotlinx.ktor)
 
             // DateTime
-            implementation(kotlinx.datetime)
+            implementation(libs.kotlinx.datetime)
         }
 
         androidJvmMain.dependencies {
@@ -35,15 +35,15 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(kotlinx.ktor.client.okhttp)
+            implementation(libs.kotlinx.ktor.client.okhttp)
         }
 
         iosMain.dependencies {
-            implementation(kotlinx.ktor.client.darwin)
+            implementation(libs.kotlinx.ktor.client.darwin)
         }
 
         jvmMain.dependencies {
-            implementation(kotlinx.ktor.client.okhttp)
+            implementation(libs.kotlinx.ktor.client.okhttp)
         }
 
         jvmTest.dependencies {

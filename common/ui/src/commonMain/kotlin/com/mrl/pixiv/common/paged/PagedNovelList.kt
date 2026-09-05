@@ -10,6 +10,7 @@ fun LazyListScope.PagedNovelList(
     state: PagedFeedState<Novel>,
     onNovelClick: (Long) -> Unit,
     onSeriesClick: (Long) -> Unit,
+    compactTitle: Boolean = false,
 ) {
     items(
         count = state.items.size,
@@ -20,6 +21,7 @@ fun LazyListScope.PagedNovelList(
             novel = novel,
             onNovelClick = onNovelClick,
             onSeriesClick = onSeriesClick,
+            compactTitle = compactTitle,
             onBookmarkClick = { isBookmarked, restrict, tags ->
                 if (isBookmarked) {
                     BookmarkState.deleteBookmarkNovel(novel.id)

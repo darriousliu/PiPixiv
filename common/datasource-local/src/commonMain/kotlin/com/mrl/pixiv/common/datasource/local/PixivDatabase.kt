@@ -39,7 +39,7 @@ import com.mrl.pixiv.common.datasource.local.entity.NovelTranslationEntity
         IllustHistoryEntity::class,
         NovelHistoryEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 @ConstructedBy(PixivDatabaseConstructor::class)
@@ -267,6 +267,19 @@ abstract class PixivDatabase : RoomDatabase() {
                     CREATE INDEX IF NOT EXISTS index_novel_read_later_userId_state_addedAtMillis
                     ON novel_read_later(userId, state, addedAtMillis)
                     """.trimIndent()
+                )
+            }
+        }
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    "ALTER TABLE novel_translation ADD COLUMN translatedTitle TEXT NOT NULL DEFAULT ''"
+                )
+                connection.execSQL(
+                    "ALTER TABLE novel_translation ADD COLUMN translatedCaption TEXT NOT NULL DEFAULT ''"
+                )
+                connection.execSQL(
+                    "ALTER TABLE novel_translation ADD COLUMN metadataSourceMd5 TEXT NOT NULL DEFAULT ''"
                 )
             }
         }

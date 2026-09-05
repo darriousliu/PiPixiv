@@ -5,7 +5,6 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.DestinationsDeepLink
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.splash.SplashViewModel
@@ -21,31 +20,10 @@ internal actual fun HandleDeeplink(
     LaunchedEffect(intent) {
         if (intent != null) {
             val data = intent.data ?: return@LaunchedEffect
-            when {
-                DestinationsDeepLink.illustRegex.matches(data.toString()) -> {
-                    navigationManager.navigate(
-                        Destination.PictureDeeplink(
-                            data.lastPathSegment?.toLong() ?: 0
-                        )
-                    )
-                }
-
-                DestinationsDeepLink.userRegex.matches(data.toString()) -> {
-                    navigationManager.navigate(
-                        Destination.ProfileDetail(
-                            data.lastPathSegment?.toLong() ?: 0
-                        )
-                    )
-                }
-
-                DestinationsDeepLink.novelRegex.matches(data.toString()) -> {
-                    navigationManager.navigate(
-                        Destination.NovelDetail(
-                            data.getQueryParameter("id")?.toLong() ?: 0
-                        )
-                    )
-                }
-            }
+            DestinationsDeepLink.findLinks(data.toString())
+                .singleOrNull()
+                ?.toDestination()
+                ?.let(navigationManager::navigate)
         }
     }
 }

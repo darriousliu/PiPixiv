@@ -1,11 +1,15 @@
 import Foundation
-import ComposeApp
+import ExportedKotlinPackages
+import KotlinRuntime
+import KotlinRuntimeSupport
+import KotlinStdlib
+import PiPixivPlatform
 import ZIPFoundation
 
-class IosZipUtil: NSObject, ZipUtil {
+class IosZipUtil: util.ZipUtilBridge {
     static let shared = IosZipUtil()
 
-    func compress(sourcePath: String, destinationPath: String) -> Bool {
+    override func compress(sourcePath: String, destinationPath: String) -> Bool {
         let sourceURL = getValidURL(path: sourcePath)
         let destinationURL = getValidURL(path: destinationPath)
         do {
@@ -17,7 +21,10 @@ class IosZipUtil: NSObject, ZipUtil {
         }
     }
 
-    func getZipEntryContent(zipFilePath: String, entryName: String) -> KotlinByteArray? {
+    override func getZipEntryContent(
+        zipFilePath: String,
+        entryName: String
+    ) -> ExportedKotlinPackages.kotlin.ByteArray? {
         let sourceURL = getValidURL(path: zipFilePath)
         guard let archive = try? Archive(url: sourceURL, accessMode: .read),
               let entry = archive[entryName]
@@ -35,30 +42,29 @@ class IosZipUtil: NSObject, ZipUtil {
             return nil
         }
 
-        let byteArray = KotlinByteArray(size: Int32(data.count))
-        for (index, byte) in data.enumerated() {
-            byteArray.set(index: Int32(index), value: Int8(bitPattern: byte))
+        return util.createByteArray(size: Int32(data.count)) { index in
+            Int8(bitPattern: data[Int(index)])
         }
-        return byteArray
     }
 
-    func getZipEntryList(zipFilePath: String) -> [KotlinPair<NSString, KotlinBoolean>] {
+    override func getZipEntryList(zipFilePath: String) -> [ExportedKotlinPackages.kotlin.Pair] {
         let sourceURL = getValidURL(path: zipFilePath)
         guard let archive = try? Archive(url: sourceURL, accessMode: .read) else {
             return []
         }
 
-        var list: [KotlinPair<NSString, KotlinBoolean>] = []
+        var list: [ExportedKotlinPackages.kotlin.Pair] = []
         for entry in archive {
-            let path = entry.path as NSString
-            let isDir = entry.type == .directory
-            let pair = KotlinPair(first: path, second: KotlinBoolean(bool: isDir))
+            let pair = ExportedKotlinPackages.kotlin.Pair(
+                first: entry.path,
+                second: entry.type == .directory
+            )
             list.append(pair)
         }
         return list
     }
 
-    func unzip(sourcePath: String, destinationPath: String) -> Bool {
+    override func unzip(sourcePath: String, destinationPath: String) -> Bool {
         let sourceURL = getValidURL(path: sourcePath)
         let destinationURL = getValidURL(path: destinationPath)
         do {

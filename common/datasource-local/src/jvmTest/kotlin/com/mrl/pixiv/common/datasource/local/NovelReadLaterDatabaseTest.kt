@@ -324,6 +324,106 @@ class NovelReadLaterDatabaseTest {
         }
     }
 
+    @Test
+    fun `migration 8 to 9 preserves body cache and defaults metadata fields`() {
+        val connection = BundledSQLiteDriver().open(":memory:")
+        try {
+            connection.execSQL(
+                """
+                CREATE TABLE novel_translation (
+                    novelId INTEGER NOT NULL,
+                    userId INTEGER NOT NULL,
+                    targetLanguage TEXT NOT NULL,
+                    provider TEXT NOT NULL,
+                    model TEXT NOT NULL,
+                    configFingerprint TEXT NOT NULL,
+                    sourceMd5 TEXT NOT NULL,
+                    translatedText TEXT NOT NULL,
+                    updatedAtMillis INTEGER NOT NULL,
+                    PRIMARY KEY(novelId, userId, targetLanguage)
+                )
+                """.trimIndent()
+            )
+            connection.execSQL(
+                """
+                INSERT INTO novel_translation VALUES (
+                    10, 1, 'en', 'OPENAI', 'model', 'fingerprint', 'body-source',
+                    'translated body', 1
+                )
+                """.trimIndent()
+            )
+
+            PixivDatabase.MIGRATION_8_9.migrate(connection)
+
+            val columns = buildSet {
+                connection.prepare("PRAGMA table_info(novel_translation)").use { statement ->
+                    while (statement.step()) {
+                        add(statement.getText(1))
+                    }
+                }
+            }
+            assertTrue(
+                columns.containsAll(
+                    setOf(
+                        "translatedTitle",
+                        "translatedCaption",
+                        "metadataSourceMd5",
+                    )
+                )
+            )
+            connection.prepare(
+                """
+                SELECT configFingerprint, sourceMd5, translatedText, updatedAtMillis,
+                    translatedTitle, translatedCaption, metadataSourceMd5
+                FROM novel_translation
+                WHERE novelId = 10 AND userId = 1 AND targetLanguage = 'en'
+                """.trimIndent()
+            ).use { statement ->
+                assertTrue(statement.step())
+                assertEquals("fingerprint", statement.getText(0))
+                assertEquals("body-source", statement.getText(1))
+                assertEquals("translated body", statement.getText(2))
+                assertEquals(1L, statement.getLong(3))
+                assertEquals("", statement.getText(4))
+                assertEquals("", statement.getText(5))
+                assertEquals("", statement.getText(6))
+            }
+
+            connection.execSQL(
+                """
+                INSERT INTO novel_translation (
+                    novelId,
+                    userId,
+                    targetLanguage,
+                    provider,
+                    model,
+                    configFingerprint,
+                    sourceMd5,
+                    translatedText,
+                    updatedAtMillis
+                ) VALUES (
+                    11, 1, 'en', 'OPENAI', 'model', 'fingerprint', 'new-body-source',
+                    'new translated body', 2
+                )
+                """.trimIndent()
+            )
+            connection.prepare(
+                """
+                SELECT translatedTitle, translatedCaption, metadataSourceMd5
+                FROM novel_translation
+                WHERE novelId = 11 AND userId = 1 AND targetLanguage = 'en'
+                """.trimIndent()
+            ).use { statement ->
+                assertTrue(statement.step())
+                assertEquals("", statement.getText(0))
+                assertEquals("", statement.getText(1))
+                assertEquals("", statement.getText(2))
+            }
+        } finally {
+            connection.close()
+        }
+    }
+
     private fun entity(
         userId: Long = 1L,
         novelId: Long,

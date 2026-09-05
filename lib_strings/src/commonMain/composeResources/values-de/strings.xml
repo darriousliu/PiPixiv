@@ -311,6 +311,10 @@
     <string name="show_novel">Diesen Roman anzeigen</string>
     <string name="block_tag_as_regex">Per regulärem Ausdruck abgleichen</string>
     <string name="browsing_setting">Browsing-Einstellungen</string>
+    <string name="privacy_setting">Datenschutzeinstellungen</string>
+    <string name="read_clipboard_on_search">Zwischenablage beim Öffnen der Suche lesen</string>
+    <string name="read_clipboard_on_search_desc">Wenn aktiviert, liest die Suchseite die Zwischenablage und erkennt darin Pixiv-Links</string>
+    <string name="select_pixiv_link">Zu öffnenden Pixiv-Link auswählen</string>
     <string name="search_setting">Sucheinstellungen</string>
     <string name="default_search_target">Standard-Suchbereich</string>
     <string name="default_search_sort">Standardsortierung der Suche</string>
@@ -369,4 +373,26 @@
     <string name="read_later_status_running">Wird übersetzt</string>
     <string name="read_later_status_ready">Übersetzung bereit</string>
     <string name="read_later_status_failed">Übersetzung fehlgeschlagen</string>
+    <string name="profile_details">Profildetails</string>
+    <string name="profile_account">Konto</string>
+    <string name="profile_webpage">Webseite</string>
+    <string name="profile_birthday">Geburtstag</string>
+    <string name="profile_region">Region</string>
+    <string name="profile_job">Beruf</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitter-Link</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">Arbeitsplatz</string>
+    <string name="profile_pc">Computer</string>
+    <string name="profile_monitor">Monitor</string>
+    <string name="profile_tool">Werkzeuge</string>
+    <string name="profile_scanner">Scanner</string>
+    <string name="profile_tablet">Grafiktablett</string>
+    <string name="profile_mouse">Maus</string>
+    <string name="profile_printer">Drucker</string>
+    <string name="profile_desktop">Desktop</string>
+    <string name="profile_music">Musik</string>
+    <string name="profile_desk">Schreibtisch</string>
+    <string name="profile_chair">Stuhl</string>
+    <string name="profile_workspace_comment">Notizen</string>
 </resources>

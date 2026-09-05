@@ -66,6 +66,21 @@ internal fun paragraphStartItemIndex(
     return itemCountBeforeParagraphs
 }
 
+internal data class ParagraphLayoutCacheKey(
+    val novelId: Long?,
+    val paragraphs: List<String>,
+    val fontSize: Int,
+    val lineSpacingSp: Int,
+)
+
+internal fun NovelState.paragraphLayoutCacheKey(): ParagraphLayoutCacheKey =
+    ParagraphLayoutCacheKey(
+        novelId = novel?.id,
+        paragraphs = paragraphs,
+        fontSize = fontSize,
+        lineSpacingSp = lineSpacingSp,
+    )
+
 internal fun buildVisibleReadingProgress(
     listState: LazyListState,
     paragraphStartIndex: Int,

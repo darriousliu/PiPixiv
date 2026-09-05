@@ -311,6 +311,10 @@
     <string name="show_novel">إظهار هذه الرواية</string>
     <string name="block_tag_as_regex">مطابقة باستخدام تعبير نمطي</string>
     <string name="browsing_setting">إعدادات التصفح</string>
+    <string name="privacy_setting">إعدادات الخصوصية</string>
+    <string name="read_clipboard_on_search">قراءة الحافظة عند فتح البحث</string>
+    <string name="read_clipboard_on_search_desc">عند التفعيل، تقرأ شاشة البحث الحافظة وتكتشف روابط Pixiv الموجودة فيها</string>
+    <string name="select_pixiv_link">اختر رابط Pixiv لفتحه</string>
     <string name="search_setting">إعدادات البحث</string>
     <string name="default_search_target">هدف البحث الافتراضي</string>
     <string name="default_search_sort">ترتيب البحث الافتراضي</string>
@@ -369,4 +373,26 @@
     <string name="read_later_status_running">جارٍ الترجمة</string>
     <string name="read_later_status_ready">الترجمة جاهزة</string>
     <string name="read_later_status_failed">فشلت الترجمة</string>
+    <string name="profile_details">تفاصيل الملف الشخصي</string>
+    <string name="profile_account">الحساب</string>
+    <string name="profile_webpage">الموقع الإلكتروني</string>
+    <string name="profile_birthday">تاريخ الميلاد</string>
+    <string name="profile_region">المنطقة</string>
+    <string name="profile_job">المهنة</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">رابط Twitter</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">مساحة العمل</string>
+    <string name="profile_pc">الكمبيوتر</string>
+    <string name="profile_monitor">الشاشة</string>
+    <string name="profile_tool">الأدوات</string>
+    <string name="profile_scanner">الماسح الضوئي</string>
+    <string name="profile_tablet">لوح الرسم</string>
+    <string name="profile_mouse">الفأرة</string>
+    <string name="profile_printer">الطابعة</string>
+    <string name="profile_desktop">سطح المكتب</string>
+    <string name="profile_music">الموسيقى</string>
+    <string name="profile_desk">المكتب</string>
+    <string name="profile_chair">الكرسي</string>
+    <string name="profile_workspace_comment">ملاحظات</string>
 </resources>

@@ -10,6 +10,7 @@ data class BrowsingSettings(
     val filterLongNovelTags: Boolean = false,
     val maxNovelTagLength: Int = DEFAULT_MAX_NOVEL_TAG_LENGTH,
     val maxNovelTagSegments: Int = DEFAULT_MAX_NOVEL_TAG_SEGMENTS,
+    val searchResultIllustLayout: SearchResultIllustLayout = SearchResultIllustLayout.SQUARE,
 ) {
     companion object {
         const val MIN_NOVEL_TAG_LIMIT = 1
@@ -24,4 +25,10 @@ enum class PreviewImageQuality {
     MEDIUM,
     HIGH,
     ORIGINAL,
+}
+
+@Serializable
+enum class SearchResultIllustLayout {
+    SQUARE,
+    ORIGINAL_ASPECT_RATIO,
 }

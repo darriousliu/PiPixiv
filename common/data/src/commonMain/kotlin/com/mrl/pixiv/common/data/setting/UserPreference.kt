@@ -21,11 +21,13 @@ data class UserPreference(
     val spanCountLandscape: Int = -1,
     val fileNameFormat: String = DEFAULT_FILE_NAME_FORMAT,
     val defaultPrivateBookmark: Boolean = false,
+    val readClipboardOnSearch: Boolean = false,
     val appViewMode: AppViewMode = AppViewMode.ILLUST,
     val aiTranslationConfig: AiTranslationConfig = AiTranslationConfig(),
     val browsingSettings: BrowsingSettings = BrowsingSettings(),
     val searchSettings: SearchSettings = SearchSettings(),
     val historySettings: HistorySettings = HistorySettings(),
+    val novelReaderSettings: NovelReaderSettings = NovelReaderSettings(),
 ) {
     companion object {
         const val TEMPLATE_ILLUST_ID = "{illust_id}"

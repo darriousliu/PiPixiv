@@ -1,6 +1,5 @@
 plugins {
     id("pixiv.multiplatform")
-    alias(libs.plugins.kotzilla)
 }
 
 kotlin {
@@ -10,8 +9,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Kotzilla
-            implementation(libs.kotzilla.sdk)
             // Sentry
             implementation(libs.sentry.multiplatform)
         }
@@ -27,14 +24,4 @@ kotlin {
 
         }
     }
-}
-
-kotzilla {
-    versionName = findProperty("versionName")!!.toString()
-    uploadMappingFile = false
-    autoAddDependencies = false
-}
-
-tasks.matching { it.name == "kspCommonMainKotlinMetadata" }.configureEach {
-    dependsOn("generateKotzillaConfig")
 }

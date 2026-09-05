@@ -10,6 +10,7 @@ import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.data.setting.BrowsingSettings
 import com.mrl.pixiv.common.data.setting.HistorySettings
+import com.mrl.pixiv.common.data.setting.NovelReaderSettings
 import com.mrl.pixiv.common.data.setting.SearchSettings
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.data.setting.UserPreference
@@ -92,6 +93,10 @@ object SettingRepository : MMKVUser {
         it.copy(defaultPrivateBookmark = enable)
     }
 
+    fun setReadClipboardOnSearch(enable: Boolean) = userPreference.update {
+        it.copy(readClipboardOnSearch = enable)
+    }
+
     fun setAppViewMode(mode: AppViewMode) = userPreference.update {
         it.copy(appViewMode = mode)
     }
@@ -117,6 +122,10 @@ object SettingRepository : MMKVUser {
 
     fun setHistorySettings(settings: HistorySettings) = userPreference.update {
         it.copy(historySettings = settings.normalized())
+    }
+
+    fun setNovelReaderSettings(settings: NovelReaderSettings) = userPreference.update {
+        it.copy(novelReaderSettings = settings.normalized())
     }
 
     fun updateSettings(block: UserPreference.() -> UserPreference) {

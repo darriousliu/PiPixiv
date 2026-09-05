@@ -11,6 +11,6 @@ kotlin {
 }
 
 dependencies {
-    val compose = project.extensions.getByType<VersionCatalogsExtension>().named("composes")
-    "androidRuntimeClasspath"(compose.findLibrary("ui-tooling").get())
+    val libs = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
+    "androidRuntimeClasspath"(libs.findLibrary("compose-ui-tooling").get())
 }

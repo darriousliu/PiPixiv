@@ -8,6 +8,13 @@
 project.xcworkspace/
 xcuserdata/
 
+# Keep the shared SwiftPM resolution while ignoring local Xcode workspace state.
+!PiPixiv.xcodeproj/project.xcworkspace/
+PiPixiv.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+!PiPixiv.xcodeproj/project.xcworkspace/xcshareddata/
+!PiPixiv.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+!PiPixiv.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
 # Podfiles
 Podfile.lock
 Pods/*

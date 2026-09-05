@@ -229,6 +229,7 @@
     <string name="save_as">另存为</string>
     <string name="copy_link">复制链接</string>
     <string name="novel">小说</string>
+    <string name="novel_work_information">作品信息</string>
     <string name="illust">插画</string>
     <string name="series">系列</string>
     <string name="word_count">字数</string>
@@ -292,6 +293,10 @@
     <string name="ai_generation_timeout_seconds">生成超时（秒）</string>
     <string name="ai_generation_timeout_desc">每次 AI 生成请求的超时时间，可设置为 %1$d–%2$d 秒</string>
     <string name="ai_generation_timeout_invalid">请输入 %1$d 到 %2$d 之间的整数</string>
+    <string name="ai_max_concurrent_requests">最大并发请求数</string>
+    <string name="ai_max_concurrent_requests_desc">即时翻译与稍后阅读共用的并发上限，可设置为 %1$d–%2$d</string>
+    <string name="ai_max_concurrent_requests_invalid">请输入 %1$d 到 %2$d 之间的整数</string>
+    <string name="ai_refresh_models">刷新模型</string>
     <string name="ai_openai_use_response_api">使用 Response API</string>
     <string name="ai_extra_body" translatable="false">extra_body JSON</string>
     <string name="ai_extra_body_hint">例如 {"thinking":{"type":"disabled"}}</string>
@@ -322,6 +327,10 @@
     <string name="show_novel">显示该小说</string>
     <string name="block_tag_as_regex">按正则表达式匹配</string>
     <string name="browsing_setting">浏览设置</string>
+    <string name="privacy_setting">隐私设置</string>
+    <string name="read_clipboard_on_search">进入搜索时读取剪切板</string>
+    <string name="read_clipboard_on_search_desc">开启后，进入搜索页时读取剪切板并识别其中的 Pixiv 链接</string>
+    <string name="select_pixiv_link">选择要打开的 Pixiv 链接</string>
     <string name="search_setting">搜索设置</string>
     <string name="default_search_target">默认搜索范围</string>
     <string name="default_search_sort">默认搜索排序</string>
@@ -329,6 +338,9 @@
     <string name="preview_image_quality_medium">中等</string>
     <string name="preview_image_quality_high">高</string>
     <string name="preview_image_quality_original">原图</string>
+    <string name="search_result_illust_layout">插画搜索结果布局</string>
+    <string name="search_result_illust_layout_square">方形网格</string>
+    <string name="search_result_illust_layout_original_aspect_ratio">原始比例瀑布流</string>
     <string name="auto_hide_preview_controls">自动隐藏预览控件</string>
     <string name="auto_hide_preview_controls_desc">在作品详情页的图片区域停留几秒后隐藏按钮和页码</string>
     <string name="tap_image_to_open_full_resolution_preview">点击打开全分辨率预览</string>
@@ -380,4 +392,26 @@
     <string name="read_later_status_running">正在翻译</string>
     <string name="read_later_status_ready">翻译已就绪</string>
     <string name="read_later_status_failed">翻译失败</string>
+    <string name="profile_details">个人资料</string>
+    <string name="profile_account">账号</string>
+    <string name="profile_webpage">网站</string>
+    <string name="profile_birthday">生日</string>
+    <string name="profile_region">地区</string>
+    <string name="profile_job">职业</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Twitter 链接</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">工作环境</string>
+    <string name="profile_pc">电脑</string>
+    <string name="profile_monitor">显示器</string>
+    <string name="profile_tool">工具</string>
+    <string name="profile_scanner">扫描仪</string>
+    <string name="profile_tablet">数位板</string>
+    <string name="profile_mouse">鼠标</string>
+    <string name="profile_printer">打印机</string>
+    <string name="profile_desktop">桌面</string>
+    <string name="profile_music">音乐</string>
+    <string name="profile_desk">书桌</string>
+    <string name="profile_chair">椅子</string>
+    <string name="profile_workspace_comment">备注</string>
 </resources>

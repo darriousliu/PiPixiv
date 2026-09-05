@@ -1,3 +1,5 @@
 /build
 *.podspec
-kotzilla.json
+/src/commonMain/composeResources/files/mmkv/libmmkvc.dylib
+/src/commonMain/composeResources/files/mmkv/mmkvc.dll
+/src/commonMain/composeResources/files/mmkv/libmmkvc.so

@@ -36,6 +36,7 @@ private const val MAX_SHOW_NOVEL_COUNT = 3
 fun NovelBookmarkWidget(
     novels: List<Novel>,
     onAllClick: () -> Unit,
+    onNovelClick: (Long) -> Unit,
     onSeriesClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -78,6 +79,7 @@ fun NovelBookmarkWidget(
         novels.take(MAX_SHOW_NOVEL_COUNT).forEach {
             NovelItem(
                 novel = it,
+                onNovelClick = onNovelClick,
                 onSeriesClick = onSeriesClick,
                 modifier = Modifier.padding(top = 10.dp)
             )
@@ -88,6 +90,7 @@ fun NovelBookmarkWidget(
 @Composable
 private fun NovelItem(
     novel: Novel,
+    onNovelClick: (Long) -> Unit,
     onSeriesClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -101,9 +104,11 @@ private fun NovelItem(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    modifier = Modifier.height(90.dp),
+                    modifier = Modifier
+                        .height(90.dp)
+                        .throttleClick { onNovelClick(novel.id) },
                     model = novel.imageUrls.medium,
-                    contentDescription = null
+                    contentDescription = novel.title
                 )
                 Row(
                     modifier = Modifier.padding(top = 5.dp),
@@ -143,7 +148,9 @@ private fun NovelItem(
                     text = novel.title,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = if (seriesTitle == null) 0.dp else 5.dp)
+                    modifier = Modifier
+                        .padding(top = if (seriesTitle == null) 0.dp else 5.dp)
+                        .throttleClick { onNovelClick(novel.id) }
                 )
                 //author
                 Text(

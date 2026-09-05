@@ -10,13 +10,24 @@ import com.mrl.pixiv.common.ai.provider.GeminiTextClient
 import com.mrl.pixiv.common.ai.provider.OpenAiTextClient
 import com.mrl.pixiv.common.data.setting.AiProvider
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.koin.core.annotation.Single
+
+data class NovelMetadataTranslation(
+    val title: String,
+    val caption: String,
+)
 
 data class NovelTranslationStreamProgress(
     val text: String,
@@ -25,11 +36,11 @@ data class NovelTranslationStreamProgress(
     val isComplete: Boolean,
 )
 
-@Single
 class NovelAiTranslationService(
     private val openAiTextClient: OpenAiTextClient,
     private val claudeTextClient: ClaudeTextClient,
     private val geminiTextClient: GeminiTextClient,
+    private val translationLimiter: NovelTranslationLimiter = NovelTranslationLimiter(),
 ) {
     suspend fun translate(
         text: String,
@@ -41,6 +52,24 @@ class NovelAiTranslationService(
             targetLanguageTag = targetLanguageTag,
             config = config,
         ).last().text
+    }
+
+    suspend fun translateMetadata(
+        title: String,
+        caption: String,
+        targetLanguageTag: String,
+        config: AiTranslationConfig,
+    ): NovelMetadataTranslation {
+        val request = buildMetadataRequest(
+            title = title,
+            caption = caption,
+            targetLanguageTag = targetLanguageTag,
+            config = config,
+        )
+        val translated = translationLimiter.withPermit(config.maxConcurrentRequests) {
+            clientFor(config.provider).generateText(request).text
+        }
+        return parseNovelMetadataTranslation(translated)
     }
 
     fun translateStreaming(
@@ -79,12 +108,23 @@ class NovelAiTranslationService(
                 )
             }
             val remainingTranslations = requests.drop(1).map { request ->
-                async {
-                    generateCompleteText(client, request)
+                async(start = CoroutineStart.LAZY) {
+                    generateCompleteText(
+                        client = client,
+                        request = request,
+                        maxConcurrentRequests = config.maxConcurrentRequests,
+                    )
                 }
             }
             combineTranslatedChunks(
-                firstChunk = client.generateTextStream(requests.first()),
+                firstChunk = generateTextStream(
+                    client = client,
+                    request = requests.first(),
+                    maxConcurrentRequests = config.maxConcurrentRequests,
+                    onPermitAcquired = {
+                        remainingTranslations.forEach { it.start() }
+                    },
+                ),
                 remainingChunks = remainingTranslations,
                 totalChunks = chunks.size,
             ).collect { emit(it) }
@@ -95,6 +135,34 @@ class NovelAiTranslationService(
         AiProvider.OPENAI -> openAiTextClient
         AiProvider.CLAUDE -> claudeTextClient
         AiProvider.GEMINI -> geminiTextClient
+    }
+
+    private fun buildMetadataRequest(
+        title: String,
+        caption: String,
+        targetLanguageTag: String,
+        config: AiTranslationConfig,
+    ): AiTextRequest {
+        return AiTextRequest(
+            provider = config.provider,
+            endpoint = config.endpoint.trim(),
+            apiKey = config.apiKey.trim(),
+            model = config.model.trim(),
+            messages = listOf(
+                AiTextMessage(
+                    role = AiMessageRole.USER,
+                    content = buildNovelMetadataTranslationPrompt(
+                        title = title,
+                        caption = caption,
+                        targetLanguage = toDisplayLanguage(targetLanguageTag),
+                    ),
+                )
+            ),
+            responseApi = config.responseApi,
+            extraBody = config.extraBody,
+            generationTimeoutMillis =
+                config.generationTimeoutSeconds.toLong() * MILLIS_PER_SECOND,
+        )
     }
 
     private fun buildRequest(
@@ -134,14 +202,31 @@ class NovelAiTranslationService(
     private suspend fun generateCompleteText(
         client: AiTextProviderClient,
         request: AiTextRequest,
+        maxConcurrentRequests: Int,
     ): String {
-        val translated = client.generateText(request).text
+        return translationLimiter.withPermit(maxConcurrentRequests) {
+            val translated = client.generateText(request).text
 
-        require(translated.isNotBlank()) {
-            "AI returned empty translation."
+            require(translated.isNotBlank()) {
+                "AI returned empty translation."
+            }
+
+            translated
         }
+    }
 
-        return translated
+    private fun generateTextStream(
+        client: AiTextProviderClient,
+        request: AiTextRequest,
+        maxConcurrentRequests: Int,
+        onPermitAcquired: () -> Unit,
+    ): Flow<AiTextStreamEvent> = flow {
+        translationLimiter.withPermit(maxConcurrentRequests) {
+            onPermitAcquired()
+            client.generateTextStream(request).collect { event ->
+                emit(event)
+            }
+        }
     }
 
     private fun buildPrompt(
@@ -247,6 +332,73 @@ class NovelAiTranslationService(
     }
 }
 
+@Single
+fun provideNovelAiTranslationService(
+    openAiTextClient: OpenAiTextClient,
+    claudeTextClient: ClaudeTextClient,
+    geminiTextClient: GeminiTextClient,
+    translationLimiter: NovelTranslationLimiter,
+): NovelAiTranslationService {
+    return NovelAiTranslationService(
+        openAiTextClient = openAiTextClient,
+        claudeTextClient = claudeTextClient,
+        geminiTextClient = geminiTextClient,
+        translationLimiter = translationLimiter,
+    )
+}
+
+internal fun buildNovelMetadataTranslationPrompt(
+    title: String,
+    caption: String,
+    targetLanguage: String,
+): String {
+    val input = buildJsonObject {
+        put("title", title)
+        put("caption", caption)
+    }
+    return """
+        你是一名专业的文学翻译。请将下面同一部小说的标题和简介翻译为 $targetLanguage。
+
+        约束：
+        1. 只返回一个 JSON 对象，不要使用 Markdown 代码块或添加任何解释。
+        2. JSON 必须且只能包含 "title" 和 "caption" 两个字符串字段。
+        3. "title" 必须为非空译文；原简介为空时 "caption" 可以为空字符串。
+        4. 必须完整保留简介中的 HTML 标签、属性和结构。
+        5. 必须原样保留所有 URL、数字和特殊符号。
+
+        输入 JSON：
+        $input
+    """.trimIndent()
+}
+
+internal fun parseNovelMetadataTranslation(text: String): NovelMetadataTranslation {
+    val payload = Json.parseToJsonElement(text.trim()) as? JsonObject
+        ?: throw IllegalArgumentException("AI metadata translation must be a JSON object.")
+    require(payload.keys == METADATA_TRANSLATION_KEYS) {
+        "AI metadata translation must contain only title and caption."
+    }
+
+    val title = payload.requiredString("title")
+    val caption = payload.requiredString("caption")
+    require(title.isNotBlank()) {
+        "AI metadata translation title must not be blank."
+    }
+    return NovelMetadataTranslation(
+        title = title.trim(),
+        caption = caption,
+    )
+}
+
+private fun JsonObject.requiredString(key: String): String {
+    val value = this[key] as? JsonPrimitive
+    require(value?.isString == true) {
+        "AI metadata translation field $key must be a string."
+    }
+    return value.content
+}
+
+private val METADATA_TRANSLATION_KEYS = setOf("title", "caption")
+
 private data class ChunkPlan(
     val chunks: List<String>,
     val maxParagraphCount: Int,
@@ -324,7 +476,7 @@ internal fun combineTranslatedChunks(
         }
     } finally {
         remainingChunks.forEach { deferred ->
-            if (deferred.isActive) deferred.cancel()
+            if (!deferred.isCompleted) deferred.cancel()
         }
     }
 }

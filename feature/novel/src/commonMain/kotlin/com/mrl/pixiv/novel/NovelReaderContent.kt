@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.rounded.ErrorOutline
@@ -89,6 +90,18 @@ internal fun NovelReaderContent(
     onCommentClick: () -> Unit,
 ) {
     val novel = state.novel ?: return
+    val displayedTitle = resolveNovelMetadataText(
+        original = novel.title,
+        translated = state.translatedTitle,
+        isTranslated = state.isTranslated,
+        isShowingOriginalText = state.isShowingOriginalText,
+    )
+    val displayedCaption = resolveNovelMetadataText(
+        original = novel.caption,
+        translated = state.translatedCaption,
+        isTranslated = state.isTranslated,
+        isShowingOriginalText = state.isShowingOriginalText,
+    )
     val isBookmarked = novel.isBookmark
     val totalBookmarks = (novel.totalBookmarks + when {
         isBookmarked && !novel.isBookmarked -> 1L
@@ -123,13 +136,15 @@ internal fun NovelReaderContent(
 
             // 标题
             item(key = KEY_TITLE) {
-                Text(
-                    text = novel.title,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
-                )
+                SelectionContainer {
+                    Text(
+                        text = displayedTitle,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
+                    )
+                }
             }
 
             item(key = KEY_AUTHOR) {
@@ -147,11 +162,13 @@ internal fun NovelReaderContent(
                         onClick = { onAuthorClick(novel.user.id) }
                     )
                     8.HSpacer
-                    Text(
-                        text = novel.user.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                    )
+                    SelectionContainer {
+                        Text(
+                            text = novel.user.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                        )
+                    }
                 }
             }
 
@@ -159,70 +176,76 @@ internal fun NovelReaderContent(
             val seriesId = novel.series.id?.takeIf { it > 0L }
             novel.series.title?.let { seriesTitle ->
                 item(key = KEY_SERIES_TITLE) {
-                    Text(
-                        text = seriesTitle,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .then(
-                                if (seriesId != null) {
-                                    Modifier.throttleClick {
-                                        onSeriesClick(seriesId)
+                    SelectionContainer {
+                        Text(
+                            text = seriesTitle,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .then(
+                                    if (seriesId != null) {
+                                        Modifier.throttleClick {
+                                            onSeriesClick(seriesId)
+                                        }
+                                    } else {
+                                        Modifier
                                     }
-                                } else {
-                                    Modifier
-                                }
-                            )
-                    )
+                                )
+                        )
+                    }
                 }
             }
 
             // 收藏数和观看数
             item(key = KEY_STATS) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Favorite,
-                        contentDescription = stringResource(RStrings.bookmarked),
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    4.HSpacer
-                    Text(
-                        text = totalBookmarks.toString(),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                SelectionContainer {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Favorite,
+                            contentDescription = stringResource(RStrings.bookmarked),
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        4.HSpacer
+                        Text(
+                            text = totalBookmarks.toString(),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
 
-                    16.HSpacer
+                        16.HSpacer
 
-                    Icon(
-                        Icons.Rounded.Visibility,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    4.HSpacer
-                    Text(
-                        text = novel.totalView.toString(),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                        Icon(
+                            Icons.Rounded.Visibility,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        4.HSpacer
+                        Text(
+                            text = novel.totalView.toString(),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
 
             // 创建时间
             item(key = KEY_CREATE_DATE) {
-                Text(
-                    text = convertUtcStringToLocalDateTime(novel.createDate),
-                    modifier = Modifier.padding(top = 8.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
+                SelectionContainer {
+                    Text(
+                        text = convertUtcStringToLocalDateTime(novel.createDate),
+                        modifier = Modifier.padding(top = 8.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             // 标签
@@ -246,12 +269,12 @@ internal fun NovelReaderContent(
             }
 
             // Caption卡片(如果有内容)
-            if (novel.caption.isNotEmpty()) {
+            if (displayedCaption.isNotEmpty()) {
                 item(key = KEY_CAPTION) {
                     val linkColor = MaterialTheme.colorScheme.primary
-                    val caption = remember(novel.caption, linkColor, onCaptionLinkClick) {
+                    val caption = remember(displayedCaption, linkColor, onCaptionLinkClick) {
                         novelCaptionToAnnotatedString(
-                            html = novel.caption,
+                            html = displayedCaption,
                             linkColor = linkColor,
                             onLinkClick = onCaptionLinkClick,
                         )
@@ -261,14 +284,16 @@ internal fun NovelReaderContent(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Text(
-                            text = caption,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = state.fontSize.sp,
-                                lineHeight = (state.fontSize + state.lineSpacingSp + 8).sp
-                            ),
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = caption,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontSize = state.fontSize.sp,
+                                    lineHeight = (state.fontSize + state.lineSpacingSp + 8).sp
+                                ),
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -377,3 +402,12 @@ internal fun NovelReaderContent(
         }
     }
 }
+
+internal fun resolveNovelMetadataText(
+    original: String,
+    translated: String,
+    isTranslated: Boolean,
+    isShowingOriginalText: Boolean,
+): String = translated.takeIf {
+    isTranslated && !isShowingOriginalText && it.isNotBlank()
+} ?: original

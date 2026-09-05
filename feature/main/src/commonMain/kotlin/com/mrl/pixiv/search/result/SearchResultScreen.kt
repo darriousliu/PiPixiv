@@ -17,6 +17,9 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,14 +51,17 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
+import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.setting.SearchResultDisplayMode
+import com.mrl.pixiv.common.data.setting.SearchResultIllustLayout
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.paged.PageControls
@@ -67,6 +73,7 @@ import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifec
 import com.mrl.pixiv.common.repository.feed.FeedCapability
 import com.mrl.pixiv.common.repository.feed.PagedFeedState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
+import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -87,6 +94,32 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+internal enum class SearchResultContentLayout(
+    val compactNovelTitle: Boolean = false,
+    val novelHorizontalPadding: Int = 16,
+) {
+    SQUARE_ILLUST,
+    ORIGINAL_ASPECT_RATIO_ILLUST,
+    COMPACT_NOVEL_LIST(
+        compactNovelTitle = true,
+        novelHorizontalPadding = 0,
+    ),
+}
+
+internal fun resolveSearchResultContentLayout(
+    searchMode: AppViewMode,
+    illustLayout: SearchResultIllustLayout = SearchResultIllustLayout.SQUARE,
+): SearchResultContentLayout =
+    when (searchMode) {
+        AppViewMode.ILLUST -> when (illustLayout) {
+            SearchResultIllustLayout.SQUARE -> SearchResultContentLayout.SQUARE_ILLUST
+            SearchResultIllustLayout.ORIGINAL_ASPECT_RATIO ->
+                SearchResultContentLayout.ORIGINAL_ASPECT_RATIO_ILLUST
+        }
+
+        AppViewMode.NOVEL -> SearchResultContentLayout.COMPACT_NOVEL_LIST
+    }
+
 @Composable
 fun SearchResultsScreen(
     searchWords: String,
@@ -106,16 +139,22 @@ fun SearchResultsScreen(
     val searchResultDisplayMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle {
         searchSettings.searchResultDisplayMode
     }
+    val searchResultIllustLayout by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle {
+        browsingSettings.searchResultIllustLayout
+    }
     val isPremium by viewModel.isPremium.collectAsStateWithLifecycle()
     val usePagedSearchResults = searchResultDisplayMode == SearchResultDisplayMode.PAGED
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(true)
-    val layoutParams = IllustGridDefaults.relatedLayoutParameters()
+    val squareLayoutParams = IllustGridDefaults.relatedLayoutParameters()
+    val originalAspectRatioLayoutParams = RecommendGridDefaults.coverLayoutParameters()
+    val contentLayout = resolveSearchResultContentLayout(searchMode, searchResultIllustLayout)
     val pullRefreshState = rememberPullToRefreshState()
     val novelPullRefreshState = rememberPullToRefreshState()
     val userPullRefreshState = rememberPullToRefreshState()
 
-    val illustsGridState = rememberLazyGridState()
+    val squareIllustGridState = rememberLazyGridState()
+    val originalAspectRatioIllustGridState = rememberLazyStaggeredGridState()
     val novelsListState = rememberLazyListState()
     val usersListState = rememberLazyListState()
     var refreshIllustResults by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -129,12 +168,21 @@ fun SearchResultsScreen(
     val pagerState = rememberPagerState { SearchResultsPage.entries.size }
     val page = pages[pagerState.currentPage]
     val scope = rememberCoroutineScope()
-    val controller = remember(page, searchMode) {
+    val controller = remember(page, searchMode, searchResultIllustLayout) {
         when (page) {
             SearchResultsPage.IllustsOrNovel -> {
                 when (searchMode) {
-                    AppViewMode.ILLUST -> keyboardScrollerController(illustsGridState) {
-                        illustsGridState.layoutInfo.viewportSize.height.toFloat()
+                    AppViewMode.ILLUST -> when (searchResultIllustLayout) {
+                        SearchResultIllustLayout.SQUARE ->
+                            keyboardScrollerController(squareIllustGridState) {
+                                squareIllustGridState.layoutInfo.viewportSize.height.toFloat()
+                            }
+
+                        SearchResultIllustLayout.ORIGINAL_ASPECT_RATIO ->
+                            keyboardScrollerController(originalAspectRatioIllustGridState) {
+                                originalAspectRatioIllustGridState.layoutInfo.viewportSize.height
+                                    .toFloat()
+                            }
                     }
 
                     AppViewMode.NOVEL -> keyboardScrollerController(novelsListState) {
@@ -237,7 +285,11 @@ fun SearchResultsScreen(
             val scrollState = when (currentPage) {
                 SearchResultsPage.IllustsOrNovel -> {
                     when (searchMode) {
-                        AppViewMode.ILLUST -> illustsGridState
+                        AppViewMode.ILLUST -> when (searchResultIllustLayout) {
+                            SearchResultIllustLayout.SQUARE -> squareIllustGridState
+                            SearchResultIllustLayout.ORIGINAL_ASPECT_RATIO ->
+                                originalAspectRatioIllustGridState
+                        }
                         AppViewMode.NOVEL -> novelsListState
                     }
                 }
@@ -250,6 +302,7 @@ fun SearchResultsScreen(
                 onBackToTop = {
                     when (scrollState) {
                         is LazyGridState -> scope.launch { scrollState.scrollToItem(0) }
+                        is LazyStaggeredGridState -> scope.launch { scrollState.scrollToItem(0) }
                         is LazyListState -> scope.launch { scrollState.scrollToItem(0) }
                     }
                 },
@@ -267,8 +320,9 @@ fun SearchResultsScreen(
 
             when (pages[index]) {
                 SearchResultsPage.IllustsOrNovel -> {
-                    when (searchMode) {
-                        AppViewMode.ILLUST -> {
+                    when (contentLayout) {
+                        SearchResultContentLayout.SQUARE_ILLUST,
+                        SearchResultContentLayout.ORIGINAL_ASPECT_RATIO_ILLUST -> {
                             val manualIllustResults = if (usePagedSearchResults) {
                                 viewModel.manualIllustResults.collectAsStateWithLifecycle().value
                             } else {
@@ -297,7 +351,15 @@ fun SearchResultsScreen(
                                     eventId = manualIllustResults.scrollToTopEventId,
                                     lastConsumedEventId = lastConsumedIllustScrollEventId,
                                     onEventConsumed = { lastConsumedIllustScrollEventId = it },
-                                    onScrollToTop = { illustsGridState.scrollToItem(0) },
+                                    onScrollToTop = {
+                                        when (searchResultIllustLayout) {
+                                            SearchResultIllustLayout.SQUARE ->
+                                                squareIllustGridState.scrollToItem(0)
+
+                                            SearchResultIllustLayout.ORIGINAL_ASPECT_RATIO ->
+                                                originalAspectRatioIllustGridState.scrollToItem(0)
+                                        }
+                                    },
                                 )
                             }
                             if (searchResults != null) {
@@ -335,35 +397,112 @@ fun SearchResultsScreen(
                                     )
                                 },
                             ) {
-                                LazyVerticalGrid(
-                                    modifier = Modifier.fillMaxSize(),
-                                    state = illustsGridState,
-                                    columns = layoutParams.gridCells,
-                                    verticalArrangement = layoutParams.verticalArrangement,
-                                    horizontalArrangement = layoutParams.horizontalArrangement,
-                                    contentPadding = PaddingValues(
-                                        start = 8.dp,
-                                        top = 8.dp,
-                                        end = 8.dp,
-                                        bottom = bottomContentPadding,
-                                    ),
-                                ) {
-                                    if (manualIllustResults != null) {
-                                        PagedIllustGrid(
-                                            state = manualIllustResults,
-                                            navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                when (searchResultIllustLayout) {
+                                    SearchResultIllustLayout.SQUARE -> {
+                                        LazyVerticalGrid(
+                                            modifier = Modifier.fillMaxSize(),
+                                            state = squareIllustGridState,
+                                            columns = squareLayoutParams.gridCells,
+                                            verticalArrangement =
+                                                squareLayoutParams.verticalArrangement,
+                                            horizontalArrangement =
+                                                squareLayoutParams.horizontalArrangement,
+                                            contentPadding = PaddingValues(
+                                                start = 8.dp,
+                                                top = 8.dp,
+                                                end = 8.dp,
+                                                bottom = bottomContentPadding,
+                                            ),
+                                        ) {
+                                            if (manualIllustResults != null) {
+                                                PagedIllustGrid(
+                                                    state = manualIllustResults,
+                                                    navToPictureScreen =
+                                                        navigationManager::navigateToPictureScreen,
+                                                )
+                                            } else if (searchResults != null) {
+                                                illustGrid(
+                                                    illusts = searchResults,
+                                                    navToPictureScreen =
+                                                        navigationManager::navigateToPictureScreen,
+                                                )
+                                            }
+                                        }
+                                        VerticalScrollbar(
+                                            state = squareIllustGridState,
+                                            modifier = Modifier.align(Alignment.CenterEnd),
                                         )
-                                    } else if (searchResults != null) {
-                                        illustGrid(
-                                            illusts = searchResults,
-                                            navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                    }
+
+                                    SearchResultIllustLayout.ORIGINAL_ASPECT_RATIO -> {
+                                        LazyVerticalStaggeredGrid(
+                                            modifier = Modifier.fillMaxSize(),
+                                            state = originalAspectRatioIllustGridState,
+                                            columns = originalAspectRatioLayoutParams.gridCells,
+                                            verticalItemSpacing =
+                                                originalAspectRatioLayoutParams.verticalArrangement
+                                                    .spacing,
+                                            horizontalArrangement =
+                                                originalAspectRatioLayoutParams.horizontalArrangement,
+                                            contentPadding = PaddingValues(
+                                                start = 8.dp,
+                                                top = 8.dp,
+                                                end = 8.dp,
+                                                bottom = bottomContentPadding,
+                                            ),
+                                        ) {
+                                            if (manualIllustResults != null) {
+                                                PagedIllustGrid(
+                                                    state = manualIllustResults,
+                                                    navToPictureScreen =
+                                                        navigationManager::navigateToPictureScreen,
+                                                )
+                                            } else if (searchResults != null) {
+                                                items(
+                                                    count = searchResults.itemCount,
+                                                    key = searchResults.itemIndexKey { index, item ->
+                                                        "${index}_${item.id}"
+                                                    },
+                                                ) { index ->
+                                                    val illust =
+                                                        searchResults[index] ?: return@items
+                                                    val isBookmarked = illust.isBookmark
+                                                    RectangleIllustItem(
+                                                        illust = illust,
+                                                        isBookmarked = isBookmarked,
+                                                        onBookmarkClick = { restrict, tags, isEdit ->
+                                                            if (isEdit || !isBookmarked) {
+                                                                BookmarkState.bookmarkIllust(
+                                                                    illust.id,
+                                                                    restrict,
+                                                                    tags,
+                                                                )
+                                                            } else {
+                                                                BookmarkState.deleteBookmarkIllust(
+                                                                    illust.id
+                                                                )
+                                                            }
+                                                        },
+                                                        navToPictureScreen =
+                                                            { prefix, enableTransition ->
+                                                                navigationManager.navigateToPictureScreen(
+                                                                    searchResults.itemSnapshotList.items,
+                                                                    index,
+                                                                    prefix,
+                                                                    enableTransition,
+                                                                )
+                                                            },
+                                                        shouldShowTip = index == 0,
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        VerticalScrollbar(
+                                            state = originalAspectRatioIllustGridState,
+                                            modifier = Modifier.align(Alignment.CenterEnd),
                                         )
                                     }
                                 }
-                                VerticalScrollbar(
-                                    state = illustsGridState,
-                                    modifier = Modifier.align(Alignment.CenterEnd)
-                                )
                                 if (manualIllustResults != null && showPagingControls) {
                                     ManualPagingToolbar(
                                         state = manualIllustResults,
@@ -383,7 +522,7 @@ fun SearchResultsScreen(
                             }
                         }
 
-                        AppViewMode.NOVEL -> {
+                        SearchResultContentLayout.COMPACT_NOVEL_LIST -> {
                             val manualNovelResults = if (usePagedSearchResults) {
                                 viewModel.manualNovelResults.collectAsStateWithLifecycle().value
                             } else {
@@ -454,9 +593,9 @@ fun SearchResultsScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     state = novelsListState,
                                     contentPadding = PaddingValues(
-                                        start = 16.dp,
+                                        start = contentLayout.novelHorizontalPadding.dp,
                                         top = 10.dp,
-                                        end = 16.dp,
+                                        end = contentLayout.novelHorizontalPadding.dp,
                                         bottom = bottomContentPadding,
                                     ),
                                 ) {
@@ -465,6 +604,7 @@ fun SearchResultsScreen(
                                             state = manualNovelResults,
                                             onNovelClick = navigationManager::navigateToNovelDetailScreen,
                                             onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
+                                            compactTitle = contentLayout.compactNovelTitle,
                                         )
                                     } else if (novelSearchResults != null) {
                                         items(
@@ -482,6 +622,7 @@ fun SearchResultsScreen(
                                                         )
                                                     },
                                                     onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
+                                                    compactTitle = contentLayout.compactNovelTitle,
                                                     onBookmarkClick = { isBookmarked, restrict, tags ->
                                                         if (isBookmarked) {
                                                             BookmarkState.deleteBookmarkNovel(novel.id)

@@ -19,6 +19,11 @@ actual fun copyToClipboard(text: String) {
     clipboard.setContents(selection, null)
 }
 
+actual fun readTextFromClipboard(): String? = runCatching {
+    Toolkit.getDefaultToolkit().systemClipboard
+        .getData(DataFlavor.stringFlavor) as? String
+}.getOrNull()
+
 suspend fun copyImageToClipboard(imageUri: String) {
     val bitmap = try {
         val file = if (imageUri.startsWith("file:")) {

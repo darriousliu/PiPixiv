@@ -64,6 +64,7 @@ import com.mrl.pixiv.search.result.SearchResultsScreen
 import com.mrl.pixiv.setting.BrowsingSettingScreen
 import com.mrl.pixiv.setting.FileNameFormatScreen
 import com.mrl.pixiv.setting.HistorySettingScreen
+import com.mrl.pixiv.setting.PrivacySettingScreen
 import com.mrl.pixiv.setting.SearchSettingScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
@@ -227,6 +228,12 @@ fun Navigation3MainGraph(
                         HistorySettingScreen()
                     }
 
+                    entry<Destination.PrivacySetting>(
+                        metadata = ListDetailSceneStrategy.detailPane()
+                    ) {
+                        PrivacySettingScreen()
+                    }
+
                     // 保存格式设置
                     entry<Destination.FileNameFormat>(
                         metadata = ListDetailSceneStrategy.detailPane()
@@ -320,6 +327,12 @@ fun Navigation3MainGraph(
                         ArtworkScreen(
                             userId = it.userId,
                             initialType = it.initialType,
+                        )
+                    }
+                    entry<Destination.UserNovels> {
+                        ArtworkScreen(
+                            userId = it.userId,
+                            initialNovel = true,
                         )
                     }
                     entry<Destination.BlockSettings> {
@@ -475,6 +488,10 @@ private fun LogScreen(
                 }
 
                 is Destination.UserArtwork -> {
+                    put("user_id", currentDestination.userId.toString())
+                }
+
+                is Destination.UserNovels -> {
                     put("user_id", currentDestination.userId.toString())
                 }
 

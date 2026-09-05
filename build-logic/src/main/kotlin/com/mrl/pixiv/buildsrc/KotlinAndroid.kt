@@ -55,16 +55,14 @@ internal fun Project.configureKotlinAndroid(
     configureKotlin()
 
     val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
-    val kotlinx = extensions.getByType<VersionCatalogsExtension>().named("kotlinx")
-    val androidx = extensions.getByType<VersionCatalogsExtension>().named("androidx")
 
     dependencies {
-        implementation(androidx.findBundle("androidx").get())
+        implementation(libs.findBundle("androidx").get())
         // Lifecycle
-        implementation(androidx.findBundle("lifecycle").get())
+        implementation(libs.findBundle("androidx-lifecycle").get())
         // Coroutines
-        implementation(platform(kotlinx.findLibrary("coroutines-bom").get()))
-        implementation(kotlinx.findBundle("coroutines").get())
+        implementation(platform(libs.findLibrary("kotlinx-coroutines-bom").get()))
+        implementation(libs.findBundle("kotlinx-coroutines").get())
         // Koin
         implementation(libs.findBundle("koin").get())
         ksp(libs.findLibrary("koin-ksp-compiler").get())

@@ -17,17 +17,6 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    versionCatalogs {
-        create("kotlinx") {
-            from(files("gradle/kotlinx.versions.toml"))
-        }
-        create("androidx") {
-            from(files("gradle/androidx.versions.toml"))
-        }
-        create("composes") {
-            from(files("gradle/compose.versions.toml"))
-        }
-    }
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google {
@@ -49,6 +38,7 @@ plugins {
 rootProject.name = "PiPixiv"
 include(":app")
 include(":composeApp")
+include(":iosExport")
 include(":lib_strings")
 include(":baselineprofile")
 

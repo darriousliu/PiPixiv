@@ -103,7 +103,7 @@ dependencies {
     implementation(project(":common:core"))
 
     // 按需添加 Paging
-    // implementation(androidx.bundles.paging)
+    // implementation(libs.bundles.androidx.paging)
 }
 ```
 
@@ -380,7 +380,7 @@ val lazyItems = viewModel.items.collectAsLazyPagingItems()
 ### 8.4 构建与分支
 - [ ] 从 `develop` 切出功能分支，向 `develop` 提 PR
 - [ ] 遵循 Conventional Commits 提交信息格式
-- [ ] 新增依赖已添加到对应 `*.versions.toml` 版本目录文件
+- [ ] 新增依赖已添加到 `gradle/libs.versions.toml` 版本目录文件
 - [ ] FOSS 变体相关埋点/分析代码有空实现
 
 ### 8.5 代码质量

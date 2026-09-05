@@ -5,7 +5,7 @@ import org.gradle.internal.extensions.stdlib.capitalized
 
 plugins {
     id("pixiv.android.application")
-//    alias(androidx.plugins.baselineprofile)
+//    alias(libs.plugins.baselineprofile)
 }
 
 val enableHotSwanCompiler = providers.gradleProperty("hotswan.enabled")
@@ -138,11 +138,11 @@ dependencies {
     implementation(project(":composeApp"))
 
     // splash screen
-    implementation(androidx.splashscreen)
+    implementation(libs.androidx.splashscreen)
     // ProfileInstaller
-    implementation(androidx.profileinstaller)
+    implementation(libs.androidx.profileinstaller)
     // Navigation3
-    implementation(composes.bundles.navigation3.android)
+    implementation(libs.bundles.compose.navigation3.android)
     // Coil3
     implementation(platform(libs.coil3.bom))
     implementation(libs.bundles.coil3)

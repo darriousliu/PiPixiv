@@ -311,6 +311,10 @@
     <string name="show_novel">Afficher ce roman</string>
     <string name="block_tag_as_regex">Faire correspondre via une expression régulière</string>
     <string name="browsing_setting">Paramètres de navigation</string>
+    <string name="privacy_setting">Paramètres de confidentialité</string>
+    <string name="read_clipboard_on_search">Lire le presse-papiers à l’ouverture de la recherche</string>
+    <string name="read_clipboard_on_search_desc">Lorsque cette option est activée, l’écran de recherche lit le presse-papiers et y détecte les liens Pixiv</string>
+    <string name="select_pixiv_link">Choisir un lien Pixiv à ouvrir</string>
     <string name="search_setting">Paramètres de recherche</string>
     <string name="default_search_target">Cible de recherche par défaut</string>
     <string name="default_search_sort">Tri de recherche par défaut</string>
@@ -369,4 +373,26 @@
     <string name="read_later_status_running">Traduction en cours</string>
     <string name="read_later_status_ready">Traduction prête</string>
     <string name="read_later_status_failed">Échec de la traduction</string>
+    <string name="profile_details">Détails du profil</string>
+    <string name="profile_account">Compte</string>
+    <string name="profile_webpage">Site web</string>
+    <string name="profile_birthday">Anniversaire</string>
+    <string name="profile_region">Région</string>
+    <string name="profile_job">Profession</string>
+    <string name="profile_twitter">Twitter</string>
+    <string name="profile_twitter_url">Lien Twitter</string>
+    <string name="profile_pawoo">Pawoo</string>
+    <string name="profile_workspace">Espace de travail</string>
+    <string name="profile_pc">Ordinateur</string>
+    <string name="profile_monitor">Moniteur</string>
+    <string name="profile_tool">Outils</string>
+    <string name="profile_scanner">Scanner</string>
+    <string name="profile_tablet">Tablette graphique</string>
+    <string name="profile_mouse">Souris</string>
+    <string name="profile_printer">Imprimante</string>
+    <string name="profile_desktop">Bureau</string>
+    <string name="profile_music">Musique</string>
+    <string name="profile_desk">Table de travail</string>
+    <string name="profile_chair">Chaise</string>
+    <string name="profile_workspace_comment">Notes</string>
 </resources>

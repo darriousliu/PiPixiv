@@ -25,6 +25,7 @@ fun provideDatabase(builder: RoomDatabase.Builder<PixivDatabase>): PixivDatabase
             PixivDatabase.MIGRATION_5_6,
             PixivDatabase.MIGRATION_6_7,
             PixivDatabase.MIGRATION_7_8,
+            PixivDatabase.MIGRATION_8_9,
         )
         .build()
 }

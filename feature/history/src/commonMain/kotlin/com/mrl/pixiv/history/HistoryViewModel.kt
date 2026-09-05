@@ -20,6 +20,7 @@ import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.repository.requireUserInfoValue
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -91,30 +92,16 @@ class HistoryViewModel(
     }
 
     val cloudIllusts = cloudIllustsSource
-        .filterIllustsBySearch()
-        .cachedIn(viewModelScope)
+        .filterHistoryBySearch(searchFlow, viewModelScope, Illust::matches)
 
     val cloudNovels = cloudNovelsSource
-        .filterNovelsBySearch()
-        .cachedIn(viewModelScope)
+        .filterHistoryBySearch(searchFlow, viewModelScope, Novel::matches)
 
     val localIllusts = localIllustsSource
-        .filterIllustsBySearch()
-        .cachedIn(viewModelScope)
+        .filterHistoryBySearch(searchFlow, viewModelScope, Illust::matches)
 
     val localNovels = localNovelsSource
-        .filterNovelsBySearch()
-        .cachedIn(viewModelScope)
-
-    private fun Flow<PagingData<Illust>>.filterIllustsBySearch(): Flow<PagingData<Illust>> =
-        combine(searchFlow) { pagingData, search ->
-            pagingData.filter { it.matches(search) }
-        }
-
-    private fun Flow<PagingData<Novel>>.filterNovelsBySearch(): Flow<PagingData<Novel>> =
-        combine(searchFlow) { pagingData, search ->
-            pagingData.filter { it.matches(search) }
-        }
+        .filterHistoryBySearch(searchFlow, viewModelScope, Novel::matches)
 
     override suspend fun handleIntent(intent: HistoryAction) {
         when (intent) {
@@ -126,6 +113,18 @@ class HistoryViewModel(
         }
     }
 }
+
+internal fun <T : Any> Flow<PagingData<T>>.filterHistoryBySearch(
+    searchFlow: Flow<String>,
+    scope: CoroutineScope,
+    matches: (T, String) -> Boolean,
+): Flow<PagingData<T>> =
+    // Search changes reuse the same PagingData generation, whose events must be cached first.
+    cachedIn(scope)
+        .combine(searchFlow) { pagingData, search ->
+            pagingData.filter { matches(it, search) }
+        }
+        .cachedIn(scope)
 
 private fun Illust.matches(search: String): Boolean {
     if (search.isBlank()) return true

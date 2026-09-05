@@ -141,17 +141,14 @@ app → common/core
 
 ### 3.3 Gradle 版本目录
 
-项目使用 **多版本目录**（Multi-Version Catalogs）管理依赖：
+项目统一使用 `libs` 版本目录管理依赖，`build-logic` 约定插件也共享同一份目录：
 
 ```
 gradle/
-├── libs.versions.toml      # 主要三方库
-├── androidx.versions.toml  # AndroidX 系列
-├── kotlinx.versions.toml   # Kotlin 官方扩展库
-└── compose.versions.toml   # Compose 相关
+└── libs.versions.toml      # 三方库、AndroidX、Kotlin 和 Compose
 ```
 
-**使用规则**：新增依赖必须先加入对应版本目录，再在 `build.gradle.kts` 中引用，禁止直接写 hardcoded 版本号。
+**使用规则**：新增依赖必须先加入 `gradle/libs.versions.toml`，再通过 `libs` 在 `build.gradle.kts` 中引用，禁止直接写 hardcoded 版本号。AndroidX、Compose 和 Kotlin 库分别使用 `androidx-`、`compose-` 和 `kotlinx-` 别名前缀。
 
 ---
 
@@ -499,7 +496,7 @@ typealias RXml = com.mrl.pixiv.strings.R.xml
 ```
 src/
 ├── main/          # 通用代码
-├── foss/          # FOSS 变体（空实现 Firebase、Kotzilla 等）
+├── foss/          # FOSS 变体（空实现 Firebase、Sentry 等）
 └── google/        # Google Play 变体（含 Firebase Analytics）
 ```
 

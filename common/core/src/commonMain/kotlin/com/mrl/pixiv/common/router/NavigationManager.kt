@@ -175,6 +175,10 @@ class NavigationManager(
         backStack.navigate(route = Destination.UserArtwork(userId, initialType))
     }
 
+    fun navigateToUserNovelsScreen(userId: Long) {
+        backStack.navigate(route = Destination.UserNovels(userId))
+    }
+
     fun navigateToBlockSettings() {
         backStack.navigate(route = Destination.BlockSettings)
     }
@@ -197,6 +201,10 @@ class NavigationManager(
 
     fun navigateToHistorySettingScreen() {
         backStack.navigate(route = Destination.HistorySetting)
+    }
+
+    fun navigateToPrivacySettingScreen() {
+        backStack.navigate(route = Destination.PrivacySetting)
     }
 
     fun navigateToFileNameFormatScreen() {

@@ -18,7 +18,7 @@ class AiTranslationConfigSerializationTest {
     }
 
     @Test
-    fun `old json config uses default generation timeout`() {
+    fun `old json config uses new field defaults`() {
         val decoded = json.decodeFromString<AiTranslationConfig>(
             """
                 {
@@ -36,10 +36,14 @@ class AiTranslationConfigSerializationTest {
             AiTranslationConfig.GENERATION_TIMEOUT_DEFAULT_SECONDS,
             decoded.generationTimeoutSeconds,
         )
+        assertEquals(
+            AiTranslationConfig.MAX_CONCURRENT_REQUESTS_DEFAULT,
+            decoded.maxConcurrentRequests,
+        )
     }
 
     @Test
-    fun `old protobuf config uses default generation timeout`() {
+    fun `old protobuf config uses new field defaults`() {
         val legacyBytes = protoBuf.encodeToByteArray(
             LegacyAiTranslationConfig.serializer(),
             LegacyAiTranslationConfig(
@@ -62,11 +66,18 @@ class AiTranslationConfigSerializationTest {
             AiTranslationConfig.GENERATION_TIMEOUT_DEFAULT_SECONDS,
             decoded.generationTimeoutSeconds,
         )
+        assertEquals(
+            AiTranslationConfig.MAX_CONCURRENT_REQUESTS_DEFAULT,
+            decoded.maxConcurrentRequests,
+        )
     }
 
     @Test
-    fun `custom generation timeout round trips through json and protobuf`() {
-        val config = AiTranslationConfig(generationTimeoutSeconds = 900)
+    fun `custom request settings round trip through json and protobuf`() {
+        val config = AiTranslationConfig(
+            generationTimeoutSeconds = 900,
+            maxConcurrentRequests = 8,
+        )
 
         assertEquals(
             config,

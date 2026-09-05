@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -37,6 +38,8 @@ import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -85,6 +88,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.paging.compose.collectAsLazyPagingItems
+import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -98,6 +102,7 @@ import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.TagItem
+import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.AppViewMode
@@ -546,28 +551,59 @@ internal fun PictureScreen(
             )
         }
         item(key = KEY_ILLUST_DATA) {
-            Row(
-                Modifier.padding(top = 10.dp)
+            val caption = remember(illust.caption) {
+                illust.caption.takeIf { it.isNotEmpty() }?.let {
+                    htmlToAnnotatedString(
+                        html = illust.caption,
+                        compactMode = true,
+                    )
+                }
+            }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                ),
             ) {
-                Text(
-                    text = convertUtcStringToLocalDateTime(illust.createDate),
-                    modifier = Modifier.padding(start = 20.dp),
-                    style = TextStyle(fontSize = 12.sp),
-                )
-                Text(
-                    text = illust.totalView.toString() + " ${stringResource(RStrings.viewed)}",
-                    Modifier.padding(start = 10.dp),
-                    style = TextStyle(fontSize = 12.sp),
-                )
-                Text(
-                    text = illust.totalBookmarks.toString() + " ${
-                        stringResource(
-                            RStrings.liked
-                        )
-                    }",
-                    Modifier.padding(start = 10.dp),
-                    style = TextStyle(fontSize = 12.sp),
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    SelectionContainer {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Text(
+                                text = convertUtcStringToLocalDateTime(illust.createDate),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "${illust.totalView} ${stringResource(RStrings.viewed)}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "${illust.totalBookmarks} ${stringResource(RStrings.liked)}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    if (caption != null) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        SelectionContainer {
+                            Text(
+                                text = caption,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
+                }
             }
         }
         // tag
@@ -591,8 +627,8 @@ internal fun PictureScreen(
         item(key = KEY_ILLUST_DIVIDER_1) {
             HorizontalDivider(
                 modifier = Modifier
-                    .padding(horizontal = 15.dp)
-                    .padding(top = 50.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 24.dp, bottom = 8.dp)
             )
         }
         item(key = KEY_ILLUST_AUTHOR) {
@@ -716,7 +752,7 @@ internal fun PictureScreen(
                 horizontalArrangement = relatedLayoutParams.horizontalArrangement
             ) {
                 illustsPair.forEach { (illust, isBookmarked, index) ->
-                    SquareIllustItem(
+                    RectangleIllustItem(
                         illust = illust,
                         isBookmarked = isBookmarked,
                         onBookmarkClick = { restrict, tags, isEdit ->
@@ -1148,25 +1184,27 @@ private fun UserFollowInfo(
                 navToUserDetailScreen(illust.user.id)
             },
         )
-        Column(
+        SelectionContainer(
             modifier = Modifier
                 .padding(start = 10.dp)
                 .align(Alignment.CenterVertically)
         ) {
-            Text(
-                text = illust.user.name,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                ),
-            )
-            Text(
-                text = "ID: ${illust.user.id}",
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                ),
-            )
+            Column {
+                Text(
+                    text = illust.user.name,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                )
+                Text(
+                    text = "ID: ${illust.user.id}",
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                )
+            }
         }
         Spacer(modifier = Modifier.weight(1f))
         if (isFollowed) {
@@ -1347,36 +1385,36 @@ private fun UserInfo(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .padding(start = 20.dp, top = 10.dp, bottom = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         UserAvatar(
             url = illust.user.profileImageUrls.medium,
             modifier = Modifier
-                .size(30.dp)
-                .align(Alignment.CenterVertically),
+                .size(40.dp),
             onClick = {
                 navToUserDetailScreen(illust.user.id)
             },
         )
-        Column(
-            modifier = Modifier.padding(start = 10.dp)
+        SelectionContainer(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 12.dp),
         ) {
-            Text(
-                text = illust.title,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                maxLines = 1,
-            )
-            Text(
-                text = illust.user.name,
-                modifier = Modifier,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                ),
-                maxLines = 1,
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = illust.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = illust.user.name,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

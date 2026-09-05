@@ -1,11 +1,6 @@
 package com.mrl.pixiv.setting
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -13,27 +8,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.NetworkWifi
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Translate
-import androidx.compose.material.icons.rounded.ViewModule
-import androidx.compose.material.icons.rounded._18UpRating
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -41,14 +29,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
-import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
@@ -56,23 +41,13 @@ import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.app_language
 import com.mrl.pixiv.strings.browsing_setting
-import com.mrl.pixiv.strings.cancel
-import com.mrl.pixiv.strings.confirm
-import com.mrl.pixiv.strings.default_private_bookmark
-import com.mrl.pixiv.strings.download_single_folder_by_user_desc
-import com.mrl.pixiv.strings.download_single_folder_by_user_title
 import com.mrl.pixiv.strings.file_name_format_title
 import com.mrl.pixiv.strings.history_setting
 import com.mrl.pixiv.strings.label_default
 import com.mrl.pixiv.strings.network_setting
-import com.mrl.pixiv.strings.r18
-import com.mrl.pixiv.strings.r18_alert_message
+import com.mrl.pixiv.strings.privacy_setting
 import com.mrl.pixiv.strings.search_setting
 import com.mrl.pixiv.strings.setting
-import com.mrl.pixiv.strings.span_count_adaptive
-import com.mrl.pixiv.strings.span_count_landscape
-import com.mrl.pixiv.strings.span_count_portrait
-import com.mrl.pixiv.strings.tips
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -81,35 +56,26 @@ const val KEY_NETWORK_SETTING = "network_setting"
 const val KEY_BROWSING_SETTING = "browsing_setting"
 const val KEY_SEARCH_SETTING = "search_setting"
 const val KEY_HISTORY_SETTING = "history_setting"
+const val KEY_PRIVACY_SETTING = "privacy_setting"
+const val KEY_FILE_NAME_FORMAT = "file_name_format"
 const val KEY_AI_TRANSLATION_SETTING = "ai_translation_setting"
 const val KEY_DEFAULT_OPEN_LINK = "default_open_link"
-const val KEY_DIVIDER_1 = "divider_1"
-const val KEY_PORTRAIT_SPAN_COUNT = "portrait_span_count"
-const val KEY_LANDSCAPE_SPAN_COUNT = "landscape_span_count"
-const val KEY_DIVIDER_2 = "divider_2"
-const val KEY_DOWNLOAD_SINGLE_FOLDER_BY_USER = "download_single_folder_by_user"
-const val KEY_FILE_NAME_FORMAT = "file_name_format"
-const val KEY_R18_ENABLED = "r18_enabled"
-const val KEY_DEFAULT_PRIVATE_BOOKMARK = "default_private_bookmark"
 
 @Composable
 fun SettingScreen(
     modifier: Modifier = Modifier,
-    navigationManager: NavigationManager = koinInject()
+    navigationManager: NavigationManager = koinInject(),
 ) {
     val labelDefault = stringResource(RStrings.label_default)
     val languages = remember { getLanguages() }
     var currentLanguage by remember(labelDefault) {
         mutableStateOf(getInitialLanguages() ?: labelDefault)
     }
-    val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = stringResource(RStrings.setting))
-                },
+                title = { Text(text = stringResource(RStrings.setting)) },
                 navigationIcon = {
                     IconButton(
                         onClick = navigationManager::popBackStack,
@@ -120,33 +86,27 @@ fun SettingScreen(
                 },
             )
         },
-    ) {
+    ) { innerPadding ->
         LazyColumn(
             modifier = modifier
-                .padding(it)
+                .padding(innerPadding)
                 .padding(horizontal = 8.dp),
         ) {
             item(key = KEY_LANGUAGE) {
                 var expanded by remember { mutableStateOf(false) }
-                // 语言
                 ListItem(
                     headlineContent = {
                         LaunchedEffect(currentLanguage, labelDefault) {
                             triggerLocaleChange(currentLanguage, labelDefault)
                         }
-
-                        Text(
-                            text = stringResource(RStrings.app_language),
-                        )
+                        Text(text = stringResource(RStrings.app_language))
                     },
                     leadingContent = {
                         Icon(Icons.Rounded.Translate, contentDescription = null)
                     },
                     trailingContent = {
                         DropDownSelector(
-                            modifier = Modifier.throttleClick {
-                                expanded = !expanded
-                            },
+                            modifier = Modifier.throttleClick { expanded = !expanded },
                             expanded = expanded,
                             onDismissRequest = { expanded = false },
                             current = currentLanguage,
@@ -154,9 +114,7 @@ fun SettingScreen(
                             languages.forEach { language ->
                                 DropdownMenuItem(
                                     text = {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
                                             Text(
                                                 text = language.displayName,
                                                 modifier = Modifier.padding(16.dp),
@@ -164,7 +122,7 @@ fun SettingScreen(
                                             if (currentLanguage == language.langTag) {
                                                 Icon(
                                                     imageVector = Icons.Rounded.Check,
-                                                    contentDescription = null
+                                                    contentDescription = null,
                                                 )
                                             }
                                         }
@@ -172,370 +130,83 @@ fun SettingScreen(
                                     onClick = {
                                         currentLanguage = language.langTag
                                         expanded = false
-                                    }
+                                    },
                                 )
                             }
                         }
-                    }
+                    },
                 )
             }
             item(key = KEY_NETWORK_SETTING) {
-                // 网络设置
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RStrings.network_setting),
-                        )
-                    },
-                    modifier = Modifier
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            navigationManager.navigateToNetworkSettingScreen()
-                        },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded.NetworkWifi, contentDescription = null)
-                    },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                            contentDescription = null
-                        )
-                    }
+                SettingDestinationItem(
+                    title = stringResource(RStrings.network_setting),
+                    icon = Icons.Rounded.NetworkWifi,
+                    onClick = navigationManager::navigateToNetworkSettingScreen,
                 )
             }
             item(key = KEY_BROWSING_SETTING) {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RStrings.browsing_setting),
-                        )
-                    },
-                    modifier = Modifier
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            navigationManager.navigateToBrowsingSettingScreen()
-                        },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded.Image, contentDescription = null)
-                    },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                            contentDescription = null
-                        )
-                    }
+                SettingDestinationItem(
+                    title = stringResource(RStrings.browsing_setting),
+                    icon = Icons.Rounded.Image,
+                    onClick = navigationManager::navigateToBrowsingSettingScreen,
                 )
             }
             item(key = KEY_SEARCH_SETTING) {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RStrings.search_setting),
-                        )
-                    },
-                    modifier = Modifier
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            navigationManager.navigateToSearchSettingScreen()
-                        },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded.Search, contentDescription = null)
-                    },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                            contentDescription = null
-                        )
-                    }
+                SettingDestinationItem(
+                    title = stringResource(RStrings.search_setting),
+                    icon = Icons.Rounded.Search,
+                    onClick = navigationManager::navigateToSearchSettingScreen,
                 )
             }
             item(key = KEY_HISTORY_SETTING) {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RStrings.history_setting),
-                        )
-                    },
-                    modifier = Modifier
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            navigationManager.navigateToHistorySettingScreen()
-                        },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded.History, contentDescription = null)
-                    },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                            contentDescription = null
-                        )
-                    }
+                SettingDestinationItem(
+                    title = stringResource(RStrings.history_setting),
+                    icon = Icons.Rounded.History,
+                    onClick = navigationManager::navigateToHistorySettingScreen,
                 )
             }
-            item(key = KEY_AI_TRANSLATION_SETTING) {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RStrings.ai_translation_setting),
-                        )
-                    },
-                    modifier = Modifier
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            navigationManager.navigateToAiTranslationSettingScreen()
-                        },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded.Translate, contentDescription = null)
-                    },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                            contentDescription = null
-                        )
-                    }
-                )
-            }
-            appLinkItem()
-
-            item(key = KEY_DIVIDER_1) {
-                HorizontalDivider(modifier = Modifier.padding(8.dp))
-            }
-            item(key = KEY_PORTRAIT_SPAN_COUNT) {
-                SpanCountSetting(
-                    title = stringResource(RStrings.span_count_portrait),
-                    currentSpanCount = userPreference.spanCountPortrait,
-                    onSpanCountChange = SettingRepository::setSpanCountPortrait,
-                )
-            }
-            item(key = KEY_LANDSCAPE_SPAN_COUNT) {
-                SpanCountSetting(
-                    title = stringResource(RStrings.span_count_landscape),
-                    currentSpanCount = userPreference.spanCountLandscape,
-                    onSpanCountChange = SettingRepository::setSpanCountLandscape,
-                )
-            }
-            item(key = KEY_DIVIDER_2) {
-                HorizontalDivider(modifier = Modifier.padding(8.dp))
-            }
-            item(key = KEY_DOWNLOAD_SINGLE_FOLDER_BY_USER) {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RStrings.download_single_folder_by_user_title),
-                        )
-                    },
-                    modifier = Modifier
-                        .height(IntrinsicSize.Min)
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            SettingRepository.setDownloadSubFolderByUser(!userPreference.downloadSubFolderByUser)
-                        },
-                    supportingContent = {
-                        Text(
-                            text = stringResource(RStrings.download_single_folder_by_user_desc),
-                        )
-                    },
-                    leadingContent = {
-                        Column(
-                            modifier = Modifier.fillMaxHeight(),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Icon(imageVector = Icons.Rounded.Folder, contentDescription = null)
-                        }
-                    },
-                    trailingContent = {
-                        Column(
-                            modifier = Modifier.fillMaxHeight(),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Switch(
-                                checked = userPreference.downloadSubFolderByUser,
-                                onCheckedChange = { checked ->
-                                    SettingRepository.setDownloadSubFolderByUser(checked)
-                                }
-                            )
-                        }
-                    }
+            item(key = KEY_PRIVACY_SETTING) {
+                SettingDestinationItem(
+                    title = stringResource(RStrings.privacy_setting),
+                    icon = Icons.Rounded.Lock,
+                    onClick = navigationManager::navigateToPrivacySettingScreen,
                 )
             }
             item(key = KEY_FILE_NAME_FORMAT) {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RStrings.file_name_format_title),
-                        )
-                    },
-                    modifier = Modifier
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            navigationManager.navigateToFileNameFormatScreen()
-                        },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded.Save, contentDescription = null)
-                    },
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
-                            contentDescription = null
-                        )
-                    }
+                SettingDestinationItem(
+                    title = stringResource(RStrings.file_name_format_title),
+                    icon = Icons.Rounded.Save,
+                    onClick = navigationManager::navigateToFileNameFormatScreen,
                 )
             }
-            item(key = KEY_R18_ENABLED) {
-                var showWarningDialog by rememberSaveable { mutableStateOf(false) }
-
-                if (showWarningDialog) {
-                    val tipText = stringResource(RStrings.r18_alert_message)
-                    AlertDialog(
-                        onDismissRequest = { showWarningDialog = false },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    SettingRepository.setIsR18Enabled(true)
-                                    showWarningDialog = false
-                                }
-                            ) {
-                                Text(text = stringResource(RStrings.confirm))
-                            }
-                        },
-                        title = { Text(text = stringResource(RStrings.tips)) },
-                        text = { Text(text = remember(tipText) { htmlToAnnotatedString(tipText) }) },
-                        dismissButton = {
-                            TextButton(onClick = { showWarningDialog = false }) {
-                                Text(text = stringResource(RStrings.cancel))
-                            }
-                        }
-                    )
-                }
-
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RStrings.r18),
-                        )
-                    },
-                    modifier = Modifier
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            if (!userPreference.isR18Enabled) {
-                                showWarningDialog = true
-                            } else {
-                                SettingRepository.setIsR18Enabled(false)
-                            }
-                        },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded._18UpRating, contentDescription = null)
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = userPreference.isR18Enabled,
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    showWarningDialog = true
-                                } else {
-                                    SettingRepository.setIsR18Enabled(false)
-                                }
-                            }
-                        )
-                    }
+            item(key = KEY_AI_TRANSLATION_SETTING) {
+                SettingDestinationItem(
+                    title = stringResource(RStrings.ai_translation_setting),
+                    icon = Icons.Rounded.Translate,
+                    onClick = navigationManager::navigateToAiTranslationSettingScreen,
                 )
             }
-            item(key = KEY_DEFAULT_PRIVATE_BOOKMARK) {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(RStrings.default_private_bookmark),
-                        )
-                    },
-                    modifier = Modifier
-                        .throttleClick(
-                            indication = ripple()
-                        ) {
-                            SettingRepository.setDefaultPrivateBookmark(!userPreference.defaultPrivateBookmark)
-                        },
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded.Favorite, contentDescription = null)
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = userPreference.defaultPrivateBookmark,
-                            onCheckedChange = { checked ->
-                                SettingRepository.setDefaultPrivateBookmark(checked)
-                            }
-                        )
-                    }
-                )
-            }
+            appLinkItem()
         }
     }
 }
 
 @Composable
-private fun SpanCountSetting(
+private fun SettingDestinationItem(
     title: String,
-    currentSpanCount: Int,
-    onSpanCountChange: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    icon: ImageVector,
+    onClick: () -> Unit,
 ) {
-    val options = listOf(
-        2 to "2",
-        3 to "3",
-        4 to "4",
-        -1 to stringResource(RStrings.span_count_adaptive),
-    )
-
-    val currentLabel = options.find { it.first == currentSpanCount }?.second
-        ?: options.find { it.first == -1 }?.second ?: ""
-
-    var expanded by remember { mutableStateOf(false) }
-
     ListItem(
         headlineContent = { Text(text = title) },
-        modifier = modifier,
-        leadingContent = { Icon(Icons.Rounded.ViewModule, contentDescription = null) },
+        modifier = Modifier.throttleClick(indication = ripple(), onClick = onClick),
+        leadingContent = { Icon(imageVector = icon, contentDescription = null) },
         trailingContent = {
-            DropDownSelector(
-                modifier = Modifier.throttleClick {
-                    expanded = !expanded
-                },
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                current = currentLabel,
-            ) {
-                options.forEach { (count, label) ->
-                    DropdownMenuItem(
-                        text = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = label,
-                                    modifier = Modifier.padding(16.dp),
-                                )
-                                if (currentSpanCount == count) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Check,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        },
-                        onClick = {
-                            onSpanCountChange(count)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
+                contentDescription = null,
+            )
+        },
     )
 }
 
@@ -543,7 +214,7 @@ expect fun getInitialLanguages(): String?
 
 expect fun triggerLocaleChange(
     currentLanguage: String,
-    labelDefault: String
+    labelDefault: String,
 )
 
 expect fun LazyListScope.appLinkItem()

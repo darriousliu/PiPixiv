@@ -9,3 +9,5 @@ interface ZipUtil {
 
     fun getZipEntryContent(zipFilePath: String, entryName: String): ByteArray?
 }
+
+fun createByteArray(size: Int, initializer: (Int) -> Byte): ByteArray = ByteArray(size, initializer)

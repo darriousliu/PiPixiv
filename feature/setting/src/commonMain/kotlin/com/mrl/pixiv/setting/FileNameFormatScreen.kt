@@ -1,10 +1,13 @@
 package com.mrl.pixiv.setting
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,6 +16,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,8 +28,10 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -35,6 +41,9 @@ import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.throttleClick
+import com.mrl.pixiv.strings.download_single_folder_by_user_desc
+import com.mrl.pixiv.strings.download_single_folder_by_user_title
 import com.mrl.pixiv.strings.file_name_format_title
 import com.mrl.pixiv.strings.legend_illust_id
 import com.mrl.pixiv.strings.legend_index
@@ -97,6 +106,40 @@ fun FileNameFormatScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(RStrings.download_single_folder_by_user_title))
+                },
+                supportingContent = {
+                    Text(text = stringResource(RStrings.download_single_folder_by_user_desc))
+                },
+                modifier = Modifier
+                    .height(IntrinsicSize.Min)
+                    .throttleClick(indication = ripple()) {
+                        SettingRepository.setDownloadSubFolderByUser(
+                            !userPreference.downloadSubFolderByUser
+                        )
+                    },
+                leadingContent = {
+                    Column(
+                        modifier = Modifier.fillMaxHeight(),
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Icon(imageVector = Icons.Rounded.Folder, contentDescription = null)
+                    }
+                },
+                trailingContent = {
+                    Column(
+                        modifier = Modifier.fillMaxHeight(),
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Switch(
+                            checked = userPreference.downloadSubFolderByUser,
+                            onCheckedChange = SettingRepository::setDownloadSubFolderByUser,
+                        )
+                    }
+                },
+            )
             OutlinedTextField(
                 state = format,
                 label = { Text(text = stringResource(RStrings.file_name_format_title)) },
@@ -111,7 +154,7 @@ fun FileNameFormatScreen(
 
             FlowRow(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 chips.forEach { key ->
                     FilterChip(

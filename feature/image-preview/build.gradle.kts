@@ -18,12 +18,12 @@ kotlin {
             implementation(libs.bundles.coil3)
             implementation(libs.zoomimage.compose.coil3)
             // Navigation3
-            implementation(composes.bundles.navigation3)
+            implementation(libs.bundles.compose.navigation3)
         }
 
         androidMain.dependencies {
             // Navigation3
-            implementation(composes.bundles.navigation3.android)
+            implementation(libs.bundles.compose.navigation3.android)
         }
     }
 }

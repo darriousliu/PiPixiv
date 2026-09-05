@@ -1,6 +1,6 @@
 plugins {
     id("pixiv.multiplatform.compose")
-    alias(kotlinx.plugins.serialization)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -11,8 +11,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // Serialization
-            implementation(kotlinx.bundles.serialization)
-            implementation(kotlinx.datetime)
+            implementation(libs.bundles.kotlinx.serialization)
+            implementation(libs.kotlinx.datetime)
         }
 
         commonTest.dependencies {

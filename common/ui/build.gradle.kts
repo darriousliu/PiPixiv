@@ -15,19 +15,23 @@ kotlin {
             implementation(project(":common:core"))
 
             // Paging
-            implementation(androidx.bundles.paging)
+            implementation(libs.bundles.androidx.paging)
             // Coil3
             implementation(project.dependencies.platform(libs.coil3.bom))
             implementation(libs.bundles.coil3)
             // Navigation3
-            implementation(composes.bundles.navigation3)
+            implementation(libs.bundles.compose.navigation3)
             // Toast
             implementation(libs.sonner)
         }
 
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
         androidMain.dependencies {
             // Navigation3
-            implementation(composes.bundles.navigation3.android)
+            implementation(libs.bundles.compose.navigation3.android)
         }
     }
 }
