@@ -14,10 +14,16 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class AiModelCatalogServiceTest {
     private val service = AiModelCatalogService(AiHttpClientHolder())
@@ -131,6 +137,198 @@ class AiModelCatalogServiceTest {
     }
 
     @Test
+    fun claudeFetchesEveryPageWithAuthenticationAndDeduplicatesModels() = runTest {
+        val requestedCursors = mutableListOf<String?>()
+        val client = mockClient { request ->
+            assertEquals("/v1/models", request.url.encodedPath)
+            assertEquals("claude-key", request.headers["x-api-key"])
+            assertEquals("2023-06-01", request.headers["anthropic-version"])
+            requestedCursors += request.url.parameters["after_id"]
+            respondJson(
+                when (requestedCursors.size) {
+                    1 -> """
+                        {
+                          "data": [{"id":"claude-opus-4-8"}],
+                          "has_more": true,
+                          "last_id": "claude-opus-4-8"
+                        }
+                    """.trimIndent()
+
+                    2 -> """
+                        {
+                          "data": [{"id":"claude-opus-4-8"},{"id":"claude-sonnet-4-6"}],
+                          "has_more": false,
+                          "last_id": "claude-sonnet-4-6"
+                        }
+                    """.trimIndent()
+
+                    else -> error("Requested a page after has_more was false")
+                }
+            )
+        }
+
+        try {
+            assertEquals(
+                listOf("claude-opus-4-8", "claude-sonnet-4-6"),
+                service.fetchModels(
+                    config(AiProvider.CLAUDE, "https://api.anthropic.com", "claude-key"),
+                    client,
+                ),
+            )
+            assertEquals(listOf(null, "claude-opus-4-8"), requestedCursors)
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun geminiPreservesOpaquePageTokensAndAuthenticationAcrossPages() = runTest {
+        val requestedTokens = mutableListOf<String?>()
+        val client = mockClient { request ->
+            assertEquals("/v1beta/models", request.url.encodedPath)
+            assertEquals("gemini-key", request.headers["x-goog-api-key"])
+            requestedTokens += request.url.parameters["pageToken"]
+            respondJson(
+                when (requestedTokens.size) {
+                    1 -> """
+                        {
+                          "models": [{"name":"models/gemini-3.5-flash"}],
+                          "nextPageToken": "next+/=&page"
+                        }
+                    """.trimIndent()
+
+                    2 -> """
+                        {
+                          "models": [
+                            {"name":"models/gemini-3.5-flash"},
+                            {"name":"models/gemini-3.1-pro-preview"}
+                          ],
+                          "nextPageToken": ""
+                        }
+                    """.trimIndent()
+
+                    else -> error("Requested a page after the token was empty")
+                }
+            )
+        }
+
+        try {
+            assertEquals(
+                listOf("gemini-3.5-flash", "gemini-3.1-pro-preview"),
+                service.fetchModels(
+                    config(AiProvider.GEMINI, "https://example.com", "gemini-key"),
+                    client,
+                ),
+            )
+            assertEquals(listOf(null, "next+/=&page"), requestedTokens)
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun cursorCyclesFailInsteadOfRepeatingRequestsOrReturningPartialResults() = runTest {
+        for (provider in listOf(AiProvider.CLAUDE, AiProvider.GEMINI)) {
+            var requestCount = 0
+            val client = mockClient {
+                val cursor = when (++requestCount) {
+                    1, 3 -> "first-cursor"
+                    2 -> "second-cursor"
+                    else -> error("Repeated a previously requested cursor")
+                }
+                respondJson(pageWithNextCursor(provider, cursor))
+            }
+
+            try {
+                val error = assertFailsWith<IllegalStateException> {
+                    service.fetchModels(config(provider, "https://example.com", "key"), client)
+                }
+                assertTrue(error.message.orEmpty().contains("repeated"))
+                assertEquals(3, requestCount)
+            } finally {
+                client.close()
+            }
+        }
+    }
+
+    @Test
+    fun claudeRejectsMissingCursorWhenMorePagesAreAdvertised() = runTest {
+        var requestCount = 0
+        val client = mockClient {
+            requestCount += 1
+            respondJson("""{"data":[{"id":"claude-sonnet-4-6"}],"has_more":true}""")
+        }
+
+        try {
+            assertFailsWith<IllegalStateException> {
+                service.fetchModels(
+                    config(AiProvider.CLAUDE, "https://example.com", "key"),
+                    client,
+                )
+            }
+            assertEquals(1, requestCount)
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun laterPageHttpFailureIsPropagatedWithoutReturningPartialModels() = runTest {
+        for (provider in listOf(AiProvider.CLAUDE, AiProvider.GEMINI)) {
+            var requestCount = 0
+            val client = mockClient {
+                if (++requestCount == 1) {
+                    respondJson(pageWithNextCursor(provider, "next-cursor"))
+                } else {
+                    respondJson(
+                        content = """{"error":{"message":"rate limit reached"}}""",
+                        status = HttpStatusCode.TooManyRequests,
+                    )
+                }
+            }
+
+            try {
+                val error = assertFailsWith<AiHttpStatusException> {
+                    service.fetchModels(config(provider, "https://example.com", "key"), client)
+                }
+                assertEquals(HttpStatusCode.TooManyRequests.value, error.statusCode)
+                assertEquals(2, requestCount)
+            } finally {
+                client.close()
+            }
+        }
+    }
+
+    @Test
+    fun cancellationStopsFetchingLaterPages() = runTest {
+        for (provider in listOf(AiProvider.CLAUDE, AiProvider.GEMINI)) {
+            var requestCount = 0
+            val secondPageStarted = CompletableDeferred<Unit>()
+            val client = mockClient {
+                if (++requestCount == 1) {
+                    respondJson(pageWithNextCursor(provider, "next-cursor"))
+                } else {
+                    secondPageStarted.complete(Unit)
+                    awaitCancellation()
+                }
+            }
+
+            try {
+                val request = async {
+                    service.fetchModels(config(provider, "https://example.com", "key"), client)
+                }
+                secondPageStarted.await()
+                request.cancelAndJoin()
+
+                assertFailsWith<CancellationException> { request.await() }
+                assertEquals(2, requestCount)
+            } finally {
+                client.close()
+            }
+        }
+    }
+
+    @Test
     fun httpErrorIsPropagated() = runTest {
         val client = mockClient {
             respondJson(
@@ -180,6 +378,16 @@ class AiModelCatalogServiceTest {
             endpoint = endpoint,
             apiKey = apiKey,
         )
+    }
+
+    private fun pageWithNextCursor(provider: AiProvider, cursor: String): String = when (provider) {
+        AiProvider.CLAUDE ->
+            """{"data":[{"id":"claude-sonnet-4-6"}],"has_more":true,"last_id":"$cursor"}"""
+
+        AiProvider.GEMINI ->
+            """{"models":[{"name":"models/gemini-3.5-flash"}],"nextPageToken":"$cursor"}"""
+
+        AiProvider.OPENAI -> error("OpenAI model catalog does not use cursor pagination")
     }
 
     private fun mockClient(
