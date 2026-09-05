@@ -111,8 +111,14 @@ class AiModelCatalogServiceTest {
                 """
                     {
                       "models": [
-                        {"name": "models/gemini-3.5-flash"},
-                        {"name": "models/gemini-3.1-pro-preview"}
+                        {
+                          "name": "models/gemini-3.5-flash",
+                          "supportedGenerationMethods": ["generateContent"]
+                        },
+                        {
+                          "name": "models/gemini-3.1-pro-preview",
+                          "supportedGenerationMethods": ["generateContent"]
+                        }
                       ]
                     }
                 """.trimIndent()
@@ -192,7 +198,10 @@ class AiModelCatalogServiceTest {
                 when (requestedTokens.size) {
                     1 -> """
                         {
-                          "models": [{"name":"models/gemini-3.5-flash"}],
+                          "models": [{
+                            "name":"models/gemini-3.5-flash",
+                            "supportedGenerationMethods":["generateContent"]
+                          }],
                           "nextPageToken": "next+/=&page"
                         }
                     """.trimIndent()
@@ -200,8 +209,14 @@ class AiModelCatalogServiceTest {
                     2 -> """
                         {
                           "models": [
-                            {"name":"models/gemini-3.5-flash"},
-                            {"name":"models/gemini-3.1-pro-preview"}
+                            {
+                              "name":"models/gemini-3.5-flash",
+                              "supportedGenerationMethods":["generateContent"]
+                            },
+                            {
+                              "name":"models/gemini-3.1-pro-preview",
+                              "supportedGenerationMethods":["generateContent"]
+                            }
                           ],
                           "nextPageToken": ""
                         }
@@ -221,6 +236,133 @@ class AiModelCatalogServiceTest {
                 ),
             )
             assertEquals(listOf(null, "next+/=&page"), requestedTokens)
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun geminiListsOnlyModelsThatAdvertiseGenerateContent() = runTest {
+        val client = mockClient {
+            respondJson(
+                """
+                    {
+                      "models": [
+                        {
+                          "name":"models/gemini-embedding-001",
+                          "supportedGenerationMethods":["embedContent","countTokens"]
+                        },
+                        {
+                          "name":"models/gemini-3.5-flash",
+                          "supportedGenerationMethods":["countTokens","generateContent"]
+                        },
+                        {
+                          "name":"models/image-generation-model",
+                          "supportedGenerationMethods":["predict"]
+                        },
+                        {
+                          "name":"models/gemini-3.1-pro-preview",
+                          "supportedGenerationMethods":["generateContent"]
+                        }
+                      ]
+                    }
+                """.trimIndent()
+            )
+        }
+
+        try {
+            assertEquals(
+                listOf("gemini-3.5-flash", "gemini-3.1-pro-preview"),
+                service.fetchModels(
+                    config(AiProvider.GEMINI, "https://example.com", "key"),
+                    client,
+                ),
+            )
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun geminiFetchesNextPageEvenWhenEveryModelOnFirstPageIsFilteredOut() = runTest {
+        val requestedTokens = mutableListOf<String?>()
+        val client = mockClient { request ->
+            requestedTokens += request.url.parameters["pageToken"]
+            respondJson(
+                when (requestedTokens.size) {
+                    1 -> """
+                        {
+                          "models":[{
+                            "name":"models/gemini-embedding-001",
+                            "supportedGenerationMethods":["embedContent"]
+                          }],
+                          "nextPageToken":"text-models-page"
+                        }
+                    """.trimIndent()
+
+                    2 -> """
+                        {
+                          "models":[{
+                            "name":"models/gemini-3.5-flash",
+                            "supportedGenerationMethods":["generateContent"]
+                          }]
+                        }
+                    """.trimIndent()
+
+                    else -> error("Requested a page after the final page")
+                }
+            )
+        }
+
+        try {
+            assertEquals(
+                listOf("gemini-3.5-flash"),
+                service.fetchModels(
+                    config(AiProvider.GEMINI, "https://example.com", "key"),
+                    client,
+                ),
+            )
+            assertEquals(listOf(null, "text-models-page"), requestedTokens)
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun geminiReturnsEmptyWhenNoModelsHaveKnownTextGenerationSupport() = runTest {
+        var requestCount = 0
+        val client = mockClient {
+            requestCount += 1
+            respondJson(
+                """
+                    {
+                      "models":[
+                        {
+                          "name":"models/gemini-embedding-001",
+                          "supportedGenerationMethods":["embedContent"]
+                        },
+                        {"name":"models/compatibility-model-without-capabilities"},
+                        {"name":"models/empty-capabilities","supportedGenerationMethods":[]},
+                        {"name":"models/null-capabilities","supportedGenerationMethods":null},
+                        {
+                          "name":"models/malformed-capabilities",
+                          "supportedGenerationMethods":"generateContent"
+                        }
+                      ]
+                    }
+                """.trimIndent()
+            )
+        }
+
+        try {
+            assertEquals(
+                emptyList(),
+                service.fetchModels(
+                    config(AiProvider.GEMINI, "https://example.com", "key"),
+                    client,
+                ),
+            )
+            assertEquals(1, requestCount)
         } finally {
             client.close()
         }
@@ -385,7 +527,15 @@ class AiModelCatalogServiceTest {
             """{"data":[{"id":"claude-sonnet-4-6"}],"has_more":true,"last_id":"$cursor"}"""
 
         AiProvider.GEMINI ->
-            """{"models":[{"name":"models/gemini-3.5-flash"}],"nextPageToken":"$cursor"}"""
+            """
+                {
+                  "models":[{
+                    "name":"models/gemini-3.5-flash",
+                    "supportedGenerationMethods":["generateContent"]
+                  }],
+                  "nextPageToken":"$cursor"
+                }
+            """.trimIndent()
 
         AiProvider.OPENAI -> error("OpenAI model catalog does not use cursor pagination")
     }

@@ -17,6 +17,7 @@ import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
@@ -79,7 +80,7 @@ class AiModelCatalogService(
                 AiProvider.GEMINI -> payload.requireModelArray(
                     key = MODELS_KEY,
                     providerName = config.provider.name,
-                ).modelIds(NAME_KEY) { modelId ->
+                ).filter(JsonElement::supportsGeminiTextGeneration).modelIds(NAME_KEY) { modelId ->
                     modelId.removePrefix(GEMINI_MODEL_PREFIX)
                 }
             }
@@ -142,7 +143,15 @@ private fun JsonObject.requireModelArray(
         )
 }
 
-private fun JsonArray.modelIds(
+private fun JsonElement.supportsGeminiTextGeneration(): Boolean {
+    // Unknown capabilities stay out of suggestions; compatible endpoints can still use manual IDs.
+    return jsonObjectOrNull()
+        ?.get(GEMINI_GENERATION_METHODS_KEY)
+        ?.jsonArrayOrNull()
+        ?.any { it.stringOrNull() == GEMINI_GENERATE_CONTENT_METHOD } == true
+}
+
+private fun Iterable<JsonElement>.modelIds(
     key: String,
     transform: (String) -> String = { it },
 ): List<String> {
@@ -174,3 +183,5 @@ private const val CLAUDE_AFTER_ID_PARAMETER = "after_id"
 private const val GEMINI_API_KEY_HEADER = "x-goog-api-key"
 private const val GEMINI_NEXT_PAGE_TOKEN_KEY = "nextPageToken"
 private const val GEMINI_PAGE_TOKEN_PARAMETER = "pageToken"
+private const val GEMINI_GENERATION_METHODS_KEY = "supportedGenerationMethods"
+private const val GEMINI_GENERATE_CONTENT_METHOD = "generateContent"
