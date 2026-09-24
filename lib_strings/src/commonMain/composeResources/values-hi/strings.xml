@@ -407,7 +407,7 @@
     <string name="profile_workspace_comment">टिप्पणियाँ</string>
     <string name="back_to_top">शीर्ष पर जाएँ</string>
     <string name="download_storage_permission_required">चित्र डाउनलोड करने के लिए स्टोरेज की अनुमति चाहिए। स्टोरेज की अनुमति देकर फिर से प्रयास करें।</string>
-    <string name="novel_series_continue_reading">पढ़ना जारी रखें: %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">पढ़ना जारी रखें</string>
     <string name="novel_series_last_read">पिछली बार पढ़ा गया अध्याय</string>
     <string name="search_content_type">चित्र का प्रकार</string>
     <string name="search_type_all">सभी प्रकार</string>

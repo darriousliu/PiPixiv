@@ -407,7 +407,7 @@
     <string name="profile_workspace_comment">備註</string>
     <string name="back_to_top">返回頂部</string>
     <string name="download_storage_permission_required">下載圖片需要儲存空間權限，請允許存取儲存空間後重試。</string>
-    <string name="novel_series_continue_reading">繼續閱讀：%1$s（%2$d%%）</string>
+    <string name="novel_series_continue_reading">繼續閱讀</string>
     <string name="novel_series_last_read">上次閱讀的章節</string>
     <string name="search_content_type">圖片類型</string>
     <string name="search_type_all">全部類型</string>

@@ -407,7 +407,7 @@
     <string name="profile_workspace_comment">메모</string>
     <string name="back_to_top">맨 위로</string>
     <string name="download_storage_permission_required">이미지를 다운로드하려면 저장소 권한이 필요합니다. 저장소 접근을 허용한 후 다시 시도하세요.</string>
-    <string name="novel_series_continue_reading">이어서 읽기: %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">이어서 읽기</string>
     <string name="novel_series_last_read">마지막으로 읽은 장</string>
     <string name="search_content_type">작품 유형</string>
     <string name="search_type_all">모든 유형</string>

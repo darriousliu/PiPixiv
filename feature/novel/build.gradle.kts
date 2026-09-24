@@ -31,5 +31,10 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }
+
+        jvmTest.dependencies {
+            implementation("org.jetbrains.compose.ui:ui-test:${libs.versions.composeMultiplatform.get()}")
+            implementation(compose.desktop.currentOs)
+        }
     }
 }

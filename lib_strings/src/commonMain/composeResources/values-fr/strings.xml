@@ -407,7 +407,7 @@
     <string name="profile_workspace_comment">Notes</string>
     <string name="back_to_top">Retour en haut</string>
     <string name="download_storage_permission_required">Une autorisation de stockage est nécessaire pour télécharger des images. Autorisez l'accès au stockage, puis réessayez.</string>
-    <string name="novel_series_continue_reading">Reprendre la lecture : %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">Reprendre la lecture</string>
     <string name="novel_series_last_read">Dernier chapitre lu</string>
     <string name="search_content_type">Type d'image</string>
     <string name="search_type_all">Tous les types</string>

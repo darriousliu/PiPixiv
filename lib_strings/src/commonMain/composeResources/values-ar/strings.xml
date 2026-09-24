@@ -407,7 +407,7 @@
     <string name="profile_workspace_comment">ملاحظات</string>
     <string name="back_to_top">العودة إلى الأعلى</string>
     <string name="download_storage_permission_required">يلزم إذن الوصول إلى التخزين لتنزيل الصور. اسمح بالوصول إلى التخزين ثم أعد المحاولة.</string>
-    <string name="novel_series_continue_reading">متابعة القراءة: %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">متابعة القراءة</string>
     <string name="novel_series_last_read">آخر فصل تمت قراءته</string>
     <string name="search_content_type">نوع العمل</string>
     <string name="search_type_all">جميع الأنواع</string>

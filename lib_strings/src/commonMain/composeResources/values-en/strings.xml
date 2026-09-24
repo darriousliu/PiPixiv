@@ -408,7 +408,7 @@
     <string name="profile_chair">Chair</string>
     <string name="profile_workspace_comment">Notes</string>
     <string name="download_storage_permission_required">Storage permission is required to download images. Allow storage access and try again.</string>
-    <string name="novel_series_continue_reading">Continue reading: %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">Continue reading</string>
     <string name="novel_series_last_read">Last read chapter</string>
     <string name="search_content_type">Artwork type</string>
     <string name="search_type_all">All types</string>

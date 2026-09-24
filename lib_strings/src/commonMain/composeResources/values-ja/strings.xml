@@ -407,7 +407,7 @@
     <string name="profile_workspace_comment">備考</string>
     <string name="back_to_top">先頭に戻る</string>
     <string name="download_storage_permission_required">画像のダウンロードにはストレージへのアクセス許可が必要です。許可してからもう一度お試しください。</string>
-    <string name="novel_series_continue_reading">続きを読む：%1$s（%2$d%%）</string>
+    <string name="novel_series_continue_reading">続きを読む</string>
     <string name="novel_series_last_read">前回読んだ章</string>
     <string name="search_content_type">作品の種類</string>
     <string name="search_type_all">すべての種類</string>
