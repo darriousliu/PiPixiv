@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Close
@@ -53,6 +55,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -67,6 +70,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -106,6 +110,7 @@ import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.back
+import com.mrl.pixiv.strings.back_to_top
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.chapter_next
 import com.mrl.pixiv.strings.chapter_previous
@@ -131,6 +136,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -183,6 +189,8 @@ fun NovelScreen(
     val listState = key(chapterStateKey) {
         rememberLazyListState()
     }
+    val scrollScope = rememberCoroutineScope()
+    val canScrollBack by remember(listState) { derivedStateOf { listState.canScrollBackward } }
     var readerContentWidthPx by remember {
         mutableIntStateOf(with(density) {
             (paneInfo.size.width.roundToPx() - 2 * 16.dp.roundToPx()).coerceAtLeast(0)
@@ -494,41 +502,61 @@ fun NovelScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = showBar,
-                enter = slideInVertically(initialOffsetY = { it }),
-                exit = slideOutVertically(targetOffsetY = { it })
-            ) {
-                Row(
-                    horizontalArrangement = 8.spaceBy
+            if (!state.loading && state.novel != null && !isNovelBlocked) {
+                // 统一排列阅读操作，避免正文层的回顶按钮与章节按钮互相覆盖。
+                Column(
+                    modifier = Modifier
+                        .padding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues())
+                        // 加上 Scaffold 自带的 16dp 边距，为滚动条热区留出空间。
+                        .padding(end = 32.dp, bottom = 8.dp),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = 12.spaceBy,
                 ) {
-                    // 上一章按钮
-                    if (state.prevNovelId != null) {
-                        FloatingActionButton(
-                            onClick = {
-                                saveReadingProgress()
-                                viewModel.dispatch(NovelIntent.NavigateToChapter(state.prevNovelId))
-                            }
+                    if (canScrollBack && !state.isTranslating) {
+                        SmallFloatingActionButton(
+                            onClick = { scrollScope.launch { listState.animateScrollToItem(0) } },
                         ) {
                             Icon(
-                                Icons.AutoMirrored.Rounded.ArrowBack,
-                                contentDescription = stringResource(RStrings.chapter_previous)
+                                Icons.Rounded.ArrowUpward,
+                                contentDescription = stringResource(RStrings.back_to_top),
                             )
                         }
                     }
-
-                    // 下一章按钮
-                    if (state.nextNovelId != null) {
-                        FloatingActionButton(
-                            onClick = {
-                                saveReadingProgress()
-                                viewModel.dispatch(NovelIntent.NavigateToChapter(state.nextNovelId))
-                            }
+                    AnimatedVisibility(
+                        visible = showBar && (state.prevNovelId != null || state.nextNovelId != null),
+                        enter = slideInVertically(initialOffsetY = { it }),
+                        exit = slideOutVertically(targetOffsetY = { it }),
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = 12.spaceBy,
                         ) {
-                            Icon(
-                                Icons.AutoMirrored.Rounded.ArrowForward,
-                                contentDescription = stringResource(RStrings.chapter_next)
-                            )
+                            if (state.prevNovelId != null) {
+                                FloatingActionButton(
+                                    onClick = {
+                                        saveReadingProgress()
+                                        viewModel.dispatch(NovelIntent.NavigateToChapter(state.prevNovelId))
+                                    },
+                                ) {
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.ArrowBack,
+                                        contentDescription = stringResource(RStrings.chapter_previous),
+                                    )
+                                }
+                            }
+                            if (state.nextNovelId != null) {
+                                FloatingActionButton(
+                                    onClick = {
+                                        saveReadingProgress()
+                                        viewModel.dispatch(NovelIntent.NavigateToChapter(state.nextNovelId))
+                                    },
+                                ) {
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.ArrowForward,
+                                        contentDescription = stringResource(RStrings.chapter_next),
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,14 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.rounded.ErrorOutline
-import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.TextFields
@@ -30,13 +27,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -70,8 +63,6 @@ import com.mrl.pixiv.strings.cover
 import com.mrl.pixiv.strings.view_comments
 import com.mrl.pixiv.strings.view_comments_count
 import com.mrl.pixiv.strings.word_count
-import com.mrl.pixiv.strings.back_to_top
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 private const val KEY_COVER = "cover"
@@ -107,8 +98,6 @@ internal fun NovelReaderContent(
 ) {
     val novel = state.novel ?: return
     val density = LocalDensity.current
-    val scrollScope = rememberCoroutineScope()
-    val canScrollBack by remember(listState) { derivedStateOf { listState.canScrollBackward } }
     // Measurement bookkeeping is deliberately not snapshot state: it must not request remeasure.
     val lastMeasuredContentWidth = remember { intArrayOf(-1) }
     val displayedTitle = resolveNovelMetadataText(
@@ -460,17 +449,6 @@ internal fun NovelReaderContent(
                     hoverColor = MaterialTheme.colorScheme.primary,
                 ),
             )
-            if (canScrollBack) {
-                SmallFloatingActionButton(
-                    onClick = { scrollScope.launch { listState.animateScrollToItem(0) } },
-                    modifier = Modifier.align(Alignment.BottomEnd)
-                        .padding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues())
-                        // 为右侧滚动条的拖动热区留出通道，避免滑块到底部时被按钮遮挡。
-                        .padding(end = 48.dp, bottom = 24.dp),
-                ) {
-                    Icon(Icons.Rounded.ArrowUpward, contentDescription = stringResource(RStrings.back_to_top))
-                }
-            }
             ReadingProgressIndicator(
                 progress = readingProgressFraction,
                 modifier = Modifier.align(Alignment.BottomCenter)
