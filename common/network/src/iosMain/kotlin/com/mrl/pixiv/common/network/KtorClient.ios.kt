@@ -1,6 +1,5 @@
 package com.mrl.pixiv.common.network
 
-import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Constants.hostMap
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.network.NetworkUtil.imageHost
@@ -58,40 +57,8 @@ private fun DarwinClientEngineConfig.configureHandleChallenge() {
 internal fun DarwinClientEngineConfig.configureProxy(
     setting: UserPreference.BypassSetting = NetworkUtil.bypassSetting,
 ) {
-    if (setting is UserPreference.BypassSetting.SNI) {
-        Logger.w(tag = "HttpClient") { "iOS 不支持 SNI，使用直连" }
-    }
     configureSession {
-        connectionProxyDictionary = proxyConfiguration(setting)
-    }
-}
-
-internal fun proxyConfiguration(setting: UserPreference.BypassSetting): Map<Any?, *>? {
-    if (setting == UserPreference.BypassSetting.System) return null
-    return buildMap<Any?, Any> {
-        // 显式关闭系统代理与自动配置，确保直连和手动代理不会继承系统 PAC 配置。
-        put("HTTPEnable", 0)
-        put("HTTPSEnable", 0)
-        put("SOCKSEnable", 0)
-        put("ProxyAutoConfigEnable", 0)
-        put("ProxyAutoDiscoveryEnable", 0)
-        if (setting is UserPreference.BypassSetting.Proxy) {
-            when (setting.proxyType) {
-                UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> {
-                    put("HTTPEnable", 1)
-                    put("HTTPProxy", setting.host)
-                    put("HTTPPort", setting.port)
-                    put("HTTPSEnable", 1)
-                    put("HTTPSProxy", setting.host)
-                    put("HTTPSPort", setting.port)
-                }
-                UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> {
-                    put("SOCKSEnable", 1)
-                    put("SOCKSProxy", setting.host)
-                    put("SOCKSPort", setting.port)
-                }
-            }
-        }
+        configureNetworkProxy(setting)
     }
 }
 
