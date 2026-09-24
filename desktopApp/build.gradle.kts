@@ -87,6 +87,7 @@ dependencies {
     implementation(libs.kotlinx.ktor.client.core)
     implementation(libs.filekit.core)
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(project(":feature:image-preview"))
     testImplementation(libs.bundles.compose.navigation3)
 }

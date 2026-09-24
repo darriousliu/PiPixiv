@@ -1,6 +1,5 @@
 package com.mrl.pixiv
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -11,7 +10,6 @@ import coil3.PlatformContext
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.mrl.pixiv.common.analytics.FLAVOR
 import com.mrl.pixiv.common.compose.LocalKeyEventFlow
-import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.AppUtil
@@ -54,40 +52,36 @@ fun main(args: Array<String>) {
     ) {
         val appName = stringResource(RStrings.app_name)
         val preferences by SettingRepository.userPreferenceFlow.collectAsState()
-        val darkTheme = when (preferences.theme) {
-            SettingTheme.LIGHT.name -> false
-            SettingTheme.DARK.name -> true
-            else -> isSystemInDarkTheme()
-        }
-
-        NucleusDecoratedWindowTheme(isDark = darkTheme) {
-            CompositionLocalProvider(
-                LocalKeyEventFlow provides remember { MutableSharedFlow() }
-            ) {
-                val flow = LocalKeyEventFlow.current as MutableSharedFlow
-                val scope = rememberCoroutineScope()
-                DecoratedWindow(
-                    onCloseRequest = ::exitApplication,
-                    title = appName,
-                    onKeyEvent = {
-                        scope.launch {
-                            flow.emit(it)
-                        }
-                        true
-                    }
+        ProvideDesktopTheme(theme = preferences.theme) { darkTheme ->
+            NucleusDecoratedWindowTheme(isDark = darkTheme) {
+                CompositionLocalProvider(
+                    LocalKeyEventFlow provides remember { MutableSharedFlow() }
                 ) {
-                    BindDesktopWindowServices(checkNotNull(nucleusWindow.unsafe.taoWindow))
-                    TitleBar { Text(appName, color = LocalTitleBarStyle.current.colors.content) }
-                    val imageHttpClient = koinInject<HttpClient>(named<ImageClient>())
-
-                    App(
-                        darkTheme = darkTheme,
-                        imageLoaderBuilder = {
-                            this.components {
-                                add(KtorNetworkFetcherFactory(imageHttpClient))
+                    val flow = LocalKeyEventFlow.current as MutableSharedFlow
+                    val scope = rememberCoroutineScope()
+                    DecoratedWindow(
+                        onCloseRequest = ::exitApplication,
+                        title = appName,
+                        onKeyEvent = {
+                            scope.launch {
+                                flow.emit(it)
                             }
+                            true
                         }
-                    )
+                    ) {
+                        BindDesktopWindowServices(checkNotNull(nucleusWindow.unsafe.taoWindow))
+                        TitleBar { Text(appName, color = LocalTitleBarStyle.current.colors.content) }
+                        val imageHttpClient = koinInject<HttpClient>(named<ImageClient>())
+
+                        App(
+                            darkTheme = darkTheme,
+                            imageLoaderBuilder = {
+                                this.components {
+                                    add(KtorNetworkFetcherFactory(imageHttpClient))
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
