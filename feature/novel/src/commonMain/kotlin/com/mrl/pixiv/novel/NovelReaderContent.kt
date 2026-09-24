@@ -452,7 +452,7 @@ internal fun NovelReaderContent(
                 state = scrollbarState,
                 modifier = Modifier.align(Alignment.CenterEnd)
                     .padding(novelReaderContentInsets().only(WindowInsetsSides.Vertical).asPaddingValues())
-                    .padding(end = 8.dp),
+                    .padding(end = 4.dp),
                 // 扩大拖动热区并与边缘留出距离，静止时也能找到并抓住滑块。
                 touchTargetWidth = 32.dp,
                 style = LocalScrollbarStyle.current.copy(
