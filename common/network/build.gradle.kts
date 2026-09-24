@@ -32,18 +32,11 @@ kotlin {
         androidJvmMain.dependencies {
             implementation(project.dependencies.platform(libs.okhttp.bom))
             implementation(libs.okhttp)
-        }
-
-        androidMain.dependencies {
             implementation(libs.kotlinx.ktor.client.okhttp)
         }
 
         iosMain.dependencies {
             implementation(libs.kotlinx.ktor.client.darwin)
-        }
-
-        jvmMain.dependencies {
-            implementation(libs.kotlinx.ktor.client.okhttp)
         }
 
         jvmTest.dependencies {

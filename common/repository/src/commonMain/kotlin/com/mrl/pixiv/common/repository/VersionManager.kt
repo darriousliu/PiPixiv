@@ -3,6 +3,7 @@ package com.mrl.pixiv.common.repository
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.network.httpEngineFactory
+import com.mrl.pixiv.common.network.configureNetworkProxy
 import com.mrl.pixiv.common.serialize.JSON
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.Platform
@@ -47,6 +48,7 @@ data class GithubAsset(
 object VersionManager {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val client = HttpClient(httpEngineFactory) {
+        configureNetworkProxy()
         install(ContentNegotiation) {
             json(JSON)
         }

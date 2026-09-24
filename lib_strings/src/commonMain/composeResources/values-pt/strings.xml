@@ -73,11 +73,13 @@
     <string name="setting">Configurações</string>
     <string name="network_setting">Configurações de rede</string>
     <string name="network_plan">Plano de rede</string>
-    <string name="use_none">Não usar</string>
-    <string name="use_proxy">Usar proxy</string>
+    <string name="use_system_proxy">Proxy do sistema</string>
+    <string name="use_system_proxy_desc">Usar as configurações de proxy do sistema. Conectar diretamente se nenhum proxy estiver configurado.</string>
+    <string name="use_none">Conexão direta</string>
+    <string name="use_proxy">Proxy manual</string>
     <string name="use_sni">Usar SNI</string>
-    <string name="use_none_desc">Não usar proxy ou detecção, conectar diretamente ao Pixiv</string>
-    <string name="use_proxy_desc">Conectar ao Pixiv através de um servidor proxy</string>
+    <string name="use_none_desc">Conectar diretamente, sem proxy do sistema ou proxy manual.</string>
+    <string name="use_proxy_desc">Usar um proxy HTTP ou SOCKS configurado manualmente.</string>
     <string name="use_sni_desc">Contornar bloqueios para se conectar ao Pixiv via SNI</string>
     <string name="proxy_host">Endereço do proxy</string>
     <string name="proxy_port">Porta do proxy</string>

@@ -73,11 +73,13 @@
     <string name="setting">सेटिंग</string>
     <string name="network_setting">नेटवर्क सेटिंग</string>
     <string name="network_plan">नेटवर्क योजना</string>
-    <string name="use_none">उपयोग न करें</string>
-    <string name="use_proxy">प्रॉक्सी का उपयोग करें</string>
+    <string name="use_system_proxy">सिस्टम प्रॉक्सी</string>
+    <string name="use_system_proxy_desc">सिस्टम की प्रॉक्सी सेटिंग का उपयोग करें। प्रॉक्सी सेट न होने पर सीधे कनेक्ट करें।</string>
+    <string name="use_none">सीधा कनेक्शन</string>
+    <string name="use_proxy">मैन्युअल प्रॉक्सी</string>
     <string name="use_sni">SNI का उपयोग करें</string>
-    <string name="use_none_desc">प्रॉक्सी या स्निफिंग का उपयोग न करें, सीधे Pixiv से जुड़ें</string>
-    <string name="use_proxy_desc">प्रॉक्सी सर्वर के माध्यम से Pixiv से जुड़ें</string>
+    <string name="use_none_desc">सिस्टम या मैन्युअल प्रॉक्सी के बिना सीधे कनेक्ट करें।</string>
+    <string name="use_proxy_desc">मैन्युअल रूप से सेट की गई HTTP या SOCKS प्रॉक्सी का उपयोग करें।</string>
     <string name="use_sni_desc">SNI के माध्यम से ब्लॉक को बायपास करके Pixiv से जुड़ें</string>
     <string name="proxy_host">प्रॉक्सी पता</string>
     <string name="proxy_port">प्रॉक्सी पोर्ट</string>

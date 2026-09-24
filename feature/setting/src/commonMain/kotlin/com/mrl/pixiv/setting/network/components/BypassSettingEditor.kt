@@ -6,6 +6,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -49,6 +50,8 @@ import com.mrl.pixiv.strings.sni_doh_url
 import com.mrl.pixiv.strings.sni_non_strict_ssl
 import com.mrl.pixiv.strings.sni_timeout
 import com.mrl.pixiv.strings.use_none
+import com.mrl.pixiv.strings.use_system_proxy
+import com.mrl.pixiv.strings.use_system_proxy_desc
 import com.mrl.pixiv.strings.use_none_desc
 import com.mrl.pixiv.strings.use_proxy
 import com.mrl.pixiv.strings.use_proxy_desc
@@ -95,7 +98,7 @@ fun BypassSettingEditor(
             modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
         )
 
-        Row(
+        FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
@@ -103,7 +106,8 @@ fun BypassSettingEditor(
         ) {
             val types = remember {
                 listOfNotNull(
-                    UserPreference.BypassSetting.None,
+                    UserPreference.BypassSetting.System,
+                    UserPreference.BypassSetting.Direct,
                     UserPreference.BypassSetting.Proxy(),
                     if (platform.isIOS()) null else UserPreference.BypassSetting.SNI()
                 )
@@ -111,7 +115,8 @@ fun BypassSettingEditor(
 
             types.forEach { type ->
                 val selected = when (bypassSetting) {
-                    is UserPreference.BypassSetting.None -> type is UserPreference.BypassSetting.None
+                    UserPreference.BypassSetting.System -> type == UserPreference.BypassSetting.System
+                    UserPreference.BypassSetting.Direct -> type == UserPreference.BypassSetting.Direct
                     is UserPreference.BypassSetting.Proxy -> type is UserPreference.BypassSetting.Proxy
                     is UserPreference.BypassSetting.SNI -> type is UserPreference.BypassSetting.SNI
                 }
@@ -127,7 +132,8 @@ fun BypassSettingEditor(
                         Text(
                             text = stringResource(
                                 when (type) {
-                                    is UserPreference.BypassSetting.None -> RStrings.use_none
+                                    UserPreference.BypassSetting.System -> RStrings.use_system_proxy
+                                    UserPreference.BypassSetting.Direct -> RStrings.use_none
                                     is UserPreference.BypassSetting.Proxy -> RStrings.use_proxy
                                     is UserPreference.BypassSetting.SNI -> RStrings.use_sni
                                 }
@@ -145,7 +151,7 @@ fun BypassSettingEditor(
                 label = "bypass_setting_content"
             ) {
                 when (bypassSetting) {
-                    is UserPreference.BypassSetting.None -> {}
+                    UserPreference.BypassSetting.System, UserPreference.BypassSetting.Direct -> {}
                     is UserPreference.BypassSetting.Proxy -> {
                         ProxyEditor(bypassSetting, onUpdate)
                     }
@@ -158,12 +164,13 @@ fun BypassSettingEditor(
             Text(
                 text = stringResource(
                     when (bypassSetting) {
-                        is UserPreference.BypassSetting.None -> RStrings.use_none_desc
+                        UserPreference.BypassSetting.System -> RStrings.use_system_proxy_desc
+                        UserPreference.BypassSetting.Direct -> RStrings.use_none_desc
                         is UserPreference.BypassSetting.Proxy -> RStrings.use_proxy_desc
                         is UserPreference.BypassSetting.SNI -> RStrings.use_sni_desc
                     }
                 ),
-                modifier = Modifier.padding(start = 16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
             )

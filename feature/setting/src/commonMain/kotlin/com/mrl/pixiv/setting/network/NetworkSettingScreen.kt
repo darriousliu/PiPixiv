@@ -39,8 +39,6 @@ fun NetworkSettingScreen(
 ) {
     val userPreference by requireUserPreferenceFlow.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
-    LocalNetworkPermissionEffect(userPreference.bypassSetting)
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -70,7 +68,10 @@ fun NetworkSettingScreen(
             BypassSettingEditor(
                 modifier = itemModifier,
                 bypassSetting = userPreference.bypassSetting,
-                onUpdate = { setting -> viewModel.updateBypassSetting(setting) }
+                onUpdate = { setting ->
+                    viewModel.updateBypassSetting(setting)
+                    toaster.show(RStrings.restart_app_to_take_effect)
+                }
             )
 
             PictureSourceWidget(
@@ -84,6 +85,4 @@ fun NetworkSettingScreen(
         }
     }
 }
-
-
 

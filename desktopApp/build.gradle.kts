@@ -130,7 +130,7 @@ nucleus {
             version.set("7.9.1")
         }
 
-        jvmArgs("--enable-native-access", "ALL-UNNAMED")
+        jvmArgs("--enable-native-access", "ALL-UNNAMED", "-Djava.net.useSystemProxies=true")
         if (desktopOsName == "Mac OS X") {
             jvmArgs("-XstartOnFirstThread")
         }
@@ -217,6 +217,7 @@ tasks.withType<AbstractElectronBuilderPackageTask>().configureEach {
 val directJvmRunTasks = setOf("run", "hotRun", "hotDev")
 tasks.withType(JavaExec::class.java).configureEach {
     if (name in directJvmRunTasks) {
+        systemProperty("java.net.useSystemProxies", "true")
         dependsOn(copyMMKVNativeLibraryToDesktopResources)
         systemProperty(
             "compose.application.resources.dir",

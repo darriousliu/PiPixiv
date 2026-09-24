@@ -5,6 +5,7 @@ import com.mrl.pixiv.common.data.Constants.hostMap
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.network.NetworkUtil.imageHost
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.engine.darwin.DarwinClientEngineConfig
@@ -54,48 +55,48 @@ private fun DarwinClientEngineConfig.configureHandleChallenge() {
     }
 }
 
-private fun DarwinClientEngineConfig.configureProxy() {
-    when (val bypassSetting = NetworkUtil.bypassSetting) {
-        is UserPreference.BypassSetting.None -> {}
-        is UserPreference.BypassSetting.Proxy -> {
-            configureSession {
-                connectionProxyDictionary = buildMap {
-                    if (bypassSetting.proxyType == UserPreference.BypassSetting.Proxy.ProxyType.HTTP) {
-                        put("HTTPEnable", true)
-                        put("HTTPProxy", bypassSetting.host)
-                        put("HTTPPort", bypassSetting.port)
+internal fun DarwinClientEngineConfig.configureProxy(
+    setting: UserPreference.BypassSetting = NetworkUtil.bypassSetting,
+) {
+    if (setting is UserPreference.BypassSetting.SNI) {
+        Logger.w(tag = "HttpClient") { "iOS 不支持 SNI，使用直连" }
+    }
+    configureSession {
+        connectionProxyDictionary = proxyConfiguration(setting)
+    }
+}
 
-                        put("HTTPSEnable", true)
-                        put("HTTPSProxy", bypassSetting.host)
-                        put("HTTPSPort", bypassSetting.port)
-                    }
-                    if (bypassSetting.proxyType == UserPreference.BypassSetting.Proxy.ProxyType.SOCKS) {
-                        put("SOCKSEnable", true)
-                        put("SOCKSProxy", bypassSetting.host)
-                        put("SOCKSPort", bypassSetting.port)
-                    }
+internal fun proxyConfiguration(setting: UserPreference.BypassSetting): Map<Any?, *>? {
+    if (setting == UserPreference.BypassSetting.System) return null
+    return buildMap<Any?, Any> {
+        // 显式关闭系统代理与自动配置，确保直连和手动代理不会继承系统 PAC 配置。
+        put("HTTPEnable", 0)
+        put("HTTPSEnable", 0)
+        put("SOCKSEnable", 0)
+        put("ProxyAutoConfigEnable", 0)
+        put("ProxyAutoDiscoveryEnable", 0)
+        if (setting is UserPreference.BypassSetting.Proxy) {
+            when (setting.proxyType) {
+                UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> {
+                    put("HTTPEnable", 1)
+                    put("HTTPProxy", setting.host)
+                    put("HTTPPort", setting.port)
+                    put("HTTPSEnable", 1)
+                    put("HTTPSProxy", setting.host)
+                    put("HTTPSPort", setting.port)
+                }
+                UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> {
+                    put("SOCKSEnable", 1)
+                    put("SOCKSProxy", setting.host)
+                    put("SOCKSPort", setting.port)
                 }
             }
-//            proxy = when (bypassSetting.proxyType) {
-//                UserPreference.BypassSetting.Proxy.ProxyType.HTTP -> ProxyBuilder.http(
-//                    URLBuilder(
-//                        protocol = URLProtocol.HTTP,
-//                        host = bypassSetting.host,
-//                        port = bypassSetting.port
-//                    ).build()
-//                )
-//
-//                UserPreference.BypassSetting.Proxy.ProxyType.SOCKS -> ProxyBuilder.socks(
-//                    host = bypassSetting.host,
-//                    port = bypassSetting.port
-//                )
-//            }
-        }
-
-        is UserPreference.BypassSetting.SNI -> {
-            Logger.w(tag = "HttpClient") { "SNI is not supported on iOS" }
         }
     }
+}
+
+actual fun HttpClientConfig<*>.configureNetworkProxy(setting: UserPreference.BypassSetting) {
+    engine { (this as DarwinClientEngineConfig).configureProxy(setting) }
 }
 
 actual val httpEngineFactory: HttpClientEngineFactory<*> = Darwin
