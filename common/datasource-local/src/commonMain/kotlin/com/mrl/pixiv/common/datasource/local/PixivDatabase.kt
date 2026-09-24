@@ -10,8 +10,8 @@ import androidx.sqlite.execSQL
 import com.mrl.pixiv.common.datasource.local.dao.BlockContentDao
 import com.mrl.pixiv.common.datasource.local.dao.BrowsingHistoryDao
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
-import com.mrl.pixiv.common.datasource.local.dao.NovelReadingProgressDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelReadLaterDao
+import com.mrl.pixiv.common.datasource.local.dao.NovelReadingProgressDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelTranslationDao
 import com.mrl.pixiv.common.datasource.local.entity.BlockCommentEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockIllustEntity
@@ -21,8 +21,8 @@ import com.mrl.pixiv.common.datasource.local.entity.BlockUserEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.IllustHistoryEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelHistoryEntity
-import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelReadLaterEntity
+import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelTranslationEntity
 
 @Database(

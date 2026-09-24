@@ -5,8 +5,8 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.mrl.pixiv.common.datasource.local.dao.BlockContentDao
 import com.mrl.pixiv.common.datasource.local.dao.BrowsingHistoryDao
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
-import com.mrl.pixiv.common.datasource.local.dao.NovelReadingProgressDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelReadLaterDao
+import com.mrl.pixiv.common.datasource.local.dao.NovelReadingProgressDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelTranslationDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
