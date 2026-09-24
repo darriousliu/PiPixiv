@@ -56,6 +56,7 @@ import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.TagItem
+import com.mrl.pixiv.common.compose.ui.LocalScrollbarStyle
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.kts.HSpacer
@@ -122,6 +123,12 @@ internal fun NovelReaderContent(
         isTranslated = state.isTranslated,
         isShowingOriginalText = state.isShowingOriginalText,
     )
+    val scrollbarState = remember(listState, state.paragraphSpans, novel.series.title, displayedCaption) {
+        NovelScrollbarState(
+            listState,
+            novelScrollContent(state.paragraphSpans, novel.series.title != null, displayedCaption),
+        )
+    }
     val isBookmarked = novel.isBookmark
     val totalBookmarks = (novel.totalBookmarks + when {
         isBookmarked && !novel.isBookmarked -> 1L
@@ -442,16 +449,24 @@ internal fun NovelReaderContent(
 
         if (!state.isTranslating) {
             VerticalScrollbar(
-                state = listState,
+                state = scrollbarState,
                 modifier = Modifier.align(Alignment.CenterEnd)
-                    .padding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical).asPaddingValues()),
+                    .padding(novelReaderContentInsets().only(WindowInsetsSides.Vertical).asPaddingValues())
+                    .padding(end = 8.dp),
+                // 扩大拖动热区并与边缘留出距离，静止时也能找到并抓住滑块。
+                touchTargetWidth = 32.dp,
+                style = LocalScrollbarStyle.current.copy(
+                    unhoverColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    hoverColor = MaterialTheme.colorScheme.primary,
+                ),
             )
             if (canScrollBack) {
                 SmallFloatingActionButton(
                     onClick = { scrollScope.launch { listState.animateScrollToItem(0) } },
                     modifier = Modifier.align(Alignment.BottomEnd)
                         .padding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues())
-                        .padding(end = 16.dp, bottom = 24.dp),
+                        // 为右侧滚动条的拖动热区留出通道，避免滑块到底部时被按钮遮挡。
+                        .padding(end = 48.dp, bottom = 24.dp),
                 ) {
                     Icon(Icons.Rounded.ArrowUpward, contentDescription = stringResource(RStrings.back_to_top))
                 }

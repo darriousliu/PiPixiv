@@ -33,6 +33,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.Dp
 import com.mrl.pixiv.common.util.currentTimeMillis
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -48,6 +49,7 @@ private fun ScrollbarImpl(
     reverseLayout: Boolean = false,
     style: ScrollbarStyle = LocalScrollbarStyle.current,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    touchTargetWidth: Dp = style.thickness,
 ) {
     if (metrics.thumbSizeFraction >= 1f) return
 
@@ -124,14 +126,19 @@ private fun ScrollbarImpl(
     var dragStartPointerY by remember { mutableFloatStateOf(0f) }
     // dragStartThumbOffset 处于滚动比例空间（而非显示空间），以便可以一致地应用 reverseLayout 增量反转。
     var dragStartThumbOffset by remember { mutableFloatStateOf(0f) }
-    val scrollJobHolder = remember { object { var job: Job? = null } }
+    val scrollJobHolder = remember {
+        object {
+            var job: Job? = null
+            var pendingFraction: Float? = null
+        }
+    }
 
     // 仅在滚动条处于交互状态时启用指针输入：这避免了在滚动条完全透明时在移动设备上创建不可见的点击目标。
     val isPointerEnabled = isHovered || isScrollInProgress || isDragging || color.alpha > 0f
 
     Canvas(
         modifier = modifier
-            .width(style.thickness)
+            .width(touchTargetWidth.coerceAtLeast(style.thickness))
             .fillMaxHeight()
             .hoverable(interactionSource)
             .pointerInput(isPointerEnabled) {
@@ -168,8 +175,17 @@ private fun ScrollbarImpl(
                             )
                         val scrollFraction = if (thumbSizeFraction >= 1f) 0f
                         else (newThumbOffset / (1f - thumbSizeFraction)).coerceIn(0f, 1f)
-                        scrollJobHolder.job?.cancel()
-                        scrollJobHolder.job = scope.launch { currentOnScroll(scrollFraction) }
+                        // 串行处理最新位置，避免高频拖动不断取消尚未完成的列表定位。
+                        scrollJobHolder.pendingFraction = scrollFraction
+                        if (scrollJobHolder.job?.isActive != true) {
+                            scrollJobHolder.job = scope.launch {
+                                while (true) {
+                                    val pending = scrollJobHolder.pendingFraction ?: break
+                                    scrollJobHolder.pendingFraction = null
+                                    currentOnScroll(pending)
+                                }
+                            }
+                        }
                     },
                 )
             }
@@ -180,12 +196,13 @@ private fun ScrollbarImpl(
         val thumbHeight = maxOf(size.height * currentMetrics.thumbSizeFraction, minThumbPx)
         val thumbTop = size.height * smoothedDisplayOffset
 
+        val thumbWidth = style.thickness.toPx().coerceAtMost(size.width)
         val outline = style.shape.createOutline(
-            Size(size.width, thumbHeight),
+            Size(thumbWidth, thumbHeight),
             layoutDirection,
             this,
         )
-        translate(top = thumbTop) {
+        translate(left = (size.width - thumbWidth) / 2f, top = thumbTop) {
             drawOutline(outline, color)
         }
     }
@@ -199,6 +216,7 @@ private fun ScrollbarImpl(
  * @param reverseLayout 当列表以 `reverseLayout = true` 组合时设置为 `true`
  * @param style 视觉样式；默认为 [LocalScrollbarStyle]
  * @param interactionSource 接收 [DragInteraction] 事件的 [MutableInteractionSource]
+ * @param touchTargetWidth 拖动热区宽度，不改变滑块本身的视觉宽度
  */
 @Composable
 fun VerticalScrollbar(
@@ -207,6 +225,7 @@ fun VerticalScrollbar(
     reverseLayout: Boolean = false,
     style: ScrollbarStyle = LocalScrollbarStyle.current,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    touchTargetWidth: Dp = style.thickness,
 ) {
     val metrics by remember(state) { derivedStateOf { state.computeMetrics() } }
 
@@ -218,6 +237,7 @@ fun VerticalScrollbar(
         reverseLayout = reverseLayout,
         style = style,
         interactionSource = interactionSource,
+        touchTargetWidth = touchTargetWidth,
     )
 }
 
