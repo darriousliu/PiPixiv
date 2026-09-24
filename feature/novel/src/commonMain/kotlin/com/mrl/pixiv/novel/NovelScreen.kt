@@ -55,7 +55,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -513,7 +512,7 @@ fun NovelScreen(
                     verticalArrangement = 12.spaceBy,
                 ) {
                     if (canScrollBack && !state.isTranslating) {
-                        SmallFloatingActionButton(
+                        FloatingActionButton(
                             onClick = { scrollScope.launch { listState.animateScrollToItem(0) } },
                         ) {
                             Icon(
