@@ -18,7 +18,7 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 ## 📥 Download
 
-Current source version: **2.5.0**.
+Current source version: **2.5.1**. See GitHub Release below for published versions.
 
 [![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=Stable)](https://github.com/darriousliu/PiPixiv/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
@@ -65,8 +65,9 @@ Current source version: **2.5.0**.
 ### 📖 Novel
 
 * 📖 Switch between illustration/novel view across Home, Feed, Collection, Ranking, and Search pages; preference is persisted.
-* 📝 Immersive novel reading with adjustable font size, line spacing, and chapter navigation (previous/next chapter), preserving your reading position when changing the layout.
+* 📝 Immersive novel reading with adjustable font size and line spacing, plus a draggable scrollbar. Back-to-top and chapter navigation buttons are stacked vertically, and your reading position is preserved when changing the layout.
 * ℹ️ View the synopsis, tags, and series information while reading, and open the author's profile or series contents.
+* ▶️ Continue reading from the series contents, with the last-read chapter title and progress percentage displayed separately.
 * 🤖 AI novel translation with OpenAI / Claude / Gemini and compatible endpoints, including local network services; configure the model, timeout, and request parameters. Supports fetching available models, global concurrency limits, and translating novel text, titles, and synopses.
 * 🌐 Stream translated text, cache translations locally, and switch between the original and translation.
 * 📚 Read Later translation queue with task status, retries for failed tasks, and translation regeneration.
@@ -93,7 +94,8 @@ Current source version: **2.5.0**.
 
 ### ⚙️ Settings & System
 
-* ⚙️ App settings (Language, Network proxy / SNI bypass, Image source, Grid columns, Private bookmarks, etc.).
+* ⚙️ App settings (language, image source, grid columns, private bookmarks, etc.).
+* 🌐 Use the system proxy by default, or choose a direct connection or manual HTTP / SOCKS proxy. Restart the app after changing the network mode. Android and desktop platforms also offer SNI mode.
 * 🔒 Privacy settings control R-18 content visibility and clipboard reading when opening search.
 * 🚫 Block artworks, users, and tags, and filter long novel tags by length and segment count.
 * 🔗 Deep link support.
@@ -102,6 +104,7 @@ Current source version: **2.5.0**.
 
 ### 🖥️ Desktop Platform
 
+* 🎨 Follow the system light/dark theme or choose a theme manually.
 * 🔄 Scrolling list supports `R` shortcut key to return to top or refresh, and ⬆️⬇️ arrow keys to scroll.
 * ⌨️ Press ESC to go back.
 
