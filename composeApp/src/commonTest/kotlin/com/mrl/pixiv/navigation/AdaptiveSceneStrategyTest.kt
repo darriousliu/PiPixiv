@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.metadata
 import androidx.navigation3.scene.SceneStrategyScope
+import androidx.navigationevent.NavigationEvent
 import com.mrl.pixiv.common.compose.layout.PaneInputState
 import com.mrl.pixiv.common.compose.layout.SplitPaneState
 import com.mrl.pixiv.common.router.CommentType
@@ -14,6 +15,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNotSame
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -162,6 +165,55 @@ class AdaptiveSceneStrategyTest {
         assertFalse(paneTransitions.suppressesAnimationFor(wide))
         paneTransitions.update(wide, previous)
         assertFalse(paneTransitions.suppressesAnimationFor(wide))
+    }
+
+    @Test
+    fun cardTransitionIsLimitedToEnabledSinglePaneNavigation() {
+        val source = entry("settings", Destination.Setting)
+        val detail = entry("network", Destination.NetworkSetting, "settings")
+        val previous = scene(listOf(source), width = 400.dp)
+        val current = scene(listOf(source, detail), width = 400.dp)
+        val split = scene(listOf(source, detail))
+        val disabled = AdaptivePaneTransitionState(enablePredictiveBackCard = false)
+        disabled.update(current, previous, TransitionKind.Predictive, NavigationEvent.EDGE_LEFT)
+        assertNull(disabled.backCardFor(current))
+
+        val enabled = AdaptivePaneTransitionState(enablePredictiveBackCard = true)
+        enabled.update(current, previous, TransitionKind.Back)
+        assertNull(enabled.backCardFor(current), "A button pop must retain its original animation")
+        enabled.update(current, previous, TransitionKind.Predictive, NavigationEvent.EDGE_RIGHT)
+        assertNotNull(enabled.backCardFor(current))
+        enabled.update(split, previous, TransitionKind.Predictive, NavigationEvent.EDGE_RIGHT)
+        assertNull(enabled.backCardFor(split))
+        assertNull(enabled.backCardFor(previous))
+    }
+
+    @Test
+    fun cardStyleAndEdgeSurviveCommitAndCancelCallbacksUntilSceneDisposal() {
+        val source = entry("settings", Destination.Setting)
+        val detail = entry("network", Destination.NetworkSetting)
+        val previous = scene(listOf(source), width = 400.dp)
+        val current = scene(listOf(source, detail), width = 400.dp)
+        val state = AdaptivePaneTransitionState(enablePredictiveBackCard = true)
+        state.update(current, previous, TransitionKind.Predictive, NavigationEvent.EDGE_RIGHT)
+        val card = assertNotNull(state.backCardFor(current))
+
+        for (kind in listOf(TransitionKind.Back, TransitionKind.Forward)) {
+            state.update(current, previous, kind)
+            assertSame(card, state.backCardFor(current))
+            assertSame(card, state.backCardFor(previous))
+            assertEquals(NavigationEvent.EDGE_RIGHT, card.swipeEdge)
+        }
+        state.finishBackCard(card)
+        assertNull(state.backCardFor(current))
+        assertNull(state.backCardFor(previous))
+
+        state.update(current, previous, TransitionKind.Predictive, NavigationEvent.EDGE_LEFT)
+        val retry = assertNotNull(state.backCardFor(current))
+        assertNotSame(card, retry)
+        state.finishBackCard(card)
+        assertSame(retry, state.backCardFor(current), "Old disposal cannot finish the next gesture")
+        assertEquals(NavigationEvent.EDGE_LEFT, retry.swipeEdge)
     }
 
     private fun strategy(

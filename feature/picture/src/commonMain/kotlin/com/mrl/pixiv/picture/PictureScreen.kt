@@ -99,6 +99,7 @@ import com.mrl.pixiv.common.compose.layout.ResizableSplitLayout
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.layout.rememberSplitPaneState
+import com.mrl.pixiv.common.compose.rememberNavigationSharedContentState
 import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
@@ -448,7 +449,7 @@ internal fun PictureScreen(
                                         .fillMaxWidth()
                                         .conditionally(enableTransition) {
                                             sharedElement(
-                                                sharedTransitionScope.rememberSharedContentState(
+                                                sharedTransitionScope.rememberNavigationSharedContentState(
                                                     key = sharedImageKey
                                                 ),
                                                 animatedVisibilityScope = animatedContentScope,
@@ -505,7 +506,7 @@ internal fun PictureScreen(
                                     .fillMaxWidth()
                                     .conditionally(enableTransition) {
                                         sharedElement(
-                                            sharedTransitionScope.rememberSharedContentState(
+                                            sharedTransitionScope.rememberNavigationSharedContentState(
                                                 key = sharedImageKey
                                             ),
                                             animatedVisibilityScope = animatedContentScope,
@@ -802,7 +803,7 @@ internal fun PictureScreen(
             modifier = modifier
                 .conditionally(enableTransition) {
                     sharedBounds(
-                        rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
+                        rememberNavigationSharedContentState(key = "${prefix}-card-${illust.id}"),
                         animatedContentScope,
                         enter = fadeIn(DefaultFloatAnimationSpec),
                         exit = fadeOut(DefaultFloatAnimationSpec),

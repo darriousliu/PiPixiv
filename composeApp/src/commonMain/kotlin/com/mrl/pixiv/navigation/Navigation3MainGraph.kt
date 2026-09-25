@@ -406,7 +406,7 @@ fun Navigation3MainGraph(
                             allowSplit = allowSplit,
                         )
                     }
-                    NavDisplay(
+                    PredictiveBackNavDisplay(
                         backStack = navigationManager.backStack,
                         modifier = Modifier.fillMaxSize(),
                         onBack = navigationManager::popBackStack,

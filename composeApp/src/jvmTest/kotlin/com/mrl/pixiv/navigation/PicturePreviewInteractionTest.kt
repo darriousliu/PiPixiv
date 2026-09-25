@@ -60,14 +60,14 @@ import com.mrl.pixiv.common.router.NavigationRecord
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.image.preview.ImagePreviewScreen
-import java.awt.image.BufferedImage
-import java.io.File
-import javax.imageio.ImageIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.swing.Swing
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -244,8 +244,9 @@ private class PictureFixture(
                         val strategy = remember(maxWidth, maxHeight) {
                             AdaptiveSceneStrategy(maxWidth, maxHeight, splitState, inputState, transitions)
                         }
-                        NavDisplay(
+                        PredictiveBackNavDisplay(
                             backStack = backStack,
+                            enableQuickBack = true,
                             onBack = { backStack.removeLast() },
                             modifier = Modifier.fillMaxSize(),
                             sharedTransitionScope = this@SharedTransitionLayout,

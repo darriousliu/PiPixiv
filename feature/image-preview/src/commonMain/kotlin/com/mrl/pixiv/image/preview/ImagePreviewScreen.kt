@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
+import com.mrl.pixiv.common.compose.rememberNavigationSharedContentState
 import kotlin.math.abs
 
 @Composable
@@ -112,7 +113,7 @@ fun ImagePreviewScreen(
                         .then(
                             if (sharedElementKey != null && page == safeInitialIndex) {
                                 Modifier.sharedElement(
-                                    sharedContentState = rememberSharedContentState(sharedElementKey),
+                                    sharedContentState = rememberNavigationSharedContentState(sharedElementKey),
                                     animatedVisibilityScope = animatedContentScope,
                                 )
                             } else {

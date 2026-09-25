@@ -26,6 +26,7 @@ import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigationevent.NavigationEvent
 import com.mrl.pixiv.common.compose.layout.PaneHost
 import com.mrl.pixiv.common.compose.layout.PaneInputState
 import com.mrl.pixiv.common.compose.layout.PaneRole
@@ -34,6 +35,8 @@ import com.mrl.pixiv.common.compose.layout.SplitPaneDividerWidth
 import com.mrl.pixiv.common.compose.layout.SplitPaneState
 import com.mrl.pixiv.common.router.NavigationRecord
 import com.mrl.pixiv.common.router.paneSpec
+import com.mrl.pixiv.common.util.isAndroid
+import com.mrl.pixiv.common.util.platform
 
 internal object NavigationRecordKey : NavMetadataKey<NavigationRecord>
 
@@ -45,21 +48,54 @@ internal val NavEntry<NavigationRecord>.record: NavigationRecord
  * Keep that UI-only segment separate from entry identity and refresh it for every kind of back.
  */
 @Stable
-internal class AdaptivePaneTransitionState {
+internal class AdaptivePaneTransitionState(
+    private val enablePredictiveBackCard: Boolean = platform.isAndroid(),
+) {
     private var segment by mutableStateOf<PaneTransitionSegment?>(null)
+    private var backCard by mutableStateOf<PredictiveBackCardTransition?>(null)
 
-    fun update(initial: AdaptiveScene?, target: AdaptiveScene?) {
+    fun update(
+        initial: AdaptiveScene?,
+        target: AdaptiveScene?,
+        kind: TransitionKind = TransitionKind.Forward,
+        swipeEdge: Int = NavigationEvent.EDGE_NONE,
+    ) {
         segment = PaneTransitionSegment(
             initialKey = initial?.key,
             targetKey = target?.key,
             keepsSamePage = initial != null && target != null &&
                 initial.top.contentKey == target.top.contentKey,
         )
+        // NavDisplay can ask for a spec before seeking to the previous scene. The
+        // disappearing scene, rather than an idle spec call, owns session cleanup.
+        if (initial?.key == target?.key) return
+        if (!enablePredictiveBackCard || initial == null || target == null ||
+            initial.source != null || target.source != null
+        ) {
+            backCard = null
+            return
+        }
+        if (kind == TransitionKind.Predictive) {
+            if (backCard?.matches(initial.key, target.key) != true || backCard?.swipeEdge != swipeEdge) {
+                backCard = PredictiveBackCardTransition(initial.key, target.key, swipeEdge)
+            }
+        } else if (backCard?.matches(initial.key, target.key) != true) {
+            backCard = null
+        }
+    }
+
+    fun backCardFor(scene: AdaptiveScene): PredictiveBackCardTransition? =
+        backCard?.takeIf { it.contains(scene.key) }
+
+    fun finishBackCard(transition: PredictiveBackCardTransition) {
+        // Disposal from an interrupted gesture must not clear its successor.
+        if (backCard === transition) backCard = null
     }
 
     fun suppressesAnimationFor(scene: AdaptiveScene): Boolean = segment?.let {
         it.keepsSamePage && (scene.key == it.initialKey || scene.key == it.targetKey)
     } ?: false
+
 }
 
 private data class PaneTransitionSegment(
@@ -124,7 +160,12 @@ internal data class AdaptiveScene(
 
     override val content: @Composable () -> Unit = {
         if (source == null) {
-            PaneHost(PaneRole.Single, isSplit = false) { top.Content() }
+            PredictiveBackCard(
+                card = paneTransitionState.backCardFor(this),
+                onFinished = paneTransitionState::finishBackCard,
+            ) {
+                PaneHost(PaneRole.Single, isSplit = false) { top.Content() }
+            }
         } else {
             val scope = LocalNavAnimatedContentScope.current
             ResizableSplitLayout(
@@ -145,7 +186,8 @@ internal data class AdaptiveScene(
                                 enter = if (suppressAnimation) EnterTransition.None else {
                                     fadeIn(tween(200)) + slideInHorizontally(tween(220)) { it / 16 }
                                 },
-                                exit = if (suppressAnimation) ExitTransition.None else fadeOut(tween(140)),
+                                // Do not fade the detail as the back gesture advances.
+                                exit = ExitTransition.None,
                             )
                         },
                     ) { top.Content() }
@@ -155,7 +197,7 @@ internal data class AdaptiveScene(
     }
 }
 
-private enum class TransitionKind { Forward, Back, Predictive }
+internal enum class TransitionKind { Forward, Back, Predictive }
 
 private fun AnimatedContentTransitionScope<Scene<*>>.adaptiveTransform(
     kind: TransitionKind,
@@ -164,7 +206,7 @@ private fun AnimatedContentTransitionScope<Scene<*>>.adaptiveTransform(
 ): ContentTransform {
     val initial = initialState as? AdaptiveScene
     val target = targetState as? AdaptiveScene
-    paneTransitionState.update(initial, target)
+    paneTransitionState.update(initial, target, kind, swipeEdge)
     if (initial != null && target != null) {
         val samePage = initial.top.contentKey == target.top.contentKey
         val sameSource = initial.source != null &&
@@ -174,6 +216,12 @@ private fun AnimatedContentTransitionScope<Scene<*>>.adaptiveTransform(
         if (samePage || sameSource || openingSidePage || closingSidePage) {
             return EnterTransition.None togetherWith ExitTransition.None
         }
+    }
+    // Keep the same transform during Nav3's commit/cancel settling phase, even
+    // when it switches back to the ordinary pop/forward transition callback.
+    // This also takes precedence over Picture and ImagePreview entry metadata.
+    if (initial != null && paneTransitionState.backCardFor(initial) != null) {
+        return EnterTransition.None togetherWith ExitTransition.None
     }
     // Preserve full-content Picture/ImagePreview transitions, even when launched from a side pane.
     val navigatingEntry = if (kind == TransitionKind.Forward) target?.top else initial?.top

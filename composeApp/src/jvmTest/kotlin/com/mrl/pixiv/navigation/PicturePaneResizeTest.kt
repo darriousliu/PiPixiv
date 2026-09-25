@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.metadata
-import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
@@ -45,8 +44,8 @@ import com.mrl.pixiv.common.compose.layout.PaneRole
 import com.mrl.pixiv.common.compose.layout.SplitPaneState
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
-import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.CommentType
+import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationRecord
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -100,8 +99,9 @@ class PicturePaneResizeTest {
                                                 maxWidth, maxHeight, splitState, inputState, paneTransitions,
                                             )
                                         }
-                                        NavDisplay(
+                                        PredictiveBackNavDisplay(
                                             backStack = backStack,
+                                            enableQuickBack = true,
                                             modifier = Modifier.fillMaxSize(),
                                             onBack = { backStack.removeLast() },
                                             sharedTransitionScope = this@SharedTransitionLayout,
