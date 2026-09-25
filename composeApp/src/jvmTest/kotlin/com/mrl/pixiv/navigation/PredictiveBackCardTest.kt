@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -61,6 +64,86 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
 class PredictiveBackCardTest {
     @Test
+    fun sameColoredLightPagesStaySeparatedUntilPreviewEnds() = checkSameColorPages(
+        pageColor = CardSameLightArgb,
+        colorScheme = lightColorScheme(background = Color(CardSameLightArgb)),
+    )
+
+    @Test
+    fun sameColoredDarkPagesStaySeparatedUntilPreviewEnds() = checkSameColorPages(
+        pageColor = CardSameDarkArgb,
+        colorScheme = darkColorScheme(background = Color(CardSameDarkArgb)),
+    )
+
+    private fun checkSameColorPages(pageColor: Int, colorScheme: ColorScheme) = withFixture(
+        rootColor = pageColor,
+        detailColor = pageColor,
+        colorScheme = colorScheme,
+    ) { fixture ->
+        assertFullPage(pageColor)
+        previewBack(fixture, NavigationEvent.EDGE_LEFT)
+        var exposedColor: Int? = null
+        for (progress in listOf(0.6f, 0.9f, 1f)) {
+            holdProgress(fixture, NavigationEvent.EDGE_LEFT, progress)
+            exposedColor = assertSameColorPreview(pageColor, NavigationEvent.EDGE_LEFT, exposedColor)
+            runOnIdle {
+                assertEquals(0, fixture.backCalls)
+                assertEquals(false, fixture.sharedEnabled["detail"])
+                assertEquals(false, fixture.sharedEnabled["root"])
+            }
+        }
+
+        // 从 100% 进度往回拖动时，两层页面仍须清晰区分，前景不能淡出。
+        holdProgress(fixture, NavigationEvent.EDGE_LEFT, 0.25f)
+        assertSameColorPreview(pageColor, NavigationEvent.EDGE_LEFT, exposedColor)
+        runOnIdle { fixture.input.backCancelled() }
+        settle()
+        assertFullPage(pageColor)
+        runOnIdle {
+            assertEquals(listOf(fixture.root, fixture.detail), fixture.backStack.toList())
+            assertEquals(0, fixture.backCalls)
+            assertEquals(true, fixture.sharedEnabled["detail"])
+            assertFalse(fixture.sharedScope.isTransitionActive)
+        }
+
+        // 正常完成返回时，卡片消失后必须清除目标页面的蒙层。
+        previewBack(fixture, NavigationEvent.EDGE_RIGHT)
+        holdProgress(fixture, NavigationEvent.EDGE_RIGHT, 1f)
+        assertSameColorPreview(pageColor, NavigationEvent.EDGE_RIGHT, exposedColor)
+        runOnIdle { fixture.input.backCompleted() }
+        settle()
+        assertFullPage(pageColor)
+        onNodeWithTag("detail").assertDoesNotExist()
+        runOnIdle {
+            assertEquals(1, fixture.backCalls)
+            assertEquals(true, fixture.sharedEnabled["root"])
+            assertFalse(fixture.sharedScope.isTransitionActive)
+            fixture.backStack.add(fixture.detail)
+        }
+        settle()
+        assertFullPage(pageColor)
+
+        // 快速完成返回时也须立即清除蒙层，并恢复共享元素动画。
+        runOnIdle {
+            fixture.input.backStarted(NavigationEvent(swipeEdge = NavigationEvent.EDGE_LEFT))
+            fixture.input.backProgressed(NavigationEvent(swipeEdge = NavigationEvent.EDGE_LEFT, progress = 0.9f))
+        }
+        mainClock.advanceTimeBy(48)
+        waitForIdle()
+        assertSameColorPreview(pageColor, NavigationEvent.EDGE_LEFT, exposedColor)
+        runOnIdle { fixture.input.backCompleted() }
+        advanceCommitFrames()
+        assertFullPage(pageColor)
+        onNodeWithTag("detail").assertDoesNotExist()
+        runOnIdle {
+            assertEquals(listOf(fixture.root), fixture.backStack.toList())
+            assertEquals(2, fixture.backCalls)
+            assertEquals(true, fixture.sharedEnabled["root"])
+            assertFalse(fixture.sharedScope.isTransitionActive)
+        }
+    }
+
+    @Test
     fun previewFollowsProgressBeforeTheQuickBackWindowEnds() = withFixture { fixture ->
         runOnIdle {
             fixture.input.backStarted(NavigationEvent(swipeEdge = NavigationEvent.EDGE_LEFT))
@@ -79,7 +162,7 @@ class PredictiveBackCardTest {
         waitForIdle()
         val nextWidth = onNodeWithTag("detail").fetchSemanticsNode().boundsInRoot.width
         assertEquals(CardWidth * 0.96f, nextWidth, 0.5f, "Later progress must also remain in sync")
-        // Crossing the classification deadline without moving the finger must cause no jump.
+        // 手指保持不动时，跨过快速返回的判定时限不能导致画面跳变。
         mainClock.advanceTimeBy(96)
         waitForIdle()
         assertEquals(nextWidth, onNodeWithTag("detail").fetchSemanticsNode().boundsInRoot.width, 0.5f)
@@ -98,7 +181,7 @@ class PredictiveBackCardTest {
             }
             runOnIdle {
                 fixture.input.backStarted(NavigationEvent(swipeEdge = edge))
-                // Even if a short swipe previews far ahead, completion must not wait for a tail.
+                // 即使短促滑动的预览进度很高，完成返回也不能等待剩余动画。
                 fixture.input.backProgressed(NavigationEvent(swipeEdge = edge, progress = 0.9f))
             }
             mainClock.advanceTimeBy(48)
@@ -128,7 +211,7 @@ class PredictiveBackCardTest {
             fixture.input.backStarted(NavigationEvent(swipeEdge = NavigationEvent.EDGE_RIGHT))
             fixture.input.backProgressed(NavigationEvent(swipeEdge = NavigationEvent.EDGE_RIGHT, progress = 0.6f))
         }
-        // The old timer would have expired by now, but the new gesture is still short.
+        // 此时旧手势的计时已结束，新手势仍应判定为快速返回。
         mainClock.advanceTimeBy(80)
         waitForIdle()
         assertHeldForeground(0.6f, NavigationEvent.EDGE_RIGHT)
@@ -187,7 +270,7 @@ class PredictiveBackCardTest {
             }
         }
 
-        // Reaching 100% is still reversible until the input explicitly completes the gesture.
+        // 输入明确完成手势之前，即使达到 100% 进度仍可往回拖动。
         holdProgress(fixture, NavigationEvent.EDGE_LEFT, 0.25f)
         assertHeldForeground(0.25f, NavigationEvent.EDGE_LEFT)
         runOnIdle { fixture.input.backCancelled() }
@@ -224,7 +307,7 @@ class PredictiveBackCardTest {
             assertEquals(true, fixture.sharedEnabled["detail"], "Cancellation must restore shared content")
         }
 
-        // Reuse exactly the same two visits: a stale session would retain the left edge.
+        // 复用相同的两个页面实例，检查旧手势是否错误保留了左侧滑入方向。
         previewBack(fixture, NavigationEvent.EDGE_RIGHT)
         val rightPreview = captureToImage().toAwtImage()
         assertPreview(rightPreview)
@@ -248,7 +331,7 @@ class PredictiveBackCardTest {
         runOnIdle { fixture.input.backCancelled() }
         settle()
 
-        // An ordinary pop has the same endpoints as the cancelled gesture.
+        // 普通返回与已取消的手势使用相同的起始页面和目标页面。
         runOnIdle { fixture.backStack.removeLast() }
         mainClock.advanceTimeBy(64)
         waitForIdle()
@@ -271,13 +354,18 @@ class PredictiveBackCardTest {
         assertFullPage(CardDetailArgb)
     }
 
-    private fun withFixture(block: DesktopComposeUiTest.(BackCardFixture) -> Unit) {
-        // The application installs Tao's Main dispatcher; desktop Compose tests use Swing EDT.
+    private fun withFixture(
+        rootColor: Int = CardRootArgb,
+        detailColor: Int = CardDetailArgb,
+        colorScheme: ColorScheme = lightColorScheme(),
+        block: DesktopComposeUiTest.(BackCardFixture) -> Unit,
+    ) {
+        // 应用安装了 Tao 的 Main 调度器，而桌面 Compose 测试使用 Swing EDT。
         Dispatchers.setMain(Dispatchers.Swing)
         try {
             runDesktopComposeUiTest(width = CardWidth, height = CardHeight, testTimeout = 30.seconds) {
                 mainClock.autoAdvance = false
-                val fixture = BackCardFixture()
+                val fixture = BackCardFixture(rootColor, detailColor, colorScheme)
                 try {
                     setContent { fixture.Content() }
                     settle()
@@ -314,7 +402,7 @@ class PredictiveBackCardTest {
 
     private fun DesktopComposeUiTest.holdProgress(fixture: BackCardFixture, edge: Int, progress: Float) {
         runOnIdle { fixture.input.backProgressed(NavigationEvent(swipeEdge = edge, progress = progress)) }
-        // Longer than any card animation: holding the finger must not finish a timed animation.
+        // 等待时间超过卡片动画时长，验证按住手指时不会自行完成动画。
         mainClock.advanceTimeBy(1_200)
         waitForIdle()
     }
@@ -326,7 +414,7 @@ class PredictiveBackCardTest {
             image.getRGB(CardWidth / 2, CardSampleY),
             "The foreground must remain fully opaque while progress $progress is held",
         )
-        // Outside the smaller previous-page marker, so its pixels cannot hide a missing foreground.
+        // 采样点位于上一页较小的图片标记之外，避免其像素掩盖前景消失的问题。
         val markerX = CardWidth / 2 + if (edge == NavigationEvent.EDGE_LEFT) 30 else -30
         assertEquals(
             CardMarkerArgb,
@@ -342,6 +430,24 @@ class PredictiveBackCardTest {
         assertEquals(expected, image.getRGB(CardWidth / 2, CardSampleY))
     }
 
+    private fun DesktopComposeUiTest.assertSameColorPreview(
+        pageColor: Int,
+        edge: Int,
+        previousExposedColor: Int?,
+    ): Int {
+        val image = captureToImage().toAwtImage()
+        val exposedColor = image.getRGB(2, 2)
+        assertTrue(exposedColor != pageColor, "Equal page backgrounds must remain distinguishable during preview")
+        assertEquals(exposedColor, image.getRGB(CardWidth - 3, CardHeight - 3))
+        if (previousExposedColor != null) {
+            assertEquals(previousExposedColor, exposedColor, "The exposed destination must not lose contrast at full progress")
+        }
+        assertEquals(pageColor, image.getRGB(CardWidth / 2, CardSampleY), "The foreground must retain its original color")
+        val markerX = CardWidth / 2 + if (edge == NavigationEvent.EDGE_LEFT) 30 else -30
+        assertEquals(CardMarkerArgb, image.getRGB(markerX, CardHeight / 2), "The foreground image must stay fully opaque")
+        return exposedColor
+    }
+
     private fun assertPreview(image: BufferedImage) {
         assertEquals(CardDetailArgb, image.getRGB(CardWidth / 2, CardSampleY), "The foreground must remain opaque")
         assertEquals(CardMarkerArgb, image.getRGB(CardWidth / 2, CardHeight / 2), "The shared image must stay visible")
@@ -354,7 +460,7 @@ class PredictiveBackCardTest {
         val end = (CardWidth - 1 downTo 0).first { image.getRGB(it, CardSampleY) == CardDetailArgb }
         assertTrue(start > 0 && end < CardWidth - 1, "The foreground must shrink on both sides")
         assertTrue(end - start < CardWidth * 0.98f, "Predictive progress must scale the whole foreground")
-        // The scaled top edge is near y=24 at 60% progress. Its center is filled, its corner clipped.
+        // 进度为 60% 时，缩放后的顶边接近 y=24；顶部中央应填充，圆角处应裁切。
         assertEquals(CardDetailArgb, image.getRGB(CardWidth / 2, 30))
         assertTrue(image.getRGB(start + 2, 26) != CardDetailArgb, "The shrunken page must have rounded corners")
     }
@@ -377,8 +483,14 @@ private const val CardSampleY = 520
 private const val CardRootArgb = 0xff286bc5.toInt()
 private const val CardDetailArgb = 0xffcc3452.toInt()
 private const val CardMarkerArgb = 0xff4bc17b.toInt()
+private const val CardSameLightArgb = 0xfff4f4f4.toInt()
+private const val CardSameDarkArgb = 0xff121212.toInt()
 
-private class BackCardFixture : NavigationEventDispatcherOwner {
+private class BackCardFixture(
+    private val rootColor: Int = CardRootArgb,
+    private val detailColor: Int = CardDetailArgb,
+    private val colorScheme: ColorScheme = lightColorScheme(),
+) : NavigationEventDispatcherOwner {
     override val navigationEventDispatcher = NavigationEventDispatcher()
     val input = DirectNavigationEventInput().also(navigationEventDispatcher::addInput)
     val root = NavigationRecord("root", Destination.Main)
@@ -390,7 +502,7 @@ private class BackCardFixture : NavigationEventDispatcherOwner {
 
     @Composable
     fun Content() {
-        MaterialTheme {
+        MaterialTheme(colorScheme = colorScheme) {
             SharedTransitionLayout(Modifier.fillMaxSize()) {
                 sharedScope = this
                 CompositionLocalProvider(
@@ -420,7 +532,7 @@ private class BackCardFixture : NavigationEventDispatcherOwner {
                                     contentKey = record.entryId,
                                     metadata = metadata { put(NavigationRecordKey, record) } +
                                         NavDisplay.predictivePopTransitionSpec {
-                                            // Existing Picture-like entry metadata must not fade the card.
+                                            // 类似 Picture 页面已有的转场元数据不能让卡片淡出。
                                             fadeIn() togetherWith (scaleOut(targetScale = 0.5f) + fadeOut())
                                         },
                                 ) { Screen(record) }
@@ -443,7 +555,7 @@ private class BackCardFixture : NavigationEventDispatcherOwner {
         with(LocalSharedTransitionScope.current) {
             Box(
                 Modifier.fillMaxSize().testTag(record.entryId)
-                    .background(Color(if (record == detail) CardDetailArgb else CardRootArgb)),
+                    .background(Color(if (record == detail) detailColor else rootColor)),
                 contentAlignment = Alignment.Center,
             ) {
                 Box(

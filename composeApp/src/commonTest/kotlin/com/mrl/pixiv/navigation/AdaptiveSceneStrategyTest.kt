@@ -160,7 +160,7 @@ class AdaptiveSceneStrategyTest {
         paneTransitions.update(wide, previous)
         assertFalse(paneTransitions.suppressesAnimationFor(wide))
         assertFalse(paneTransitions.suppressesAnimationFor(previous))
-        // A cancelled gesture retargets the original detail; this remains navigation, not resize.
+        // 取消手势会重新指向原详情页面，此时仍属于导航操作，而非窗口尺寸变化。
         paneTransitions.update(previous, wide)
         assertFalse(paneTransitions.suppressesAnimationFor(wide))
         paneTransitions.update(wide, previous)

@@ -26,10 +26,10 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mrl.pixiv.common.util.isAndroid
 import com.mrl.pixiv.common.util.platform
 
-// Classify completion only. Never delay rendering progress to classify a gesture.
+// 此阈值仅用于决定完成方式，不得为判断手势类型而延迟绘制进度。
 private const val QuickBackDurationMillis = 120L
 
-/** Keeps quick back completion separate from Nav3's seekable preview timeline. */
+/** 将快速返回的完成方式与 Nav3 可随手势调整进度的预览动画分开处理。 */
 @Composable
 internal fun <T : Any> PredictiveBackNavDisplay(
     backStack: List<T>,
@@ -42,8 +42,8 @@ internal fun <T : Any> PredictiveBackNavDisplay(
     entryProvider: (T) -> NavEntry<T>,
 ) {
     require(backStack.isNotEmpty()) { "Navigation back stack cannot be empty" }
-    // Keep all entry ownership outside the display's animation identity. In particular,
-    // SceneState owns movable content, so a visible tablet source retains its remember state.
+    // 导航条目及场景状态不随下方动画容器的标识重建。
+    // SceneState 持有可移动内容，使平板上仍可见的来源页面保留 remember 状态。
     val entries = rememberDecoratedNavEntries(backStack, entryDecorators, entryProvider)
     val sceneState = rememberSceneState(
         entries = entries,
@@ -58,8 +58,8 @@ internal fun <T : Any> PredictiveBackNavDisplay(
     var isLongGesture by remember { mutableStateOf(false) }
     var gestureSequence by remember { mutableIntStateOf(0) }
     var displaySequence by remember { mutableIntStateOf(0) }
-    // Only Idle/InProgress changes matter to the timer. Let NavDisplay itself observe
-    // individual progress events without recomposing this entry/history owner for each one.
+    // 计时器只关心 Idle 与 InProgress 之间的切换。每次进度更新由 NavDisplay 自行观察，
+    // 避免管理导航条目与历史记录的这一层随每个进度事件重组。
     val inProgress by remember(gestureState) {
         derivedStateOf { gestureState.transitionState is InProgress }
     }
@@ -82,14 +82,14 @@ internal fun <T : Any> PredictiveBackNavDisplay(
         isBackEnabled = scene.previousEntries.isNotEmpty(),
         onBackCancelled = {
             isLongGesture = false
-            // Also cancel the classification timer if cancel/retry happen within one frame.
+            // 即使在同一帧内取消并重试，也要使上一次手势的分类计时器失效。
             gestureSequence++
         },
         onBackCompleted = {
             val popCount = (entries.size - scene.previousEntries.size).coerceAtLeast(0)
             if (enableQuickBack && !isLongGesture && popCount > 0) {
-                // Initialize only the renderer at the committed scene. Changing a pop spec
-                // alone would still wait for child/shared-entry animations to finish.
+                // 仅重建动画容器，直接显示确认返回后的场景。
+                // 只修改返回动画参数仍会等待子动画及共享条目动画结束。
                 displaySequence++
             }
             isLongGesture = false
@@ -101,8 +101,8 @@ internal fun <T : Any> PredictiveBackNavDisplay(
     key(displaySequence) {
         NavDisplay(
             sceneState = sceneState,
-            // Seek from the first progress event. Waiting here produces a visible pause
-            // followed by a jump to the finger's already advanced position.
+            // 从第一个进度事件开始跟随手势；若在此等待，页面会先停顿，
+            // 随后突然跳到手指已经到达的位置。
             navigationEventState = gestureState,
             modifier = modifier,
         )

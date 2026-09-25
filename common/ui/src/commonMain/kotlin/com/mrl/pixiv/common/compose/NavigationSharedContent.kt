@@ -8,7 +8,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 
-/** Allows a navigation scene to keep its content inside the predictive-back card. */
+/** 允许导航场景控制共享元素动画，使内容始终位于预测性返回卡片内部。 */
 val LocalNavigationSharedContentEnabled = compositionLocalOf { true }
 
 @Composable
@@ -19,8 +19,8 @@ fun SharedTransitionScope.rememberNavigationSharedContentState(key: Any): Shared
             override val SharedContentState.isEnabled: Boolean
                 get() = enabled.value
 
-            // A gesture can interrupt an existing shared transition. Disable that animation too,
-            // otherwise its overlay would escape the navigation card's transform and clipping.
+            // 手势可能打断正在运行的共享元素动画，因此也要停用该动画，
+            // 避免叠加层中的内容脱离导航卡片的变换和裁剪范围。
             override val shouldKeepEnabledForOngoingAnimation: Boolean
                 get() = enabled.value
         }

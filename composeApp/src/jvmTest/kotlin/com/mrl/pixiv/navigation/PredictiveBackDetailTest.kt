@@ -87,7 +87,7 @@ class PredictiveBackDetailTest {
                         mainClock.advanceTimeByFrame()
                         waitForIdle()
                     }
-                    // At 64 ms the preview must already follow the finger, without an activation delay.
+                    // 到 64 ms 时预览就须跟随手指，不能等待额外的激活延迟。
                     assertTrue(
                         sourcePaintedWidth() > originalSourceWidth,
                         "The source must visibly expand during the first frames of the gesture",
@@ -146,7 +146,7 @@ class PredictiveBackDetailTest {
                         fixture.input.backCompleted()
                     }
 
-                    // A short gesture must finish promptly, without waiting out the preview timeline.
+                    // 短促手势须及时完成，不能等待预览动画的剩余时间。
                     repeat(3) {
                         mainClock.advanceTimeByFrame()
                         waitForIdle()
@@ -189,7 +189,7 @@ class PredictiveBackDetailTest {
                     startBack(fixture, NavigationEvent.EDGE_LEFT)
                     for (progress in listOf(0.6f, 0.9f, 1f)) {
                         holdProgress(fixture, NavigationEvent.EDGE_LEFT, progress)
-                        // Closing the last detail intentionally lets the shared source expand over it.
+                        // 关闭最后一个详情面板时，共享的来源页面应展开并覆盖详情。
                         val expectedRight = when {
                             hasPreviousDetail -> outgoingColor
                             progress == 1f -> DetailSourceArgb
@@ -240,7 +240,7 @@ class PredictiveBackDetailTest {
 
     private fun DesktopComposeUiTest.holdProgress(fixture: DetailBackFixture, edge: Int, progress: Float) {
         runOnIdle { fixture.input.backProgressed(NavigationEvent(swipeEdge = edge, progress = progress)) }
-        // Waiting beyond the transition duration must not fade a gesture still held by the user.
+        // 即使等待超过转场时长，只要用户仍按住手指，页面就不能淡出。
         mainClock.advanceTimeBy(1_200)
         waitForIdle()
     }

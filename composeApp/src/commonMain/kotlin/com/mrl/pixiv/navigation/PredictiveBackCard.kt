@@ -22,7 +22,7 @@ import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigationevent.NavigationEvent
 import com.mrl.pixiv.common.compose.LocalNavigationSharedContentEnabled
 
-/** Identity distinguishes successive gestures between the same two visits. */
+/** 通过实例身份区分同一对导航记录之间连续发生的返回手势。 */
 internal class PredictiveBackCardTransition(
     private val initialKey: Any,
     private val targetKey: Any,
@@ -30,12 +30,15 @@ internal class PredictiveBackCardTransition(
 ) {
     fun contains(key: Any): Boolean = key == initialKey || key == targetKey
 
+    fun isTarget(key: Any): Boolean = key == targetKey
+
     fun matches(initial: Any, target: Any): Boolean =
         initial == initialKey && target == targetKey
 }
 
 @Composable
 internal fun PredictiveBackCard(
+    sceneKey: Any,
     card: PredictiveBackCardTransition?,
     onFinished: (PredictiveBackCardTransition) -> Unit,
     content: @Composable () -> Unit,
@@ -49,22 +52,20 @@ internal fun PredictiveBackCard(
     ) { state ->
         if (card != null && state == EnterExitState.PostExit) 1f else 0f
     }
-    val scrim = transition.animateFloat(
-        transitionSpec = {
-            if (card != null) tween(300, easing = LinearEasing) else snap()
-        },
-        label = "predictiveBackCardScrim",
-    ) { state ->
-        if (card != null && state == EnterExitState.PreEnter) 0.18f else 0f
-    }
+    // 按住手势到 100% 时，目标场景已经进入 Visible 状态。
+    // 因此通过场景标识识别返回目的地，让蒙层一直保留到手势完成或取消。
+    val showDestinationScrim = card?.isTarget(sceneKey) == true
 
-    // Nav3 retains both scenes until their child animations settle. On commit
-    // the outgoing scene is disposed; on cancellation the preview is disposed.
+    // Nav3 会保留两个场景，直到子动画结束。
+    // 确认返回后移除离开的场景，取消返回后移除预览场景，此时清理手势状态。
     DisposableEffect(card) {
         onDispose { card?.let(onFinished) }
     }
 
     val background = MaterialTheme.colorScheme.background
+    // 纯黑蒙层无法区分两个黑色页面。使用主题对比色压暗浅色目的地，
+    // 并略微提亮深色目的地，保持前景卡片边界清晰。
+    val destinationScrim = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.18f)
     CompositionLocalProvider(LocalNavigationSharedContentEnabled provides (card == null)) {
         Box(
             modifier = Modifier.fillMaxSize()
@@ -83,7 +84,7 @@ internal fun PredictiveBackCard(
                 }
                 .drawWithContent {
                     drawContent()
-                    if (scrim.value > 0f) drawRect(Color.Black.copy(alpha = scrim.value))
+                    if (showDestinationScrim) drawRect(destinationScrim)
                 }
                 .background(if (card != null) background else Color.Transparent),
             propagateMinConstraints = true,

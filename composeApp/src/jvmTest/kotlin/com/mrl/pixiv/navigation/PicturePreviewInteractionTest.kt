@@ -95,8 +95,8 @@ class PicturePreviewInteractionTest {
     )
 
     private fun checkPreviewRoundTrip(width: Int, desktopPointerHandler: Boolean) {
-        // A local image keeps CoilZoomAsyncImage and the real preview screen in the test,
-        // while avoiding network, account state, repositories, and dependency injection.
+        // 使用本地图片测试 CoilZoomAsyncImage 和真实预览页面，
+        // 避免依赖网络、账号状态、数据仓库和依赖注入。
         val bitmap = BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB).apply {
             createGraphics().let { graphics ->
                 graphics.color = java.awt.Color(ImageArgb, true)
@@ -106,13 +106,13 @@ class PicturePreviewInteractionTest {
         }
         val imageFile = File.createTempFile("picture-preview-", ".png")
         ImageIO.write(bitmap, "png", imageFile)
-        // common:core brings the native Tao Main dispatcher into the runtime. Compose's
-        // headless desktop test renders on Swing EDT, including NavDisplay lifecycle changes.
+        // common:core 会引入原生 Tao Main 调度器；Compose 无窗口桌面测试
+        // 则在 Swing EDT 上渲染，并处理 NavDisplay 的生命周期变化。
         Dispatchers.setMain(Dispatchers.Swing)
         try {
             runDesktopComposeUiTest(width = width, height = 800, testTimeout = 40.seconds) {
-                // A stuck shared transition must fail an assertion instead of making the
-                // test's automatic animation settling wait indefinitely.
+                // 共享转场卡住时应触发断言失败，
+                // 避免测试自动等待动画结束而无限挂起。
                 mainClock.autoAdvance = false
                 val fixture = PictureFixture(bitmap, imageFile, desktopPointerHandler)
                 val screenshotPrefix = "$width-desktop-handler-$desktopPointerHandler"
@@ -140,8 +140,8 @@ class PicturePreviewInteractionTest {
                     assertTrue(fixture.backStack.last().destination is Destination.ImagePreview)
                 }
 
-                // Node existence cannot detect an invisible screen that consumes all input.
-                // Check black outside the fitted image and image pixels over the former details.
+                // 节点存在无法排除页面不可见但仍拦截输入的情况。
+                // 检查图片外侧为黑色，以及原详情区域已被图片像素覆盖。
                 assertPixel(width - 8, 8, 0xff000000.toInt(), "Preview must paint its black background")
                 waitUntil(timeoutMillis = 10_000) {
                     mainClock.advanceTimeByFrame()
@@ -149,8 +149,8 @@ class PicturePreviewInteractionTest {
                 }
                 assertPixel(width * 3 / 4, 400, ImageArgb, "Preview image must cover the right column")
 
-                // Use a real pointer event on the production back button (8 dp inset, 48 dp size).
-                // Calling the back callback or semantics action would bypass an input interceptor.
+                // 对实际返回按钮发送指针事件（内缩 8 dp，尺寸 48 dp）。
+                // 直接调用返回回调或语义操作会绕过输入拦截器。
                 onNodeWithTag("preview").performMouseInput { click(Offset(32f, 32f)) }
                 advanceFrames()
                 runOnIdle {
@@ -205,10 +205,10 @@ private const val ImageKey = "preview-test-image-5-0"
 private fun LazyListState.hasScrolled() = firstVisibleItemIndex > 0 || firstVisibleItemScrollOffset > 0
 
 /**
- * The Picture fixture preserves its production modifier ordering and wide-screen layout:
- * card sharedBounds -> equal-weight columns -> LazyColumn -> fillMaxWidth -> conditional
- * image sharedElement(AnimatedSize) -> click handler -> conditional desktop pointer handler.
- * The destination, navigation scene, preview, and conditional modifier helper are production code.
+ * Picture 测试保留生产代码的修饰符顺序和宽屏布局：
+ * 卡片 sharedBounds -> 等权重分栏 -> LazyColumn -> fillMaxWidth -> 按条件启用的
+ * 图片 sharedElement(AnimatedSize) -> 点击处理 -> 按条件启用的桌面指针处理。
+ * 目标页面、导航场景、预览页面和条件修饰符辅助函数均使用生产代码。
  */
 private class PictureFixture(
     bitmap: BufferedImage,
