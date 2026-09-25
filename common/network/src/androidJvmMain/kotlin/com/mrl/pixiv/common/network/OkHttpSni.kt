@@ -226,6 +226,9 @@ internal class DnsJsonResolver(
     }
     private val client by lazy {
         OkHttpClient.Builder().apply {
+            // SNI 的 DNS 查询也必须直连，避免继承桌面端启用的系统代理。
+            proxy(Proxy.NO_PROXY)
+            socketFactory(DirectSocketFactory)
             if (unsafeSSL) {
                 ignoreSSL()
             }

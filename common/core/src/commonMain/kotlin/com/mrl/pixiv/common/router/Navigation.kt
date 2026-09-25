@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Type
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -154,10 +155,17 @@ sealed class Destination : NavKey {
     data object About : Destination()
 
     @Serializable
-    data class Comment(val id: Long, val type: CommentType) : Destination()
+    data class Comment(
+        val id: Long,
+        // type 保留给导航类判别字段，业务类型使用独立的序列化名称。
+        @SerialName("commentType") val type: CommentType,
+    ) : Destination()
 
     @Serializable
-    data class Report(val id: Long, val type: ReportType) : Destination()
+    data class Report(
+        val id: Long,
+        @SerialName("reportType") val type: ReportType,
+    ) : Destination()
 
     @Serializable
     data class NovelDetail(

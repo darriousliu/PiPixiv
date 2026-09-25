@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.repository.VersionManager
+import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
@@ -92,13 +93,30 @@ fun MainNavigationScaffold(
                 )
             }
         },
-        layoutType = if (showNavigation) {
-            NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfoV2())
-        } else {
-            NavigationSuiteType.None
-        }
+        layoutType = mainNavigationSuiteType(
+            adaptiveType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfoV2()),
+            showNavigation = showNavigation,
+            currentDestination = navigationManager.currentDestination,
+        ),
     ) {
         content()
+    }
+}
+
+internal fun mainNavigationSuiteType(
+    adaptiveType: NavigationSuiteType,
+    showNavigation: Boolean,
+    currentDestination: Destination,
+): NavigationSuiteType {
+    if (!showNavigation) return NavigationSuiteType.None
+    // 大屏侧边导航属于应用框架，底部导航仅在主页面显示。
+    val isBottomBar = adaptiveType == NavigationSuiteType.NavigationBar ||
+        adaptiveType == NavigationSuiteType.ShortNavigationBarCompact ||
+        adaptiveType == NavigationSuiteType.ShortNavigationBarMedium
+    return if (isBottomBar && currentDestination != Destination.Main) {
+        NavigationSuiteType.None
+    } else {
+        adaptiveType
     }
 }
 

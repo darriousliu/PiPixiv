@@ -12,7 +12,7 @@ data class UserPreference(
     val theme: String = SettingTheme.SYSTEM.name,
     @Deprecated("use bypassSetting")
     val enableBypassSniffing: Boolean = false,
-    val bypassSetting: BypassSetting = if (enableBypassSniffing) BypassSetting.SNI() else BypassSetting.None,
+    val bypassSetting: BypassSetting = if (enableBypassSniffing) BypassSetting.SNI() else BypassSetting.System,
     val isR18Enabled: Boolean = false,
     val imageHost: String = IMAGE_HOST,
     val hasShowBookmarkTip: Boolean = false,
@@ -44,8 +44,13 @@ data class UserPreference(
     @Serializable
     sealed interface BypassSetting {
         @Serializable
+        // 旧版 none 沿用引擎的默认代理选择器，保留存储名称以兼容历史设置与备份。
         @SerialName("none")
-        data object None : BypassSetting
+        data object System : BypassSetting
+
+        @Serializable
+        @SerialName("direct")
+        data object Direct : BypassSetting
 
         @Serializable
         @SerialName("proxy")

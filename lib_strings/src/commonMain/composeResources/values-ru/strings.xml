@@ -73,11 +73,13 @@
     <string name="setting">Настройки</string>
     <string name="network_setting">Настройки сети</string>
     <string name="network_plan">Сетевой план</string>
-    <string name="use_none">Не использовать</string>
-    <string name="use_proxy">Использовать прокси</string>
+    <string name="use_system_proxy">Системный прокси</string>
+    <string name="use_system_proxy_desc">Использовать настройки прокси системы. Если прокси не настроен, подключаться напрямую.</string>
+    <string name="use_none">Прямое подключение</string>
+    <string name="use_proxy">Прокси вручную</string>
     <string name="use_sni">Использовать SNI</string>
-    <string name="use_none_desc">Не использовать прокси или сниффинг, подключаться к Pixiv напрямую</string>
-    <string name="use_proxy_desc">Подключаться к Pixiv через прокси-сервер</string>
+    <string name="use_none_desc">Подключаться напрямую, без системного или настроенного вручную прокси.</string>
+    <string name="use_proxy_desc">Использовать прокси HTTP или SOCKS, настроенный вручную.</string>
     <string name="use_sni_desc">Обходить блокировки для подключения к Pixiv через SNI</string>
     <string name="proxy_host">Адрес прокси</string>
     <string name="proxy_port">Порт прокси</string>
@@ -405,7 +407,7 @@
     <string name="profile_workspace_comment">Примечания</string>
     <string name="back_to_top">Наверх</string>
     <string name="download_storage_permission_required">Для загрузки изображений необходимо разрешение на доступ к хранилищу. Предоставьте его и повторите попытку.</string>
-    <string name="novel_series_continue_reading">Продолжить чтение: %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">Продолжить чтение</string>
     <string name="novel_series_last_read">Последняя прочитанная глава</string>
     <string name="search_content_type">Тип изображения</string>
     <string name="search_type_all">Все типы</string>

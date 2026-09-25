@@ -1,5 +1,7 @@
 package com.mrl.pixiv.common.ai.provider
 
+import com.mrl.pixiv.common.ai.TestNetworkFeature
+
 import com.mrl.pixiv.common.ai.AiMessageRole
 import com.mrl.pixiv.common.ai.AiTextMessage
 import com.mrl.pixiv.common.ai.AiTextRequest
@@ -96,7 +98,7 @@ class OpenAiStreamParserTest {
 
     @Test
     fun extraBodyCannotDisableStreaming() {
-        val client = OpenAiTextClient(AiHttpClientHolder())
+        val client = OpenAiTextClient(AiHttpClientHolder(TestNetworkFeature))
         val body = client.buildStreamingBody(
             request = AiTextRequest(
                 provider = AiProvider.OPENAI,

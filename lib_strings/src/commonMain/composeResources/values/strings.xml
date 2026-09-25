@@ -76,11 +76,13 @@
     <string name="setting">设置</string>
     <string name="network_setting">网络设置</string>
     <string name="network_plan">网络方案</string>
-    <string name="use_none">不使用</string>
-    <string name="use_proxy">使用代理</string>
+    <string name="use_system_proxy">系统代理</string>
+    <string name="use_system_proxy_desc">使用系统配置的代理；系统未设置代理时直接连接。</string>
+    <string name="use_none">直连</string>
+    <string name="use_proxy">手动代理</string>
     <string name="use_sni">使用SNI</string>
-    <string name="use_none_desc">不使用代理或嗅探，直接连接Pixiv</string>
-    <string name="use_proxy_desc">通过代理服务器连接Pixiv</string>
+    <string name="use_none_desc">直接连接，不使用系统或手动代理。</string>
+    <string name="use_proxy_desc">使用手动配置的 HTTP 或 SOCKS 代理。</string>
     <string name="use_sni_desc">通过SNI绕过封锁连接Pixiv</string>
     <string name="proxy_host">代理地址</string>
     <string name="proxy_port">代理端口</string>
@@ -417,7 +419,7 @@
     <string name="profile_chair">椅子</string>
     <string name="profile_workspace_comment">备注</string>
     <string name="download_storage_permission_required">下载图片需要存储权限，请允许访问存储空间后重试。</string>
-    <string name="novel_series_continue_reading">继续阅读：%1$s（%2$d%%）</string>
+    <string name="novel_series_continue_reading">继续阅读</string>
     <string name="novel_series_last_read">上次阅读的章节</string>
     <string name="search_content_type">图片类型</string>
     <string name="search_type_all">全部类型</string>

@@ -48,7 +48,6 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.load_failed
 import com.mrl.pixiv.strings.novel_series_chapter_count
-import com.mrl.pixiv.strings.novel_series_continue_reading
 import com.mrl.pixiv.strings.novel_series_last_read
 import com.mrl.pixiv.strings.novel_watchlist_add
 import com.mrl.pixiv.strings.novel_watchlist_added
@@ -115,20 +114,6 @@ fun NovelSeriesScreen(
                     state = listState,
                     contentPadding = PaddingValues(bottom = 24.dp),
                 ) {
-                    state.lastRead?.let { progress ->
-                        item(key = "continue_reading") {
-                            Button(
-                                onClick = { navigationManager.navigateToNovelDetailScreen(progress.novelId) },
-                                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                            ) {
-                                Text(stringResource(
-                                    RStrings.novel_series_continue_reading,
-                                    progress.title,
-                                    (progress.fraction * 100).toInt(),
-                                ))
-                            }
-                        }
-                    }
                     state.detail?.let { detail ->
                         item(key = "series_header") {
                             Card(
@@ -210,6 +195,18 @@ fun NovelSeriesScreen(
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    state.lastRead?.let { progress ->
+                        item(key = "continue_reading") {
+                            NovelSeriesContinueReadingCard(
+                                progress = progress,
+                                onClick = { navigationManager.navigateToNovelDetailScreen(progress.novelId) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                            )
                         }
                     }
 

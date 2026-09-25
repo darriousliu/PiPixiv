@@ -73,11 +73,13 @@
     <string name="setting">Configurações</string>
     <string name="network_setting">Configurações de rede</string>
     <string name="network_plan">Plano de rede</string>
-    <string name="use_none">Não usar</string>
-    <string name="use_proxy">Usar proxy</string>
+    <string name="use_system_proxy">Proxy do sistema</string>
+    <string name="use_system_proxy_desc">Usar as configurações de proxy do sistema. Conectar diretamente se nenhum proxy estiver configurado.</string>
+    <string name="use_none">Conexão direta</string>
+    <string name="use_proxy">Proxy manual</string>
     <string name="use_sni">Usar SNI</string>
-    <string name="use_none_desc">Não usar proxy ou detecção, conectar diretamente ao Pixiv</string>
-    <string name="use_proxy_desc">Conectar ao Pixiv através de um servidor proxy</string>
+    <string name="use_none_desc">Conectar diretamente, sem proxy do sistema ou proxy manual.</string>
+    <string name="use_proxy_desc">Usar um proxy HTTP ou SOCKS configurado manualmente.</string>
     <string name="use_sni_desc">Contornar bloqueios para se conectar ao Pixiv via SNI</string>
     <string name="proxy_host">Endereço do proxy</string>
     <string name="proxy_port">Porta do proxy</string>
@@ -405,7 +407,7 @@
     <string name="profile_workspace_comment">Notas</string>
     <string name="back_to_top">Voltar ao topo</string>
     <string name="download_storage_permission_required">É necessária permissão de armazenamento para baixar imagens. Permita o acesso ao armazenamento e tente novamente.</string>
-    <string name="novel_series_continue_reading">Continuar lendo: %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">Continuar lendo</string>
     <string name="novel_series_last_read">Último capítulo lido</string>
     <string name="search_content_type">Tipo de imagem</string>
     <string name="search_type_all">Todos os tipos</string>

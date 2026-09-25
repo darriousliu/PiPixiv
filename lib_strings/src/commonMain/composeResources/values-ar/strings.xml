@@ -73,11 +73,13 @@
     <string name="setting">الإعدادات</string>
     <string name="network_setting">إعدادات الشبكة</string>
     <string name="network_plan">خطة الشبكة</string>
-    <string name="use_none">لا تستخدم</string>
-    <string name="use_proxy">استخدام الوكيل</string>
+    <string name="use_system_proxy">وكيل النظام</string>
+    <string name="use_system_proxy_desc">استخدام إعدادات وكيل النظام. الاتصال مباشرة إذا لم يتم إعداد وكيل.</string>
+    <string name="use_none">اتصال مباشر</string>
+    <string name="use_proxy">وكيل يدوي</string>
     <string name="use_sni">استخدام SNI</string>
-    <string name="use_none_desc">لا تستخدم الوكيل أو الاستنشاق، اتصل بـ Pixiv مباشرة</string>
-    <string name="use_proxy_desc">الاتصال بـ Pixiv عبر خادم وكيل</string>
+    <string name="use_none_desc">الاتصال مباشرة دون استخدام وكيل النظام أو وكيل يدوي.</string>
+    <string name="use_proxy_desc">استخدام وكيل HTTP أو SOCKS تم إعداده يدويًا.</string>
     <string name="use_sni_desc">تجاوز الحظر للاتصال بـ Pixiv عبر SNI</string>
     <string name="proxy_host">عنوان الوكيل</string>
     <string name="proxy_port">منفذ الوكيل</string>
@@ -405,7 +407,7 @@
     <string name="profile_workspace_comment">ملاحظات</string>
     <string name="back_to_top">العودة إلى الأعلى</string>
     <string name="download_storage_permission_required">يلزم إذن الوصول إلى التخزين لتنزيل الصور. اسمح بالوصول إلى التخزين ثم أعد المحاولة.</string>
-    <string name="novel_series_continue_reading">متابعة القراءة: %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">متابعة القراءة</string>
     <string name="novel_series_last_read">آخر فصل تمت قراءته</string>
     <string name="search_content_type">نوع العمل</string>
     <string name="search_type_all">جميع الأنواع</string>

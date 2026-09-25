@@ -74,11 +74,13 @@
     <string name="setting">Setting</string>
     <string name="network_setting">Network Setting</string>
     <string name="network_plan">Network Plan</string>
-    <string name="use_none">Do Not Use</string>
-    <string name="use_proxy">Use Proxy</string>
+    <string name="use_system_proxy">System proxy</string>
+    <string name="use_system_proxy_desc">Use the system proxy settings. Connect directly when no proxy is configured.</string>
+    <string name="use_none">Direct connection</string>
+    <string name="use_proxy">Manual proxy</string>
     <string name="use_sni">Use SNI</string>
-    <string name="use_none_desc">Do not use proxy or sniffing, connect to Pixiv directly</string>
-    <string name="use_proxy_desc">Connect to Pixiv through a proxy server</string>
+    <string name="use_none_desc">Connect directly without a system or manual proxy.</string>
+    <string name="use_proxy_desc">Use a manually configured HTTP or SOCKS proxy.</string>
     <string name="use_sni_desc">Bypass blocks to connect to Pixiv via SNI</string>
     <string name="proxy_host">Proxy Address</string>
     <string name="proxy_port">Proxy Port</string>
@@ -406,7 +408,7 @@
     <string name="profile_chair">Chair</string>
     <string name="profile_workspace_comment">Notes</string>
     <string name="download_storage_permission_required">Storage permission is required to download images. Allow storage access and try again.</string>
-    <string name="novel_series_continue_reading">Continue reading: %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">Continue reading</string>
     <string name="novel_series_last_read">Last read chapter</string>
     <string name="search_content_type">Artwork type</string>
     <string name="search_type_all">All types</string>

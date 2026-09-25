@@ -1,6 +1,7 @@
 package com.mrl.pixiv.setting.network
 
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,9 +21,17 @@ private const val ACCESS_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWOR
 
 @Composable
 actual fun LocalNetworkPermissionEffect(bypassSetting: UserPreference.BypassSetting) {
+    val context = LocalContext.current
+    val systemProxy = context.getSystemService(ConnectivityManager::class.java)?.defaultProxy
     LocalNetworkPermissionRequestEffect(
         key = bypassSetting,
-        needsLocalNetworkAccess = bypassSetting.needsLocalNetworkAccess(),
+        needsLocalNetworkAccess = when (bypassSetting) {
+            UserPreference.BypassSetting.System -> {
+                systemProxy?.host?.isLocalNetworkHost() == true ||
+                    systemProxy?.pacFileUrl?.host?.isLocalNetworkHost() == true
+            }
+            else -> bypassSetting.needsLocalNetworkAccess()
+        },
     )
 }
 
@@ -81,7 +90,7 @@ private fun LocalNetworkPermissionRequestEffect(
 
 private fun UserPreference.BypassSetting.needsLocalNetworkAccess(): Boolean {
     return when (this) {
-        UserPreference.BypassSetting.None -> false
+        UserPreference.BypassSetting.System, UserPreference.BypassSetting.Direct -> false
         is UserPreference.BypassSetting.Proxy -> host.isLocalNetworkHost()
         is UserPreference.BypassSetting.SNI -> {
             parseUrl(url)?.host?.isLocalNetworkHost() == true ||

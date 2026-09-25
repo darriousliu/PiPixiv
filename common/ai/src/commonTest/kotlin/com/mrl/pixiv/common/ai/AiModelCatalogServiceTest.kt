@@ -26,7 +26,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class AiModelCatalogServiceTest {
-    private val service = AiModelCatalogService(AiHttpClientHolder())
+    private val service = AiModelCatalogService(AiHttpClientHolder(TestNetworkFeature))
 
     @Test
     fun openAiUsesModelsEndpointAndBearerAuthentication() = runTest {

@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
+import com.mrl.pixiv.common.network.configureNetworkProxy
 import com.mrl.pixiv.common.repository.util.generateFileName
 import com.mrl.pixiv.common.util.PhotoUtil
 import com.mrl.pixiv.common.util.PictureType
@@ -35,6 +36,8 @@ import platform.Foundation.NSURLSessionConfiguration
 import platform.Foundation.NSURLSessionDownloadDelegateProtocol
 import platform.Foundation.NSURLSessionDownloadTask
 import platform.Foundation.NSURLSessionTask
+import platform.Foundation.NSURLSessionTaskMetrics
+import platform.Foundation.NSURLSessionTaskTransactionMetrics
 import platform.UIKit.UIImage
 import platform.darwin.NSObject
 import kotlin.time.Duration.Companion.milliseconds
@@ -53,6 +56,7 @@ class IosDownloadStrategy(
     init {
         val config =
             NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier("com.mrl.pixiv.background_download")
+        config.configureNetworkProxy(requireUserPreferenceValue.bypassSetting)
         config.HTTPAdditionalHeaders = mapOf(
             "Referer" to "https://app-api.pixiv.net/"
         )
@@ -116,6 +120,21 @@ class DownloadDelegate(
     val downloadFolder: String,
     private val photoUtil: PhotoUtil,
 ) : NSObject(), NSURLSessionDownloadDelegateProtocol {
+    override fun URLSession(
+        session: NSURLSession,
+        task: NSURLSessionTask,
+        didFinishCollectingMetrics: NSURLSessionTaskMetrics,
+    ) {
+        // 只记录连接属性，便于核对后台下载路由，不输出下载地址或请求内容。
+        didFinishCollectingMetrics.transactionMetrics
+            .filterIsInstance<NSURLSessionTaskTransactionMetrics>()
+            .forEach { metrics ->
+                Logger.d(tag = "DownloadRoute") {
+                    "后台下载连接：使用代理=${metrics.proxyConnection}，远端端口=${metrics.remotePort}"
+                }
+            }
+    }
+
     override fun URLSession(
         session: NSURLSession,
         downloadTask: NSURLSessionDownloadTask,

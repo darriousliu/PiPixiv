@@ -73,11 +73,13 @@
     <string name="setting">설정</string>
     <string name="network_setting">네트워크 설정</string>
     <string name="network_plan">네트워크 플랜</string>
-    <string name="use_none">사용 안 함</string>
-    <string name="use_proxy">프록시 사용</string>
+    <string name="use_system_proxy">시스템 프록시</string>
+    <string name="use_system_proxy_desc">시스템 프록시 설정을 사용합니다. 프록시가 설정되어 있지 않으면 직접 연결합니다.</string>
+    <string name="use_none">직접 연결</string>
+    <string name="use_proxy">수동 프록시</string>
     <string name="use_sni">SNI 사용</string>
-    <string name="use_none_desc">프록시나 스니핑을 사용하지 않고 Pixiv에 직접 연결합니다</string>
-    <string name="use_proxy_desc">프록시 서버를 통해 Pixiv에 연결합니다</string>
+    <string name="use_none_desc">시스템 또는 수동 프록시를 사용하지 않고 직접 연결합니다.</string>
+    <string name="use_proxy_desc">수동으로 설정한 HTTP 또는 SOCKS 프록시를 사용합니다.</string>
     <string name="use_sni_desc">SNI를 통해 차단을 우회하여 Pixiv에 연결합니다</string>
     <string name="proxy_host">프록시 주소</string>
     <string name="proxy_port">프록시 포트</string>
@@ -405,7 +407,7 @@
     <string name="profile_workspace_comment">메모</string>
     <string name="back_to_top">맨 위로</string>
     <string name="download_storage_permission_required">이미지를 다운로드하려면 저장소 권한이 필요합니다. 저장소 접근을 허용한 후 다시 시도하세요.</string>
-    <string name="novel_series_continue_reading">이어서 읽기: %1$s (%2$d%%)</string>
+    <string name="novel_series_continue_reading">이어서 읽기</string>
     <string name="novel_series_last_read">마지막으로 읽은 장</string>
     <string name="search_content_type">작품 유형</string>
     <string name="search_type_all">모든 유형</string>
