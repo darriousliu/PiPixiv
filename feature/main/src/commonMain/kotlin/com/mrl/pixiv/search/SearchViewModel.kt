@@ -3,6 +3,8 @@ package com.mrl.pixiv.search
 import androidx.compose.runtime.Stable
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Tag
+import com.mrl.pixiv.common.data.search.IllustAdvancedFilter
+import com.mrl.pixiv.common.data.search.NovelAdvancedFilter
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchContentFilter
 import com.mrl.pixiv.common.data.search.SearchSort
@@ -29,6 +31,8 @@ data class SearchState(
         val searchTarget: SearchTarget = SearchTarget.PARTIAL_MATCH_FOR_TAGS,
         val searchAiType: SearchAiType = SearchAiType.HIDE_AI,
         val contentFilter: SearchContentFilter = SearchContentFilter(),
+        val illustAdvanced: IllustAdvancedFilter = IllustAdvancedFilter(),
+        val novelAdvanced: NovelAdvancedFilter = NovelAdvancedFilter(),
     )
 }
 

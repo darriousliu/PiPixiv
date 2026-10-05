@@ -125,6 +125,7 @@ import com.mrl.pixiv.strings.novel_marker
 import com.mrl.pixiv.strings.novel_marker_page
 import com.mrl.pixiv.strings.novel_work_information
 import com.mrl.pixiv.strings.read_later
+import com.mrl.pixiv.strings.reading_novel_interactions
 import com.mrl.pixiv.strings.regenerate_translation
 import com.mrl.pixiv.strings.share_link
 import com.mrl.pixiv.strings.show_novel
@@ -214,6 +215,7 @@ fun NovelScreen(
     }
     var showBookmarkBottomSheet by remember { mutableStateOf(false) }
     var showMetadataBottomSheet by remember(state.novel?.id) { mutableStateOf(false) }
+    var showInteractions by remember(state.novel?.id) { mutableStateOf(false) }
     var translationListAnchor by remember(state.novel?.id) {
         mutableStateOf<NovelTranslationListAnchor?>(null)
     }
@@ -873,6 +875,18 @@ fun NovelScreen(
         )
     }
 
+    if (showInteractions && state.novel != null && !isNovelBlocked) {
+        NovelInteractionsBottomSheet(
+            novelId = state.novel.id,
+            onDismissRequest = { showInteractions = false },
+            onNovelClick = { id ->
+                saveReadingProgress()
+                showInteractions = false
+                navigationManager.navigateToNovelDetailScreen(id)
+            },
+        )
+    }
+
     // BottomSheet
     if (state.showBottomSheet) {
         ModalBottomSheet(
@@ -891,6 +905,10 @@ fun NovelScreen(
                 onLineSpacingChange = {
                     saveReadingProgress()
                     viewModel.dispatch(NovelIntent.UpdateLineSpacing(it))
+                },
+                onInteractions = {
+                    viewModel.dispatch(NovelIntent.ToggleBottomSheet)
+                    showInteractions = true
                 },
                 onExport = { viewModel.dispatch(NovelIntent.ExportToTxt) },
                 onShare = { viewModel.dispatch(NovelIntent.ShareNovel) },
@@ -927,6 +945,7 @@ private fun NovelBottomSheetContent(
     state: NovelState,
     onFontSizeChange: (Int) -> Unit,
     onLineSpacingChange: (Int) -> Unit,
+    onInteractions: () -> Unit,
     onExport: () -> Unit,
     onShare: () -> Unit,
     onToggleDisplayedText: () -> Unit,
@@ -944,6 +963,16 @@ private fun NovelBottomSheetContent(
     ) {
         val colors =
             ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+
+        if (!isNovelBlocked && state.novel != null && !state.loading) {
+            ListItem(
+                onClick = rememberThrottleClick(onClick = onInteractions),
+                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                content = { Text(stringResource(RStrings.reading_novel_interactions)) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = colors,
+            )
+        }
 
         // 字号调整
         ListItem(

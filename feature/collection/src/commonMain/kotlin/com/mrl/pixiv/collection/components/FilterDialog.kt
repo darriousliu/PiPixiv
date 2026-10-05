@@ -13,6 +13,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.TextButton
+import com.mrl.pixiv.collection.CollectionTagPage
+import com.mrl.pixiv.strings.discovery_load_more
+import com.mrl.pixiv.strings.discovery_retry
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
@@ -53,10 +58,14 @@ fun FilterDialog(
     onLoadUserBookmarksTags: (Restrict) -> Unit,
     onSelected: (restrict: Restrict, tag: String?) -> Unit,
     modifier: Modifier = Modifier,
+    publicPage: CollectionTagPage = CollectionTagPage(),
+    privatePage: CollectionTagPage = CollectionTagPage(),
+    onLoadMore: (Restrict) -> Unit = {},
+    allowPrivate: Boolean = true,
 ) {
     val scope = rememberCoroutineScope()
-    var selectedTab by remember(restrict) { mutableIntStateOf(if (restrict == Restrict.PUBLIC) 0 else 1) }
-    val pagerState = rememberPagerState(initialPage = selectedTab, pageCount = { 2 })
+    var selectedTab by remember(restrict, allowPrivate) { mutableIntStateOf(if (allowPrivate && restrict == Restrict.PRIVATE) 1 else 0) }
+    val pagerState = rememberPagerState(initialPage = selectedTab, pageCount = { if (allowPrivate) 2 else 1 })
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             modifier = modifier.fillMaxWidth(),
@@ -101,7 +110,7 @@ fun FilterDialog(
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
-                        Tab(
+                        if (allowPrivate) Tab(
                             selected = selectedTab == 1,
                             onClick = {
                                 scope.launch { pagerState.animateScrollToPage(1) }
@@ -135,6 +144,15 @@ fun FilterDialog(
                             .padding(horizontal = 8.dp)
                             .height(300.dp)
                     ) {
+                        item {
+                            val page = if (currentPage == 0) publicPage else privatePage
+                            when {
+                                page.loading -> CircularProgressIndicator(modifier = Modifier.padding(12.dp))
+                                page.failed -> TextButton(onClick = { onLoadMore(if (currentPage == 0) Restrict.PUBLIC else Restrict.PRIVATE) }) {
+                                    Text(stringResource(RStrings.discovery_retry))
+                                }
+                            }
+                        }
                         items(
                             if (currentPage == 0) userBookmarkTags else privateBookmarkTags,
                             key = { it.name.toString() }
@@ -144,7 +162,7 @@ fun FilterDialog(
                                     .fillMaxWidth()
                                     .throttleClick(indication = ripple()) {
                                         onSelected(
-                                            if (selectedTab == 0) Restrict.PUBLIC else Restrict.PRIVATE,
+                                            if (currentPage == 0) Restrict.PUBLIC else Restrict.PRIVATE,
                                             it.name
                                         )
                                         onDismissRequest()
@@ -158,6 +176,14 @@ fun FilterDialog(
                                 Text(text = it.displayName)
                                 if (it.count != null) {
                                     Text(text = it.count.toString())
+                                }
+                            }
+                        }
+                        item {
+                            val page = if (currentPage == 0) publicPage else privatePage
+                            if (page.nextUrl != null && !page.loading && !page.failed) {
+                                TextButton(onClick = { onLoadMore(if (currentPage == 0) Restrict.PUBLIC else Restrict.PRIVATE) }) {
+                                    Text(stringResource(RStrings.discovery_load_more))
                                 }
                             }
                         }

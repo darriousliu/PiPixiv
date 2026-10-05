@@ -37,6 +37,8 @@ import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
 import com.mrl.pixiv.comment.BlockCommentsScreen
 import com.mrl.pixiv.comment.CommentScreen
+import com.mrl.pixiv.community.CommunityUsersScreen
+import com.mrl.pixiv.community.NotificationScreen
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
@@ -67,6 +69,9 @@ import com.mrl.pixiv.login.oauth.WebCookieLoginScreen
 import com.mrl.pixiv.novel.NovelScreen
 import com.mrl.pixiv.novel.readlater.NovelReadLaterScreen
 import com.mrl.pixiv.novel.series.NovelSeriesScreen
+import com.mrl.pixiv.manga.MangaSeriesScreen
+import com.mrl.pixiv.manga.MangaWatchlistScreen
+import com.mrl.pixiv.manga.UserMangaSeriesScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
@@ -88,6 +93,7 @@ import com.mrl.pixiv.setting.block.BlockNovelScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
 import com.mrl.pixiv.setting.block.BlockTagScreen
 import com.mrl.pixiv.setting.block.BlockUserScreen
+import com.mrl.pixiv.setting.block.CloudMuteScreen
 import com.mrl.pixiv.setting.download.DownloadScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import kotlinx.collections.immutable.toImmutableList
@@ -362,6 +368,29 @@ fun Navigation3MainGraph(
             NovelSeriesScreen(
                 seriesId = it.seriesId,
             )
+        }
+        entry<Destination.MangaSeries> {
+            MangaSeriesScreen(seriesId = it.seriesId)
+        }
+        entry<Destination.MangaWatchlist> {
+            MangaWatchlistScreen()
+        }
+        entry<Destination.UserMangaSeries> {
+            UserMangaSeriesScreen(userId = it.userId)
+        }
+        entry<Destination.Notifications> { destination ->
+            val entryNavigation = com.mrl.pixiv.common.router.currentNavigationManager()
+            NotificationScreen(
+                notificationId = destination.notificationId,
+                title = destination.title,
+                onViewMore = { id, title -> entryNavigation.navigateToNotifications(id, title) },
+            )
+        }
+        entry<Destination.CommunityUsers> {
+            CommunityUsersScreen(kind = it.kind, seedUserId = it.seedUserId)
+        }
+        entry<Destination.CloudMute> {
+            CloudMuteScreen()
         }
     }
 

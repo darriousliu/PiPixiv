@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Pixiv 雲端屏蔽</string>
+    <string name="cloud_mute_description">管理 Pixiv 帳號中的使用者和標籤屏蔽，修改會同步到 Pixiv。匯入只新增本機缺少的規則，保留現有本機屏蔽和正規表示式。</string>
+    <string name="cloud_mute_back">返回</string>
+    <string name="cloud_mute_refresh">重新整理</string>
+    <string name="cloud_mute_failed">操作失敗，請重新整理後重試。</string>
+    <string name="cloud_mute_saved_refresh_failed">修改已儲存到 Pixiv，但清單重新整理失敗。請重新整理清單，無需重複提交。</string>
+    <string name="cloud_mute_quota">已使用 %1$d / %2$d 項</string>
+    <string name="cloud_mute_add_tag">新增雲端標籤屏蔽</string>
+    <string name="cloud_mute_add_user">新增雲端使用者屏蔽</string>
+    <string name="cloud_mute_import">將雲端屏蔽匯入本機</string>
+    <string name="cloud_mute_imported">已新增 %1$d 條本機屏蔽規則</string>
+    <string name="cloud_mute_remove">解除雲端屏蔽</string>
+    <string name="cloud_mute_remove_description">從 Pixiv 雲端屏蔽中移除「%1$s」？已有本機規則會保留。</string>
+    <string name="cloud_mute_tag">標籤名稱</string>
+    <string name="cloud_mute_user_id">Pixiv 使用者 ID</string>
+    <string name="cloud_mute_input_hint">請輸入未屏蔽的標籤或有效使用者 ID。</string>
+</resources>

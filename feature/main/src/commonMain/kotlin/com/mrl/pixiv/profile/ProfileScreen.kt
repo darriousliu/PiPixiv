@@ -28,6 +28,9 @@ import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.Style
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.People
+import androidx.compose.material.icons.rounded.MenuBook
 import androidx.compose.material3.Badge
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -63,6 +66,10 @@ import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.community.NotificationUnreadBadge
+import com.mrl.pixiv.strings.community_notifications
+import com.mrl.pixiv.strings.community_followers
+import com.mrl.pixiv.strings.reading_manga_watchlist
 import com.mrl.pixiv.strings.about
 import com.mrl.pixiv.strings.app_data
 import com.mrl.pixiv.strings.block_settings
@@ -231,6 +238,34 @@ fun ProfileScreen(
                 )
             }
             // 收藏
+            item(key = "community_notifications") {
+                ListItem(
+                    onClick = rememberThrottleClick { navigationManager.navigateToNotifications() },
+                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                    content = { Text(stringResource(RStrings.community_notifications)) },
+                    leadingContent = { Icon(Icons.Rounded.Notifications, contentDescription = null) },
+                    trailingContent = { NotificationUnreadBadge() },
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
+            }
+            item(key = "community_followers") {
+                ListItem(
+                    onClick = rememberThrottleClick { navigationManager.navigateToFollowers() },
+                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                    content = { Text(stringResource(RStrings.community_followers)) },
+                    leadingContent = { Icon(Icons.Rounded.People, contentDescription = null) },
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
+            }
+            item(key = "manga_watchlist") {
+                ListItem(
+                    onClick = rememberThrottleClick { navigationManager.navigateToMangaWatchlistScreen() },
+                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                    content = { Text(stringResource(RStrings.reading_manga_watchlist)) },
+                    leadingContent = { Icon(Icons.Rounded.MenuBook, contentDescription = null) },
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
+            }
             item(key = KEY_COLLECTION) {
                 ListItem(
                     onClick = rememberThrottleClick {

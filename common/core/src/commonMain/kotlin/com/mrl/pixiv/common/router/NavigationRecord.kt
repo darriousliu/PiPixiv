@@ -76,6 +76,11 @@ val Destination.paneSpec: DestinationPaneSpec
         is Destination.UserArtwork,
         is Destination.UserNovels,
         is Destination.NovelSeries,
+        is Destination.MangaSeries,
+        Destination.MangaWatchlist,
+        is Destination.UserMangaSeries,
+        is Destination.Notifications,
+        is Destination.CommunityUsers,
         Destination.Download -> sourcePaneSpec
 
         is Destination.Picture,
@@ -102,6 +107,7 @@ val Destination.paneSpec: DestinationPaneSpec
         Destination.BlockNovel,
         Destination.BlockUser,
         Destination.BlockTag,
+        Destination.CloudMute,
         Destination.BlockComments,
         Destination.AppData,
         Destination.About -> detailPaneSpec

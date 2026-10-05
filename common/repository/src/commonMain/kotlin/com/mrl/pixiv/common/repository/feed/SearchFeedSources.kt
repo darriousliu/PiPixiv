@@ -20,7 +20,7 @@ class SearchIllustFeedSource(
     override val capability: FeedCapability
         get() = when {
             isIdSearch -> FeedCapability.SINGLE_PAGE
-            query.sort == SearchSort.POPULAR_DESC && !isPremium -> FeedCapability.SINGLE_PAGE
+            query.sort == SearchSort.POPULAR_DESC && !isPremium && !query.advanced.isActive -> FeedCapability.SINGLE_PAGE
             else -> FeedCapability.OFFSET
         }
 
@@ -47,7 +47,7 @@ class SearchIllustFeedSource(
         val resp = if (capability == FeedCapability.SINGLE_PAGE) {
             PixivRepository.searchPopularPreviewIllust(query.copy(offset = 0))
         } else {
-            PixivRepository.searchIllust(query.copy(offset = offset))
+            PixivRepository.searchIllust(query.copy(offset = offset, sort = effectiveSearchSort(query.sort, isPremium, query.advanced.isActive)))
         }
         val illusts = resp.illusts.distinctBy { it.id }
             .filter { query.contentFilter.matches(it, requireUserPreferenceValue.isR18Enabled) }
@@ -69,7 +69,7 @@ class SearchNovelFeedSource(
     override val capability: FeedCapability
         get() = when {
             isIdSearch -> FeedCapability.SINGLE_PAGE
-            query.sort == SearchSort.POPULAR_DESC && !isPremium -> FeedCapability.SINGLE_PAGE
+            query.sort == SearchSort.POPULAR_DESC && !isPremium && !query.advanced.isActive -> FeedCapability.SINGLE_PAGE
             else -> FeedCapability.OFFSET
         }
 
@@ -96,7 +96,7 @@ class SearchNovelFeedSource(
         val resp = if (capability == FeedCapability.SINGLE_PAGE) {
             PixivRepository.searchPopularPreviewNovel(query.copy(offset = 0))
         } else {
-            PixivRepository.searchNovel(query.copy(offset = offset))
+            PixivRepository.searchNovel(query.copy(offset = offset, sort = effectiveSearchSort(query.sort, isPremium, query.advanced.isActive)))
         }
         val novels = resp.novels.distinctBy { it.id }
             .filter { query.contentFilter.matches(it, requireUserPreferenceValue.isR18Enabled) }
@@ -164,3 +164,8 @@ internal fun String?.nextOffset(): Int? {
         }.getOrNull()
     }
 }
+
+
+/** The free popular preview endpoint does not accept advanced search conditions. */
+internal fun effectiveSearchSort(sort: SearchSort, isPremium: Boolean, advanced: Boolean): SearchSort =
+    if (!isPremium && advanced && sort == SearchSort.POPULAR_DESC) SearchSort.DATE_DESC else sort

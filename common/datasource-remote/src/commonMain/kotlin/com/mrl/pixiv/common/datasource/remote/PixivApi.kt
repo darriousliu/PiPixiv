@@ -20,6 +20,7 @@ import com.mrl.pixiv.common.data.novel.NovelWatchlistResp
 import com.mrl.pixiv.common.data.novel.SearchNovelResp
 import com.mrl.pixiv.common.data.report.ReportTopicListResp
 import com.mrl.pixiv.common.data.search.SearchAiType
+import com.mrl.pixiv.common.data.search.SearchOptionsResponse
 import com.mrl.pixiv.common.data.search.SearchAutoCompleteResp
 import com.mrl.pixiv.common.data.search.SearchIllustResp
 import com.mrl.pixiv.common.data.search.SearchSort
@@ -116,18 +117,7 @@ interface PixivApi {
 
     @GET("v1/search/illust")
     suspend fun searchIllust(
-        @Query("filter") filter: String = Filter.ANDROID.value,
-        @Query("include_translated_tag_results") includeTranslatedTagResults: Boolean = true,
-        @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
-        @Query("word") word: String,
-        @Query("sort") sort: String = SearchSort.POPULAR_DESC.value,
-        @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
-        @Query("bookmark_num_min") bookmarkNumMin: Int? = null,
-        @Query("bookmark_num_max") bookmarkNumMax: Int? = null,
-        @Query("start_date") startDate: String? = null,
-        @Query("end_date") endDate: String? = null,
-        @Query("search_ai_type") searchAiType: Int = SearchAiType.HIDE_AI.value,
-        @Query("offset") offset: Int = 0,
+        @QueryMap queryMap: Map<String, String>,
     ): SearchIllustResp
 
     @GET("v1/search/illust")
@@ -146,6 +136,15 @@ interface PixivApi {
     suspend fun searchUserNext(
         @QueryMap queryMap: Map<String, String>,
     ): SearchUserResp
+
+    @GET("v1/search/options")
+    suspend fun getSearchOptions(
+        @Query("word") word: String,
+        @Query("search_target") searchTarget: String,
+        @Query("search_ai_types") searchAiTypes: Int,
+        @Query("include_translated_tag_results") includeTranslatedTagResults: Boolean = true,
+        @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
+    ): SearchOptionsResponse
 
     @GET("v2/search/autocomplete")
     suspend fun searchAutoComplete(
@@ -237,10 +236,16 @@ interface PixivApi {
     ): UserNovelsResp
 
     @GET("v1/user/bookmark-tags/illust")
+    suspend fun loadMoreUserBookmarkTagsIllust(@QueryMap queryMap: Map<String, String>): UserBookmarkTagsResp
+
+    @GET("v1/user/bookmark-tags/illust")
     suspend fun getUserBookmarkTagsIllust(
         @Query("user_id") userId: Long,
         @Query("restrict") restrict: String,
     ): UserBookmarkTagsResp
+
+    @GET("v1/user/bookmark-tags/novel")
+    suspend fun loadMoreUserBookmarkTagsNovel(@QueryMap queryMap: Map<String, String>): UserBookmarkTagsResp
 
     @GET("v1/user/bookmark-tags/novel")
     suspend fun getUserBookmarkTagsNovel(
@@ -504,18 +509,7 @@ interface PixivApi {
 
     @GET("v1/search/novel")
     suspend fun searchNovel(
-        @Query("filter") filter: String = Filter.ANDROID.value,
-        @Query("include_translated_tag_results") includeTranslatedTagResults: Boolean = true,
-        @Query("merge_plain_keyword_results") mergePlainKeywordResults: Boolean = true,
-        @Query("word") word: String,
-        @Query("sort") sort: String = SearchSort.POPULAR_DESC.value,
-        @Query("search_target") searchTarget: String = SearchTarget.PARTIAL_MATCH_FOR_TAGS.value,
-        @Query("bookmark_num_min") bookmarkNumMin: Int? = null,
-        @Query("bookmark_num_max") bookmarkNumMax: Int? = null,
-        @Query("start_date") startDate: String? = null,
-        @Query("end_date") endDate: String? = null,
-        @Query("search_ai_type") searchAiType: Int = SearchAiType.HIDE_AI.value,
-        @Query("offset") offset: Int = 0,
+        @QueryMap queryMap: Map<String, String>,
     ): SearchNovelResp
 
     @GET("v1/search/novel")

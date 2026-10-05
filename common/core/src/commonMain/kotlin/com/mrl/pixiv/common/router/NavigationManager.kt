@@ -315,6 +315,34 @@ class NavigationManager(
     fun navigateToNovelSeriesScreen(seriesId: Long) {
         navigate(destination = Destination.NovelSeries(seriesId))
     }
+
+    fun navigateToMangaSeriesScreen(seriesId: Long) {
+        navigate(Destination.MangaSeries(seriesId))
+    }
+
+    fun navigateToMangaWatchlistScreen() {
+        navigate(Destination.MangaWatchlist)
+    }
+
+    fun navigateToUserMangaSeriesScreen(userId: Long) {
+        navigate(Destination.UserMangaSeries(userId))
+    }
+
+    fun navigateToNotifications(notificationId: Long? = null, title: String? = null) {
+        navigate(Destination.Notifications(notificationId, title))
+    }
+
+    fun navigateToRecommendedUsers() {
+        navigate(Destination.CommunityUsers(com.mrl.pixiv.common.data.discovery.CommunityUsersKind.RECOMMENDED))
+    }
+
+    fun navigateToRelatedUsers(userId: Long) {
+        navigate(Destination.CommunityUsers(com.mrl.pixiv.common.data.discovery.CommunityUsersKind.RELATED, userId))
+    }
+
+    fun navigateToFollowers() {
+        navigate(Destination.CommunityUsers(com.mrl.pixiv.common.data.discovery.CommunityUsersKind.FOLLOWERS))
+    }
 }
 
 private class NavigationStore(initialDestinations: List<Destination>) {

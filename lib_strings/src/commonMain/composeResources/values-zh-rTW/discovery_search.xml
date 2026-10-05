@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">載入更多</string>
+    <string name="discovery_retry">重試</string>
+    <string name="discovery_load_failed">載入結果失敗，請重試。</string>
+    <string name="discovery_no_results">沒有符合條件的收藏</string>
+    <string name="discovery_advanced_filters">進階篩選</string>
+    <string name="discovery_advanced_sort_note">非會員使用熱門預覽時，進階篩選將按最新作品排序。</string>
+    <string name="discovery_character_count">字數</string>
+    <string name="discovery_word_count">單詞數</string>
+    <string name="discovery_reading_minutes">閱讀時長（分鐘）</string>
+    <string name="discovery_original_only">僅原創小說</string>
+    <string name="discovery_replaceable_only">支援角色名字替換</string>
+    <string name="discovery_language">語言</string>
+    <string name="discovery_genre">題材</string>
+    <string name="discovery_width_pixels">寬度（像素）</string>
+    <string name="discovery_height_pixels">高度（像素）</string>
+    <string name="discovery_ratio">畫幅比例</string>
+    <string name="discovery_portrait">直向</string>
+    <string name="discovery_landscape">橫向</string>
+    <string name="discovery_square">正方形</string>
+    <string name="discovery_tool">繪圖工具</string>
+    <string name="discovery_options_failed">篩選候選載入失敗，仍可使用已輸入的標籤及其他條件。</string>
+    <string name="discovery_minimum">最小值</string>
+    <string name="discovery_maximum">最大值</string>
+    <string name="discovery_invalid_range">請輸入非負整數，最小值不能大於最大值。</string>
+    <string name="discovery_collection_search">搜尋我的收藏</string>
+    <string name="discovery_collection_syncing">Pixiv 正在同步收藏資訊，完成後即可搜尋。</string>
+    <string name="discovery_collection_self_only">進階收藏搜尋僅支援自己的收藏。</string>
+    <string name="discovery_collection_sync_failed">無法檢查收藏同步狀態，請重試。</string>
+    <string name="discovery_work_tag">作品標籤</string>
+    <string name="discovery_bookmark_month">收藏月份</string>
+    <string name="discovery_bookmarked_newest">最近收藏</string>
+    <string name="discovery_bookmarked_oldest">最早收藏</string>
+    <string name="discovery_clear_filters">清空篩選</string>
+    <string name="discovery_tag_suggestions">標籤候選</string>
+    <string name="discovery_search_options_failed">動態篩選選項載入失敗，其他篩選條件仍可使用。</string>
+    <string name="discovery_word_count_languages">字數篩選支援的語言：%1$s</string>
+</resources>

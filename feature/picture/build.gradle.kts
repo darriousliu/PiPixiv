@@ -11,6 +11,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":lib_strings"))
             implementation(project(":common:data"))
+            implementation(project(":feature:manga"))
             implementation(project(":common:datasource-local"))
             implementation(project(":common:network"))
             implementation(project(":common:repository"))

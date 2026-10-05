@@ -139,6 +139,7 @@ import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.util.selectSaveFile
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.manga.MangaSeriesContextCard
 import com.mrl.pixiv.picture.components.UgoiraPlayer
 import com.mrl.pixiv.strings.cancel_user_blocked
 import com.mrl.pixiv.strings.copy_link
@@ -621,6 +622,15 @@ internal fun PictureScreen(
                         }
                     }
                 }
+            }
+        }
+        if (illust.series?.id?.let { it > 0 } == true) {
+            item(key = "manga_series_context") {
+                MangaSeriesContextCard(
+                    illust = illust,
+                    onSeriesClick = navigationManager::navigateToMangaSeriesScreen,
+                    onEpisodeClick = navigationManager::navigateToSinglePictureScreen,
+                )
             }
         }
         // tag

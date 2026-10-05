@@ -29,6 +29,7 @@ import com.mrl.pixiv.strings.block_novel
 import com.mrl.pixiv.strings.block_settings
 import com.mrl.pixiv.strings.block_tags
 import com.mrl.pixiv.strings.block_user
+import com.mrl.pixiv.strings.cloud_mute_title
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -70,6 +71,12 @@ fun BlockSettingsScreen(
                 .padding(innerPadding)
                 .fillMaxSize(),
         ) {
+            item(key = "cloud_mute") {
+                BlockEntry(
+                    title = RStrings.cloud_mute_title,
+                    onClick = { navigationManager.navigate(Destination.CloudMute) },
+                )
+            }
             item(key = KEY_BLOCK_ILLUST) {
                 BlockEntry(
                     title = RStrings.block_illust,

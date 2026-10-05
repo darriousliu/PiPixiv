@@ -15,6 +15,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Search
+import com.mrl.pixiv.common.data.Restrict
+import com.mrl.pixiv.strings.discovery_collection_search
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -86,6 +89,7 @@ fun CollectionScreen(
     val userBookmarksNovels = viewModel.userBookmarksNovels.collectAsLazyPagingItems()
     val dispatch = viewModel::dispatch
     var showFilterDialog by rememberSaveable { mutableStateOf(false) }
+    var showSearch by rememberSaveable { mutableStateOf(false) }
     val lazyGridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -122,6 +126,7 @@ fun CollectionScreen(
                 CollectionTopAppBar(
                     uid = uid,
                     showFilterDialog = { showFilterDialog = true },
+                    onSearch = { showSearch = true },
                     onBack = { navigationManager.popBackStack() }
                 )
                 if (!useViewModeFab) {
@@ -284,10 +289,17 @@ fun CollectionScreen(
             }
         }
 
+        if (showSearch && uid.isSelf) {
+            CollectionSearchDialog(uid, initialNovel = !isIllustPage, onDismiss = { showSearch = false })
+        }
         if (showFilterDialog) {
             if (isIllustPage) {
                 FilterDialog(
                     onDismissRequest = { showFilterDialog = false },
+                    allowPrivate = uid.isSelf,
+                    publicPage = state.tagPages[CollectionTagKey(false, Restrict.PUBLIC)] ?: CollectionTagPage(),
+                    privatePage = state.tagPages[CollectionTagKey(false, Restrict.PRIVATE)] ?: CollectionTagPage(),
+                    onLoadMore = { viewModel.loadMoreTags(false, it) },
                     userBookmarkTags = state.userBookmarkTagsIllust,
                     privateBookmarkTags = state.privateBookmarkTagsIllust,
                     restrict = state.restrict,
@@ -303,6 +315,10 @@ fun CollectionScreen(
             } else {
                 FilterDialog(
                     onDismissRequest = { showFilterDialog = false },
+                    allowPrivate = uid.isSelf,
+                    publicPage = state.tagPages[CollectionTagKey(true, Restrict.PUBLIC)] ?: CollectionTagPage(),
+                    privatePage = state.tagPages[CollectionTagKey(true, Restrict.PRIVATE)] ?: CollectionTagPage(),
+                    onLoadMore = { viewModel.loadMoreTags(true, it) },
                     userBookmarkTags = state.userBookmarkTagsNovel,
                     privateBookmarkTags = state.privateBookmarkTagsNovel,
                     restrict = state.novelRestrict,
@@ -324,6 +340,7 @@ fun CollectionScreen(
 private fun CollectionTopAppBar(
     uid: Long,
     showFilterDialog: () -> Unit = {},
+    onSearch: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     TopAppBar(
@@ -341,13 +358,16 @@ private fun CollectionTopAppBar(
         },
         actions = {
             if (uid.isSelf) {
-                IconButton(
+                IconButton(onClick = onSearch) {
+                    Icon(Icons.Rounded.Search, stringResource(RStrings.discovery_collection_search))
+                }
+            }
+            IconButton(
                     onClick = showFilterDialog,
                     shapes = IconButtonDefaults.shapes(),
                 ) {
                     Icon(Icons.Rounded.FilterList, contentDescription = null)
                 }
-            }
         }
     )
 }

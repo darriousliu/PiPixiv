@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="reading_manga_series">Manga series</string>
+    <string name="reading_manga_watchlist">Manga watchlist</string>
+    <string name="reading_manga_user_series">Manga series by this author</string>
+    <string name="reading_manga_episode_count">%1$d episodes</string>
+    <string name="reading_manga_episode_order">Episode %1$d</string>
+    <string name="reading_manga_previous">Previous episode</string>
+    <string name="reading_manga_next">Next episode</string>
+    <string name="reading_manga_add_watchlist">Follow series</string>
+    <string name="reading_manga_remove_watchlist">Unfollow series</string>
+    <string name="reading_manga_latest">Read latest episode</string>
+    <string name="reading_manga_empty">No manga series yet</string>
+    <string name="reading_manga_watchlist_empty">Follow a manga series to find its updates here</string>
+    <string name="reading_manga_chapters_empty">No episodes to display</string>
+    <string name="reading_manga_view_directory">View series episodes</string>
+    <string name="reading_refresh">Refresh</string>
+    <string name="reading_novel_interactions">Recommendations and poll</string>
+    <string name="reading_novel_recommendations">Related novels</string>
+    <string name="reading_novel_public_note">Recommendations and poll information are from public reading pages. Restricted works may be unavailable.</string>
+    <string name="reading_novel_poll">Work poll</string>
+    <string name="reading_novel_poll_absent">This work has no poll</string>
+    <string name="reading_novel_poll_vote">Vote</string>
+    <string name="reading_novel_poll_voted">Voted</string>
+    <string name="reading_novel_poll_count">%1$d votes</string>
+    <string name="reading_novel_recommendations_empty">No related novels to display</string>
+</resources>

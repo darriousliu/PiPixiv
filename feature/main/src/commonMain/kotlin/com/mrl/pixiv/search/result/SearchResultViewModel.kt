@@ -9,6 +9,15 @@ import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.data.search.SearchNovelQuery
 import com.mrl.pixiv.common.data.search.SearchSort
+import com.mrl.pixiv.common.data.search.SearchOptionsResponse
+import com.mrl.pixiv.common.data.search.SearchTarget
+import com.mrl.pixiv.common.data.search.SearchAiType
+import com.mrl.pixiv.common.data.search.validatedBy
+import com.mrl.pixiv.common.repository.PixivRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.feed.PagedFeedController
 import com.mrl.pixiv.common.repository.feed.SearchIllustFeedSource
@@ -75,6 +84,25 @@ class SearchResultViewModel(
         ),
     ),
 ), KoinComponent {
+    private val _searchOptions = MutableStateFlow(SearchOptionsState())
+    val searchOptions = _searchOptions.asStateFlow()
+    private var optionsJob: Job? = null
+
+    fun loadSearchOptions(target: SearchTarget, ai: SearchAiType) {
+        optionsJob?.cancel()
+        optionsJob = viewModelScope.launch {
+            _searchOptions.value = SearchOptionsState(loading = true)
+            try {
+                val result = PixivRepository.getSearchOptions(uiState.value.searchWords, target.value, ai.value)
+                _searchOptions.value = SearchOptionsState(options = result)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                _searchOptions.value = SearchOptionsState(failed = true)
+            }
+        }
+    }
+
     private var manualIsPremium = requireUserInfoValue.profile.isPremium
 
     private val manualIllustController by lazy {
@@ -165,6 +193,7 @@ class SearchResultViewModel(
                         endDate = endDate?.format(LocalDate.Formats.ISO),
                         searchAiType = filter.searchAiType,
                         contentFilter = filter.contentFilter,
+            advanced = filter.illustAdvanced,
                     ),
                     isPremium = isPremium,
                     isIdSearch = isIdSearch
@@ -200,6 +229,7 @@ class SearchResultViewModel(
                         endDate = endDate?.format(LocalDate.Formats.ISO),
                         searchAiType = filter.searchAiType,
                         contentFilter = filter.contentFilter,
+            advanced = filter.novelAdvanced,
                     ),
                     isPremium = isPremium,
                     isIdSearch = isIdSearch
@@ -221,8 +251,19 @@ class SearchResultViewModel(
 
     override suspend fun handleIntent(intent: SearchResultAction) {
         when (intent) {
-            is SearchResultAction.UpdateFilter ->
-                updateState { copy(searchFilter = intent.searchFilter) }
+            is SearchResultAction.UpdateFilter -> {
+                val selected = intent.searchFilter
+                val options = searchOptions.value.options
+                val validated = if (options == null) selected else selected.copy(
+                    illustAdvanced = selected.illustAdvanced.validatedBy(options),
+                    novelAdvanced = selected.novelAdvanced.validatedBy(options),
+                )
+                val active = if (searchMode == AppViewMode.NOVEL) validated.novelAdvanced.isActive
+                    else validated.illustAdvanced.isActive
+                val filter = if (!isPremium.value && active && validated.sort == SearchSort.POPULAR_DESC)
+                    validated.copy(sort = SearchSort.DATE_DESC) else validated
+                updateState { copy(searchFilter = filter) }
+            }
 
             is SearchResultAction.UpdateBookmarkNumRange ->
                 updateState {
@@ -288,7 +329,11 @@ class SearchResultViewModel(
     fun isPopularPreview(isPremium: Boolean): Boolean {
         return !isIdSearch &&
             !isPremium &&
-            uiState.value.searchFilter.sort == SearchSort.POPULAR_DESC
+            uiState.value.searchFilter.sort == SearchSort.POPULAR_DESC &&
+            when (searchMode) {
+                AppViewMode.ILLUST -> !uiState.value.searchFilter.illustAdvanced.isActive
+                AppViewMode.NOVEL -> !uiState.value.searchFilter.novelAdvanced.isActive
+            }
     }
 
     fun switchToLatestSort() {
@@ -365,6 +410,7 @@ class SearchResultViewModel(
             endDate = endDate?.format(LocalDate.Formats.ISO),
             searchAiType = filter.searchAiType,
             contentFilter = filter.contentFilter,
+            advanced = filter.illustAdvanced,
         )
     }
 
@@ -383,6 +429,7 @@ class SearchResultViewModel(
             endDate = endDate?.format(LocalDate.Formats.ISO),
             searchAiType = filter.searchAiType,
             contentFilter = filter.contentFilter,
+            advanced = filter.novelAdvanced,
         )
     }
 
@@ -406,4 +453,11 @@ private data class ManualNovelQueryKey(
 private data class ManualUserQueryKey(
     val word: String,
     val isIdSearch: Boolean,
+)
+
+
+data class SearchOptionsState(
+    val options: SearchOptionsResponse? = null,
+    val loading: Boolean = false,
+    val failed: Boolean = false,
 )

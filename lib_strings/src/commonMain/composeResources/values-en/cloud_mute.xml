@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Pixiv cloud mutes</string>
+    <string name="cloud_mute_description">Manage muted users and tags on your Pixiv account. Changes sync to Pixiv. Import adds missing local rules and preserves existing rules and regular expressions.</string>
+    <string name="cloud_mute_back">Back</string>
+    <string name="cloud_mute_refresh">Refresh</string>
+    <string name="cloud_mute_failed">Could not complete the operation. Refresh and try again.</string>
+    <string name="cloud_mute_saved_refresh_failed">Your change was saved to Pixiv, but the list could not refresh. Refresh the list without submitting again.</string>
+    <string name="cloud_mute_quota">Used %1$d of %2$d slots</string>
+    <string name="cloud_mute_add_tag">Mute a tag</string>
+    <string name="cloud_mute_add_user">Mute a user</string>
+    <string name="cloud_mute_import">Import cloud mutes locally</string>
+    <string name="cloud_mute_imported">Added %1$d local mute rules</string>
+    <string name="cloud_mute_remove">Remove cloud mute</string>
+    <string name="cloud_mute_remove_description">Remove “%1$s” from Pixiv cloud mutes? Existing local rules will be kept.</string>
+    <string name="cloud_mute_tag">Tag name</string>
+    <string name="cloud_mute_user_id">Pixiv user ID</string>
+    <string name="cloud_mute_input_hint">Enter a tag or a valid user ID that is not already muted.</string>
+</resources>

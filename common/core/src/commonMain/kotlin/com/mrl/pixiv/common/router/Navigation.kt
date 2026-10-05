@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Type
+import com.mrl.pixiv.common.data.discovery.CommunityUsersKind
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -131,6 +132,21 @@ sealed class Destination : NavKey {
     data object BlockSettings : Destination()
 
     @Serializable
+    data object CloudMute : Destination()
+
+    @Serializable
+    data class Notifications(
+        val notificationId: Long? = null,
+        val title: String? = null,
+    ) : Destination()
+
+    @Serializable
+    data class CommunityUsers(
+        val kind: CommunityUsersKind,
+        val seedUserId: Long? = null,
+    ) : Destination()
+
+    @Serializable
     data object BlockIllust : Destination()
 
     @Serializable
@@ -178,6 +194,15 @@ sealed class Destination : NavKey {
     data class NovelSeries(
         val seriesId: Long,
     ) : Destination()
+
+    @Serializable
+    data class MangaSeries(val seriesId: Long) : Destination()
+
+    @Serializable
+    data object MangaWatchlist : Destination()
+
+    @Serializable
+    data class UserMangaSeries(val userId: Long) : Destination()
 }
 
 @Serializable

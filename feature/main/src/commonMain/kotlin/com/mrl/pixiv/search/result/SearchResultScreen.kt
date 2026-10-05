@@ -161,6 +161,13 @@ fun SearchResultsScreen(
     val originalAspectRatioIllustGridState = rememberLazyStaggeredGridState()
     val novelsListState = rememberLazyListState()
     val usersListState = rememberLazyListState()
+    LaunchedEffect(state.searchFilter, state.bookmarkNumRange, state.bookmarkStringRange, state.searchDateRange) {
+        if (!usePagedSearchResults) {
+            squareIllustGridState.scrollToItem(0)
+            originalAspectRatioIllustGridState.scrollToItem(0)
+            novelsListState.scrollToItem(0)
+        }
+    }
     var refreshIllustResults by remember { mutableStateOf<(() -> Unit)?>(null) }
     var refreshNovelResults by remember { mutableStateOf<(() -> Unit)?>(null) }
     var refreshUserResults by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -788,6 +795,7 @@ fun SearchResultsScreen(
         }
 
         if (showBottomSheet) {
+            val searchOptions by viewModel.searchOptions.collectAsStateWithLifecycle()
             FilterBottomSheet(
                 bottomSheetState = bottomSheetState,
                 searchFilter = state.searchFilter,
@@ -797,7 +805,9 @@ fun SearchResultsScreen(
                 onUpdateFilter = {
                     viewModel.dispatch(SearchResultAction.UpdateFilter(it))
                 },
-                isNovelMode = searchMode == AppViewMode.NOVEL
+                isNovelMode = searchMode == AppViewMode.NOVEL,
+                options = searchOptions,
+                onLoadOptions = viewModel::loadSearchOptions,
             )
         }
     }

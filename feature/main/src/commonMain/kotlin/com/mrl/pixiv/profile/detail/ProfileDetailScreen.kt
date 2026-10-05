@@ -1,5 +1,9 @@
 package com.mrl.pixiv.profile.detail
 
+import androidx.compose.material3.TextButton
+import com.mrl.pixiv.strings.community_related_users
+import com.mrl.pixiv.strings.reading_manga_user_series
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -263,6 +267,16 @@ fun ProfileDetailScreen(
                             )
                         }
                         //id点击可复制
+                        Row {
+                            TextButton(
+                                onClick = { navigationManager.navigateToRelatedUsers(userInfo.user.id) },
+                                enabled = userInfo.user.id > 0,
+                            ) { Text(stringResource(RStrings.community_related_users)) }
+                            TextButton(
+                                onClick = { navigationManager.navigateToUserMangaSeriesScreen(userInfo.user.id) },
+                                enabled = userInfo.user.id > 0,
+                            ) { Text(stringResource(RStrings.reading_manga_user_series)) }
+                        }
                         Row(
                             horizontalArrangement = 5f.spaceBy,
                             verticalAlignment = CenterVertically,

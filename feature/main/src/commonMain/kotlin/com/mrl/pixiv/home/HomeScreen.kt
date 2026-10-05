@@ -13,6 +13,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.PersonSearch
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -48,6 +49,7 @@ import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifec
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.strings.community_recommended_users
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.home.components.RecommendGrid
@@ -89,6 +91,9 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text(text = stringResource(RStrings.app_name)) },
                 actions = {
+                    IconButton(onClick = navigationManager::navigateToRecommendedUsers) {
+                        Icon(Icons.Rounded.PersonSearch, contentDescription = stringResource(RStrings.community_recommended_users))
+                    }
                     IconButton(
                         onClick = {
                             scope.launch {

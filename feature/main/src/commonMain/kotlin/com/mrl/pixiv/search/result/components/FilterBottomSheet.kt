@@ -16,6 +16,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
+import com.mrl.pixiv.search.result.SearchOptionsState
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -60,8 +63,14 @@ internal fun FilterBottomSheet(
     onUpdateFilter: (SearchFilter) -> Unit,
     modifier: Modifier = Modifier,
     isNovelMode: Boolean = false,
+    options: SearchOptionsState = SearchOptionsState(),
+    onLoadOptions: (SearchTarget, SearchAiType) -> Unit = { _, _ -> },
 ) {
     var innerSearchFilter by remember { mutableStateOf(searchFilter) }
+    var rangesValid by remember { mutableStateOf(true) }
+    LaunchedEffect(innerSearchFilter.searchTarget, innerSearchFilter.searchAiType) {
+        onLoadOptions(innerSearchFilter.searchTarget, innerSearchFilter.searchAiType)
+    }
     val scope = rememberCoroutineScope()
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -109,18 +118,12 @@ internal fun FilterBottomSheet(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = stringResource(RStrings.filter))
-            Text(
-                text = stringResource(RStrings.apply),
-                modifier = Modifier.throttleClick {
-                    scope.launch { bottomSheetState.hide() }
-                        .invokeOnCompletion {
-                            if (!bottomSheetState.isVisible) {
-                                onDismissRequest()
-                            }
-                        }
-                    onUpdateFilter(innerSearchFilter)
-                }
-            )
+            TextButton(enabled = rangesValid, onClick = {
+                onUpdateFilter(innerSearchFilter)
+                scope.launch { bottomSheetState.hide(); onDismissRequest() }
+            }) {
+                Text(stringResource(RStrings.apply))
+            }
         }
 
         Column(modifier = Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(rememberScrollState())) {
@@ -148,6 +151,15 @@ internal fun FilterBottomSheet(
                 )
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+            SearchAdvancedControls(
+                filter = innerSearchFilter,
+                isNovel = isNovelMode,
+                options = options,
+                onChange = { innerSearchFilter = it },
+                onValidityChanged = { rangesValid = it },
+                onRetry = { onLoadOptions(innerSearchFilter.searchTarget, innerSearchFilter.searchAiType) },
+            )
             Spacer(modifier = Modifier.height(16.dp))
             SearchContentFilterControls(
                 filter = innerSearchFilter.contentFilter,

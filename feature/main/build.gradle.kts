@@ -16,6 +16,7 @@ kotlin {
             implementation(project(":common:core"))
             implementation(project(":feature:collection"))
             implementation(project(":feature:follow"))
+            implementation(project(":feature:community"))
 
             // Paging
             implementation(libs.bundles.androidx.paging)

@@ -33,6 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.collection.CollectionAction
+import com.mrl.pixiv.collection.CollectionSearchDialog
+import com.mrl.pixiv.collection.CollectionTagKey
+import com.mrl.pixiv.collection.CollectionTagPage
+import androidx.compose.material.icons.rounded.Search
+import com.mrl.pixiv.strings.discovery_collection_search
+import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.collection.CollectionViewModel
 import com.mrl.pixiv.collection.components.FilterDialog
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
@@ -113,6 +119,7 @@ private fun CollectionIllustPage(
     val lazyGridState = latestViewModel.collectionLazyGirdState
     val state = viewModel.asState()
     var showFilterDialog by rememberSaveable { mutableStateOf(false) }
+    var showSearch by rememberSaveable { mutableStateOf(false) }
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
     val isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading
     val controller = remember {
@@ -192,6 +199,9 @@ private fun CollectionIllustPage(
                 modifier = Modifier.align(Alignment.TopCenter),
                 horizontalArrangement = 8f.spaceBy
             ) {
+                if (uid.isSelf) IconButton(onClick = { showSearch = true }) {
+                    Icon(Icons.Rounded.Search, stringResource(RStrings.discovery_collection_search))
+                }
                 val options = listOf(
                     RStrings.word_public to Restrict.PUBLIC,
                     RStrings.word_private to Restrict.PRIVATE,
@@ -228,9 +238,16 @@ private fun CollectionIllustPage(
             }
         }
     }
+    if (showSearch && uid.isSelf) {
+        CollectionSearchDialog(uid, initialNovel = false, onDismiss = { showSearch = false })
+    }
     if (showFilterDialog) {
         FilterDialog(
             onDismissRequest = { showFilterDialog = false },
+            allowPrivate = uid.isSelf,
+            publicPage = state.tagPages[CollectionTagKey(false, Restrict.PUBLIC)] ?: CollectionTagPage(),
+            privatePage = state.tagPages[CollectionTagKey(false, Restrict.PRIVATE)] ?: CollectionTagPage(),
+            onLoadMore = { viewModel.loadMoreTags(false, it) },
             userBookmarkTags = state.userBookmarkTagsIllust,
             privateBookmarkTags = state.privateBookmarkTagsIllust,
             restrict = state.restrict,
@@ -260,6 +277,7 @@ private fun CollectionNovelPage(
     val lazyListState = latestViewModel.collectionNovelLazyListState
     val state = viewModel.asState()
     var showFilterDialog by rememberSaveable { mutableStateOf(false) }
+    var showSearch by rememberSaveable { mutableStateOf(false) }
     val isRefreshing = userBookmarksNovels.loadState.refresh is LoadState.Loading
     val controller = remember {
         keyboardScrollerController(lazyListState) {
@@ -324,6 +342,9 @@ private fun CollectionNovelPage(
                 modifier = Modifier.align(Alignment.TopCenter),
                 horizontalArrangement = 8f.spaceBy
             ) {
+                if (uid.isSelf) IconButton(onClick = { showSearch = true }) {
+                    Icon(Icons.Rounded.Search, stringResource(RStrings.discovery_collection_search))
+                }
                 val options = listOf(
                     RStrings.word_public to Restrict.PUBLIC,
                     RStrings.word_private to Restrict.PRIVATE,
@@ -349,9 +370,16 @@ private fun CollectionNovelPage(
         }
     }
 
+    if (showSearch && uid.isSelf) {
+        CollectionSearchDialog(uid, initialNovel = true, onDismiss = { showSearch = false })
+    }
     if (showFilterDialog) {
         FilterDialog(
             onDismissRequest = { showFilterDialog = false },
+            allowPrivate = uid.isSelf,
+            publicPage = state.tagPages[CollectionTagKey(true, Restrict.PUBLIC)] ?: CollectionTagPage(),
+            privatePage = state.tagPages[CollectionTagKey(true, Restrict.PRIVATE)] ?: CollectionTagPage(),
+            onLoadMore = { viewModel.loadMoreTags(true, it) },
             userBookmarkTags = state.userBookmarkTagsNovel,
             privateBookmarkTags = state.privateBookmarkTagsNovel,
             restrict = state.novelRestrict,

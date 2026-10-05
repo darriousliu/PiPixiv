@@ -8,6 +8,9 @@ import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.user.UserBookmarksQuery
+import com.mrl.pixiv.common.repository.util.queryParams
+import kotlinx.coroutines.CancellationException
+import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.paging.CollectionIllustPagingSource
 import com.mrl.pixiv.common.repository.paging.CollectionNovelPagingSource
@@ -26,6 +29,7 @@ import org.koin.android.annotation.KoinViewModel
 
 @Stable
 data class CollectionState(
+    val tagPages: Map<CollectionTagKey, CollectionTagPage> = emptyMap(),
     val restrict: Restrict = Restrict.PUBLIC,
     val filterTag: String? = null,
     val novelRestrict: Restrict = Restrict.PUBLIC,
@@ -35,6 +39,14 @@ data class CollectionState(
     val privateBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
     val userBookmarkTagsNovel: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
     val privateBookmarkTagsNovel: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
+)
+
+data class CollectionTagKey(val novel: Boolean, val restrict: Restrict)
+data class CollectionTagPage(
+    val nextUrl: String? = null,
+    val loading: Boolean = false,
+    val failed: Boolean = false,
+    val loaded: Boolean = false,
 )
 
 @Stable
@@ -86,7 +98,7 @@ class CollectionViewModel(
     fun updateFilterTag(restrict: Restrict, filterTag: String?) {
         updateState {
             copy(
-                restrict = restrict,
+                restrict = if (uid.isSelf) restrict else Restrict.PUBLIC,
                 filterTag = filterTag
             )
         }
@@ -95,82 +107,63 @@ class CollectionViewModel(
     fun updateNovelFilterTag(restrict: Restrict, filterTag: String?) {
         updateState {
             copy(
-                novelRestrict = restrict,
+                novelRestrict = if (uid.isSelf) restrict else Restrict.PUBLIC,
                 novelFilterTag = filterTag
             )
         }
     }
 
-    private fun loadUserBookmarkTagsIllust(restrict: Restrict) {
-        launchIO {
-            val resp = PixivRepository.getUserBookmarkTagsIllust(
-                userId = uid,
-                restrict = restrict.value
-            )
-            val isPublic = restrict == Restrict.PUBLIC
-            updateState {
-                if (isPublic) {
-                    copy(
-                        userBookmarkTagsIllust = (generateInitialTags(true) +
-                                resp.bookmarkTags.map {
-                                    RestrictBookmarkTag(
-                                        isPublic = true,
-                                        count = it.count,
-                                        displayName = it.name,
-                                        name = it.name
-                                    )
-                                }).toImmutableList()
-                    )
-                } else {
-                    copy(
-                        privateBookmarkTagsIllust = (generateInitialTags(false) +
-                                resp.bookmarkTags.map {
-                                    RestrictBookmarkTag(
-                                        isPublic = false,
-                                        count = it.count,
-                                        displayName = it.name,
-                                        name = it.name
-                                    )
-                                }).toImmutableList()
-                    )
-                }
-            }
-        }
+    private fun loadUserBookmarkTagsIllust(restrict: Restrict) = loadTags(false, restrict, false)
+    private fun loadUserBookmarkTagsNovel(restrict: Restrict) = loadTags(true, restrict, false)
+
+    fun loadMoreTags(novel: Boolean, restrict: Restrict) {
+        val page = state.tagPages[CollectionTagKey(novel, restrict)]
+        loadTags(novel, restrict, page?.loaded == true)
     }
 
-    private fun loadUserBookmarkTagsNovel(restrict: Restrict) {
+    private fun loadTags(novel: Boolean, restrict: Restrict, append: Boolean) {
+        if (!uid.isSelf && restrict != Restrict.PUBLIC) return
+        val key = CollectionTagKey(novel, restrict)
+        val page = state.tagPages[key] ?: CollectionTagPage()
+        if (page.loading || (append && page.nextUrl == null)) return
+        updateState { copy(tagPages = tagPages + (key to page.copy(loading = true, failed = false))) }
         launchIO {
-            val resp = PixivRepository.getUserBookmarkTagsNovel(
-                userId = uid,
-                restrict = restrict.value
-            )
-            val isPublic = restrict == Restrict.PUBLIC
-            updateState {
-                if (isPublic) {
-                    copy(
-                        userBookmarkTagsNovel = (generateInitialTags(true) +
-                                resp.bookmarkTags.map {
-                                    RestrictBookmarkTag(
-                                        isPublic = true,
-                                        count = it.count,
-                                        displayName = it.name,
-                                        name = it.name
-                                    )
-                                }).toImmutableList()
-                    )
+            try {
+                val response = if (append) {
+                    val params = requireNotNull(page.nextUrl).queryParams +
+                        mapOf("user_id" to uid.toString(), "restrict" to restrict.value)
+                    if (novel) PixivRepository.loadMoreUserBookmarkTagsNovel(params)
+                    else PixivRepository.loadMoreUserBookmarkTagsIllust(params)
                 } else {
-                    copy(
-                        privateBookmarkTagsNovel = (generateInitialTags(false) +
-                                resp.bookmarkTags.map {
-                                    RestrictBookmarkTag(
-                                        isPublic = false,
-                                        count = it.count,
-                                        displayName = it.name,
-                                        name = it.name
-                                    )
-                                }).toImmutableList()
-                    )
+                    if (novel) PixivRepository.getUserBookmarkTagsNovel(uid, restrict.value)
+                    else PixivRepository.getUserBookmarkTagsIllust(uid, restrict.value)
                 }
+                val isPublic = restrict == Restrict.PUBLIC
+                val added = response.bookmarkTags.map {
+                    RestrictBookmarkTag(isPublic, it.count, it.name, it.name)
+                }
+                updateState {
+                    val previous = when {
+                        novel && isPublic -> userBookmarkTagsNovel
+                        novel -> privateBookmarkTagsNovel
+                        isPublic -> userBookmarkTagsIllust
+                        else -> privateBookmarkTagsIllust
+                    }
+                    val tags = ((if (append) previous else generateInitialTags(isPublic)) + added)
+                        .distinctBy { it.name }.toImmutableList()
+                    val next = response.nextUrl?.takeIf { it.isNotBlank() && (!append || it != page.nextUrl) }
+                    val updated = copy(tagPages = tagPages + (key to CollectionTagPage(nextUrl = next, loaded = true)))
+                    when {
+                        novel && isPublic -> updated.copy(userBookmarkTagsNovel = tags)
+                        novel -> updated.copy(privateBookmarkTagsNovel = tags)
+                        isPublic -> updated.copy(userBookmarkTagsIllust = tags)
+                        else -> updated.copy(privateBookmarkTagsIllust = tags)
+                    }
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                updateState { copy(tagPages = tagPages + (key to page.copy(failed = true))) }
             }
         }
     }

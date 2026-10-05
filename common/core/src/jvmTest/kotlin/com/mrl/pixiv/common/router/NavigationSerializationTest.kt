@@ -3,6 +3,7 @@ package com.mrl.pixiv.common.router
 import androidx.compose.runtime.saveable.SaverScope
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Type
+import com.mrl.pixiv.common.data.discovery.CommunityUsersKind
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -92,6 +93,12 @@ class NavigationSerializationTest {
             Destination.Report(9, ReportType.USER),
             Destination.NovelDetail(10, markerPage = 3, readLaterTargetLanguage = "zh-CN"),
             Destination.NovelSeries(11),
+            Destination.MangaSeries(12),
+            Destination.MangaWatchlist,
+            Destination.UserMangaSeries(13),
+            Destination.Notifications(14, "Updates"),
+            Destination.CommunityUsers(CommunityUsersKind.RELATED, 15),
+            Destination.CloudMute,
         )
         // 新增路由时必须补全样本，防止其他业务字段再次与判别字段冲突。
         val subtypes = Destination.serializer().descriptor.getElementDescriptor(1)
