@@ -28,7 +28,7 @@ Pixiv 应用
 
 ## 📸 应用预览
 
-<img width="100%" alt="b48d643b-8bd4-479c-bc7b-9c586a9fafd8" src="https://github.com/user-attachments/assets/396ff31e-fecc-4447-bb6f-f9cb3e79b812" />
+<img width="100%" alt="preview" src="docs/preview.png" />
 
 ### 📱 支持平台
 
