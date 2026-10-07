@@ -2,21 +2,15 @@ package com.mrl.pixiv.collection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.collection.CollectionPeriodOption
 import com.mrl.pixiv.common.data.collection.CollectionSearchQuery
 import com.mrl.pixiv.common.data.collection.CollectionTagOptions
-import com.mrl.pixiv.common.data.collection.CollectionWorkType
 import com.mrl.pixiv.common.data.collection.isCollectionMonth
 import com.mrl.pixiv.common.repository.CollectionSearchRepository
-import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.util.filterBlockedTags
@@ -24,18 +18,12 @@ import com.mrl.pixiv.common.repository.util.filterNormalIllust
 import com.mrl.pixiv.common.repository.util.filterNormalNovel
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
@@ -53,7 +41,6 @@ data class CollectionSearchState(
     val optionsFailed: Boolean = false,
 )
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @KoinViewModel
 class CollectionSearchViewModel(private val uid: Long) : ViewModel() {
     private val _state = MutableStateFlow(CollectionSearchState())
@@ -62,24 +49,11 @@ class CollectionSearchViewModel(private val uid: Long) : ViewModel() {
     private var optionsJob: Job? = null
     private var moreJob: Job? = null
 
-    val illusts = state.map { it.sync to it.query }.distinctUntilChanged().flatMapLatest { (sync, query) ->
-        if (sync != CollectionSyncState.READY || query.type != CollectionWorkType.ILLUST) flowOf(PagingData.empty())
-        else Pager(PagingConfig(pageSize = 30)) { CollectionSearchIllustPagingSource(query) }.flow
-    }.cachedIn(viewModelScope)
-
-    private val novelRequests = combine(
-        state.map { it.sync to it.query }.distinctUntilChanged(),
-        SettingRepository.userPreferenceFlow.map { it.browsingSettings to it.isR18Enabled }.distinctUntilChanged(),
-    ) { request, settings -> request to settings }
-
-    val novels = novelRequests.flatMapLatest { (request, _) ->
-        val (sync, query) = request
-        if (sync != CollectionSyncState.READY || query.type != CollectionWorkType.NOVEL) flowOf(PagingData.empty())
-        else Pager(PagingConfig(pageSize = 30)) { CollectionSearchNovelPagingSource(query) }.flow
-    }.cachedIn(viewModelScope)
-
-    fun open(type: CollectionWorkType) {
-        _state.update { it.copy(query = it.query.copy(type = type), draft = it.query.copy(type = type)) }
+    /** Start a fresh draft from the same query that drives the visible collection list. */
+    fun open(query: CollectionSearchQuery) {
+        optionsJob?.cancel()
+        moreJob?.cancel()
+        _state.value = beginCollectionFilterEdit(query, uid.isSelf)
         checkSync()
     }
 
@@ -104,17 +78,27 @@ class CollectionSearchViewModel(private val uid: Long) : ViewModel() {
     }
 
     fun updateDraft(value: CollectionSearchQuery) {
-        if (!uid.isSelf) return
-        _state.update { it.copy(draft = value) }
+        val draft = if (uid.isSelf) value else value.normalizedForOwner(false)
+        _state.update { it.copy(draft = draft) }
         loadOptions(debounce = true)
     }
 
-    fun applyDraft() {
-        if (!uid.isSelf || state.value.sync != CollectionSyncState.READY) return
+    fun applyDraft(): CollectionSearchQuery? {
+        if (!canApplyCollectionDraft(state.value)) return null
         _state.update { applyCollectionSearchDraft(it) }
+        return state.value.query.normalizedForOwner(uid.isSelf)
     }
 
-    fun resetDraft() = updateDraft(CollectionSearchQuery(type = state.value.query.type))
+    fun close() {
+        syncJob?.cancel()
+        optionsJob?.cancel()
+        moreJob?.cancel()
+    }
+
+    fun resetDraft() {
+        _state.update(::resetCollectionFilterDraft)
+        loadOptions(debounce = true)
+    }
 
     fun loadOptions(debounce: Boolean = false) {
         optionsJob?.cancel()
@@ -165,9 +149,10 @@ class CollectionSearchViewModel(private val uid: Long) : ViewModel() {
     }
 }
 
-internal fun applyCollectionSearchDraft(state: CollectionSearchState): CollectionSearchState = state.copy(
-    query = state.draft.copy(bookmarkTag = state.draft.bookmarkTag.trim(), workTag = state.draft.workTag.trim()),
-)
+internal fun applyCollectionSearchDraft(state: CollectionSearchState): CollectionSearchState =
+    if (!canApplyCollectionDraft(state)) state else state.copy(
+        query = state.draft.copy(bookmarkTag = state.draft.bookmarkTag.trim(), workTag = state.draft.workTag.trim()),
+    )
 
 internal class CollectionSearchIllustPagingSource(private val query: CollectionSearchQuery) : PagingSource<String, Illust>() {
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Illust> = try {

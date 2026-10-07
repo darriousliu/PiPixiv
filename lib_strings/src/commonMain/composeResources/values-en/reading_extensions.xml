@@ -15,13 +15,4 @@
     <string name="reading_manga_chapters_empty">No episodes to display</string>
     <string name="reading_manga_view_directory">View series episodes</string>
     <string name="reading_refresh">Refresh</string>
-    <string name="reading_novel_interactions">Recommendations and poll</string>
-    <string name="reading_novel_recommendations">Related novels</string>
-    <string name="reading_novel_public_note">Recommendations and poll information are from public reading pages. Restricted works may be unavailable.</string>
-    <string name="reading_novel_poll">Work poll</string>
-    <string name="reading_novel_poll_absent">This work has no poll</string>
-    <string name="reading_novel_poll_vote">Vote</string>
-    <string name="reading_novel_poll_voted">Voted</string>
-    <string name="reading_novel_poll_count">%1$d votes</string>
-    <string name="reading_novel_recommendations_empty">No related novels to display</string>
 </resources>

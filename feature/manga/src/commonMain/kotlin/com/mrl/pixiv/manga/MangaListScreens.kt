@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -21,6 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,15 +59,34 @@ fun MangaWatchlistScreen(
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
     val series = viewModel.series.collectAsLazyPagingItems()
-    MangaPagedList(
+    MangaListScaffold(
         title = stringResource(RStrings.reading_manga_watchlist),
-        emptyText = stringResource(RStrings.reading_manga_watchlist_empty),
-        items = series,
         modifier = modifier,
         onBack = navigationManager::popBackStack,
-    ) { entry ->
-        MangaWatchlistCard(entry, navigationManager)
+        onRefresh = series::refresh,
+    ) { contentModifier ->
+        MangaWatchlistContent(
+            watchlist = series,
+            modifier = contentModifier,
+            navigationManager = navigationManager,
+        )
     }
+}
+
+/** Shared list body for the Latest tab and the independent watchlist screen. */
+@Composable
+fun MangaWatchlistContent(
+    watchlist: LazyPagingItems<MangaWatchlistEntry>,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+    navigationManager: NavigationManager = currentNavigationManager(),
+) {
+    MangaPagedListContent(
+        emptyText = stringResource(RStrings.reading_manga_watchlist_empty),
+        items = watchlist,
+        modifier = modifier,
+        listState = listState,
+    ) { entry -> MangaWatchlistCard(entry, navigationManager) }
 }
 
 @Composable
@@ -75,27 +97,30 @@ fun UserMangaSeriesScreen(
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
     val series = viewModel.series.collectAsLazyPagingItems()
-    MangaPagedList(
+    MangaListScaffold(
         title = stringResource(RStrings.reading_manga_user_series),
-        emptyText = stringResource(RStrings.reading_manga_empty),
-        items = series,
         modifier = modifier,
         onBack = navigationManager::popBackStack,
-    ) { entry ->
-        MangaSeriesCard(entry) { navigationManager.navigateToMangaSeriesScreen(entry.id) }
+        onRefresh = series::refresh,
+    ) { contentModifier ->
+        MangaPagedListContent(
+            emptyText = stringResource(RStrings.reading_manga_empty),
+            items = series,
+            modifier = contentModifier,
+        ) { entry ->
+            MangaSeriesCard(entry) { navigationManager.navigateToMangaSeriesScreen(entry.id) }
+        }
     }
 }
 
 @Composable
-private fun <T : Any> MangaPagedList(
+private fun MangaListScaffold(
     title: String,
-    emptyText: String,
-    items: LazyPagingItems<T>,
     modifier: Modifier,
     onBack: () -> Unit,
-    content: @Composable (T) -> Unit,
+    onRefresh: () -> Unit,
+    content: @Composable (Modifier) -> Unit,
 ) {
-    val listState = rememberLazyListState()
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -105,30 +130,51 @@ private fun <T : Any> MangaPagedList(
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(RStrings.back)) }
                 },
                 actions = {
-                    TextButton(onClick = items::refresh) { Text(stringResource(RStrings.reading_refresh)) }
+                    TextButton(onClick = onRefresh) { Text(stringResource(RStrings.reading_refresh)) }
                 },
             )
         },
     ) { padding ->
-        PullToRefreshBox(
-            modifier = Modifier.padding(padding).fillMaxSize(),
-            isRefreshing = items.loadState.refresh is LoadState.Loading,
-            onRefresh = items::refresh,
-        ) {
-            LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                if (items.itemCount == 0) {
-                    item(key = "refresh_state") {
-                        MangaLoadState(items.loadState.refresh, items::retry) { Text(emptyText) }
-                    }
-                } else if (items.loadState.refresh is LoadState.Error) {
-                    item(key = "refresh_error") { MangaLoadState(items.loadState.refresh, items::retry) }
+        content(Modifier.padding(padding))
+    }
+}
+
+@Composable
+private fun <T : Any> MangaPagedListContent(
+    emptyText: String,
+    items: LazyPagingItems<T>,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+    content: @Composable (T) -> Unit,
+) {
+    val pullRefreshState = rememberPullToRefreshState()
+    val isRefreshing = items.loadState.refresh is LoadState.Loading
+    PullToRefreshBox(
+        modifier = modifier.fillMaxSize(),
+        isRefreshing = isRefreshing,
+        onRefresh = items::refresh,
+        state = pullRefreshState,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = pullRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        },
+    ) {
+        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+            if (items.itemCount == 0) {
+                item(key = "refresh_state") {
+                    MangaLoadState(items.loadState.refresh, items::retry) { Text(emptyText) }
                 }
-                // Masked entries have no stable server ID, so use the paging position.
-                items(count = items.itemCount) { index -> items[index]?.let { content(it) } }
-                item(key = "append_state") { MangaLoadState(items.loadState.append, items::retry) }
+            } else if (items.loadState.refresh is LoadState.Error) {
+                item(key = "refresh_error") { MangaLoadState(items.loadState.refresh, items::retry) }
             }
-            VerticalScrollbar(state = listState, modifier = Modifier.align(Alignment.CenterEnd))
+            // Masked entries have no stable server ID, so use the paging position.
+            items(count = items.itemCount) { index -> items[index]?.let { content(it) } }
+            item(key = "append_state") { MangaLoadState(items.loadState.append, items::retry) }
         }
+        VerticalScrollbar(state = listState, modifier = Modifier.align(Alignment.CenterEnd))
     }
 }
 

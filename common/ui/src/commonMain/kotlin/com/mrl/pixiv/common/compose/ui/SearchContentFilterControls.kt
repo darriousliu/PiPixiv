@@ -11,10 +11,12 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.search.SearchArtworkType
@@ -37,11 +39,19 @@ fun SearchContentFilterControls(
     onChange: (SearchContentFilter) -> Unit,
     modifier: Modifier = Modifier,
     mode: AppViewMode? = null,
+    horizontalContentPadding: Dp = 0.dp,
 ) {
     Column(modifier) {
         if (mode != AppViewMode.NOVEL) {
-            Text(stringResource(RStrings.search_content_type), style = MaterialTheme.typography.titleSmall)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                stringResource(RStrings.search_content_type),
+                modifier = Modifier.padding(horizontal = horizontalContentPadding),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            FlowRow(
+                modifier = Modifier.padding(horizontal = horizontalContentPadding),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 SearchArtworkType.entries.forEach { type ->
                     FilterChip(
                         selected = filter.artworkType == type,
@@ -59,32 +69,57 @@ fun SearchContentFilterControls(
             }
         }
         if (mode != AppViewMode.ILLUST) {
-            ContentSwitch(stringResource(RStrings.search_series_only), filter.seriesOnly) {
-                onChange(filter.copy(seriesOnly = it))
-            }
+            SearchFilterSwitch(
+                label = stringResource(RStrings.search_series_only),
+                checked = filter.seriesOnly,
+                horizontalContentPadding = horizontalContentPadding,
+                onCheckedChange = { onChange(filter.copy(seriesOnly = it)) },
+            )
         }
         val showR18 = filter.showR18 ?: defaultShowR18
-        ContentSwitch(stringResource(RStrings.search_show_r18), showR18) {
-            onChange(filter.withR18Enabled(it))
-        }
+        SearchFilterSwitch(
+            label = stringResource(RStrings.search_show_r18),
+            checked = showR18,
+            horizontalContentPadding = horizontalContentPadding,
+            onCheckedChange = { onChange(filter.withR18Enabled(it)) },
+        )
         if (showR18) {
-            ContentSwitch(stringResource(RStrings.search_r18_only), filter.r18Only) {
-                onChange(filter.copy(r18Only = it))
-            }
+            SearchFilterSwitch(
+                label = stringResource(RStrings.search_r18_only),
+                checked = filter.r18Only,
+                horizontalContentPadding = horizontalContentPadding,
+                onCheckedChange = { onChange(filter.copy(r18Only = it)) },
+            )
         }
     }
 }
 
 @Composable
-private fun ContentSwitch(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+fun SearchFilterSwitch(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    horizontalContentPadding: Dp = 0.dp,
+) {
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
+            .padding(vertical = 4.dp)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
-            .padding(vertical = 4.dp),
+            .padding(horizontal = horizontalContentPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(label, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = null)
+        Text(
+            label,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            modifier = Modifier.minimumInteractiveComponentSize(),
+        )
     }
 }

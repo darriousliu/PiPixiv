@@ -15,9 +15,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Search
-import com.mrl.pixiv.common.data.Restrict
-import com.mrl.pixiv.strings.discovery_collection_search
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,7 +43,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.mrl.pixiv.collection.components.FilterDialog
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
@@ -68,6 +64,7 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.strings.discovery_collection_filters
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.illusts
 import com.mrl.pixiv.strings.novels
@@ -87,9 +84,7 @@ fun CollectionScreen(
     val state = viewModel.asState()
     val userBookmarksIllusts = viewModel.userBookmarksIllusts.collectAsLazyPagingItems()
     val userBookmarksNovels = viewModel.userBookmarksNovels.collectAsLazyPagingItems()
-    val dispatch = viewModel::dispatch
     var showFilterDialog by rememberSaveable { mutableStateOf(false) }
-    var showSearch by rememberSaveable { mutableStateOf(false) }
     val lazyGridState = rememberLazyGridState()
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -124,9 +119,7 @@ fun CollectionScreen(
         topBar = {
             Column {
                 CollectionTopAppBar(
-                    uid = uid,
                     showFilterDialog = { showFilterDialog = true },
-                    onSearch = { showSearch = true },
                     onBack = { navigationManager.popBackStack() }
                 )
                 if (!useViewModeFab) {
@@ -220,6 +213,7 @@ fun CollectionScreen(
                                 navToPictureScreen = navigationManager::navigateToPictureScreen,
                             )
                         }
+                        CollectionResultsStatus(userBookmarksIllusts.loadState, userBookmarksIllusts.itemCount, userBookmarksIllusts::retry)
                         VerticalScrollbar(
                             state = lazyGridState,
                             modifier = Modifier.align(Alignment.CenterEnd)
@@ -280,6 +274,7 @@ fun CollectionScreen(
                                 }
                             }
                         }
+                        CollectionResultsStatus(userBookmarksNovels.loadState, userBookmarksNovels.itemCount, userBookmarksNovels::retry)
                         VerticalScrollbar(
                             state = lazyListState,
                             modifier = Modifier.align(Alignment.CenterEnd)
@@ -289,58 +284,27 @@ fun CollectionScreen(
             }
         }
 
-        if (showSearch && uid.isSelf) {
-            CollectionSearchDialog(uid, initialNovel = !isIllustPage, onDismiss = { showSearch = false })
-        }
         if (showFilterDialog) {
-            if (isIllustPage) {
-                FilterDialog(
-                    onDismissRequest = { showFilterDialog = false },
-                    allowPrivate = uid.isSelf,
-                    publicPage = state.tagPages[CollectionTagKey(false, Restrict.PUBLIC)] ?: CollectionTagPage(),
-                    privatePage = state.tagPages[CollectionTagKey(false, Restrict.PRIVATE)] ?: CollectionTagPage(),
-                    onLoadMore = { viewModel.loadMoreTags(false, it) },
-                    userBookmarkTags = state.userBookmarkTagsIllust,
-                    privateBookmarkTags = state.privateBookmarkTagsIllust,
-                    restrict = state.restrict,
-                    filterTag = state.filterTag,
-                    onLoadUserBookmarksTags = {
-                        dispatch(CollectionAction.LoadUserBookmarksTagsIllust(it))
-                    },
-                    onSelected = { restrict, tag ->
-                        viewModel.updateFilterTag(restrict, tag)
-                        userBookmarksIllusts.refresh()
+            CollectionFilterSheet(
+                uid = uid,
+                query = if (isIllustPage) state.illustQuery else state.novelQuery,
+                collectionViewModel = viewModel,
+                onDismiss = { showFilterDialog = false },
+                onApply = { query ->
+                    val previous = if (isIllustPage) state.illustQuery else state.novelQuery
+                    viewModel.applyFilter(query)
+                    if (query != previous) scope.launch {
+                        if (isIllustPage) lazyGridState.scrollToItem(0) else lazyListState.scrollToItem(0)
                     }
-                )
-            } else {
-                FilterDialog(
-                    onDismissRequest = { showFilterDialog = false },
-                    allowPrivate = uid.isSelf,
-                    publicPage = state.tagPages[CollectionTagKey(true, Restrict.PUBLIC)] ?: CollectionTagPage(),
-                    privatePage = state.tagPages[CollectionTagKey(true, Restrict.PRIVATE)] ?: CollectionTagPage(),
-                    onLoadMore = { viewModel.loadMoreTags(true, it) },
-                    userBookmarkTags = state.userBookmarkTagsNovel,
-                    privateBookmarkTags = state.privateBookmarkTagsNovel,
-                    restrict = state.novelRestrict,
-                    filterTag = state.novelFilterTag,
-                    onLoadUserBookmarksTags = {
-                        dispatch(CollectionAction.LoadUserBookmarksTagsNovel(it))
-                    },
-                    onSelected = { restrict, tag ->
-                        viewModel.updateNovelFilterTag(restrict, tag)
-                        userBookmarksNovels.refresh()
-                    }
-                )
-            }
+                },
+            )
         }
     }
 }
 
 @Composable
 private fun CollectionTopAppBar(
-    uid: Long,
     showFilterDialog: () -> Unit = {},
-    onSearch: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     TopAppBar(
@@ -357,17 +321,12 @@ private fun CollectionTopAppBar(
             }
         },
         actions = {
-            if (uid.isSelf) {
-                IconButton(onClick = onSearch) {
-                    Icon(Icons.Rounded.Search, stringResource(RStrings.discovery_collection_search))
-                }
-            }
             IconButton(
-                    onClick = showFilterDialog,
-                    shapes = IconButtonDefaults.shapes(),
-                ) {
-                    Icon(Icons.Rounded.FilterList, contentDescription = null)
-                }
+                onClick = showFilterDialog,
+                shapes = IconButtonDefaults.shapes(),
+            ) {
+                Icon(Icons.Rounded.FilterList, contentDescription = stringResource(RStrings.discovery_collection_filters))
+            }
         }
     )
 }

@@ -32,15 +32,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.mrl.pixiv.collection.CollectionAction
-import com.mrl.pixiv.collection.CollectionSearchDialog
-import com.mrl.pixiv.collection.CollectionTagKey
-import com.mrl.pixiv.collection.CollectionTagPage
-import androidx.compose.material.icons.rounded.Search
-import com.mrl.pixiv.strings.discovery_collection_search
 import com.mrl.pixiv.common.repository.isSelf
+import com.mrl.pixiv.collection.CollectionResultsStatus
+import com.mrl.pixiv.collection.CollectionFilterSheet
+import com.mrl.pixiv.strings.discovery_collection_filters
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.mrl.pixiv.collection.CollectionViewModel
-import com.mrl.pixiv.collection.components.FilterDialog
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
@@ -119,7 +117,7 @@ private fun CollectionIllustPage(
     val lazyGridState = latestViewModel.collectionLazyGirdState
     val state = viewModel.asState()
     var showFilterDialog by rememberSaveable { mutableStateOf(false) }
-    var showSearch by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
     val isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading
     val controller = remember {
@@ -191,6 +189,7 @@ private fun CollectionIllustPage(
                     )
                 }
             }
+            CollectionResultsStatus(userBookmarksIllusts.loadState, userBookmarksIllusts.itemCount, userBookmarksIllusts::retry)
             VerticalScrollbar(
                 state = lazyGridState,
                 modifier = Modifier.align(Alignment.CenterEnd)
@@ -199,19 +198,16 @@ private fun CollectionIllustPage(
                 modifier = Modifier.align(Alignment.TopCenter),
                 horizontalArrangement = 8f.spaceBy
             ) {
-                if (uid.isSelf) IconButton(onClick = { showSearch = true }) {
-                    Icon(Icons.Rounded.Search, stringResource(RStrings.discovery_collection_search))
-                }
-                val options = listOf(
+                val options = if (uid.isSelf) listOf(
                     RStrings.word_public to Restrict.PUBLIC,
                     RStrings.word_private to Restrict.PRIVATE,
-                )
+                ) else listOf(RStrings.word_public to Restrict.PUBLIC)
                 options.forEach { (label, restrict) ->
                     FilterChip(
                         selected = state.restrict == restrict,
                         onClick = {
                             viewModel.updateFilterTag(restrict, state.filterTag)
-                            userBookmarksIllusts.refresh()
+                            if (state.restrict != restrict) scope.launch { lazyGridState.scrollToItem(0) }
                         },
                         label = {
                             Text(
@@ -232,35 +228,25 @@ private fun CollectionIllustPage(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.FilterList,
-                        contentDescription = null
+                        contentDescription = stringResource(RStrings.discovery_collection_filters)
                     )
                 }
             }
         }
     }
-    if (showSearch && uid.isSelf) {
-        CollectionSearchDialog(uid, initialNovel = false, onDismiss = { showSearch = false })
-    }
     if (showFilterDialog) {
-        FilterDialog(
-            onDismissRequest = { showFilterDialog = false },
-            allowPrivate = uid.isSelf,
-            publicPage = state.tagPages[CollectionTagKey(false, Restrict.PUBLIC)] ?: CollectionTagPage(),
-            privatePage = state.tagPages[CollectionTagKey(false, Restrict.PRIVATE)] ?: CollectionTagPage(),
-            onLoadMore = { viewModel.loadMoreTags(false, it) },
-            userBookmarkTags = state.userBookmarkTagsIllust,
-            privateBookmarkTags = state.privateBookmarkTagsIllust,
-            restrict = state.restrict,
-            filterTag = state.filterTag,
-            onLoadUserBookmarksTags = {
-                viewModel.dispatch(CollectionAction.LoadUserBookmarksTagsIllust(it))
+        CollectionFilterSheet(
+            uid = uid,
+            query = state.illustQuery,
+            collectionViewModel = viewModel,
+            onDismiss = { showFilterDialog = false },
+            onApply = { query ->
+                viewModel.applyFilter(query)
+                if (query != state.illustQuery) scope.launch { lazyGridState.scrollToItem(0) }
             },
-            onSelected = { restrict, tag ->
-                viewModel.updateFilterTag(restrict, tag)
-                userBookmarksIllusts.refresh()
-            }
         )
     }
+
 }
 
 @Composable
@@ -277,7 +263,7 @@ private fun CollectionNovelPage(
     val lazyListState = latestViewModel.collectionNovelLazyListState
     val state = viewModel.asState()
     var showFilterDialog by rememberSaveable { mutableStateOf(false) }
-    var showSearch by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     val isRefreshing = userBookmarksNovels.loadState.refresh is LoadState.Loading
     val controller = remember {
         keyboardScrollerController(lazyListState) {
@@ -334,6 +320,7 @@ private fun CollectionNovelPage(
                     }
                 }
             }
+            CollectionResultsStatus(userBookmarksNovels.loadState, userBookmarksNovels.itemCount, userBookmarksNovels::retry)
             VerticalScrollbar(
                 state = lazyListState,
                 modifier = Modifier.align(Alignment.CenterEnd)
@@ -342,19 +329,16 @@ private fun CollectionNovelPage(
                 modifier = Modifier.align(Alignment.TopCenter),
                 horizontalArrangement = 8f.spaceBy
             ) {
-                if (uid.isSelf) IconButton(onClick = { showSearch = true }) {
-                    Icon(Icons.Rounded.Search, stringResource(RStrings.discovery_collection_search))
-                }
-                val options = listOf(
+                val options = if (uid.isSelf) listOf(
                     RStrings.word_public to Restrict.PUBLIC,
                     RStrings.word_private to Restrict.PRIVATE,
-                )
+                ) else listOf(RStrings.word_public to Restrict.PUBLIC)
                 options.forEach { (label, restrict) ->
                     FilterChip(
                         selected = state.novelRestrict == restrict,
                         onClick = {
                             viewModel.updateNovelFilterTag(restrict, state.novelFilterTag)
-                            userBookmarksNovels.refresh()
+                            if (state.novelRestrict != restrict) scope.launch { lazyListState.scrollToItem(0) }
                         },
                         label = {
                             Text(
@@ -366,31 +350,27 @@ private fun CollectionNovelPage(
                         )
                     )
                 }
+                IconButton(
+                    onClick = { showFilterDialog = true },
+                    shapes = IconButtonDefaults.shapes(),
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                ) {
+                    Icon(Icons.Rounded.FilterList, stringResource(RStrings.discovery_collection_filters))
+                }
             }
         }
     }
 
-    if (showSearch && uid.isSelf) {
-        CollectionSearchDialog(uid, initialNovel = true, onDismiss = { showSearch = false })
-    }
     if (showFilterDialog) {
-        FilterDialog(
-            onDismissRequest = { showFilterDialog = false },
-            allowPrivate = uid.isSelf,
-            publicPage = state.tagPages[CollectionTagKey(true, Restrict.PUBLIC)] ?: CollectionTagPage(),
-            privatePage = state.tagPages[CollectionTagKey(true, Restrict.PRIVATE)] ?: CollectionTagPage(),
-            onLoadMore = { viewModel.loadMoreTags(true, it) },
-            userBookmarkTags = state.userBookmarkTagsNovel,
-            privateBookmarkTags = state.privateBookmarkTagsNovel,
-            restrict = state.novelRestrict,
-            filterTag = state.novelFilterTag,
-            onLoadUserBookmarksTags = {
-                viewModel.dispatch(CollectionAction.LoadUserBookmarksTagsNovel(it))
+        CollectionFilterSheet(
+            uid = uid,
+            query = state.novelQuery,
+            collectionViewModel = viewModel,
+            onDismiss = { showFilterDialog = false },
+            onApply = { query ->
+                viewModel.applyFilter(query)
+                if (query != state.novelQuery) scope.launch { lazyListState.scrollToItem(0) }
             },
-            onSelected = { restrict, tag ->
-                viewModel.updateNovelFilterTag(restrict, tag)
-                userBookmarksNovels.refresh()
-            }
         )
     }
 }

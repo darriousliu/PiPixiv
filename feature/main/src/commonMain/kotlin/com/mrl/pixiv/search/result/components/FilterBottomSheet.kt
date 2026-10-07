@@ -15,12 +15,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import com.mrl.pixiv.search.result.SearchOptionsState
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,11 +33,11 @@ import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.compose.ui.SearchContentFilterControls
+import com.mrl.pixiv.common.compose.ui.SearchFilterSwitch
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.search.SearchState.SearchFilter
 import com.mrl.pixiv.strings.ai_generate
 import com.mrl.pixiv.strings.apply
@@ -165,43 +163,22 @@ internal fun FilterBottomSheet(
                 filter = innerSearchFilter.contentFilter,
                 defaultShowR18 = requireUserPreferenceValue.isR18Enabled,
                 onChange = { innerSearchFilter = innerSearchFilter.copy(contentFilter = it) },
-                modifier = Modifier.padding(horizontal = 32.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
+                horizontalContentPadding = 16.dp,
                 mode = if (isNovelMode) AppViewMode.NOVEL else AppViewMode.ILLUST,
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
-                    .throttleClick(
-                        indication = ripple()
-                    ) {
-                        innerSearchFilter = innerSearchFilter.copy(
-                            searchAiType = if (innerSearchFilter.searchAiType == SearchAiType.SHOW_AI) {
-                                SearchAiType.HIDE_AI
-                            } else {
-                                SearchAiType.SHOW_AI
-                            }
-                        )
-                    }
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(RStrings.ai_generate),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Switch(
-                    checked = innerSearchFilter.searchAiType == SearchAiType.SHOW_AI,
-                    onCheckedChange = { checked ->
-                        innerSearchFilter = innerSearchFilter.copy(
-                            searchAiType = if (checked) SearchAiType.SHOW_AI else SearchAiType.HIDE_AI
-                        )
-                    }
-                )
-            }
+            SearchFilterSwitch(
+                label = stringResource(RStrings.ai_generate),
+                checked = innerSearchFilter.searchAiType == SearchAiType.SHOW_AI,
+                onCheckedChange = { checked ->
+                    innerSearchFilter = innerSearchFilter.copy(
+                        searchAiType = if (checked) SearchAiType.SHOW_AI else SearchAiType.HIDE_AI,
+                    )
+                },
+                modifier = Modifier.padding(horizontal = 16.dp),
+                horizontalContentPadding = 16.dp,
+            )
         }
         Spacer(modifier = Modifier.height(50.dp))
     }

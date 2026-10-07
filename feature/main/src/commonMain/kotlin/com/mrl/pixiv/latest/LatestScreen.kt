@@ -15,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +35,6 @@ import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.strings.reading_manga_watchlist
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.latest_tab_following
@@ -54,7 +52,6 @@ fun LatestScreen(
     viewModel: LatestViewModel = koinViewModel(),
 ) {
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
-    val navigationManager = currentNavigationManager()
     val scope = rememberCoroutineScope()
     val paneSizeClass = currentPaneLayoutInfo().sizeClass
     val refreshFlow = remember { MutableSharedFlow<LatestPage>() }
@@ -90,6 +87,7 @@ fun LatestScreen(
 
         LatestPage.NovelNew -> viewModel.newNovelLazyListState
         LatestPage.NovelWatchlist -> viewModel.watchlistNovelLazyListState
+        LatestPage.MangaWatchlist -> viewModel.watchlistMangaLazyListState
     }
 
 
@@ -130,12 +128,6 @@ fun LatestScreen(
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
         Column(modifier = Modifier.padding(it)) {
-            if (appViewMode == AppViewMode.ILLUST) {
-                TextButton(
-                    onClick = navigationManager::navigateToMangaWatchlistScreen,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                ) { Text(stringResource(RStrings.reading_manga_watchlist)) }
-            }
             key(appViewMode) {
                 PrimaryScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
@@ -162,6 +154,7 @@ fun LatestScreen(
                                             LatestPage.Following -> RStrings.latest_tab_following
                                             LatestPage.NovelNew -> RStrings.novel_new
                                             LatestPage.NovelWatchlist -> RStrings.novel_watchlist
+                                            LatestPage.MangaWatchlist -> RStrings.reading_manga_watchlist
                                         }
                                     ),
                                     maxLines = 1,
@@ -202,6 +195,10 @@ fun LatestScreen(
 
                     LatestPage.NovelWatchlist -> {
                         NovelWatchlistPage(refreshFlow = refreshFlow)
+                    }
+
+                    LatestPage.MangaWatchlist -> {
+                        MangaWatchlistPage(refreshFlow = refreshFlow)
                     }
                 }
             }

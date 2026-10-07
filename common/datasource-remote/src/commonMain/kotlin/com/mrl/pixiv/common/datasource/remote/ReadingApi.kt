@@ -5,10 +5,7 @@ import com.mrl.pixiv.common.data.manga.MangaSeriesResp
 import com.mrl.pixiv.common.data.manga.MangaSeriesContextResp
 import com.mrl.pixiv.common.data.manga.MangaWatchlistResp
 import com.mrl.pixiv.common.data.manga.UserMangaSeriesResp
-import com.mrl.pixiv.common.data.novel.NovelPollResponse
-import com.mrl.pixiv.common.data.novel.NovelRelatedResp
 import de.jensklingenberg.ktorfit.http.Field
-import de.jensklingenberg.ktorfit.http.FieldMap
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
@@ -44,26 +41,4 @@ interface ReadingApi {
     @FormUrlEncoded
     @POST("v1/watchlist/manga/delete")
     suspend fun deleteMangaWatchlist(@Field("series_id") seriesId: Long): EmptyResp
-
-    // params is supplied by the official web reader's requestRelatedWorks message.
-    // Do not construct an undocumented seed parameter from a novel ID.
-    @FormUrlEncoded
-    @POST("v1/novel/related")
-    suspend fun novelRelated(
-        @FieldMap params: Map<String, String>,
-        @Field("read_novel_ids[]") readNovelIds: List<Long>,
-        @Field("view_novel_ids[]") viewNovelIds: List<Long>,
-        @Field("read_novel_datetimes[]") readNovelDatetimes: List<String>,
-        @Field("view_novel_datetimes[]") viewNovelDatetimes: List<String>,
-    ): NovelRelatedResp
-
-    @GET("v1/novel/related")
-    suspend fun novelRelatedNext(@QueryMap params: Map<String, String>): NovelRelatedResp
-
-    @FormUrlEncoded
-    @POST("v1/novel/poll/answer")
-    suspend fun answerNovelPoll(
-        @Field("novel_id") novelId: Long,
-        @Field("choice_id") choiceId: Int,
-    ): NovelPollResponse
 }

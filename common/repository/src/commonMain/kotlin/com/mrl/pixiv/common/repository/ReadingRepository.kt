@@ -9,7 +9,6 @@ import kotlinx.coroutines.sync.withLock
 
 object ReadingRepository {
     private val api by lazy { PixivRepository.apiKtorfit.createReadingApi() }
-    private val publicNovels by lazy { PublicNovelClient(createPublicNovelHttpClient()) }
     private val watchlistMutex = Mutex()
     private val _watchlistChanges = MutableSharedFlow<Pair<Long, Boolean>>(extraBufferCapacity = 8)
     val watchlistChanges = _watchlistChanges.asSharedFlow()
@@ -21,11 +20,6 @@ object ReadingRepository {
     suspend fun userMangaSeriesNext(nextUrl: String) = api.userMangaSeriesNext(nextUrl.queryParams)
     suspend fun mangaWatchlist() = api.mangaWatchlist()
     suspend fun mangaWatchlistNext(nextUrl: String) = api.mangaWatchlistNext(nextUrl.queryParams)
-
-    suspend fun publicNovelRecommendations(novelId: Long) = publicNovels.recommendations(novelId)
-    suspend fun publicNovelRecommendationPage(ids: List<String>) = publicNovels.recommendationPage(ids)
-    suspend fun publicNovelPoll(novelId: Long) = publicNovels.poll(novelId).pollData
-    suspend fun answerNovelPoll(novelId: Long, choiceId: Int) = api.answerNovelPoll(novelId, choiceId).pollData
 
     suspend fun setMangaWatchlist(seriesId: Long, added: Boolean) = watchlistMutex.withLock {
         require(seriesId > 0)

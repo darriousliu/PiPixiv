@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_collection_filters">Bookmark filters</string>
+    <string name="discovery_bookmark_tag_list">Choose a bookmark tag</string>
+</resources>

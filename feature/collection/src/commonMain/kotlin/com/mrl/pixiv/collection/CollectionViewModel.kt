@@ -7,7 +7,14 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
-import com.mrl.pixiv.common.data.user.UserBookmarksQuery
+import com.mrl.pixiv.common.data.collection.CollectionSearchQuery
+import com.mrl.pixiv.common.data.collection.CollectionWorkType
+import com.mrl.pixiv.common.repository.SettingRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import com.mrl.pixiv.common.repository.util.queryParams
 import kotlinx.coroutines.CancellationException
 import com.mrl.pixiv.common.repository.isSelf
@@ -30,16 +37,19 @@ import org.koin.android.annotation.KoinViewModel
 @Stable
 data class CollectionState(
     val tagPages: Map<CollectionTagKey, CollectionTagPage> = emptyMap(),
-    val restrict: Restrict = Restrict.PUBLIC,
-    val filterTag: String? = null,
-    val novelRestrict: Restrict = Restrict.PUBLIC,
-    val novelFilterTag: String? = null,
+    val illustQuery: CollectionSearchQuery = CollectionSearchQuery(),
+    val novelQuery: CollectionSearchQuery = CollectionSearchQuery(type = CollectionWorkType.NOVEL),
     val userBookmarksNovels: ImmutableList<Novel> = persistentListOf(),
     val userBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
     val privateBookmarkTagsIllust: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
     val userBookmarkTagsNovel: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
     val privateBookmarkTagsNovel: ImmutableList<RestrictBookmarkTag> = persistentListOf(),
-)
+) {
+    val restrict: Restrict get() = illustQuery.restrict
+    val filterTag: String? get() = illustQuery.bookmarkTag.takeIf(String::isNotBlank)
+    val novelRestrict: Restrict get() = novelQuery.restrict
+    val novelFilterTag: String? get() = novelQuery.bookmarkTag.takeIf(String::isNotBlank)
+}
 
 data class CollectionTagKey(val novel: Boolean, val restrict: Restrict)
 data class CollectionTagPage(
@@ -62,31 +72,40 @@ sealed class CollectionAction : ViewIntent {
     data class LoadUserBookmarksTagsNovel(val restrict: Restrict) : CollectionAction()
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @KoinViewModel
 class CollectionViewModel(
     private val uid: Long,
 ) : BaseMviViewModel<CollectionState, CollectionAction>(
     initialState = CollectionState(),
 ) {
-    val userBookmarksIllusts = Pager(PagingConfig(pageSize = 20)) {
-        CollectionIllustPagingSource(
-            uid, UserBookmarksQuery(
-                restrict = state.restrict,
-                userId = uid,
-                tag = state.filterTag
-            )
-        )
-    }.flow.cachedIn(viewModelScope)
+    // The existing grids collect these flows for both ordinary and advanced bookmark filters.
+    val userBookmarksIllusts = uiState.map { it.illustQuery }.distinctUntilChanged().flatMapLatest { query ->
+        if (uid.isSelf && query.requiresBookmarkSearch) {
+            Pager(PagingConfig(pageSize = 30)) { CollectionSearchIllustPagingSource(query) }.flow
+        } else {
+            Pager(PagingConfig(pageSize = 20)) {
+                CollectionIllustPagingSource(uid, query.toUserBookmarksQuery(uid))
+            }.flow
+        }
+    }.cachedIn(viewModelScope)
 
-    val userBookmarksNovels = Pager(PagingConfig(pageSize = 30)) {
-        CollectionNovelPagingSource(
-            UserBookmarksQuery(
-                restrict = state.novelRestrict,
-                userId = uid,
-                tag = state.novelFilterTag
-            )
-        )
-    }.flow.cachedIn(viewModelScope)
+    val userBookmarksNovels = combine(
+        uiState.map { it.novelQuery }.distinctUntilChanged(),
+        SettingRepository.userPreferenceFlow.map { it.browsingSettings to it.isR18Enabled }.distinctUntilChanged(),
+    ) { query, settings -> query to settings }.flatMapLatest { (query, _) ->
+        if (uid.isSelf && query.requiresBookmarkSearch) {
+            Pager(PagingConfig(pageSize = 30)) { CollectionSearchNovelPagingSource(query) }.flow
+        } else {
+            Pager(PagingConfig(pageSize = 30)) {
+                CollectionNovelPagingSource(query.toUserBookmarksQuery(uid))
+            }.flow
+        }
+    }.cachedIn(viewModelScope)
+
+    fun applyFilter(query: CollectionSearchQuery) {
+        updateState { withCollectionFilter(query, uid.isSelf) }
+    }
 
     override suspend fun handleIntent(intent: CollectionAction) {
         when (intent) {
@@ -95,23 +114,13 @@ class CollectionViewModel(
         }
     }
 
-    fun updateFilterTag(restrict: Restrict, filterTag: String?) {
-        updateState {
-            copy(
-                restrict = if (uid.isSelf) restrict else Restrict.PUBLIC,
-                filterTag = filterTag
-            )
-        }
-    }
+    fun updateFilterTag(restrict: Restrict, filterTag: String?) = applyFilter(
+        state.illustQuery.copy(restrict = restrict, bookmarkTag = filterTag.orEmpty()),
+    )
 
-    fun updateNovelFilterTag(restrict: Restrict, filterTag: String?) {
-        updateState {
-            copy(
-                novelRestrict = if (uid.isSelf) restrict else Restrict.PUBLIC,
-                novelFilterTag = filterTag
-            )
-        }
-    }
+    fun updateNovelFilterTag(restrict: Restrict, filterTag: String?) = applyFilter(
+        state.novelQuery.copy(restrict = restrict, bookmarkTag = filterTag.orEmpty()),
+    )
 
     private fun loadUserBookmarkTagsIllust(restrict: Restrict) = loadTags(false, restrict, false)
     private fun loadUserBookmarkTagsNovel(restrict: Restrict) = loadTags(true, restrict, false)

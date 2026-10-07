@@ -15,13 +15,4 @@
     <string name="reading_manga_chapters_empty">暫無可顯示的章節</string>
     <string name="reading_manga_view_directory">查看系列目錄</string>
     <string name="reading_refresh">重新整理</string>
-    <string name="reading_novel_interactions">相關推薦與問卷</string>
-    <string name="reading_novel_recommendations">相關推薦</string>
-    <string name="reading_novel_public_note">推薦與問卷資訊來自公開閱讀頁，受限作品可能無法顯示。</string>
-    <string name="reading_novel_poll">作品問卷</string>
-    <string name="reading_novel_poll_absent">本作品未設定問卷</string>
-    <string name="reading_novel_poll_vote">投票</string>
-    <string name="reading_novel_poll_voted">已投票</string>
-    <string name="reading_novel_poll_count">%1$d 票</string>
-    <string name="reading_novel_recommendations_empty">暫無相關推薦</string>
 </resources>

@@ -12,6 +12,7 @@ class LatestPageTest {
         assertEquals(
             listOf(
                 LatestPage.Trend,
+                LatestPage.MangaWatchlist,
                 LatestPage.Following,
                 LatestPage.Collection,
             ),
@@ -40,13 +41,21 @@ class LatestPageTest {
     }
 
     @Test
+    fun mangaWatchlistKeepsItsScrollPositionSeparateFromOtherLists() {
+        val viewModel = LatestViewModel()
+
+        assertNotSame(viewModel.watchlistMangaLazyListState, viewModel.watchlistNovelLazyListState)
+        assertNotSame(viewModel.watchlistMangaLazyListState, viewModel.followingLazyListState)
+    }
+
+    @Test
     fun illustrationAndNovelModesUsePagerStatesWithMatchingPageCounts() {
         val viewModel = LatestViewModel()
         val illustPagerState = viewModel.pagerStateFor(AppViewMode.ILLUST)
         val novelPagerState = viewModel.pagerStateFor(AppViewMode.NOVEL)
 
         assertNotSame(illustPagerState, novelPagerState)
-        assertEquals(3, illustPagerState.pageCount)
+        assertEquals(4, illustPagerState.pageCount)
         assertEquals(5, novelPagerState.pageCount)
     }
 }
