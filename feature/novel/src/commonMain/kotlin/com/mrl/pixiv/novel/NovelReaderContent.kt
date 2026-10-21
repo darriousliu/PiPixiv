@@ -49,7 +49,6 @@ import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.TagItem
-import com.mrl.pixiv.common.compose.ui.LocalScrollbarStyle
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.kts.HSpacer
@@ -440,14 +439,7 @@ internal fun NovelReaderContent(
             VerticalScrollbar(
                 state = scrollbarState,
                 modifier = Modifier.align(Alignment.CenterEnd)
-                    .padding(novelReaderContentInsets().only(WindowInsetsSides.Vertical).asPaddingValues())
-                    .padding(end = 4.dp),
-                // 扩大拖动热区并与边缘留出距离，静止时也能找到并抓住滑块。
-                touchTargetWidth = 32.dp,
-                style = LocalScrollbarStyle.current.copy(
-                    unhoverColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                    hoverColor = MaterialTheme.colorScheme.primary,
-                ),
+                    .padding(novelReaderContentInsets().only(WindowInsetsSides.Vertical).asPaddingValues()),
             )
             ReadingProgressIndicator(
                 progress = readingProgressFraction,

@@ -507,8 +507,7 @@ fun NovelScreen(
                 Column(
                     modifier = Modifier
                         .padding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues())
-                        // 加上 Scaffold 自带的 16dp 边距，为滚动条热区留出空间。
-                        .padding(end = 32.dp, bottom = 8.dp),
+                        .padding(bottom = 8.dp),
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = 12.spaceBy,
                 ) {
