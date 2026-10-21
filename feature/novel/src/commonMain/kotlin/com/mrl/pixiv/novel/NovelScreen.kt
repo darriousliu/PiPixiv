@@ -511,7 +511,11 @@ fun NovelScreen(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = 12.spaceBy,
                 ) {
-                    if (canScrollBack && !state.isTranslating) {
+                    AnimatedVisibility(
+                        visible = showBar && canScrollBack && !state.isTranslating,
+                        enter = slideInVertically(initialOffsetY = { it }),
+                        exit = slideOutVertically(targetOffsetY = { it }),
+                    ) {
                         FloatingActionButton(
                             onClick = { scrollScope.launch { listState.animateScrollToItem(0) } },
                         ) {
