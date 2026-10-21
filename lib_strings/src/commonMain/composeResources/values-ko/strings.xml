@@ -234,6 +234,7 @@
     <string name="line_spacing">줄 간격</string>
     <string name="chapter_previous">이전 장</string>
     <string name="chapter_next">다음 장</string>
+    <string name="novel_table_of_contents">목차</string>
     <string name="reading_progress">읽기 진행률</string>
     <string name="novels">소설</string>
     <string name="novel_recommended">추천 소설</string>

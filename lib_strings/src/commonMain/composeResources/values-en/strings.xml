@@ -236,6 +236,7 @@
     <string name="line_spacing">Line Spacing</string>
     <string name="chapter_previous">Previous Chapter</string>
     <string name="chapter_next">Next Chapter</string>
+    <string name="novel_table_of_contents">Table of contents</string>
     <string name="reading_progress">Reading Progress</string>
     <string name="novels">Novels</string>
     <string name="novel_recommended">Recommended Novels</string>

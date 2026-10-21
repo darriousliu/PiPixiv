@@ -234,6 +234,7 @@
     <string name="line_spacing">Межстрочный интервал</string>
     <string name="chapter_previous">Предыдущая глава</string>
     <string name="chapter_next">Следующая глава</string>
+    <string name="novel_table_of_contents">Оглавление</string>
     <string name="reading_progress">Прогресс чтения</string>
     <string name="novels">Романы</string>
     <string name="novel_recommended">Рекомендуемые романы</string>

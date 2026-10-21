@@ -234,6 +234,7 @@
     <string name="line_spacing">Satır Boşluğu</string>
     <string name="chapter_previous">Önceki Bölüm</string>
     <string name="chapter_next">Sonraki Bölüm</string>
+    <string name="novel_table_of_contents">İçindekiler</string>
     <string name="reading_progress">Okuma İlerlemesi</string>
     <string name="novels">Romanlar</string>
     <string name="novel_recommended">Önerilen Romanlar</string>

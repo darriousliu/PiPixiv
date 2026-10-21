@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Bookmark
@@ -91,7 +92,7 @@ import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
-import com.mrl.pixiv.common.compose.ui.novel.NovelReadLaterButton
+import com.mrl.pixiv.common.compose.ui.novel.NovelReadLaterListItem
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
@@ -123,8 +124,8 @@ import com.mrl.pixiv.strings.novel_collection
 import com.mrl.pixiv.strings.novel_hidden
 import com.mrl.pixiv.strings.novel_marker
 import com.mrl.pixiv.strings.novel_marker_page
+import com.mrl.pixiv.strings.novel_table_of_contents
 import com.mrl.pixiv.strings.novel_work_information
-import com.mrl.pixiv.strings.read_later
 import com.mrl.pixiv.strings.regenerate_translation
 import com.mrl.pixiv.strings.share_link
 import com.mrl.pixiv.strings.show_novel
@@ -747,36 +748,18 @@ fun NovelScreen(
                                             contentDescription = stringResource(RStrings.novel_collection),
                                         )
                                     }
-                                    IconButton(
-                                        onClick = {
-                                            viewModel.dispatch(
-                                                NovelIntent.ToggleMarker(currentMarkerPage)
-                                            )
-                                        },
-                                        enabled = !state.markerUpdating && !state.isTranslating,
-                                    ) {
-                                        if (state.markerUpdating) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(20.dp),
-                                                strokeWidth = 2.dp,
-                                            )
-                                        } else {
+                                    state.novel.series.id?.takeIf { it > 0L }?.let { seriesId ->
+                                        IconButton(
+                                            onClick = {
+                                                saveReadingProgress()
+                                                navigationManager.navigateToNovelSeriesScreen(seriesId)
+                                            },
+                                        ) {
                                             Icon(
-                                                imageVector = if (
-                                                    state.markerPage == currentMarkerPage
-                                                ) {
-                                                    Icons.Rounded.Bookmark
-                                                } else {
-                                                    Icons.Rounded.BookmarkBorder
-                                                },
-                                                contentDescription = if (state.markerPage != null) {
-                                                    stringResource(
-                                                        RStrings.novel_marker_page,
-                                                        state.markerPage,
-                                                    )
-                                                } else {
-                                                    stringResource(RStrings.novel_marker)
-                                                },
+                                                imageVector = Icons.AutoMirrored.Rounded.List,
+                                                contentDescription = stringResource(
+                                                    RStrings.novel_table_of_contents
+                                                ),
                                             )
                                         }
                                     }
@@ -888,6 +871,10 @@ fun NovelScreen(
         ) {
             NovelBottomSheetContent(
                 state = state,
+                currentMarkerPage = currentMarkerPage,
+                onToggleMarker = {
+                    viewModel.dispatch(NovelIntent.ToggleMarker(currentMarkerPage))
+                },
                 onFontSizeChange = {
                     saveReadingProgress()
                     viewModel.dispatch(NovelIntent.UpdateFontSize(it))
@@ -929,6 +916,8 @@ fun NovelScreen(
 @Composable
 private fun NovelBottomSheetContent(
     state: NovelState,
+    currentMarkerPage: Int,
+    onToggleMarker: () -> Unit,
     onFontSizeChange: (Int) -> Unit,
     onLineSpacingChange: (Int) -> Unit,
     onExport: () -> Unit,
@@ -948,6 +937,42 @@ private fun NovelBottomSheetContent(
     ) {
         val colors =
             ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+
+        ListItem(
+            onClick = rememberThrottleClick(onClick = onToggleMarker),
+            enabled = !state.markerUpdating && !state.isTranslating,
+            shapes = ListItemDefaults.shapes(shape = RectangleShape),
+            content = {
+                Column {
+                    Text(text = stringResource(RStrings.novel_marker))
+                    state.markerPage?.let { page ->
+                        Text(
+                            text = stringResource(RStrings.novel_marker_page, page),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            leadingContent = {
+                if (state.markerUpdating) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Icon(
+                        imageVector = if (state.markerPage == currentMarkerPage) {
+                            Icons.Rounded.Bookmark
+                        } else {
+                            Icons.Rounded.BookmarkBorder
+                        },
+                        contentDescription = null,
+                    )
+                }
+            },
+            colors = colors,
+        )
 
         // 字号调整
         ListItem(
@@ -1023,15 +1048,10 @@ private fun NovelBottomSheetContent(
         )
 
         state.novel?.let { novel ->
-            ListItem(
-                headlineContent = { Text(text = stringResource(RStrings.read_later)) },
-                trailingContent = {
-                    NovelReadLaterButton(
-                        novel = novel,
-                        tint = LocalContentColor.current,
-                    )
-                },
-                colors = colors
+            NovelReadLaterListItem(
+                novel = novel,
+                modifier = Modifier.fillMaxWidth(),
+                colors = colors,
             )
         }
 

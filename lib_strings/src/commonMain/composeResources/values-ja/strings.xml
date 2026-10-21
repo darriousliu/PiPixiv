@@ -234,6 +234,7 @@
     <string name="line_spacing">行間</string>
     <string name="chapter_previous">前の章</string>
     <string name="chapter_next">次の章</string>
+    <string name="novel_table_of_contents">目次</string>
     <string name="reading_progress">読書進捗</string>
     <string name="novels">小説</string>
     <string name="novel_recommended">おすすめ小説</string>

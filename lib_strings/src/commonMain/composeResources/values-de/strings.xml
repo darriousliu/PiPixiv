@@ -234,6 +234,7 @@
     <string name="line_spacing">Zeilenabstand</string>
     <string name="chapter_previous">Vorheriges Kapitel</string>
     <string name="chapter_next">Nächstes Kapitel</string>
+    <string name="novel_table_of_contents">Inhaltsverzeichnis</string>
     <string name="reading_progress">Lesefortschritt</string>
     <string name="novels">Romane</string>
     <string name="novel_recommended">Empfohlene Romane</string>

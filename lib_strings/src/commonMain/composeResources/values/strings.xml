@@ -242,6 +242,7 @@
     <string name="line_spacing">行间距</string>
     <string name="chapter_previous">上一章</string>
     <string name="chapter_next">下一章</string>
+    <string name="novel_table_of_contents">章节目录</string>
     <string name="reading_progress">阅读进度</string>
     <string name="novels">小说</string>
     <string name="novel_recommended">推荐小说</string>

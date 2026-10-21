@@ -234,6 +234,7 @@
     <string name="line_spacing">Interligne</string>
     <string name="chapter_previous">Chapitre précédent</string>
     <string name="chapter_next">Chapitre suivant</string>
+    <string name="novel_table_of_contents">Table des matières</string>
     <string name="reading_progress">Progression de lecture</string>
     <string name="novels">Romans</string>
     <string name="novel_recommended">Romans recommandés</string>
