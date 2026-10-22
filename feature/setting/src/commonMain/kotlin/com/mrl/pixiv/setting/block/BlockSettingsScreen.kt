@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
@@ -18,7 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.currentNavigationManager
@@ -118,7 +119,7 @@ private fun BlockEntry(
 ) {
     ListItem(
         onClick = rememberThrottleClick(onClick = onClick),
-        shapes = ListItemDefaults.shapes(shape = RectangleShape),
+        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
         content = {
             Text(
                 text = stringResource(title),

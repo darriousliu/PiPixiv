@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Folder
@@ -35,7 +36,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.rememberThrottleClick
@@ -113,7 +113,7 @@ fun FileNameFormatScreen(
                         !userPreference.downloadSubFolderByUser
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                 content = {
                     Text(text = stringResource(RStrings.download_single_folder_by_user_title))
                 },

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
@@ -32,14 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.app_language
@@ -108,7 +107,7 @@ fun SettingScreen(
                     },
                     trailingContent = {
                         DropDownSelector(
-                            modifier = Modifier.throttleClick { expanded = !expanded },
+                            onClick = { expanded = !expanded },
                             expanded = expanded,
                             onDismissRequest = { expanded = false },
                             current = currentLanguage,
@@ -201,7 +200,7 @@ private fun SettingDestinationItem(
 ) {
     ListItem(
         onClick = rememberThrottleClick(onClick = onClick),
-        shapes = ListItemDefaults.shapes(shape = RectangleShape),
+        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
         content = { Text(text = title) },
         leadingContent = { Icon(imageVector = icon, contentDescription = null) },
         trailingContent = {

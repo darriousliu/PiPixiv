@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -34,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -133,7 +133,7 @@ fun AboutScreen(
                     onClick = rememberThrottleClick {
                         uriHandler.openUri(Constants.GITHUB_URL)
                     },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                     content = { Text(text = stringResource(RStrings.project_url)) },
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
@@ -147,7 +147,7 @@ fun AboutScreen(
                     onClick = rememberThrottleClick {
                         uriHandler.openUri(Constants.GITHUB_ISSUE_URL)
                     },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                     content = { Text(text = stringResource(RStrings.feedback)) },
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
@@ -168,7 +168,7 @@ fun AboutScreen(
                             )
                         }
                     },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                     content = { Text(text = stringResource(RStrings.share_app)) },
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
@@ -183,7 +183,7 @@ fun AboutScreen(
                         VersionManager.checkUpdate(true)
                         showUpdateDialog = true
                     },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                     content = { Text(text = stringResource(RStrings.check_update)) },
                     trailingContent = {
                         if (hasNewVersion) {

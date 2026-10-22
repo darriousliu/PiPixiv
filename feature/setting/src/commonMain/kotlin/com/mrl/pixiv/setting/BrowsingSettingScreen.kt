@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
@@ -39,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,7 +52,6 @@ import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.auto_hide_preview_controls
 import com.mrl.pixiv.strings.auto_hide_preview_controls_desc
@@ -144,7 +143,7 @@ fun BrowsingSettingScreen(
                         )
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                 content = {
                     Text(text = stringResource(RStrings.auto_hide_preview_controls))
                 },
@@ -186,7 +185,7 @@ fun BrowsingSettingScreen(
                         )
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                 content = {
                     Text(text = stringResource(RStrings.tap_image_to_open_full_resolution_preview))
                 },
@@ -229,7 +228,7 @@ fun BrowsingSettingScreen(
                         )
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                 content = {
                     Text(text = stringResource(RStrings.filter_long_novel_tags))
                 },
@@ -303,7 +302,7 @@ private fun SearchResultIllustLayoutSetting(
         leadingContent = { Icon(Icons.Rounded.ViewModule, contentDescription = null) },
         trailingContent = {
             DropDownSelector(
-                modifier = Modifier.throttleClick { expanded = !expanded },
+                onClick = { expanded = !expanded },
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 current = selectedLayout.label(),
@@ -359,7 +358,7 @@ private fun SpanCountSetting(
         leadingContent = { Icon(Icons.Rounded.ViewModule, contentDescription = null) },
         trailingContent = {
             DropDownSelector(
-                modifier = Modifier.throttleClick { expanded = !expanded },
+                onClick = { expanded = !expanded },
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 current = currentLabel,
@@ -442,7 +441,7 @@ private fun PreviewImageQualitySetting(
         leadingContent = { Icon(Icons.Rounded.Image, contentDescription = null) },
         trailingContent = {
             DropDownSelector(
-                modifier = Modifier.throttleClick { expanded = !expanded },
+                onClick = { expanded = !expanded },
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 current = selectedQuality.label(),

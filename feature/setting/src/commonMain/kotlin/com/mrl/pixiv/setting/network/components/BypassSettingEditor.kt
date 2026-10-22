@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItem
@@ -27,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.data.setting.UserPreference
@@ -264,7 +264,7 @@ fun ProxyEditor(
             onClick = {
                 showEditHost = true
             },
-            shapes = ListItemDefaults.shapes(shape = RectangleShape),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
             content = { Text(text = stringResource(RStrings.proxy_host)) },
             supportingContent = { Text(text = setting.host) },
         )
@@ -272,7 +272,7 @@ fun ProxyEditor(
             onClick = {
                 showEditPort = true
             },
-            shapes = ListItemDefaults.shapes(shape = RectangleShape),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
             content = { Text(text = stringResource(RStrings.proxy_port)) },
             supportingContent = { Text(text = setting.port.toString()) },
         )
@@ -280,7 +280,7 @@ fun ProxyEditor(
             onClick = {
                 showEditType = true
             },
-            shapes = ListItemDefaults.shapes(shape = RectangleShape),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
             content = { Text(text = stringResource(RStrings.proxy_type)) },
             supportingContent = {
                 Text(
@@ -370,7 +370,7 @@ fun SniEditor(
             onClick = {
                 showEditUrl = true
             },
-            shapes = ListItemDefaults.shapes(shape = RectangleShape),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
             content = { Text(text = stringResource(RStrings.sni_doh_url)) },
             supportingContent = { Text(text = setting.url) },
         )
@@ -378,7 +378,7 @@ fun SniEditor(
             onClick = {
                 showEditTimeout = true
             },
-            shapes = ListItemDefaults.shapes(shape = RectangleShape),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
             content = { Text(text = stringResource(RStrings.sni_timeout)) },
             supportingContent = { Text(text = setting.dohTimeout.toString()) },
         )
@@ -395,7 +395,7 @@ fun SniEditor(
             onClick = {
                 showEditInternalIpPool = true
             },
-            shapes = ListItemDefaults.shapes(shape = RectangleShape),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
             content = { Text(text = stringResource(RStrings.internal_ip_pool)) },
             supportingContent = { Text(text = stringResource(RStrings.internal_ip_pool_desc)) },
         )

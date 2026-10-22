@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ViewList
@@ -41,7 +42,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -167,7 +167,7 @@ fun HistorySettingScreen(
                                 ToastUtil.safeShortToast(RStrings.local_history_cleared)
                             }
                         },
-                        shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                         content = {
                             Text(text = stringResource(RStrings.clear_local_history))
                         },
@@ -203,7 +203,7 @@ private fun HistorySwitchItem(
         onClick = rememberThrottleClick {
             onCheckedChange(!checked)
         },
-        shapes = ListItemDefaults.shapes(shape = RectangleShape),
+        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
         content = {
             Text(text = title)
         },

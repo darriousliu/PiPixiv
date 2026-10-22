@@ -17,7 +17,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.mrl.pixiv.common.data.Constants.IMAGE_HOST
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.image_source
 import com.mrl.pixiv.strings.label_default
@@ -62,7 +61,7 @@ fun PictureSourceWidget(
         modifier = modifier,
         trailingContent = {
             DropDownSelector(
-                modifier = Modifier.throttleClick { expanded = !expanded },
+                onClick = { expanded = !expanded },
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 current = sources[selectedHost] ?: selectedHost,

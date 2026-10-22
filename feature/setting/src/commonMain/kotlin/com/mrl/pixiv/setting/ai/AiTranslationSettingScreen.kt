@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
@@ -42,7 +43,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -58,7 +58,6 @@ import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.ai_api_key
 import com.mrl.pixiv.strings.ai_endpoint
@@ -343,7 +342,7 @@ fun AiTranslationSettingScreen(
                     onClick = rememberThrottleClick {
                         responseApi = !responseApi
                     },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
                     modifier = Modifier
                         .fillMaxWidth(),
                     content = {
@@ -683,7 +682,7 @@ private fun ProviderItem(
         },
         trailingContent = {
             DropDownSelector(
-                modifier = Modifier.throttleClick {
+                onClick = {
                     expanded = !expanded
                 },
                 expanded = expanded,
