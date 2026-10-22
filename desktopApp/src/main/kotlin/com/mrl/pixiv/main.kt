@@ -6,6 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import coil3.PlatformContext
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.mrl.pixiv.common.analytics.FLAVOR
@@ -62,6 +64,7 @@ fun main(args: Array<String>) {
                     DecoratedWindow(
                         onCloseRequest = ::exitApplication,
                         title = appName,
+                        minimumSize = DpSize(1080.dp, 720.dp),
                         onKeyEvent = {
                             scope.launch {
                                 flow.emit(it)
@@ -70,7 +73,12 @@ fun main(args: Array<String>) {
                         }
                     ) {
                         BindDesktopWindowServices(checkNotNull(nucleusWindow.unsafe.taoWindow))
-                        TitleBar { Text(appName, color = LocalTitleBarStyle.current.colors.content) }
+                        TitleBar {
+                            Text(
+                                text = appName,
+                                color = LocalTitleBarStyle.current.colors.content
+                            )
+                        }
                         val imageHttpClient = koinInject<HttpClient>(named<ImageClient>())
 
                         App(
