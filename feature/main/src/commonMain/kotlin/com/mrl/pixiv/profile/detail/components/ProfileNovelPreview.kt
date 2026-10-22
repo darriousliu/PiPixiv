@@ -3,10 +3,14 @@ package com.mrl.pixiv.profile.detail.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.Favorite
@@ -39,6 +43,7 @@ private const val MAX_PROFILE_NOVEL_PREVIEW_COUNT = 3
 internal fun <T> previewProfileNovels(novels: List<T>): List<T> =
     novels.take(MAX_PROFILE_NOVEL_PREVIEW_COUNT)
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun ProfileNovelPreview(
     title: String,
@@ -50,10 +55,10 @@ internal fun ProfileNovelPreview(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End,
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = title,
@@ -64,12 +69,9 @@ internal fun ProfileNovelPreview(
             )
             TextButton(
                 onClick = throttleClick(onClick = onAllClick),
-                modifier = Modifier.weight(1f, fill = false),
             ) {
                 Text(
                     text = stringResource(RStrings.view_all),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
                 Icon(
@@ -94,6 +96,7 @@ internal fun ProfileNovelPreview(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ProfileNovelPreviewItem(
     novel: Novel,
@@ -138,11 +141,14 @@ private fun ProfileNovelPreviewItem(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .fillMaxWidth()
+                        // 保留实际触摸空间，避免系列热区扩展到相邻标题或作者上。
+                        .heightIn(min = 48.dp)
                         .clickable(
                             onClickLabel = stringResource(RStrings.novel_table_of_contents),
                             onClick = throttleClick { onSeriesClick(seriesId) },
                         )
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = 4.dp)
+                        .wrapContentHeight(Alignment.CenterVertically),
                 )
             }
             if (showAuthor) {
@@ -154,18 +160,19 @@ private fun ProfileNovelPreviewItem(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 NovelStatistic(
                     icon = Icons.Rounded.TextFields,
                     label = stringResource(RStrings.word_count),
                     count = novel.textLength,
-                    modifier = Modifier.weight(1f, fill = false),
                 )
                 NovelStatistic(
                     icon = Icons.Rounded.Favorite,
                     label = stringResource(RStrings.liked),
                     count = novel.totalBookmarks,
-                    modifier = Modifier.weight(1f, fill = false),
                 )
             }
             if (novel.tags.isNotEmpty()) {
