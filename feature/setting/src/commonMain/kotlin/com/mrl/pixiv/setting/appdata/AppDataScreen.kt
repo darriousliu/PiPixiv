@@ -133,7 +133,7 @@ fun AppDataScreen(
                     }"
                     exportLauncher.launch(suggestedName = fileName, defaultExtension = "zip")
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.export_data))
                 },
@@ -149,7 +149,7 @@ fun AppDataScreen(
                 onClick = {
                     importLauncher.launch()
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.import_data))
                 },
@@ -165,7 +165,7 @@ fun AppDataScreen(
                 onClick = rememberThrottleClick {
                     viewModel.clearCache()
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.clear_cache, viewModel.cacheDirSize))
                 },

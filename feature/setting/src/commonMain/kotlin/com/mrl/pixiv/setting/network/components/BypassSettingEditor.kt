@@ -264,7 +264,7 @@ fun ProxyEditor(
             onClick = {
                 showEditHost = true
             },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
             content = { Text(text = stringResource(RStrings.proxy_host)) },
             supportingContent = { Text(text = setting.host) },
         )
@@ -272,7 +272,7 @@ fun ProxyEditor(
             onClick = {
                 showEditPort = true
             },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
             content = { Text(text = stringResource(RStrings.proxy_port)) },
             supportingContent = { Text(text = setting.port.toString()) },
         )
@@ -280,7 +280,7 @@ fun ProxyEditor(
             onClick = {
                 showEditType = true
             },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
             content = { Text(text = stringResource(RStrings.proxy_type)) },
             supportingContent = {
                 Text(
@@ -370,7 +370,7 @@ fun SniEditor(
             onClick = {
                 showEditUrl = true
             },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
             content = { Text(text = stringResource(RStrings.sni_doh_url)) },
             supportingContent = { Text(text = setting.url) },
         )
@@ -378,7 +378,7 @@ fun SniEditor(
             onClick = {
                 showEditTimeout = true
             },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
             content = { Text(text = stringResource(RStrings.sni_timeout)) },
             supportingContent = { Text(text = setting.dohTimeout.toString()) },
         )
@@ -395,7 +395,7 @@ fun SniEditor(
             onClick = {
                 showEditInternalIpPool = true
             },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
             content = { Text(text = stringResource(RStrings.internal_ip_pool)) },
             supportingContent = { Text(text = stringResource(RStrings.internal_ip_pool_desc)) },
         )

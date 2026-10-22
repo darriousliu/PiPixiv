@@ -200,7 +200,7 @@ private fun SettingDestinationItem(
 ) {
     ListItem(
         onClick = rememberThrottleClick(onClick = onClick),
-        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
         content = { Text(text = title) },
         leadingContent = { Icon(imageVector = icon, contentDescription = null) },
         trailingContent = {

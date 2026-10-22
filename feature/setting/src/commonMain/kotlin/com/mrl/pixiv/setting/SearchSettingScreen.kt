@@ -117,7 +117,7 @@ fun SearchSettingScreen(
                         )
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.ai_generate))
                 },

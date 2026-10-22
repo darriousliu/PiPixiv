@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.currentNavigationManager
@@ -119,7 +118,7 @@ private fun BlockEntry(
 ) {
     ListItem(
         onClick = rememberThrottleClick(onClick = onClick),
-        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
         content = {
             Text(
                 text = stringResource(title),

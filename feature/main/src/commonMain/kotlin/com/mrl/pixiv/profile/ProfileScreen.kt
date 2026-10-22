@@ -178,7 +178,7 @@ fun ProfileScreen(
                     onClick = rememberThrottleClick {
                         navigationManager.navigateToSettingScreen()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.preference),
@@ -198,7 +198,7 @@ fun ProfileScreen(
                     onClick = rememberThrottleClick {
                         navigationManager.navigateToHistoryScreen()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.history),
@@ -220,7 +220,7 @@ fun ProfileScreen(
                     onClick = rememberThrottleClick {
                         navigationManager.navigateToNovelReadLaterScreen()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.read_later),
@@ -241,7 +241,7 @@ fun ProfileScreen(
             item(key = "community_notifications") {
                 ListItem(
                     onClick = rememberThrottleClick { navigationManager.navigateToNotifications() },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = { Text(stringResource(RStrings.community_notifications)) },
                     leadingContent = { Icon(Icons.Rounded.Notifications, contentDescription = null) },
                     trailingContent = { NotificationUnreadBadge() },
@@ -251,7 +251,7 @@ fun ProfileScreen(
             item(key = "community_followers") {
                 ListItem(
                     onClick = rememberThrottleClick { navigationManager.navigateToFollowers() },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = { Text(stringResource(RStrings.community_followers)) },
                     leadingContent = { Icon(Icons.Rounded.People, contentDescription = null) },
                     modifier = Modifier.padding(horizontal = 8.dp),
@@ -260,7 +260,7 @@ fun ProfileScreen(
             item(key = "manga_watchlist") {
                 ListItem(
                     onClick = rememberThrottleClick { navigationManager.navigateToMangaWatchlistScreen() },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = { Text(stringResource(RStrings.reading_manga_watchlist)) },
                     leadingContent = { Icon(Icons.Rounded.MenuBook, contentDescription = null) },
                     modifier = Modifier.padding(horizontal = 8.dp),
@@ -274,7 +274,7 @@ fun ProfileScreen(
                             isNovel = requireUserPreferenceValue.collectionViewMode == AppViewMode.NOVEL,
                         )
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.collection),
@@ -297,7 +297,7 @@ fun ProfileScreen(
                     onClick = rememberThrottleClick {
                         navigationManager.navigateToNovelMarkersScreen()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.novel_markers),
@@ -320,7 +320,7 @@ fun ProfileScreen(
                     onClick = rememberThrottleClick {
                         navigationManager.navigateToBookmarkedTagsScreen()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.bookmark_tags),
@@ -343,7 +343,7 @@ fun ProfileScreen(
                     onClick = rememberThrottleClick {
                         navigationManager.navigateToBlockSettings()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.block_settings),
@@ -366,7 +366,7 @@ fun ProfileScreen(
                     onClick = rememberThrottleClick {
                         navigationManager.navigateToDownloadScreen()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.download_manager),
@@ -389,7 +389,7 @@ fun ProfileScreen(
                     onClick = rememberThrottleClick {
                         navigationManager.navigateToAppDataScreen()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.app_data),
@@ -416,7 +416,7 @@ fun ProfileScreen(
                         onClick = rememberThrottleClick {
                             viewModel.dispatch(ProfileAction.ExportToken)
                         },
-                        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                         content = {
                             Text(
                                 text = stringResource(RStrings.export_token),
@@ -440,7 +440,7 @@ fun ProfileScreen(
                     onClick = rememberThrottleClick {
                         navigationManager.navigateToAboutScreen()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.about),
@@ -474,7 +474,7 @@ fun ProfileScreen(
                         viewModel.logout()
                         navigationManager.navigateToLoginOptionScreen()
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = {
                         Text(
                             text = stringResource(RStrings.sign_out),

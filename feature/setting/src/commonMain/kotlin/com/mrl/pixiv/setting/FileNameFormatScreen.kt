@@ -113,7 +113,7 @@ fun FileNameFormatScreen(
                         !userPreference.downloadSubFolderByUser
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.download_single_folder_by_user_title))
                 },

@@ -342,7 +342,7 @@ fun AiTranslationSettingScreen(
                     onClick = rememberThrottleClick {
                         responseApi = !responseApi
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     modifier = Modifier
                         .fillMaxWidth(),
                     content = {

@@ -143,7 +143,7 @@ fun BrowsingSettingScreen(
                         )
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.auto_hide_preview_controls))
                 },
@@ -185,7 +185,7 @@ fun BrowsingSettingScreen(
                         )
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.tap_image_to_open_full_resolution_preview))
                 },
@@ -228,7 +228,7 @@ fun BrowsingSettingScreen(
                         )
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.filter_long_novel_tags))
                 },

@@ -19,7 +19,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.os.LocaleListCompat
 import com.mrl.pixiv.common.compose.rememberThrottleClick
@@ -59,7 +58,7 @@ actual fun LazyListScope.appLinkItem() {
                     } catch (_: Throwable) {
                     }
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(
                         text = stringResource(RStrings.default_open),

@@ -113,7 +113,7 @@ fun PrivacySettingScreen(
                         showR18Warning = true
                     }
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = { Text(text = stringResource(RStrings.r18)) },
                 leadingContent = {
                     Icon(imageVector = Icons.Rounded._18UpRating, contentDescription = null)
@@ -134,7 +134,7 @@ fun PrivacySettingScreen(
                         !userPreference.defaultPrivateBookmark
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.default_private_bookmark))
                 },
@@ -154,7 +154,7 @@ fun PrivacySettingScreen(
                         !userPreference.readClipboardOnSearch
                     )
                 },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.read_clipboard_on_search))
                 },

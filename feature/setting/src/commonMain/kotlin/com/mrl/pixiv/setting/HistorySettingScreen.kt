@@ -167,7 +167,7 @@ fun HistorySettingScreen(
                                 ToastUtil.safeShortToast(RStrings.local_history_cleared)
                             }
                         },
-                        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                         content = {
                             Text(text = stringResource(RStrings.clear_local_history))
                         },
@@ -203,7 +203,7 @@ private fun HistorySwitchItem(
         onClick = rememberThrottleClick {
             onCheckedChange(!checked)
         },
-        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
         content = {
             Text(text = title)
         },

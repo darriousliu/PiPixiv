@@ -133,7 +133,7 @@ fun AboutScreen(
                     onClick = rememberThrottleClick {
                         uriHandler.openUri(Constants.GITHUB_URL)
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = { Text(text = stringResource(RStrings.project_url)) },
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
@@ -147,7 +147,7 @@ fun AboutScreen(
                     onClick = rememberThrottleClick {
                         uriHandler.openUri(Constants.GITHUB_ISSUE_URL)
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = { Text(text = stringResource(RStrings.feedback)) },
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
@@ -168,7 +168,7 @@ fun AboutScreen(
                             )
                         }
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = { Text(text = stringResource(RStrings.share_app)) },
                     modifier = Modifier
                         .padding(horizontal = 8.dp),
@@ -183,7 +183,7 @@ fun AboutScreen(
                         VersionManager.checkUpdate(true)
                         showUpdateDialog = true
                     },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(0.dp)),
+                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                     content = { Text(text = stringResource(RStrings.check_update)) },
                     trailingContent = {
                         if (hasNewVersion) {
