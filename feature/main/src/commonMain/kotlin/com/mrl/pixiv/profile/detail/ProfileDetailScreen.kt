@@ -385,11 +385,11 @@ fun ProfileDetailScreen(
                                 navigationManager.navigateToCollectionScreen(uid)
                             }
                         )
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
-                item(key = KEY_USER_BOOKMARKS_NOVELS) {
-                    if (state.userBookmarksNovels.isNotEmpty()) {
-                        // 小说收藏网格组件
+                if (state.userBookmarksNovels.isNotEmpty()) {
+                    item(key = KEY_USER_BOOKMARKS_NOVELS) {
                         NovelBookmarkWidget(
                             novels = state.userBookmarksNovels,
                             onAllClick = {
@@ -397,9 +397,7 @@ fun ProfileDetailScreen(
                             },
                             onNovelClick = navigationManager::navigateToNovelDetailScreen,
                             onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 20.dp)
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
