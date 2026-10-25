@@ -1,4 +1,6 @@
 import com.mrl.pixiv.buildsrc.configureRemoveKoinMeta
+import io.sentry.kotlin.multiplatform.gradle.AppleDependencyProvider
+import io.sentry.kotlin.multiplatform.gradle.SentryExtension
 
 plugins {
     id("pixiv.multiplatform.compose")
@@ -6,6 +8,10 @@ plugins {
 
 if (findProperty("applyFirebasePlugins") == "true") {
     pluginManager.apply(libs.plugins.sentry.kmp.get().pluginId)
+    extensions.configure<SentryExtension> {
+        // Sentry Cocoa 已由 Xcode 的 SwiftPM 管理，保留原生链接并关闭重复安装。
+        autoInstall.apple.provider.set(AppleDependencyProvider.NONE)
+    }
 }
 
 kotlin {
