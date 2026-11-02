@@ -7,6 +7,7 @@ import com.mrl.pixiv.common.data.User
 import com.mrl.pixiv.common.repository.PixivRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 
 val User.isFollowing: Boolean
     get() = FollowState.state[id] ?: isFollowed
@@ -14,17 +15,15 @@ val User.isFollowing: Boolean
 object FollowState {
     internal val state = mutableStateMapOf<Long, Boolean>()
 
-    fun followUser(userId: Long, restrict: Restrict = Restrict.PUBLIC) {
-        launchProcess(Dispatchers.IO) {
+    fun followUser(userId: Long, restrict: Restrict = Restrict.PUBLIC): Job =
+        launchProcess(Dispatchers.IO, errorToast = true) {
             PixivRepository.followUser(userId, restrict)
             state[userId] = true
         }
-    }
 
-    fun unFollowUser(userId: Long) {
-        launchProcess(Dispatchers.IO) {
+    fun unFollowUser(userId: Long): Job =
+        launchProcess(Dispatchers.IO, errorToast = true) {
             PixivRepository.unFollowUser(userId)
             state[userId] = false
         }
-    }
 }

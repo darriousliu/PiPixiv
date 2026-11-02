@@ -166,6 +166,7 @@ fun ProfileDetailScreen(
                     userInfo = userInfo,
                     scrollBehavior = scrollBehavior,
                     isBlocked = isBlocked,
+                    isUpdatingFollow = state.isUpdatingFollow,
                     onBack = navigationManager::popBackStack,
                     onPrivateFollow = { userId ->
                         viewModel.followUser(userId, Restrict.PRIVATE)
@@ -216,6 +217,16 @@ fun ProfileDetailScreen(
                 item(key = KEY_USER_INFO) {
                     ProfileIdentityHeader(
                         userInfo = userInfo,
+                        isSelf = userInfo.user.isSelf,
+                        isFollowing = userInfo.user.isFollowing,
+                        isUpdatingFollow = state.isUpdatingFollow,
+                        onToggleFollow = {
+                            if (userInfo.user.isFollowing) {
+                                viewModel.unFollowUser(userInfo.user.id)
+                            } else {
+                                viewModel.followUser(userInfo.user.id)
+                            }
+                        },
                         onFollowing = { navigationManager.navigateToFollowingScreen(userInfo.user.id) },
                         onCopyId = {
                             coroutineScope.launch { copyToClipboard(userInfo.user.id.toString()) }
@@ -481,6 +492,7 @@ private fun ProfileDetailAppBar(
     userInfo: UserDetailResp,
     scrollBehavior: TopAppBarScrollBehavior,
     isBlocked: Boolean,
+    isUpdatingFollow: Boolean,
     onBack: () -> Unit,
     onPrivateFollow: (Long) -> Unit,
     onBlockUser: (Long) -> Unit,
@@ -571,6 +583,7 @@ private fun ProfileDetailAppBar(
                 val isSelf = userInfo.user.isSelf
                 if (!userInfo.user.isFollowing && !isSelf) {
                     DropdownMenuItem(
+                        enabled = userInfo.user.id > 0 && !isUpdatingFollow,
                         text = {
                             Text(
                                 text = stringResource(RStrings.private_follow),
