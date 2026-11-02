@@ -11,6 +11,7 @@ import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.data.setting.BrowsingSettings
 import com.mrl.pixiv.common.data.setting.HistorySettings
 import com.mrl.pixiv.common.data.setting.NovelReaderSettings
+import com.mrl.pixiv.common.data.setting.SearchFilterPreferences
 import com.mrl.pixiv.common.data.setting.SearchSettings
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.data.setting.UserPreference
@@ -119,6 +120,17 @@ object SettingRepository : MMKVUser {
     fun setSearchSettings(settings: SearchSettings) = userPreference.update {
         it.copy(searchSettings = settings)
     }
+
+    fun updateSearchFilterDefaults(
+        transform: SearchFilterPreferences.() -> SearchFilterPreferences,
+    ) = userPreference.update {
+        it.copy(searchSettings = it.searchSettings.updateFilterDefaults(transform))
+    }
+
+    fun rememberSearchFilter(mode: AppViewMode, filter: SearchFilterPreferences) =
+        userPreference.update {
+            it.copy(searchSettings = it.searchSettings.rememberFilter(mode, filter))
+        }
 
     fun setHistorySettings(settings: HistorySettings) = userPreference.update {
         it.copy(historySettings = settings.normalized())

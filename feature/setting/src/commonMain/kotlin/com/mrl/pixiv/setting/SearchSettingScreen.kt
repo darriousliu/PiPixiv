@@ -96,26 +96,19 @@ fun SearchSettingScreen(
             DefaultSearchTargetSetting(
                 selectedTarget = searchSettings.defaultSearchTarget,
                 onTargetChange = { target ->
-                    SettingRepository.setSearchSettings(
-                        searchSettings.copy(defaultSearchTarget = target)
-                    )
+                    SettingRepository.updateSearchFilterDefaults { copy(searchTarget = target) }
                 }
             )
             DefaultSearchSortSetting(
                 selectedSort = searchSettings.defaultSearchSort,
                 onSortChange = { sort ->
-                    SettingRepository.setSearchSettings(
-                        searchSettings.copy(defaultSearchSort = sort)
-                    )
+                    SettingRepository.updateSearchFilterDefaults { copy(sort = sort) }
                 }
             )
             ListItem(
                 onClick = rememberThrottleClick {
-                    SettingRepository.setSearchSettings(
-                        searchSettings.copy(
-                            defaultSearchAiType = searchSettings.defaultSearchAiType.toggled()
-                        )
-                    )
+                    val aiType = searchSettings.defaultSearchAiType.toggled()
+                    SettingRepository.updateSearchFilterDefaults { copy(searchAiType = aiType) }
                 },
                 shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
@@ -128,15 +121,15 @@ fun SearchSettingScreen(
                     Switch(
                         checked = searchSettings.defaultSearchAiType == SearchAiType.SHOW_AI,
                         onCheckedChange = { checked ->
-                            SettingRepository.setSearchSettings(
-                                searchSettings.copy(
-                                    defaultSearchAiType = if (checked) {
+                            SettingRepository.updateSearchFilterDefaults {
+                                copy(
+                                    searchAiType = if (checked) {
                                         SearchAiType.SHOW_AI
                                     } else {
                                         SearchAiType.HIDE_AI
                                     }
                                 )
-                            )
+                            }
                         }
                     )
                 },
@@ -152,8 +145,8 @@ fun SearchSettingScreen(
             SearchContentFilterControls(
                 filter = searchSettings.defaultContentFilter,
                 defaultShowR18 = userPreference.isR18Enabled,
-                onChange = {
-                    SettingRepository.setSearchSettings(searchSettings.copy(defaultContentFilter = it))
+                onChange = { contentFilter ->
+                    SettingRepository.updateSearchFilterDefaults { copy(contentFilter = contentFilter) }
                 },
                 modifier = Modifier.padding(16.dp),
             )

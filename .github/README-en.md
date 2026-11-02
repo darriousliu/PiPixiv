@@ -76,7 +76,7 @@ Current source version: **2.5.1**. See GitHub Release below for published versio
 ### 🔍 Search & Discovery
 
 * 🔍 Search illustrations/novels and users, sort by popularity, latest, etc.
-* 🛠️ Configure default matching, sorting, and AI content filters; temporary changes in search leave global defaults intact.
+* 🛠️ Configure default matching, sorting, and AI content filters; illustration and novel searches separately remember their last applied sorting and filters across app restarts.
 * 📄 Choose continuous scrolling or paged search results; supported results offer previous/next page and page-jump controls.
 * 🖼️ Choose square thumbnails or an original-aspect-ratio waterfall layout for illustration search; novel search uses wider lists and compact titles.
 * 🏷️ Long-press a tag to collect it or copy it to clipboard.
