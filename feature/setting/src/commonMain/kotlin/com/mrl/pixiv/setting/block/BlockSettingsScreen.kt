@@ -44,7 +44,19 @@ fun BlockSettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val navigationManager = currentNavigationManager()
+    BlockSettingsContent(
+        modifier = modifier,
+        onBack = navigationManager::popBackStack,
+        onNavigate = navigationManager::navigate,
+    )
+}
 
+@Composable
+private fun BlockSettingsContent(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
+    onNavigate: (Destination) -> Unit = {},
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -54,7 +66,7 @@ fun BlockSettingsScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = navigationManager::popBackStack,
+                        onClick = onBack,
                         shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(
@@ -74,37 +86,37 @@ fun BlockSettingsScreen(
             item(key = "cloud_mute") {
                 BlockEntry(
                     title = RStrings.cloud_mute_title,
-                    onClick = { navigationManager.navigate(Destination.CloudMute) },
+                    onClick = { onNavigate(Destination.CloudMute) },
                 )
             }
             item(key = KEY_BLOCK_ILLUST) {
                 BlockEntry(
                     title = RStrings.block_illust,
-                    onClick = { navigationManager.navigate(Destination.BlockIllust) }
+                    onClick = { onNavigate(Destination.BlockIllust) }
                 )
             }
             item(key = KEY_BLOCK_NOVEL) {
                 BlockEntry(
                     title = RStrings.block_novel,
-                    onClick = { navigationManager.navigate(Destination.BlockNovel) }
+                    onClick = { onNavigate(Destination.BlockNovel) }
                 )
             }
             item(key = KEY_BLOCK_USER) {
                 BlockEntry(
                     title = RStrings.block_user,
-                    onClick = { navigationManager.navigate(Destination.BlockUser) }
+                    onClick = { onNavigate(Destination.BlockUser) }
                 )
             }
             item(key = KEY_BLOCK_TAG) {
                 BlockEntry(
                     title = RStrings.block_tags,
-                    onClick = { navigationManager.navigate(Destination.BlockTag) }
+                    onClick = { onNavigate(Destination.BlockTag) }
                 )
             }
             item(key = KEY_BLOCK_COMMENTS) {
                 BlockEntry(
                     title = RStrings.block_comments,
-                    onClick = { navigationManager.navigate(Destination.BlockComments) }
+                    onClick = { onNavigate(Destination.BlockComments) }
                 )
             }
         }

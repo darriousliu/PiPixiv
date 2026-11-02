@@ -1,8 +1,5 @@
 package com.mrl.pixiv.profile
 
-import com.mrl.pixiv.common.data.AppViewMode
-import com.mrl.pixiv.common.repository.requireUserPreferenceValue
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.Bookmarks
@@ -24,14 +22,13 @@ import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.ImportExport
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.Style
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.People
-import androidx.compose.material.icons.rounded.MenuBook
 import androidx.compose.material3.Badge
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -53,28 +50,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
+import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.community.NotificationUnreadBadge
-import com.mrl.pixiv.strings.community_notifications
-import com.mrl.pixiv.strings.community_followers
-import com.mrl.pixiv.strings.reading_manga_watchlist
 import com.mrl.pixiv.strings.about
 import com.mrl.pixiv.strings.app_data
 import com.mrl.pixiv.strings.block_settings
 import com.mrl.pixiv.strings.bookmark_tags
 import com.mrl.pixiv.strings.collection
+import com.mrl.pixiv.strings.community_followers
+import com.mrl.pixiv.strings.community_notifications
 import com.mrl.pixiv.strings.download_manager
 import com.mrl.pixiv.strings.export_token
 import com.mrl.pixiv.strings.history
@@ -82,6 +81,7 @@ import com.mrl.pixiv.strings.new_version_available
 import com.mrl.pixiv.strings.novel_markers
 import com.mrl.pixiv.strings.preference
 import com.mrl.pixiv.strings.read_later
+import com.mrl.pixiv.strings.reading_manga_watchlist
 import com.mrl.pixiv.strings.sign_out
 import com.mrl.pixiv.strings.theme_dark
 import com.mrl.pixiv.strings.theme_light
@@ -239,31 +239,25 @@ fun ProfileScreen(
             }
             // 收藏
             item(key = "community_notifications") {
-                ListItem(
+                ProfileDiscoveryItem(
+                    label = stringResource(RStrings.community_notifications),
+                    icon = Icons.Rounded.Notifications,
                     onClick = rememberThrottleClick { navigationManager.navigateToNotifications() },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-                    content = { Text(stringResource(RStrings.community_notifications)) },
-                    leadingContent = { Icon(Icons.Rounded.Notifications, contentDescription = null) },
                     trailingContent = { NotificationUnreadBadge() },
-                    modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
             item(key = "community_followers") {
-                ListItem(
+                ProfileDiscoveryItem(
+                    label = stringResource(RStrings.community_followers),
+                    icon = Icons.Rounded.People,
                     onClick = rememberThrottleClick { navigationManager.navigateToFollowers() },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-                    content = { Text(stringResource(RStrings.community_followers)) },
-                    leadingContent = { Icon(Icons.Rounded.People, contentDescription = null) },
-                    modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
             item(key = "manga_watchlist") {
-                ListItem(
+                ProfileDiscoveryItem(
+                    label = stringResource(RStrings.reading_manga_watchlist),
+                    icon = Icons.AutoMirrored.Rounded.MenuBook,
                     onClick = rememberThrottleClick { navigationManager.navigateToMangaWatchlistScreen() },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-                    content = { Text(stringResource(RStrings.reading_manga_watchlist)) },
-                    leadingContent = { Icon(Icons.Rounded.MenuBook, contentDescription = null) },
-                    modifier = Modifier.padding(horizontal = 8.dp),
                 )
             }
             item(key = KEY_COLLECTION) {
@@ -543,5 +537,23 @@ private fun ProfileAppBar(
                 }
             }
         }
+    )
+}
+
+/** Discovery entries share the same row geometry as the existing profile menu. */
+@Composable
+internal fun ProfileDiscoveryItem(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    trailingContent: (@Composable () -> Unit)? = null,
+) {
+    ListItem(
+        onClick = onClick,
+        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
+        content = { Text(label, style = MaterialTheme.typography.bodyLarge) },
+        leadingContent = { Icon(icon, contentDescription = null) },
+        trailingContent = trailingContent,
+        modifier = Modifier.padding(horizontal = 8.dp),
     )
 }

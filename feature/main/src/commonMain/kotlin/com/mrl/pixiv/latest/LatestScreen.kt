@@ -35,12 +35,12 @@ import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.strings.reading_manga_watchlist
 import com.mrl.pixiv.strings.collection
 import com.mrl.pixiv.strings.latest_tab_following
 import com.mrl.pixiv.strings.latest_tab_trend
 import com.mrl.pixiv.strings.novel_new
 import com.mrl.pixiv.strings.novel_watchlist
+import com.mrl.pixiv.strings.reading_manga_watchlist
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -129,41 +129,11 @@ fun LatestScreen(
     ) {
         Column(modifier = Modifier.padding(it)) {
             key(appViewMode) {
-                PrimaryScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    edgePadding = 0.dp,
-                    minTabWidth = 48.dp,
-                ) {
-                    pages.forEachIndexed { index, page ->
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                            text = {
-                                Text(
-                                    text = stringResource(
-                                        when (page) {
-                                            LatestPage.Trend -> RStrings.latest_tab_trend
-                                            LatestPage.Collection -> RStrings.collection
-                                            LatestPage.Following -> RStrings.latest_tab_following
-                                            LatestPage.NovelNew -> RStrings.novel_new
-                                            LatestPage.NovelWatchlist -> RStrings.novel_watchlist
-                                            LatestPage.MangaWatchlist -> RStrings.reading_manga_watchlist
-                                        }
-                                    ),
-                                    maxLines = 1,
-                                    softWrap = false,
-                                )
-                            },
-                        )
-                    }
-                }
+                LatestTabs(
+                    pages = pages,
+                    selectedIndex = pagerState.currentPage,
+                    onSelect = { index -> scope.launch { pagerState.animateScrollToPage(index) } },
+                )
             }
             HorizontalPager(
                 state = pagerState,
@@ -202,6 +172,39 @@ fun LatestScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+internal fun LatestTabs(pages: List<LatestPage>, selectedIndex: Int, onSelect: (Int) -> Unit) {
+    PrimaryScrollableTabRow(
+        selectedTabIndex = selectedIndex,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        edgePadding = 0.dp,
+        minTabWidth = 48.dp,
+    ) {
+        pages.forEachIndexed { index, page ->
+            Tab(
+                selected = selectedIndex == index,
+                onClick = { onSelect(index) },
+                text = {
+                    Text(
+                        text = stringResource(
+                            when (page) {
+                                LatestPage.Trend -> RStrings.latest_tab_trend
+                                LatestPage.Collection -> RStrings.collection
+                                LatestPage.Following -> RStrings.latest_tab_following
+                                LatestPage.NovelNew -> RStrings.novel_new
+                                LatestPage.NovelWatchlist -> RStrings.novel_watchlist
+                                LatestPage.MangaWatchlist -> RStrings.reading_manga_watchlist
+                            }
+                        ),
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                },
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.mrl.pixiv.community
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,11 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.Badge
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -35,8 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,13 +54,13 @@ import com.mrl.pixiv.common.repository.resolveNotificationTarget
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
 import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.community_empty_notifications
 import com.mrl.pixiv.strings.community_notification
 import com.mrl.pixiv.strings.community_notifications
 import com.mrl.pixiv.strings.community_refresh
 import com.mrl.pixiv.strings.community_unknown_link
-import com.mrl.pixiv.strings.community_unread
 import com.mrl.pixiv.strings.community_unread_failed
 import com.mrl.pixiv.strings.community_view_more
 import com.mrl.pixiv.strings.retry
@@ -69,9 +72,9 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun NotificationScreen(
     onViewMore: (Long, String?) -> Unit,
+    modifier: Modifier = Modifier,
     notificationId: Long? = null,
     title: String? = null,
-    modifier: Modifier = Modifier,
     viewModel: NotificationViewModel = koinViewModel(key = "notifications-$notificationId") {
         parametersOf(notificationId)
     },
@@ -94,24 +97,13 @@ fun NotificationScreen(
         viewModel.refreshUnread()
         onPauseOrDispose {}
     }
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(title?.takeIf(String::isNotBlank) ?: stringResource(RStrings.community_notifications)) },
-                navigationIcon = {
-                    IconButton(onClick = navigationManager::popBackStack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(RStrings.back))
-                    }
-                },
-                actions = {
-                    IconButton(onClick = refresh) {
-                        Icon(Icons.Rounded.Refresh, stringResource(RStrings.community_refresh))
-                    }
-                },
-            )
-        },
+    NotificationScaffold(
+        title = title?.takeIf(String::isNotBlank)
+            ?: stringResource(RStrings.community_notifications),
+        modifier = modifier,
         snackbarHost = { SnackbarHost(snackbar) },
+        onBack = navigationManager::popBackStack,
+        onRefresh = refresh,
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = notifications.loadState.refresh is LoadState.Loading,
@@ -128,8 +120,17 @@ fun NotificationScreen(
                             Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(stringResource(RStrings.community_unread_failed), Modifier.weight(1f))
-                            TextButton(onClick = viewModel::refreshUnread) { Text(stringResource(RStrings.retry)) }
+                            Text(
+                                stringResource(RStrings.community_unread_failed),
+                                Modifier.weight(1f)
+                            )
+                            TextButton(onClick = viewModel::refreshUnread) {
+                                Text(
+                                    stringResource(
+                                        RStrings.retry
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -151,18 +152,36 @@ fun NotificationScreen(
                             notification = notification,
                             onViewMore = onViewMore,
                             onClick = {
-                                when (val target = resolveNotificationTarget(notification.targetUrl)) {
-                                    is NotificationTarget.Illust -> navigationManager.navigateToSinglePictureScreen(target.id)
-                                    is NotificationTarget.Novel -> navigationManager.navigateToNovelDetailScreen(target.id)
-                                    is NotificationTarget.User -> navigationManager.navigateToProfileDetailScreen(target.id)
-                                    is NotificationTarget.Web -> if (runCatching { uriHandler.openUri(target.url) }.isFailure) {
+                                when (val target =
+                                    resolveNotificationTarget(notification.targetUrl)) {
+                                    is NotificationTarget.Illust -> navigationManager.navigateToSinglePictureScreen(
+                                        target.id
+                                    )
+
+                                    is NotificationTarget.Novel -> navigationManager.navigateToNovelDetailScreen(
+                                        target.id
+                                    )
+
+                                    is NotificationTarget.User -> navigationManager.navigateToProfileDetailScreen(
+                                        target.id
+                                    )
+
+                                    is NotificationTarget.Web -> if (runCatching {
+                                            uriHandler.openUri(
+                                                target.url
+                                            )
+                                        }.isFailure) {
                                         scope.launch { snackbar.showSnackbar(unavailableMessage) }
                                     }
+
                                     null -> scope.launch { snackbar.showSnackbar(unavailableMessage) }
                                 }
                             },
                         )
-                        HorizontalDivider()
+                        HorizontalDivider(
+                            Modifier.padding(start = 80.dp, end = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+                        )
                     }
                 }
                 if (notifications.itemCount > 0 && notifications.loadState.append !is LoadState.NotLoading) {
@@ -181,31 +200,58 @@ private fun NotificationRow(
     onViewMore: (Long, String?) -> Unit,
     onClick: () -> Unit,
 ) {
-    val unreadDescription = stringResource(RStrings.community_unread)
-    Column(Modifier.fillMaxWidth()) {
+    Column(
+        Modifier.fillMaxWidth().background(
+            if (notification.isRead) MaterialTheme.colorScheme.surface
+            else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.18f)
+        )
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            notification.content.leftImage?.takeIf(String::isNotBlank)?.let { image ->
+            val avatar = notification.content.leftImage?.takeIf(String::isNotBlank)
+            if (avatar != null) {
                 LoadingImage(
-                    model = image,
-                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)),
+                    model = avatar,
+                    modifier = Modifier.size(48.dp).clip(CircleShape),
                     contentScale = ContentScale.Crop,
                 )
+            } else {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                ) {
+                    Icon(
+                        Icons.Outlined.Notifications,
+                        null,
+                        Modifier.padding(12.dp).size(24.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
                     notification.content.text.ifBlank { stringResource(RStrings.community_notification) },
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 if (notification.createdDatetime.isNotBlank()) {
-                    Text(notification.createdDatetime, style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        runCatching { convertUtcStringToLocalDateTime(notification.createdDatetime) }.getOrDefault(
+                            notification.createdDatetime
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
             if (!notification.isRead) {
-                Badge(Modifier.semantics { contentDescription = unreadDescription })
+                UnreadNotificationIndicator()
             }
             notification.content.rightImage?.takeIf(String::isNotBlank)?.let { image ->
                 LoadingImage(
@@ -218,13 +264,52 @@ private fun NotificationRow(
         notification.viewMore?.let { more ->
             TextButton(
                 onClick = { onViewMore(notification.id, more.title.takeIf(String::isNotBlank)) },
-                modifier = Modifier.padding(start = 12.dp, bottom = 4.dp),
+                modifier = Modifier.padding(start = 68.dp, bottom = 8.dp),
             ) {
-                Text(more.title.ifBlank { stringResource(RStrings.community_view_more) })
-                if (more.unreadExists) Badge(Modifier.padding(start = 8.dp).semantics {
-                    contentDescription = unreadDescription
-                })
+                Text(
+                    more.title.ifBlank { stringResource(RStrings.community_view_more) },
+                    modifier = Modifier.weight(1f, fill = false),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Icon(
+                    Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                    null,
+                    Modifier.padding(start = 4.dp).size(18.dp)
+                )
+                if (more.unreadExists) UnreadNotificationIndicator(Modifier.padding(start = 8.dp))
             }
         }
     }
+}
+
+
+@Composable
+private fun NotificationScaffold(
+    title: String,
+    modifier: Modifier = Modifier,
+    snackbarHost: @Composable () -> Unit = {},
+    onBack: () -> Unit = {},
+    onRefresh: () -> Unit = {},
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(RStrings.back))
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onRefresh) {
+                        Icon(Icons.Rounded.Refresh, stringResource(RStrings.community_refresh))
+                    }
+                },
+            )
+        },
+        snackbarHost = snackbarHost,
+    ) { padding -> content(padding) }
 }

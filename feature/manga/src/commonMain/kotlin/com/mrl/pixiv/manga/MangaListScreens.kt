@@ -1,32 +1,46 @@
 package com.mrl.pixiv.manga
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,6 +54,7 @@ import com.mrl.pixiv.common.data.manga.MangaWatchlistEntry
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
 import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.reading_manga_empty
 import com.mrl.pixiv.strings.reading_manga_episode_count
@@ -86,7 +101,13 @@ fun MangaWatchlistContent(
         items = watchlist,
         modifier = modifier,
         listState = listState,
-    ) { entry -> MangaWatchlistCard(entry, navigationManager) }
+    ) { entry ->
+        MangaWatchlistCard(
+            entry = entry,
+            onSeriesClick = navigationManager::navigateToMangaSeriesScreen,
+            onLatestClick = navigationManager::navigateToSinglePictureScreen,
+        )
+    }
 }
 
 @Composable
@@ -114,7 +135,7 @@ fun UserMangaSeriesScreen(
 }
 
 @Composable
-private fun MangaListScaffold(
+internal fun MangaListScaffold(
     title: String,
     modifier: Modifier,
     onBack: () -> Unit,
@@ -125,7 +146,7 @@ private fun MangaListScaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(title) },
+                title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -135,7 +156,9 @@ private fun MangaListScaffold(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onRefresh) { Text(stringResource(RStrings.reading_refresh)) }
+                    IconButton(onClick = onRefresh) {
+                        Icon(Icons.Rounded.Refresh, stringResource(RStrings.reading_refresh))
+                    }
                 },
             )
         },
@@ -167,7 +190,7 @@ private fun <T : Any> MangaPagedListContent(
             )
         },
     ) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+        MangaListColumn(state = listState) {
             if (items.itemCount == 0) {
                 item(key = "refresh_state") {
                     MangaLoadState(items.loadState.refresh, items::retry) { Text(emptyText) }
@@ -184,72 +207,102 @@ private fun <T : Any> MangaPagedListContent(
             items(count = items.itemCount) { index -> items[index]?.let { content(it) } }
             item(key = "append_state") { MangaLoadState(items.loadState.append, items::retry) }
         }
-        VerticalScrollbar(state = listState, modifier = Modifier.align(Alignment.CenterEnd))
+    }
+}
+
+/** A comfortable reading width shared by full-screen lists, embedded lists and previews. */
+@Composable
+internal fun MangaListColumn(
+    modifier: Modifier = Modifier,
+    state: LazyListState = rememberLazyListState(),
+    content: LazyListScope.() -> Unit,
+) {
+    Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Box(Modifier.widthIn(max = 720.dp).fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = state,
+                contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
+                content = content,
+            )
+            VerticalScrollbar(state = state, modifier = Modifier.align(Alignment.CenterEnd))
+        }
     }
 }
 
 @Composable
-private fun MangaWatchlistCard(entry: MangaWatchlistEntry, navigationManager: NavigationManager) {
+internal fun MangaWatchlistCard(
+    entry: MangaWatchlistEntry,
+    onSeriesClick: (Long) -> Unit,
+    onLatestClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-            .clickable(enabled = entry.navigableSeriesId != null) {
-                entry.navigableSeriesId?.let(navigationManager::navigateToMangaSeriesScreen)
-            },
+        onClick = { entry.navigableSeriesId?.let(onSeriesClick) },
+        enabled = entry.navigableSeriesId != null,
+        modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         if (entry.isMasked) {
-            Text(
-                entry.maskText.orEmpty(),
+            Row(
                 Modifier.padding(20.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    Icons.Rounded.VisibilityOff,
+                    null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    entry.maskText.orEmpty(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         } else {
             Row(
                 modifier = Modifier.padding(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                if (!entry.url.isNullOrBlank()) {
-                    AsyncImage(
-                        entry.url,
-                        entry.title,
-                        modifier = Modifier.size(84.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
+                MangaCover(entry.url, Modifier.width(88.dp).height(124.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         entry.title.orEmpty(),
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
-                    entry.user?.let { Text(it.name, style = MaterialTheme.typography.bodyMedium) }
-                    entry.publishedContentCount?.let {
+                    entry.user?.let { MangaAuthorLabel(it.name) }
+                    entry.publishedContentCount?.let { MangaEpisodeCount(it) }
+                    entry.lastPublishedContentDatetime?.takeIf { it.isNotBlank() }?.let { date ->
                         Text(
-                            stringResource(
-                                RStrings.reading_manga_episode_count,
-                                it
-                            )
-                        )
-                    }
-                    entry.lastPublishedContentDatetime?.takeIf { it.isNotBlank() }?.let {
-                        Text(
-                            it,
+                            remember(date) {
+                                runCatching { convertUtcStringToLocalDateTime(date) }.getOrDefault(
+                                    date
+                                )
+                            },
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    entry.navigableLatestId?.let { id ->
-                        TextButton(
-                            onClick = { navigationManager.navigateToSinglePictureScreen(id) }
-                        ) {
-                            Text(stringResource(RStrings.reading_manga_latest))
-                        }
-                    }
+                }
+            }
+            entry.navigableLatestId?.let { id ->
+                FilledTonalButton(
+                    onClick = { onLatestClick(id) },
+                    modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                ) {
+                    Text(
+                        stringResource(RStrings.reading_manga_latest),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp))
                 }
             }
         }
@@ -257,25 +310,82 @@ private fun MangaWatchlistCard(entry: MangaWatchlistEntry, navigationManager: Na
 }
 
 @Composable
-private fun MangaSeriesCard(entry: MangaSeriesDetail, onClick: () -> Unit) {
+internal fun MangaSeriesCard(
+    entry: MangaSeriesDetail,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
     Card(
-        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)
-            .clickable(onClick = onClick)
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (entry.coverImageUrls.medium.isNotBlank()) {
-                AsyncImage(
-                    entry.coverImageUrls.medium,
+        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            MangaCover(entry.coverImageUrls.medium, Modifier.width(80.dp).height(112.dp))
+            Column(
+                modifier = Modifier.weight(1f).padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
                     entry.title,
-                    modifier = Modifier.size(84.dp),
-                    contentScale = ContentScale.Crop
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
-            }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(entry.title, style = MaterialTheme.typography.titleMedium)
-                Text(entry.user.name)
-                Text(stringResource(RStrings.reading_manga_episode_count, entry.seriesWorkCount))
+                MangaAuthorLabel(entry.user.name)
+                MangaEpisodeCount(entry.seriesWorkCount)
             }
         }
     }
+}
+
+@Composable
+internal fun MangaCover(url: String?, modifier: Modifier = Modifier) {
+    Box(
+        modifier.clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            Icons.AutoMirrored.Rounded.MenuBook,
+            null,
+            Modifier.size(28.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+        )
+        if (!url.isNullOrBlank()) {
+            AsyncImage(url, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        }
+    }
+}
+
+@Composable
+private fun MangaAuthorLabel(name: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(
+            Icons.Rounded.Person,
+            null,
+            Modifier.size(14.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            name,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+internal fun MangaEpisodeCount(count: Int) {
+    Text(
+        stringResource(RStrings.reading_manga_episode_count, count),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+    )
 }

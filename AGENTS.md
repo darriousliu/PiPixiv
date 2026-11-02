@@ -1,0 +1,52 @@
+# 项目协作约定
+
+## 代码风格与提交
+
+- Kotlin 使用 Kotlin 官方代码风格，优先按 Android Studio 的项目 Code Style 格式化本次修改的文件，避免顺带格式化无关文件。
+- 保留工作区中已有的用户修改；提交前检查暂存差异和 `git diff --check`。
+- 提交信息使用中文，遵循 Conventional Commits，例如 `feat(ui): 统一漫画与发现页面样式`。
+
+## Compose UI 开发与视觉验证
+
+新增或调整页面、列表条目、按钮、筛选面板等 UI 时，沿用项目的 Material Expressive 主题、排版、间距、圆角和导航习惯，并通过带 mock 数据的 Compose Preview 检查最终布局。预览代码仅在验证期间临时创建，完成后删除，不纳入提交。
+
+### 复用真实组件
+
+1. 将依赖 ViewModel、导航、分页或仓库的页面与可预览的内容组件分开。内容组件接收状态和回调，由实际页面与 Preview 共同调用，不单独仿制一套预览 UI。
+2. 临时 Preview 使用与实际页面相同的 Material Expressive 浅色/深色主题。可用 Coil 的 `LocalAsyncImagePreviewHandler` 为 mock 地址提供离线封面和头像，不依赖网络、登录、真实账号或 Koin 初始化；验证结束后一起删除这些预览辅助代码。
+3. 提供能暴露布局问题的 mock 数据：长标题、长作者名、多行说明、不同封面和数量；根据组件行为补齐空列表、加载、失败、禁用、提交中或屏蔽等状态。
+4. 至少检查常规手机布局；对会受尺寸影响的 UI 增加 320dp 窄屏、大字体和深色预览，对大屏页面增加 840dp 预览。使用 `@Preview` 的 `widthDp`、`fontScale`、`uiMode`、`locale` 明确配置；深色预览同时设置 `uiMode = 0x20`，确保截图元数据准确。
+
+临时预览放在能访问实际内容组件的源码包中，并使用独立文件，便于验证结束后清理。不要覆盖或删除任务开始前已有的预览。
+
+### 生成截图
+
+在项目根目录执行。环境需具备带 `android preview` 的 Android CLI、匹配的 Preview renderer pack，以及项目所需的 Android SDK/JDK。首次使用可通过 `android preview --help` 确认可用命令。
+
+```sh
+# 列出当前临时预览的完整函数名
+android preview list 'gradle://.?app' --all -- \
+  -PcomposePreview=true --no-parallel --max-workers=1
+
+# 将以下示例 FQN 替换为本次实际创建的预览；多个预览重复传入 --fqn
+python3 scripts/render_ui_review.py \
+  --fqn com.mrl.pixiv.example.UiReviewPreviewKt.ExamplePreview
+
+# 使用已有 PNG 和组件树重新生成总览
+python3 scripts/render_ui_review.py --gallery-only
+```
+
+- 默认输出为 `build/reports/ui-review/`，`index.html` 是截图总览，`images/` 包含 PNG 和组件树 JSON，日志和预览函数清单也保存在该目录。可通过 `--output` 指定独立的报告目录。
+- 脚本不维护固定预览清单。每次通过 `--fqn` 选择本次临时预览，避免依赖已清理的预览类。
+- 渲染使用 Android app 目标 `gradle://.?app`。KMP feature 模块中的预览也通过 app 汇总；不要直接将 KMP library 作为 Android CLI 的渲染目标。
+- 脚本传入 `-PcomposePreview=true --no-parallel --max-workers=1`。`composePreview` 只关闭离线 Layoutlib 无法初始化的 HotSwan 插桩，正常调试构建仍启用热重载。app 的 debug 依赖必须保留 `ui-tooling`。
+- 保持项目默认 Firebase/analytics 构建配置，不为渲染临时切换构建变体。串行 Gradle 参数用于避免跨平台 metadata 构建依赖缺失。
+- 不使用持久 Preview renderer daemon：改动 `@Preview` 配置后可能复用旧参数。脚本每次启动新的渲染进程，并在渲染前清理自身的旧图片输出。
+
+### 审核与收尾
+
+1. 打开总览并逐张查看最终 PNG，检查文字是否截断、重叠，封面比例与留白是否协调，按钮主次是否清楚，点击区域是否合理，以及深色和大字体布局。渲染成功不能代替视觉检查。
+2. 预览必须实际展示待检查内容。若自动聚焦或滚动导致错误提示等内容不可见，为真实状态组件补独立 Preview；不要为截图改变生产逻辑，也不要把被遮住的状态算作已审核。
+3. 调整 UI 后重新渲染受影响的预览。布局截图不能替代交互、网络和分页验证；根据改动运行相关现有测试，涉及这些行为时补充必要的运行验证，并如实记录未验证范围。
+4. 向用户提供截图总览与简洁的验证结果供检查。检查完成后，删除本次新增的 `@Preview` 函数、mock 数据、预览专用主题及辅助代码，同时清理图片、组件树、构建日志、下载包和调试脚本；这些内容不纳入提交。保留生产 UI、通用验证脚本和必要的构建配置。
+5. 清理后检查是否存在对预览代码的残留引用，并运行相关编译检查。只清理本次任务生成的文件，不删除其他任务的文件或通用 SDK/Gradle 缓存。下次修改 UI 时重新创建对应的临时预览并重复上述流程。

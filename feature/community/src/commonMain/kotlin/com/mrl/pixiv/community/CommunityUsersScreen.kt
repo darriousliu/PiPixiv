@@ -5,26 +5,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -40,6 +44,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.ui.image.LoadingImage
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
+import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.User
 import com.mrl.pixiv.common.data.XRestrict
 import com.mrl.pixiv.common.data.discovery.CommunityUserPreview
 import com.mrl.pixiv.common.data.discovery.CommunityUsersKind
@@ -68,8 +74,8 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun CommunityUsersScreen(
     kind: CommunityUsersKind,
-    seedUserId: Long? = null,
     modifier: Modifier = Modifier,
+    seedUserId: Long? = null,
     viewModel: CommunityUsersViewModel = koinViewModel(key = "community-users-$kind-$seedUserId") {
         parametersOf(kind, seedUserId)
     },
@@ -81,23 +87,11 @@ fun CommunityUsersScreen(
         CommunityUsersKind.RELATED -> RStrings.community_related_users
         CommunityUsersKind.FOLLOWERS -> RStrings.community_followers
     }
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(title)) },
-                navigationIcon = {
-                    IconButton(onClick = navigationManager::popBackStack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(RStrings.back))
-                    }
-                },
-                actions = {
-                    IconButton(onClick = users::refresh) {
-                        Icon(Icons.Rounded.Refresh, stringResource(RStrings.community_refresh))
-                    }
-                },
-            )
-        },
+    CommunityUsersScaffold(
+        title = stringResource(title),
+        modifier = modifier,
+        onBack = navigationManager::popBackStack,
+        onRefresh = users::refresh,
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = users.loadState.refresh is LoadState.Loading,
@@ -116,9 +110,11 @@ fun CommunityUsersScreen(
                         CommunityListStatus(
                             state = users.loadState.refresh,
                             onRetry = users::retry,
-                            emptyMessage = stringResource(if (kind == CommunityUsersKind.FOLLOWERS) {
-                                RStrings.community_empty_followers
-                            } else RStrings.community_empty_users),
+                            emptyMessage = stringResource(
+                                if (kind == CommunityUsersKind.FOLLOWERS) {
+                                    RStrings.community_empty_followers
+                                } else RStrings.community_empty_users
+                            ),
                         )
                     }
                 }
@@ -149,7 +145,35 @@ private fun CommunityUserCard(preview: CommunityUserPreview, navigationManager: 
         .filter { it.visible != false && (preference.isR18Enabled || it.xRestrict == XRestrict.Normal) }
         .filterBlockedTags()
         .take(3)
-    Card(onClick = openProfile, modifier = Modifier.fillMaxWidth()) {
+    CommunityUserCardContent(
+        user = user,
+        works = works,
+        following = user.isFollowing,
+        showFollow = !user.isSelf,
+        onProfileClick = openProfile,
+        onWorkClick = navigationManager::navigateToSinglePictureScreen,
+        onFollowClick = {
+            if (user.isFollowing) FollowState.unFollowUser(user.id) else FollowState.followUser(user.id)
+        },
+    )
+}
+
+@Composable
+private fun CommunityUserCardContent(
+    user: User,
+    works: List<Illust>,
+    following: Boolean,
+    showFollow: Boolean = true,
+    onProfileClick: () -> Unit = {},
+    onWorkClick: (Long) -> Unit = {},
+    onFollowClick: () -> Unit = {},
+) {
+    Card(
+        onClick = onProfileClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
         if (works.isNotEmpty()) {
             Row(Modifier.fillMaxWidth()) {
                 works.forEach { illust ->
@@ -157,44 +181,99 @@ private fun CommunityUserCard(preview: CommunityUserPreview, navigationManager: 
                         model = illust.imageUrls.squareMedium.ifBlank { illust.imageUrls.medium },
                         contentDescription = illust.title,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.weight(1f).aspectRatio(1f).clickable {
-                            navigationManager.navigateToSinglePictureScreen(illust.id)
-                        },
+                        modifier = Modifier.weight(1f)
+                            .aspectRatio(if (works.size == 1) 2.4f else 1f).clickable {
+                                onWorkClick(illust.id)
+                            },
                     )
                 }
-                if (works.size < 3) Spacer(Modifier.weight((3 - works.size).toFloat()))
             }
         }
         Row(
-            Modifier.fillMaxWidth().padding(12.dp),
+            Modifier.fillMaxWidth().heightIn(min = 88.dp).padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (user.profileImageUrls.medium.isBlank()) {
-                Icon(Icons.Rounded.Person, null, Modifier.size(40.dp))
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                ) {
+                    Icon(
+                        Icons.Rounded.Person,
+                        null,
+                        Modifier.padding(10.dp).size(24.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             } else {
-                UserAvatar(user.profileImageUrls.medium, Modifier.size(40.dp), onClick = openProfile)
+                UserAvatar(
+                    user.profileImageUrls.medium,
+                    Modifier.size(44.dp),
+                    onClick = onProfileClick
+                )
             }
-            Column(Modifier.weight(1f)) {
-                Text(user.name, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    user.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
                 if (user.account.isNotBlank()) Text(
                     "@${user.account}",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            if (!user.isSelf) {
-                if (user.isFollowing) {
-                    OutlinedButton(onClick = { FollowState.unFollowUser(user.id) }) {
+            if (showFollow) {
+                if (following) {
+                    OutlinedButton(
+                        onClick = onFollowClick,
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
                         Text(stringResource(RStrings.followed))
                     }
                 } else {
-                    Button(onClick = { FollowState.followUser(user.id) }) {
+                    Button(
+                        onClick = onFollowClick,
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
                         Text(stringResource(RStrings.follow))
                     }
                 }
             }
         }
     }
+}
+
+
+@Composable
+private fun CommunityUsersScaffold(
+    title: String,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
+    onRefresh: () -> Unit = {},
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(RStrings.back))
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onRefresh) {
+                        Icon(Icons.Rounded.Refresh, stringResource(RStrings.community_refresh))
+                    }
+                },
+            )
+        },
+    ) { padding -> content(padding) }
 }

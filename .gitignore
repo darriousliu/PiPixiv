@@ -25,6 +25,7 @@ local.properties
 GEMINI.md
 CLAUDE.md
 AGENTS.md
+!/AGENTS.md
 
 captures
 *.xcodeproj/*

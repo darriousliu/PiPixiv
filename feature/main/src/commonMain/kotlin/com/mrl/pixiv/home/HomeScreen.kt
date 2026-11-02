@@ -12,8 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.PersonSearch
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -49,11 +49,11 @@ import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifec
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.strings.community_recommended_users
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.home.components.RecommendGrid
 import com.mrl.pixiv.strings.app_name
+import com.mrl.pixiv.strings.community_recommended_users
 import com.mrl.pixiv.strings.illustrations
 import com.mrl.pixiv.strings.manga
 import kotlinx.coroutines.launch
@@ -88,24 +88,12 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(RStrings.app_name)) },
-                actions = {
-                    IconButton(onClick = navigationManager::navigateToRecommendedUsers) {
-                        Icon(Icons.Rounded.PersonSearch, contentDescription = stringResource(RStrings.community_recommended_users))
-                    }
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                scrollToTop()
-                            }
-                            onRefresh()
-                        },
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(imageVector = Icons.Rounded.Refresh, contentDescription = null)
-                    }
-                }
+            HomeTopBar(
+                onRecommendedUsers = navigationManager::navigateToRecommendedUsers,
+                onRefresh = {
+                    scope.launch { scrollToTop() }
+                    onRefresh()
+                },
             )
         },
         floatingActionButton = {
@@ -187,31 +175,10 @@ private fun IllustMode(
             .fillMaxSize()
             .fillMaxWidth(),
     ) {
-        PrimaryTabRow(
-            selectedTabIndex = pagerState.currentPage,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            HomeImageFeedMode.entries.forEachIndexed { index, mode ->
-                Tab(
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    },
-                    text = {
-                        Text(
-                            text = stringResource(
-                                when (mode) {
-                                    HomeImageFeedMode.Illust -> RStrings.illustrations
-                                    HomeImageFeedMode.Manga -> RStrings.manga
-                                }
-                            )
-                        )
-                    }
-                )
-            }
-        }
+        HomeFeedTabs(
+            selectedIndex = pagerState.currentPage,
+            onSelect = { index -> scope.launch { pagerState.animateScrollToPage(index) } },
+        )
 
         HorizontalPager(
             state = pagerState,
@@ -357,6 +324,46 @@ private fun NovelMode(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+internal fun HomeTopBar(onRecommendedUsers: () -> Unit, onRefresh: () -> Unit) {
+    TopAppBar(
+        title = { Text(text = stringResource(RStrings.app_name)) },
+        actions = {
+            IconButton(onClick = onRecommendedUsers, shapes = IconButtonDefaults.shapes()) {
+                Icon(
+                    Icons.Rounded.PersonSearch,
+                    contentDescription = stringResource(RStrings.community_recommended_users)
+                )
+            }
+            IconButton(onClick = onRefresh, shapes = IconButtonDefaults.shapes()) {
+                Icon(Icons.Rounded.Refresh, contentDescription = null)
+            }
+        },
+    )
+}
+
+@Composable
+internal fun HomeFeedTabs(selectedIndex: Int, onSelect: (Int) -> Unit) {
+    PrimaryTabRow(selectedTabIndex = selectedIndex, modifier = Modifier.fillMaxWidth()) {
+        HomeImageFeedMode.entries.forEachIndexed { index, mode ->
+            Tab(
+                selected = selectedIndex == index,
+                onClick = { onSelect(index) },
+                text = {
+                    Text(
+                        stringResource(
+                            when (mode) {
+                                HomeImageFeedMode.Illust -> RStrings.illustrations
+                                HomeImageFeedMode.Manga -> RStrings.manga
+                            }
+                        )
+                    )
+                },
+            )
         }
     }
 }

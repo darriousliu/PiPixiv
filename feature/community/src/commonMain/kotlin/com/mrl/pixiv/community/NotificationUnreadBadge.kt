@@ -1,6 +1,7 @@
 package com.mrl.pixiv.community
 
 import androidx.compose.material3.Badge
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,7 +28,16 @@ fun NotificationUnreadBadge(modifier: Modifier = Modifier) {
         onPauseOrDispose { job.cancel() }
     }
     if (state.accountId == userInfo.user.id && state.hasUnread == true) {
-        val description = stringResource(RStrings.community_unread)
-        Badge(modifier.semantics { contentDescription = description })
+        UnreadNotificationIndicator(modifier)
     }
+}
+
+
+@Composable
+internal fun UnreadNotificationIndicator(modifier: Modifier = Modifier) {
+    val description = stringResource(RStrings.community_unread)
+    Badge(
+        modifier = modifier.semantics { contentDescription = description },
+        containerColor = MaterialTheme.colorScheme.primary,
+    )
 }
