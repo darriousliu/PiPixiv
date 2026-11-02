@@ -35,3 +35,4 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 .hotswan/
+.swiftpm-locks

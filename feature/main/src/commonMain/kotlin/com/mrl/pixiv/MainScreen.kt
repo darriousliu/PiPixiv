@@ -40,7 +40,6 @@ import com.mrl.pixiv.strings.search
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
 import org.jetbrains.compose.resources.stringResource
-import org.koin.core.annotation.KoinExperimentalAPI
 
 @Composable
 fun MainNavigationScaffold(
@@ -103,7 +102,9 @@ fun MainNavigationScaffold(
     }
 }
 
-internal fun mainNavigationSuiteType(
+// HotSwan 2.2.0 无法为 NavigationSuiteType 生成返回值桥接，inline 可跳过该函数的插桩。
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun mainNavigationSuiteType(
     adaptiveType: NavigationSuiteType,
     showNavigation: Boolean,
     currentDestination: Destination,
@@ -120,7 +121,7 @@ internal fun mainNavigationSuiteType(
     }
 }
 
-@OptIn(KoinExperimentalAPI::class, InternalSerializationApi::class)
+@OptIn(InternalSerializationApi::class)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,

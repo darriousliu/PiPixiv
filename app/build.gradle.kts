@@ -7,14 +7,7 @@ import org.gradle.internal.extensions.stdlib.capitalized
 plugins {
     id("pixiv.android.application")
 //    alias(libs.plugins.baselineprofile)
-}
-
-// 热重载插桩仅在显式开启时启用，避免影响普通构建和测试。
-val enableHotSwanCompiler = providers.gradleProperty("hotswan.enabled")
-    .map(String::toBoolean)
-    .getOrElse(false)
-if (enableHotSwanCompiler) {
-    pluginManager.apply(libs.plugins.hotswan.compiler.get().pluginId)
+    alias(libs.plugins.hotswan.compiler)
 }
 
 if (project.findProperty("applyFirebasePlugins") == "true") {

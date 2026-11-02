@@ -110,7 +110,7 @@ fun NovelItem(
                 },
                 contentDescription = novel.title,
                 modifier = Modifier
-                    .width(80.dp)
+                    .width(if (markerPageLabel != null) 120.dp else 80.dp)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
                 contentScale = ContentScale.Crop
