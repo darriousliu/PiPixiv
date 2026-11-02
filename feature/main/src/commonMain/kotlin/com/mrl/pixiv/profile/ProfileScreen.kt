@@ -20,6 +20,7 @@ import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.HowToReg
 import androidx.compose.material.icons.rounded.ImportExport
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Notifications
@@ -76,6 +77,7 @@ import com.mrl.pixiv.strings.community_followers
 import com.mrl.pixiv.strings.community_notifications
 import com.mrl.pixiv.strings.download_manager
 import com.mrl.pixiv.strings.export_token
+import com.mrl.pixiv.strings.followed
 import com.mrl.pixiv.strings.history
 import com.mrl.pixiv.strings.new_version_available
 import com.mrl.pixiv.strings.novel_markers
@@ -246,11 +248,14 @@ fun ProfileScreen(
                     trailingContent = { NotificationUnreadBadge() },
                 )
             }
-            item(key = "community_followers") {
-                ProfileDiscoveryItem(
-                    label = stringResource(RStrings.community_followers),
-                    icon = Icons.Rounded.People,
-                    onClick = rememberThrottleClick { navigationManager.navigateToFollowers() },
+            item(key = "connections") {
+                ProfileConnections(
+                    onFollowingClick = rememberThrottleClick {
+                        navigationManager.navigateToFollowingScreen(userInfo.user.id)
+                    },
+                    onFollowersClick = rememberThrottleClick {
+                        navigationManager.navigateToFollowers()
+                    },
                 )
             }
             item(key = "manga_watchlist") {
@@ -540,7 +545,26 @@ private fun ProfileAppBar(
     )
 }
 
-/** Discovery entries share the same row geometry as the existing profile menu. */
+@Composable
+internal fun ProfileConnections(
+    onFollowingClick: () -> Unit,
+    onFollowersClick: () -> Unit,
+) {
+    Column {
+        ProfileDiscoveryItem(
+            label = stringResource(RStrings.followed),
+            icon = Icons.Rounded.HowToReg,
+            onClick = onFollowingClick,
+        )
+        ProfileDiscoveryItem(
+            label = stringResource(RStrings.community_followers),
+            icon = Icons.Rounded.People,
+            onClick = onFollowersClick,
+        )
+    }
+}
+
+/** 与个人页其他菜单项使用一致的尺寸与样式。 */
 @Composable
 internal fun ProfileDiscoveryItem(
     label: String,
