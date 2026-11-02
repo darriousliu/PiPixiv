@@ -127,7 +127,12 @@ private fun MangaListScaffold(
             TopAppBar(
                 title = { Text(title) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(RStrings.back)) }
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            stringResource(RStrings.back)
+                        )
+                    }
                 },
                 actions = {
                     TextButton(onClick = onRefresh) { Text(stringResource(RStrings.reading_refresh)) }
@@ -168,7 +173,12 @@ private fun <T : Any> MangaPagedListContent(
                     MangaLoadState(items.loadState.refresh, items::retry) { Text(emptyText) }
                 }
             } else if (items.loadState.refresh is LoadState.Error) {
-                item(key = "refresh_error") { MangaLoadState(items.loadState.refresh, items::retry) }
+                item(key = "refresh_error") {
+                    MangaLoadState(
+                        items.loadState.refresh,
+                        items::retry
+                    )
+                }
             }
             // Masked entries have no stable server ID, so use the paging position.
             items(count = items.itemCount) { index -> items[index]?.let { content(it) } }
@@ -181,27 +191,62 @@ private fun <T : Any> MangaPagedListContent(
 @Composable
 private fun MangaWatchlistCard(entry: MangaWatchlistEntry, navigationManager: NavigationManager) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp)
             .clickable(enabled = entry.navigableSeriesId != null) {
                 entry.navigableSeriesId?.let(navigationManager::navigateToMangaSeriesScreen)
             },
     ) {
         if (entry.isMasked) {
-            Text(entry.maskText.orEmpty(), Modifier.padding(20.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                entry.maskText.orEmpty(),
+                Modifier.padding(20.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         } else {
-            Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 if (!entry.url.isNullOrBlank()) {
-                    AsyncImage(entry.url, entry.title, modifier = Modifier.size(84.dp), contentScale = ContentScale.Crop)
+                    AsyncImage(
+                        entry.url,
+                        entry.title,
+                        modifier = Modifier.size(84.dp),
+                        contentScale = ContentScale.Crop
+                    )
                 }
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(entry.title.orEmpty(), style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        entry.title.orEmpty(),
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
                     entry.user?.let { Text(it.name, style = MaterialTheme.typography.bodyMedium) }
-                    entry.publishedContentCount?.let { Text(stringResource(RStrings.reading_manga_episode_count, it)) }
+                    entry.publishedContentCount?.let {
+                        Text(
+                            stringResource(
+                                RStrings.reading_manga_episode_count,
+                                it
+                            )
+                        )
+                    }
                     entry.lastPublishedContentDatetime?.takeIf { it.isNotBlank() }?.let {
-                        Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     entry.navigableLatestId?.let { id ->
-                        TextButton(onClick = { navigationManager.navigateToSinglePictureScreen(id) }) {
+                        TextButton(
+                            onClick = { navigationManager.navigateToSinglePictureScreen(id) }
+                        ) {
                             Text(stringResource(RStrings.reading_manga_latest))
                         }
                     }
@@ -213,10 +258,18 @@ private fun MangaWatchlistCard(entry: MangaWatchlistEntry, navigationManager: Na
 
 @Composable
 private fun MangaSeriesCard(entry: MangaSeriesDetail, onClick: () -> Unit) {
-    Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp).clickable(onClick = onClick)) {
+    Card(
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp)
+            .clickable(onClick = onClick)
+    ) {
         Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (entry.coverImageUrls.medium.isNotBlank()) {
-                AsyncImage(entry.coverImageUrls.medium, entry.title, modifier = Modifier.size(84.dp), contentScale = ContentScale.Crop)
+                AsyncImage(
+                    entry.coverImageUrls.medium,
+                    entry.title,
+                    modifier = Modifier.size(84.dp),
+                    contentScale = ContentScale.Crop
+                )
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(entry.title, style = MaterialTheme.typography.titleMedium)
