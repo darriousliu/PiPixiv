@@ -20,7 +20,7 @@ Pixiv 应用
 
 ## 📥 下载
 
-当前源码版本：**2.5.1**。已发布版本请查看下方 GitHub Release。
+当前源码版本：**2.6.0**。已发布版本请查看下方 GitHub Release。
 
 [![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=稳定版)](https://github.com/darriousliu/PiPixiv/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=下载量&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)

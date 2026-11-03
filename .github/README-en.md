@@ -18,7 +18,7 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 ## 📥 Download
 
-Current source version: **2.5.1**. See GitHub Release below for published versions.
+Current source version: **2.6.0**. See GitHub Release below for published versions.
 
 [![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=Stable)](https://github.com/darriousliu/PiPixiv/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
