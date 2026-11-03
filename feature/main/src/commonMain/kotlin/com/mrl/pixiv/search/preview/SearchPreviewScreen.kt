@@ -221,6 +221,7 @@ private fun BookmarkedTagsSection(
             if (tags.isEmpty()) {
                 ContentEmptyState(
                     icon = Icons.Rounded.Style,
+                    compact = true,
                     action = {
                         TextButton(onClick = onViewAll) { Text(stringResource(RStrings.view_all)) }
                     },

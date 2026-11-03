@@ -230,8 +230,8 @@ private fun <T> BlockTextScreen(
     items: List<T>,
     key: (T) -> Any,
     onRemove: (T) -> Unit,
-    topBarActions: @Composable RowScope.() -> Unit = {},
     modifier: Modifier = Modifier,
+    topBarActions: @Composable RowScope.() -> Unit = {},
     embedded: Boolean = false,
     hasActions: Boolean = false,
     itemContent: @Composable RowScope.(T) -> Unit = {},
@@ -279,8 +279,8 @@ internal fun <T> BlockTextContent(
 ) {
     if (items.isEmpty()) {
         ContentEmptyState(
-            message = stringResource(RStrings.no_blocked_items),
             modifier = modifier.fillMaxSize(),
+            message = stringResource(RStrings.no_blocked_items),
         )
         return
     }

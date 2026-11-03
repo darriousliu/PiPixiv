@@ -75,8 +75,8 @@ internal fun BlockCommentsContent(
 ) {
     if (blockedComments.isEmpty()) {
         ContentEmptyState(
-            message = stringResource(RStrings.no_blocked_items),
             modifier = modifier.fillMaxSize(),
+            message = stringResource(RStrings.no_blocked_items),
         )
         return
     }

@@ -69,19 +69,40 @@ fun ContentLoadingState(
 
 @Composable
 fun ContentEmptyState(
-    message: String? = null,
     modifier: Modifier = Modifier,
+    message: String? = null,
     description: String? = null,
     icon: ImageVector = Icons.Rounded.Inbox,
+    compact: Boolean = false,
     action: (@Composable () -> Unit)? = null,
 ) {
-    ContentStateLayout(modifier) {
-        ContentStateIcon(icon)
-        Text(
-            message ?: stringResource(RStrings.content_empty_title),
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-        )
+    ContentStateLayout(modifier, compact = compact) {
+        if (compact) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    message ?: stringResource(RStrings.content_empty_title),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        } else {
+            ContentStateIcon(icon)
+            Text(
+                message ?: stringResource(RStrings.content_empty_title),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+            )
+        }
         description?.let {
             Text(
                 it,
@@ -148,15 +169,21 @@ fun ContentErrorState(
 }
 
 @Composable
-private fun ContentStateLayout(modifier: Modifier, content: @Composable () -> Unit) {
+private fun ContentStateLayout(
+    modifier: Modifier,
+    compact: Boolean = false,
+    content: @Composable () -> Unit,
+) {
     Box(
-        modifier = modifier.fillMaxWidth().heightIn(min = 280.dp).padding(24.dp),
+        modifier = modifier.fillMaxWidth()
+            .heightIn(min = if (compact) 0.dp else 280.dp)
+            .padding(if (compact) 12.dp else 24.dp),
         contentAlignment = Alignment.Center,
     ) {
         Column(
             modifier = Modifier.widthIn(max = 360.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 16.dp),
         ) {
             content()
         }
