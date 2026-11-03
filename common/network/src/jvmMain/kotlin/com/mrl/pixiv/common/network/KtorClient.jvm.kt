@@ -10,7 +10,7 @@ internal actual val baseHttpClient: HttpClient
             followRedirects(true)
             retryOnConnectionFailure(true)
         }
-        configureProxyOrSNI()
+        configureProxyOrECH()
     }
 internal actual val baseImageHttpClient: HttpClient
     get() = imageHttpClient(OkHttp) {
@@ -18,7 +18,7 @@ internal actual val baseImageHttpClient: HttpClient
             followRedirects(true)
             retryOnConnectionFailure(true)
         }
-        configureProxyOrSNI()
+        configureProxyOrECH()
     }
 
 actual val httpEngineFactory: HttpClientEngineFactory<*> = OkHttp

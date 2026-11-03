@@ -13,12 +13,13 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-class SniReplacingSslSocketFactoryTest {
+class PixivEchSslSocketFactoryTest {
     @Test
-    fun apiAndOauthReplaceSniWhilePreservingLayeredSocketContract() {
+    fun apiAndOauthConfigureEchWhilePreservingLayeredSocketContract() {
         for (host in listOf(API_HOST, AUTH_HOST)) {
             val delegate = RecordingSslSocketFactory()
-            val factory = SniReplacingSslSocketFactory(delegate)
+            var configuredSocket: SSLSocket? = null
+            val factory = PixivEchSslSocketFactory(delegate) { configuredSocket = it }
             val rawSocket = connectedSocket()
 
             factory.createSocket(
@@ -27,11 +28,12 @@ class SniReplacingSslSocketFactoryTest {
                 443,
                 false,
             ).use { result ->
+                assertSame<Socket?>(result, configuredSocket)
                 assertSame(rawSocket, delegate.layeredSocket)
-                assertEquals(PIXIV_TLS_SERVER_NAME, delegate.layeredHost)
+                assertEquals(host, delegate.layeredHost)
                 assertEquals(443, delegate.layeredPort)
                 assertEquals(false, delegate.layeredAutoClose)
-                assertEquals(listOf(PIXIV_TLS_SERVER_NAME), result.serverNames())
+                assertEquals(listOf(host), result.serverNames())
             }
         }
     }
@@ -40,7 +42,7 @@ class SniReplacingSslSocketFactoryTest {
     fun imageHostsDisableSni() {
         for (host in listOf(IMAGE_HOST, STATIC_IMAGE_HOST)) {
             val delegate = RecordingSslSocketFactory()
-            val factory = SniReplacingSslSocketFactory(delegate)
+            val factory = PixivEchSslSocketFactory(delegate) {}
             val rawSocket = connectedSocket()
 
             factory.createSocket(rawSocket, host, 443, true).use { result ->
@@ -53,7 +55,7 @@ class SniReplacingSslSocketFactoryTest {
     @Test
     fun unknownHostKeepsDelegateSni() {
         val delegate = RecordingSslSocketFactory()
-        val factory = SniReplacingSslSocketFactory(delegate)
+        val factory = PixivEchSslSocketFactory(delegate) {}
 
         factory.createSocket(connectedSocket(), "example.com", 443, true).use { result ->
             assertEquals(listOf("example.com"), result.serverNames())
@@ -61,8 +63,8 @@ class SniReplacingSslSocketFactoryTest {
     }
 
     @Test
-    fun addingAlpnDoesNotDiscardReplacementSni() {
-        val factory = SniReplacingSslSocketFactory(RecordingSslSocketFactory())
+    fun addingAlpnPreservesInnerServerName() {
+        val factory = PixivEchSslSocketFactory(RecordingSslSocketFactory()) {}
 
         factory.createSocket(connectedSocket(), API_HOST, 443, true).use { result ->
             val sslSocket = result as SSLSocket
@@ -70,7 +72,7 @@ class SniReplacingSslSocketFactoryTest {
                 applicationProtocols = arrayOf("h2", "http/1.1")
             }
 
-            assertEquals(listOf(PIXIV_TLS_SERVER_NAME), sslSocket.serverNames())
+            assertEquals(listOf(API_HOST), sslSocket.serverNames())
             assertContentEquals(
                 arrayOf("h2", "http/1.1"),
                 sslSocket.sslParameters.applicationProtocols,
@@ -81,7 +83,7 @@ class SniReplacingSslSocketFactoryTest {
     @Test
     fun allFactoryMethodsDelegateInsteadOfReturningNull() {
         val delegate = RecordingSslSocketFactory()
-        val factory = SniReplacingSslSocketFactory(delegate)
+        val factory = PixivEchSslSocketFactory(delegate) {}
         val loopback = InetAddress.getLoopbackAddress()
 
         val sockets = listOf(
@@ -101,7 +103,7 @@ class SniReplacingSslSocketFactoryTest {
     @Test
     fun cipherSuitesComeFromDelegate() {
         val delegate = RecordingSslSocketFactory()
-        val factory = SniReplacingSslSocketFactory(delegate)
+        val factory = PixivEchSslSocketFactory(delegate) {}
 
         assertContentEquals(delegate.defaultCipherSuites, factory.defaultCipherSuites)
         assertContentEquals(delegate.supportedCipherSuites, factory.supportedCipherSuites)
@@ -109,7 +111,7 @@ class SniReplacingSslSocketFactoryTest {
 
     @Test
     fun layeredSocketRequiresConnectedRawSocket() {
-        val factory = SniReplacingSslSocketFactory(RecordingSslSocketFactory())
+        val factory = PixivEchSslSocketFactory(RecordingSslSocketFactory()) {}
 
         assertFailsWith<java.net.SocketException> {
             factory.createSocket(Socket(), API_HOST, 443, true)

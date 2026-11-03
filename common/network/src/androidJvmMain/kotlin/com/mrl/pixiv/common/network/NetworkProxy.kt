@@ -13,7 +13,7 @@ import okhttp3.OkHttpClient
 
 internal fun OkHttpClient.Builder.configureNetworkRouting(
     setting: BypassSetting,
-    usePixivSni: Boolean,
+    usePixivEch: Boolean,
 ): OkHttpClient.Builder = apply {
     // 代理由 OkHttp 选择，底层 TCP 不应再次套用 JVM 的系统 SOCKS 代理。
     socketFactory(DirectSocketFactory)
@@ -30,11 +30,11 @@ internal fun OkHttpClient.Builder.configureNetworkRouting(
                 InetSocketAddress.createUnresolved(setting.host, setting.port),
             ),
         )
-        is BypassSetting.SNI -> {
-            if (usePixivSni) {
-                bypassSNI(setting.url, setting.nonStrictSSL, setting.fallback, setting.dohTimeout)
+        is BypassSetting.ECH -> {
+            if (usePixivEch) {
+                bypassECH(setting.url)
             } else {
-                // AI 与更新检查沿用直连，避免把 Pixiv 的 DNS、SNI 和证书策略用于其他服务。
+                // AI 与更新检查沿用直连，避免把 Pixiv 的 DNS、ECH 和证书策略用于其他服务。
                 proxy(Proxy.NO_PROXY)
             }
         }
@@ -46,13 +46,13 @@ private object DirectProxySelector : ProxySelector() {
     override fun connectFailed(uri: URI, address: SocketAddress, exception: IOException) = Unit
 }
 
-internal fun OkHttpConfig.configureProxyOrSNI(
+internal fun OkHttpConfig.configureProxyOrECH(
     setting: BypassSetting = NetworkUtil.bypassSetting,
-    usePixivSni: Boolean = true,
+    usePixivEch: Boolean = true,
 ) {
-    config { configureNetworkRouting(setting, usePixivSni) }
+    config { configureNetworkRouting(setting, usePixivEch) }
 }
 
 actual fun HttpClientConfig<*>.configureNetworkProxy(setting: BypassSetting) {
-    engine { (this as OkHttpConfig).configureProxyOrSNI(setting, usePixivSni = false) }
+    engine { (this as OkHttpConfig).configureProxyOrECH(setting, usePixivEch = false) }
 }

@@ -1,6 +1,7 @@
 package com.mrl.pixiv.setting.network.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -10,53 +11,56 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.collapse
+import androidx.compose.ui.semantics.expand
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.kts.spaceBy
-import com.mrl.pixiv.common.serialize.fromJson
-import com.mrl.pixiv.common.serialize.toJson
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.isIOS
 import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.strings.cancel
-import com.mrl.pixiv.strings.internal_ip_pool
-import com.mrl.pixiv.strings.internal_ip_pool_desc
+import com.mrl.pixiv.strings.ech_doh_url
+import com.mrl.pixiv.strings.network_advanced_settings
+import com.mrl.pixiv.strings.network_advanced_settings_desc
 import com.mrl.pixiv.strings.network_plan
 import com.mrl.pixiv.strings.protocol_http
 import com.mrl.pixiv.strings.protocol_socks
 import com.mrl.pixiv.strings.proxy_host
 import com.mrl.pixiv.strings.proxy_port
 import com.mrl.pixiv.strings.proxy_type
-import com.mrl.pixiv.strings.sni_doh_url
-import com.mrl.pixiv.strings.sni_non_strict_ssl
-import com.mrl.pixiv.strings.sni_timeout
+import com.mrl.pixiv.strings.use_ech
+import com.mrl.pixiv.strings.use_ech_desc
 import com.mrl.pixiv.strings.use_none
-import com.mrl.pixiv.strings.use_system_proxy
-import com.mrl.pixiv.strings.use_system_proxy_desc
 import com.mrl.pixiv.strings.use_none_desc
 import com.mrl.pixiv.strings.use_proxy
 import com.mrl.pixiv.strings.use_proxy_desc
-import com.mrl.pixiv.strings.use_sni
-import com.mrl.pixiv.strings.use_sni_desc
+import com.mrl.pixiv.strings.use_system_proxy
+import com.mrl.pixiv.strings.use_system_proxy_desc
 import io.ktor.http.URLProtocol
 import io.ktor.http.parseUrl
 import org.jetbrains.compose.resources.stringResource
@@ -91,6 +95,36 @@ fun BypassSettingEditor(
     onUpdate: (UserPreference.BypassSetting) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var advancedExpanded by rememberSaveable { mutableStateOf(false) }
+    var showEditDoh by rememberSaveable { mutableStateOf(false) }
+
+    if (showEditDoh && bypassSetting is UserPreference.BypassSetting.ECH) {
+        EchDohEditDialog(
+            setting = bypassSetting,
+            onUpdate = onUpdate,
+            onDismiss = { showEditDoh = false },
+        )
+    }
+
+    BypassSettingContent(
+        bypassSetting = bypassSetting,
+        onUpdate = onUpdate,
+        advancedExpanded = advancedExpanded,
+        onToggleAdvanced = { advancedExpanded = !advancedExpanded },
+        onEditDoh = { showEditDoh = true },
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun BypassSettingContent(
+    bypassSetting: UserPreference.BypassSetting,
+    onUpdate: (UserPreference.BypassSetting) -> Unit,
+    advancedExpanded: Boolean,
+    onToggleAdvanced: () -> Unit,
+    onEditDoh: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(modifier = modifier) {
         Text(
             text = stringResource(RStrings.network_plan),
@@ -109,7 +143,7 @@ fun BypassSettingEditor(
                     UserPreference.BypassSetting.System,
                     UserPreference.BypassSetting.Direct,
                     UserPreference.BypassSetting.Proxy(),
-                    if (platform.isIOS()) null else UserPreference.BypassSetting.SNI()
+                    if (platform.isIOS()) null else UserPreference.BypassSetting.ECH()
                 )
             }
 
@@ -118,7 +152,7 @@ fun BypassSettingEditor(
                     UserPreference.BypassSetting.System -> type == UserPreference.BypassSetting.System
                     UserPreference.BypassSetting.Direct -> type == UserPreference.BypassSetting.Direct
                     is UserPreference.BypassSetting.Proxy -> type is UserPreference.BypassSetting.Proxy
-                    is UserPreference.BypassSetting.SNI -> type is UserPreference.BypassSetting.SNI
+                    is UserPreference.BypassSetting.ECH -> type is UserPreference.BypassSetting.ECH
                 }
 
                 FilterChip(
@@ -135,7 +169,7 @@ fun BypassSettingEditor(
                                     UserPreference.BypassSetting.System -> RStrings.use_system_proxy
                                     UserPreference.BypassSetting.Direct -> RStrings.use_none
                                     is UserPreference.BypassSetting.Proxy -> RStrings.use_proxy
-                                    is UserPreference.BypassSetting.SNI -> RStrings.use_sni
+                                    is UserPreference.BypassSetting.ECH -> RStrings.use_ech
                                 }
                             )
                         )
@@ -156,8 +190,13 @@ fun BypassSettingEditor(
                         ProxyEditor(bypassSetting, onUpdate)
                     }
 
-                    is UserPreference.BypassSetting.SNI -> {
-                        SniEditor(bypassSetting, onUpdate)
+                    is UserPreference.BypassSetting.ECH -> {
+                        EchEditor(
+                            dohUrl = bypassSetting.url,
+                            advancedExpanded = advancedExpanded,
+                            onToggleAdvanced = onToggleAdvanced,
+                            onEditDoh = onEditDoh,
+                        )
                     }
                 }
             }
@@ -167,7 +206,7 @@ fun BypassSettingEditor(
                         UserPreference.BypassSetting.System -> RStrings.use_system_proxy_desc
                         UserPreference.BypassSetting.Direct -> RStrings.use_none_desc
                         is UserPreference.BypassSetting.Proxy -> RStrings.use_proxy_desc
-                        is UserPreference.BypassSetting.SNI -> RStrings.use_sni_desc
+                        is UserPreference.BypassSetting.ECH -> RStrings.use_ech_desc
                     }
                 ),
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -297,107 +336,71 @@ fun ProxyEditor(
 }
 
 @Composable
-fun SniEditor(
-    setting: UserPreference.BypassSetting.SNI,
-    onUpdate: (UserPreference.BypassSetting) -> Unit
+private fun EchEditor(
+    dohUrl: String,
+    advancedExpanded: Boolean,
+    onToggleAdvanced: () -> Unit,
+    onEditDoh: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    var showEditUrl by remember { mutableStateOf(false) }
-    var showEditTimeout by remember { mutableStateOf(false) }
-    var showEditInternalIpPool by remember { mutableStateOf(false) }
-
-
-    if (showEditUrl) {
-        EditDialog(
-            title = stringResource(RStrings.sni_doh_url),
-            initialValue = setting.url,
-            onConfirm = {
-                onUpdate(setting.copy(url = it))
-                showEditUrl = false
-            },
-            isValid = {
-                parseUrl(it)?.let {
-                    it.protocol == URLProtocol.HTTPS
-                } ?: false
-            },
-            onDismiss = { showEditUrl = false }
-        )
-    }
-
-    if (showEditTimeout) {
-        EditDialog(
-            title = stringResource(RStrings.sni_timeout),
-            initialValue = setting.dohTimeout.toString(),
-            onConfirm = {
-                val timeout = it.filter { char -> char.isDigit() }.toIntOrNull() ?: 5
-                onUpdate(setting.copy(dohTimeout = timeout))
-                showEditTimeout = false
-            },
-            onDismiss = { showEditTimeout = false },
-            isValid = { it.toIntOrNull() != null },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-    }
-
-    if (showEditInternalIpPool) {
-        EditDialog(
-            title = stringResource(RStrings.internal_ip_pool),
-            initialValue = setting.fallback.toJson(),
-            onConfirm = onConfirm@{
-                val fallback = try {
-                    it.fromJson<Map<String, String>>()
-                } catch (_: Exception) {
-                    showEditInternalIpPool = false
-                    return@onConfirm
-                }
-                onUpdate(setting.copy(fallback = fallback))
-                showEditInternalIpPool = false
-            },
-            onDismiss = { showEditInternalIpPool = false },
-            isValid = {
-                runCatching {
-                    it.fromJson<Map<String, String>>()
-                    true
-                }.getOrElse {
-                    false
+    Column(modifier = modifier) {
+        ListItem(
+            onClick = onToggleAdvanced,
+            modifier = Modifier.semantics {
+                if (advancedExpanded) {
+                    collapse {
+                        onToggleAdvanced()
+                        true
+                    }
+                } else {
+                    expand {
+                        onToggleAdvanced()
+                        true
+                    }
                 }
             },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-        )
-    }
-
-    Column {
-        ListItem(
-            onClick = {
-                showEditUrl = true
-            },
             shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-            content = { Text(text = stringResource(RStrings.sni_doh_url)) },
-            supportingContent = { Text(text = setting.url) },
-        )
-        ListItem(
-            onClick = {
-                showEditTimeout = true
+            content = { Text(text = stringResource(RStrings.network_advanced_settings)) },
+            supportingContent = {
+                Text(text = stringResource(RStrings.network_advanced_settings_desc))
             },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-            content = { Text(text = stringResource(RStrings.sni_timeout)) },
-            supportingContent = { Text(text = setting.dohTimeout.toString()) },
-        )
-        ListItem(
-            headlineContent = { Text(text = stringResource(RStrings.sni_non_strict_ssl)) },
             trailingContent = {
-                Switch(
-                    checked = setting.nonStrictSSL,
-                    onCheckedChange = { onUpdate(setting.copy(nonStrictSSL = it)) }
+                Icon(
+                    imageVector = if (advancedExpanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                    contentDescription = null,
                 )
-            }
-        )
-        ListItem(
-            onClick = {
-                showEditInternalIpPool = true
             },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-            content = { Text(text = stringResource(RStrings.internal_ip_pool)) },
-            supportingContent = { Text(text = stringResource(RStrings.internal_ip_pool_desc)) },
         )
+        AnimatedVisibility(visible = advancedExpanded) {
+            ListItem(
+                onClick = onEditDoh,
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
+                content = { Text(text = stringResource(RStrings.ech_doh_url)) },
+                supportingContent = { Text(text = dohUrl) },
+            )
+        }
     }
+}
+
+@Composable
+internal fun EchDohEditDialog(
+    setting: UserPreference.BypassSetting.ECH,
+    onUpdate: (UserPreference.BypassSetting) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    EditDialog(
+        title = stringResource(RStrings.ech_doh_url),
+        initialValue = setting.url,
+        onConfirm = {
+            onUpdate(setting.copy(url = it.trim()))
+            onDismiss()
+        },
+        isValid = {
+            parseUrl(it.trim())?.let { url ->
+                url.protocol == URLProtocol.HTTPS && url.host.isNotBlank()
+            } ?: false
+        },
+        onDismiss = onDismiss,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+    )
 }

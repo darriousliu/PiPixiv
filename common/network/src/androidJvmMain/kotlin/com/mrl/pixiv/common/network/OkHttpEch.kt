@@ -5,6 +5,8 @@ import com.mrl.pixiv.common.data.Constants.API_HOST
 import com.mrl.pixiv.common.data.Constants.AUTH_HOST
 import com.mrl.pixiv.common.data.Constants.IMAGE_HOST
 import com.mrl.pixiv.common.data.Constants.STATIC_IMAGE_HOST
+import com.mrl.pixiv.common.data.Constants.hostMap
+import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting.ECH
 import com.mrl.pixiv.common.serialize.JSON
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -12,6 +14,7 @@ import okhttp3.Dns
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.conscrypt.EchRejectedException
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.InetAddress
@@ -19,21 +22,14 @@ import java.net.Proxy
 import java.net.Socket
 import java.net.SocketException
 import java.net.UnknownHostException
-import java.security.KeyStore
-import java.security.SecureRandom
-import java.security.cert.X509Certificate
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-import javax.net.ssl.SNIHostName
-import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
-import javax.net.ssl.TrustManagerFactory
-import javax.net.ssl.X509TrustManager
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
@@ -51,38 +47,56 @@ private data class DnsJsonAnswer(
     val type: Int,
 )
 
-fun OkHttpClient.Builder.bypassSNI(
+fun OkHttpClient.Builder.bypassECH(
     queryUrl: String,
-    nonStrictSSL: Boolean,
-    fallback: Map<String, String>,
-    dohTimeout: Int,
 ): OkHttpClient.Builder {
-    val dohResolver = DnsJsonResolver(
-        queryUrl = queryUrl,
-        timeoutSeconds = dohTimeout,
-        unsafeSSL = nonStrictSSL,
-    )
+    val dohResolver = DnsJsonResolver(queryUrl)
     val originResolver = RacingOriginDnsResolver(
-        timeoutSeconds = dohTimeout,
+        timeoutSeconds = DOH_TIMEOUT_SECONDS,
         dohLookup = dohResolver::lookup,
         systemLookup = Dns.SYSTEM::lookup,
     )
+    val echBootstrapResolver = DnsJsonResolver(ECH.DEFAULT_DOH_URL)
+    val echConfig = PixivEchConfigCache(
+        lookup = {
+            try {
+                dohResolver.lookupEchConfig()
+            } catch (failure: Exception) {
+                if (Thread.currentThread().isInterrupted || queryUrl == ECH.DEFAULT_DOH_URL) {
+                    throw failure
+                }
+                // 自定义解析器不支持 HTTPS 记录时，使用内置解析器并严格验证证书。
+                Logger.w(failure) { "Configured DoH could not resolve ECH; trying bootstrap resolver" }
+                echBootstrapResolver.lookupEchConfig()
+            }
+        },
+    )
     return dns(
-        SniReplaceDns(
-            fallback = fallback,
+        PixivEchDns(
             originLookup = originResolver::lookup,
         )
     ).proxy(
         Proxy.NO_PROXY
     ).sslSocketFactory(
-        SniReplacingSslSocketFactory(SystemTls.socketFactory),
-        SystemTls.trustManager,
-    )
+        PixivEchSslSocketFactory(PixivEchTls.socketFactory) { socket ->
+            PixivEchTls.configure(socket, echConfig.get())
+        },
+        PixivEchTls.trustManager,
+    ).addInterceptor { chain ->
+        try {
+            chain.proceed(chain.request())
+        } catch (failure: EchRejectedException) {
+            if (chain.call().isCanceled()) throw failure
+            // 握手被拒时 HTTP 请求尚未发送；密钥轮换后重新查询一次，禁止明文回退。
+            echConfig.invalidate()
+            chain.proceed(chain.request())
+        }
+    }
 }
 
-internal class SniReplaceDns(
-    private val fallback: Map<String, String>,
+internal class PixivEchDns(
     private val originLookup: (String) -> DnsLookupResult?,
+    private val fallback: Map<String, String> = hostMap,
     private val systemDns: Dns = Dns.SYSTEM,
     private val fallbackLookup: (String) -> List<InetAddress> = ::parseFallbackAddresses,
 ) : Dns {
@@ -96,7 +110,7 @@ internal class SniReplaceDns(
             return systemDns.lookup(hostname).logResult(hostname, "system DNS")
         }
 
-        val originHostname = PIXIV_ORIGIN_ALIASES[normalizedHostname] ?: hostname
+        val originHostname = PIXIV_DNS_ALIASES[normalizedHostname] ?: hostname
         val originResult = lookupResultSafely("origin DNS", hostname) {
             originLookup(originHostname)
         }
@@ -218,20 +232,20 @@ internal class RacingOriginDnsResolver(
 
 internal class DnsJsonResolver(
     private val queryUrl: String,
-    private val timeoutSeconds: Int,
-    unsafeSSL: Boolean,
+    private val timeoutSeconds: Int = DOH_TIMEOUT_SECONDS,
+    baseClient: OkHttpClient = OkHttpClient(),
 ) {
     private val endpoint by lazy {
-        queryUrl.toHttpUrl()
+        queryUrl.toHttpUrl().also {
+            if (!it.isHttps) throw IOException("DoH endpoint must use HTTPS")
+        }
     }
     private val client by lazy {
-        OkHttpClient.Builder().apply {
-            // SNI 的 DNS 查询也必须直连，避免继承桌面端启用的系统代理。
+        baseClient.newBuilder().apply {
+            // ECH 的 DNS 查询也必须直连，避免继承桌面端启用的系统代理。
             proxy(Proxy.NO_PROXY)
             socketFactory(DirectSocketFactory)
-            if (unsafeSSL) {
-                ignoreSSL()
-            }
+            followSslRedirects(false)
             callTimeout(
                 timeoutSeconds.coerceAtLeast(MIN_DOH_TIMEOUT_SECONDS)
                     .seconds
@@ -240,10 +254,16 @@ internal class DnsJsonResolver(
         }.build()
     }
 
-    fun lookup(hostname: String): List<InetAddress> {
+    fun lookup(hostname: String): List<InetAddress> =
+        decodeDnsJsonAddresses(query(hostname, "A"))
+
+    fun lookupEchConfig(): PixivEchConfig =
+        decodePixivEchConfig(query("cloudflare-ech.com", "HTTPS"))
+
+    private fun query(hostname: String, type: String): String {
         val url = endpoint.newBuilder()
             .setQueryParameter("name", hostname)
-            .setQueryParameter("type", "A")
+            .setQueryParameter("type", type)
             .build()
         return client.newCall(
             Request.Builder()
@@ -254,7 +274,7 @@ internal class DnsJsonResolver(
             if (!response.isSuccessful) {
                 throw IOException("DoH request failed with HTTP ${response.code}")
             }
-            decodeDnsJsonAddresses(response.body.string())
+            response.body.string()
         }
     }
 }
@@ -290,8 +310,9 @@ internal fun parseFallbackAddresses(value: String): List<InetAddress> =
         .mapNotNull(::parseIpv4Address)
         .distinct()
 
-internal class SniReplacingSslSocketFactory(
+internal class PixivEchSslSocketFactory(
     private val delegate: SSLSocketFactory,
+    private val configureApiTls: (SSLSocket) -> Unit,
 ) : SSLSocketFactory() {
     override fun getDefaultCipherSuites(): Array<String> =
         delegate.defaultCipherSuites
@@ -312,7 +333,6 @@ internal class SniReplacingSslSocketFactory(
         val peerAddress = rawSocket.inetAddress
             ?: throw SocketException("Socket is not connected")
         val peerHost = when (host?.lowercase()) {
-            in PIXIV_SNI_REPLACEMENT_HOSTS -> PIXIV_TLS_SERVER_NAME
             in PIXIV_NO_SNI_HOSTS -> peerAddress.hostAddress
             else -> host ?: peerAddress.hostAddress
         }
@@ -360,14 +380,13 @@ internal class SniReplacingSslSocketFactory(
     private fun Socket.configureServerName(host: String?): Socket {
         val sslSocket = this as? SSLSocket
             ?: throwAndClose(SocketException("Delegate did not create an SSLSocket"))
-        val serverNames = when (host?.lowercase()) {
-            in PIXIV_SNI_REPLACEMENT_HOSTS -> listOf(SNIHostName(PIXIV_TLS_SERVER_NAME))
-            in PIXIV_NO_SNI_HOSTS -> emptyList()
-            else -> return sslSocket
-        }
         return try {
-            sslParameters = sslParameters.apply {
-                this.serverNames = serverNames
+            when (host?.lowercase()) {
+                // 保留真实的内层域名，使用 ECH 加密 ClientHello，HTTP Host 与证书校验均不变。
+                in PIXIV_ECH_HOSTS -> configureApiTls(sslSocket)
+                in PIXIV_NO_SNI_HOSTS -> sslSocket.sslParameters = sslSocket.sslParameters.apply {
+                    serverNames = emptyList()
+                }
             }
             sslSocket
         } catch (failure: Throwable) {
@@ -385,41 +404,6 @@ internal class SniReplacingSslSocketFactory(
     }
 }
 
-fun OkHttpClient.Builder.ignoreSSL() {
-    val sslContext = SSLContext.getInstance("TLS")
-    val trust = object : X509TrustManager {
-        override fun checkClientTrusted(
-            chain: Array<out X509Certificate>?,
-            authType: String?,
-        ) = Unit
-
-        override fun checkServerTrusted(
-            chain: Array<out X509Certificate>?,
-            authType: String?,
-        ) = Unit
-
-        override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
-    }
-    sslContext.init(null, arrayOf(trust), SecureRandom())
-
-    sslSocketFactory(sslContext.socketFactory, trust)
-    hostnameVerifier { _, _ -> true }
-}
-
-private object SystemTls {
-    private val trustManagers = TrustManagerFactory
-        .getInstance(TrustManagerFactory.getDefaultAlgorithm())
-        .apply { init(null as KeyStore?) }
-        .trustManagers
-
-    val trustManager: X509TrustManager = trustManagers.singleOrNull() as? X509TrustManager
-        ?: error("Unexpected default trust managers: ${trustManagers.contentToString()}")
-
-    val socketFactory: SSLSocketFactory = SSLContext.getInstance("TLS")
-        .apply { init(null, arrayOf(trustManager), null) }
-        .socketFactory
-}
-
 private object OriginDnsExecutor {
     val instance: ExecutorService = Executors.newFixedThreadPool(MAX_ORIGIN_DNS_THREADS) { task ->
         Thread(task, "PiPixiv-origin-dns").apply {
@@ -432,19 +416,19 @@ private const val DNS_RECORD_TYPE_A = 1
 private const val IPV4_OCTET_COUNT = 4
 private const val IPV4_MAX_OCTET = 255
 private const val MIN_DOH_TIMEOUT_SECONDS = 1
+private const val DOH_TIMEOUT_SECONDS = 5
 private const val MAX_ORIGIN_DNS_THREADS = 8
 private val FALLBACK_ADDRESS_SEPARATOR = Regex("[,\\s]+")
-internal const val PIXIV_ORIGIN_HOST = "pixiv.net"
-internal const val PIXIV_ORIGIN_ALIAS = "$PIXIV_ORIGIN_HOST.cdn.cloudflare.net"
-internal const val PIXIV_TLS_SERVER_NAME = "pixiv.me"
-
-private val PIXIV_SNI_REPLACEMENT_HOSTS = setOf(API_HOST, AUTH_HOST)
+internal const val PIXIV_API_DNS_ALIAS = "$API_HOST.cdn.cloudflare.net"
+internal const val PIXIV_AUTH_DNS_ALIAS = "$AUTH_HOST.cdn.cloudflare.net"
+private val PIXIV_ECH_HOSTS = setOf(API_HOST, AUTH_HOST)
 private val PIXIV_NO_SNI_HOSTS = setOf(IMAGE_HOST, STATIC_IMAGE_HOST)
 private val PIXIV_BYPASS_HOSTS =
-    PIXIV_SNI_REPLACEMENT_HOSTS + PIXIV_NO_SNI_HOSTS
-private val PIXIV_ORIGIN_ALIASES = mapOf(
-    API_HOST to PIXIV_ORIGIN_ALIAS,
-    AUTH_HOST to PIXIV_ORIGIN_ALIAS,
+    PIXIV_ECH_HOSTS + PIXIV_NO_SNI_HOSTS
+private val PIXIV_DNS_ALIASES = mapOf(
+    // API/OAuth 使用各自的 CDN 入口，网站源站会拒绝 API 请求并返回 421/403。
+    API_HOST to PIXIV_API_DNS_ALIAS,
+    AUTH_HOST to PIXIV_AUTH_DNS_ALIAS,
     IMAGE_HOST to "$IMAGE_HOST.cdn.cloudflare.net",
     STATIC_IMAGE_HOST to "$STATIC_IMAGE_HOST.cdn.cloudflare.net",
 )

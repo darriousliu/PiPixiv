@@ -7,11 +7,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.protobuf.ProtoNumber
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 
 class NetworkSettingsSerializationTest {
     @Test
@@ -39,9 +39,9 @@ class NetworkSettingsSerializationTest {
     }
 
     @Test
-    fun legacySniffingFlagStillEnablesSni() {
+    fun legacySniffingFlagEnablesEch() {
         val preference = Json.decodeFromString<UserPreference>("""{"enableBypassSniffing":true}""")
-        assertIs<BypassSetting.SNI>(preference.bypassSetting)
+        assertEquals(BypassSetting.ECH(), preference.bypassSetting)
     }
 
     @Test
@@ -67,11 +67,60 @@ class NetworkSettingsSerializationTest {
     }
 
     @Test
-    fun existingSniRetainsCustomSettings() {
-        val preference = Json.decodeFromString<UserPreference>(
-            """{"bypassSetting":{"type":"sni","url":"https://dns.example/query","nonStrictSSL":false,"dohTimeout":7,"fallback":{}}}""",
+    fun legacySniJsonMigratesToEchAndDiscardsRemovedSettings() {
+        val savedUrls = mapOf(
+            "https://doh.pub/dns-query" to BypassSetting.ECH.DEFAULT_DOH_URL,
+            "http://dns.example/query" to BypassSetting.ECH.DEFAULT_DOH_URL,
+            "https://dns.example/query" to "https://dns.example/query",
         )
-        assertEquals(BypassSetting.SNI("https://dns.example/query", emptyMap(), false, 7), preference.bypassSetting)
+        val backupJson = Json { encodeDefaults = true }
+        for ((savedUrl, expectedUrl) in savedUrls) {
+            val preference = Json.decodeFromString<UserPreference>(
+                """{"theme":"DARK","bypassSetting":{"type":"sni","url":"$savedUrl","nonStrictSSL":true,"dohTimeout":99,"fallback":{"app-api.pixiv.net":"210.140.139.155"}}}""",
+            )
+
+            assertEquals(BypassSetting.ECH(expectedUrl), preference.bypassSetting)
+            assertEquals("DARK", preference.theme)
+            val saved = backupJson.parseToJsonElement(backupJson.encodeToString(preference))
+                .jsonObject.getValue("bypassSetting").jsonObject
+            assertEquals(setOf("type", "url"), saved.keys)
+        }
+    }
+
+    @Test
+    fun legacySniProtobufMigratesWithoutWritingRemovedFieldsBack() {
+        val protoBuf = ProtoBuf { encodeDefaults = true }
+        for (savedUrl in listOf("https://doh.pub/dns-query", "https://dns.example/query")) {
+            val legacy = LegacyPreference(
+                bypassSetting = LegacyBypassSetting.Sni(
+                    url = savedUrl,
+                    fallback = mapOf("app-api.pixiv.net" to "210.140.139.155"),
+                    nonStrictSSL = true,
+                    dohTimeout = 99,
+                ),
+            )
+            val restored = protoBuf.decodeFromByteArray(
+                UserPreference.serializer(),
+                protoBuf.encodeToByteArray(LegacyPreference.serializer(), legacy),
+            )
+            val expectedUrl = if (savedUrl == "https://doh.pub/dns-query") {
+                BypassSetting.ECH.DEFAULT_DOH_URL
+            } else {
+                savedUrl
+            }
+            assertEquals(BypassSetting.ECH(expectedUrl), restored.bypassSetting)
+            assertEquals("DARK", restored.theme)
+
+            val saved = protoBuf.decodeFromByteArray(
+                LegacyBypassSetting.Sni.serializer(),
+                protoBuf.encodeToByteArray(
+                    BypassSetting.ECH.serializer(),
+                    restored.bypassSetting as BypassSetting.ECH,
+                ),
+            )
+            // 使用旧结构读取新数据时，已移除的字段只能得到旧结构的默认值。
+            assertEquals(LegacyBypassSetting.Sni(url = expectedUrl), saved)
+        }
     }
 
     @Test
@@ -81,7 +130,8 @@ class NetworkSettingsSerializationTest {
             BypassSetting.Direct,
             BypassSetting.Proxy(),
             BypassSetting.Proxy("proxy.local", 1080, BypassSetting.Proxy.ProxyType.SOCKS),
-            BypassSetting.SNI(),
+            BypassSetting.ECH(),
+            BypassSetting.ECH("https://dns.example/query"),
         )
         for (encodeDefaults in listOf(false, true)) {
             val json = Json { this.encodeDefaults = encodeDefaults }
@@ -104,4 +154,13 @@ private sealed interface LegacyBypassSetting {
     @Serializable
     @SerialName("none")
     data object None : LegacyBypassSetting
+
+    @Serializable
+    @SerialName("sni")
+    data class Sni(
+        val url: String = "https://doh.pub/dns-query",
+        val fallback: Map<String, String> = emptyMap(),
+        val nonStrictSSL: Boolean = false,
+        val dohTimeout: Int = 0,
+    ) : LegacyBypassSetting
 }

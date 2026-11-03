@@ -19,15 +19,12 @@ import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class SniReplaceDnsTest {
+class PixivEchDnsTest {
     @Test
     fun bypassClientDoesNotInheritAProcessProxy() {
         val client = OkHttpClient.Builder()
-            .bypassSNI(
+            .bypassECH(
                 queryUrl = "https://doh.example/dns-query",
-                nonStrictSSL = false,
-                fallback = emptyMap(),
-                dohTimeout = 5,
             )
             .build()
 
@@ -35,7 +32,7 @@ class SniReplaceDnsTest {
     }
 
     @Test
-    fun apiCombinesOriginDohWithOwnFallbackWithoutUsingSystemDns() {
+    fun apiCombinesCdnDohWithOwnFallbackWithoutUsingSystemDns() {
         val firstDohAddress = ipv4("210.140.139.152")
         val secondDohAddress = ipv4("210.140.139.155")
         val fallbackAddress = ipv4("210.140.139.158")
@@ -43,7 +40,7 @@ class SniReplaceDnsTest {
         var fallbackValue: String? = null
         var systemCalled = false
 
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = mapOf(API_HOST to "configured-pool"),
             originLookup = { hostname ->
                 dohHostname = hostname
@@ -66,17 +63,17 @@ class SniReplaceDnsTest {
             listOf(firstDohAddress, secondDohAddress, fallbackAddress),
             dns.lookup(API_HOST),
         )
-        assertEquals(PIXIV_ORIGIN_ALIAS, dohHostname)
+        assertEquals("app-api.pixiv.net.cdn.cloudflare.net", dohHostname)
         assertEquals("configured-pool", fallbackValue)
         assertFalse(systemCalled)
     }
 
     @Test
-    fun oauthUsesOriginDohAliasAndItsOwnFallback() {
+    fun oauthUsesItsOwnCdnDohAliasAndFallback() {
         var dohHostname: String? = null
         val dohAddress = ipv4("210.140.139.158")
         val fallbackAddress = ipv4("210.140.139.161")
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = mapOf(AUTH_HOST to "210.140.139.161"),
             originLookup = {
                 dohHostname = it
@@ -86,7 +83,19 @@ class SniReplaceDnsTest {
         )
 
         assertEquals(listOf(dohAddress, fallbackAddress), dns.lookup(AUTH_HOST))
-        assertEquals(PIXIV_ORIGIN_ALIAS, dohHostname)
+        assertEquals("oauth.secure.pixiv.net.cdn.cloudflare.net", dohHostname)
+    }
+
+    @Test
+    fun builtInApiPoolUsesCdnAddressesWhenDnsFails() {
+        val dns = PixivEchDns(
+            originLookup = { null },
+            systemDns = Dns { error("System DNS must not be used") },
+        )
+        val expected = listOf(ipv4("104.18.42.239"), ipv4("172.64.145.17"))
+
+        assertEquals(expected, dns.lookup(API_HOST))
+        assertEquals(expected, dns.lookup(AUTH_HOST))
     }
 
     @Test
@@ -94,7 +103,7 @@ class SniReplaceDnsTest {
         val queriedHosts = mutableListOf<String>()
         val dohAddress = ipv4("210.140.139.133")
         val fallbackAddress = ipv4("210.140.139.134")
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = mapOf(
                 IMAGE_HOST to "210.140.139.134",
                 STATIC_IMAGE_HOST to "210.140.139.134",
@@ -121,7 +130,7 @@ class SniReplaceDnsTest {
     fun dohFailureFallsBackWithoutCallingSystemDns() {
         val fallbackAddress = ipv4("210.140.139.155")
         var systemCalled = false
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = mapOf(API_HOST to "configured-ip"),
             originLookup = { throw IOException("Origin DNS unavailable") },
             systemDns = Dns {
@@ -140,7 +149,7 @@ class SniReplaceDnsTest {
         val systemAddress = ipv4("192.0.2.10")
         var originCalled = false
         var fallbackCalled = false
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = emptyMap(),
             originLookup = {
                 originCalled = true
@@ -161,7 +170,7 @@ class SniReplaceDnsTest {
     @Test
     fun managedHostDoesNotFallThroughToSystemDns() {
         var systemCalled = false
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = emptyMap(),
             originLookup = { null },
             systemDns = Dns {
@@ -180,7 +189,7 @@ class SniReplaceDnsTest {
     fun fallbackFailureKeepsDohAddressesWithoutCallingSystemDns() {
         val dohAddress = ipv4("210.140.139.152")
         var systemCalled = false
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = mapOf(API_HOST to "invalid fallback"),
             originLookup = {
                 DnsLookupResult("DoH($it)", listOf(dohAddress))
@@ -202,14 +211,13 @@ class SniReplaceDnsTest {
         val resolver = DnsJsonResolver(
             queryUrl = "not a URL",
             timeoutSeconds = -1,
-            unsafeSSL = false,
         )
         val originResolver = RacingOriginDnsResolver(
             timeoutSeconds = 1,
             dohLookup = resolver::lookup,
             systemLookup = { throw UnknownHostException(it) },
         )
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = mapOf(API_HOST to "configured-ip"),
             originLookup = originResolver::lookup,
             systemDns = Dns { throw UnknownHostException(it) },
@@ -233,10 +241,10 @@ class SniReplaceDnsTest {
         )
 
         assertEquals(
-            DnsLookupResult("DoH($PIXIV_ORIGIN_ALIAS)", listOf(dohAddress)),
-            resolver.lookup(PIXIV_ORIGIN_ALIAS),
+            DnsLookupResult("DoH($PIXIV_API_DNS_ALIAS)", listOf(dohAddress)),
+            resolver.lookup(PIXIV_API_DNS_ALIAS),
         )
-        assertEquals(PIXIV_ORIGIN_ALIAS, dohHostname)
+        assertEquals(PIXIV_API_DNS_ALIAS, dohHostname)
     }
 
     @Test
@@ -250,10 +258,10 @@ class SniReplaceDnsTest {
 
         assertEquals(
             DnsLookupResult(
-                "system origin DNS($PIXIV_ORIGIN_ALIAS)",
+                "system origin DNS($PIXIV_API_DNS_ALIAS)",
                 listOf(systemAddress),
             ),
-            resolver.lookup(PIXIV_ORIGIN_ALIAS),
+            resolver.lookup(PIXIV_API_DNS_ALIAS),
         )
     }
 
@@ -278,7 +286,7 @@ class SniReplaceDnsTest {
             },
             executor = executor,
         )
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = mapOf(API_HOST to "210.140.139.155"),
             originLookup = resolver::lookup,
             fallbackLookup = {
@@ -314,7 +322,7 @@ class SniReplaceDnsTest {
         val first = ipv4("210.140.139.161")
         val second = ipv4("210.140.139.152")
         val third = ipv4("210.140.139.155")
-        val dns = SniReplaceDns(
+        val dns = PixivEchDns(
             fallback = mapOf(API_HOST to "configured-pool"),
             originLookup = {
                 DnsLookupResult("DoH($it)", listOf(first, second, first))

@@ -23,6 +23,7 @@ konfig = "0.23.0"
 filekit = "0.17.0"
 htmlconverter = "1.1.1"
 okhttp = "5.5.1"
+conscrypt = "2.7.0"
 sentry-bom = "8.62.0"
 sentry-plugin = "6.25.0"
 sentry-kmp = "0.29.0"
@@ -136,6 +137,8 @@ okhttp-bom = { module = "com.squareup.okhttp3:okhttp-bom", version.ref = "okhttp
 okhttp = { module = "com.squareup.okhttp3:okhttp" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver3" }
 okhttp-tls = { module = "com.squareup.okhttp3:okhttp-tls" }
+conscrypt-android = { module = "org.conscrypt:conscrypt-android", version.ref = "conscrypt" }
+conscrypt-openjdk = { module = "org.conscrypt:conscrypt-openjdk-uber", version.ref = "conscrypt" }
 
 sentry-multiplatform = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sentry-kmp" }
 sentry-bom = { module = "io.sentry:sentry-bom", version.ref = "sentry-bom" }
