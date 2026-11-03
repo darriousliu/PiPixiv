@@ -10,6 +10,8 @@
 
 新增或调整页面、列表条目、按钮、筛选面板等 UI 时，沿用项目的 Material Expressive 主题、排版、间距、圆角和导航习惯，并通过带 mock 数据的 Compose Preview 检查最终布局。预览代码仅在验证期间临时创建，完成后删除，不纳入提交。
 
+分页页面复用 `ContentPullToRefreshBox`、`PagingContentState` 和 `PagingAppendState`：首载或零数据重试使用页面状态，有内容时刷新使用下拉指示器，追加分页使用底部状态。传入真实 `isRefreshing`，仅控制指示器可见性，避免破坏加载中禁止重复刷新的行为。分页状态项只在需要时加入列表，错误提示应保留已有内容并避开底部按钮。普通空态、异常态复用 `ContentEmptyState` / `ContentErrorState`；空态的操作按钮通过 `action` 插槽放在文案下方。
+
 ### 复用真实组件
 
 1. 将依赖 ViewModel、导航、分页或仓库的页面与可预览的内容组件分开。内容组件接收状态和回调，由实际页面与 Preview 共同调用，不单独仿制一套预览 UI。
@@ -40,6 +42,7 @@ python3 scripts/render_ui_review.py --gallery-only
 - 脚本不维护固定预览清单。每次通过 `--fqn` 选择本次临时预览，避免依赖已清理的预览类。
 - 渲染使用 Android app 目标 `gradle://.?app`。KMP feature 模块中的预览也通过 app 汇总；不要直接将 KMP library 作为 Android CLI 的渲染目标。
 - 脚本传入 `-PcomposePreview=true --no-parallel --max-workers=1`。`composePreview` 只关闭离线 Layoutlib 无法初始化的 HotSwan 插桩，正常调试构建仍启用热重载。app 的 debug 依赖必须保留 `ui-tooling`。
+- 不启动真实应用的 JVM 状态/UI 测试也使用 `-PcomposePreview=true`，避免 HotSwan 的未初始化解释器干扰测试。正常调试编译另行不带该参数验证，不将两种配置混在同一次 Gradle 调用中。
 - 保持项目默认 Firebase/analytics 构建配置，不为渲染临时切换构建变体。串行 Gradle 参数用于避免跨平台 metadata 构建依赖缺失。
 - 不使用持久 Preview renderer daemon：改动 `@Preview` 配置后可能复用旧参数。脚本每次启动新的渲染进程，并在渲染前清理自身的旧图片输出。
 

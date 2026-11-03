@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -31,8 +33,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -56,6 +56,9 @@ import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
@@ -161,7 +164,12 @@ fun SearchResultsScreen(
     val originalAspectRatioIllustGridState = rememberLazyStaggeredGridState()
     val novelsListState = rememberLazyListState()
     val usersListState = rememberLazyListState()
-    LaunchedEffect(state.searchFilter, state.bookmarkNumRange, state.bookmarkStringRange, state.searchDateRange) {
+    LaunchedEffect(
+        state.searchFilter,
+        state.bookmarkNumRange,
+        state.bookmarkStringRange,
+        state.searchDateRange
+    ) {
         if (!usePagedSearchResults) {
             squareIllustGridState.scrollToItem(0)
             originalAspectRatioIllustGridState.scrollToItem(0)
@@ -215,7 +223,8 @@ fun SearchResultsScreen(
         modifier: Modifier = Modifier,
     ) {
         PageControls(
-            state = state,
+            // The page status owns failure feedback and its retry action.
+            state = state.copy(error = null),
             onPreviousPage = { viewModel.loadPreviousManualPage(page) },
             onNextPage = { viewModel.loadNextManualPage(page) },
             onLoadPage = { viewModel.loadManualPage(page, it) },
@@ -301,6 +310,7 @@ fun SearchResultsScreen(
                             SearchResultIllustLayout.ORIGINAL_ASPECT_RATIO ->
                                 originalAspectRatioIllustGridState
                         }
+
                         AppViewMode.NOVEL -> novelsListState
                     }
                 }
@@ -383,14 +393,16 @@ fun SearchResultsScreen(
                                 ?: (searchResults?.loadState?.refresh is LoadState.Loading)
                             val showPopularPreviewNotice =
                                 manualIllustResults != null &&
-                                    viewModel.isPopularPreview(isPremium)
+                                        viewModel.isPopularPreview(isPremium)
                             val showPagingControls =
                                 manualIllustResults?.capability != null &&
-                                    manualIllustResults.capability != FeedCapability.SINGLE_PAGE
+                                        manualIllustResults.capability != FeedCapability.SINGLE_PAGE
                             val bottomContentPadding = navigationBarBottomPadding +
-                                if (showPagingControls || showPopularPreviewNotice) 88.dp else 0.dp
+                                    if (showPagingControls || showPopularPreviewNotice) 88.dp else 0.dp
 
-                            PullToRefreshBox(
+                            ContentPullToRefreshBox(
+                                hasContent = (manualIllustResults?.items?.size
+                                    ?: searchResults?.itemCount ?: 0) > 0,
                                 isRefreshing = isRefreshing,
                                 onRefresh = {
                                     if (manualIllustResults != null) {
@@ -400,13 +412,6 @@ fun SearchResultsScreen(
                                     }
                                 },
                                 state = pullRefreshState,
-                                indicator = {
-                                    PullToRefreshDefaults.LoadingIndicator(
-                                        state = pullRefreshState,
-                                        isRefreshing = isRefreshing,
-                                        modifier = Modifier.align(Alignment.TopCenter),
-                                    )
-                                },
                             ) {
                                 when (searchResultIllustLayout) {
                                     SearchResultIllustLayout.SQUARE -> {
@@ -437,6 +442,25 @@ fun SearchResultsScreen(
                                                     navToPictureScreen =
                                                         navigationManager::navigateToPictureScreen,
                                                 )
+                                            }
+
+                                            if (searchResults != null) {
+                                                if (
+                                                    searchResults.itemCount > 0 &&
+                                                    searchResults.loadState.refresh is LoadState.NotLoading &&
+                                                    searchResults.loadState.append !is LoadState.NotLoading
+                                                ) {
+                                                    item(
+                                                        key = "append_state",
+                                                        span = { GridItemSpan(maxLineSpan) }) {
+                                                        PagingAppendState(
+                                                            loadStates = searchResults.loadState,
+                                                            itemCount = searchResults.itemCount,
+                                                            onRetry = searchResults::retry,
+                                                            modifier = Modifier.padding(bottom = 72.dp),
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                         VerticalScrollbar(
@@ -507,12 +531,56 @@ fun SearchResultsScreen(
                                                     )
                                                 }
                                             }
+
+                                            if (searchResults != null) {
+                                                if (
+                                                    searchResults.itemCount > 0 &&
+                                                    searchResults.loadState.refresh is LoadState.NotLoading &&
+                                                    searchResults.loadState.append !is LoadState.NotLoading
+                                                ) {
+                                                    item(
+                                                        key = "append_state",
+                                                        span = StaggeredGridItemSpan.FullLine
+                                                    ) {
+                                                        PagingAppendState(
+                                                            loadStates = searchResults.loadState,
+                                                            itemCount = searchResults.itemCount,
+                                                            onRetry = searchResults::retry,
+                                                            modifier = Modifier.padding(bottom = 72.dp),
+                                                        )
+                                                    }
+                                                }
+                                            }
                                         }
                                         VerticalScrollbar(
                                             state = originalAspectRatioIllustGridState,
                                             modifier = Modifier.align(Alignment.CenterEnd),
                                         )
                                     }
+                                }
+                                if (manualIllustResults != null) {
+                                    ManualSearchResultsStatus(
+                                        state = manualIllustResults,
+                                        onRetry = { viewModel.refreshManualPage(SearchResultsPage.IllustsOrNovel) },
+                                        modifier = Modifier.padding(
+                                            bottom = maxOf(
+                                                bottomContentPadding,
+                                                navigationBarBottomPadding + 80.dp
+                                            )
+                                        ),
+                                    )
+                                } else if (searchResults != null) {
+                                    PagingContentState(
+                                        loadStates = searchResults.loadState,
+                                        itemCount = searchResults.itemCount,
+                                        onRetry = searchResults::retry,
+                                        modifier = Modifier.padding(
+                                            bottom = maxOf(
+                                                bottomContentPadding,
+                                                navigationBarBottomPadding + 80.dp
+                                            )
+                                        ),
+                                    )
                                 }
                                 if (manualIllustResults != null && showPagingControls) {
                                     ManualPagingToolbar(
@@ -575,14 +643,16 @@ fun SearchResultsScreen(
                                 ?: (novelSearchResults?.loadState?.refresh is LoadState.Loading)
                             val showPopularPreviewNotice =
                                 manualNovelResults != null &&
-                                    viewModel.isPopularPreview(isPremium)
+                                        viewModel.isPopularPreview(isPremium)
                             val showPagingControls =
                                 manualNovelResults?.capability != null &&
-                                    manualNovelResults.capability != FeedCapability.SINGLE_PAGE
+                                        manualNovelResults.capability != FeedCapability.SINGLE_PAGE
                             val bottomContentPadding = navigationBarBottomPadding +
-                                if (showPagingControls || showPopularPreviewNotice) 88.dp else 0.dp
+                                    if (showPagingControls || showPopularPreviewNotice) 88.dp else 0.dp
 
-                            PullToRefreshBox(
+                            ContentPullToRefreshBox(
+                                hasContent = (manualNovelResults?.items?.size
+                                    ?: novelSearchResults?.itemCount ?: 0) > 0,
                                 isRefreshing = isNovelRefreshing,
                                 onRefresh = {
                                     if (manualNovelResults != null) {
@@ -592,13 +662,6 @@ fun SearchResultsScreen(
                                     }
                                 },
                                 state = novelPullRefreshState,
-                                indicator = {
-                                    PullToRefreshDefaults.LoadingIndicator(
-                                        state = novelPullRefreshState,
-                                        isRefreshing = isNovelRefreshing,
-                                        modifier = Modifier.align(Alignment.TopCenter),
-                                    )
-                                },
                             ) {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
@@ -649,11 +712,52 @@ fun SearchResultsScreen(
                                             }
                                         }
                                     }
+
+                                    if (novelSearchResults != null) {
+                                        if (
+                                            novelSearchResults.itemCount > 0 &&
+                                            novelSearchResults.loadState.refresh is LoadState.NotLoading &&
+                                            novelSearchResults.loadState.append !is LoadState.NotLoading
+                                        ) {
+                                            item(key = "append_state") {
+                                                PagingAppendState(
+                                                    loadStates = novelSearchResults.loadState,
+                                                    itemCount = novelSearchResults.itemCount,
+                                                    onRetry = novelSearchResults::retry,
+                                                    modifier = Modifier.padding(bottom = 72.dp),
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                                 VerticalScrollbar(
                                     state = novelsListState,
                                     modifier = Modifier.align(Alignment.CenterEnd)
                                 )
+                                if (manualNovelResults != null) {
+                                    ManualSearchResultsStatus(
+                                        state = manualNovelResults,
+                                        onRetry = { viewModel.refreshManualPage(SearchResultsPage.IllustsOrNovel) },
+                                        modifier = Modifier.padding(
+                                            bottom = maxOf(
+                                                bottomContentPadding,
+                                                navigationBarBottomPadding + 80.dp
+                                            )
+                                        ),
+                                    )
+                                } else if (novelSearchResults != null) {
+                                    PagingContentState(
+                                        loadStates = novelSearchResults.loadState,
+                                        itemCount = novelSearchResults.itemCount,
+                                        onRetry = novelSearchResults::retry,
+                                        modifier = Modifier.padding(
+                                            bottom = maxOf(
+                                                bottomContentPadding,
+                                                navigationBarBottomPadding + 80.dp
+                                            )
+                                        ),
+                                    )
+                                }
                                 if (manualNovelResults != null && showPagingControls) {
                                     ManualPagingToolbar(
                                         state = manualNovelResults,
@@ -711,11 +815,13 @@ fun SearchResultsScreen(
                         ?: (userSearchResults?.loadState?.refresh is LoadState.Loading)
                     val showPagingControls =
                         manualUserResults?.capability != null &&
-                            manualUserResults.capability != FeedCapability.SINGLE_PAGE
+                                manualUserResults.capability != FeedCapability.SINGLE_PAGE
                     val bottomContentPadding = navigationBarBottomPadding +
-                        if (showPagingControls) 88.dp else 0.dp
+                            if (showPagingControls) 88.dp else 0.dp
 
-                    PullToRefreshBox(
+                    ContentPullToRefreshBox(
+                        hasContent = (manualUserResults?.items?.size ?: userSearchResults?.itemCount
+                        ?: 0) > 0,
                         isRefreshing = isUserRefreshing,
                         onRefresh = {
                             if (manualUserResults != null) {
@@ -725,13 +831,6 @@ fun SearchResultsScreen(
                             }
                         },
                         state = userPullRefreshState,
-                        indicator = {
-                            PullToRefreshDefaults.LoadingIndicator(
-                                state = userPullRefreshState,
-                                isRefreshing = isUserRefreshing,
-                                modifier = Modifier.align(Alignment.TopCenter),
-                            )
-                        },
                     ) {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -770,9 +869,28 @@ fun SearchResultsScreen(
                                         isFollowed = userPreview.user.isFollowing,
                                         navToPictureScreen = navigationManager::navigateToPictureScreen,
                                         navToUserProfile = {
-                                            navigationManager.navigateToProfileDetailScreen(userPreview.user.id)
+                                            navigationManager.navigateToProfileDetailScreen(
+                                                userPreview.user.id
+                                            )
                                         }
                                     )
+                                }
+                            }
+
+                            if (userSearchResults != null) {
+                                if (
+                                    userSearchResults.itemCount > 0 &&
+                                    userSearchResults.loadState.refresh is LoadState.NotLoading &&
+                                    userSearchResults.loadState.append !is LoadState.NotLoading
+                                ) {
+                                    item(key = "append_state") {
+                                        PagingAppendState(
+                                            loadStates = userSearchResults.loadState,
+                                            itemCount = userSearchResults.itemCount,
+                                            onRetry = userSearchResults::retry,
+                                            modifier = Modifier.padding(bottom = 72.dp),
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -780,6 +898,30 @@ fun SearchResultsScreen(
                             state = usersListState,
                             modifier = Modifier.align(Alignment.CenterEnd)
                         )
+                        if (manualUserResults != null) {
+                            ManualSearchResultsStatus(
+                                state = manualUserResults,
+                                onRetry = { viewModel.refreshManualPage(SearchResultsPage.Users) },
+                                modifier = Modifier.padding(
+                                    bottom = maxOf(
+                                        bottomContentPadding,
+                                        navigationBarBottomPadding + 80.dp
+                                    )
+                                ),
+                            )
+                        } else if (userSearchResults != null) {
+                            PagingContentState(
+                                loadStates = userSearchResults.loadState,
+                                itemCount = userSearchResults.itemCount,
+                                onRetry = userSearchResults::retry,
+                                modifier = Modifier.padding(
+                                    bottom = maxOf(
+                                        bottomContentPadding,
+                                        navigationBarBottomPadding + 80.dp
+                                    )
+                                ),
+                            )
+                        }
                         if (manualUserResults != null && showPagingControls) {
                             ManualPagingToolbar(
                                 state = manualUserResults,

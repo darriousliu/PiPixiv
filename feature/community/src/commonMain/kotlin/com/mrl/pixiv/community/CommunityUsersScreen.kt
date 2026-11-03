@@ -31,7 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,6 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingContentState
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.compose.ui.image.LoadingImage
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Illust
@@ -93,8 +95,9 @@ fun CommunityUsersScreen(
         onBack = navigationManager::popBackStack,
         onRefresh = users::refresh,
     ) { padding ->
-        PullToRefreshBox(
+        ContentPullToRefreshBox(
             isRefreshing = users.loadState.refresh is LoadState.Loading,
+            hasContent = users.itemCount > 0,
             onRefresh = users::refresh,
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
@@ -107,8 +110,9 @@ fun CommunityUsersScreen(
             ) {
                 if (users.itemCount == 0 || users.loadState.refresh is LoadState.Error) {
                     item(key = "refresh-state", span = { GridItemSpan(maxLineSpan) }) {
-                        CommunityListStatus(
-                            state = users.loadState.refresh,
+                        PagingContentState(
+                            loadStates = users.loadState,
+                            itemCount = users.itemCount,
                             onRetry = users::retry,
                             emptyMessage = stringResource(
                                 if (kind == CommunityUsersKind.FOLLOWERS) {
@@ -124,9 +128,9 @@ fun CommunityUsersScreen(
                 ) { index ->
                     users[index]?.let { preview -> CommunityUserCard(preview, navigationManager) }
                 }
-                if (users.itemCount > 0 && users.loadState.append !is LoadState.NotLoading) {
+                if (users.itemCount > 0 && users.loadState.refresh is LoadState.NotLoading && users.loadState.append !is LoadState.NotLoading) {
                     item(key = "append-state", span = { GridItemSpan(maxLineSpan) }) {
-                        CommunityListStatus(users.loadState.append, users::retry)
+                        PagingAppendState(users.loadState, users.itemCount, users::retry)
                     }
                 }
             }

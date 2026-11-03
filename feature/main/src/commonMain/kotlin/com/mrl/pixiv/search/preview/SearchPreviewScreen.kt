@@ -1,6 +1,7 @@
 package com.mrl.pixiv.search.preview
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -25,8 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +38,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.compose.ui.ContentEmptyState
+import com.mrl.pixiv.common.compose.ui.ContentErrorState
+import com.mrl.pixiv.common.compose.ui.ContentLoadingState
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
 import com.mrl.pixiv.common.compose.ui.ViewModeToggleButton
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
@@ -112,18 +116,12 @@ fun SearchPreviewScreen(
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) {
-        PullToRefreshBox(
+        ContentPullToRefreshBox(
+            hasContent = state.trendingTags.isNotEmpty(),
             isRefreshing = state.refreshing,
             onRefresh = { viewModel.dispatch(SearchPreviewAction.LoadTrendingTags) },
             modifier = Modifier.padding(it),
             state = pullRefreshState,
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    state = pullRefreshState,
-                    isRefreshing = state.refreshing,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                )
-            }
         ) {
             LazyVerticalGrid(
                 modifier = Modifier.fillMaxSize(),
@@ -163,6 +161,37 @@ fun SearchPreviewScreen(
                     )
                 }
             }
+            TrendingTagsStatus(
+                state = state,
+                onRetry = { viewModel.dispatch(SearchPreviewAction.LoadTrendingTags) },
+                modifier = Modifier.padding(bottom = 88.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TrendingTagsStatus(
+    state: SearchPreviewState,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val hasContent = state.trendingTags.isNotEmpty()
+    if (hasContent && (!state.failed || state.refreshing)) return
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = if (hasContent) Alignment.BottomCenter else Alignment.Center,
+    ) {
+        when {
+            !hasContent && state.refreshing -> ContentLoadingState()
+            state.failed -> ContentErrorState(
+                onRetry = onRetry,
+                compact = hasContent,
+                modifier = if (hasContent) Modifier.widthIn(max = 480.dp)
+                    .padding(16.dp) else Modifier,
+            )
+
+            !hasContent -> ContentEmptyState()
         }
     }
 }

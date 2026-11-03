@@ -1,6 +1,5 @@
 package com.mrl.pixiv.comment
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,16 +9,15 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.comment.components.CommentItem
+import com.mrl.pixiv.common.compose.ui.ContentEmptyState
 import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.hPadding
 import com.mrl.pixiv.common.kts.spaceBy
@@ -59,17 +57,10 @@ fun BlockCommentsScreen(
         }
     ) { innerPadding ->
         if (blockedComments.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(RStrings.no_blocked_items),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
+            ContentEmptyState(
+                message = stringResource(RStrings.no_blocked_items),
+                modifier = Modifier.padding(innerPadding).fillMaxSize(),
+            )
             return@Scaffold
         }
         LazyColumn(

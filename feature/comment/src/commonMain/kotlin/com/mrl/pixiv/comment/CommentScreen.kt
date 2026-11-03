@@ -1,7 +1,6 @@
 package com.mrl.pixiv.comment
 
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,16 +12,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
@@ -47,6 +42,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.comment.components.CommentInput
 import com.mrl.pixiv.comment.components.CommentInputPlaceholder
 import com.mrl.pixiv.comment.components.CommentItem
+import com.mrl.pixiv.common.compose.ui.ContentLoadingState
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingContentState
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.data.comment.Comment
 import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.hPadding
@@ -61,11 +60,11 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.common.viewmodel.state
+import com.mrl.pixiv.strings.content_loading
 import com.mrl.pixiv.strings.comment_success
 import com.mrl.pixiv.strings.delete_comment_success
-import com.mrl.pixiv.strings.load_failed
+import com.mrl.pixiv.strings.no_comments
 import com.mrl.pixiv.strings.no_replies
-import com.mrl.pixiv.strings.retry
 import com.mrl.pixiv.strings.view_comments
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
@@ -176,8 +175,9 @@ fun CommentScreen(
             )
         }
     ) { innerPadding ->
-        PullToRefreshBox(
+        ContentPullToRefreshBox(
             isRefreshing = comments.loadState.refresh is LoadState.Loading,
+            hasContent = comments.itemCount > 0,
             onRefresh = { comments.refresh() },
             modifier = Modifier
                 .padding(innerPadding)
@@ -242,6 +242,26 @@ fun CommentScreen(
                             8.VSpacer
                             HorizontalDivider()
                         }
+                    }
+                }
+                // Keep status rows after comments so reply-target scroll indices stay unchanged.
+                if (comments.itemCount == 0 || comments.loadState.refresh is LoadState.Error) {
+                    item(key = "comments-content-state") {
+                        PagingContentState(
+                            loadStates = comments.loadState,
+                            itemCount = comments.itemCount,
+                            onRetry = comments::retry,
+                            modifier = if (comments.itemCount == 0) Modifier.fillParentMaxHeight() else Modifier,
+                            emptyMessage = stringResource(RStrings.no_comments),
+                        )
+                    }
+                }
+                if (comments.itemCount > 0 &&
+                    comments.loadState.refresh is LoadState.NotLoading &&
+                    comments.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "comments-append-state") {
+                        PagingAppendState(comments.loadState, comments.itemCount, comments::retry)
                     }
                 }
             }
@@ -420,36 +440,31 @@ private fun RepliesContent(
             }
         }
 
-        val refresh = replies.loadState.refresh
-        val append = replies.loadState.append
-        when {
-            refresh is LoadState.Loading || append is LoadState.Loading -> {
-                item(key = "replies-loading") {
-                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+        // The parent stays at index 0 and replies at index + 1, including while retrying.
+        if (replies.itemCount == 0 || replies.loadState.refresh !is LoadState.NotLoading) {
+            item(key = "replies-content-state") {
+                if (replies.itemCount > 0 && replies.loadState.refresh is LoadState.Loading) {
+                    // Replies have no pull-to-refresh indicator; keep their refresh feedback inline.
+                    ContentLoadingState(
+                        compact = true,
+                        message = stringResource(RStrings.content_loading)
+                    )
+                } else {
+                    PagingContentState(
+                        loadStates = replies.loadState,
+                        itemCount = replies.itemCount,
+                        onRetry = replies::retry,
+                        emptyMessage = stringResource(RStrings.no_replies),
+                    )
                 }
             }
-            refresh is LoadState.Error || append is LoadState.Error -> {
-                val error = (refresh as? LoadState.Error ?: append as LoadState.Error).error
-                item(key = "replies-error") {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(stringResource(RStrings.load_failed, error.message.orEmpty()))
-                        TextButton(onClick = replies::retry) {
-                            Text(stringResource(RStrings.retry))
-                        }
-                    }
-                }
-            }
-            replies.itemCount == 0 -> {
-                item(key = "replies-empty") {
-                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                        Text(stringResource(RStrings.no_replies))
-                    }
-                }
+        }
+        if (replies.itemCount > 0 &&
+            replies.loadState.refresh is LoadState.NotLoading &&
+            replies.loadState.append !is LoadState.NotLoading
+        ) {
+            item(key = "replies-append-state") {
+                PagingAppendState(replies.loadState, replies.itemCount, replies::retry)
             }
         }
     }

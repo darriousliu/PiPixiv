@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.mrl.pixiv.common.compose.ui.ContentEmptyState
 import com.mrl.pixiv.common.repository.NovelReadLaterItem
 import com.mrl.pixiv.common.repository.NovelReadLaterRepository
 import com.mrl.pixiv.common.repository.NovelReadLaterState
@@ -89,10 +90,7 @@ fun NovelReadLaterScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = stringResource(RStrings.read_later_empty),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                ContentEmptyState(message = stringResource(RStrings.read_later_empty))
             }
         } else {
             LazyColumn(

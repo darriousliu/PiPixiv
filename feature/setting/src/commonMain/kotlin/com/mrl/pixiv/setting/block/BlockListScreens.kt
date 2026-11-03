@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.lightBlue
+import com.mrl.pixiv.common.compose.ui.ContentEmptyState
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -133,7 +134,8 @@ fun BlockTagScreen(
     var inputTag by remember { mutableStateOf("") }
     var isRegex by remember { mutableStateOf(false) }
     val normalizedTag = inputTag.trim()
-    val regexValid = !isRegex || normalizedTag.isBlank() || runCatching { Regex(normalizedTag) }.isSuccess
+    val regexValid =
+        !isRegex || normalizedTag.isBlank() || runCatching { Regex(normalizedTag) }.isSuccess
     val canConfirm = normalizedTag.isNotEmpty() && regexValid
 
     BlockTextScreen(
@@ -254,10 +256,7 @@ private fun <T> BlockTextScreen(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = stringResource(RStrings.no_blocked_items),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
+                ContentEmptyState(message = stringResource(RStrings.no_blocked_items))
             }
             return@Scaffold
         }

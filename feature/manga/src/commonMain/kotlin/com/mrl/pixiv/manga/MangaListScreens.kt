@@ -33,9 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -48,6 +45,9 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingContentState
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.data.manga.MangaSeriesDetail
 import com.mrl.pixiv.common.data.manga.MangaWatchlistEntry
@@ -175,37 +175,43 @@ private fun <T : Any> MangaPagedListContent(
     listState: LazyListState = rememberLazyListState(),
     content: @Composable (T) -> Unit,
 ) {
-    val pullRefreshState = rememberPullToRefreshState()
     val isRefreshing = items.loadState.refresh is LoadState.Loading
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
         modifier = modifier.fillMaxSize(),
         isRefreshing = isRefreshing,
+        hasContent = items.itemCount > 0,
         onRefresh = items::refresh,
-        state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        },
     ) {
         MangaListColumn(state = listState) {
             if (items.itemCount == 0) {
                 item(key = "refresh_state") {
-                    MangaLoadState(items.loadState.refresh, items::retry) { Text(emptyText) }
+                    PagingContentState(
+                        loadStates = items.loadState,
+                        itemCount = items.itemCount,
+                        onRetry = items::retry,
+                        modifier = Modifier.fillParentMaxHeight(),
+                        emptyMessage = emptyText,
+                    )
                 }
             } else if (items.loadState.refresh is LoadState.Error) {
                 item(key = "refresh_error") {
-                    MangaLoadState(
-                        items.loadState.refresh,
-                        items::retry
-                    )
+                    PagingContentState(items.loadState, items.itemCount, items::retry)
                 }
             }
             // Masked entries have no stable server ID, so use the paging position.
             items(count = items.itemCount) { index -> items[index]?.let { content(it) } }
-            item(key = "append_state") { MangaLoadState(items.loadState.append, items::retry) }
+            if (items.itemCount > 0 &&
+                items.loadState.refresh is LoadState.NotLoading &&
+                items.loadState.append !is LoadState.NotLoading
+            ) {
+                item(key = "append_state") {
+                    PagingAppendState(
+                        items.loadState,
+                        items.itemCount,
+                        items::retry
+                    )
+                }
+            }
         }
     }
 }

@@ -29,7 +29,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -45,6 +44,9 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingContentState
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.compose.ui.image.LoadingImage
 import com.mrl.pixiv.common.data.notification.PixivNotification
 import com.mrl.pixiv.common.repository.CommunityRepository
@@ -105,8 +107,9 @@ fun NotificationScreen(
         onBack = navigationManager::popBackStack,
         onRefresh = refresh,
     ) { padding ->
-        PullToRefreshBox(
+        ContentPullToRefreshBox(
             isRefreshing = notifications.loadState.refresh is LoadState.Loading,
+            hasContent = notifications.itemCount > 0,
             onRefresh = refresh,
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
@@ -136,8 +139,9 @@ fun NotificationScreen(
                 }
                 if (notifications.itemCount == 0 || notifications.loadState.refresh is LoadState.Error) {
                     item(key = "refresh-state") {
-                        CommunityListStatus(
-                            state = notifications.loadState.refresh,
+                        PagingContentState(
+                            loadStates = notifications.loadState,
+                            itemCount = notifications.itemCount,
                             onRetry = notifications::retry,
                             emptyMessage = stringResource(RStrings.community_empty_notifications),
                         )
@@ -184,9 +188,13 @@ fun NotificationScreen(
                         )
                     }
                 }
-                if (notifications.itemCount > 0 && notifications.loadState.append !is LoadState.NotLoading) {
+                if (notifications.itemCount > 0 && notifications.loadState.refresh is LoadState.NotLoading && notifications.loadState.append !is LoadState.NotLoading) {
                     item(key = "append-state") {
-                        CommunityListStatus(notifications.loadState.append, notifications::retry)
+                        PagingAppendState(
+                            notifications.loadState,
+                            notifications.itemCount,
+                            notifications::retry
+                        )
                     }
                 }
             }

@@ -1,0 +1,8 @@
+<resources>
+    <string name="content_loading">Loading</string>
+    <string name="content_loading_more">Loading more</string>
+    <string name="content_empty_title">Nothing here yet</string>
+    <string name="content_empty_downloads">No downloads here yet</string>
+    <string name="content_error_title">Unable to load right now</string>
+    <string name="content_error_description">Please try again in a moment</string>
+</resources>

@@ -23,8 +23,6 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,11 +31,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.ViewModeToggleButton
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
@@ -59,7 +61,6 @@ import com.mrl.pixiv.strings.manga
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-
 
 @Composable
 fun HomeScreen(
@@ -226,18 +227,12 @@ private fun HomeImageFeedPage(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = recommendImageList.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = recommendImageList::refresh,
         modifier = Modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         Box(
             modifier = Modifier
@@ -248,6 +243,12 @@ private fun HomeImageFeedPage(
                 recommendImageList = recommendImageList,
                 navToPictureScreen = navigateToPictureScreen,
                 lazyStaggeredGridState = lazyStaggeredGridState,
+            )
+            PagingContentState(
+                loadStates = recommendImageList.loadState,
+                itemCount = recommendImageList.itemCount,
+                onRetry = recommendImageList::retry,
+                modifier = Modifier.padding(bottom = if (recommendImageList.itemCount > 0) 136.dp else 0.dp),
             )
             VerticalScrollbar(
                 state = lazyStaggeredGridState,
@@ -286,18 +287,12 @@ private fun NovelMode(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = recommendNovelList.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier,
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -324,7 +319,28 @@ private fun NovelMode(
                     )
                 }
             }
+
+            if (
+                recommendNovelList.itemCount > 0 &&
+                recommendNovelList.loadState.refresh is LoadState.NotLoading &&
+                recommendNovelList.loadState.append !is LoadState.NotLoading
+            ) {
+                item(key = "append_state") {
+                    PagingAppendState(
+                        loadStates = recommendNovelList.loadState,
+                        itemCount = recommendNovelList.itemCount,
+                        onRetry = recommendNovelList::retry,
+                        modifier = Modifier.padding(bottom = 136.dp),
+                    )
+                }
+            }
         }
+        PagingContentState(
+            loadStates = recommendNovelList.loadState,
+            itemCount = recommendNovelList.itemCount,
+            onRetry = recommendNovelList::retry,
+            modifier = Modifier.padding(bottom = if (recommendNovelList.itemCount > 0) 136.dp else 0.dp),
+        )
     }
 }
 

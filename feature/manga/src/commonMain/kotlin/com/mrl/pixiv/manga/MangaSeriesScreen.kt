@@ -15,10 +15,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -26,17 +24,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,6 +38,9 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingContentState
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.manga.MangaSeriesDetail
@@ -55,7 +52,6 @@ import com.mrl.pixiv.strings.reading_manga_add_watchlist
 import com.mrl.pixiv.strings.reading_manga_chapters_empty
 import com.mrl.pixiv.strings.reading_manga_remove_watchlist
 import com.mrl.pixiv.strings.reading_manga_series
-import com.mrl.pixiv.strings.retry
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -80,9 +76,10 @@ fun MangaSeriesScreen(
         onBack = navigationManager::popBackStack,
         onRefresh = works::refresh,
     ) { contentModifier ->
-        PullToRefreshBox(
+        ContentPullToRefreshBox(
             modifier = contentModifier.fillMaxSize(),
             isRefreshing = works.loadState.refresh is LoadState.Loading,
+            hasContent = works.itemCount > 0,
             onRefresh = works::refresh,
         ) {
             LazyVerticalGrid(
@@ -108,13 +105,16 @@ fun MangaSeriesScreen(
                 }
                 if (works.itemCount == 0) {
                     item(key = "refresh_state", span = { GridItemSpan(maxLineSpan) }) {
-                        MangaLoadState(works.loadState.refresh, works::retry) {
-                            Text(stringResource(RStrings.reading_manga_chapters_empty))
-                        }
+                        PagingContentState(
+                            loadStates = works.loadState,
+                            itemCount = works.itemCount,
+                            onRetry = works::retry,
+                            emptyMessage = stringResource(RStrings.reading_manga_chapters_empty),
+                        )
                     }
                 } else if (works.loadState.refresh is LoadState.Error) {
                     item(key = "refresh_error", span = { GridItemSpan(maxLineSpan) }) {
-                        MangaLoadState(works.loadState.refresh, works::retry)
+                        PagingContentState(works.loadState, works.itemCount, works::retry)
                     }
                 }
                 items(
@@ -131,8 +131,13 @@ fun MangaSeriesScreen(
                         }
                     }
                 }
-                item(key = "append_state", span = { GridItemSpan(maxLineSpan) }) {
-                    MangaLoadState(works.loadState.append, works::retry)
+                if (works.itemCount > 0 &&
+                    works.loadState.refresh is LoadState.NotLoading &&
+                    works.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "append_state", span = { GridItemSpan(maxLineSpan) }) {
+                        PagingAppendState(works.loadState, works.itemCount, works::retry)
+                    }
                 }
             }
             VerticalScrollbar(state = gridState, modifier = Modifier.align(Alignment.CenterEnd))
@@ -228,58 +233,6 @@ internal fun MangaSeriesHeader(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )
-            }
-        }
-    }
-}
-
-@Composable
-internal fun MangaLoadState(
-    state: LoadState,
-    onRetry: () -> Unit,
-    empty: (@Composable () -> Unit)? = null,
-) {
-    if (state is LoadState.NotLoading && empty == null) return
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        when (state) {
-            is LoadState.Loading -> CircularProgressIndicator(
-                Modifier.size(32.dp),
-                strokeWidth = 3.dp
-            )
-
-            is LoadState.Error -> {
-                Icon(
-                    Icons.Rounded.CloudOff,
-                    null,
-                    Modifier.size(40.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    stringResource(RStrings.load_failed, state.error.message.orEmpty()),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-                TextButton(onClick = onRetry) { Text(stringResource(RStrings.retry)) }
-            }
-
-            is LoadState.NotLoading -> {
-                Icon(
-                    Icons.AutoMirrored.Rounded.MenuBook,
-                    null,
-                    Modifier.size(40.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                ProvideTextStyle(
-                    MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                ) { empty?.invoke() }
             }
         }
     }

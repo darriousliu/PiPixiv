@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -26,8 +27,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -51,6 +50,9 @@ import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.ViewModeToggleButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
@@ -72,6 +74,9 @@ import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.confirm
 import com.mrl.pixiv.strings.r18
 import com.mrl.pixiv.strings.ranking
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -82,9 +87,6 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Instant
 
 @Composable
 fun RankingScreen(
@@ -332,18 +334,12 @@ private fun IllustMode(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = rankingList.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         val layoutParams = RecommendGridDefaults.coverLayoutParameters()
         AdaptiveVerticalStaggeredGrid(
@@ -358,7 +354,28 @@ private fun IllustMode(
                 illusts = rankingList,
                 navToPictureScreen = navigateToPictureScreen
             )
+
+            if (
+                rankingList.itemCount > 0 &&
+                rankingList.loadState.refresh is LoadState.NotLoading &&
+                rankingList.loadState.append !is LoadState.NotLoading
+            ) {
+                item(key = "append_state", span = StaggeredGridItemSpan.FullLine) {
+                    PagingAppendState(
+                        loadStates = rankingList.loadState,
+                        itemCount = rankingList.itemCount,
+                        onRetry = rankingList::retry,
+                        modifier = Modifier.padding(bottom = 136.dp),
+                    )
+                }
+            }
         }
+        PagingContentState(
+            loadStates = rankingList.loadState,
+            itemCount = rankingList.itemCount,
+            onRetry = rankingList::retry,
+            modifier = Modifier.padding(bottom = if (rankingList.itemCount > 0) 136.dp else 0.dp),
+        )
         VerticalScrollbar(
             state = lazyStaggeredGridState,
             modifier = Modifier.align(Alignment.CenterEnd)
@@ -399,18 +416,12 @@ private fun NovelMode(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = rankingList.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -437,7 +448,28 @@ private fun NovelMode(
                     )
                 }
             }
+
+            if (
+                rankingList.itemCount > 0 &&
+                rankingList.loadState.refresh is LoadState.NotLoading &&
+                rankingList.loadState.append !is LoadState.NotLoading
+            ) {
+                item(key = "append_state") {
+                    PagingAppendState(
+                        loadStates = rankingList.loadState,
+                        itemCount = rankingList.itemCount,
+                        onRetry = rankingList::retry,
+                        modifier = Modifier.padding(bottom = 136.dp),
+                    )
+                }
+            }
         }
+        PagingContentState(
+            loadStates = rankingList.loadState,
+            itemCount = rankingList.itemCount,
+            onRetry = rankingList::retry,
+            modifier = Modifier.padding(bottom = if (rankingList.itemCount > 0) 136.dp else 0.dp),
+        )
         VerticalScrollbar(
             state = lazyListState,
             modifier = Modifier.align(Alignment.CenterEnd)

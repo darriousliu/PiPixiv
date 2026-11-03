@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,8 +24,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +35,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
@@ -46,12 +47,10 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.back
-import com.mrl.pixiv.strings.load_failed
 import com.mrl.pixiv.strings.novel_series_chapter_count
 import com.mrl.pixiv.strings.novel_series_last_read
 import com.mrl.pixiv.strings.novel_watchlist_add
 import com.mrl.pixiv.strings.novel_watchlist_added
-import com.mrl.pixiv.strings.retry
 import com.mrl.pixiv.strings.series
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -93,20 +92,14 @@ fun NovelSeriesScreen(
             )
         },
     ) { paddingValues ->
-        PullToRefreshBox(
+        ContentPullToRefreshBox(
             isRefreshing = isRefreshing,
+            hasContent = novels.itemCount > 0,
             onRefresh = novels::refresh,
             state = pullRefreshState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    state = pullRefreshState,
-                    isRefreshing = isRefreshing,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                )
-            },
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
@@ -210,28 +203,17 @@ fun NovelSeriesScreen(
                         }
                     }
 
-                    if (
-                        novels.itemCount == 0 &&
-                        novels.loadState.refresh is LoadState.Loading
-                    ) {
-                        item(key = "loading") {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(48.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularWavyProgressIndicator()
-                            }
-                        }
-                    }
-
-                    val refreshError = novels.loadState.refresh as? LoadState.Error
-                    if (novels.itemCount == 0 && refreshError != null) {
-                        item(key = "refresh_error") {
-                            SeriesLoadError(
-                                message = refreshError.error.message.orEmpty(),
+                    if (novels.itemCount == 0) {
+                        item(key = "content_state") {
+                            PagingContentState(
+                                loadStates = novels.loadState,
+                                itemCount = novels.itemCount,
                                 onRetry = novels::retry,
+                                modifier = if (state.detail == null && state.lastRead == null) {
+                                    Modifier.fillParentMaxHeight()
+                                } else {
+                                    Modifier.fillMaxWidth().heightIn(min = 240.dp)
+                                },
                             )
                         }
                     }
@@ -263,55 +245,29 @@ fun NovelSeriesScreen(
                         )
                     }
 
-                    when (val appendState = novels.loadState.append) {
-                        is LoadState.Loading -> item(key = "append_loading") {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator()
-                            }
+                    if (
+                        novels.itemCount > 0 &&
+                        novels.loadState.refresh is LoadState.NotLoading &&
+                        novels.loadState.append !is LoadState.NotLoading
+                    ) {
+                        item(key = "append_state") {
+                            PagingAppendState(novels.loadState, novels.itemCount, novels::retry)
                         }
-
-                        is LoadState.Error -> item(key = "append_error") {
-                            SeriesLoadError(
-                                message = appendState.error.message.orEmpty(),
-                                onRetry = novels::retry,
-                            )
-                        }
-
-                        else -> Unit
                     }
+                }
+                if (novels.itemCount > 0) {
+                    PagingContentState(
+                        loadStates = novels.loadState,
+                        itemCount = novels.itemCount,
+                        onRetry = novels::retry,
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 }
                 VerticalScrollbar(
                     state = listState,
                     modifier = Modifier.align(Alignment.CenterEnd),
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun SeriesLoadError(
-    message: String,
-    onRetry: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = stringResource(RStrings.load_failed, message),
-            textAlign = TextAlign.Center,
-        )
-        Button(onClick = onRetry) {
-            Text(text = stringResource(RStrings.retry))
         }
     }
 }

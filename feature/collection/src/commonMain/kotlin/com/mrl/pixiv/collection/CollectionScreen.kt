@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,18 +26,16 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -49,6 +48,8 @@ import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.ViewModeToggleButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
@@ -56,18 +57,18 @@ import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.itemIndexKey
-import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.repository.SettingRepository
-import kotlinx.coroutines.flow.drop
+import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
-import com.mrl.pixiv.strings.discovery_collection_filters
 import com.mrl.pixiv.strings.collection
+import com.mrl.pixiv.strings.discovery_collection_filters
 import com.mrl.pixiv.strings.illusts
 import com.mrl.pixiv.strings.novels
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -182,17 +183,11 @@ fun CollectionScreen(
                     val layoutParams = IllustGridDefaults.relatedLayoutParameters()
                     val pullRefreshState = rememberPullToRefreshState()
                     val isRefreshing = userBookmarksIllusts.loadState.refresh is LoadState.Loading
-                    PullToRefreshBox(
+                    ContentPullToRefreshBox(
+                        hasContent = userBookmarksIllusts.itemCount > 0,
                         isRefreshing = isRefreshing,
                         onRefresh = { userBookmarksIllusts.refresh() },
                         state = pullRefreshState,
-                        indicator = {
-                            PullToRefreshDefaults.LoadingIndicator(
-                                state = pullRefreshState,
-                                isRefreshing = isRefreshing,
-                                modifier = Modifier.align(Alignment.TopCenter),
-                            )
-                        }
                     ) {
                         LazyVerticalGrid(
                             state = lazyGridState,
@@ -212,8 +207,28 @@ fun CollectionScreen(
                                 illusts = userBookmarksIllusts,
                                 navToPictureScreen = navigationManager::navigateToPictureScreen,
                             )
+
+                            if (
+                                userBookmarksIllusts.itemCount > 0 &&
+                                userBookmarksIllusts.loadState.refresh is LoadState.NotLoading &&
+                                userBookmarksIllusts.loadState.append !is LoadState.NotLoading
+                            ) {
+                                item(key = "append_state", span = { GridItemSpan(maxLineSpan) }) {
+                                    PagingAppendState(
+                                        loadStates = userBookmarksIllusts.loadState,
+                                        itemCount = userBookmarksIllusts.itemCount,
+                                        onRetry = userBookmarksIllusts::retry,
+                                        modifier = Modifier.padding(bottom = if (useViewModeFab) 136.dp else 72.dp),
+                                    )
+                                }
+                            }
                         }
-                        CollectionResultsStatus(userBookmarksIllusts.loadState, userBookmarksIllusts.itemCount, userBookmarksIllusts::retry)
+                        CollectionResultsStatus(
+                            loadStates = userBookmarksIllusts.loadState,
+                            itemCount = userBookmarksIllusts.itemCount,
+                            onRetry = userBookmarksIllusts::retry,
+                            modifier = Modifier.padding(bottom = if (userBookmarksIllusts.itemCount > 0) if (useViewModeFab) 136.dp else 72.dp else 0.dp),
+                        )
                         VerticalScrollbar(
                             state = lazyGridState,
                             modifier = Modifier.align(Alignment.CenterEnd)
@@ -225,17 +240,11 @@ fun CollectionScreen(
                     val novelPullRefreshState = rememberPullToRefreshState()
                     val isNovelRefreshing =
                         userBookmarksNovels.loadState.refresh is LoadState.Loading
-                    PullToRefreshBox(
+                    ContentPullToRefreshBox(
+                        hasContent = userBookmarksNovels.itemCount > 0,
                         isRefreshing = isNovelRefreshing,
                         onRefresh = { userBookmarksNovels.refresh() },
                         state = novelPullRefreshState,
-                        indicator = {
-                            PullToRefreshDefaults.LoadingIndicator(
-                                state = novelPullRefreshState,
-                                isRefreshing = isNovelRefreshing,
-                                modifier = Modifier.align(Alignment.TopCenter),
-                            )
-                        }
                     ) {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
@@ -273,8 +282,28 @@ fun CollectionScreen(
                                     )
                                 }
                             }
+
+                            if (
+                                userBookmarksNovels.itemCount > 0 &&
+                                userBookmarksNovels.loadState.refresh is LoadState.NotLoading &&
+                                userBookmarksNovels.loadState.append !is LoadState.NotLoading
+                            ) {
+                                item(key = "append_state") {
+                                    PagingAppendState(
+                                        loadStates = userBookmarksNovels.loadState,
+                                        itemCount = userBookmarksNovels.itemCount,
+                                        onRetry = userBookmarksNovels::retry,
+                                        modifier = Modifier.padding(bottom = if (useViewModeFab) 136.dp else 72.dp),
+                                    )
+                                }
+                            }
                         }
-                        CollectionResultsStatus(userBookmarksNovels.loadState, userBookmarksNovels.itemCount, userBookmarksNovels::retry)
+                        CollectionResultsStatus(
+                            loadStates = userBookmarksNovels.loadState,
+                            itemCount = userBookmarksNovels.itemCount,
+                            onRetry = userBookmarksNovels::retry,
+                            modifier = Modifier.padding(bottom = if (userBookmarksNovels.itemCount > 0) if (useViewModeFab) 136.dp else 72.dp else 0.dp),
+                        )
                         VerticalScrollbar(
                             state = lazyListState,
                             modifier = Modifier.align(Alignment.CenterEnd)
@@ -294,7 +323,9 @@ fun CollectionScreen(
                     val previous = if (isIllustPage) state.illustQuery else state.novelQuery
                     viewModel.applyFilter(query)
                     if (query != previous) scope.launch {
-                        if (isIllustPage) lazyGridState.scrollToItem(0) else lazyListState.scrollToItem(0)
+                        if (isIllustPage) lazyGridState.scrollToItem(0) else lazyListState.scrollToItem(
+                            0
+                        )
                     }
                 },
             )
@@ -325,7 +356,10 @@ private fun CollectionTopAppBar(
                 onClick = showFilterDialog,
                 shapes = IconButtonDefaults.shapes(),
             ) {
-                Icon(Icons.Rounded.FilterList, contentDescription = stringResource(RStrings.discovery_collection_filters))
+                Icon(
+                    Icons.Rounded.FilterList,
+                    contentDescription = stringResource(RStrings.discovery_collection_filters)
+                )
             }
         }
     )

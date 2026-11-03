@@ -6,13 +6,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -32,8 +35,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +58,9 @@ import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
@@ -72,6 +76,7 @@ import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.strings.community_empty_users
 import com.mrl.pixiv.strings.follow
 import com.mrl.pixiv.strings.followed
 import com.mrl.pixiv.strings.word_private
@@ -257,18 +262,12 @@ fun FollowingScreenBody(
     val paneSizeClass = currentPaneLayoutInfo().sizeClass
 
     val isRefreshing = followingUsers.loadState.refresh is LoadState.Loading
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
         isRefreshing = isRefreshing,
+        hasContent = followingUsers.itemCount > 0,
         onRefresh = { followingUsers.refresh() },
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         if (paneSizeClass.isWidthAtLeastMedium) {
             val layoutParams = IllustGridDefaults.userFollowingParameters()
@@ -302,6 +301,19 @@ fun FollowingScreenBody(
                         },
                         showIllusts = showIllusts
                     )
+                }
+                if (
+                    followingUsers.itemCount > 0 &&
+                    followingUsers.loadState.refresh is LoadState.NotLoading &&
+                    followingUsers.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "append_state", span = { GridItemSpan(maxLineSpan) }) {
+                        PagingAppendState(
+                            followingUsers.loadState,
+                            followingUsers.itemCount,
+                            followingUsers::retry
+                        )
+                    }
                 }
             }
             VerticalScrollbar(
@@ -338,12 +350,38 @@ fun FollowingScreenBody(
                         showIllusts = showIllusts
                     )
                 }
+                if (
+                    followingUsers.itemCount > 0 &&
+                    followingUsers.loadState.refresh is LoadState.NotLoading &&
+                    followingUsers.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "append_state") {
+                        PagingAppendState(
+                            followingUsers.loadState,
+                            followingUsers.itemCount,
+                            followingUsers::retry
+                        )
+                    }
+                }
             }
             VerticalScrollbar(
                 state = lazyListState,
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
         }
+        PagingContentState(
+            loadStates = followingUsers.loadState,
+            itemCount = followingUsers.itemCount,
+            onRetry = followingUsers::retry,
+            modifier = Modifier.fillMaxSize().padding(
+                bottom = if (followingUsers.itemCount > 0) {
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 88.dp
+                } else {
+                    0.dp
+                },
+            ),
+            emptyMessage = stringResource(RStrings.community_empty_users),
+        )
     }
 }
 
