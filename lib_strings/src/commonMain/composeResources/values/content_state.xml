@@ -1,0 +1,8 @@
+<resources>
+    <string name="content_loading">正在加载</string>
+    <string name="content_loading_more">正在加载更多</string>
+    <string name="content_empty_title">这里还没有内容</string>
+    <string name="content_empty_downloads">暂无下载任务</string>
+    <string name="content_error_title">暂时无法加载</string>
+    <string name="content_error_description">请稍后重试</string>
+</resources>

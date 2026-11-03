@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">Carregar mais</string>
+    <string name="discovery_retry">Tentar novamente</string>
+    <string name="discovery_load_failed">Não foi possível carregar os resultados. Tente novamente.</string>
+    <string name="discovery_no_results">Nenhum marcador correspondente</string>
+    <string name="discovery_advanced_filters">Filtros avançados</string>
+    <string name="discovery_advanced_sort_note">Na prévia gratuita de obras populares, os filtros avançados mostram as obras mais recentes primeiro.</string>
+    <string name="discovery_character_count">Número de caracteres</string>
+    <string name="discovery_word_count">Número de palavras</string>
+    <string name="discovery_reading_minutes">Tempo de leitura (minutos)</string>
+    <string name="discovery_original_only">Apenas romances originais</string>
+    <string name="discovery_replaceable_only">Permite substituir os nomes dos personagens</string>
+    <string name="discovery_language">Idioma</string>
+    <string name="discovery_genre">Gênero</string>
+    <string name="discovery_width_pixels">Largura (pixels)</string>
+    <string name="discovery_height_pixels">Altura (pixels)</string>
+    <string name="discovery_ratio">Proporção da imagem</string>
+    <string name="discovery_portrait">Vertical</string>
+    <string name="discovery_landscape">Horizontal</string>
+    <string name="discovery_square">Quadrado</string>
+    <string name="discovery_tool">Ferramenta de desenho</string>
+    <string name="discovery_options_failed">Não foi possível carregar as sugestões de filtros. As tags digitadas e os outros filtros continuam disponíveis.</string>
+    <string name="discovery_minimum">Mínimo</string>
+    <string name="discovery_maximum">Máximo</string>
+    <string name="discovery_invalid_range">Digite números inteiros não negativos. O mínimo não pode ser maior que o máximo.</string>
+    <string name="discovery_collection_search">Pesquisar nos meus marcadores</string>
+    <string name="discovery_collection_syncing">O Pixiv está sincronizando seus marcadores. A pesquisa estará disponível quando a sincronização terminar.</string>
+    <string name="discovery_collection_self_only">A pesquisa avançada de marcadores está disponível apenas para os seus próprios marcadores.</string>
+    <string name="discovery_collection_sync_failed">Não foi possível verificar a sincronização dos marcadores. Tente novamente.</string>
+    <string name="discovery_work_tag">Tag da ilustração ou do romance</string>
+    <string name="discovery_bookmark_month">Mês de adição aos marcadores</string>
+    <string name="discovery_bookmarked_newest">Marcadores mais recentes</string>
+    <string name="discovery_bookmarked_oldest">Marcadores mais antigos</string>
+    <string name="discovery_clear_filters">Limpar filtros</string>
+    <string name="discovery_tag_suggestions">Sugestões de tags</string>
+    <string name="discovery_search_options_failed">Não foi possível carregar as opções de filtro. Os outros filtros continuam disponíveis.</string>
+    <string name="discovery_word_count_languages">Idiomas compatíveis com a contagem de palavras: %1$s</string>
+</resources>

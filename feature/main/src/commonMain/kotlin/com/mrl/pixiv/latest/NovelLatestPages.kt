@@ -14,20 +14,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -43,8 +35,13 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.Novel
@@ -54,10 +51,8 @@ import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.strings.load_failed
 import com.mrl.pixiv.strings.novel_series_chapter_count
 import com.mrl.pixiv.strings.novel_watchlist_empty
-import com.mrl.pixiv.strings.retry
 import com.mrl.pixiv.strings.switch_to_latest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -107,44 +102,19 @@ private fun NovelFeedPage(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = pagingItems.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = pagingItems::refresh,
         modifier = modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        },
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState,
-                contentPadding = PaddingValues(vertical = 8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp).withMainNavigationBottomInset(),
             ) {
-                if (
-                    pagingItems.itemCount == 0 &&
-                    pagingItems.loadState.refresh is LoadState.Loading
-                ) {
-                    item(key = "loading") {
-                        LatestLoading()
-                    }
-                }
-
-                val refreshError = pagingItems.loadState.refresh as? LoadState.Error
-                if (pagingItems.itemCount == 0 && refreshError != null) {
-                    item(key = "refresh_error") {
-                        LatestLoadError(
-                            message = refreshError.error.message.orEmpty(),
-                            onRetry = pagingItems::retry,
-                        )
-                    }
-                }
-
                 items(
                     count = pagingItems.itemCount,
                     key = pagingItems.itemKey { it.id },
@@ -164,11 +134,30 @@ private fun NovelFeedPage(
                     )
                 }
 
-                pagingAppendState(
-                    appendState = pagingItems.loadState.append,
-                    onRetry = pagingItems::retry,
-                )
+                if (
+                    pagingItems.itemCount > 0 &&
+                    pagingItems.loadState.refresh is LoadState.NotLoading &&
+                    pagingItems.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "append_state") {
+                        PagingAppendState(
+                            loadStates = pagingItems.loadState,
+                            itemCount = pagingItems.itemCount,
+                            onRetry = pagingItems::retry,
+                            modifier = Modifier.padding(bottom = 136.dp),
+                        )
+                    }
+                }
             }
+            PagingContentState(
+                loadStates = pagingItems.loadState,
+                itemCount = pagingItems.itemCount,
+                onRetry = pagingItems::retry,
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (pagingItems.itemCount > 0) 136.dp else 0.dp,
+                ),
+            )
             VerticalScrollbar(
                 state = listState,
                 modifier = Modifier.align(Alignment.CenterEnd),
@@ -204,60 +193,19 @@ fun NovelWatchlistPage(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = watchlist.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = watchlist::refresh,
         modifier = modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        },
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState,
-                contentPadding = PaddingValues(vertical = 8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp).withMainNavigationBottomInset(),
             ) {
-                if (
-                    watchlist.itemCount == 0 &&
-                    watchlist.loadState.refresh is LoadState.Loading
-                ) {
-                    item(key = "loading") {
-                        LatestLoading()
-                    }
-                }
-
-                val refreshError = watchlist.loadState.refresh as? LoadState.Error
-                if (watchlist.itemCount == 0 && refreshError != null) {
-                    item(key = "refresh_error") {
-                        LatestLoadError(
-                            message = refreshError.error.message.orEmpty(),
-                            onRetry = watchlist::retry,
-                        )
-                    }
-                }
-
-                if (
-                    watchlist.itemCount == 0 &&
-                    watchlist.loadState.refresh is LoadState.NotLoading
-                ) {
-                    item(key = "empty") {
-                        Text(
-                            text = stringResource(RStrings.novel_watchlist_empty),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(48.dp),
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-
                 items(
                     count = watchlist.itemCount,
                     key = watchlist.itemIndexKey { index, item ->
@@ -272,11 +220,31 @@ fun NovelWatchlistPage(
                     )
                 }
 
-                pagingAppendState(
-                    appendState = watchlist.loadState.append,
-                    onRetry = watchlist::retry,
-                )
+                if (
+                    watchlist.itemCount > 0 &&
+                    watchlist.loadState.refresh is LoadState.NotLoading &&
+                    watchlist.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "append_state") {
+                        PagingAppendState(
+                            loadStates = watchlist.loadState,
+                            itemCount = watchlist.itemCount,
+                            onRetry = watchlist::retry,
+                            modifier = Modifier.padding(bottom = 136.dp),
+                        )
+                    }
+                }
             }
+            PagingContentState(
+                loadStates = watchlist.loadState,
+                itemCount = watchlist.itemCount,
+                onRetry = watchlist::retry,
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (watchlist.itemCount > 0) 136.dp else 0.dp,
+                ),
+                emptyMessage = stringResource(RStrings.novel_watchlist_empty),
+            )
             VerticalScrollbar(
                 state = listState,
                 modifier = Modifier.align(Alignment.CenterEnd),
@@ -391,67 +359,6 @@ private fun NovelWatchlistItem(
                     }
                 }
             }
-        }
-    }
-}
-
-private fun LazyListScope.pagingAppendState(
-    appendState: LoadState,
-    onRetry: () -> Unit,
-) {
-    when (appendState) {
-        is LoadState.Loading -> item(key = "append_loading") {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp))
-            }
-        }
-
-        is LoadState.Error -> item(key = "append_error") {
-            LatestLoadError(
-                message = appendState.error.message.orEmpty(),
-                onRetry = onRetry,
-            )
-        }
-
-        else -> Unit
-    }
-}
-
-@Composable
-private fun LatestLoading() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(48.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularWavyProgressIndicator()
-    }
-}
-
-@Composable
-private fun LatestLoadError(
-    message: String,
-    onRetry: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = stringResource(RStrings.load_failed, message),
-            textAlign = TextAlign.Center,
-        )
-        Button(onClick = onRetry) {
-            Text(text = stringResource(RStrings.retry))
         }
     }
 }

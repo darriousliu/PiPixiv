@@ -33,6 +33,16 @@ kotlin {
             implementation(project.dependencies.platform(libs.okhttp.bom))
             implementation(libs.okhttp)
             implementation(libs.kotlinx.ktor.client.okhttp)
+            // 共享 Java API；Android 运行时使用 AAR 中对应 ABI 的原生库。
+            compileOnly(libs.conscrypt.openjdk)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.conscrypt.android)
+        }
+
+        jvmMain.dependencies {
+            implementation(libs.conscrypt.openjdk)
         }
 
         iosMain.dependencies {

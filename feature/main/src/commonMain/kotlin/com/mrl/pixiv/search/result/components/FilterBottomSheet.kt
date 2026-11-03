@@ -1,24 +1,24 @@
 package com.mrl.pixiv.search.result.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,18 +26,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.mrl.pixiv.common.data.search.SearchAiType
-import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.compose.ui.SearchContentFilterControls
-import com.mrl.pixiv.common.repository.requireUserPreferenceValue
+import com.mrl.pixiv.common.compose.ui.SearchFilterSwitch
+import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.data.search.SearchAiType
 import com.mrl.pixiv.common.data.search.SearchSort
 import com.mrl.pixiv.common.data.search.SearchTarget
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.search.SearchState.SearchFilter
+import com.mrl.pixiv.search.result.SearchOptionsState
 import com.mrl.pixiv.strings.ai_generate
 import com.mrl.pixiv.strings.apply
 import com.mrl.pixiv.strings.date_asc
@@ -60,8 +59,9 @@ internal fun FilterBottomSheet(
     onUpdateFilter: (SearchFilter) -> Unit,
     modifier: Modifier = Modifier,
     isNovelMode: Boolean = false,
+    options: SearchOptionsState = SearchOptionsState(),
+    onLoadOptions: (SearchTarget, SearchAiType) -> Unit = { _, _ -> },
 ) {
-    var innerSearchFilter by remember { mutableStateOf(searchFilter) }
     val scope = rememberCoroutineScope()
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -69,6 +69,35 @@ internal fun FilterBottomSheet(
         sheetState = bottomSheetState,
         containerColor = MaterialTheme.colorScheme.background,
     ) {
+        SearchFilterSheetContent(
+            searchFilter = searchFilter,
+            isNovelMode = isNovelMode,
+            options = options,
+            defaultShowR18 = requireUserPreferenceValue.isR18Enabled,
+            onLoadOptions = onLoadOptions,
+            onApply = {
+                onUpdateFilter(it)
+                scope.launch { bottomSheetState.hide(); onDismissRequest() }
+            },
+        )
+    }
+}
+
+@Composable
+internal fun SearchFilterSheetContent(
+    searchFilter: SearchFilter,
+    isNovelMode: Boolean,
+    options: SearchOptionsState,
+    defaultShowR18: Boolean,
+    onLoadOptions: (SearchTarget, SearchAiType) -> Unit,
+    onApply: (SearchFilter) -> Unit,
+) {
+    var innerSearchFilter by remember { mutableStateOf(searchFilter) }
+    var rangesValid by remember { mutableStateOf(true) }
+    LaunchedEffect(innerSearchFilter.searchTarget, innerSearchFilter.searchAiType) {
+        onLoadOptions(innerSearchFilter.searchTarget, innerSearchFilter.searchAiType)
+    }
+    Column(Modifier.fillMaxWidth()) {
         val searchTargetMap = remember(isNovelMode) {
             if (isNovelMode) {
                 mapOf(
@@ -105,93 +134,90 @@ internal fun FilterBottomSheet(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = stringResource(RStrings.filter))
             Text(
-                text = stringResource(RStrings.apply),
-                modifier = Modifier.throttleClick {
-                    scope.launch { bottomSheetState.hide() }
-                        .invokeOnCompletion {
-                            if (!bottomSheetState.isVisible) {
-                                onDismissRequest()
-                            }
-                        }
-                    onUpdateFilter(innerSearchFilter)
-                }
+                text = stringResource(RStrings.filter),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleLarge
             )
+            Button(enabled = rangesValid, onClick = { onApply(innerSearchFilter) }) {
+                Text(stringResource(RStrings.apply))
+            }
         }
 
-        Column(modifier = Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(rememberScrollState())) {
-            searchTargetMap.forEach { (key, value) ->
-                FilterItem(
-                    text = stringResource(value),
-                    selected = innerSearchFilter.searchTarget == key,
-                    onClick = {
-                        innerSearchFilter = innerSearchFilter.copy(searchTarget = key)
-                    }
-                )
+        Column(
+            modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
+                .verticalScroll(rememberScrollState())
+        ) {
+            FlowRow(
+                Modifier.padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                searchTargetMap.forEach { (key, value) ->
+                    FilterItem(
+                        text = stringResource(value),
+                        selected = innerSearchFilter.searchTarget == key,
+                        onClick = {
+                            innerSearchFilter = innerSearchFilter.copy(searchTarget = key)
+                        },
+                    )
+                }
             }
-
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp))
             Spacer(modifier = Modifier.height(4.dp))
-            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            Spacer(modifier = Modifier.height(4.dp))
-
-            searchSortMap.forEach { (key, value) ->
-                FilterItem(
-                    text = stringResource(value),
-                    selected = innerSearchFilter.sort == key,
-                    onClick = {
-                        innerSearchFilter = innerSearchFilter.copy(sort = key)
-                    }
-                )
+            FlowRow(
+                Modifier.padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                searchSortMap.forEach { (key, value) ->
+                    FilterItem(
+                        text = stringResource(value),
+                        selected = innerSearchFilter.sort == key,
+                        onClick = { innerSearchFilter = innerSearchFilter.copy(sort = key) },
+                    )
+                }
             }
-
+            Spacer(modifier = Modifier.height(24.dp))
+            SearchAdvancedControls(
+                filter = innerSearchFilter,
+                isNovel = isNovelMode,
+                options = options,
+                onChange = { innerSearchFilter = it },
+                onValidityChanged = { rangesValid = it },
+                onRetry = {
+                    onLoadOptions(
+                        innerSearchFilter.searchTarget,
+                        innerSearchFilter.searchAiType
+                    )
+                },
+            )
             Spacer(modifier = Modifier.height(16.dp))
             SearchContentFilterControls(
                 filter = innerSearchFilter.contentFilter,
-                defaultShowR18 = requireUserPreferenceValue.isR18Enabled,
+                defaultShowR18 = defaultShowR18,
                 onChange = { innerSearchFilter = innerSearchFilter.copy(contentFilter = it) },
-                modifier = Modifier.padding(horizontal = 32.dp),
+                modifier = Modifier.padding(horizontal = 24.dp),
+                horizontalContentPadding = 0.dp,
                 mode = if (isNovelMode) AppViewMode.NOVEL else AppViewMode.ILLUST,
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
-                    .throttleClick(
-                        indication = ripple()
-                    ) {
-                        innerSearchFilter = innerSearchFilter.copy(
-                            searchAiType = if (innerSearchFilter.searchAiType == SearchAiType.SHOW_AI) {
-                                SearchAiType.HIDE_AI
-                            } else {
-                                SearchAiType.SHOW_AI
-                            }
-                        )
-                    }
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(RStrings.ai_generate),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Switch(
-                    checked = innerSearchFilter.searchAiType == SearchAiType.SHOW_AI,
-                    onCheckedChange = { checked ->
-                        innerSearchFilter = innerSearchFilter.copy(
-                            searchAiType = if (checked) SearchAiType.SHOW_AI else SearchAiType.HIDE_AI
-                        )
-                    }
-                )
-            }
+            SearchFilterSwitch(
+                label = stringResource(RStrings.ai_generate),
+                checked = innerSearchFilter.searchAiType == SearchAiType.SHOW_AI,
+                onCheckedChange = { checked ->
+                    innerSearchFilter = innerSearchFilter.copy(
+                        searchAiType = if (checked) SearchAiType.SHOW_AI else SearchAiType.HIDE_AI,
+                    )
+                },
+                modifier = Modifier.padding(horizontal = 24.dp),
+                horizontalContentPadding = 0.dp,
+            )
         }
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -201,20 +227,9 @@ private fun FilterItem(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .background(if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = text,
-            color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(text, style = MaterialTheme.typography.labelLarge) },
+    )
 }

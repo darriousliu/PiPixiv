@@ -1,7 +1,6 @@
 package com.mrl.pixiv.common.data.setting
 
 import com.mrl.pixiv.common.data.AppViewMode
-import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.data.Constants.IMAGE_HOST
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -12,7 +11,7 @@ data class UserPreference(
     val theme: String = SettingTheme.SYSTEM.name,
     @Deprecated("use bypassSetting")
     val enableBypassSniffing: Boolean = false,
-    val bypassSetting: BypassSetting = if (enableBypassSniffing) BypassSetting.SNI() else BypassSetting.System,
+    val bypassSetting: BypassSetting = if (enableBypassSniffing) BypassSetting.ECH() else BypassSetting.System,
     val isR18Enabled: Boolean = false,
     val imageHost: String = IMAGE_HOST,
     val hasShowBookmarkTip: Boolean = false,
@@ -25,6 +24,7 @@ data class UserPreference(
     val appViewMode: AppViewMode = AppViewMode.ILLUST,
     val collectionViewMode: AppViewMode = AppViewMode.ILLUST,
     val historyViewMode: AppViewMode = AppViewMode.ILLUST,
+    val readingTab: ReadingTab = ReadingTab.READ_LATER,
     val aiTranslationConfig: AiTranslationConfig = AiTranslationConfig(),
     val browsingSettings: BrowsingSettings = BrowsingSettings(),
     val searchSettings: SearchSettings = SearchSettings(),
@@ -64,13 +64,15 @@ data class UserPreference(
             }
         }
 
-        @Serializable
+        @Serializable(with = EchSettingSerializer::class)
+        // 保留旧存储类型名称，使历史设置和备份自动升级为 ECH。
         @SerialName("sni")
-        data class SNI(
-            val url: String = "https://doh.pub/dns-query",
-            val fallback: Map<String, String> = Constants.hostMap,
-            val nonStrictSSL: Boolean = true,
-            val dohTimeout: Int = 5,
-        ) : BypassSetting
+        data class ECH(
+            val url: String = DEFAULT_DOH_URL,
+        ) : BypassSetting {
+            companion object {
+                const val DEFAULT_DOH_URL = "https://223.5.5.5/resolve"
+            }
+        }
     }
 }

@@ -48,7 +48,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
@@ -81,6 +80,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -99,8 +99,10 @@ import com.mrl.pixiv.common.compose.layout.ResizableSplitLayout
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.layout.rememberSplitPaneState
+import com.mrl.pixiv.common.compose.rememberNavigationSharedContentState
 import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
+import com.mrl.pixiv.common.compose.ui.FollowButton
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
@@ -138,14 +140,13 @@ import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.util.selectSaveFile
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.manga.MangaSeriesContextCard
 import com.mrl.pixiv.picture.components.UgoiraPlayer
 import com.mrl.pixiv.strings.cancel_user_blocked
 import com.mrl.pixiv.strings.copy_link
 import com.mrl.pixiv.strings.download
 import com.mrl.pixiv.strings.download_with_size
 import com.mrl.pixiv.strings.export_failed
-import com.mrl.pixiv.strings.follow
-import com.mrl.pixiv.strings.followed
 import com.mrl.pixiv.strings.hide_illust
 import com.mrl.pixiv.strings.illust_hidden
 import com.mrl.pixiv.strings.liked
@@ -171,7 +172,9 @@ import kotlin.uuid.Uuid
 fun PictureDeeplinkScreen(
     modifier: Modifier = Modifier,
     illustId: Long,
-    pictureViewModel: PictureViewModel = koinViewModel { parametersOf(null, illustId) },
+    pictureViewModel: PictureViewModel = koinViewModel(key = "picture-$illustId") {
+        parametersOf(null, illustId)
+    },
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
     val state = pictureViewModel.asState()
@@ -182,6 +185,7 @@ fun PictureDeeplinkScreen(
             onBack = navigationManager::popBackStack,
             enableTransition = false,
             modifier = modifier,
+            pictureViewModel = pictureViewModel,
         )
     } else {
         Box(
@@ -210,12 +214,16 @@ private const val KEY_ILLUST_RELATED_TITLE = "illust_related_title"
 private const val KEY_SPACER = "spacer"
 
 @Composable
+internal fun rememberPictureViewModel(illust: Illust): PictureViewModel =
+    koinViewModel(key = "picture-${illust.id}") { parametersOf(illust, null) }
+
+@Composable
 internal fun PictureScreen(
     illust: Illust,
     onBack: () -> Unit,
     enableTransition: Boolean,
     modifier: Modifier = Modifier,
-    pictureViewModel: PictureViewModel = koinViewModel { parametersOf(illust, null) },
+    pictureViewModel: PictureViewModel = rememberPictureViewModel(illust),
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
     val relatedIllusts = pictureViewModel.relatedIllusts.collectAsLazyPagingItems()
@@ -300,6 +308,7 @@ internal fun PictureScreen(
     val showPreviewControls = !browsingSettings.autoHidePreviewControls ||
             !isBarVisible ||
             arePreviewControlsVisible
+
     fun revealPreviewControls() {
         if (browsingSettings.autoHidePreviewControls) {
             arePreviewControlsVisible = true
@@ -361,23 +370,24 @@ internal fun PictureScreen(
             )
         }.firstOrNull { !it.isNullOrBlank() }
     }
-    val openOriginalPreview: (Int, String?) -> Unit = openOriginalPreview@{ index, sharedElementKey ->
-        if (browsingSettings.autoHidePreviewControls && !arePreviewControlsVisible) {
-            revealPreviewControls()
-            return@openOriginalPreview
+    val openOriginalPreview: (Int, String?) -> Unit =
+        openOriginalPreview@{ index, sharedElementKey ->
+            if (browsingSettings.autoHidePreviewControls && !arePreviewControlsVisible) {
+                revealPreviewControls()
+                return@openOriginalPreview
+            }
+            if (!browsingSettings.tapImageToOpenFullResolutionPreview) return@openOriginalPreview
+            val selectedUrl = getOriginalUrl(index) ?: return@openOriginalPreview
+            val imageUrls = (0 until illust.pageCount.coerceAtLeast(1))
+                .mapNotNull(getOriginalUrl)
+            if (imageUrls.isNotEmpty()) {
+                navigationManager.navigateToImagePreviewScreen(
+                    imageUrls = imageUrls,
+                    initialIndex = imageUrls.indexOf(selectedUrl).coerceAtLeast(0),
+                    sharedElementKey = sharedElementKey,
+                )
+            }
         }
-        if (!browsingSettings.tapImageToOpenFullResolutionPreview) return@openOriginalPreview
-        val selectedUrl = getOriginalUrl(index) ?: return@openOriginalPreview
-        val imageUrls = (0 until illust.pageCount.coerceAtLeast(1))
-            .mapNotNull(getOriginalUrl)
-        if (imageUrls.isNotEmpty()) {
-            navigationManager.navigateToImagePreviewScreen(
-                imageUrls = imageUrls,
-                initialIndex = imageUrls.indexOf(selectedUrl).coerceAtLeast(0),
-                sharedElementKey = sharedElementKey,
-            )
-        }
-    }
     // Mobile keeps FileKit's Compose ActivityResult integration; desktop borrows
     // a native Tao parent for the lifetime of each file dialog.
     var pendingMobileSaveAsUrl by remember { mutableStateOf<String?>(null) }
@@ -429,10 +439,11 @@ internal fun PictureScreen(
                     illust.pageCount,
                     key = { "${illust.id}_$it" },
                 ) { index ->
-                    val placeholder = com.mrl.pixiv.picture.components.rememberArtworkPagePlaceholder(
-                        page = index + 1,
-                        pageCount = illust.pageCount,
-                    )
+                    val placeholder =
+                        com.mrl.pixiv.picture.components.rememberArtworkPagePlaceholder(
+                            page = index + 1,
+                            pageCount = illust.pageCount,
+                        )
                     val imageKey = "image-${illust.id}-$index"
                     val sharedImageKey = "${prefix}-$imageKey"
                     if (illust.pageCount > 1) {
@@ -448,7 +459,7 @@ internal fun PictureScreen(
                                         .fillMaxWidth()
                                         .conditionally(enableTransition) {
                                             sharedElement(
-                                                sharedTransitionScope.rememberSharedContentState(
+                                                sharedTransitionScope.rememberNavigationSharedContentState(
                                                     key = sharedImageKey
                                                 ),
                                                 animatedVisibilityScope = animatedContentScope,
@@ -505,7 +516,7 @@ internal fun PictureScreen(
                                     .fillMaxWidth()
                                     .conditionally(enableTransition) {
                                         sharedElement(
-                                            sharedTransitionScope.rememberSharedContentState(
+                                            sharedTransitionScope.rememberNavigationSharedContentState(
                                                 key = sharedImageKey
                                             ),
                                             animatedVisibilityScope = animatedContentScope,
@@ -620,6 +631,15 @@ internal fun PictureScreen(
                         }
                     }
                 }
+            }
+        }
+        if (illust.series?.id?.let { it > 0 } == true) {
+            item(key = "manga_series_context") {
+                MangaSeriesContextCard(
+                    illust = illust,
+                    onSeriesClick = navigationManager::navigateToMangaSeriesScreen,
+                    onEpisodeClick = navigationManager::navigateToSinglePictureScreen,
+                )
             }
         }
         // tag
@@ -802,7 +822,7 @@ internal fun PictureScreen(
             modifier = modifier
                 .conditionally(enableTransition) {
                     sharedBounds(
-                        rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
+                        rememberNavigationSharedContentState(key = "${prefix}-card-${illust.id}"),
                         animatedContentScope,
                         enter = fadeIn(DefaultFloatAnimationSpec),
                         exit = fadeOut(DefaultFloatAnimationSpec),
@@ -1189,6 +1209,7 @@ private fun UserFollowInfo(
     navToUserDetailScreen: (Long) -> Unit,
     isFollowed: Boolean,
     modifier: Modifier = Modifier,
+    isUpdatingFollow: Boolean = FollowState.isUpdating(illust.user.id),
 ) {
     Row(
         modifier = modifier
@@ -1204,7 +1225,8 @@ private fun UserFollowInfo(
         )
         SelectionContainer(
             modifier = Modifier
-                .padding(start = 10.dp)
+                .weight(1f)
+                .padding(horizontal = 10.dp)
                 .align(Alignment.CenterVertically)
         ) {
             Column {
@@ -1214,6 +1236,8 @@ private fun UserFollowInfo(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                     ),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = "ID: ${illust.user.id}",
@@ -1224,28 +1248,17 @@ private fun UserFollowInfo(
                 )
             }
         }
-        Spacer(modifier = Modifier.weight(1f))
-        if (isFollowed) {
-            OutlinedButton(
-                onClick = {
+        FollowButton(
+            isFollowing = isFollowed,
+            isUpdating = isUpdatingFollow,
+            onClick = {
+                if (isFollowed) {
                     FollowState.unFollowUser(illust.user.id)
-                }
-            ) {
-                Text(
-                    text = stringResource(RStrings.followed),
-                )
-            }
-        } else {
-            Button(
-                onClick = {
+                } else {
                     FollowState.followUser(illust.user.id)
                 }
-            ) {
-                Text(
-                    text = stringResource(RStrings.follow),
-                )
-            }
-        }
+            },
+        )
     }
 }
 

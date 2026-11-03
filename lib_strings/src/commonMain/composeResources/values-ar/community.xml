@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="community_notifications">مركز الإشعارات</string>
+    <string name="community_notification">إشعار</string>
+    <string name="community_unread">توجد إشعارات غير مقروءة</string>
+    <string name="community_unread_failed">تعذر تحديث حالة الإشعارات غير المقروءة</string>
+    <string name="community_empty_notifications">لا توجد إشعارات بعد</string>
+    <string name="community_view_more">عرض المزيد</string>
+    <string name="community_unknown_link">لا يمكن فتح رابط هذا الإشعار حاليًا</string>
+    <string name="community_recommended_users">فنانون مقترحون</string>
+    <string name="community_related_users">فنانون مشابهون</string>
+    <string name="community_followers">متابعوني</string>
+    <string name="community_empty_users">لا يوجد فنانون لعرضهم</string>
+    <string name="community_empty_followers">لا يوجد متابعون بعد</string>
+    <string name="community_refresh">تحديث</string>
+    <string name="community_load_failed">تعذر التحميل. يرجى إعادة المحاولة.</string>
+</resources>

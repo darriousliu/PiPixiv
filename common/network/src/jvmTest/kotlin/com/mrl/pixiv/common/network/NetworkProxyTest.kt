@@ -6,6 +6,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import java.io.IOException
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.net.ProxySelector
@@ -17,8 +18,12 @@ import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import okhttp3.Dns
 import okhttp3.OkHttpClient
+import okhttp3.tls.HandshakeCertificates
+import okhttp3.tls.HeldCertificate
+import javax.net.ssl.SSLHandshakeException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -26,8 +31,8 @@ import kotlin.test.assertTrue
 
 class NetworkProxyTest {
     private val clientFactories: List<(BypassSetting) -> HttpClient> = listOf(
-        { setting -> httpClient(OkHttp) { configureProxyOrSNI(setting) } },
-        { setting -> imageHttpClient(OkHttp) { configureProxyOrSNI(setting) } },
+        { setting -> httpClient(OkHttp) { configureProxyOrECH(setting) } },
+        { setting -> imageHttpClient(OkHttp) { configureProxyOrECH(setting) } },
         { setting -> HttpClient(OkHttp) { configureNetworkProxy(setting) } },
     )
 
@@ -127,7 +132,7 @@ class NetworkProxyTest {
     fun manualSocksProxyKeepsProtocolAndUnresolvedAddress() {
         val client = OkHttpClient.Builder().configureNetworkRouting(
             BypassSetting.Proxy("socks.example", 1081, BypassSetting.Proxy.ProxyType.SOCKS),
-            usePixivSni = true,
+            usePixivEch = true,
         ).build()
         val proxy = checkNotNull(client.proxy)
         val address = assertIs<InetSocketAddress>(proxy.address())
@@ -140,31 +145,57 @@ class NetworkProxyTest {
     @Test
     fun returningToSystemClearsExplicitProxy() {
         val client = OkHttpClient.Builder()
-            .configureNetworkRouting(BypassSetting.Direct, usePixivSni = false)
-            .configureNetworkRouting(BypassSetting.System, usePixivSni = false)
+            .configureNetworkRouting(BypassSetting.Direct, usePixivEch = false)
+            .configureNetworkRouting(BypassSetting.System, usePixivEch = false)
             .build()
         assertNull(client.proxy)
     }
 
     @Test
-    fun sniAppliesOnlyToPixivClientsAndNeverUsesSystemProxy() {
-        val pixiv = OkHttpClient.Builder().configureNetworkRouting(BypassSetting.SNI(), true).build()
-        val auxiliary = OkHttpClient.Builder().configureNetworkRouting(BypassSetting.SNI(), false).build()
+    fun echAppliesOnlyToPixivClientsAndNeverUsesSystemProxy() {
+        val pixiv = OkHttpClient.Builder().configureNetworkRouting(BypassSetting.ECH(), true).build()
+        val auxiliary = OkHttpClient.Builder().configureNetworkRouting(BypassSetting.ECH(), false).build()
         assertEquals(Proxy.NO_PROXY, pixiv.proxy)
-        assertIs<SniReplaceDns>(pixiv.dns)
+        assertIs<PixivEchDns>(pixiv.dns)
         assertEquals(Proxy.NO_PROXY, auxiliary.proxy)
         assertSame(Dns.SYSTEM, auxiliary.dns)
     }
 
     @Test
-    fun sniDnsQueriesDoNotInheritSystemProxy() {
+    fun echDnsQueriesUseStrictTlsWithoutSystemProxy() {
+        val loopback = InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1))
+        val certificate = HeldCertificate.Builder()
+            .addSubjectAlternativeName("127.0.0.1")
+            .build()
+        val serverCertificates = HandshakeCertificates.Builder()
+            .heldCertificate(certificate)
+            .build()
+        val clientCertificates = HandshakeCertificates.Builder()
+            .addTrustedCertificate(certificate.certificate)
+            .build()
         MockWebServer().use { origin ->
-            origin.start()
+            origin.useHttps(serverCertificates.sslSocketFactory())
+            origin.start(loopback, 0)
             origin.enqueue(MockResponse(body = """{"Status":0,"Answer":[{"type":1,"data":"203.0.113.7"}]}"""))
-            withSystemProxy({ error("SNI 的 DoH 查询不应经过系统代理") }) {
-                val resolver = DnsJsonResolver(origin.url("/dns-query").toString(), 2, false)
-                assertEquals("203.0.113.7", resolver.lookup("example.test").single().hostAddress)
-                assertEquals(1, origin.requestCount)
+            withSystemProxy({ error("ECH 的 DoH 查询不应经过系统代理") }) {
+                val endpoint = origin.url("/dns-query").newBuilder().host("127.0.0.1").build()
+                assertFailsWith<IOException> {
+                    DnsJsonResolver(endpoint.newBuilder().scheme("http").build().toString())
+                        .lookup("example.test")
+                }
+                assertFailsWith<SSLHandshakeException> {
+                    DnsJsonResolver(endpoint.toString(), 2).lookup("example.test")
+                }
+                val trustedClient = OkHttpClient.Builder()
+                    .sslSocketFactory(clientCertificates.sslSocketFactory(), clientCertificates.trustManager)
+                    .build()
+                try {
+                    val resolver = DnsJsonResolver(endpoint.toString(), 2, trustedClient)
+                    assertEquals("203.0.113.7", resolver.lookup("example.test").single().hostAddress)
+                    assertEquals(1, origin.requestCount)
+                } finally {
+                    trustedClient.connectionPool.evictAll()
+                }
             }
         }
     }

@@ -24,6 +24,7 @@ import com.mrl.pixiv.common.viewmodel.ViewIntent
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,7 @@ data class ProfileDetailState(
     val userBookmarksIllusts: ImmutableList<Illust> = persistentListOf(),
     val userBookmarksNovels: ImmutableList<Novel> = persistentListOf(),
     val userInfo: UserDetailResp = UserDetailResp(),
+    val isUpdatingFollow: Boolean = false,
 )
 
 sealed class ProfileDetailAction : ViewIntent {
@@ -149,7 +151,19 @@ class ProfileDetailViewModel(
     }
 
     fun followUser(userId: Long, restrict: Restrict = Restrict.PUBLIC) {
-        FollowState.followUser(userId, restrict)
+        updateFollow { FollowState.followUser(userId, restrict) }
+    }
+
+    fun unFollowUser(userId: Long) {
+        updateFollow { FollowState.unFollowUser(userId) }
+    }
+
+    private fun updateFollow(action: () -> Job) {
+        if (uiState.value.isUpdatingFollow) return
+        updateState { copy(isUpdatingFollow = true) }
+        action().invokeOnCompletion {
+            updateState { copy(isUpdatingFollow = false) }
+        }
     }
 
     fun blockUser(userId: Long) {

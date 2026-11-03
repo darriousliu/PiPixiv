@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="community_notifications">通知センター</string>
+    <string name="community_notification">通知</string>
+    <string name="community_unread">未読の通知があります</string>
+    <string name="community_unread_failed">未読状態を更新できませんでした</string>
+    <string name="community_empty_notifications">通知はまだありません</string>
+    <string name="community_view_more">もっと見る</string>
+    <string name="community_unknown_link">この通知のリンクにはまだ対応していません</string>
+    <string name="community_recommended_users">おすすめの作者</string>
+    <string name="community_related_users">関連する作者</string>
+    <string name="community_followers">自分のフォロワー</string>
+    <string name="community_empty_users">表示できる作者がいません</string>
+    <string name="community_empty_followers">フォロワーはまだいません</string>
+    <string name="community_refresh">更新</string>
+    <string name="community_load_failed">読み込みに失敗しました。もう一度お試しください。</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Pixiv 云端屏蔽</string>
+    <string name="cloud_mute_description">管理 Pixiv 账号中的用户和标签屏蔽，修改会同步到 Pixiv。导入只添加本地缺少的规则，保留现有本地屏蔽和正则规则。</string>
+    <string name="cloud_mute_back">返回</string>
+    <string name="cloud_mute_refresh">刷新</string>
+    <string name="cloud_mute_failed">操作失败，请刷新后重试。</string>
+    <string name="cloud_mute_saved_refresh_failed">修改已保存到 Pixiv，但列表刷新失败。请刷新列表，无需重复提交。</string>
+    <string name="cloud_mute_quota">已使用 %1$d / %2$d 项</string>
+    <string name="cloud_mute_add_tag">添加云端标签屏蔽</string>
+    <string name="cloud_mute_add_user">添加云端用户屏蔽</string>
+    <string name="cloud_mute_import">将云端屏蔽导入本地</string>
+    <string name="cloud_mute_imported">已添加 %1$d 条本地屏蔽规则</string>
+    <string name="cloud_mute_remove">解除云端屏蔽</string>
+    <string name="cloud_mute_remove_description">从 Pixiv 云端屏蔽中移除「%1$s」？已有本地规则会保留。</string>
+    <string name="cloud_mute_tag">标签名称</string>
+    <string name="cloud_mute_user_id">Pixiv 用户 ID</string>
+    <string name="cloud_mute_input_hint">请输入未屏蔽的标签或有效用户 ID。</string>
+</resources>

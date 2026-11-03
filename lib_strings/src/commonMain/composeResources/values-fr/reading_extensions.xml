@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_manga_series">Séries de mangas</string>
+    <string name="reading_manga_watchlist">Liste de suivi des mangas</string>
+    <string name="reading_manga_user_series">Séries de mangas de cet auteur</string>
+    <string name="reading_manga_episode_count">%1$d chapitres</string>
+    <string name="reading_manga_episode_order">Chapitre %1$d</string>
+    <string name="reading_manga_previous">Chapitre précédent</string>
+    <string name="reading_manga_next">Chapitre suivant</string>
+    <string name="reading_manga_add_watchlist">Suivre la série</string>
+    <string name="reading_manga_remove_watchlist">Ne plus suivre la série</string>
+    <string name="reading_manga_latest">Lire le dernier chapitre</string>
+    <string name="reading_manga_empty">Aucune série de mangas pour le moment</string>
+    <string name="reading_manga_watchlist_empty">Suivez une série de mangas pour retrouver ses nouveaux chapitres ici</string>
+    <string name="reading_manga_chapters_empty">Aucun chapitre à afficher</string>
+    <string name="reading_manga_view_directory">Voir les chapitres de la série</string>
+    <string name="reading_refresh">Actualiser</string>
+</resources>

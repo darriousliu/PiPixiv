@@ -1,0 +1,16 @@
+<resources>
+    <string name="community_notifications">Notifications</string>
+    <string name="community_notification">Notification</string>
+    <string name="community_unread">Unread notifications</string>
+    <string name="community_unread_failed">Could not update unread status</string>
+    <string name="community_empty_notifications">No notifications yet</string>
+    <string name="community_view_more">View more</string>
+    <string name="community_unknown_link">This notification link cannot be opened yet</string>
+    <string name="community_recommended_users">Recommended artists</string>
+    <string name="community_related_users">Similar artists</string>
+    <string name="community_followers">My followers</string>
+    <string name="community_empty_users">No artists to show</string>
+    <string name="community_empty_followers">No followers yet</string>
+    <string name="community_refresh">Refresh</string>
+    <string name="community_load_failed">Could not load. Please try again.</string>
+</resources>

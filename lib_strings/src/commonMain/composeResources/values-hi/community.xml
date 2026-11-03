@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="community_notifications">सूचना केंद्र</string>
+    <string name="community_notification">सूचना</string>
+    <string name="community_unread">अपठित सूचनाएँ हैं</string>
+    <string name="community_unread_failed">अपठित स्थिति अपडेट नहीं हो सकी</string>
+    <string name="community_empty_notifications">अभी कोई सूचना नहीं है</string>
+    <string name="community_view_more">और देखें</string>
+    <string name="community_unknown_link">इस सूचना का लिंक अभी नहीं खोला जा सकता</string>
+    <string name="community_recommended_users">सुझाए गए कलाकार</string>
+    <string name="community_related_users">मिलते-जुलते कलाकार</string>
+    <string name="community_followers">मेरे फ़ॉलोअर</string>
+    <string name="community_empty_users">दिखाने के लिए कोई कलाकार नहीं है</string>
+    <string name="community_empty_followers">अभी कोई फ़ॉलोअर नहीं है</string>
+    <string name="community_refresh">रिफ्रेश करें</string>
+    <string name="community_load_failed">लोड नहीं हो सका। फिर से प्रयास करें।</string>
+</resources>

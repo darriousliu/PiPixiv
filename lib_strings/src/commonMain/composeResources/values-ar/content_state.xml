@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_loading">جارٍ التحميل</string>
+    <string name="content_loading_more">جارٍ تحميل المزيد</string>
+    <string name="content_empty_title">لا يوجد محتوى هنا بعد</string>
+    <string name="content_empty_downloads">لا توجد مهام تنزيل بعد</string>
+    <string name="content_error_title">يتعذر التحميل حاليًا</string>
+    <string name="content_error_description">يرجى إعادة المحاولة بعد قليل</string>
+</resources>

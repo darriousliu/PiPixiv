@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">Mehr laden</string>
+    <string name="discovery_retry">Erneut versuchen</string>
+    <string name="discovery_load_failed">Ergebnisse konnten nicht geladen werden. Bitte erneut versuchen.</string>
+    <string name="discovery_no_results">Keine passenden Lesezeichen</string>
+    <string name="discovery_advanced_filters">Erweiterte Filter</string>
+    <string name="discovery_advanced_sort_note">Bei der kostenlosen Vorschau beliebter Werke sortieren erweiterte Filter nach den neuesten Werken.</string>
+    <string name="discovery_character_count">Zeichenanzahl</string>
+    <string name="discovery_word_count">Wortanzahl</string>
+    <string name="discovery_reading_minutes">Lesezeit (Minuten)</string>
+    <string name="discovery_original_only">Nur Originalromane</string>
+    <string name="discovery_replaceable_only">Ersetzen von Charakternamen unterstützt</string>
+    <string name="discovery_language">Sprache</string>
+    <string name="discovery_genre">Genre</string>
+    <string name="discovery_width_pixels">Breite (Pixel)</string>
+    <string name="discovery_height_pixels">Höhe (Pixel)</string>
+    <string name="discovery_ratio">Seitenverhältnis</string>
+    <string name="discovery_portrait">Hochformat</string>
+    <string name="discovery_landscape">Querformat</string>
+    <string name="discovery_square">Quadratisch</string>
+    <string name="discovery_tool">Zeichenwerkzeug</string>
+    <string name="discovery_options_failed">Filtervorschläge konnten nicht geladen werden. Eingegebene Tags und andere Filter sind weiterhin verfügbar.</string>
+    <string name="discovery_minimum">Minimum</string>
+    <string name="discovery_maximum">Maximum</string>
+    <string name="discovery_invalid_range">Gib nicht negative ganze Zahlen ein. Das Minimum darf nicht größer als das Maximum sein.</string>
+    <string name="discovery_collection_search">Meine Lesezeichen durchsuchen</string>
+    <string name="discovery_collection_syncing">Pixiv synchronisiert deine Lesezeichen. Nach Abschluss ist die Suche verfügbar.</string>
+    <string name="discovery_collection_self_only">Die erweiterte Lesezeichensuche ist nur für deine eigenen Lesezeichen verfügbar.</string>
+    <string name="discovery_collection_sync_failed">Der Synchronisierungsstatus der Lesezeichen konnte nicht geprüft werden. Bitte erneut versuchen.</string>
+    <string name="discovery_work_tag">Tag der Illustration oder des Romans</string>
+    <string name="discovery_bookmark_month">Monat des Hinzufügens</string>
+    <string name="discovery_bookmarked_newest">Neueste Lesezeichen</string>
+    <string name="discovery_bookmarked_oldest">Älteste Lesezeichen</string>
+    <string name="discovery_clear_filters">Filter zurücksetzen</string>
+    <string name="discovery_tag_suggestions">Tag-Vorschläge</string>
+    <string name="discovery_search_options_failed">Filteroptionen konnten nicht geladen werden. Andere Filter sind weiterhin verfügbar.</string>
+    <string name="discovery_word_count_languages">Unterstützte Sprachen für die Wortanzahl: %1$s</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_collection_filters">बुकमार्क फ़िल्टर</string>
+    <string name="discovery_bookmark_tag_list">बुकमार्क टैग चुनें</string>
+</resources>

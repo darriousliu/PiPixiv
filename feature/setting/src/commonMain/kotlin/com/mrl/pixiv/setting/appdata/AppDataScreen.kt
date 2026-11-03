@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Delete
@@ -27,14 +28,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
-import com.mrl.pixiv.strings.app_data
+import com.mrl.pixiv.strings.data_storage_title
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.clear_cache
 import com.mrl.pixiv.strings.confirm
@@ -97,19 +97,7 @@ fun AppDataScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(RStrings.app_data))
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navigationManager::popBackStack,
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
-                    }
-                }
-            )
+            AppDataTopAppBar(onBack = navigationManager::popBackStack)
         }
     ) { paddingValues ->
         Column(
@@ -133,7 +121,7 @@ fun AppDataScreen(
                     }"
                     exportLauncher.launch(suggestedName = fileName, defaultExtension = "zip")
                 },
-                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.export_data))
                 },
@@ -149,7 +137,7 @@ fun AppDataScreen(
                 onClick = {
                     importLauncher.launch()
                 },
-                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.import_data))
                 },
@@ -165,7 +153,7 @@ fun AppDataScreen(
                 onClick = rememberThrottleClick {
                     viewModel.clearCache()
                 },
-                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.clear_cache, viewModel.cacheDirSize))
                 },
@@ -229,3 +217,20 @@ expect fun MigrationCard(
     migrateData: () -> Unit,
     viewModel: AppDataViewModel,
 )
+
+@Composable
+internal fun AppDataTopAppBar(onBack: () -> Unit) {
+    TopAppBar(
+        title = {
+            Text(text = stringResource(RStrings.data_storage_title))
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = onBack,
+                shapes = IconButtonDefaults.shapes(),
+            ) {
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
+            }
+        }
+    )
+}

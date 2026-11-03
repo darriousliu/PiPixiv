@@ -10,7 +10,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.separatingVerticalHingeBounds
 import androidx.compose.runtime.Composable
@@ -57,6 +56,8 @@ import com.mrl.pixiv.common.toast.ToastMessage
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.result.LocalResultEventBus
 import com.mrl.pixiv.common.util.result.ResultEventBus
+import com.mrl.pixiv.community.CommunityUsersScreen
+import com.mrl.pixiv.community.NotificationScreen
 import com.mrl.pixiv.follow.FollowingScreen
 import com.mrl.pixiv.history.HistoryScreen
 import com.mrl.pixiv.image.preview.ImagePreviewScreen
@@ -64,6 +65,9 @@ import com.mrl.pixiv.login.LoginOptionScreen
 import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.login.oauth.WebCookieLoginScreen
+import com.mrl.pixiv.manga.MangaSeriesScreen
+import com.mrl.pixiv.manga.MangaWatchlistScreen
+import com.mrl.pixiv.manga.UserMangaSeriesScreen
 import com.mrl.pixiv.novel.NovelScreen
 import com.mrl.pixiv.novel.readlater.NovelReadLaterScreen
 import com.mrl.pixiv.novel.series.NovelSeriesScreen
@@ -71,6 +75,7 @@ import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.profile.marker.NovelMarkersScreen
+import com.mrl.pixiv.profile.reading.ReadingScreen
 import com.mrl.pixiv.report.ReportScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
@@ -88,6 +93,7 @@ import com.mrl.pixiv.setting.block.BlockNovelScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
 import com.mrl.pixiv.setting.block.BlockTagScreen
 import com.mrl.pixiv.setting.block.BlockUserScreen
+import com.mrl.pixiv.setting.block.CloudMuteScreen
 import com.mrl.pixiv.setting.download.DownloadScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import kotlinx.collections.immutable.toImmutableList
@@ -99,7 +105,6 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun Navigation3MainGraph(
     startDestination: Destination,
@@ -117,14 +122,15 @@ fun Navigation3MainGraph(
     val sourceRecord = navigationManager.backStack.lastOrNull {
         it.entryId == topRecord.ownerEntryId
     } ?: topRecord
-    val showMainNavigation = navigationManager.backStack.any { it.destination == Destination.Main } &&
-        !sourceRecord.destination.paneSpec.preferredFullWidth
+    val showMainNavigation =
+        navigationManager.backStack.any { it.destination == Destination.Main } &&
+                !sourceRecord.destination.paneSpec.preferredFullWidth
     LaunchedEffect(topRecord.entryId) {
         inputState.activeEntryId = topRecord.entryId
         inputState.dividerFocused = false
     }
     val pictureCacheDecorator = rememberPictureCacheDecorator(navigationManager)
-    val destinationEntryProvider = entryProvider<Destination> {
+    val destinationEntryProvider = entryProvider {
         entry<Destination.LoginOption> {
             LoginOptionScreen()
         }
@@ -156,9 +162,9 @@ fun Navigation3MainGraph(
         // 作品详情页（深度链接）
         entry<Destination.PictureDeeplink>(
             metadata = NavDisplay.transitionSpec {
-                        scaleIn(initialScale = 0.9f) + fadeIn() togetherWith
-                                scaleOut(targetScale = 1.1f) + fadeOut()
-                    } + NavDisplay.predictivePopTransitionSpec {
+                scaleIn(initialScale = 0.9f) + fadeIn() togetherWith
+                        scaleOut(targetScale = 1.1f) + fadeOut()
+            } + NavDisplay.predictivePopTransitionSpec {
                 scaleIn(initialScale = 1.1f) + fadeIn() togetherWith
                         scaleOut(targetScale = 0.9f) + fadeOut()
             },
@@ -240,6 +246,10 @@ fun Navigation3MainGraph(
             HistoryScreen()
         }
 
+        entry<Destination.Reading> {
+            ReadingScreen()
+        }
+
         entry<Destination.NovelReadLater> {
             NovelReadLaterScreen()
         }
@@ -313,7 +323,11 @@ fun Navigation3MainGraph(
             )
         }
         entry<Destination.BlockSettings> {
-            BlockSettingsScreen()
+            BlockSettingsScreen(
+                blockedCommentsContent = { modifier ->
+                    BlockCommentsScreen(modifier = modifier, embedded = true)
+                },
+            )
         }
         entry<Destination.BlockIllust> {
             BlockIllustScreen()
@@ -363,6 +377,29 @@ fun Navigation3MainGraph(
                 seriesId = it.seriesId,
             )
         }
+        entry<Destination.MangaSeries> {
+            MangaSeriesScreen(seriesId = it.seriesId)
+        }
+        entry<Destination.MangaWatchlist> {
+            MangaWatchlistScreen()
+        }
+        entry<Destination.UserMangaSeries> {
+            UserMangaSeriesScreen(userId = it.userId)
+        }
+        entry<Destination.Notifications> { destination ->
+            val entryNavigation = com.mrl.pixiv.common.router.currentNavigationManager()
+            NotificationScreen(
+                notificationId = destination.notificationId,
+                title = destination.title,
+                onViewMore = { id, title -> entryNavigation.navigateToNotifications(id, title) },
+            )
+        }
+        entry<Destination.CommunityUsers> {
+            CommunityUsersScreen(kind = it.kind, seedUserId = it.seedUserId)
+        }
+        entry<Destination.CloudMute> {
+            CloudMuteScreen()
+        }
     }
 
     HandleDeeplink(navigationManager)
@@ -381,12 +418,13 @@ fun Navigation3MainGraph(
             MainNavigationScaffold(showMainNavigation, navigationManager) {
                 BoxWithConstraints(modifier.fillMaxSize()) {
                     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-                    val allowSplit = adaptiveInfo.windowPosture.separatingVerticalHingeBounds.isEmpty()
+                    val allowSplit =
+                        adaptiveInfo.windowPosture.separatingVerticalHingeBounds.isEmpty()
                     val showsSidePane = allowSplit && topRecord.ownerEntryId != null &&
-                        topRecord.destination.paneSpec.canShowAsDetail &&
-                        !topRecord.destination.paneSpec.preferredFullWidth &&
-                        sourceRecord.destination.paneSpec.canHostDetail && maxHeight >= 480.dp &&
-                        maxWidth >= sourceRecord.destination.paneSpec.minSourceWidth +
+                            topRecord.destination.paneSpec.canShowAsDetail &&
+                            !topRecord.destination.paneSpec.preferredFullWidth &&
+                            sourceRecord.destination.paneSpec.canHostDetail && maxHeight >= 480.dp &&
+                            maxWidth >= sourceRecord.destination.paneSpec.minSourceWidth +
                             SplitPaneDividerWidth + topRecord.destination.paneSpec.minDetailWidth
                     LaunchedEffect(showsSidePane, topRecord.entryId) {
                         if (!showsSidePane || inputState.activeEntryId !in
@@ -396,7 +434,14 @@ fun Navigation3MainGraph(
                         }
                         if (!showsSidePane) inputState.dividerFocused = false
                     }
-                    val strategy = remember(maxWidth, maxHeight, allowSplit, splitState, inputState, paneTransitionState) {
+                    val strategy = remember(
+                        maxWidth,
+                        maxHeight,
+                        allowSplit,
+                        splitState,
+                        inputState,
+                        paneTransitionState
+                    ) {
                         AdaptiveSceneStrategy(
                             availableWidth = maxWidth,
                             availableHeight = maxHeight,
@@ -406,7 +451,7 @@ fun Navigation3MainGraph(
                             allowSplit = allowSplit,
                         )
                     }
-                    NavDisplay(
+                    PredictiveBackNavDisplay(
                         backStack = navigationManager.backStack,
                         modifier = Modifier.fillMaxSize(),
                         onBack = navigationManager::popBackStack,

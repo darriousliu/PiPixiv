@@ -7,13 +7,12 @@ import org.gradle.internal.extensions.stdlib.capitalized
 plugins {
     id("pixiv.android.application")
 //    alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.hotswan.compiler) apply false
 }
 
-// 热重载插桩仅在显式开启时启用，避免影响普通构建和测试。
-val enableHotSwanCompiler = providers.gradleProperty("hotswan.enabled")
-    .map(String::toBoolean)
-    .getOrElse(false)
-if (enableHotSwanCompiler) {
+// Layoutlib has no running app in which HotSwan can initialize its interpreter.
+// Keep normal debug builds unchanged; use -PcomposePreview=true for offline previews.
+if (providers.gradleProperty("composePreview").orNull != "true") {
     pluginManager.apply(libs.plugins.hotswan.compiler.get().pluginId)
 }
 
@@ -130,6 +129,8 @@ androidComponents {
 }
 
 dependencies {
+    // The CLI preview renderer needs tooling on the application's debug classpath.
+    debugImplementation(libs.compose.ui.tooling)
 //    baselineProfile(project(":baselineprofile"))
     implementation(project(":common:data"))
     implementation(project(":common:network"))

@@ -25,6 +25,7 @@ local.properties
 GEMINI.md
 CLAUDE.md
 AGENTS.md
+!/AGENTS.md
 
 captures
 *.xcodeproj/*
@@ -35,3 +36,4 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 .hotswan/
+.swiftpm-locks

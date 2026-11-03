@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_manga_series">मंगा शृंखलाएँ</string>
+    <string name="reading_manga_watchlist">फ़ॉलो की गई मंगा शृंखलाएँ</string>
+    <string name="reading_manga_user_series">इस लेखक की मंगा शृंखलाएँ</string>
+    <string name="reading_manga_episode_count">कुल %1$d अध्याय</string>
+    <string name="reading_manga_episode_order">अध्याय %1$d</string>
+    <string name="reading_manga_previous">पिछला अध्याय</string>
+    <string name="reading_manga_next">अगला अध्याय</string>
+    <string name="reading_manga_add_watchlist">शृंखला फ़ॉलो करें</string>
+    <string name="reading_manga_remove_watchlist">शृंखला फ़ॉलो करना बंद करें</string>
+    <string name="reading_manga_latest">नवीनतम अध्याय पढ़ें</string>
+    <string name="reading_manga_empty">अभी कोई मंगा शृंखला नहीं है</string>
+    <string name="reading_manga_watchlist_empty">मंगा शृंखला फ़ॉलो करने पर उसके अपडेट यहाँ दिखाई देंगे</string>
+    <string name="reading_manga_chapters_empty">दिखाने के लिए कोई अध्याय नहीं है</string>
+    <string name="reading_manga_view_directory">शृंखला के अध्याय देखें</string>
+    <string name="reading_refresh">रिफ्रेश करें</string>
+</resources>

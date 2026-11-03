@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_title">My reading</string>
+    <string name="data_storage_title">Data and storage</string>
+    <string name="download_settings_title">Download settings</string>
+    <string name="settings_section_content">Content and experience</string>
+    <string name="settings_section_app">App</string>
+    <string name="settings_section_account">Account</string>
+    <string name="profile_view_homepage">View profile</string>
+    <string name="settings_section_general">General</string>
+    <string name="unblock_item">Unblock</string>
+</resources>

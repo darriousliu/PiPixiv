@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Bloqueos de Pixiv en la nube</string>
+    <string name="cloud_mute_description">Gestiona los usuarios y las etiquetas bloqueados en tu cuenta de Pixiv. Los cambios se sincronizan con Pixiv. La importación solo añade las reglas locales que faltan y conserva los bloqueos y las expresiones regulares existentes.</string>
+    <string name="cloud_mute_back">Volver</string>
+    <string name="cloud_mute_refresh">Actualizar</string>
+    <string name="cloud_mute_failed">La operación ha fallado. Actualiza e inténtalo de nuevo.</string>
+    <string name="cloud_mute_saved_refresh_failed">Tu cambio se ha guardado en Pixiv, pero no se ha podido actualizar la lista. Actualiza la lista sin volver a enviar el cambio.</string>
+    <string name="cloud_mute_quota">%1$d de %2$d espacios utilizados</string>
+    <string name="cloud_mute_add_tag">Bloquear etiqueta en la nube</string>
+    <string name="cloud_mute_add_user">Bloquear usuario en la nube</string>
+    <string name="cloud_mute_import">Importar bloqueos de la nube al dispositivo</string>
+    <string name="cloud_mute_imported">Se han añadido %1$d reglas de bloqueo locales</string>
+    <string name="cloud_mute_remove">Eliminar bloqueo en la nube</string>
+    <string name="cloud_mute_remove_description">¿Eliminar «%1$s» de los bloqueos de Pixiv en la nube? Se conservarán las reglas locales existentes.</string>
+    <string name="cloud_mute_tag">Nombre de la etiqueta</string>
+    <string name="cloud_mute_user_id">ID de usuario de Pixiv</string>
+    <string name="cloud_mute_input_hint">Introduce una etiqueta o un ID de usuario válido que aún no esté bloqueado.</string>
+</resources>

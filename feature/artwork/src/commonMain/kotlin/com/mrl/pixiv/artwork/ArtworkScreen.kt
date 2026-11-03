@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,8 +26,6 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -43,6 +42,9 @@ import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
@@ -206,17 +208,12 @@ private fun UserIllustPage(
     val pullRefreshState = rememberPullToRefreshState()
     val isRefreshing = illusts.loadState.refresh is LoadState.Loading
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
         isRefreshing = isRefreshing,
-        onRefresh = { illusts.refresh() },
+        hasContent = illusts.itemCount > 0,
+        onRefresh = illusts::refresh,
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyVerticalGrid(
             state = gridState,
@@ -234,8 +231,30 @@ private fun UserIllustPage(
             illustGrid(
                 illusts = illusts,
                 navToPictureScreen = navToPictureScreen,
+                enableLoading = false,
             )
+            if (
+                illusts.itemCount > 0 &&
+                illusts.loadState.refresh is LoadState.NotLoading &&
+                illusts.loadState.append !is LoadState.NotLoading
+            ) {
+                item(key = "append_state", span = { GridItemSpan(maxLineSpan) }) {
+                    PagingAppendState(illusts.loadState, illusts.itemCount, illusts::retry)
+                }
+            }
         }
+        PagingContentState(
+            loadStates = illusts.loadState,
+            itemCount = illusts.itemCount,
+            onRetry = illusts::retry,
+            modifier = Modifier.fillMaxSize().padding(
+                bottom = if (illusts.itemCount > 0) {
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 88.dp
+                } else {
+                    0.dp
+                },
+            ),
+        )
         VerticalScrollbar(
             state = gridState,
             modifier = Modifier.align(Alignment.CenterEnd)
@@ -253,17 +272,12 @@ private fun UserNovelPage(
     val pullRefreshState = rememberPullToRefreshState()
     val isRefreshing = novels.loadState.refresh is LoadState.Loading
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
         isRefreshing = isRefreshing,
-        onRefresh = { novels.refresh() },
+        hasContent = novels.itemCount > 0,
+        onRefresh = novels::refresh,
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
+        modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -292,7 +306,28 @@ private fun UserNovelPage(
                     )
                 }
             }
+            if (
+                novels.itemCount > 0 &&
+                novels.loadState.refresh is LoadState.NotLoading &&
+                novels.loadState.append !is LoadState.NotLoading
+            ) {
+                item(key = "append_state") {
+                    PagingAppendState(novels.loadState, novels.itemCount, novels::retry)
+                }
+            }
         }
+        PagingContentState(
+            loadStates = novels.loadState,
+            itemCount = novels.itemCount,
+            onRetry = novels::retry,
+            modifier = Modifier.fillMaxSize().padding(
+                bottom = if (novels.itemCount > 0) {
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 88.dp
+                } else {
+                    0.dp
+                },
+            ),
+        )
         VerticalScrollbar(
             state = listState,
             modifier = Modifier.align(Alignment.CenterEnd)

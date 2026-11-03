@@ -8,13 +8,13 @@ import platform.Foundation.NSURLSessionConfiguration
 fun NSURLSessionConfiguration.configureNetworkProxy(
     setting: BypassSetting = NetworkUtil.bypassSetting,
 ) {
-    if (setting is BypassSetting.SNI) {
-        Logger.w(tag = "HttpClient") { "iOS 不支持 SNI，使用直连" }
+    if (setting is BypassSetting.ECH) {
+        Logger.w(tag = "HttpClient") { "iOS 不支持 ECH，使用直连" }
     }
     connectionProxyDictionary = when (setting) {
         BypassSetting.System -> null
         // 空字典表示显式直连；全部 Enable 设为 0 在 iOS 27 上仍会继承系统代理。
-        BypassSetting.Direct, is BypassSetting.SNI -> emptyMap<Any?, Any>()
+        BypassSetting.Direct, is BypassSetting.ECH -> emptyMap<Any?, Any>()
         is BypassSetting.Proxy -> buildMap<Any?, Any> {
             put("HTTPEnable", 0)
             put("HTTPSEnable", 0)

@@ -5,17 +5,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.strings.word_public
-import com.mrl.pixiv.strings.word_private
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
@@ -26,11 +23,16 @@ import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.router.currentNavigationManager
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.follow.FollowingScreenBody
 import com.mrl.pixiv.follow.FollowingViewModel
+import com.mrl.pixiv.strings.word_private
+import com.mrl.pixiv.strings.word_public
 import kotlinx.coroutines.flow.SharedFlow
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import com.mrl.pixiv.follow.FollowingPage as FollowingTab
 
 @Composable
 fun FollowingPage(
@@ -45,8 +47,16 @@ fun FollowingPage(
     val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
     var selectedPage by rememberSaveable(uid) { mutableIntStateOf(0) }
     val pageIndex = selectedPage.coerceIn(viewModel.pages.indices)
-    val followingUsers = (if (pageIndex == 0) viewModel.publicFollowingPageSource
-        else viewModel.privateFollowingPageSource).collectAsLazyPagingItems()
+    val followingUsersByPage = viewModel.pages.map { page ->
+        key(page) {
+            val source = when (page) {
+                FollowingTab.Public -> viewModel.publicFollowingPageSource
+                FollowingTab.Private -> viewModel.privateFollowingPageSource
+            }
+            source.collectAsLazyPagingItems()
+        }
+    }
+    val followingUsers = followingUsersByPage[pageIndex]
     val listState = viewModel.lazyListState[pageIndex]
     val gridState = viewModel.lazyGridState[pageIndex]
     val controller = remember(isWidthAtLeastMedium, pageIndex) {

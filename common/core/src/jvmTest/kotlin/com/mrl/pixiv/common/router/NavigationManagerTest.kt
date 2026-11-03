@@ -225,7 +225,25 @@ class NavigationManagerTest {
 
         assertEquals(1, original.size)
         assertEquals(navigation.backStack, Json.decodeFromString(serializer, encoded))
-        assertTrue(navigation.backStack.drop(1).all { it.ownerEntryId == original.single().entryId })
+        assertTrue(
+            navigation.backStack.drop(1).all { it.ownerEntryId == original.single().entryId })
+    }
+
+    @Test
+    fun blockManagementReturnsThroughSettingsToProfile() {
+        val navigation = NavigationManager(Destination.Main)
+        navigation.switchMainPage(MainPage.Profile)
+        navigation.navigateToSettingScreen()
+        navigation.navigateToBlockSettings()
+
+        assertEquals(
+            listOf(Destination.Main, Destination.Setting, Destination.BlockSettings),
+            navigation.backStack.map { it.destination },
+        )
+        navigation.popBackStack()
+        assertEquals(Destination.Setting, navigation.currentDestination)
+        navigation.popBackStack()
+        assertEquals(MainPage.Profile, navigation.currentMainPage)
     }
 
     @Test

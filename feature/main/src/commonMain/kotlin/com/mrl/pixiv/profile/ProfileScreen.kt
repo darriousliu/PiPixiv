@@ -1,45 +1,48 @@
 package com.mrl.pixiv.profile
 
-import com.mrl.pixiv.common.data.AppViewMode
-import com.mrl.pixiv.common.repository.requireUserPreferenceValue
-
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Logout
-import androidx.compose.material.icons.rounded.Block
-import androidx.compose.material.icons.rounded.Bookmark
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.History
-import androidx.compose.material.icons.rounded.ImportExport
-import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.HowToReg
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Storage
-import androidx.compose.material.icons.rounded.Style
-import androidx.compose.material3.Badge
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -49,60 +52,49 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
+import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.data.User
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.strings.about
-import com.mrl.pixiv.strings.app_data
-import com.mrl.pixiv.strings.block_settings
-import com.mrl.pixiv.strings.bookmark_tags
+import com.mrl.pixiv.community.NotificationUnreadBadge
 import com.mrl.pixiv.strings.collection
+import com.mrl.pixiv.strings.community_followers
+import com.mrl.pixiv.strings.community_notifications
 import com.mrl.pixiv.strings.download_manager
-import com.mrl.pixiv.strings.export_token
+import com.mrl.pixiv.strings.followed
 import com.mrl.pixiv.strings.history
+import com.mrl.pixiv.strings.my
 import com.mrl.pixiv.strings.new_version_available
-import com.mrl.pixiv.strings.novel_markers
-import com.mrl.pixiv.strings.preference
-import com.mrl.pixiv.strings.read_later
-import com.mrl.pixiv.strings.sign_out
+import com.mrl.pixiv.strings.profile_view_homepage
+import com.mrl.pixiv.strings.reading_title
+import com.mrl.pixiv.strings.setting
 import com.mrl.pixiv.strings.theme_dark
 import com.mrl.pixiv.strings.theme_light
 import com.mrl.pixiv.strings.theme_system
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-private val options =
-    mapOf(
-        SettingTheme.SYSTEM to RStrings.theme_system,
-        SettingTheme.LIGHT to RStrings.theme_light,
-        SettingTheme.DARK to RStrings.theme_dark,
-    )
-
-private const val KEY_USER_INFO = "user_info"
-private const val KEY_DIVIDER = "divider"
-private const val KEY_PREFERENCE = "preference"
-private const val KEY_HISTORY = "history"
-private const val KEY_READ_LATER = "read_later"
-private const val KEY_COLLECTION = "collection"
-private const val KEY_NOVEL_MARKERS = "novel_markers"
-private const val KEY_BOOKMARK_TAGS = "bookmark_tags"
-private const val KEY_BLOCK_SETTINGS = "block_settings"
-private const val KEY_DOWNLOAD_MANAGER = "download_manager"
-private const val KEY_APP_DATA = "app_data"
-private const val KEY_EXPORT_TOKEN = "export_token"
-private const val KEY_ABOUT = "about"
-private const val KEY_LOGOUT = "logout"
+private val themeOptions = mapOf(
+    SettingTheme.SYSTEM to RStrings.theme_system,
+    SettingTheme.LIGHT to RStrings.theme_light,
+    SettingTheme.DARK to RStrings.theme_dark,
+)
 
 @Composable
 fun ProfileScreen(
@@ -111,402 +103,293 @@ fun ProfileScreen(
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
+    val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
     LifecycleResumeEffect(Unit) {
         viewModel.dispatch(ProfileAction.GetUserInfo)
         onPauseOrDispose {}
     }
-    Scaffold(
-        topBar = {
-            ProfileAppBar(
-                onChangeAppTheme = { theme ->
-                    viewModel.changeAppTheme(theme)
-                }
+    ProfileContent(
+        user = userInfo.user,
+        currentTheme = userPreference.theme,
+        hasNewVersion = hasNewVersion,
+        onProfile = { navigationManager.navigateToProfileDetailScreen(userInfo.user.id) },
+        onFollowing = { navigationManager.navigateToFollowingScreen(userInfo.user.id) },
+        onFollowers = navigationManager::navigateToFollowers,
+        onCollection = {
+            navigationManager.navigateToCollectionScreen(
+                userInfo.user.id,
+                isNovel = requireUserPreferenceValue.collectionViewMode == AppViewMode.NOVEL,
             )
         },
+        onReading = navigationManager::navigateToReadingScreen,
+        onHistory = navigationManager::navigateToHistoryScreen,
+        onDownloads = navigationManager::navigateToDownloadScreen,
+        onNotifications = { navigationManager.navigateToNotifications() },
+        onSettings = navigationManager::navigateToSettingScreen,
+        onChangeTheme = viewModel::changeAppTheme,
+        notificationBadge = { NotificationUnreadBadge() },
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun ProfileContent(
+    user: User,
+    currentTheme: String,
+    hasNewVersion: Boolean,
+    onProfile: () -> Unit,
+    onFollowing: () -> Unit,
+    onFollowers: () -> Unit,
+    onCollection: () -> Unit,
+    onReading: () -> Unit,
+    onHistory: () -> Unit,
+    onDownloads: () -> Unit,
+    onNotifications: () -> Unit,
+    onSettings: () -> Unit,
+    onChangeTheme: (SettingTheme) -> Unit,
+    modifier: Modifier = Modifier,
+    notificationBadge: @Composable () -> Unit = {},
+) {
+    Scaffold(
+        modifier = modifier,
+        topBar = { ProfileAppBar(currentTheme, onChangeTheme) },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
-    ) {
-        LazyColumn(
-            modifier = modifier
-                .padding(it)
-                .fillMaxSize()
-                .padding(top = 16.dp),
-        ) {
-            item(key = KEY_USER_INFO) {
-                // 头像和昵称
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    with(LocalSharedTransitionScope.current) {
-                        UserAvatar(
-                            url = userInfo.user.profileImageUrls.medium,
-                            modifier = Modifier.size(80.dp),
-                            onClick = {
-                                navigationManager.navigateToProfileDetailScreen(userInfo.user.id)
-                            }
-                        )
-                        Column {
-                            // 昵称
-                            Text(
-                                text = userInfo.user.name,
-                            )
-                            // ID
-                            Text(
-                                text = "ID: ${userInfo.user.id}",
-                            )
-                        }
-                    }
-                }
-            }
-            item(key = KEY_DIVIDER) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
-                )
-            }
-            // 偏好设置
-            item(key = KEY_PREFERENCE) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToSettingScreen()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.preference),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
-                    },
-                )
-            }
-            // 历史记录
-            item(key = KEY_HISTORY) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToHistoryScreen()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.history),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.History,
-                            contentDescription = null
-                        )
-                    },
-                )
-            }
-            item(key = KEY_READ_LATER) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToNovelReadLaterScreen()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.read_later),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Schedule,
-                            contentDescription = null,
-                        )
-                    },
-                )
-            }
-            // 收藏
-            item(key = KEY_COLLECTION) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToCollectionScreen(
-                            userInfo.user.id,
-                            isNovel = requireUserPreferenceValue.collectionViewMode == AppViewMode.NOVEL,
-                        )
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.collection),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Bookmarks,
-                            contentDescription = null
-                        )
-                    },
-                )
-            }
-            // 小说阅读书签
-            item(key = KEY_NOVEL_MARKERS) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToNovelMarkersScreen()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.novel_markers),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Bookmark,
-                            contentDescription = null
-                        )
-                    },
-                )
-            }
-            // 收藏标签
-            item(key = KEY_BOOKMARK_TAGS) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToBookmarkedTagsScreen()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.bookmark_tags),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Style,
-                            contentDescription = null
-                        )
-                    },
-                )
-            }
-            // 屏蔽设定
-            item(key = KEY_BLOCK_SETTINGS) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToBlockSettings()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.block_settings),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Block,
-                            contentDescription = null
-                        )
-                    },
-                )
-            }
-            // 下载管理
-            item(key = KEY_DOWNLOAD_MANAGER) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToDownloadScreen()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.download_manager),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Download,
-                            contentDescription = null
-                        )
-                    },
-                )
-            }
-            // 应用数据
-            item(key = KEY_APP_DATA) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToAppDataScreen()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.app_data),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Storage,
-                            contentDescription = null
-                        )
-                    },
-                )
-            }
-            // 导出Token
-            item(key = KEY_EXPORT_TOKEN) {
-                Column {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-                    ListItem(
-                        onClick = rememberThrottleClick {
-                            viewModel.dispatch(ProfileAction.ExportToken)
-                        },
-                        shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                        content = {
-                            Text(
-                                text = stringResource(RStrings.export_token),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp),
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Rounded.ImportExport,
-                                contentDescription = null
-                            )
-                        },
-                    )
-                }
-            }
-            // 关于
-            item(key = KEY_ABOUT) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        navigationManager.navigateToAboutScreen()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.about),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.Rounded.Info,
-                            contentDescription = null
-                        )
-                    },
-                    trailingContent = {
-                        if (hasNewVersion) {
-                            Badge {
-                                Text(
-                                    text = stringResource(RStrings.new_version_available),
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+    ) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+            LazyColumn(
+                modifier = Modifier.widthIn(max = 680.dp).fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp)
+                    .withMainNavigationBottomInset(),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+            ) {
+                item(key = "identity") {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Surface(
+                            onClick = rememberThrottleClick(onClick = onProfile),
+                            shape = MaterialTheme.shapes.extraLarge,
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                UserAvatar(
+                                    url = user.profileImageUrls.medium,
+                                    modifier = Modifier.size(64.dp),
+                                    onClick = onProfile,
+                                    contentDescription = stringResource(RStrings.profile_view_homepage),
+                                )
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Text(
+                                        text = user.name,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    Text(
+                                        text = "ID: ${user.id}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    Text(
+                                        text = stringResource(RStrings.profile_view_homepage),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+                                Icon(
+                                    Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
-                    },
-                )
-            }
-            // 退出登录
-            item(key = KEY_LOGOUT) {
-                ListItem(
-                    onClick = rememberThrottleClick {
-                        viewModel.logout()
-                        navigationManager.navigateToLoginOptionScreen()
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RectangleShape),
-                    content = {
-                        Text(
-                            text = stringResource(RStrings.sign_out),
-                            style = MaterialTheme.typography.bodyLarge
+                        ProfileConnections(onFollowing, onFollowers)
+                    }
+                }
+                item(key = "library") {
+                    ProfileMenuGroup {
+                        ProfileDiscoveryItem(
+                            stringResource(RStrings.collection),
+                            Icons.Rounded.Bookmarks,
+                            onCollection
                         )
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
-                    leadingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.Logout,
-                            contentDescription = null
+                        ProfileMenuDivider()
+                        ProfileDiscoveryItem(
+                            stringResource(RStrings.reading_title),
+                            Icons.AutoMirrored.Rounded.MenuBook,
+                            onReading
                         )
-                    },
-                )
+                        ProfileMenuDivider()
+                        ProfileDiscoveryItem(
+                            stringResource(RStrings.history),
+                            Icons.Rounded.History,
+                            onHistory
+                        )
+                        ProfileMenuDivider()
+                        ProfileDiscoveryItem(
+                            stringResource(RStrings.download_manager),
+                            Icons.Rounded.Download,
+                            onDownloads
+                        )
+                    }
+                }
+                item(key = "app") {
+                    ProfileMenuGroup {
+                        ProfileDiscoveryItem(
+                            label = stringResource(RStrings.community_notifications),
+                            icon = Icons.Rounded.Notifications,
+                            onClick = onNotifications,
+                            trailingContent = notificationBadge,
+                        )
+                        ProfileMenuDivider()
+                        ProfileDiscoveryItem(
+                            label = stringResource(RStrings.setting),
+                            icon = Icons.Rounded.Settings,
+                            onClick = onSettings,
+                            supportingText = if (hasNewVersion) stringResource(RStrings.new_version_available) else null,
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ProfileAppBar(
-    onChangeAppTheme: (SettingTheme) -> Unit = {},
-) {
-    val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
+private fun ProfileMenuGroup(content: @Composable () -> Unit) {
+    Surface(
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceContainerLow
+    ) {
+        Column(content = { content() })
+    }
+}
+
+@Composable
+private fun ProfileMenuDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 56.dp, end = 16.dp),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+    )
+}
+
+@Composable
+private fun ProfileAppBar(currentTheme: String, onChangeTheme: (SettingTheme) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     TopAppBar(
-        title = {},
+        title = { Text(stringResource(RStrings.my)) },
         actions = {
-            IconButton(
-                onClick = { expanded = true },
-                shapes = IconButtonDefaults.shapes(),
-            ) {
-                Icon(imageVector = Icons.Rounded.Palette, contentDescription = null)
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = {
-                    expanded = false
-                }
-            ) {
-                options.forEach { (theme, resId) ->
-                    DropdownMenuItem(
-                        text = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(resId),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                if (userPreference.theme == theme.name) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Check,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        },
-                        onClick = {
-                            onChangeAppTheme(theme)
-                            expanded = false
-                        }
+            Box {
+                IconButton(onClick = { expanded = true }, shapes = IconButtonDefaults.shapes()) {
+                    Icon(
+                        Icons.Rounded.Palette, contentDescription = stringResource(
+                            themeOptions.entries.firstOrNull { it.key.name == currentTheme }?.value
+                                ?: RStrings.theme_system
+                        )
                     )
                 }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    themeOptions.forEach { (theme, label) ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(label)) },
+                            trailingIcon = if (currentTheme == theme.name) {
+                                { Icon(Icons.Rounded.Check, contentDescription = null) }
+                            } else null,
+                            onClick = {
+                                onChangeTheme(theme)
+                                expanded = false
+                            },
+                        )
+                    }
+                }
+            }
+        },
+    )
+}
+
+@Composable
+internal fun ProfileConnections(onFollowingClick: () -> Unit, onFollowersClick: () -> Unit) {
+    Row(
+        modifier = Modifier.height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        ProfileConnectionButton(
+            label = stringResource(RStrings.followed),
+            icon = Icons.Rounded.HowToReg,
+            onClick = onFollowingClick,
+            modifier = Modifier.weight(1f),
+        )
+        ProfileConnectionButton(
+            label = stringResource(RStrings.community_followers),
+            icon = Icons.Rounded.People,
+            onClick = onFollowersClick,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun ProfileConnectionButton(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier
+) {
+    FilledTonalButton(
+        onClick = rememberThrottleClick(onClick = onClick),
+        modifier = modifier.fillMaxHeight().heightIn(min = 64.dp),
+        shapes = ButtonDefaults.shapes(),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+            Text(label, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+@Composable
+internal fun ProfileDiscoveryItem(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    supportingText: String? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth()
+            .clickable(role = Role.Button, onClick = rememberThrottleClick(onClick = onClick))
+            .heightIn(min = 64.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge)
+            if (supportingText != null) {
+                Text(
+                    supportingText,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
-    )
+        trailingContent?.invoke()
+        Icon(
+            Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }

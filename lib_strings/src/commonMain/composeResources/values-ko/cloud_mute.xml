@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Pixiv 클라우드 차단</string>
+    <string name="cloud_mute_description">Pixiv 계정에서 차단한 사용자와 태그를 관리합니다. 변경 사항은 Pixiv에 동기화됩니다. 가져오기는 로컬에 없는 규칙만 추가하며 기존 로컬 차단 규칙과 정규식은 유지합니다.</string>
+    <string name="cloud_mute_back">뒤로</string>
+    <string name="cloud_mute_refresh">새로고침</string>
+    <string name="cloud_mute_failed">작업에 실패했습니다. 새로고침 후 다시 시도하세요.</string>
+    <string name="cloud_mute_saved_refresh_failed">변경 사항은 Pixiv에 저장되었지만 목록을 새로고침하지 못했습니다. 다시 제출하지 말고 목록을 새로고침하세요.</string>
+    <string name="cloud_mute_quota">%2$d개 중 %1$d개 사용 중</string>
+    <string name="cloud_mute_add_tag">태그 차단</string>
+    <string name="cloud_mute_add_user">사용자 차단</string>
+    <string name="cloud_mute_import">클라우드 차단을 로컬로 가져오기</string>
+    <string name="cloud_mute_imported">로컬 차단 규칙 %1$d개를 추가했습니다</string>
+    <string name="cloud_mute_remove">클라우드 차단 해제</string>
+    <string name="cloud_mute_remove_description">Pixiv 클라우드 차단에서 “%1$s”을(를) 삭제할까요? 기존 로컬 규칙은 유지됩니다.</string>
+    <string name="cloud_mute_tag">태그 이름</string>
+    <string name="cloud_mute_user_id">Pixiv 사용자 ID</string>
+    <string name="cloud_mute_input_hint">아직 차단하지 않은 태그 또는 유효한 사용자 ID를 입력하세요.</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Pixiv-Cloud-Blockierungen</string>
+    <string name="cloud_mute_description">Verwalte blockierte Benutzer und Tags deines Pixiv-Kontos. Änderungen werden mit Pixiv synchronisiert. Beim Import werden nur fehlende lokale Regeln ergänzt; bestehende Blockierungen und reguläre Ausdrücke bleiben erhalten.</string>
+    <string name="cloud_mute_back">Zurück</string>
+    <string name="cloud_mute_refresh">Aktualisieren</string>
+    <string name="cloud_mute_failed">Die Aktion ist fehlgeschlagen. Bitte aktualisieren und erneut versuchen.</string>
+    <string name="cloud_mute_saved_refresh_failed">Deine Änderung wurde bei Pixiv gespeichert, aber die Liste konnte nicht aktualisiert werden. Aktualisiere die Liste, ohne die Änderung erneut zu senden.</string>
+    <string name="cloud_mute_quota">%1$d von %2$d Einträgen belegt</string>
+    <string name="cloud_mute_add_tag">Tag in der Cloud blockieren</string>
+    <string name="cloud_mute_add_user">Benutzer in der Cloud blockieren</string>
+    <string name="cloud_mute_import">Cloud-Blockierungen lokal importieren</string>
+    <string name="cloud_mute_imported">%1$d lokale Blockierungsregeln hinzugefügt</string>
+    <string name="cloud_mute_remove">Cloud-Blockierung aufheben</string>
+    <string name="cloud_mute_remove_description">„%1$s“ aus den Pixiv-Cloud-Blockierungen entfernen? Bestehende lokale Regeln bleiben erhalten.</string>
+    <string name="cloud_mute_tag">Tag-Name</string>
+    <string name="cloud_mute_user_id">Pixiv-Benutzer-ID</string>
+    <string name="cloud_mute_input_hint">Gib einen noch nicht blockierten Tag oder eine gültige, noch nicht blockierte Benutzer-ID ein.</string>
+</resources>

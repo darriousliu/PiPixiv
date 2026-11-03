@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.metadata
-import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
@@ -45,8 +44,8 @@ import com.mrl.pixiv.common.compose.layout.PaneRole
 import com.mrl.pixiv.common.compose.layout.SplitPaneState
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
-import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.CommentType
+import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationRecord
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -73,7 +72,7 @@ class PicturePaneResizeTest {
     )
 
     private fun checkPictureResize(initialWidth: Dp, visitCommentPane: Boolean) {
-        // The application's Tao dispatcher differs from the Swing EDT used by Compose UI tests.
+        // 应用的 Tao 调度器与 Compose UI 测试使用的 Swing EDT 不同。
         Dispatchers.setMain(Dispatchers.Swing)
         try {
             runDesktopComposeUiTest(width = 1580, height = 800, testTimeout = 30.seconds) {
@@ -85,8 +84,8 @@ class PicturePaneResizeTest {
                     MaterialTheme {
                         SharedTransitionLayout(Modifier.fillMaxSize()) {
                             CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-                                // Leave the host window at 1580 dp while changing only the page's
-                                // container, so falling back to LocalWindowInfo cannot pass this test.
+                                // 保持宿主窗口为 1580 dp，只调整页面容器，
+                                // 确保错误地回退到 LocalWindowInfo 时无法通过测试。
                                 Box(Modifier.fillMaxSize()) {
                                     BoxWithConstraints(
                                         Modifier.width(containerWidth).fillMaxHeight()
@@ -100,8 +99,9 @@ class PicturePaneResizeTest {
                                                 maxWidth, maxHeight, splitState, inputState, paneTransitions,
                                             )
                                         }
-                                        NavDisplay(
+                                        PredictiveBackNavDisplay(
                                             backStack = backStack,
+                                            enableQuickBack = true,
                                             modifier = Modifier.fillMaxSize(),
                                             onBack = { backStack.removeLast() },
                                             sharedTransitionScope = this@SharedTransitionLayout,
@@ -112,8 +112,8 @@ class PicturePaneResizeTest {
                                                     contentKey = entryRecord.entryId,
                                                     metadata = metadata { put(NavigationRecordKey, entryRecord) },
                                                 ) {
-                                                    // AdaptiveScene creates the production PaneHost
-                                                    // around this shared navigation entry.
+                                                    // AdaptiveScene 使用生产代码中的 PaneHost
+                                                    // 包裹这个共享导航条目。
                                                     if (entryRecord.destination is Destination.Comment) {
                                                         Text("Comments", Modifier.testTag("comment-content"))
                                                     } else {
@@ -188,7 +188,7 @@ class PicturePaneResizeTest {
 
 @Composable
 private fun PicturePager(onPaneChanged: (PaneLayoutInfo) -> Unit) {
-    // Match HorizontalSwipePictureScreen: its pager has no explicit sizing modifier.
+    // 与 HorizontalSwipePictureScreen 保持一致：分页器不显式指定尺寸修饰符。
     HorizontalPager(state = rememberPagerState { 1 }) {
         val pane = currentPaneLayoutInfo()
         SideEffect { onPaneChanged(pane) }

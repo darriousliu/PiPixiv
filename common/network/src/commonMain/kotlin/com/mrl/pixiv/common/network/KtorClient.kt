@@ -83,7 +83,7 @@ internal expect val baseImageHttpClient: HttpClient
 
 expect val httpEngineFactory: HttpClientEngineFactory<*>
 
-// 非 Pixiv 客户端共享代理选择，但不启用 Pixiv 专用的 SNI 处理。
+// 非 Pixiv 客户端共享代理选择，但不启用 Pixiv 专用的 ECH 处理。
 expect fun HttpClientConfig<*>.configureNetworkProxy(
     setting: UserPreference.BypassSetting = NetworkUtil.bypassSetting,
 )

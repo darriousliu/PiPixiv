@@ -6,14 +6,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,8 +26,13 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
@@ -109,25 +113,22 @@ private fun TrendingIllustPage(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = illustsFollowing.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = { illustsFollowing.refresh() },
         modifier = modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         Box {
             AdaptiveVerticalStaggeredGrid(
                 columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
                 state = lazyGridState,
-                contentPadding = PaddingValues(horizontal = 5.dp, vertical = 10.dp),
+                contentPadding = PaddingValues(
+                    horizontal = 5.dp,
+                    vertical = 10.dp
+                ).withMainNavigationBottomInset(),
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,
             ) {
@@ -163,7 +164,31 @@ private fun TrendingIllustPage(
                         }
                     )
                 }
+
+                if (
+                    illustsFollowing.itemCount > 0 &&
+                    illustsFollowing.loadState.refresh is LoadState.NotLoading &&
+                    illustsFollowing.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "append_state", span = StaggeredGridItemSpan.FullLine) {
+                        PagingAppendState(
+                            loadStates = illustsFollowing.loadState,
+                            itemCount = illustsFollowing.itemCount,
+                            onRetry = illustsFollowing::retry,
+                            modifier = Modifier.padding(bottom = 136.dp),
+                        )
+                    }
+                }
             }
+            PagingContentState(
+                loadStates = illustsFollowing.loadState,
+                itemCount = illustsFollowing.itemCount,
+                onRetry = illustsFollowing::retry,
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (illustsFollowing.itemCount > 0) 136.dp else 0.dp,
+                ),
+            )
             VerticalScrollbar(
                 state = lazyGridState,
                 modifier = Modifier.align(Alignment.CenterEnd)
@@ -225,24 +250,18 @@ private fun TrendingNovelPage(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = novelsFollowing.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = { novelsFollowing.refresh() },
         modifier = modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         Box {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
-                contentPadding = PaddingValues(vertical = 50.dp),
+                contentPadding = PaddingValues(vertical = 50.dp).withMainNavigationBottomInset(),
             ) {
                 items(
                     count = novelsFollowing.itemCount,
@@ -265,7 +284,31 @@ private fun TrendingNovelPage(
                         )
                     }
                 }
+
+                if (
+                    novelsFollowing.itemCount > 0 &&
+                    novelsFollowing.loadState.refresh is LoadState.NotLoading &&
+                    novelsFollowing.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "append_state") {
+                        PagingAppendState(
+                            loadStates = novelsFollowing.loadState,
+                            itemCount = novelsFollowing.itemCount,
+                            onRetry = novelsFollowing::retry,
+                            modifier = Modifier.padding(bottom = 136.dp),
+                        )
+                    }
+                }
             }
+            PagingContentState(
+                loadStates = novelsFollowing.loadState,
+                itemCount = novelsFollowing.itemCount,
+                onRetry = novelsFollowing::retry,
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (novelsFollowing.itemCount > 0) 136.dp else 0.dp,
+                ),
+            )
             VerticalScrollbar(
                 state = lazyListState,
                 modifier = Modifier.align(Alignment.CenterEnd)

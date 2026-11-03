@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Sort
@@ -28,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.rememberThrottleClick
@@ -42,7 +42,6 @@ import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.setting.components.DropDownSelector
 import com.mrl.pixiv.strings.ai_generate
 import com.mrl.pixiv.strings.date_asc
@@ -97,28 +96,21 @@ fun SearchSettingScreen(
             DefaultSearchTargetSetting(
                 selectedTarget = searchSettings.defaultSearchTarget,
                 onTargetChange = { target ->
-                    SettingRepository.setSearchSettings(
-                        searchSettings.copy(defaultSearchTarget = target)
-                    )
+                    SettingRepository.updateSearchFilterDefaults { copy(searchTarget = target) }
                 }
             )
             DefaultSearchSortSetting(
                 selectedSort = searchSettings.defaultSearchSort,
                 onSortChange = { sort ->
-                    SettingRepository.setSearchSettings(
-                        searchSettings.copy(defaultSearchSort = sort)
-                    )
+                    SettingRepository.updateSearchFilterDefaults { copy(sort = sort) }
                 }
             )
             ListItem(
                 onClick = rememberThrottleClick {
-                    SettingRepository.setSearchSettings(
-                        searchSettings.copy(
-                            defaultSearchAiType = searchSettings.defaultSearchAiType.toggled()
-                        )
-                    )
+                    val aiType = searchSettings.defaultSearchAiType.toggled()
+                    SettingRepository.updateSearchFilterDefaults { copy(searchAiType = aiType) }
                 },
-                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.ai_generate))
                 },
@@ -129,15 +121,15 @@ fun SearchSettingScreen(
                     Switch(
                         checked = searchSettings.defaultSearchAiType == SearchAiType.SHOW_AI,
                         onCheckedChange = { checked ->
-                            SettingRepository.setSearchSettings(
-                                searchSettings.copy(
-                                    defaultSearchAiType = if (checked) {
+                            SettingRepository.updateSearchFilterDefaults {
+                                copy(
+                                    searchAiType = if (checked) {
                                         SearchAiType.SHOW_AI
                                     } else {
                                         SearchAiType.HIDE_AI
                                     }
                                 )
-                            )
+                            }
                         }
                     )
                 },
@@ -153,8 +145,8 @@ fun SearchSettingScreen(
             SearchContentFilterControls(
                 filter = searchSettings.defaultContentFilter,
                 defaultShowR18 = userPreference.isR18Enabled,
-                onChange = {
-                    SettingRepository.setSearchSettings(searchSettings.copy(defaultContentFilter = it))
+                onChange = { contentFilter ->
+                    SettingRepository.updateSearchFilterDefaults { copy(contentFilter = contentFilter) }
                 },
                 modifier = Modifier.padding(16.dp),
             )
@@ -185,7 +177,7 @@ private fun DefaultSearchTargetSetting(
         },
         trailingContent = {
             DropDownSelector(
-                modifier = Modifier.throttleClick { expanded = !expanded },
+                onClick = { expanded = !expanded },
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 current = selectedTarget.label(),
@@ -236,7 +228,7 @@ private fun DefaultSearchSortSetting(
         },
         trailingContent = {
             DropDownSelector(
-                modifier = Modifier.throttleClick { expanded = !expanded },
+                onClick = { expanded = !expanded },
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 current = selectedSort.label(),
@@ -310,7 +302,7 @@ private fun SearchResultDisplayModeSetting(
         leadingContent = { Icon(Icons.Rounded.ViewModule, contentDescription = null) },
         trailingContent = {
             DropDownSelector(
-                modifier = Modifier.throttleClick { expanded = !expanded },
+                onClick = { expanded = !expanded },
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 current = selectedMode.label(),

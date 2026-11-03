@@ -92,10 +92,7 @@ private fun UserPreference.BypassSetting.needsLocalNetworkAccess(): Boolean {
     return when (this) {
         UserPreference.BypassSetting.System, UserPreference.BypassSetting.Direct -> false
         is UserPreference.BypassSetting.Proxy -> host.isLocalNetworkHost()
-        is UserPreference.BypassSetting.SNI -> {
-            parseUrl(url)?.host?.isLocalNetworkHost() == true ||
-                    fallback.values.any { it.isLocalNetworkHost() }
-        }
+        is UserPreference.BypassSetting.ECH -> parseUrl(url)?.host?.isLocalNetworkHost() == true
     }
 }
 

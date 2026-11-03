@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_title">Mis lecturas</string>
+    <string name="data_storage_title">Datos y almacenamiento</string>
+    <string name="download_settings_title">Configuración de descargas</string>
+    <string name="settings_section_content">Contenido y experiencia</string>
+    <string name="settings_section_app">Aplicación</string>
+    <string name="settings_section_account">Cuenta</string>
+    <string name="profile_view_homepage">Ver perfil</string>
+    <string name="settings_section_general">General</string>
+    <string name="unblock_item">Desbloquear</string>
+</resources>

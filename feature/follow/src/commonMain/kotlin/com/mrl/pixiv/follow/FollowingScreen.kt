@@ -6,41 +6,43 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -48,13 +50,19 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.FollowButton
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
@@ -70,7 +78,7 @@ import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.strings.follow
+import com.mrl.pixiv.strings.community_empty_users
 import com.mrl.pixiv.strings.followed
 import com.mrl.pixiv.strings.word_private
 import com.mrl.pixiv.strings.word_public
@@ -94,18 +102,54 @@ fun FollowingScreen(
     viewModel: FollowingViewModel = koinViewModel { parametersOf(uid) },
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
-    val scope = rememberCoroutineScope()
     val pages = viewModel.pages
     val pagerState = viewModel.pagerState
+    // Collect each available page at a stable call site, independent of the selected tab.
+    val followingUsers = pages.map { page ->
+        key(page) {
+            val source = when (page) {
+                FollowingPage.Public -> viewModel.publicFollowingPageSource
+                FollowingPage.Private -> viewModel.privateFollowingPageSource
+            }
+            source.collectAsLazyPagingItems()
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        logEvent("screen_view", buildMap {
+            put("screen_name", "Following")
+            put("page_name", pages[pagerState.currentPage].name)
+        })
+    }
+
+    FollowingScreenContent(
+        pages = pages,
+        followingUsers = followingUsers,
+        pagerState = pagerState,
+        lazyListStates = viewModel.lazyListState,
+        lazyGridStates = viewModel.lazyGridState,
+        onBack = { navigationManager.popBackStack() },
+        navToPictureScreen = navigationManager::navigateToPictureScreen,
+        navToUserProfile = navigationManager::navigateToProfileDetailScreen,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun FollowingScreenContent(
+    pages: List<FollowingPage>,
+    followingUsers: List<LazyPagingItems<UserPreview>>,
+    pagerState: PagerState,
+    lazyListStates: List<LazyListState>,
+    lazyGridStates: List<LazyGridState>,
+    onBack: () -> Unit,
+    navToPictureScreen: NavigateToHorizontalPictureScreen,
+    navToUserProfile: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val scope = rememberCoroutineScope()
     val paneSizeClass = currentPaneLayoutInfo().sizeClass
     val isWidthAtLeastMedium = paneSizeClass.isWidthAtLeastMedium
-    val lazyListStates = viewModel.lazyListState
-    val lazyGridStates = viewModel.lazyGridState
-    val page = pages[pagerState.currentPage]
-    val followingUsers = when (page) {
-        FollowingPage.Public -> viewModel.publicFollowingPageSource.collectAsLazyPagingItems()
-        FollowingPage.Private -> viewModel.privateFollowingPageSource.collectAsLazyPagingItems()
-    }
     val controller = remember(isWidthAtLeastMedium, pagerState.currentPage) {
         if (isWidthAtLeastMedium) {
             val lazyGridState = lazyGridStates[pagerState.currentPage]
@@ -131,9 +175,7 @@ fun FollowingScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = rememberThrottleClick {
-                            navigationManager.popBackStack()
-                        },
+                        onClick = rememberThrottleClick(onClick = onBack),
                         shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(
@@ -160,7 +202,7 @@ fun FollowingScreen(
                     }
                 },
                 onRefresh = {
-                    followingUsers.refresh()
+                    followingUsers[pagerState.currentPage].refresh()
                 }
             )
         },
@@ -190,21 +232,15 @@ fun FollowingScreen(
                     }
                 }
             }
-            LaunchedEffect(pagerState.currentPage) {
-                logEvent("screen_view", buildMap {
-                    put("screen_name", "Following")
-                    put("page_name", FollowingPage.entries[pagerState.currentPage].name)
-                })
-            }
-
             HorizontalPager(
                 state = pagerState,
-                modifier = modifier.weight(1f),
+                modifier = Modifier.weight(1f),
+                key = { pages[it] },
             ) { index ->
                 FollowingScreenBody(
-                    followingUsers = followingUsers,
-                    navToPictureScreen = navigationManager::navigateToPictureScreen,
-                    navToUserProfile = navigationManager::navigateToProfileDetailScreen,
+                    followingUsers = followingUsers[index],
+                    navToPictureScreen = navToPictureScreen,
+                    navToUserProfile = navToUserProfile,
                     lazyListState = lazyListStates[index],
                     lazyGridState = lazyGridStates[index],
                 )
@@ -227,18 +263,12 @@ fun FollowingScreenBody(
     val paneSizeClass = currentPaneLayoutInfo().sizeClass
 
     val isRefreshing = followingUsers.loadState.refresh is LoadState.Loading
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
         isRefreshing = isRefreshing,
+        hasContent = followingUsers.itemCount > 0,
         onRefresh = { followingUsers.refresh() },
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         if (paneSizeClass.isWidthAtLeastMedium) {
             val layoutParams = IllustGridDefaults.userFollowingParameters()
@@ -251,7 +281,7 @@ fun FollowingScreenBody(
                     top = 10.dp,
                     end = 16.dp,
                     bottom = 20.dp
-                ),
+                ).withMainNavigationBottomInset(),
                 horizontalArrangement = layoutParams.horizontalArrangement,
                 verticalArrangement = layoutParams.verticalArrangement,
             ) {
@@ -273,6 +303,19 @@ fun FollowingScreenBody(
                         showIllusts = showIllusts
                     )
                 }
+                if (
+                    followingUsers.itemCount > 0 &&
+                    followingUsers.loadState.refresh is LoadState.NotLoading &&
+                    followingUsers.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "append_state", span = { GridItemSpan(maxLineSpan) }) {
+                        PagingAppendState(
+                            followingUsers.loadState,
+                            followingUsers.itemCount,
+                            followingUsers::retry
+                        )
+                    }
+                }
             }
             VerticalScrollbar(
                 state = lazyGridState,
@@ -287,7 +330,7 @@ fun FollowingScreenBody(
                     top = 10.dp,
                     end = 16.dp,
                     bottom = 20.dp
-                ),
+                ).withMainNavigationBottomInset(),
                 verticalArrangement = 10f.spaceBy,
             ) {
                 items(
@@ -308,12 +351,41 @@ fun FollowingScreenBody(
                         showIllusts = showIllusts
                     )
                 }
+                if (
+                    followingUsers.itemCount > 0 &&
+                    followingUsers.loadState.refresh is LoadState.NotLoading &&
+                    followingUsers.loadState.append !is LoadState.NotLoading
+                ) {
+                    item(key = "append_state") {
+                        PagingAppendState(
+                            followingUsers.loadState,
+                            followingUsers.itemCount,
+                            followingUsers::retry
+                        )
+                    }
+                }
             }
             VerticalScrollbar(
                 state = lazyListState,
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
         }
+        PagingContentState(
+            loadStates = followingUsers.loadState,
+            itemCount = followingUsers.itemCount,
+            onRetry = followingUsers::retry,
+            modifier = Modifier.fillMaxSize().padding(
+                bottom = if (followingUsers.itemCount > 0) {
+                    maxOf(
+                        LocalMainNavigationBottomInset.current,
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                    ) + 88.dp
+                } else {
+                    LocalMainNavigationBottomInset.current
+                },
+            ),
+            emptyMessage = stringResource(RStrings.community_empty_users),
+        )
     }
 }
 
@@ -329,7 +401,8 @@ fun FollowingUserCard(
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     navToUserProfile: () -> Unit,
     modifier: Modifier = Modifier,
-    showIllusts: Boolean = true
+    showIllusts: Boolean = true,
+    isUpdatingFollow: Boolean = FollowState.isUpdating(userId),
 ) {
     Card(
         onClick = navToUserProfile,
@@ -375,29 +448,21 @@ fun FollowingUserCard(
             )
             Text(
                 text = userName,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
-            if (isFollowed) {
-                OutlinedButton(
-                    onClick = {
+            FollowButton(
+                isFollowing = isFollowed,
+                isUpdating = isUpdatingFollow,
+                onClick = {
+                    if (isFollowed) {
                         FollowState.unFollowUser(userId)
-                    }
-                ) {
-                    Text(
-                        text = stringResource(RStrings.followed),
-                    )
-                }
-            } else {
-                Button(
-                    onClick = {
+                    } else {
                         FollowState.followUser(userId)
                     }
-                ) {
-                    Text(
-                        text = stringResource(RStrings.follow),
-                    )
-                }
-            }
+                },
+            )
         }
     }
 }

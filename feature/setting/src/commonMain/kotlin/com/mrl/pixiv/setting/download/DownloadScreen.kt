@@ -1,6 +1,7 @@
 package com.mrl.pixiv.setting.download
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,8 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.mrl.pixiv.common.compose.ui.ContentEmptyState
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.router.NavigationManager
@@ -45,8 +49,10 @@ import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.strings.content_empty_downloads
 import com.mrl.pixiv.strings.delete
 import com.mrl.pixiv.strings.download_manager
+import com.mrl.pixiv.strings.download_settings_title
 import com.mrl.pixiv.strings.retry
 import com.mrl.pixiv.strings.status_all
 import com.mrl.pixiv.strings.status_completed
@@ -75,19 +81,9 @@ fun DownloadScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(RStrings.download_manager)) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navigationManager::popBackStack,
-                        shapes = IconButtonDefaults.shapes()
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
-                }
+            DownloadTopAppBar(
+                onBack = navigationManager::popBackStack,
+                onSettings = navigationManager::navigateToFileNameFormatScreen,
             )
         }
     ) { padding ->
@@ -105,6 +101,16 @@ fun DownloadScreen(
                         text = { Text(stringResource(titleRes)) }
                     )
                 }
+            }
+
+            if (downloads.isEmpty()) {
+                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    ContentEmptyState(
+                        message = stringResource(RStrings.content_empty_downloads),
+                        icon = Icons.Rounded.Download,
+                    )
+                }
+                return@Column
             }
 
             LazyColumn(
@@ -216,4 +222,30 @@ fun DownloadItem(
             }
         }
     }
+}
+
+@Composable
+internal fun DownloadTopAppBar(onBack: () -> Unit, onSettings: () -> Unit) {
+    TopAppBar(
+        title = { Text(stringResource(RStrings.download_manager)) },
+        navigationIcon = {
+            IconButton(
+                onClick = onBack,
+                shapes = IconButtonDefaults.shapes()
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = null
+                )
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = onSettings,
+                shapes = IconButtonDefaults.shapes(),
+            ) {
+                Icon(Icons.Rounded.Settings, stringResource(RStrings.download_settings_title))
+            }
+        },
+    )
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_title">我的阅读</string>
+    <string name="data_storage_title">数据与存储</string>
+    <string name="download_settings_title">下载设置</string>
+    <string name="settings_section_content">内容与体验</string>
+    <string name="settings_section_app">应用</string>
+    <string name="settings_section_account">账号</string>
+    <string name="profile_view_homepage">查看个人主页</string>
+    <string name="settings_section_general">通用</string>
+    <string name="unblock_item">解除屏蔽</string>
+</resources>

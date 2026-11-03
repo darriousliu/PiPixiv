@@ -51,3 +51,8 @@
 -printmapping build/compose/binaries/main-release/proguard/mapping.txt
 -printseeds build/compose/binaries/main-release/proguard/seeds.txt
 -printusage build/compose/binaries/main-release/proguard/usage.txt
+# Conscrypt 反射读取此策略；丢失该方法会导致 ECH 未启用。
+-keep class org.conscrypt.** { *; }
+-keep,allowoptimization class com.mrl.pixiv.common.network.PixivEchTrustManager {
+    public org.conscrypt.NetworkSecurityPolicy getNetworkSecurityPolicy();
+}

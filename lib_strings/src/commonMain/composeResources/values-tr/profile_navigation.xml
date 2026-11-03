@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_title">Okuma listem</string>
+    <string name="data_storage_title">Veriler ve depolama</string>
+    <string name="download_settings_title">İndirme ayarları</string>
+    <string name="settings_section_content">İçerik ve deneyim</string>
+    <string name="settings_section_app">Uygulama</string>
+    <string name="settings_section_account">Hesap</string>
+    <string name="profile_view_homepage">Profili görüntüle</string>
+    <string name="settings_section_general">Genel</string>
+    <string name="unblock_item">Engeli kaldır</string>
+</resources>

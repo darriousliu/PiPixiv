@@ -18,22 +18,22 @@ import kotlin.test.assertTrue
 
 class SniTlsIntegrationTest {
     @Test
-    fun apiClientHelloUsesReplacementSniAndKeepsOriginalHttpHost() {
+    fun apiKeepsOriginalInnerServerNameAndHttpHost() {
         withTlsServer(API_HOST) { server, client ->
             val request = execute(server, client, API_HOST)
 
-            assertEquals(listOf(PIXIV_TLS_SERVER_NAME), request.handshakeServerNames)
+            assertEquals(listOf(API_HOST), request.handshakeServerNames)
             assertEquals(API_HOST, request.url.host)
             assertEquals(server.port, request.url.port)
         }
     }
 
     @Test
-    fun oauthClientHelloUsesReplacementSniAndKeepsOriginalHttpHost() {
+    fun oauthKeepsOriginalInnerServerNameAndHttpHost() {
         withTlsServer(AUTH_HOST) { server, client ->
             val request = execute(server, client, AUTH_HOST)
 
-            assertEquals(listOf(PIXIV_TLS_SERVER_NAME), request.handshakeServerNames)
+            assertEquals(listOf(AUTH_HOST), request.handshakeServerNames)
             assertEquals(AUTH_HOST, request.url.host)
             assertEquals(server.port, request.url.port)
         }
@@ -73,8 +73,8 @@ class SniTlsIntegrationTest {
     }
 
     @Test
-    fun replacementSniRejectsCertificateThatOnlyCoversReplacementHost() {
-        withTlsServer(PIXIV_TLS_SERVER_NAME) { server, client ->
+    fun apiRejectsCertificateThatOnlyCoversEchPublicName() {
+        withTlsServer("cloudflare-ech.com") { server, client ->
             assertFailsWith<SSLPeerUnverifiedException> {
                 client.newCall(
                     Request.Builder()
@@ -86,7 +86,7 @@ class SniTlsIntegrationTest {
     }
 
     @Test
-    fun replacementSniStillRejectsUntrustedCertificateChains() {
+    fun apiStillRejectsUntrustedCertificateChains() {
         withTlsServer(
             certificateHost = API_HOST,
             trustServerCertificate = false,
@@ -148,7 +148,8 @@ class SniTlsIntegrationTest {
                 .proxy(Proxy.NO_PROXY)
                 .dns(Dns { listOf(InetAddress.getLoopbackAddress()) })
                 .sslSocketFactory(
-                    SniReplacingSslSocketFactory(clientCertificates.sslSocketFactory()),
+                    // 本地服务不支持 ECH；加密握手由 PixivEchTlsTest 单独验证。
+                    PixivEchSslSocketFactory(clientCertificates.sslSocketFactory()) {},
                     clientCertificates.trustManager,
                 )
                 .build()

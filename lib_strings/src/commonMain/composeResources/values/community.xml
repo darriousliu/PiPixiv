@@ -1,0 +1,16 @@
+<resources>
+    <string name="community_notifications">通知中心</string>
+    <string name="community_notification">通知</string>
+    <string name="community_unread">有未读通知</string>
+    <string name="community_unread_failed">未能更新未读状态</string>
+    <string name="community_empty_notifications">暂无通知</string>
+    <string name="community_view_more">查看更多</string>
+    <string name="community_unknown_link">暂不支持打开这条通知的链接</string>
+    <string name="community_recommended_users">推荐作者</string>
+    <string name="community_related_users">相似作者</string>
+    <string name="community_followers">我的粉丝</string>
+    <string name="community_empty_users">暂无可显示的作者</string>
+    <string name="community_empty_followers">暂无粉丝</string>
+    <string name="community_refresh">刷新</string>
+    <string name="community_load_failed">加载失败，请重试</string>
+</resources>

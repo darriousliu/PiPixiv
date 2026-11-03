@@ -6,7 +6,7 @@ import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Series
 import com.mrl.pixiv.common.data.User
 import com.mrl.pixiv.common.data.XRestrict
-import com.mrl.pixiv.profile.detail.components.previewNovelWorks
+import com.mrl.pixiv.profile.detail.components.previewProfileNovels
 import com.mrl.pixiv.profile.detail.components.shouldShowNovelWorks
 import kotlinx.collections.immutable.persistentListOf
 import kotlin.test.Test
@@ -25,7 +25,7 @@ class ProfileNovelWorksTest {
         assertTrue(shouldShowNovelWorks(listOf(1L)))
         assertEquals(
             listOf(1L, 2L, 3L),
-            previewNovelWorks(listOf(1L, 2L, 3L, 4L)),
+            previewProfileNovels(listOf(1L, 2L, 3L, 4L)),
         )
     }
 
@@ -36,7 +36,7 @@ class ProfileNovelWorksTest {
             userBookmarksNovels = persistentListOf(novel(id = 90L)),
         )
 
-        val preview = previewNovelWorks(state.userNovels)
+        val preview = previewProfileNovels(state.userNovels)
 
         assertEquals(listOf(10L), preview.map(Novel::id))
         assertEquals(listOf(90L), state.userBookmarksNovels.map(Novel::id))

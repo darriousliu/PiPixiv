@@ -18,7 +18,7 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 ## 📥 Download
 
-Current source version: **2.5.1**. See GitHub Release below for published versions.
+Current source version: **2.6.0**. See GitHub Release below for published versions.
 
 [![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=Stable)](https://github.com/darriousliu/PiPixiv/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
@@ -26,7 +26,7 @@ Current source version: **2.5.1**. See GitHub Release below for published versio
 
 ## 📸 App Preview
 
-<img width="100%" alt="b48d643b-8bd4-479c-bc7b-9c586a9fafd8" src="https://github.com/user-attachments/assets/396ff31e-fecc-4447-bb6f-f9cb3e79b812" />
+<img width="100%" alt="preview" src="docs/preview.png" />
 
 ### 📱 Supported Platforms
 
@@ -76,7 +76,7 @@ Current source version: **2.5.1**. See GitHub Release below for published versio
 ### 🔍 Search & Discovery
 
 * 🔍 Search illustrations/novels and users, sort by popularity, latest, etc.
-* 🛠️ Configure default matching, sorting, and AI content filters; temporary changes in search leave global defaults intact.
+* 🛠️ Configure default matching, sorting, and AI content filters; illustration and novel searches separately remember their last applied sorting and filters across app restarts.
 * 📄 Choose continuous scrolling or paged search results; supported results offer previous/next page and page-jump controls.
 * 🖼️ Choose square thumbnails or an original-aspect-ratio waterfall layout for illustration search; novel search uses wider lists and compact titles.
 * 🏷️ Long-press a tag to collect it or copy it to clipboard.

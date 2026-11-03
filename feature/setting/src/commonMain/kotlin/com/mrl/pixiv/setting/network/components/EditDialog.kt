@@ -9,7 +9,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.mrl.pixiv.common.util.RStrings
@@ -26,7 +26,7 @@ fun EditDialog(
     isValid: (String) -> Boolean = { true },
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
-    var text by remember(initialValue) { mutableStateOf(initialValue) }
+    var text by rememberSaveable(initialValue) { mutableStateOf(initialValue) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },

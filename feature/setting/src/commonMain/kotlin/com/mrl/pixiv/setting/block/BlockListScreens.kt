@@ -1,7 +1,6 @@
 package com.mrl.pixiv.setting.block
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -37,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.lightBlue
+import com.mrl.pixiv.common.compose.ui.ContentEmptyState
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -49,11 +49,13 @@ import com.mrl.pixiv.strings.block_user
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.confirm
 import com.mrl.pixiv.strings.no_blocked_items
+import com.mrl.pixiv.strings.unblock_item
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BlockIllustScreen(
     modifier: Modifier = Modifier,
+    embedded: Boolean = false,
 ) {
     val blockedIllusts by BlockingRepositoryV2.blockIllustItemsFlow
         .collectAsStateWithLifecycle(emptyList())
@@ -65,6 +67,7 @@ fun BlockIllustScreen(
             BlockingRepositoryV2.removeBlockIllust(item.illustId)
         },
         modifier = modifier,
+        embedded = embedded,
         itemContent = {
             Text(
                 text = it.title.ifBlank { it.illustId.toString() },
@@ -78,6 +81,7 @@ fun BlockIllustScreen(
 @Composable
 fun BlockNovelScreen(
     modifier: Modifier = Modifier,
+    embedded: Boolean = false,
 ) {
     val blockedNovels by BlockingRepositoryV2.blockNovelItemsFlow
         .collectAsStateWithLifecycle(emptyList())
@@ -89,6 +93,7 @@ fun BlockNovelScreen(
             BlockingRepositoryV2.removeBlockNovel(item.novelId)
         },
         modifier = modifier,
+        embedded = embedded,
         itemContent = {
             Text(
                 text = it.title.ifBlank { it.novelId.toString() },
@@ -102,6 +107,7 @@ fun BlockNovelScreen(
 @Composable
 fun BlockUserScreen(
     modifier: Modifier = Modifier,
+    embedded: Boolean = false,
 ) {
     val blockedUsers by BlockingRepositoryV2.blockUserItemsFlow
         .collectAsStateWithLifecycle(emptyList())
@@ -113,6 +119,7 @@ fun BlockUserScreen(
             BlockingRepositoryV2.removeBlockUser(item.userId)
         },
         modifier = modifier,
+        embedded = embedded,
         itemContent = {
             Text(
                 text = it.name.ifBlank { it.userId.toString() },
@@ -126,6 +133,7 @@ fun BlockUserScreen(
 @Composable
 fun BlockTagScreen(
     modifier: Modifier = Modifier,
+    embedded: Boolean = false,
 ) {
     val blockedTags by BlockingRepositoryV2.blockTagItemsFlow.collectAsStateWithLifecycle(emptyList())
     val tags = blockedTags.sortedBy { it.tag.lowercase() }
@@ -133,7 +141,8 @@ fun BlockTagScreen(
     var inputTag by remember { mutableStateOf("") }
     var isRegex by remember { mutableStateOf(false) }
     val normalizedTag = inputTag.trim()
-    val regexValid = !isRegex || normalizedTag.isBlank() || runCatching { Regex(normalizedTag) }.isSuccess
+    val regexValid =
+        !isRegex || normalizedTag.isBlank() || runCatching { Regex(normalizedTag) }.isSuccess
     val canConfirm = normalizedTag.isNotEmpty() && regexValid
 
     BlockTextScreen(
@@ -142,6 +151,8 @@ fun BlockTagScreen(
         key = { it.tag },
         onRemove = { item -> BlockingRepositoryV2.removeBlockTag(item.tag) },
         modifier = modifier,
+        embedded = embedded,
+        hasActions = true,
         topBarActions = {
             IconButton(
                 onClick = {
@@ -219,77 +230,74 @@ private fun <T> BlockTextScreen(
     items: List<T>,
     key: (T) -> Any,
     onRemove: (T) -> Unit,
-    topBarActions: @Composable RowScope.() -> Unit = {},
     modifier: Modifier = Modifier,
+    topBarActions: @Composable RowScope.() -> Unit = {},
+    embedded: Boolean = false,
+    hasActions: Boolean = false,
     itemContent: @Composable RowScope.(T) -> Unit = {},
 ) {
-    val navigationManager = currentNavigationManager()
-
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = title)
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navigationManager::popBackStack,
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
-                },
-                actions = topBarActions,
-            )
+    if (embedded) {
+        Column(modifier.fillMaxSize()) {
+            if (hasActions) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    topBarActions()
+                }
+            }
+            BlockTextContent(items, key, onRemove, Modifier.weight(1f), itemContent)
         }
-    ) { innerPadding ->
-        if (items.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(RStrings.no_blocked_items),
-                    style = MaterialTheme.typography.bodyLarge,
+    } else {
+        val navigationManager = currentNavigationManager()
+        Scaffold(
+            modifier = modifier,
+            topBar = {
+                TopAppBar(
+                    title = { Text(title) },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = navigationManager::popBackStack,
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
+                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
+                        }
+                    },
+                    actions = topBarActions,
                 )
-            }
-            return@Scaffold
+            },
+        ) { innerPadding ->
+            BlockTextContent(items, key, onRemove, Modifier.padding(innerPadding), itemContent)
         }
+    }
+}
 
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-        ) {
-            itemsIndexed(
-                items = items,
-                key = { _, item -> key(item) }
-            ) { index, item ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    itemContent(item)
-                    IconButton(onClick = { onRemove(item) }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Delete,
-                            contentDescription = null
-                        )
-                    }
-                }
-                if (index != items.lastIndex) {
-                    HorizontalDivider()
+@Composable
+internal fun <T> BlockTextContent(
+    items: List<T>,
+    key: (T) -> Any,
+    onRemove: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    itemContent: @Composable RowScope.(T) -> Unit,
+) {
+    if (items.isEmpty()) {
+        ContentEmptyState(
+            modifier = modifier.fillMaxSize(),
+            message = stringResource(RStrings.no_blocked_items),
+        )
+        return
+    }
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        itemsIndexed(items = items, key = { _, item -> key(item) }) { index, item ->
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                itemContent(item)
+                IconButton(onClick = { onRemove(item) }) {
+                    Icon(Icons.Rounded.Delete, stringResource(RStrings.unblock_item))
                 }
             }
+            if (index != items.lastIndex) HorizontalDivider()
         }
     }
 }

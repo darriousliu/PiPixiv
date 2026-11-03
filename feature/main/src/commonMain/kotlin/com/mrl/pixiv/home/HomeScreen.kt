@@ -2,6 +2,7 @@ package com.mrl.pixiv.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PersonSearch
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,8 +24,6 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,11 +32,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
+import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.ViewModeToggleButton
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
@@ -52,12 +58,12 @@ import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.home.components.RecommendGrid
 import com.mrl.pixiv.strings.app_name
+import com.mrl.pixiv.strings.community_recommended_users
 import com.mrl.pixiv.strings.illustrations
 import com.mrl.pixiv.strings.manga
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-
 
 @Composable
 fun HomeScreen(
@@ -69,7 +75,6 @@ fun HomeScreen(
     val mangaLazyStaggeredGridState = viewModel.mangaLazyStaggeredGridState
     val lazyListState = viewModel.lazyListState
     val imageFeedMode = viewModel.imageFeedMode
-    val scope = rememberCoroutineScope()
     val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
     val onRefresh = { viewModel.refresh(appViewMode) }
     val scrollToTop = suspend {
@@ -83,49 +88,21 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(RStrings.app_name)) },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                scrollToTop()
-                            }
-                            onRefresh()
-                        },
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(imageVector = Icons.Rounded.Refresh, contentDescription = null)
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            Column {
-                BackToTopButton(
-                    visibility = when (appViewMode) {
-                        AppViewMode.ILLUST -> when (imageFeedMode) {
-                            HomeImageFeedMode.Illust -> lazyStaggeredGridState.canScrollBackward
-                            HomeImageFeedMode.Manga -> mangaLazyStaggeredGridState.canScrollBackward
-                        }
-
-                        AppViewMode.NOVEL -> lazyListState.canScrollBackward
-                    },
-                    modifier = Modifier,
-                    onBackToTop = scrollToTop,
-                    onRefresh = onRefresh
-                )
-                8.VSpacer
-                ViewModeToggleButton(
-                    currentMode = appViewMode,
-                    onModeChange = viewModel::switchViewMode
-                )
+    HomeScaffold(
+        appViewMode = appViewMode,
+        canScrollBackward = when (appViewMode) {
+            AppViewMode.ILLUST -> when (imageFeedMode) {
+                HomeImageFeedMode.Illust -> lazyStaggeredGridState.canScrollBackward
+                HomeImageFeedMode.Manga -> mangaLazyStaggeredGridState.canScrollBackward
             }
+
+            AppViewMode.NOVEL -> lazyListState.canScrollBackward
         },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
+        onRecommendedUsers = navigationManager::navigateToRecommendedUsers,
+        onBackToTop = scrollToTop,
+        onRefresh = onRefresh,
+        onModeChange = viewModel::switchViewMode,
+        modifier = modifier,
     ) { paddingValues ->
         when (appViewMode) {
             AppViewMode.ILLUST -> {
@@ -147,6 +124,49 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Composable
+internal fun HomeScaffold(
+    appViewMode: AppViewMode,
+    canScrollBackward: Boolean,
+    onRecommendedUsers: () -> Unit,
+    onBackToTop: suspend () -> Unit,
+    onRefresh: () -> Unit,
+    onModeChange: (AppViewMode) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            HomeTopBar(
+                onRecommendedUsers = onRecommendedUsers,
+                onRefresh = {
+                    scope.launch { onBackToTop() }
+                    onRefresh()
+                },
+            )
+        },
+        floatingActionButton = {
+            Column(modifier = Modifier.padding(bottom = LocalMainNavigationBottomInset.current)) {
+                BackToTopButton(
+                    visibility = canScrollBackward,
+                    onBackToTop = onBackToTop,
+                    onRefresh = onRefresh
+                )
+                8.VSpacer
+                ViewModeToggleButton(
+                    currentMode = appViewMode,
+                    onModeChange = onModeChange
+                )
+            }
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
+        content = content,
+    )
 }
 
 @Composable
@@ -182,31 +202,10 @@ private fun IllustMode(
             .fillMaxSize()
             .fillMaxWidth(),
     ) {
-        PrimaryTabRow(
-            selectedTabIndex = pagerState.currentPage,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            HomeImageFeedMode.entries.forEachIndexed { index, mode ->
-                Tab(
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    },
-                    text = {
-                        Text(
-                            text = stringResource(
-                                when (mode) {
-                                    HomeImageFeedMode.Illust -> RStrings.illustrations
-                                    HomeImageFeedMode.Manga -> RStrings.manga
-                                }
-                            )
-                        )
-                    }
-                )
-            }
-        }
+        HomeFeedTabs(
+            selectedIndex = pagerState.currentPage,
+            onSelect = { index -> scope.launch { pagerState.animateScrollToPage(index) } },
+        )
 
         HorizontalPager(
             state = pagerState,
@@ -254,18 +253,12 @@ private fun HomeImageFeedPage(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = recommendImageList.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = recommendImageList::refresh,
         modifier = Modifier.fillMaxSize(),
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         Box(
             modifier = Modifier
@@ -276,6 +269,15 @@ private fun HomeImageFeedPage(
                 recommendImageList = recommendImageList,
                 navToPictureScreen = navigateToPictureScreen,
                 lazyStaggeredGridState = lazyStaggeredGridState,
+            )
+            PagingContentState(
+                loadStates = recommendImageList.loadState,
+                itemCount = recommendImageList.itemCount,
+                onRetry = recommendImageList::retry,
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (recommendImageList.itemCount > 0) 136.dp else 0.dp,
+                ),
             )
             VerticalScrollbar(
                 state = lazyStaggeredGridState,
@@ -314,22 +316,17 @@ private fun NovelMode(
         }
     }
 
-    PullToRefreshBox(
+    ContentPullToRefreshBox(
+        hasContent = recommendNovelList.itemCount > 0,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier,
         state = pullRefreshState,
-        indicator = {
-            PullToRefreshDefaults.LoadingIndicator(
-                state = pullRefreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
-            )
-        }
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = lazyListState,
+            contentPadding = PaddingValues().withMainNavigationBottomInset(),
         ) {
             items(
                 count = recommendNovelList.itemCount,
@@ -352,6 +349,70 @@ private fun NovelMode(
                     )
                 }
             }
+
+            if (
+                recommendNovelList.itemCount > 0 &&
+                recommendNovelList.loadState.refresh is LoadState.NotLoading &&
+                recommendNovelList.loadState.append !is LoadState.NotLoading
+            ) {
+                item(key = "append_state") {
+                    PagingAppendState(
+                        loadStates = recommendNovelList.loadState,
+                        itemCount = recommendNovelList.itemCount,
+                        onRetry = recommendNovelList::retry,
+                        modifier = Modifier.padding(bottom = 136.dp),
+                    )
+                }
+            }
+        }
+        PagingContentState(
+            loadStates = recommendNovelList.loadState,
+            itemCount = recommendNovelList.itemCount,
+            onRetry = recommendNovelList::retry,
+            modifier = Modifier.padding(
+                bottom = LocalMainNavigationBottomInset.current +
+                        if (recommendNovelList.itemCount > 0) 136.dp else 0.dp,
+            ),
+        )
+    }
+}
+
+@Composable
+internal fun HomeTopBar(onRecommendedUsers: () -> Unit, onRefresh: () -> Unit) {
+    TopAppBar(
+        title = { Text(text = stringResource(RStrings.app_name)) },
+        actions = {
+            IconButton(onClick = onRecommendedUsers, shapes = IconButtonDefaults.shapes()) {
+                Icon(
+                    Icons.Rounded.PersonSearch,
+                    contentDescription = stringResource(RStrings.community_recommended_users)
+                )
+            }
+            IconButton(onClick = onRefresh, shapes = IconButtonDefaults.shapes()) {
+                Icon(Icons.Rounded.Refresh, contentDescription = null)
+            }
+        },
+    )
+}
+
+@Composable
+internal fun HomeFeedTabs(selectedIndex: Int, onSelect: (Int) -> Unit) {
+    PrimaryTabRow(selectedTabIndex = selectedIndex, modifier = Modifier.fillMaxWidth()) {
+        HomeImageFeedMode.entries.forEachIndexed { index, mode ->
+            Tab(
+                selected = selectedIndex == index,
+                onClick = { onSelect(index) },
+                text = {
+                    Text(
+                        stringResource(
+                            when (mode) {
+                                HomeImageFeedMode.Illust -> RStrings.illustrations
+                                HomeImageFeedMode.Manga -> RStrings.manga
+                            }
+                        )
+                    )
+                },
+            )
         }
     }
 }

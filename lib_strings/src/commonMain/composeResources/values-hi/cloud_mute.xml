@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Pixiv क्लाउड ब्लॉक</string>
+    <string name="cloud_mute_description">अपने Pixiv खाते पर ब्लॉक किए गए उपयोगकर्ताओं और टैग को प्रबंधित करें। बदलाव Pixiv से सिंक होते हैं। आयात करने पर केवल वे नियम जुड़ते हैं जो स्थानीय रूप से मौजूद नहीं हैं; मौजूदा स्थानीय ब्लॉक नियम और रेगुलर एक्सप्रेशन बने रहते हैं।</string>
+    <string name="cloud_mute_back">वापस</string>
+    <string name="cloud_mute_refresh">रिफ्रेश करें</string>
+    <string name="cloud_mute_failed">कार्रवाई विफल रही। रिफ्रेश करके फिर से प्रयास करें।</string>
+    <string name="cloud_mute_saved_refresh_failed">आपका बदलाव Pixiv पर सहेजा गया, लेकिन सूची रिफ्रेश नहीं हो सकी। दोबारा सबमिट किए बिना सूची रिफ्रेश करें।</string>
+    <string name="cloud_mute_quota">%2$d में से %1$d स्थान इस्तेमाल किए गए</string>
+    <string name="cloud_mute_add_tag">टैग ब्लॉक करें</string>
+    <string name="cloud_mute_add_user">उपयोगकर्ता को ब्लॉक करें</string>
+    <string name="cloud_mute_import">क्लाउड ब्लॉक स्थानीय रूप से आयात करें</string>
+    <string name="cloud_mute_imported">%1$d स्थानीय ब्लॉक नियम जोड़े गए</string>
+    <string name="cloud_mute_remove">क्लाउड ब्लॉक हटाएँ</string>
+    <string name="cloud_mute_remove_description">क्या “%1$s” को Pixiv क्लाउड ब्लॉक से हटाना है? मौजूदा स्थानीय नियम बने रहेंगे।</string>
+    <string name="cloud_mute_tag">टैग का नाम</string>
+    <string name="cloud_mute_user_id">Pixiv उपयोगकर्ता ID</string>
+    <string name="cloud_mute_input_hint">ऐसा टैग या मान्य उपयोगकर्ता ID दर्ज करें जो पहले से ब्लॉक न हो।</string>
+</resources>

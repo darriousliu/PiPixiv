@@ -1,6 +1,6 @@
 package com.mrl.pixiv.profile.detail
 
-import androidx.compose.foundation.Image
+
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBackIos
-import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material3.Button
@@ -41,11 +40,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -62,7 +59,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -71,17 +67,15 @@ import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.user.UserDetailResp
-import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.isSelf
+import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
-import com.mrl.pixiv.common.util.RDrawables
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.allowRgb565
 import com.mrl.pixiv.common.util.copyToClipboard
-import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.profile.detail.components.IllustWidget
 import com.mrl.pixiv.profile.detail.components.NovelBookmarkWidget
@@ -89,9 +83,6 @@ import com.mrl.pixiv.profile.detail.components.NovelWorksWidget
 import com.mrl.pixiv.profile.detail.components.shouldShowNovelWorks
 import com.mrl.pixiv.strings.block_user
 import com.mrl.pixiv.strings.cancel_user_blocked
-import com.mrl.pixiv.strings.copy_to_clipboard
-import com.mrl.pixiv.strings.followed
-import com.mrl.pixiv.strings.ic_profile_premium
 import com.mrl.pixiv.strings.illust_and_manga_liked
 import com.mrl.pixiv.strings.illustration_count
 import com.mrl.pixiv.strings.illustration_works
@@ -124,7 +115,6 @@ import com.mrl.pixiv.strings.user_blocked
 import com.mrl.pixiv.strings.view_all
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.pow
@@ -148,6 +138,7 @@ fun ProfileDetailScreen(
     val state = viewModel.asState()
     val coroutineScope = rememberCoroutineScope()
     val userInfo = state.userInfo
+    val isUpdatingFollow = state.isUpdatingFollow || FollowState.isUpdating(userInfo.user.id)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val lazyListState = rememberLazyListState()
     val isBlocked = BlockingRepositoryV2.collectUserBlockAsState(uid)
@@ -177,6 +168,7 @@ fun ProfileDetailScreen(
                     userInfo = userInfo,
                     scrollBehavior = scrollBehavior,
                     isBlocked = isBlocked,
+                    isUpdatingFollow = isUpdatingFollow,
                     onBack = navigationManager::popBackStack,
                     onPrivateFollow = { userId ->
                         viewModel.followUser(userId, Restrict.PRIVATE)
@@ -225,86 +217,25 @@ fun ProfileDetailScreen(
                 contentPadding = PaddingValues(horizontal = 15.dp)
             ) {
                 item(key = KEY_USER_INFO) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = CenterVertically
-                        ) {
-                            SelectionContainer {
-                                Text(
-                                    text = userInfo.user.name,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
+                    ProfileIdentityHeader(
+                        userInfo = userInfo,
+                        isSelf = userInfo.user.isSelf,
+                        isFollowing = userInfo.user.isFollowing,
+                        isUpdatingFollow = isUpdatingFollow,
+                        onToggleFollow = {
+                            if (userInfo.user.isFollowing) {
+                                viewModel.unFollowUser(userInfo.user.id)
+                            } else {
+                                viewModel.followUser(userInfo.user.id)
                             }
-                            if (userInfo.profile.isPremium) {
-                                Image(
-                                    imageVector = vectorResource(RDrawables.ic_profile_premium),
-                                    modifier = Modifier
-                                        .padding(start = 5.dp)
-                                        .size(20.dp),
-                                    contentDescription = null
-                                )
-                            }
-                        }
-                        SelectionContainer {
-                            Text(
-                                text = buildString {
-                                    append(userInfo.profile.totalFollowUsers.toString())
-                                    append(" ")
-                                    append(stringResource(RStrings.followed))
-                                },
-                                modifier = Modifier.throttleClick {
-                                    navigationManager.navigateToFollowingScreen(userInfo.user.id)
-                                },
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                        //id点击可复制
-                        Row(
-                            horizontalArrangement = 5f.spaceBy,
-                            verticalAlignment = CenterVertically,
-                        ) {
-                            SelectionContainer {
-                                Text(
-                                    text = "ID: ${userInfo.user.id}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            Icon(
-                                imageVector = Icons.Rounded.ContentCopy,
-                                contentDescription = stringResource(RStrings.copy_to_clipboard),
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .throttleClick(indication = ripple(radius = 20.dp)) {
-                                        coroutineScope.launch {
-                                            copyToClipboard(userInfo.user.id.toString())
-                                        }
-                                    }
-                                    .padding(10.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        // 个人简介
-                        if (userInfo.user.comment.isNotEmpty()) {
-                            val comment = remember(userInfo.user.comment) {
-                                htmlToAnnotatedString(
-                                    html = userInfo.user.comment,
-                                    compactMode = true,
-                                )
-                            }
-                            SelectionContainer {
-                                Text(
-                                    text = comment,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
+                        },
+                        onFollowing = { navigationManager.navigateToFollowingScreen(userInfo.user.id) },
+                        onCopyId = {
+                            coroutineScope.launch { copyToClipboard(userInfo.user.id.toString()) }
+                        },
+                        onRelatedUsers = { navigationManager.navigateToRelatedUsers(userInfo.user.id) },
+                        onMangaSeries = { navigationManager.navigateToUserMangaSeriesScreen(userInfo.user.id) },
+                    )
                 }
                 item(key = KEY_USER_DETAILS) {
                     ProfileDetails(userInfo = userInfo)
@@ -371,11 +302,11 @@ fun ProfileDetailScreen(
                                 navigationManager.navigateToCollectionScreen(uid)
                             }
                         )
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
-                item(key = KEY_USER_BOOKMARKS_NOVELS) {
-                    if (state.userBookmarksNovels.isNotEmpty()) {
-                        // 小说收藏网格组件
+                if (state.userBookmarksNovels.isNotEmpty()) {
+                    item(key = KEY_USER_BOOKMARKS_NOVELS) {
                         NovelBookmarkWidget(
                             novels = state.userBookmarksNovels,
                             onAllClick = {
@@ -383,9 +314,7 @@ fun ProfileDetailScreen(
                             },
                             onNovelClick = navigationManager::navigateToNovelDetailScreen,
                             onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 20.dp)
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -565,6 +494,7 @@ private fun ProfileDetailAppBar(
     userInfo: UserDetailResp,
     scrollBehavior: TopAppBarScrollBehavior,
     isBlocked: Boolean,
+    isUpdatingFollow: Boolean,
     onBack: () -> Unit,
     onPrivateFollow: (Long) -> Unit,
     onBlockUser: (Long) -> Unit,
@@ -655,6 +585,7 @@ private fun ProfileDetailAppBar(
                 val isSelf = userInfo.user.isSelf
                 if (!userInfo.user.isFollowing && !isSelf) {
                     DropdownMenuItem(
+                        enabled = userInfo.user.id > 0 && !isUpdatingFollow,
                         text = {
                             Text(
                                 text = stringResource(RStrings.private_follow),

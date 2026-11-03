@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_title">読書リスト</string>
+    <string name="data_storage_title">データとストレージ</string>
+    <string name="download_settings_title">ダウンロード設定</string>
+    <string name="settings_section_content">コンテンツと使い心地</string>
+    <string name="settings_section_app">アプリ</string>
+    <string name="settings_section_account">アカウント</string>
+    <string name="profile_view_homepage">プロフィールを見る</string>
+    <string name="settings_section_general">一般</string>
+    <string name="unblock_item">ブロックを解除</string>
+</resources>

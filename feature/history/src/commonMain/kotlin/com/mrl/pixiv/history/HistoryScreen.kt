@@ -1,6 +1,5 @@
 package com.mrl.pixiv.history
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
@@ -23,9 +23,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.HistoryToggleOff
 import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,9 +51,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -60,6 +62,9 @@ import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.transparentIndicatorColors
+import com.mrl.pixiv.common.compose.ui.ContentEmptyState
+import com.mrl.pixiv.common.compose.ui.PagingAppendState
+import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
@@ -77,6 +82,7 @@ import com.mrl.pixiv.strings.cloud_history
 import com.mrl.pixiv.strings.enable_history_now
 import com.mrl.pixiv.strings.history_disabled_empty_desc
 import com.mrl.pixiv.strings.history_disabled_empty_title
+import com.mrl.pixiv.strings.history_setting
 import com.mrl.pixiv.strings.local_history
 import com.mrl.pixiv.strings.no_history_records
 import com.mrl.pixiv.strings.search_by_title_author
@@ -132,7 +138,8 @@ fun HistoryScreen(
                         searchValue = it
                         viewModel.dispatch(HistoryAction.UpdateSearch(it.text))
                     },
-                    onBack = { navigationManager.popBackStack() }
+                    onBack = { navigationManager.popBackStack() },
+                    onSettings = navigationManager::navigateToHistorySettingScreen,
                 )
                 PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
                     sources.forEachIndexed { index, source ->
@@ -300,18 +307,29 @@ private fun IllustHistoryPage(
                 start = 8.dp,
                 top = 8.dp,
                 end = 8.dp,
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 88.dp
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + 88.dp
             ),
         ) {
             illustGrid(
                 illusts = illusts,
                 navToPictureScreen = navToPictureScreen,
-                enableLoading = true,
+                enableLoading = false,
             )
+            if (
+                illusts.itemCount > 0 &&
+                illusts.loadState.refresh is LoadState.NotLoading &&
+                illusts.loadState.append !is LoadState.NotLoading
+            ) {
+                item(key = "append_state", span = { GridItemSpan(maxLineSpan) }) {
+                    PagingAppendState(illusts.loadState, illusts.itemCount, illusts::retry)
+                }
+            }
         }
         HistoryPageOverlay(
-            isLoading = illusts.loadState.refresh is LoadState.Loading,
-            isEmpty = illusts.itemCount == 0,
+            loadStates = illusts.loadState,
+            itemCount = illusts.itemCount,
+            onRetry = illusts::retry,
             showDisabledShortcut = showDisabledShortcut,
             onOpenHistorySettings = onOpenHistorySettings,
         )
@@ -347,7 +365,8 @@ private fun NovelHistoryPage(
             state = lazyListState,
             contentPadding = PaddingValues(
                 top = 8.dp,
-                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 88.dp
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + 88.dp
             ),
         ) {
             items(
@@ -369,10 +388,20 @@ private fun NovelHistoryPage(
                     )
                 }
             }
+            if (
+                novels.itemCount > 0 &&
+                novels.loadState.refresh is LoadState.NotLoading &&
+                novels.loadState.append !is LoadState.NotLoading
+            ) {
+                item(key = "append_state") {
+                    PagingAppendState(novels.loadState, novels.itemCount, novels::retry)
+                }
+            }
         }
         HistoryPageOverlay(
-            isLoading = novels.loadState.refresh is LoadState.Loading,
-            isEmpty = novels.itemCount == 0,
+            loadStates = novels.loadState,
+            itemCount = novels.itemCount,
+            onRetry = novels::retry,
             showDisabledShortcut = showDisabledShortcut,
             onOpenHistorySettings = onOpenHistorySettings,
         )
@@ -385,36 +414,31 @@ private fun NovelHistoryPage(
 
 @Composable
 private fun HistoryPageOverlay(
-    isLoading: Boolean,
-    isEmpty: Boolean,
+    loadStates: CombinedLoadStates,
+    itemCount: Int,
+    onRetry: () -> Unit,
     showDisabledShortcut: Boolean,
     onOpenHistorySettings: () -> Unit,
 ) {
-    when {
-        showDisabledShortcut && !isLoading && isEmpty -> {
-            DisabledHistoryShortcut(onOpenHistorySettings = onOpenHistorySettings)
-        }
-
-        isLoading && isEmpty -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularWavyProgressIndicator()
-            }
-        }
-
-        !isLoading && isEmpty -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(RStrings.no_history_records),
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
+    if (
+        showDisabledShortcut && itemCount == 0 &&
+        loadStates.refresh is LoadState.NotLoading && loadStates.append is LoadState.NotLoading
+    ) {
+        DisabledHistoryShortcut(onOpenHistorySettings = onOpenHistorySettings)
+    } else {
+        PagingContentState(
+            loadStates = loadStates,
+            itemCount = itemCount,
+            onRetry = onRetry,
+            modifier = Modifier.fillMaxSize().padding(
+                bottom = if (itemCount > 0) {
+                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 88.dp
+                } else {
+                    0.dp
+                },
+            ),
+            emptyMessage = stringResource(RStrings.no_history_records),
+        )
     }
 }
 
@@ -426,29 +450,24 @@ private fun DisabledHistoryShortcut(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = stringResource(RStrings.history_disabled_empty_title),
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = stringResource(RStrings.history_disabled_empty_desc),
-                textAlign = TextAlign.Center,
-            )
-            Button(onClick = onOpenHistorySettings) {
-                Text(text = stringResource(RStrings.enable_history_now))
-            }
-        }
+        ContentEmptyState(
+            message = stringResource(RStrings.history_disabled_empty_title),
+            description = stringResource(RStrings.history_disabled_empty_desc),
+            icon = Icons.Rounded.HistoryToggleOff,
+            action = {
+                Button(onClick = onOpenHistorySettings) {
+                    Text(text = stringResource(RStrings.enable_history_now))
+                }
+            },
+        )
     }
 }
 
 @Composable
-private fun HistoryAppBar(
+internal fun HistoryAppBar(
     searchValue: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
+    onSettings: () -> Unit,
     onBack: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
@@ -462,7 +481,11 @@ private fun HistoryAppBar(
                     unfocusedContainerColor = Color.Transparent
                 ),
                 placeholder = {
-                    Text(text = stringResource(RStrings.search_by_title_author))
+                    Text(
+                        text = stringResource(RStrings.search_by_title_author),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
@@ -480,6 +503,14 @@ private fun HistoryAppBar(
                 keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             )
+        },
+        actions = {
+            IconButton(onClick = onSettings, shapes = IconButtonDefaults.shapes()) {
+                Icon(
+                    Icons.Rounded.Settings,
+                    contentDescription = stringResource(RStrings.history_setting)
+                )
+            }
         },
         navigationIcon = {
             IconButton(

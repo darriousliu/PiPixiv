@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">Загрузить ещё</string>
+    <string name="discovery_retry">Повторить</string>
+    <string name="discovery_load_failed">Не удалось загрузить результаты. Попробуйте снова.</string>
+    <string name="discovery_no_results">Нет подходящих закладок</string>
+    <string name="discovery_advanced_filters">Расширенные фильтры</string>
+    <string name="discovery_advanced_sort_note">При бесплатном предпросмотре популярных работ расширенные фильтры сортируют работы от новых к старым.</string>
+    <string name="discovery_character_count">Количество символов</string>
+    <string name="discovery_word_count">Количество слов</string>
+    <string name="discovery_reading_minutes">Время чтения (в минутах)</string>
+    <string name="discovery_original_only">Только оригинальные романы</string>
+    <string name="discovery_replaceable_only">Поддержка замены имён персонажей</string>
+    <string name="discovery_language">Язык</string>
+    <string name="discovery_genre">Жанр</string>
+    <string name="discovery_width_pixels">Ширина (в пикселях)</string>
+    <string name="discovery_height_pixels">Высота (в пикселях)</string>
+    <string name="discovery_ratio">Соотношение сторон</string>
+    <string name="discovery_portrait">Вертикальное</string>
+    <string name="discovery_landscape">Горизонтальное</string>
+    <string name="discovery_square">Квадратное</string>
+    <string name="discovery_tool">Инструмент рисования</string>
+    <string name="discovery_options_failed">Не удалось загрузить подсказки фильтров. Введённые теги и другие фильтры по-прежнему доступны.</string>
+    <string name="discovery_minimum">Минимум</string>
+    <string name="discovery_maximum">Максимум</string>
+    <string name="discovery_invalid_range">Введите неотрицательные целые числа. Минимум не должен превышать максимум.</string>
+    <string name="discovery_collection_search">Поиск в моих закладках</string>
+    <string name="discovery_collection_syncing">Pixiv синхронизирует ваши закладки. Поиск станет доступен после завершения синхронизации.</string>
+    <string name="discovery_collection_self_only">Расширенный поиск доступен только для ваших собственных закладок.</string>
+    <string name="discovery_collection_sync_failed">Не удалось проверить статус синхронизации закладок. Попробуйте снова.</string>
+    <string name="discovery_work_tag">Тег произведения</string>
+    <string name="discovery_bookmark_month">Месяц добавления в закладки</string>
+    <string name="discovery_bookmarked_newest">Сначала новые закладки</string>
+    <string name="discovery_bookmarked_oldest">Сначала старые закладки</string>
+    <string name="discovery_clear_filters">Сбросить фильтры</string>
+    <string name="discovery_tag_suggestions">Подсказки тегов</string>
+    <string name="discovery_search_options_failed">Не удалось загрузить динамические параметры фильтров. Другие фильтры по-прежнему доступны.</string>
+    <string name="discovery_word_count_languages">Языки, поддерживаемые фильтром по количеству слов: %1$s</string>
+</resources>

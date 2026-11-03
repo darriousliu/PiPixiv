@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -35,7 +37,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.rememberThrottleClick
@@ -44,6 +45,7 @@ import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.strings.download_settings_title
 import com.mrl.pixiv.strings.download_single_folder_by_user_desc
 import com.mrl.pixiv.strings.download_single_folder_by_user_title
 import com.mrl.pixiv.strings.file_name_format_title
@@ -65,13 +67,40 @@ fun FileNameFormatScreen(
     val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
     val format = rememberTextFieldState(userPreference.fileNameFormat)
 
+    FileNameFormatContent(
+        format = format,
+        downloadSubFolderByUser = userPreference.downloadSubFolderByUser,
+        onFolderByUserChange = SettingRepository::setDownloadSubFolderByUser,
+        onBack = navigationManager::popBackStack,
+        onReset = {
+            format.edit { replace(0, length, UserPreference.DEFAULT_FILE_NAME_FORMAT) }
+        },
+        onSave = {
+            SettingRepository.setFileNameFormat(format.text.toString())
+            navigationManager.popBackStack()
+        },
+        modifier = modifier,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+internal fun FileNameFormatContent(
+    format: TextFieldState,
+    downloadSubFolderByUser: Boolean,
+    onFolderByUserChange: (Boolean) -> Unit,
+    onBack: () -> Unit,
+    onReset: () -> Unit,
+    onSave: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(RStrings.file_name_format_title)) },
+                title = { Text(text = stringResource(RStrings.download_settings_title)) },
                 navigationIcon = {
                     IconButton(
-                        onClick = navigationManager::popBackStack,
+                        onClick = onBack,
                         shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(
@@ -82,19 +111,12 @@ fun FileNameFormatScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = {
-                            format.edit {
-                                replace(0, length, UserPreference.DEFAULT_FILE_NAME_FORMAT)
-                            }
-                        }
+                        onClick = onReset
                     ) {
                         Icon(imageVector = Icons.Rounded.Refresh, contentDescription = null)
                     }
                     IconButton(
-                        onClick = {
-                            SettingRepository.setFileNameFormat(format.text.toString())
-                            navigationManager.popBackStack()
-                        }
+                        onClick = onSave
                     ) {
                         Icon(imageVector = Icons.Rounded.Save, contentDescription = null)
                     }
@@ -109,11 +131,9 @@ fun FileNameFormatScreen(
         ) {
             ListItem(
                 onClick = rememberThrottleClick {
-                    SettingRepository.setDownloadSubFolderByUser(
-                        !userPreference.downloadSubFolderByUser
-                    )
+                    onFolderByUserChange(!downloadSubFolderByUser)
                 },
-                shapes = ListItemDefaults.shapes(shape = RectangleShape),
+                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
                 content = {
                     Text(text = stringResource(RStrings.download_single_folder_by_user_title))
                 },
@@ -136,8 +156,8 @@ fun FileNameFormatScreen(
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Switch(
-                            checked = userPreference.downloadSubFolderByUser,
-                            onCheckedChange = SettingRepository::setDownloadSubFolderByUser,
+                            checked = downloadSubFolderByUser,
+                            onCheckedChange = onFolderByUserChange,
                         )
                     }
                 },
@@ -175,7 +195,10 @@ fun FileNameFormatScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
                 Text(
                     text = stringResource(RStrings.legend_template),
                     modifier = Modifier.weight(1f)
@@ -194,7 +217,7 @@ fun FileNameFormatScreen(
                 HorizontalDivider()
                 ListItem(
                     headlineContent = {
-                        Row {
+                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             Text(text = key, modifier = Modifier.weight(1f))
                             Text(text = stringResource(res), modifier = Modifier.weight(1f))
                         }

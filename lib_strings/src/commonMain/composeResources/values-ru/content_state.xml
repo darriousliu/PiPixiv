@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_loading">Загрузка</string>
+    <string name="content_loading_more">Загрузка дополнительных материалов</string>
+    <string name="content_empty_title">Здесь пока ничего нет</string>
+    <string name="content_empty_downloads">Заданий на загрузку пока нет</string>
+    <string name="content_error_title">Сейчас не удаётся загрузить</string>
+    <string name="content_error_description">Попробуйте чуть позже</string>
+</resources>

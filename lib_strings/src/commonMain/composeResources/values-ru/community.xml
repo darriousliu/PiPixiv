@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="community_notifications">Центр уведомлений</string>
+    <string name="community_notification">Уведомление</string>
+    <string name="community_unread">Есть непрочитанные уведомления</string>
+    <string name="community_unread_failed">Не удалось обновить статус непрочитанных уведомлений</string>
+    <string name="community_empty_notifications">Уведомлений пока нет</string>
+    <string name="community_view_more">Показать больше</string>
+    <string name="community_unknown_link">Открытие ссылки из этого уведомления пока не поддерживается</string>
+    <string name="community_recommended_users">Рекомендуемые авторы</string>
+    <string name="community_related_users">Похожие авторы</string>
+    <string name="community_followers">Мои подписчики</string>
+    <string name="community_empty_users">Нет авторов для отображения</string>
+    <string name="community_empty_followers">Подписчиков пока нет</string>
+    <string name="community_refresh">Обновить</string>
+    <string name="community_load_failed">Не удалось загрузить. Попробуйте снова.</string>
+</resources>

@@ -58,6 +58,7 @@ import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
+import com.mrl.pixiv.common.compose.rememberNavigationSharedContentState
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.data.AiType
@@ -111,7 +112,7 @@ fun SquareIllustItem(
             modifier = modifier
                 .aspectRatio(1f)
                 .sharedBounds(
-                    rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
+                    rememberNavigationSharedContentState(key = "${prefix}-card-${illust.id}"),
                     animatedContentScope,
                     enter = fadeIn(DefaultFloatAnimationSpec),
                     exit = fadeOut(DefaultFloatAnimationSpec),
@@ -127,7 +128,7 @@ fun SquareIllustItem(
                 modifier = Modifier
                     .matchParentSize()
                     .sharedElement(
-                        rememberSharedContentState(key = "${prefix}-$imageKey"),
+                        rememberNavigationSharedContentState(key = "${prefix}-$imageKey"),
                         animatedVisibilityScope = LocalNavAnimatedContentScope.current,
                         placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
                     )
@@ -235,7 +236,7 @@ fun RectangleIllustItem(
         Box(
             modifier = modifier
                 .sharedBounds(
-                    rememberSharedContentState(key = "${prefix}-card-${illust.id}"),
+                    rememberNavigationSharedContentState(key = "${prefix}-card-${illust.id}"),
                     animatedContentScope,
                     enter = fadeIn(DefaultFloatAnimationSpec),
                     exit = fadeOut(DefaultFloatAnimationSpec),
@@ -272,7 +273,7 @@ fun RectangleIllustItem(
                         }
                         .clip(imageShape)
                         .sharedElement(
-                            sharedTransitionScope.rememberSharedContentState(key = "${prefix}-$imageKey"),
+                            sharedTransitionScope.rememberNavigationSharedContentState(key = "${prefix}-$imageKey"),
                             animatedVisibilityScope = animatedContentScope,
                             placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
                         ),

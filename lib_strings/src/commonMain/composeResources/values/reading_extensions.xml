@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="reading_manga_series">漫画系列</string>
+    <string name="reading_manga_watchlist">漫画追更</string>
+    <string name="reading_manga_user_series">作者的漫画系列</string>
+    <string name="reading_manga_episode_count">共 %1$d 话</string>
+    <string name="reading_manga_episode_order">第 %1$d 话</string>
+    <string name="reading_manga_previous">上一话</string>
+    <string name="reading_manga_next">下一话</string>
+    <string name="reading_manga_add_watchlist">追更系列</string>
+    <string name="reading_manga_remove_watchlist">取消追更</string>
+    <string name="reading_manga_latest">阅读最新一话</string>
+    <string name="reading_manga_empty">暂无漫画系列</string>
+    <string name="reading_manga_watchlist_empty">追更漫画系列后，可以在这里查看更新</string>
+    <string name="reading_manga_chapters_empty">暂无可显示的章节</string>
+    <string name="reading_manga_view_directory">查看系列目录</string>
+    <string name="reading_refresh">刷新</string>
+</resources>

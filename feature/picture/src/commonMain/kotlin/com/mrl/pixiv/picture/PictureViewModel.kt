@@ -425,7 +425,8 @@ class PictureViewModel(
     }
 
     fun saveAsImage(imageUrl: String, file: PlatformFile) {
-        launchIO {
+        // 用户已确认的保存任务应在滑出作品页后继续完成。
+        launchProcess(Dispatchers.IO) {
             try {
                 showLoading(true)
                 val response = imageOkHttpClient.request {

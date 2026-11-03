@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="community_notifications">Benachrichtigungen</string>
+    <string name="community_notification">Benachrichtigung</string>
+    <string name="community_unread">Ungelesene Benachrichtigungen</string>
+    <string name="community_unread_failed">Der Ungelesen-Status konnte nicht aktualisiert werden</string>
+    <string name="community_empty_notifications">Noch keine Benachrichtigungen</string>
+    <string name="community_view_more">Mehr anzeigen</string>
+    <string name="community_unknown_link">Der Link dieser Benachrichtigung kann noch nicht geöffnet werden</string>
+    <string name="community_recommended_users">Empfohlene Künstler</string>
+    <string name="community_related_users">Ähnliche Künstler</string>
+    <string name="community_followers">Meine Follower</string>
+    <string name="community_empty_users">Keine Künstler zum Anzeigen</string>
+    <string name="community_empty_followers">Noch keine Follower</string>
+    <string name="community_refresh">Aktualisieren</string>
+    <string name="community_load_failed">Laden fehlgeschlagen. Bitte erneut versuchen.</string>
+</resources>

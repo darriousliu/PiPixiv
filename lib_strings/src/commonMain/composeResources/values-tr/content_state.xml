@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_loading">Yükleniyor</string>
+    <string name="content_loading_more">Daha fazlası yükleniyor</string>
+    <string name="content_empty_title">Burada henüz içerik yok</string>
+    <string name="content_empty_downloads">Henüz indirme görevi yok</string>
+    <string name="content_error_title">Şu anda yüklenemiyor</string>
+    <string name="content_error_description">Lütfen biraz sonra tekrar deneyin</string>
+</resources>

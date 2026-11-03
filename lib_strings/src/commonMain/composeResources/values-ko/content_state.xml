@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_loading">불러오는 중</string>
+    <string name="content_loading_more">더 불러오는 중</string>
+    <string name="content_empty_title">아직 콘텐츠가 없습니다</string>
+    <string name="content_empty_downloads">아직 다운로드가 없습니다</string>
+    <string name="content_error_title">현재 불러올 수 없습니다</string>
+    <string name="content_error_description">잠시 후 다시 시도하세요</string>
+</resources>

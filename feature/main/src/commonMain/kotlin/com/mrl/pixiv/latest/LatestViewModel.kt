@@ -12,9 +12,11 @@ import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.repository.NovelWatchlistChanges
+import com.mrl.pixiv.common.repository.ReadingRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.paging.FollowNovelPagingSource
 import com.mrl.pixiv.common.repository.paging.IllustFollowingPagingSource
+import com.mrl.pixiv.common.repository.paging.MangaWatchlistPagingSource
 import com.mrl.pixiv.common.repository.paging.NovelNewPagingSource
 import com.mrl.pixiv.common.repository.paging.NovelWatchlistPagingSource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +26,7 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class LatestViewModel : ViewModel() {
     private var activeNovelWatchlistSource: NovelWatchlistPagingSource? = null
+    private var activeMangaWatchlistSource: MangaWatchlistPagingSource? = null
     private val illustPagerState = PagerState {
         LatestPage.pagesFor(AppViewMode.ILLUST).size
     }
@@ -34,6 +37,7 @@ class LatestViewModel : ViewModel() {
     // Illust states
     val trendingLazyGirdState = LazyStaggeredGridState()
     val collectionLazyGirdState = LazyStaggeredGridState()
+    val watchlistMangaLazyListState = LazyListState()
     val followingLazyListState = LazyListState()
     val followingLazyGirdState = LazyGridState()
 
@@ -61,10 +65,19 @@ class LatestViewModel : ViewModel() {
         NovelWatchlistPagingSource().also { activeNovelWatchlistSource = it }
     }.flow.cachedIn(viewModelScope)
 
+    val mangaWatchlist = Pager(PagingConfig(pageSize = 30, enablePlaceholders = false)) {
+        MangaWatchlistPagingSource().also { activeMangaWatchlistSource = it }
+    }.flow.cachedIn(viewModelScope)
+
     init {
         viewModelScope.launch {
             NovelWatchlistChanges.changes.collect {
                 activeNovelWatchlistSource?.invalidate()
+            }
+        }
+        viewModelScope.launch {
+            ReadingRepository.watchlistChanges.collect {
+                activeMangaWatchlistSource?.invalidate()
             }
         }
     }

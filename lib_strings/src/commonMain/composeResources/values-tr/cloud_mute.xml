@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Pixiv bulut engellemeleri</string>
+    <string name="cloud_mute_description">Pixiv hesabınızdaki engellenen kullanıcıları ve etiketleri yönetin. Değişiklikler Pixiv ile eşitlenir. İçe aktarma yalnızca eksik yerel kuralları ekler; mevcut kuralları ve düzenli ifadeleri korur.</string>
+    <string name="cloud_mute_back">Geri</string>
+    <string name="cloud_mute_refresh">Yenile</string>
+    <string name="cloud_mute_failed">İşlem tamamlanamadı. Yenileyip tekrar deneyin.</string>
+    <string name="cloud_mute_saved_refresh_failed">Değişikliğiniz Pixiv’e kaydedildi ancak liste yenilenemedi. Değişikliği yeniden göndermeden listeyi yenileyin.</string>
+    <string name="cloud_mute_quota">%2$d hakkın %1$d adedi kullanıldı</string>
+    <string name="cloud_mute_add_tag">Bulutta etiket engelle</string>
+    <string name="cloud_mute_add_user">Bulutta kullanıcı engelle</string>
+    <string name="cloud_mute_import">Bulut engellemelerini yerele aktar</string>
+    <string name="cloud_mute_imported">%1$d yerel engelleme kuralı eklendi</string>
+    <string name="cloud_mute_remove">Bulut engelini kaldır</string>
+    <string name="cloud_mute_remove_description">“%1$s” Pixiv bulut engellemelerinden kaldırılsın mı? Mevcut yerel kurallar korunur.</string>
+    <string name="cloud_mute_tag">Etiket adı</string>
+    <string name="cloud_mute_user_id">Pixiv kullanıcı kimliği</string>
+    <string name="cloud_mute_input_hint">Henüz engellenmemiş bir etiket veya geçerli bir kullanıcı kimliği girin.</string>
+</resources>

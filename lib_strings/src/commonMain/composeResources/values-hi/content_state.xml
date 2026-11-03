@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_loading">लोड हो रहा है</string>
+    <string name="content_loading_more">और लोड हो रहा है</string>
+    <string name="content_empty_title">अभी यहाँ कोई सामग्री नहीं है</string>
+    <string name="content_empty_downloads">अभी कोई डाउनलोड नहीं है</string>
+    <string name="content_error_title">अभी लोड नहीं किया जा सकता</string>
+    <string name="content_error_description">कृपया थोड़ी देर बाद फिर से प्रयास करें</string>
+</resources>

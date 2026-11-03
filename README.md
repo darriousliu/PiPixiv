@@ -20,7 +20,7 @@ Pixiv 应用
 
 ## 📥 下载
 
-当前源码版本：**2.5.1**。已发布版本请查看下方 GitHub Release。
+当前源码版本：**2.6.0**。已发布版本请查看下方 GitHub Release。
 
 [![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=稳定版)](https://github.com/darriousliu/PiPixiv/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=下载量&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
@@ -28,7 +28,7 @@ Pixiv 应用
 
 ## 📸 应用预览
 
-<img width="100%" alt="b48d643b-8bd4-479c-bc7b-9c586a9fafd8" src="https://github.com/user-attachments/assets/396ff31e-fecc-4447-bb6f-f9cb3e79b812" />
+<img width="100%" alt="preview" src="docs/preview.png" />
 
 ### 📱 支持平台
 
@@ -78,7 +78,7 @@ Pixiv 应用
 ### 🔍 搜索与发现
 
 * 🔍 搜索插图/小说和用户，按人气、最新等排序。
-* 🛠️ 配置默认匹配方式、排序和 AI 内容筛选；搜索页可临时调整，不覆盖全局默认值。
+* 🛠️ 配置默认匹配方式、排序和 AI 内容筛选；插画与小说分别记住上次应用的排序和筛选，重启后仍然保留。
 * 📄 搜索结果支持连续滚动或分页显示；支持分页的结果可前后翻页和跳页。
 * 🖼️ 插画搜索可选择方图或原图比例瀑布流；小说搜索使用更宽的列表和紧凑标题。
 * 🏷️ 长按 Tag 可收藏标签或复制到剪贴板。
@@ -97,7 +97,7 @@ Pixiv 应用
 ### ⚙️ 设置与系统
 
 * ⚙️ 应用设置（语言、图片来源、网格列数、私密收藏等）。
-* 🌐 默认使用系统代理，可切换为直连或手动 HTTP / SOCKS 代理，修改网络模式后重启应用生效；Android 和桌面端另提供 SNI 模式。
+* 🌐 默认使用系统代理，可切换为直连或手动 HTTP / SOCKS 代理，修改网络模式后重启应用生效；Android 和桌面端另提供 ECH 模式。
 * 🔒 隐私设置支持控制 R-18 内容显示、进入搜索页时读取剪贴板。
 * 🚫 屏蔽作品、用户和标签，可按长度与分段数量过滤小说长标签。
 * 🔗 深度链接支持。

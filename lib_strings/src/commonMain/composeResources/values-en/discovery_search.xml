@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">Load more</string>
+    <string name="discovery_retry">Retry</string>
+    <string name="discovery_load_failed">Could not load results. Please retry.</string>
+    <string name="discovery_no_results">No matching bookmarks</string>
+    <string name="discovery_advanced_filters">Advanced filters</string>
+    <string name="discovery_advanced_sort_note">Advanced filters use newest first when free popular preview is selected.</string>
+    <string name="discovery_character_count">Characters</string>
+    <string name="discovery_word_count">Word count</string>
+    <string name="discovery_reading_minutes">Reading time (minutes)</string>
+    <string name="discovery_original_only">Original novels only</string>
+    <string name="discovery_replaceable_only">Character name replacement supported</string>
+    <string name="discovery_language">Language</string>
+    <string name="discovery_genre">Genre</string>
+    <string name="discovery_width_pixels">Width (pixels)</string>
+    <string name="discovery_height_pixels">Height (pixels)</string>
+    <string name="discovery_ratio">Aspect ratio</string>
+    <string name="discovery_portrait">Portrait</string>
+    <string name="discovery_landscape">Landscape</string>
+    <string name="discovery_square">Square</string>
+    <string name="discovery_tool">Drawing tool</string>
+    <string name="discovery_options_failed">Filter suggestions could not be loaded. Your typed tags and other filters remain available.</string>
+    <string name="discovery_minimum">Minimum</string>
+    <string name="discovery_maximum">Maximum</string>
+    <string name="discovery_invalid_range">Enter non-negative whole numbers with minimum no greater than maximum.</string>
+    <string name="discovery_collection_search">Search my bookmarks</string>
+    <string name="discovery_collection_syncing">Pixiv is synchronising your bookmarks. Search will be available when it finishes.</string>
+    <string name="discovery_collection_self_only">Advanced bookmark search is available for your own bookmarks.</string>
+    <string name="discovery_collection_sync_failed">Could not check bookmark synchronisation. Please retry.</string>
+    <string name="discovery_work_tag">Artwork or novel tag</string>
+    <string name="discovery_bookmark_month">Bookmarked month</string>
+    <string name="discovery_bookmarked_newest">Newest bookmarks</string>
+    <string name="discovery_bookmarked_oldest">Oldest bookmarks</string>
+    <string name="discovery_clear_filters">Clear filters</string>
+    <string name="discovery_tag_suggestions">Tag suggestions</string>
+    <string name="discovery_search_options_failed">Could not load filter choices. Other filters remain available.</string>
+    <string name="discovery_word_count_languages">Word count supported languages: %1$s</string>
+</resources>

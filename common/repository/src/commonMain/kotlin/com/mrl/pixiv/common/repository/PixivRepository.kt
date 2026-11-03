@@ -28,7 +28,7 @@ object PixivRepository : KoinComponent {
         .httpClient(authHttpClient)
         .build()
 
-    private val apiKtorfit = Ktorfit.Builder()
+    internal val apiKtorfit = Ktorfit.Builder()
         .baseUrl(
             "https://$API_HOST/"
         )
@@ -108,21 +108,7 @@ object PixivRepository : KoinComponent {
     suspend fun getIllustBookmarkDetail(illustId: Long) =
         apiApi.getIllustBookmarkDetail(illustId)
 
-    suspend fun searchIllust(query: SearchIllustQuery) =
-        apiApi.searchIllust(
-            query.filter.value,
-            query.includeTranslatedTagResults,
-            query.mergePlainKeywordResults,
-            query.word,
-            query.sort.value,
-            query.searchTarget.value,
-            query.bookmarkNumMin,
-            query.bookmarkNumMax,
-            query.startDate,
-            query.endDate,
-            query.searchAiType.value,
-            query.offset
-        )
+    suspend fun searchIllust(query: SearchIllustQuery) = apiApi.searchIllust(query.toMap())
 
     suspend fun searchIllustNext(queryMap: Map<String, String>) =
         apiApi.searchIllustNext(queryMap)
@@ -131,6 +117,9 @@ object PixivRepository : KoinComponent {
         apiApi.searchUser(word = word, offset = offset)
 
     suspend fun searchUserNext(queryMap: Map<String, String>) = apiApi.searchUserNext(queryMap)
+
+    suspend fun getSearchOptions(word: String, searchTarget: String, searchAiTypes: Int) =
+        apiApi.getSearchOptions(word, searchTarget, searchAiTypes)
 
     suspend fun searchAutoComplete(word: String, mergePlainKeywordResults: Boolean = true) =
         apiApi.searchAutoComplete(word, mergePlainKeywordResults)
@@ -201,6 +190,12 @@ object PixivRepository : KoinComponent {
         userId: Long,
         restrict: String
     ) = apiApi.getUserBookmarkTagsNovel(userId, restrict)
+
+    suspend fun loadMoreUserBookmarkTagsIllust(queryMap: Map<String, String>) =
+        apiApi.loadMoreUserBookmarkTagsIllust(queryMap)
+
+    suspend fun loadMoreUserBookmarkTagsNovel(queryMap: Map<String, String>) =
+        apiApi.loadMoreUserBookmarkTagsNovel(queryMap)
 
     suspend fun getUserFollowing(
         filter: Filter = Filter.ANDROID,
@@ -366,21 +361,7 @@ object PixivRepository : KoinComponent {
     suspend fun getTrendingNovelTags(filter: Filter = Filter.ANDROID) =
         apiApi.getTrendingNovelTags(filter.value)
 
-    suspend fun searchNovel(query: SearchNovelQuery) =
-        apiApi.searchNovel(
-            query.filter.value,
-            query.includeTranslatedTagResults,
-            query.mergePlainKeywordResults,
-            query.word,
-            query.sort.value,
-            query.searchTarget.value,
-            query.bookmarkNumMin,
-            query.bookmarkNumMax,
-            query.startDate,
-            query.endDate,
-            query.searchAiType.value,
-            query.offset
-        )
+    suspend fun searchNovel(query: SearchNovelQuery) = apiApi.searchNovel(query.toMap())
 
     suspend fun searchNovelNext(queryMap: Map<String, String>) =
         apiApi.searchNovelNext(queryMap)

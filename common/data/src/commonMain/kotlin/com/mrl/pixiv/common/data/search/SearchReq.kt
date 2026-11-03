@@ -17,6 +17,7 @@ data class SearchIllustQuery(
     val searchAiType: SearchAiType = SearchAiType.HIDE_AI,
     val offset: Int = 0,
     val contentFilter: SearchContentFilter = SearchContentFilter(),
+    val advanced: IllustAdvancedFilter = IllustAdvancedFilter(),
 ) {
     fun toMap(): Map<String, String> {
         val map = mutableMapOf<String, String>()
@@ -32,6 +33,7 @@ data class SearchIllustQuery(
         endDate?.let { map["end_date"] = it }
         map["search_ai_type"] = searchAiType.value.toString()
         map["offset"] = offset.toString()
+        map.putAll(advanced.toMap())
         return map
     }
 }
@@ -76,6 +78,7 @@ data class SearchNovelQuery(
     val searchAiType: SearchAiType = SearchAiType.HIDE_AI,
     val offset: Int = 0,
     val contentFilter: SearchContentFilter = SearchContentFilter(),
+    val advanced: NovelAdvancedFilter = NovelAdvancedFilter(),
 ) {
     fun toMap(): Map<String, String> {
         val map = mutableMapOf<String, String>()
@@ -91,6 +94,7 @@ data class SearchNovelQuery(
         endDate?.let { map["end_date"] = it }
         map["search_ai_type"] = searchAiType.value.toString()
         map["offset"] = offset.toString()
+        map.putAll(advanced.toMap())
         return map
     }
 }

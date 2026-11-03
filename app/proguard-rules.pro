@@ -1,4 +1,8 @@
 # Add project specific ProGuard rules here.
+# Conscrypt 反射读取此策略；丢失该方法会导致 ECH 未启用。
+-keep,allowoptimization class com.mrl.pixiv.common.network.PixivEchTrustManager {
+    public org.conscrypt.NetworkSecurityPolicy getNetworkSecurityPolicy();
+}
 # You can control the set of applied configuration files using the
 # proguardFiles setting in build.gradle.kts.
 #
