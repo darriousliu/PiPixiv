@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Pixiv クラウドミュート</string>
+    <string name="cloud_mute_description">Pixiv アカウントでミュートしているユーザーとタグを管理します。変更は Pixiv に同期されます。インポートではローカルにないルールのみを追加し、既存のブロックルールと正規表現は保持します。</string>
+    <string name="cloud_mute_back">戻る</string>
+    <string name="cloud_mute_refresh">更新</string>
+    <string name="cloud_mute_failed">操作に失敗しました。更新してからもう一度お試しください。</string>
+    <string name="cloud_mute_saved_refresh_failed">変更は Pixiv に保存されましたが、リストを更新できませんでした。再送信せずにリストを更新してください。</string>
+    <string name="cloud_mute_quota">%2$d 件中 %1$d 件を使用中</string>
+    <string name="cloud_mute_add_tag">タグをミュート</string>
+    <string name="cloud_mute_add_user">ユーザーをミュート</string>
+    <string name="cloud_mute_import">クラウドミュートをローカルにインポート</string>
+    <string name="cloud_mute_imported">ローカルのブロックルールを %1$d 件追加しました</string>
+    <string name="cloud_mute_remove">クラウドミュートを解除</string>
+    <string name="cloud_mute_remove_description">「%1$s」を Pixiv のクラウドミュートから削除しますか？既存のローカルルールは保持されます。</string>
+    <string name="cloud_mute_tag">タグ名</string>
+    <string name="cloud_mute_user_id">Pixiv ユーザー ID</string>
+    <string name="cloud_mute_input_hint">ミュートしていないタグ、または有効なユーザー ID を入力してください。</string>
+</resources>

@@ -187,6 +187,7 @@
     <string name="view_replies">Посмотреть ответы</string>
     <string name="view_comments_count">Посмотреть комментарии (%1$d)</string>
     <string name="no_comments">Комментариев пока нет</string>
+    <string name="no_replies">Ответов пока нет</string>
     <string name="add_comment">Добавить комментарий</string>
     <string name="reply">Ответить</string>
     <string name="block_comment">Заблокировать комментарий</string>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">Облачные блокировки Pixiv</string>
+    <string name="cloud_mute_description">Управляйте блокировками пользователей и тегов в своём аккаунте Pixiv. Изменения синхронизируются с Pixiv. Импорт добавляет только недостающие локальные правила, сохраняя существующие правила и регулярные выражения.</string>
+    <string name="cloud_mute_back">Назад</string>
+    <string name="cloud_mute_refresh">Обновить</string>
+    <string name="cloud_mute_failed">Не удалось выполнить операцию. Обновите и попробуйте снова.</string>
+    <string name="cloud_mute_saved_refresh_failed">Изменение сохранено в Pixiv, но не удалось обновить список. Обновите список, не отправляя изменение повторно.</string>
+    <string name="cloud_mute_quota">Использовано %1$d из %2$d</string>
+    <string name="cloud_mute_add_tag">Заблокировать тег в облаке</string>
+    <string name="cloud_mute_add_user">Заблокировать пользователя в облаке</string>
+    <string name="cloud_mute_import">Импортировать облачные блокировки локально</string>
+    <string name="cloud_mute_imported">Добавлено локальных правил блокировки: %1$d</string>
+    <string name="cloud_mute_remove">Снять облачную блокировку</string>
+    <string name="cloud_mute_remove_description">Удалить «%1$s» из облачных блокировок Pixiv? Существующие локальные правила будут сохранены.</string>
+    <string name="cloud_mute_tag">Название тега</string>
+    <string name="cloud_mute_user_id">ID пользователя Pixiv</string>
+    <string name="cloud_mute_input_hint">Введите незаблокированный тег или действительный ID незаблокированного пользователя.</string>
+</resources>

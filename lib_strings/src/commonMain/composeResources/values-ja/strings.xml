@@ -187,6 +187,7 @@
     <string name="view_replies">返信を表示</string>
     <string name="view_comments_count">コメントを表示(%1$d)</string>
     <string name="no_comments">コメントはまだありません</string>
+    <string name="no_replies">返信はまだありません</string>
     <string name="add_comment">コメントを追加</string>
     <string name="reply">返信</string>
     <string name="block_comment">コメントをブロック</string>

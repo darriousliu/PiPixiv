@@ -187,6 +187,7 @@
     <string name="view_replies">Yanıtları görüntüle</string>
     <string name="view_comments_count">Yorumları görüntüle %1$d</string>
     <string name="no_comments">Henüz yorum yok</string>
+    <string name="no_replies">Henüz yanıt yok</string>
     <string name="add_comment">Yorum Ekle</string>
     <string name="reply">Yanıtla</string>
     <string name="block_comment">Yorumu Engelle</string>

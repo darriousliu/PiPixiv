@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">もっと読み込む</string>
+    <string name="discovery_retry">再試行</string>
+    <string name="discovery_load_failed">検索結果を読み込めませんでした。もう一度お試しください。</string>
+    <string name="discovery_no_results">条件に一致するブックマークがありません</string>
+    <string name="discovery_advanced_filters">詳細な絞り込み</string>
+    <string name="discovery_advanced_sort_note">無料の人気順プレビューを選択している場合、詳細な絞り込みでは新しい作品順に表示されます。</string>
+    <string name="discovery_character_count">文字数</string>
+    <string name="discovery_word_count">単語数</string>
+    <string name="discovery_reading_minutes">読了時間（分）</string>
+    <string name="discovery_original_only">オリジナル小説のみ</string>
+    <string name="discovery_replaceable_only">登場人物の名前変換に対応</string>
+    <string name="discovery_language">言語</string>
+    <string name="discovery_genre">ジャンル</string>
+    <string name="discovery_width_pixels">幅（ピクセル）</string>
+    <string name="discovery_height_pixels">高さ（ピクセル）</string>
+    <string name="discovery_ratio">縦横比</string>
+    <string name="discovery_portrait">縦長</string>
+    <string name="discovery_landscape">横長</string>
+    <string name="discovery_square">正方形</string>
+    <string name="discovery_tool">使用ツール</string>
+    <string name="discovery_options_failed">絞り込み候補を読み込めませんでした。入力済みのタグや他の条件は引き続き利用できます。</string>
+    <string name="discovery_minimum">最小値</string>
+    <string name="discovery_maximum">最大値</string>
+    <string name="discovery_invalid_range">0 以上の整数を入力してください。最小値は最大値以下にしてください。</string>
+    <string name="discovery_collection_search">自分のブックマークを検索</string>
+    <string name="discovery_collection_syncing">Pixiv がブックマーク情報を同期しています。完了すると検索できます。</string>
+    <string name="discovery_collection_self_only">ブックマークの詳細検索は自分のブックマークでのみ利用できます。</string>
+    <string name="discovery_collection_sync_failed">ブックマークの同期状態を確認できませんでした。もう一度お試しください。</string>
+    <string name="discovery_work_tag">作品タグ</string>
+    <string name="discovery_bookmark_month">ブックマークした月</string>
+    <string name="discovery_bookmarked_newest">新しくブックマークした順</string>
+    <string name="discovery_bookmarked_oldest">古くブックマークした順</string>
+    <string name="discovery_clear_filters">絞り込みを解除</string>
+    <string name="discovery_tag_suggestions">タグ候補</string>
+    <string name="discovery_search_options_failed">絞り込みの選択肢を読み込めませんでした。他の条件は引き続き利用できます。</string>
+    <string name="discovery_word_count_languages">単語数での絞り込みに対応する言語：%1$s</string>
+</resources>

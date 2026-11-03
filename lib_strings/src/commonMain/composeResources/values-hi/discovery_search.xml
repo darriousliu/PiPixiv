@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">और लोड करें</string>
+    <string name="discovery_retry">फिर से प्रयास करें</string>
+    <string name="discovery_load_failed">परिणाम लोड नहीं हो सके। फिर से प्रयास करें।</string>
+    <string name="discovery_no_results">कोई मेल खाता बुकमार्क नहीं है</string>
+    <string name="discovery_advanced_filters">उन्नत फ़िल्टर</string>
+    <string name="discovery_advanced_sort_note">मुफ़्त लोकप्रिय पूर्वावलोकन चुने जाने पर उन्नत फ़िल्टर के परिणामों में सबसे नई रचनाएँ पहले दिखाई जाती हैं।</string>
+    <string name="discovery_character_count">अक्षरों की संख्या</string>
+    <string name="discovery_word_count">शब्दों की संख्या</string>
+    <string name="discovery_reading_minutes">पढ़ने का समय (मिनट)</string>
+    <string name="discovery_original_only">केवल मौलिक उपन्यास</string>
+    <string name="discovery_replaceable_only">पात्रों के नाम बदलने की सुविधा</string>
+    <string name="discovery_language">भाषा</string>
+    <string name="discovery_genre">शैली</string>
+    <string name="discovery_width_pixels">चौड़ाई (पिक्सेल)</string>
+    <string name="discovery_height_pixels">ऊँचाई (पिक्सेल)</string>
+    <string name="discovery_ratio">पक्षानुपात</string>
+    <string name="discovery_portrait">खड़ा</string>
+    <string name="discovery_landscape">आड़ा</string>
+    <string name="discovery_square">वर्गाकार</string>
+    <string name="discovery_tool">चित्र बनाने का उपकरण</string>
+    <string name="discovery_options_failed">फ़िल्टर सुझाव लोड नहीं हो सके। दर्ज किए गए टैग और अन्य फ़िल्टर अब भी इस्तेमाल किए जा सकते हैं।</string>
+    <string name="discovery_minimum">न्यूनतम</string>
+    <string name="discovery_maximum">अधिकतम</string>
+    <string name="discovery_invalid_range">शून्य या उससे बड़े पूर्णांक दर्ज करें। न्यूनतम मान अधिकतम मान से बड़ा नहीं होना चाहिए।</string>
+    <string name="discovery_collection_search">मेरे बुकमार्क खोजें</string>
+    <string name="discovery_collection_syncing">Pixiv आपके बुकमार्क सिंक कर रहा है। पूरा होने पर खोज उपलब्ध होगी।</string>
+    <string name="discovery_collection_self_only">उन्नत बुकमार्क खोज केवल अपने बुकमार्क के लिए उपलब्ध है।</string>
+    <string name="discovery_collection_sync_failed">बुकमार्क सिंक की स्थिति जाँची नहीं जा सकी। फिर से प्रयास करें।</string>
+    <string name="discovery_work_tag">रचना का टैग</string>
+    <string name="discovery_bookmark_month">बुकमार्क करने का महीना</string>
+    <string name="discovery_bookmarked_newest">सबसे नए बुकमार्क पहले</string>
+    <string name="discovery_bookmarked_oldest">सबसे पुराने बुकमार्क पहले</string>
+    <string name="discovery_clear_filters">फ़िल्टर हटाएँ</string>
+    <string name="discovery_tag_suggestions">टैग सुझाव</string>
+    <string name="discovery_search_options_failed">फ़िल्टर विकल्प लोड नहीं हो सके। अन्य फ़िल्टर अब भी उपलब्ध हैं।</string>
+    <string name="discovery_word_count_languages">शब्दों की संख्या के फ़िल्टर द्वारा समर्थित भाषाएँ: %1$s</string>
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">Daha fazla yükle</string>
+    <string name="discovery_retry">Tekrar dene</string>
+    <string name="discovery_load_failed">Sonuçlar yüklenemedi. Lütfen tekrar deneyin.</string>
+    <string name="discovery_no_results">Eşleşen yer işareti yok</string>
+    <string name="discovery_advanced_filters">Gelişmiş filtreler</string>
+    <string name="discovery_advanced_sort_note">Ücretsiz popüler önizleme kullanılırken gelişmiş filtreler eserleri en yeniden eskiye sıralar.</string>
+    <string name="discovery_character_count">Karakter sayısı</string>
+    <string name="discovery_word_count">Sözcük sayısı</string>
+    <string name="discovery_reading_minutes">Okuma süresi (dakika)</string>
+    <string name="discovery_original_only">Yalnızca özgün romanlar</string>
+    <string name="discovery_replaceable_only">Karakter adı değiştirmeyi destekleyenler</string>
+    <string name="discovery_language">Dil</string>
+    <string name="discovery_genre">Tür</string>
+    <string name="discovery_width_pixels">Genişlik (piksel)</string>
+    <string name="discovery_height_pixels">Yükseklik (piksel)</string>
+    <string name="discovery_ratio">En boy oranı</string>
+    <string name="discovery_portrait">Dikey</string>
+    <string name="discovery_landscape">Yatay</string>
+    <string name="discovery_square">Kare</string>
+    <string name="discovery_tool">Çizim aracı</string>
+    <string name="discovery_options_failed">Filtre önerileri yüklenemedi. Girdiğiniz etiketleri ve diğer filtreleri kullanmaya devam edebilirsiniz.</string>
+    <string name="discovery_minimum">En az</string>
+    <string name="discovery_maximum">En çok</string>
+    <string name="discovery_invalid_range">Negatif olmayan tam sayılar girin. En küçük değer en büyük değeri aşmamalıdır.</string>
+    <string name="discovery_collection_search">Yer işaretlerimde ara</string>
+    <string name="discovery_collection_syncing">Pixiv yer işaretlerinizi eşitliyor. İşlem tamamlandığında arama kullanılabilir olacak.</string>
+    <string name="discovery_collection_self_only">Gelişmiş yer işareti araması yalnızca kendi yer işaretlerinizde kullanılabilir.</string>
+    <string name="discovery_collection_sync_failed">Yer işareti eşitleme durumu kontrol edilemedi. Lütfen tekrar deneyin.</string>
+    <string name="discovery_work_tag">Eser etiketi</string>
+    <string name="discovery_bookmark_month">Yer işaretine eklenme ayı</string>
+    <string name="discovery_bookmarked_newest">En yeni yer işaretleri</string>
+    <string name="discovery_bookmarked_oldest">En eski yer işaretleri</string>
+    <string name="discovery_clear_filters">Filtreleri temizle</string>
+    <string name="discovery_tag_suggestions">Etiket önerileri</string>
+    <string name="discovery_search_options_failed">Dinamik filtre seçenekleri yüklenemedi. Diğer filtreleri kullanmaya devam edebilirsiniz.</string>
+    <string name="discovery_word_count_languages">Sözcük sayısı filtresinin desteklediği diller: %1$s</string>
+</resources>

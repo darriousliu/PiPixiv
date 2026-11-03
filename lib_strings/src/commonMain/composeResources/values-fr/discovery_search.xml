@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">Charger plus</string>
+    <string name="discovery_retry">Réessayer</string>
+    <string name="discovery_load_failed">Impossible de charger les résultats. Veuillez réessayer.</string>
+    <string name="discovery_no_results">Aucun signet correspondant</string>
+    <string name="discovery_advanced_filters">Filtres avancés</string>
+    <string name="discovery_advanced_sort_note">Avec l’aperçu gratuit des œuvres populaires, les filtres avancés affichent les œuvres les plus récentes en premier.</string>
+    <string name="discovery_character_count">Nombre de caractères</string>
+    <string name="discovery_word_count">Nombre de mots</string>
+    <string name="discovery_reading_minutes">Temps de lecture (minutes)</string>
+    <string name="discovery_original_only">Romans originaux uniquement</string>
+    <string name="discovery_replaceable_only">Remplacement des noms des personnages pris en charge</string>
+    <string name="discovery_language">Langue</string>
+    <string name="discovery_genre">Genre</string>
+    <string name="discovery_width_pixels">Largeur (pixels)</string>
+    <string name="discovery_height_pixels">Hauteur (pixels)</string>
+    <string name="discovery_ratio">Format de l’image</string>
+    <string name="discovery_portrait">Portrait</string>
+    <string name="discovery_landscape">Paysage</string>
+    <string name="discovery_square">Carré</string>
+    <string name="discovery_tool">Outil de dessin</string>
+    <string name="discovery_options_failed">Impossible de charger les suggestions de filtres. Les tags saisis et les autres filtres restent disponibles.</string>
+    <string name="discovery_minimum">Minimum</string>
+    <string name="discovery_maximum">Maximum</string>
+    <string name="discovery_invalid_range">Saisissez des nombres entiers positifs ou nuls. Le minimum ne doit pas dépasser le maximum.</string>
+    <string name="discovery_collection_search">Rechercher dans mes signets</string>
+    <string name="discovery_collection_syncing">Pixiv synchronise vos signets. La recherche sera disponible une fois la synchronisation terminée.</string>
+    <string name="discovery_collection_self_only">La recherche avancée de signets est disponible uniquement pour vos propres signets.</string>
+    <string name="discovery_collection_sync_failed">Impossible de vérifier la synchronisation des signets. Veuillez réessayer.</string>
+    <string name="discovery_work_tag">Tag d’illustration ou de roman</string>
+    <string name="discovery_bookmark_month">Mois d’ajout aux signets</string>
+    <string name="discovery_bookmarked_newest">Signets les plus récents</string>
+    <string name="discovery_bookmarked_oldest">Signets les plus anciens</string>
+    <string name="discovery_clear_filters">Effacer les filtres</string>
+    <string name="discovery_tag_suggestions">Suggestions de tags</string>
+    <string name="discovery_search_options_failed">Impossible de charger les options de filtre. Les autres filtres restent disponibles.</string>
+    <string name="discovery_word_count_languages">Langues prises en charge pour le nombre de mots : %1$s</string>
+</resources>

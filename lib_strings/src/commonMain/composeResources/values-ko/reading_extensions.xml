@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_manga_series">만화 시리즈</string>
+    <string name="reading_manga_watchlist">만화 구독 목록</string>
+    <string name="reading_manga_user_series">이 작가의 만화 시리즈</string>
+    <string name="reading_manga_episode_count">총 %1$d화</string>
+    <string name="reading_manga_episode_order">제%1$d화</string>
+    <string name="reading_manga_previous">이전 화</string>
+    <string name="reading_manga_next">다음 화</string>
+    <string name="reading_manga_add_watchlist">시리즈 구독</string>
+    <string name="reading_manga_remove_watchlist">시리즈 구독 취소</string>
+    <string name="reading_manga_latest">최신 화 읽기</string>
+    <string name="reading_manga_empty">아직 만화 시리즈가 없습니다</string>
+    <string name="reading_manga_watchlist_empty">만화 시리즈를 구독하면 여기에서 업데이트를 확인할 수 있습니다</string>
+    <string name="reading_manga_chapters_empty">표시할 회차가 없습니다</string>
+    <string name="reading_manga_view_directory">시리즈 회차 목록 보기</string>
+    <string name="reading_refresh">새로고침</string>
+</resources>

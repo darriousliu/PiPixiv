@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_manga_series">سلاسل المانغا</string>
+    <string name="reading_manga_watchlist">قائمة متابعة المانغا</string>
+    <string name="reading_manga_user_series">سلاسل المانغا لهذا المؤلف</string>
+    <string name="reading_manga_episode_count">عدد الفصول: %1$d</string>
+    <string name="reading_manga_episode_order">الفصل %1$d</string>
+    <string name="reading_manga_previous">الفصل السابق</string>
+    <string name="reading_manga_next">الفصل التالي</string>
+    <string name="reading_manga_add_watchlist">متابعة السلسلة</string>
+    <string name="reading_manga_remove_watchlist">إلغاء متابعة السلسلة</string>
+    <string name="reading_manga_latest">قراءة أحدث فصل</string>
+    <string name="reading_manga_empty">لا توجد سلاسل مانغا بعد</string>
+    <string name="reading_manga_watchlist_empty">تابع سلسلة مانغا لعرض تحديثاتها هنا</string>
+    <string name="reading_manga_chapters_empty">لا توجد فصول لعرضها</string>
+    <string name="reading_manga_view_directory">عرض فهرس السلسلة</string>
+    <string name="reading_refresh">تحديث</string>
+</resources>

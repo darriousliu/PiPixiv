@@ -187,6 +187,7 @@
     <string name="view_replies">查看回覆</string>
     <string name="view_comments_count">查看評論 (%1$d)</string>
     <string name="no_comments">暫無評論</string>
+    <string name="no_replies">暫無回覆</string>
     <string name="add_comment">發表評論</string>
     <string name="reply">回覆</string>
     <string name="block_comment">封鎖評論</string>

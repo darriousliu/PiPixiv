@@ -187,6 +187,7 @@
     <string name="view_replies">जवाब देखें</string>
     <string name="view_comments_count">टिप्पणियाँ देखें (%1$d)</string>
     <string name="no_comments">अभी तक कोई टिप्पणी नहीं</string>
+    <string name="no_replies">अभी कोई जवाब नहीं है</string>
     <string name="add_comment">टिप्पणी जोड़ें</string>
     <string name="reply">जवाब दें</string>
     <string name="block_comment">टिप्पणी ब्लॉक करें</string>

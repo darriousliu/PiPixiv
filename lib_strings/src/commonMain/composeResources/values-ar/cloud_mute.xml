@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cloud_mute_title">عمليات الحظر السحابية في Pixiv</string>
+    <string name="cloud_mute_description">إدارة المستخدمين والوسوم المحظورة في حسابك على Pixiv. تتم مزامنة التغييرات مع Pixiv. يضيف الاستيراد القواعد المحلية الناقصة فقط، ويحافظ على القواعد الحالية والتعبيرات النمطية.</string>
+    <string name="cloud_mute_back">رجوع</string>
+    <string name="cloud_mute_refresh">تحديث</string>
+    <string name="cloud_mute_failed">تعذر إكمال العملية. حدّث ثم أعد المحاولة.</string>
+    <string name="cloud_mute_saved_refresh_failed">تم حفظ التغيير في Pixiv، لكن تعذر تحديث القائمة. حدّث القائمة دون إرسال التغيير مجددًا.</string>
+    <string name="cloud_mute_quota">تم استخدام %1$d من أصل %2$d</string>
+    <string name="cloud_mute_add_tag">حظر وسم سحابيًا</string>
+    <string name="cloud_mute_add_user">حظر مستخدم سحابيًا</string>
+    <string name="cloud_mute_import">استيراد عمليات الحظر السحابية محليًا</string>
+    <string name="cloud_mute_imported">تمت إضافة %1$d من قواعد الحظر المحلية</string>
+    <string name="cloud_mute_remove">إلغاء الحظر السحابي</string>
+    <string name="cloud_mute_remove_description">هل تريد إزالة «%1$s» من عمليات الحظر السحابية في Pixiv؟ سيتم الاحتفاظ بالقواعد المحلية الحالية.</string>
+    <string name="cloud_mute_tag">اسم الوسم</string>
+    <string name="cloud_mute_user_id">معرّف مستخدم Pixiv</string>
+    <string name="cloud_mute_input_hint">أدخل وسمًا غير محظور أو معرّف مستخدم صالحًا غير محظور.</string>
+</resources>

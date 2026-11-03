@@ -8,7 +8,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 private val localeList = listOf(
-    "en", "zh-CN", "zh-TW", "es", "hi", "pt", "ru", "ja", "de", "fr", "ar", "ko"
+    "en", "zh-CN", "zh-TW", "es", "hi", "pt", "ru", "ja", "de", "fr", "ar", "ko", "tr"
 )
 
 internal fun getLanguages(): ImmutableList<Language> {

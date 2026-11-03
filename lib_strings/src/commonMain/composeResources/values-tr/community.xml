@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="community_notifications">Bildirim merkezi</string>
+    <string name="community_notification">Bildirim</string>
+    <string name="community_unread">Okunmamış bildirimler var</string>
+    <string name="community_unread_failed">Okunmamış bildirim durumu güncellenemedi</string>
+    <string name="community_empty_notifications">Henüz bildirim yok</string>
+    <string name="community_view_more">Daha fazlasını görüntüle</string>
+    <string name="community_unknown_link">Bu bildirimin bağlantısı henüz açılamıyor</string>
+    <string name="community_recommended_users">Önerilen sanatçılar</string>
+    <string name="community_related_users">Benzer sanatçılar</string>
+    <string name="community_followers">Takipçilerim</string>
+    <string name="community_empty_users">Görüntülenecek sanatçı yok</string>
+    <string name="community_empty_followers">Henüz takipçi yok</string>
+    <string name="community_refresh">Yenile</string>
+    <string name="community_load_failed">Yüklenemedi. Lütfen tekrar deneyin.</string>
+</resources>

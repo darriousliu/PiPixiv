@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">Cargar más</string>
+    <string name="discovery_retry">Reintentar</string>
+    <string name="discovery_load_failed">No se han podido cargar los resultados. Inténtalo de nuevo.</string>
+    <string name="discovery_no_results">No hay marcadores que coincidan</string>
+    <string name="discovery_advanced_filters">Filtros avanzados</string>
+    <string name="discovery_advanced_sort_note">En la vista previa gratuita de obras populares, los filtros avanzados muestran primero las obras más recientes.</string>
+    <string name="discovery_character_count">Número de caracteres</string>
+    <string name="discovery_word_count">Número de palabras</string>
+    <string name="discovery_reading_minutes">Tiempo de lectura (minutos)</string>
+    <string name="discovery_original_only">Solo novelas originales</string>
+    <string name="discovery_replaceable_only">Permite reemplazar los nombres de los personajes</string>
+    <string name="discovery_language">Idioma</string>
+    <string name="discovery_genre">Género</string>
+    <string name="discovery_width_pixels">Ancho (píxeles)</string>
+    <string name="discovery_height_pixels">Alto (píxeles)</string>
+    <string name="discovery_ratio">Relación de aspecto</string>
+    <string name="discovery_portrait">Vertical</string>
+    <string name="discovery_landscape">Horizontal</string>
+    <string name="discovery_square">Cuadrado</string>
+    <string name="discovery_tool">Herramienta de dibujo</string>
+    <string name="discovery_options_failed">No se han podido cargar las sugerencias de filtros. Las etiquetas introducidas y los demás filtros siguen disponibles.</string>
+    <string name="discovery_minimum">Mínimo</string>
+    <string name="discovery_maximum">Máximo</string>
+    <string name="discovery_invalid_range">Introduce números enteros no negativos. El mínimo no puede superar el máximo.</string>
+    <string name="discovery_collection_search">Buscar en mis marcadores</string>
+    <string name="discovery_collection_syncing">Pixiv está sincronizando tus marcadores. La búsqueda estará disponible cuando termine.</string>
+    <string name="discovery_collection_self_only">La búsqueda avanzada de marcadores solo está disponible para tus propios marcadores.</string>
+    <string name="discovery_collection_sync_failed">No se ha podido comprobar la sincronización de marcadores. Inténtalo de nuevo.</string>
+    <string name="discovery_work_tag">Etiqueta de ilustración o novela</string>
+    <string name="discovery_bookmark_month">Mes de guardado en marcadores</string>
+    <string name="discovery_bookmarked_newest">Marcadores más recientes</string>
+    <string name="discovery_bookmarked_oldest">Marcadores más antiguos</string>
+    <string name="discovery_clear_filters">Borrar filtros</string>
+    <string name="discovery_tag_suggestions">Sugerencias de etiquetas</string>
+    <string name="discovery_search_options_failed">No se han podido cargar las opciones de filtro. Los demás filtros siguen disponibles.</string>
+    <string name="discovery_word_count_languages">Idiomas compatibles con el recuento de palabras: %1$s</string>
+</resources>

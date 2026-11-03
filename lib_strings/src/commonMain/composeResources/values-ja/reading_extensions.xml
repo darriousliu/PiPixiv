@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_manga_series">マンガシリーズ</string>
+    <string name="reading_manga_watchlist">マンガのフォロー一覧</string>
+    <string name="reading_manga_user_series">この作者のマンガシリーズ</string>
+    <string name="reading_manga_episode_count">全 %1$d 話</string>
+    <string name="reading_manga_episode_order">第 %1$d 話</string>
+    <string name="reading_manga_previous">前の話</string>
+    <string name="reading_manga_next">次の話</string>
+    <string name="reading_manga_add_watchlist">シリーズをフォロー</string>
+    <string name="reading_manga_remove_watchlist">シリーズのフォローを解除</string>
+    <string name="reading_manga_latest">最新話を読む</string>
+    <string name="reading_manga_empty">マンガシリーズはまだありません</string>
+    <string name="reading_manga_watchlist_empty">マンガシリーズをフォローすると、ここで更新を確認できます</string>
+    <string name="reading_manga_chapters_empty">表示できるエピソードがありません</string>
+    <string name="reading_manga_view_directory">シリーズのエピソード一覧を見る</string>
+    <string name="reading_refresh">更新</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="community_notifications">알림 센터</string>
+    <string name="community_notification">알림</string>
+    <string name="community_unread">읽지 않은 알림이 있습니다</string>
+    <string name="community_unread_failed">읽지 않음 상태를 업데이트하지 못했습니다</string>
+    <string name="community_empty_notifications">아직 알림이 없습니다</string>
+    <string name="community_view_more">더 보기</string>
+    <string name="community_unknown_link">이 알림의 링크는 아직 지원하지 않습니다</string>
+    <string name="community_recommended_users">추천 작가</string>
+    <string name="community_related_users">비슷한 작가</string>
+    <string name="community_followers">내 팔로워</string>
+    <string name="community_empty_users">표시할 작가가 없습니다</string>
+    <string name="community_empty_followers">아직 팔로워가 없습니다</string>
+    <string name="community_refresh">새로고침</string>
+    <string name="community_load_failed">불러오지 못했습니다. 다시 시도하세요.</string>
+</resources>

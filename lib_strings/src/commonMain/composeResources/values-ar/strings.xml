@@ -187,6 +187,7 @@
     <string name="view_replies">عرض الردود</string>
     <string name="view_comments_count">عرض التعليقات (%1$d)</string>
     <string name="no_comments">لا توجد تعليقات بعد</string>
+    <string name="no_replies">لا توجد ردود بعد</string>
     <string name="add_comment">إضافة تعليق</string>
     <string name="reply">رد</string>
     <string name="block_comment">حظر التعليق</string>

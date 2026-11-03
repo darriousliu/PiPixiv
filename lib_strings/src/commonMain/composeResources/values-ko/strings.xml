@@ -187,6 +187,7 @@
     <string name="view_replies">답글 보기</string>
     <string name="view_comments_count">댓글 보기(%1$d)</string>
     <string name="no_comments">현재 댓글이 없습니다</string>
+    <string name="no_replies">아직 답글이 없습니다</string>
     <string name="add_comment">댓글 추가</string>
     <string name="reply">답글</string>
     <string name="block_comment">댓글 차단</string>

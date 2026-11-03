@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_loading">Cargando</string>
+    <string name="content_loading_more">Cargando más</string>
+    <string name="content_empty_title">Aún no hay contenido</string>
+    <string name="content_empty_downloads">Aún no hay descargas</string>
+    <string name="content_error_title">No se puede cargar en este momento</string>
+    <string name="content_error_description">Inténtalo de nuevo en unos instantes</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="community_notifications">Notificaciones</string>
+    <string name="community_notification">Notificación</string>
+    <string name="community_unread">Notificaciones sin leer</string>
+    <string name="community_unread_failed">No se ha podido actualizar el estado de lectura</string>
+    <string name="community_empty_notifications">Aún no hay notificaciones</string>
+    <string name="community_view_more">Ver más</string>
+    <string name="community_unknown_link">Aún no se puede abrir el enlace de esta notificación</string>
+    <string name="community_recommended_users">Artistas recomendados</string>
+    <string name="community_related_users">Artistas similares</string>
+    <string name="community_followers">Mis seguidores</string>
+    <string name="community_empty_users">No hay artistas para mostrar</string>
+    <string name="community_empty_followers">Aún no hay seguidores</string>
+    <string name="community_refresh">Actualizar</string>
+    <string name="community_load_failed">No se ha podido cargar. Inténtalo de nuevo.</string>
+</resources>

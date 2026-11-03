@@ -1,0 +1,31 @@
+name: Localization Checks
+
+on:
+  pull_request:
+    paths:
+      - 'lib_strings/src/commonMain/composeResources/**'
+      - 'iosApp/iosApp/**/*.strings'
+      - 'iosApp/iosApp/Info.plist'
+      - 'feature/setting/src/commonMain/kotlin/com/mrl/pixiv/setting/LanguageHelper.kt'
+      - 'scripts/check_localizations.py'
+      - '.github/workflows/localizations.yml'
+  push:
+    branches: [main, master, develop, 'feature/**', 'codex/**']
+    paths:
+      - 'lib_strings/src/commonMain/composeResources/**'
+      - 'iosApp/iosApp/**/*.strings'
+      - 'iosApp/iosApp/Info.plist'
+      - 'feature/setting/src/commonMain/kotlin/com/mrl/pixiv/setting/LanguageHelper.kt'
+      - 'scripts/check_localizations.py'
+      - '.github/workflows/localizations.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check all translations
+        run: python3 scripts/check_localizations.py

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_load_more">تحميل المزيد</string>
+    <string name="discovery_retry">إعادة المحاولة</string>
+    <string name="discovery_load_failed">تعذر تحميل النتائج. يرجى إعادة المحاولة.</string>
+    <string name="discovery_no_results">لا توجد إشارات مرجعية مطابقة</string>
+    <string name="discovery_advanced_filters">عوامل التصفية المتقدمة</string>
+    <string name="discovery_advanced_sort_note">عند استخدام معاينة الأعمال الشائعة لغير المشتركين، ترتّب عوامل التصفية المتقدمة الأعمال من الأحدث.</string>
+    <string name="discovery_character_count">عدد الأحرف</string>
+    <string name="discovery_word_count">عدد الكلمات</string>
+    <string name="discovery_reading_minutes">وقت القراءة (بالدقائق)</string>
+    <string name="discovery_original_only">الروايات الأصلية فقط</string>
+    <string name="discovery_replaceable_only">يدعم استبدال أسماء الشخصيات</string>
+    <string name="discovery_language">اللغة</string>
+    <string name="discovery_genre">النوع</string>
+    <string name="discovery_width_pixels">العرض (بالبكسل)</string>
+    <string name="discovery_height_pixels">الارتفاع (بالبكسل)</string>
+    <string name="discovery_ratio">نسبة الأبعاد</string>
+    <string name="discovery_portrait">عمودي</string>
+    <string name="discovery_landscape">أفقي</string>
+    <string name="discovery_square">مربع</string>
+    <string name="discovery_tool">أداة الرسم</string>
+    <string name="discovery_options_failed">تعذر تحميل اقتراحات التصفية. يمكنك الاستمرار في استخدام الوسوم التي أدخلتها وعوامل التصفية الأخرى.</string>
+    <string name="discovery_minimum">الحد الأدنى</string>
+    <string name="discovery_maximum">الحد الأقصى</string>
+    <string name="discovery_invalid_range">أدخل أعدادًا صحيحة غير سالبة، بحيث لا يتجاوز الحد الأدنى الحد الأقصى.</string>
+    <string name="discovery_collection_search">البحث في إشاراتي المرجعية</string>
+    <string name="discovery_collection_syncing">يقوم Pixiv بمزامنة إشاراتك المرجعية. سيتاح البحث عند اكتمال المزامنة.</string>
+    <string name="discovery_collection_self_only">يتاح البحث المتقدم في الإشارات المرجعية لإشاراتك المرجعية فقط.</string>
+    <string name="discovery_collection_sync_failed">تعذر التحقق من حالة مزامنة الإشارات المرجعية. يرجى إعادة المحاولة.</string>
+    <string name="discovery_work_tag">وسم العمل</string>
+    <string name="discovery_bookmark_month">شهر إضافة الإشارة المرجعية</string>
+    <string name="discovery_bookmarked_newest">أحدث الإشارات المرجعية</string>
+    <string name="discovery_bookmarked_oldest">أقدم الإشارات المرجعية</string>
+    <string name="discovery_clear_filters">مسح عوامل التصفية</string>
+    <string name="discovery_tag_suggestions">اقتراحات الوسوم</string>
+    <string name="discovery_search_options_failed">تعذر تحميل خيارات التصفية الديناميكية. يمكنك الاستمرار في استخدام عوامل التصفية الأخرى.</string>
+    <string name="discovery_word_count_languages">اللغات المدعومة في تصفية عدد الكلمات: %1$s</string>
+</resources>

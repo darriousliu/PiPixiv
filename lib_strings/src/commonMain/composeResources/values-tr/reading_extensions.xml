@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_manga_series">Manga serileri</string>
+    <string name="reading_manga_watchlist">Manga takip listesi</string>
+    <string name="reading_manga_user_series">Bu yazarın manga serileri</string>
+    <string name="reading_manga_episode_count">%1$d bölüm</string>
+    <string name="reading_manga_episode_order">%1$d. bölüm</string>
+    <string name="reading_manga_previous">Önceki bölüm</string>
+    <string name="reading_manga_next">Sonraki bölüm</string>
+    <string name="reading_manga_add_watchlist">Seriyi takip et</string>
+    <string name="reading_manga_remove_watchlist">Takibi bırak</string>
+    <string name="reading_manga_latest">En son bölümü oku</string>
+    <string name="reading_manga_empty">Henüz manga serisi yok</string>
+    <string name="reading_manga_watchlist_empty">Güncellemelerini burada görmek için bir manga serisini takip edin</string>
+    <string name="reading_manga_chapters_empty">Görüntülenecek bölüm yok</string>
+    <string name="reading_manga_view_directory">Serinin bölüm listesini görüntüle</string>
+    <string name="reading_refresh">Yenile</string>
+</resources>
