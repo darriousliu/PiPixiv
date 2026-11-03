@@ -31,7 +31,7 @@ sealed class Destination : NavKey {
     data object OAuthLogin : Destination()
 
     @Serializable
-    data object WebCookieLogin: Destination()
+    data object WebCookieLogin : Destination()
 
     @Serializable
     data object Main : Destination()
@@ -96,6 +96,9 @@ sealed class Destination : NavKey {
 
     @Serializable
     data object History : Destination()
+
+    @Serializable
+    data object Reading : Destination()
 
     @Serializable
     data object NovelReadLater : Destination()

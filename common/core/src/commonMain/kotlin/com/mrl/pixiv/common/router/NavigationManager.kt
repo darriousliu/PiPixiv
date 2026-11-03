@@ -60,9 +60,10 @@ class NavigationManager(
             if (record.ownerEntryId == null) {
                 source = record
             } else {
-                require(record.ownerEntryId == source?.entryId &&
-                    source.destination.paneSpec.canHostDetail &&
-                    record.destination.paneSpec.canShowAsDetail
+                require(
+                    record.ownerEntryId == source?.entryId &&
+                            source.destination.paneSpec.canHostDetail &&
+                            record.destination.paneSpec.canShowAsDetail
                 ) {
                     "A detail must belong to its preceding source without crossing a full-width entry"
                 }
@@ -79,11 +80,12 @@ class NavigationManager(
         val sourceIndex = records.indexOf(source)
         // A source's own back button leaves the source and its entire detail branch.
         // The root manager and the current detail's back button pop one visit at a time.
-        val keepCount = if (sourceEntryId != null && source.entryId == records.last().ownerEntryId) {
-            sourceIndex.coerceAtLeast(1)
-        } else {
-            records.lastIndex
-        }
+        val keepCount =
+            if (sourceEntryId != null && source.entryId == records.last().ownerEntryId) {
+                sourceIndex.coerceAtLeast(1)
+            } else {
+                records.lastIndex
+            }
         store.records = records.take(keepCount)
     }
 
@@ -96,7 +98,8 @@ class NavigationManager(
             spec.preferredFullWidth -> null
             source?.ownerEntryId != null && spec.canShowAsDetail -> source.ownerEntryId
             source != null && source.destination.paneSpec.canHostDetail &&
-                spec.canShowAsDetail && !spec.preferAsSource -> source.entryId
+                    spec.canShowAsDetail && !spec.preferAsSource -> source.entryId
+
             else -> null
         }
         // Opening Picture (or a preview) preserves the complete previous split context.
@@ -226,6 +229,10 @@ class NavigationManager(
         navigate(destination = Destination.History)
     }
 
+    fun navigateToReadingScreen() {
+        navigate(destination = Destination.Reading)
+    }
+
     fun navigateToNovelReadLaterScreen() {
         navigate(destination = Destination.NovelReadLater)
     }
@@ -337,7 +344,12 @@ class NavigationManager(
     }
 
     fun navigateToRelatedUsers(userId: Long) {
-        navigate(Destination.CommunityUsers(com.mrl.pixiv.common.data.discovery.CommunityUsersKind.RELATED, userId))
+        navigate(
+            Destination.CommunityUsers(
+                com.mrl.pixiv.common.data.discovery.CommunityUsersKind.RELATED,
+                userId
+            )
+        )
     }
 
     fun navigateToFollowers() {

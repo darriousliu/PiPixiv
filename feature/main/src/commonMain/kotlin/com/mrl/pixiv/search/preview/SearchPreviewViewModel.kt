@@ -24,7 +24,10 @@ import org.koin.android.annotation.KoinViewModel
 
 sealed class SearchPreviewAction : ViewIntent {
     data object LoadTrendingTags : SearchPreviewAction()
-    data class AddSearchHistory(val keyword: String) : SearchPreviewAction()
+    data class AddSearchHistory(
+        val keyword: String,
+        val mode: AppViewMode,
+    ) : SearchPreviewAction()
 }
 
 data class SearchPreviewState(
@@ -43,7 +46,7 @@ class SearchPreviewViewModel : BaseMviViewModel<SearchPreviewState, SearchPrevie
     override suspend fun handleIntent(intent: SearchPreviewAction) {
         when (intent) {
             is SearchPreviewAction.LoadTrendingTags -> loadTrendingTags()
-            is SearchPreviewAction.AddSearchHistory -> addSearchHistory(intent.keyword)
+            is SearchPreviewAction.AddSearchHistory -> addSearchHistory(intent.keyword, intent.mode)
         }
     }
 
@@ -51,8 +54,11 @@ class SearchPreviewViewModel : BaseMviViewModel<SearchPreviewState, SearchPrevie
         dispatch(SearchPreviewAction.LoadTrendingTags)
     }
 
-    private fun addSearchHistory(keyword: String) {
-        SearchRepository.addSearchHistory(keyword)
+    private fun addSearchHistory(keyword: String, mode: AppViewMode) {
+        when (mode) {
+            AppViewMode.ILLUST -> SearchRepository.addSearchHistory(keyword)
+            AppViewMode.NOVEL -> SearchRepository.addNovelSearchHistory(keyword)
+        }
     }
 
     fun switchViewMode(mode: AppViewMode) {

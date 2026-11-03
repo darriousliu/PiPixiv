@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_title">我的閱讀</string>
+    <string name="data_storage_title">資料與儲存空間</string>
+    <string name="download_settings_title">下載設定</string>
+    <string name="settings_section_content">內容與體驗</string>
+    <string name="settings_section_app">應用程式</string>
+    <string name="settings_section_account">帳號</string>
+    <string name="profile_view_homepage">查看個人主頁</string>
+    <string name="settings_section_general">一般</string>
+    <string name="unblock_item">解除封鎖</string>
+</resources>

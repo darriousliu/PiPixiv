@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_title">내 독서</string>
+    <string name="data_storage_title">데이터 및 저장공간</string>
+    <string name="download_settings_title">다운로드 설정</string>
+    <string name="settings_section_content">콘텐츠 및 사용 환경</string>
+    <string name="settings_section_app">앱</string>
+    <string name="settings_section_account">계정</string>
+    <string name="profile_view_homepage">프로필 보기</string>
+    <string name="settings_section_general">일반</string>
+    <string name="unblock_item">차단 해제</string>
+</resources>

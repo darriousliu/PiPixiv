@@ -25,6 +25,7 @@ data class UserPreference(
     val appViewMode: AppViewMode = AppViewMode.ILLUST,
     val collectionViewMode: AppViewMode = AppViewMode.ILLUST,
     val historyViewMode: AppViewMode = AppViewMode.ILLUST,
+    val readingTab: ReadingTab = ReadingTab.READ_LATER,
     val aiTranslationConfig: AiTranslationConfig = AiTranslationConfig(),
     val browsingSettings: BrowsingSettings = BrowsingSettings(),
     val searchSettings: SearchSettings = SearchSettings(),

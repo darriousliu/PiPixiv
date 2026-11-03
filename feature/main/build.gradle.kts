@@ -18,6 +18,7 @@ kotlin {
             implementation(project(":feature:follow"))
             implementation(project(":feature:community"))
             implementation(project(":feature:manga"))
+            implementation(project(":feature:novel"))
 
             // Paging
             implementation(libs.bundles.androidx.paging)
@@ -32,6 +33,11 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.kotlinx.serialization.json)
+        }
+
+        jvmTest.dependencies {
+            implementation("org.jetbrains.compose.ui:ui-test:${libs.versions.composeMultiplatform.get()}")
+            implementation(compose.desktop.currentOs)
         }
     }
 }

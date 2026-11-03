@@ -96,6 +96,23 @@ fun MangaWatchlistContent(
     listState: LazyListState = rememberLazyListState(),
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
+    MangaWatchlistList(
+        watchlist = watchlist,
+        modifier = modifier,
+        listState = listState,
+        onSeriesClick = navigationManager::navigateToMangaSeriesScreen,
+        onLatestClick = navigationManager::navigateToSinglePictureScreen,
+    )
+}
+
+@Composable
+fun MangaWatchlistList(
+    watchlist: LazyPagingItems<MangaWatchlistEntry>,
+    onSeriesClick: (Long) -> Unit,
+    onLatestClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+) {
     MangaPagedListContent(
         emptyText = stringResource(RStrings.reading_manga_watchlist_empty),
         items = watchlist,
@@ -104,8 +121,8 @@ fun MangaWatchlistContent(
     ) { entry ->
         MangaWatchlistCard(
             entry = entry,
-            onSeriesClick = navigationManager::navigateToMangaSeriesScreen,
-            onLatestClick = navigationManager::navigateToSinglePictureScreen,
+            onSeriesClick = onSeriesClick,
+            onLatestClick = onLatestClick,
         )
     }
 }

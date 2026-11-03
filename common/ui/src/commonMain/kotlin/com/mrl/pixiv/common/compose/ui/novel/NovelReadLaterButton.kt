@@ -8,6 +8,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,19 +40,29 @@ import org.koin.compose.koinInject
 fun NovelReadLaterButton(
     novel: Novel,
     modifier: Modifier = Modifier,
-    tint: Color = Color.Unspecified,
+    tint: Color = LocalContentColor.current,
     repository: NovelReadLaterRepository = koinInject(),
 ) {
     NovelReadLaterAction(novel, repository) { isAdded, onClick ->
-        IconButton(modifier = modifier, onClick = onClick) {
-            Icon(
-                imageVector = if (isAdded) Icons.Rounded.WatchLater else Icons.Outlined.WatchLater,
-                contentDescription = stringResource(
-                    if (isAdded) RStrings.remove_from_read_later else RStrings.add_to_read_later
-                ),
-                tint = tint,
-            )
-        }
+        NovelReadLaterButtonContent(isAdded, onClick, modifier, tint)
+    }
+}
+
+@Composable
+fun NovelReadLaterButtonContent(
+    isAdded: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current,
+) {
+    IconButton(modifier = modifier, onClick = onClick) {
+        Icon(
+            imageVector = if (isAdded) Icons.Rounded.WatchLater else Icons.Outlined.WatchLater,
+            contentDescription = stringResource(
+                if (isAdded) RStrings.remove_from_read_later else RStrings.add_to_read_later
+            ),
+            tint = tint,
+        )
     }
 }
 

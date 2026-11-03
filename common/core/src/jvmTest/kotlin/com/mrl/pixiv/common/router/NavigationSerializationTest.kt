@@ -73,6 +73,7 @@ class NavigationSerializationTest {
             Destination.FileNameFormat,
             Destination.AiTranslationSetting,
             Destination.History,
+            Destination.Reading,
             Destination.NovelReadLater,
             Destination.Collection(4, true),
             Destination.BookmarkedTags,

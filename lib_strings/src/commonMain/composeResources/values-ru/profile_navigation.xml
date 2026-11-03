@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_title">Моё чтение</string>
+    <string name="data_storage_title">Данные и хранилище</string>
+    <string name="download_settings_title">Настройки загрузки</string>
+    <string name="settings_section_content">Контент и удобство</string>
+    <string name="settings_section_app">Приложение</string>
+    <string name="settings_section_account">Аккаунт</string>
+    <string name="profile_view_homepage">Посмотреть профиль</string>
+    <string name="settings_section_general">Общие</string>
+    <string name="unblock_item">Разблокировать</string>
+</resources>

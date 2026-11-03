@@ -66,6 +66,7 @@ import kotlin.time.Duration.Companion.seconds
  * @param markerPageLabel 阅读书签页码；为空时不展示书签操作
  * @param onMarkerClick 点击阅读书签按钮时的回调
  * @param compactTitle 是否使用紧凑标题字号
+ * @param compactMarkerLayout 在窄屏书签列表中缩小封面并分行显示作者、字数
  */
 @Composable
 fun NovelItem(
@@ -77,6 +78,8 @@ fun NovelItem(
     markerPageLabel: String? = null,
     onMarkerClick: (() -> Unit)? = null,
     compactTitle: Boolean = false,
+    compactMarkerLayout: Boolean = false,
+    readLaterAction: @Composable () -> Unit = { NovelReadLaterButton(novel = novel) },
 ) {
     val context = LocalPlatformContext.current
     val isBookmarked = novel.isBookmark
@@ -110,7 +113,13 @@ fun NovelItem(
                 },
                 contentDescription = novel.title,
                 modifier = Modifier
-                    .width(if (markerPageLabel != null) 120.dp else 80.dp)
+                    .width(
+                        when {
+                            compactMarkerLayout -> 64.dp
+                            markerPageLabel != null -> 120.dp
+                            else -> 80.dp
+                        }
+                    )
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
                 contentScale = ContentScale.Crop
@@ -151,42 +160,85 @@ fun NovelItem(
                     modifier = Modifier.padding(top = 4.dp)
                 )
 
-                // 作者和字数
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    4.HSpacer
-                    Text(
-                        text = novel.user.name,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                    8.HSpacer
-                    Icon(
-                        imageVector = Icons.Rounded.TextFields,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    4.HSpacer
-                    Text(
-                        text = "${novel.textLength}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    if (isAI) {
+                // Narrow marker cards keep the author readable beside the action column.
+                if (compactMarkerLayout) {
+                    Column(
+                        modifier = Modifier.padding(top = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Rounded.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            4.HSpacer
+                            Text(
+                                text = novel.user.name,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Rounded.TextFields,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            4.HSpacer
+                            Text(
+                                text = "${novel.textLength}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            if (isAI) {
+                                8.HSpacer
+                                AIBadge()
+                            }
+                        }
+                    }
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        4.HSpacer
+                        Text(
+                            text = novel.user.name,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
                         8.HSpacer
-                        AIBadge()
+                        Icon(
+                            imageVector = Icons.Rounded.TextFields,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        4.HSpacer
+                        Text(
+                            text = "${novel.textLength}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (isAI) {
+                            8.HSpacer
+                            AIBadge()
+                        }
                     }
                 }
 
@@ -234,7 +286,7 @@ fun NovelItem(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                NovelReadLaterButton(novel = novel)
+                readLaterAction()
                 IconButton(
                     onClick = {
                         val restrict = if (requireUserPreferenceValue.defaultPrivateBookmark) {

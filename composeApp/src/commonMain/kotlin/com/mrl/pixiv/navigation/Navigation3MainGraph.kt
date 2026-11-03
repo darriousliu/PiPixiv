@@ -76,6 +76,7 @@ import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
 import com.mrl.pixiv.profile.marker.NovelMarkersScreen
+import com.mrl.pixiv.profile.reading.ReadingScreen
 import com.mrl.pixiv.report.ReportScreen
 import com.mrl.pixiv.search.SearchScreen
 import com.mrl.pixiv.search.result.SearchResultsScreen
@@ -123,8 +124,9 @@ fun Navigation3MainGraph(
     val sourceRecord = navigationManager.backStack.lastOrNull {
         it.entryId == topRecord.ownerEntryId
     } ?: topRecord
-    val showMainNavigation = navigationManager.backStack.any { it.destination == Destination.Main } &&
-        !sourceRecord.destination.paneSpec.preferredFullWidth
+    val showMainNavigation =
+        navigationManager.backStack.any { it.destination == Destination.Main } &&
+                !sourceRecord.destination.paneSpec.preferredFullWidth
     LaunchedEffect(topRecord.entryId) {
         inputState.activeEntryId = topRecord.entryId
         inputState.dividerFocused = false
@@ -162,9 +164,9 @@ fun Navigation3MainGraph(
         // 作品详情页（深度链接）
         entry<Destination.PictureDeeplink>(
             metadata = NavDisplay.transitionSpec {
-                        scaleIn(initialScale = 0.9f) + fadeIn() togetherWith
-                                scaleOut(targetScale = 1.1f) + fadeOut()
-                    } + NavDisplay.predictivePopTransitionSpec {
+                scaleIn(initialScale = 0.9f) + fadeIn() togetherWith
+                        scaleOut(targetScale = 1.1f) + fadeOut()
+            } + NavDisplay.predictivePopTransitionSpec {
                 scaleIn(initialScale = 1.1f) + fadeIn() togetherWith
                         scaleOut(targetScale = 0.9f) + fadeOut()
             },
@@ -246,6 +248,10 @@ fun Navigation3MainGraph(
             HistoryScreen()
         }
 
+        entry<Destination.Reading> {
+            ReadingScreen()
+        }
+
         entry<Destination.NovelReadLater> {
             NovelReadLaterScreen()
         }
@@ -319,7 +325,11 @@ fun Navigation3MainGraph(
             )
         }
         entry<Destination.BlockSettings> {
-            BlockSettingsScreen()
+            BlockSettingsScreen(
+                blockedCommentsContent = { modifier ->
+                    BlockCommentsScreen(modifier = modifier, embedded = true)
+                },
+            )
         }
         entry<Destination.BlockIllust> {
             BlockIllustScreen()
@@ -410,12 +420,13 @@ fun Navigation3MainGraph(
             MainNavigationScaffold(showMainNavigation, navigationManager) {
                 BoxWithConstraints(modifier.fillMaxSize()) {
                     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-                    val allowSplit = adaptiveInfo.windowPosture.separatingVerticalHingeBounds.isEmpty()
+                    val allowSplit =
+                        adaptiveInfo.windowPosture.separatingVerticalHingeBounds.isEmpty()
                     val showsSidePane = allowSplit && topRecord.ownerEntryId != null &&
-                        topRecord.destination.paneSpec.canShowAsDetail &&
-                        !topRecord.destination.paneSpec.preferredFullWidth &&
-                        sourceRecord.destination.paneSpec.canHostDetail && maxHeight >= 480.dp &&
-                        maxWidth >= sourceRecord.destination.paneSpec.minSourceWidth +
+                            topRecord.destination.paneSpec.canShowAsDetail &&
+                            !topRecord.destination.paneSpec.preferredFullWidth &&
+                            sourceRecord.destination.paneSpec.canHostDetail && maxHeight >= 480.dp &&
+                            maxWidth >= sourceRecord.destination.paneSpec.minSourceWidth +
                             SplitPaneDividerWidth + topRecord.destination.paneSpec.minDetailWidth
                     LaunchedEffect(showsSidePane, topRecord.entryId) {
                         if (!showsSidePane || inputState.activeEntryId !in
@@ -425,7 +436,14 @@ fun Navigation3MainGraph(
                         }
                         if (!showsSidePane) inputState.dividerFocused = false
                     }
-                    val strategy = remember(maxWidth, maxHeight, allowSplit, splitState, inputState, paneTransitionState) {
+                    val strategy = remember(
+                        maxWidth,
+                        maxHeight,
+                        allowSplit,
+                        splitState,
+                        inputState,
+                        paneTransitionState
+                    ) {
                         AdaptiveSceneStrategy(
                             availableWidth = maxWidth,
                             availableHeight = maxHeight,

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,9 +49,10 @@ import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.strings.content_empty_downloads
 import com.mrl.pixiv.strings.delete
 import com.mrl.pixiv.strings.download_manager
-import com.mrl.pixiv.strings.content_empty_downloads
+import com.mrl.pixiv.strings.download_settings_title
 import com.mrl.pixiv.strings.retry
 import com.mrl.pixiv.strings.status_all
 import com.mrl.pixiv.strings.status_completed
@@ -79,19 +81,9 @@ fun DownloadScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(RStrings.download_manager)) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navigationManager::popBackStack,
-                        shapes = IconButtonDefaults.shapes()
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
-                }
+            DownloadTopAppBar(
+                onBack = navigationManager::popBackStack,
+                onSettings = navigationManager::navigateToFileNameFormatScreen,
             )
         }
     ) { padding ->
@@ -230,4 +222,30 @@ fun DownloadItem(
             }
         }
     }
+}
+
+@Composable
+internal fun DownloadTopAppBar(onBack: () -> Unit, onSettings: () -> Unit) {
+    TopAppBar(
+        title = { Text(stringResource(RStrings.download_manager)) },
+        navigationIcon = {
+            IconButton(
+                onClick = onBack,
+                shapes = IconButtonDefaults.shapes()
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = null
+                )
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = onSettings,
+                shapes = IconButtonDefaults.shapes(),
+            ) {
+                Icon(Icons.Rounded.Settings, stringResource(RStrings.download_settings_title))
+            }
+        },
+    )
 }

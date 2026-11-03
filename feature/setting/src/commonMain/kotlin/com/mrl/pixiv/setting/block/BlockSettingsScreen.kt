@@ -1,26 +1,28 @@
 package com.mrl.pixiv.setting.block
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import com.mrl.pixiv.common.compose.rememberThrottleClick
-import com.mrl.pixiv.common.router.Destination
+import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.block_comments
@@ -29,121 +31,100 @@ import com.mrl.pixiv.strings.block_novel
 import com.mrl.pixiv.strings.block_settings
 import com.mrl.pixiv.strings.block_tags
 import com.mrl.pixiv.strings.block_user
+import com.mrl.pixiv.strings.cloud_mute_back
 import com.mrl.pixiv.strings.cloud_mute_title
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val KEY_BLOCK_ILLUST = "block_illust"
-private const val KEY_BLOCK_NOVEL = "block_novel"
-private const val KEY_BLOCK_USER = "block_user"
-private const val KEY_BLOCK_TAG = "block_tag"
-private const val KEY_BLOCK_COMMENTS = "block_comments"
+internal enum class BlockCategory(val title: StringResource) {
+    Cloud(RStrings.cloud_mute_title),
+    Illust(RStrings.block_illust),
+    Novel(RStrings.block_novel),
+    User(RStrings.block_user),
+    Tag(RStrings.block_tags),
+    Comment(RStrings.block_comments),
+}
 
 @Composable
 fun BlockSettingsScreen(
+    blockedCommentsContent: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val navigationManager = currentNavigationManager()
     BlockSettingsContent(
-        modifier = modifier,
+        onCategoryChange = { navigationManager.closeCurrentDetailBranch() },
         onBack = navigationManager::popBackStack,
-        onNavigate = navigationManager::navigate,
-    )
-}
-
-@Composable
-private fun BlockSettingsContent(
-    modifier: Modifier = Modifier,
-    onBack: () -> Unit = {},
-    onNavigate: (Destination) -> Unit = {},
-) {
-    Scaffold(
         modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(RStrings.block_settings))
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = onBack,
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
-                }
+    ) { category, contentModifier ->
+        when (category) {
+            BlockCategory.Cloud -> CloudMuteScreen(modifier = contentModifier, embedded = true)
+            BlockCategory.Illust -> BlockIllustScreen(
+                modifier = contentModifier,
+                embedded = true
             )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-        ) {
-            item(key = "cloud_mute") {
-                BlockEntry(
-                    title = RStrings.cloud_mute_title,
-                    onClick = { onNavigate(Destination.CloudMute) },
-                )
-            }
-            item(key = KEY_BLOCK_ILLUST) {
-                BlockEntry(
-                    title = RStrings.block_illust,
-                    onClick = { onNavigate(Destination.BlockIllust) }
-                )
-            }
-            item(key = KEY_BLOCK_NOVEL) {
-                BlockEntry(
-                    title = RStrings.block_novel,
-                    onClick = { onNavigate(Destination.BlockNovel) }
-                )
-            }
-            item(key = KEY_BLOCK_USER) {
-                BlockEntry(
-                    title = RStrings.block_user,
-                    onClick = { onNavigate(Destination.BlockUser) }
-                )
-            }
-            item(key = KEY_BLOCK_TAG) {
-                BlockEntry(
-                    title = RStrings.block_tags,
-                    onClick = { onNavigate(Destination.BlockTag) }
-                )
-            }
-            item(key = KEY_BLOCK_COMMENTS) {
-                BlockEntry(
-                    title = RStrings.block_comments,
-                    onClick = { onNavigate(Destination.BlockComments) }
-                )
-            }
+
+            BlockCategory.Novel -> BlockNovelScreen(modifier = contentModifier, embedded = true)
+            BlockCategory.User -> BlockUserScreen(modifier = contentModifier, embedded = true)
+            BlockCategory.Tag -> BlockTagScreen(modifier = contentModifier, embedded = true)
+            BlockCategory.Comment -> blockedCommentsContent(contentModifier)
         }
     }
 }
 
 @Composable
-private fun BlockEntry(
-    title: StringResource,
-    onClick: () -> Unit,
+internal fun BlockSettingsContent(
+    onCategoryChange: (BlockCategory) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    initialCategory: BlockCategory = BlockCategory.Cloud,
+    categoryContent: @Composable (BlockCategory, Modifier) -> Unit,
 ) {
-    ListItem(
-        onClick = rememberThrottleClick(onClick = onClick),
-        shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-        content = {
-            Text(
-                text = stringResource(title),
-                style = MaterialTheme.typography.titleMedium,
+    val pagerState = rememberPagerState(initialPage = initialCategory.ordinal) {
+        BlockCategory.entries.size
+    }
+    val scope = rememberCoroutineScope()
+    val onSettledCategoryChange by rememberUpdatedState(onCategoryChange)
+    LaunchedEffect(pagerState) {
+        // Preserve a restored detail until the user actually changes the category.
+        snapshotFlow { pagerState.settledPage }.drop(1).collect { page ->
+            onSettledCategoryChange(BlockCategory.entries[page])
+        }
+    }
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(RStrings.block_settings)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack, shapes = IconButtonDefaults.shapes()) {
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            stringResource(RStrings.cloud_mute_back)
+                        )
+                    }
+                },
             )
         },
-        trailingContent = {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                contentDescription = null
-            )
-        },
-        modifier = Modifier
-            .fillMaxWidth(),
-    )
+    ) { innerPadding ->
+        Column(Modifier.padding(innerPadding).fillMaxSize()) {
+            PrimaryScrollableTabRow(selectedTabIndex = pagerState.currentPage, edgePadding = 8.dp) {
+                BlockCategory.entries.forEach { tab ->
+                    Tab(
+                        selected = tab.ordinal == pagerState.currentPage,
+                        onClick = { scope.launch { pagerState.animateScrollToPage(tab.ordinal) } },
+                        text = { Text(stringResource(tab.title)) },
+                    )
+                }
+            }
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f).fillMaxSize(),
+                key = { BlockCategory.entries[it].name },
+            ) { page ->
+                categoryContent(BlockCategory.entries[page], Modifier.fillMaxSize())
+            }
+        }
+    }
 }

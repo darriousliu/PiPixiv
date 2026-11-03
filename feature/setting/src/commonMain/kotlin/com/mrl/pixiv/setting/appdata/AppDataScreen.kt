@@ -34,7 +34,7 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
-import com.mrl.pixiv.strings.app_data
+import com.mrl.pixiv.strings.data_storage_title
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.clear_cache
 import com.mrl.pixiv.strings.confirm
@@ -97,19 +97,7 @@ fun AppDataScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(RStrings.app_data))
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = navigationManager::popBackStack,
-                        shapes = IconButtonDefaults.shapes(),
-                    ) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
-                    }
-                }
-            )
+            AppDataTopAppBar(onBack = navigationManager::popBackStack)
         }
     ) { paddingValues ->
         Column(
@@ -229,3 +217,20 @@ expect fun MigrationCard(
     migrateData: () -> Unit,
     viewModel: AppDataViewModel,
 )
+
+@Composable
+internal fun AppDataTopAppBar(onBack: () -> Unit) {
+    TopAppBar(
+        title = {
+            Text(text = stringResource(RStrings.data_storage_title))
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = onBack,
+                shapes = IconButtonDefaults.shapes(),
+            ) {
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
+            }
+        }
+    )
+}

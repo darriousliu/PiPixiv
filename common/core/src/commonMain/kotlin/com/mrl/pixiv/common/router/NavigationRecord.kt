@@ -68,6 +68,7 @@ val Destination.paneSpec: DestinationPaneSpec
         Destination.Setting,
         Destination.BlockSettings,
         Destination.History,
+        Destination.Reading,
         Destination.NovelReadLater,
         is Destination.Collection,
         Destination.BookmarkedTags,

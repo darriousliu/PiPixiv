@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,10 +66,6 @@ fun NovelReadLaterScreen(
     repository: NovelReadLaterRepository = koinInject(),
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
-    val items by repository.observeItems()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-    val scope = rememberCoroutineScope()
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -79,66 +78,84 @@ fun NovelReadLaterScreen(
                             contentDescription = stringResource(RStrings.back),
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
-        if (items.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                ContentEmptyState(message = stringResource(RStrings.read_later_empty))
+        NovelReadLaterPage(
+            modifier = Modifier.padding(paddingValues),
+            repository = repository,
+            navigationManager = navigationManager,
+        )
+    }
+}
+
+/** Repository-backed body shared by the standalone page and My Reading. */
+@Composable
+fun NovelReadLaterPage(
+    modifier: Modifier = Modifier,
+    repository: NovelReadLaterRepository = koinInject(),
+    navigationManager: NavigationManager = currentNavigationManager(),
+) {
+    val itemsFlow = remember(repository) { repository.observeItems() }
+    val items by itemsFlow.collectAsStateWithLifecycle(initialValue = emptyList())
+    val scope = rememberCoroutineScope()
+    NovelReadLaterContent(
+        items = items,
+        modifier = modifier,
+        onOpen = { item ->
+            navigationManager.navigateToNovelDetailScreen(
+                novelId = item.novelId,
+                readLaterTargetLanguage = item.targetLanguage,
+            )
+        },
+        onRetry = { item ->
+            scope.launch {
+                try {
+                    repository.retry(item.novelId, item.targetLanguage)
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (_: IllegalArgumentException) {
+                    ToastUtil.safeShortToast(RStrings.ai_translation_config_required)
+                } catch (throwable: Throwable) {
+                    ToastUtil.safeShortToast(
+                        RStrings.ai_translation_failed,
+                        throwable.message.orEmpty(),
+                    )
+                }
             }
+        },
+        onDelete = { item ->
+            scope.launch { repository.remove(item.novelId, item.targetLanguage) }
+        },
+    )
+}
+
+@Composable
+fun NovelReadLaterContent(
+    items: List<NovelReadLaterItem>,
+    onOpen: (NovelReadLaterItem) -> Unit,
+    onRetry: (NovelReadLaterItem) -> Unit,
+    onDelete: (NovelReadLaterItem) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        if (items.isEmpty()) {
+            ContentEmptyState(
+                message = stringResource(RStrings.read_later_empty),
+                modifier = Modifier.align(Alignment.Center),
+            )
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                modifier = Modifier.widthIn(max = 720.dp).fillMaxSize(),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
             ) {
-                items(
-                    items = items,
-                    key = { "${it.novelId}_${it.targetLanguage}" },
-                ) { item ->
+                items(items = items, key = { "${it.novelId}_${it.targetLanguage}" }) { item ->
                     NovelReadLaterItem(
                         item = item,
-                        onOpen = {
-                            navigationManager.navigateToNovelDetailScreen(
-                                novelId = item.novelId,
-                                readLaterTargetLanguage = item.targetLanguage,
-                            )
-                        },
-                        onRetry = {
-                            scope.launch {
-                                try {
-                                    repository.retry(
-                                        novelId = item.novelId,
-                                        targetLanguage = item.targetLanguage,
-                                    )
-                                } catch (cancellation: CancellationException) {
-                                    throw cancellation
-                                } catch (_: IllegalArgumentException) {
-                                    ToastUtil.safeShortToast(
-                                        RStrings.ai_translation_config_required
-                                    )
-                                } catch (throwable: Throwable) {
-                                    ToastUtil.safeShortToast(
-                                        RStrings.ai_translation_failed,
-                                        throwable.message.orEmpty(),
-                                    )
-                                }
-                            }
-                        },
-                        onDelete = {
-                            scope.launch {
-                                repository.remove(
-                                    novelId = item.novelId,
-                                    targetLanguage = item.targetLanguage,
-                                )
-                            }
-                        }
+                        onOpen = { onOpen(item) },
+                        onRetry = { onRetry(item) },
+                        onDelete = { onDelete(item) },
                     )
                 }
             }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_title">मेरी पठन सूची</string>
+    <string name="data_storage_title">डेटा और स्टोरेज</string>
+    <string name="download_settings_title">डाउनलोड सेटिंग</string>
+    <string name="settings_section_content">सामग्री और अनुभव</string>
+    <string name="settings_section_app">ऐप्लिकेशन</string>
+    <string name="settings_section_account">खाता</string>
+    <string name="profile_view_homepage">प्रोफ़ाइल देखें</string>
+    <string name="settings_section_general">सामान्य</string>
+    <string name="unblock_item">अनब्लॉक करें</string>
+</resources>

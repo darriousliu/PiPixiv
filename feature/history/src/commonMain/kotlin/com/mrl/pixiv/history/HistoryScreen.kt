@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.HistoryToggleOff
 import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -51,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.CombinedLoadStates
@@ -81,6 +83,7 @@ import com.mrl.pixiv.strings.cloud_history
 import com.mrl.pixiv.strings.enable_history_now
 import com.mrl.pixiv.strings.history_disabled_empty_desc
 import com.mrl.pixiv.strings.history_disabled_empty_title
+import com.mrl.pixiv.strings.history_setting
 import com.mrl.pixiv.strings.local_history
 import com.mrl.pixiv.strings.no_history_records
 import com.mrl.pixiv.strings.search_by_title_author
@@ -136,7 +139,8 @@ fun HistoryScreen(
                         searchValue = it
                         viewModel.dispatch(HistoryAction.UpdateSearch(it.text))
                     },
-                    onBack = { navigationManager.popBackStack() }
+                    onBack = { navigationManager.popBackStack() },
+                    onSettings = navigationManager::navigateToHistorySettingScreen,
                 )
                 PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
                     sources.forEachIndexed { index, source ->
@@ -461,9 +465,10 @@ private fun DisabledHistoryShortcut(
 }
 
 @Composable
-private fun HistoryAppBar(
+internal fun HistoryAppBar(
     searchValue: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
+    onSettings: () -> Unit,
     onBack: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
@@ -477,7 +482,11 @@ private fun HistoryAppBar(
                     unfocusedContainerColor = Color.Transparent
                 ),
                 placeholder = {
-                    Text(text = stringResource(RStrings.search_by_title_author))
+                    Text(
+                        text = stringResource(RStrings.search_by_title_author),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
@@ -495,6 +504,14 @@ private fun HistoryAppBar(
                 keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             )
+        },
+        actions = {
+            IconButton(onClick = onSettings, shapes = IconButtonDefaults.shapes()) {
+                Icon(
+                    Icons.Rounded.Settings,
+                    contentDescription = stringResource(RStrings.history_setting)
+                )
+            }
         },
         navigationIcon = {
             IconButton(
