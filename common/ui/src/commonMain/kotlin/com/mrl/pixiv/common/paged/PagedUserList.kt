@@ -5,15 +5,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.compose.ui.FollowButton
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Illust
@@ -25,11 +25,7 @@ import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
-import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.strings.follow
-import com.mrl.pixiv.strings.followed
 import kotlinx.collections.immutable.toImmutableList
-import org.jetbrains.compose.resources.stringResource
 
 private const val USER_PREVIEW_SIZE = 3
 
@@ -48,6 +44,7 @@ fun LazyListScope.PagedUserList(
             userPreview = userPreview,
             navToPictureScreen = navToPictureScreen,
             navToUserProfile = { navToUserProfile(userPreview.user.id) },
+            isUpdatingFollow = FollowState.isUpdating(userPreview.user.id),
             showIllusts = showIllusts,
         )
     }
@@ -58,6 +55,7 @@ private fun PagedUserItem(
     userPreview: UserPreview,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     navToUserProfile: () -> Unit,
+    isUpdatingFollow: Boolean,
     modifier: Modifier = Modifier,
     showIllusts: Boolean = true,
 ) {
@@ -95,20 +93,20 @@ private fun PagedUserItem(
             Text(
                 text = user.name,
                 modifier = Modifier.weight(1f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
-            if (user.isFollowing) {
-                OutlinedButton(
-                    onClick = { FollowState.unFollowUser(user.id) },
-                ) {
-                    Text(text = stringResource(RStrings.followed))
-                }
-            } else {
-                Button(
-                    onClick = { FollowState.followUser(user.id) },
-                ) {
-                    Text(text = stringResource(RStrings.follow))
-                }
-            }
+            FollowButton(
+                isFollowing = user.isFollowing,
+                isUpdating = isUpdatingFollow,
+                onClick = {
+                    if (user.isFollowing) {
+                        FollowState.unFollowUser(user.id)
+                    } else {
+                        FollowState.followUser(user.id)
+                    }
+                },
+            )
         }
     }
 }

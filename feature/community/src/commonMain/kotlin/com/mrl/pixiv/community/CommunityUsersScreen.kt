@@ -20,13 +20,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.FollowButton
 import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.compose.ui.image.LoadingImage
@@ -67,8 +66,6 @@ import com.mrl.pixiv.strings.community_followers
 import com.mrl.pixiv.strings.community_recommended_users
 import com.mrl.pixiv.strings.community_refresh
 import com.mrl.pixiv.strings.community_related_users
-import com.mrl.pixiv.strings.follow
-import com.mrl.pixiv.strings.followed
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -153,6 +150,7 @@ private fun CommunityUserCard(preview: CommunityUserPreview, navigationManager: 
         user = user,
         works = works,
         following = user.isFollowing,
+        isUpdatingFollow = FollowState.isUpdating(user.id),
         showFollow = !user.isSelf,
         onProfileClick = openProfile,
         onWorkClick = navigationManager::navigateToSinglePictureScreen,
@@ -167,6 +165,7 @@ private fun CommunityUserCardContent(
     user: User,
     works: List<Illust>,
     following: Boolean,
+    isUpdatingFollow: Boolean,
     showFollow: Boolean = true,
     onProfileClick: () -> Unit = {},
     onWorkClick: (Long) -> Unit = {},
@@ -233,21 +232,11 @@ private fun CommunityUserCardContent(
                 )
             }
             if (showFollow) {
-                if (following) {
-                    OutlinedButton(
-                        onClick = onFollowClick,
-                        contentPadding = PaddingValues(horizontal = 16.dp)
-                    ) {
-                        Text(stringResource(RStrings.followed))
-                    }
-                } else {
-                    Button(
-                        onClick = onFollowClick,
-                        contentPadding = PaddingValues(horizontal = 16.dp)
-                    ) {
-                        Text(stringResource(RStrings.follow))
-                    }
-                }
+                FollowButton(
+                    isFollowing = following,
+                    isUpdating = isUpdatingFollow,
+                    onClick = onFollowClick,
+                )
             }
         }
     }

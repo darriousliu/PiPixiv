@@ -69,6 +69,7 @@ import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.isSelf
+import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
@@ -137,6 +138,7 @@ fun ProfileDetailScreen(
     val state = viewModel.asState()
     val coroutineScope = rememberCoroutineScope()
     val userInfo = state.userInfo
+    val isUpdatingFollow = state.isUpdatingFollow || FollowState.isUpdating(userInfo.user.id)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val lazyListState = rememberLazyListState()
     val isBlocked = BlockingRepositoryV2.collectUserBlockAsState(uid)
@@ -166,7 +168,7 @@ fun ProfileDetailScreen(
                     userInfo = userInfo,
                     scrollBehavior = scrollBehavior,
                     isBlocked = isBlocked,
-                    isUpdatingFollow = state.isUpdatingFollow,
+                    isUpdatingFollow = isUpdatingFollow,
                     onBack = navigationManager::popBackStack,
                     onPrivateFollow = { userId ->
                         viewModel.followUser(userId, Restrict.PRIVATE)
@@ -219,7 +221,7 @@ fun ProfileDetailScreen(
                         userInfo = userInfo,
                         isSelf = userInfo.user.isSelf,
                         isFollowing = userInfo.user.isFollowing,
-                        isUpdatingFollow = state.isUpdatingFollow,
+                        isUpdatingFollow = isUpdatingFollow,
                         onToggleFollow = {
                             if (userInfo.user.isFollowing) {
                                 viewModel.unFollowUser(userInfo.user.id)

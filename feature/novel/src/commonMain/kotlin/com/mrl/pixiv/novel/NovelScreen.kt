@@ -299,7 +299,7 @@ fun NovelScreen(
             if (novel.id != chapterId || currentState.isTranslating ||
                 currentState.paragraphs.isEmpty() || resizeReadingAnchor != null ||
                 (currentState.restoreProgress != null &&
-                    handledRestoreVersion != currentState.restoreVersion)
+                        handledRestoreVersion != currentState.restoreVersion)
             ) {
                 return@remember
             }
@@ -422,7 +422,10 @@ fun NovelScreen(
                 val line = layout.getLineForOffset(anchor.charIndex.coerceIn(0, paragraph.length))
                 val padding = (-listState.layoutInfo.viewportStartOffset).coerceAtLeast(0)
                 listState.scrollToItem(
-                    index = paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty()) +
+                    index = paragraphStartItemIndex(
+                        novel.series.title != null,
+                        novel.caption.isNotEmpty()
+                    ) +
                             anchor.paragraphIndex,
                     scrollOffset = (layout.getLineTop(line) + padding).toInt().coerceAtLeast(0),
                 )
@@ -506,7 +509,9 @@ fun NovelScreen(
                 // 统一排列阅读操作，避免正文层的回顶按钮与章节按钮互相覆盖。
                 Column(
                     modifier = Modifier
-                        .padding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues())
+                        .padding(
+                            WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues()
+                        )
                         .padding(bottom = 8.dp),
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = 12.spaceBy,
@@ -751,7 +756,9 @@ fun NovelScreen(
                                         IconButton(
                                             onClick = {
                                                 saveReadingProgress()
-                                                navigationManager.navigateToNovelSeriesScreen(seriesId)
+                                                navigationManager.navigateToNovelSeriesScreen(
+                                                    seriesId
+                                                )
                                             },
                                         ) {
                                             Icon(
@@ -937,42 +944,6 @@ private fun NovelBottomSheetContent(
         val colors =
             ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
 
-        ListItem(
-            onClick = rememberThrottleClick(onClick = onToggleMarker),
-            enabled = !state.markerUpdating && !state.isTranslating,
-            shapes = ListItemDefaults.shapes(shape = RectangleShape),
-            content = {
-                Column {
-                    Text(text = stringResource(RStrings.novel_marker))
-                    state.markerPage?.let { page ->
-                        Text(
-                            text = stringResource(RStrings.novel_marker_page, page),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            leadingContent = {
-                if (state.markerUpdating) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp,
-                    )
-                } else {
-                    Icon(
-                        imageVector = if (state.markerPage == currentMarkerPage) {
-                            Icons.Rounded.Bookmark
-                        } else {
-                            Icons.Rounded.BookmarkBorder
-                        },
-                        contentDescription = null,
-                    )
-                }
-            },
-            colors = colors,
-        )
-
         // 字号调整
         ListItem(
             headlineContent = {
@@ -1012,6 +983,42 @@ private fun NovelBottomSheetContent(
                 )
             },
             colors = colors
+        )
+
+        ListItem(
+            onClick = rememberThrottleClick(onClick = onToggleMarker),
+            enabled = !state.markerUpdating && !state.isTranslating,
+            shapes = ListItemDefaults.shapes(shape = RectangleShape),
+            content = {
+                Column {
+                    Text(text = stringResource(RStrings.novel_marker))
+                    state.markerPage?.let { page ->
+                        Text(
+                            text = stringResource(RStrings.novel_marker_page, page),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            leadingContent = {
+                if (state.markerUpdating) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Icon(
+                        imageVector = if (state.markerPage == currentMarkerPage) {
+                            Icons.Rounded.Bookmark
+                        } else {
+                            Icons.Rounded.BookmarkBorder
+                        },
+                        contentDescription = null,
+                    )
+                }
+            },
+            colors = colors,
         )
 
         // 导出按钮

@@ -24,12 +24,10 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -44,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -61,6 +60,7 @@ import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
 import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
+import com.mrl.pixiv.common.compose.ui.FollowButton
 import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
@@ -79,7 +79,6 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.community_empty_users
-import com.mrl.pixiv.strings.follow
 import com.mrl.pixiv.strings.followed
 import com.mrl.pixiv.strings.word_private
 import com.mrl.pixiv.strings.word_public
@@ -402,7 +401,8 @@ fun FollowingUserCard(
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     navToUserProfile: () -> Unit,
     modifier: Modifier = Modifier,
-    showIllusts: Boolean = true
+    showIllusts: Boolean = true,
+    isUpdatingFollow: Boolean = FollowState.isUpdating(userId),
 ) {
     Card(
         onClick = navToUserProfile,
@@ -448,29 +448,21 @@ fun FollowingUserCard(
             )
             Text(
                 text = userName,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
-            if (isFollowed) {
-                OutlinedButton(
-                    onClick = {
+            FollowButton(
+                isFollowing = isFollowed,
+                isUpdating = isUpdatingFollow,
+                onClick = {
+                    if (isFollowed) {
                         FollowState.unFollowUser(userId)
-                    }
-                ) {
-                    Text(
-                        text = stringResource(RStrings.followed),
-                    )
-                }
-            } else {
-                Button(
-                    onClick = {
+                    } else {
                         FollowState.followUser(userId)
                     }
-                ) {
-                    Text(
-                        text = stringResource(RStrings.follow),
-                    )
-                }
-            }
+                },
+            )
         }
     }
 }

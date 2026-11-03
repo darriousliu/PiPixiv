@@ -7,28 +7,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.PeopleOutline
-import androidx.compose.material.icons.rounded.PersonAdd
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,12 +32,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
+import com.mrl.pixiv.common.compose.ui.FollowButton
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.util.RDrawables
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.strings.community_related_users
 import com.mrl.pixiv.strings.copy_to_clipboard
-import com.mrl.pixiv.strings.follow
 import com.mrl.pixiv.strings.followed
 import com.mrl.pixiv.strings.ic_profile_premium
 import com.mrl.pixiv.strings.reading_manga_user_series
@@ -98,7 +90,7 @@ internal fun ProfileIdentityHeader(
                 color = MaterialTheme.colorScheme.primary,
             )
             if (userInfo.user.id > 0 && !isSelf) {
-                ProfileFollowButton(
+                FollowButton(
                     isFollowing = isFollowing,
                     isUpdating = isUpdatingFollow,
                     onClick = onToggleFollow,
@@ -141,46 +133,6 @@ internal fun ProfileIdentityHeader(
             modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
         )
     }
-}
-
-@Composable
-private fun ProfileFollowButton(
-    isFollowing: Boolean,
-    isUpdating: Boolean,
-    onClick: () -> Unit,
-) {
-    if (isFollowing) {
-        OutlinedButton(
-            onClick = onClick,
-            enabled = !isUpdating,
-            shapes = ButtonDefaults.shapes(),
-        ) {
-            ProfileFollowButtonContent(isFollowing = true, isUpdating = isUpdating)
-        }
-    } else {
-        Button(
-            onClick = onClick,
-            enabled = !isUpdating,
-            shapes = ButtonDefaults.shapes(),
-        ) {
-            ProfileFollowButtonContent(isFollowing = false, isUpdating = isUpdating)
-        }
-    }
-}
-
-@Composable
-private fun ProfileFollowButtonContent(isFollowing: Boolean, isUpdating: Boolean) {
-    if (isUpdating) {
-        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-    } else {
-        Icon(
-            imageVector = if (isFollowing) Icons.Rounded.Check else Icons.Rounded.PersonAdd,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-        )
-    }
-    Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
-    Text(text = stringResource(if (isFollowing) RStrings.followed else RStrings.follow))
 }
 
 @Composable
