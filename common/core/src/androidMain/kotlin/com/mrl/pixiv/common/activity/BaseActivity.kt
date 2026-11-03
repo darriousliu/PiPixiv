@@ -7,6 +7,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import com.mrl.pixiv.common.util.LegacyStoragePermission
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.init
 
 abstract class BaseActivity : AppCompatActivity() {
     private val storagePermissionLauncher = registerForActivityResult(
@@ -20,6 +22,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FileKit.init(this)
         LegacyStoragePermission.bind(storagePermissionLauncher)
         enableEdgeToEdge()
         setContent { BuildContent() }
