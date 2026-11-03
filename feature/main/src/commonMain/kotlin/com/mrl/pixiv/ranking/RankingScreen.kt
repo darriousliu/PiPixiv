@@ -47,6 +47,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
@@ -242,7 +244,7 @@ fun RankingScreen(
             }
         },
         floatingActionButton = {
-            Column {
+            Column(Modifier.padding(bottom = LocalMainNavigationBottomInset.current)) {
                 val mode = availableModes.getOrNull(pagerState.currentPage)
                 if (mode != null) {
                     val scrollToTop = suspend {
@@ -344,7 +346,7 @@ private fun IllustMode(
         val layoutParams = RecommendGridDefaults.coverLayoutParameters()
         AdaptiveVerticalStaggeredGrid(
             state = lazyStaggeredGridState,
-            contentPadding = PaddingValues(5.dp),
+            contentPadding = PaddingValues(5.dp).withMainNavigationBottomInset(),
             columns = layoutParams.gridCells,
             verticalItemSpacing = layoutParams.verticalArrangement.spacing,
             horizontalArrangement = layoutParams.horizontalArrangement,
@@ -374,7 +376,10 @@ private fun IllustMode(
             loadStates = rankingList.loadState,
             itemCount = rankingList.itemCount,
             onRetry = rankingList::retry,
-            modifier = Modifier.padding(bottom = if (rankingList.itemCount > 0) 136.dp else 0.dp),
+            modifier = Modifier.padding(
+                bottom = LocalMainNavigationBottomInset.current +
+                        if (rankingList.itemCount > 0) 136.dp else 0.dp,
+            ),
         )
         VerticalScrollbar(
             state = lazyStaggeredGridState,
@@ -426,6 +431,7 @@ private fun NovelMode(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = lazyListState,
+            contentPadding = PaddingValues().withMainNavigationBottomInset(),
         ) {
             items(
                 count = rankingList.itemCount,
@@ -468,7 +474,10 @@ private fun NovelMode(
             loadStates = rankingList.loadState,
             itemCount = rankingList.itemCount,
             onRetry = rankingList::retry,
-            modifier = Modifier.padding(bottom = if (rankingList.itemCount > 0) 136.dp else 0.dp),
+            modifier = Modifier.padding(
+                bottom = LocalMainNavigationBottomInset.current +
+                        if (rankingList.itemCount > 0) 136.dp else 0.dp,
+            ),
         )
         VerticalScrollbar(
             state = lazyListState,

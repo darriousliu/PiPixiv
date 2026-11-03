@@ -35,6 +35,8 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
@@ -111,7 +113,7 @@ private fun NovelFeedPage(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState,
-                contentPadding = PaddingValues(vertical = 8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp).withMainNavigationBottomInset(),
             ) {
                 items(
                     count = pagingItems.itemCount,
@@ -151,7 +153,10 @@ private fun NovelFeedPage(
                 loadStates = pagingItems.loadState,
                 itemCount = pagingItems.itemCount,
                 onRetry = pagingItems::retry,
-                modifier = Modifier.padding(bottom = if (pagingItems.itemCount > 0) 136.dp else 0.dp),
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (pagingItems.itemCount > 0) 136.dp else 0.dp,
+                ),
             )
             VerticalScrollbar(
                 state = listState,
@@ -199,7 +204,7 @@ fun NovelWatchlistPage(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = listState,
-                contentPadding = PaddingValues(vertical = 8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp).withMainNavigationBottomInset(),
             ) {
                 items(
                     count = watchlist.itemCount,
@@ -234,7 +239,10 @@ fun NovelWatchlistPage(
                 loadStates = watchlist.loadState,
                 itemCount = watchlist.itemCount,
                 onRetry = watchlist::retry,
-                modifier = Modifier.padding(bottom = if (watchlist.itemCount > 0) 136.dp else 0.dp),
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (watchlist.itemCount > 0) 136.dp else 0.dp,
+                ),
                 emptyMessage = stringResource(RStrings.novel_watchlist_empty),
             )
             VerticalScrollbar(

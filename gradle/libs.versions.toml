@@ -30,6 +30,7 @@ hotswan = "2.2.0"
 webview = "1.0.3"
 nucleus = "2.5.18"
 zoomimage = "1.7.0"
+miuix = "0.9.4"
 
 # AndroidX
 agp = "9.5.0"
@@ -75,6 +76,8 @@ datetime = "0.8.0"
 collections-immutable = "0.5.2"
 
 [libraries]
+miuix-blur = { module = "top.yukonga.miuix.kmp:miuix-blur", version.ref = "miuix" }
+
 # General
 compose-webview-multiplatform = { module = "dev.nucleusframework:composewebview", version.ref = "webview" }
 nucleus-application = { module = "dev.nucleusframework:nucleus.nucleus-application", version.ref = "nucleus" }

@@ -27,6 +27,7 @@ kotlin {
             implementation(libs.bundles.coil3)
             implementation(libs.kotlinx.datetime)
             implementation(libs.html.converter)
+            implementation(libs.miuix.blur)
         }
 
         commonTest.dependencies {

@@ -37,6 +37,8 @@ import com.mrl.pixiv.collection.CollectionResultsStatus
 import com.mrl.pixiv.collection.CollectionViewModel
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
@@ -147,7 +149,10 @@ private fun CollectionIllustPage(
                 columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
                 state = lazyGridState,
-                contentPadding = PaddingValues(horizontal = 5.dp, vertical = 10.dp),
+                contentPadding = PaddingValues(
+                    horizontal = 5.dp,
+                    vertical = 10.dp
+                ).withMainNavigationBottomInset(),
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,
             ) {
@@ -203,7 +208,10 @@ private fun CollectionIllustPage(
                 loadStates = userBookmarksIllusts.loadState,
                 itemCount = userBookmarksIllusts.itemCount,
                 onRetry = userBookmarksIllusts::retry,
-                modifier = Modifier.padding(bottom = if (userBookmarksIllusts.itemCount > 0) 136.dp else 0.dp),
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (userBookmarksIllusts.itemCount > 0) 136.dp else 0.dp,
+                ),
             )
             VerticalScrollbar(
                 state = lazyGridState,
@@ -309,7 +317,7 @@ private fun CollectionNovelPage(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
-                contentPadding = PaddingValues(vertical = 50.dp),
+                contentPadding = PaddingValues(vertical = 50.dp).withMainNavigationBottomInset(),
             ) {
                 items(
                     count = userBookmarksNovels.itemCount,
@@ -352,7 +360,10 @@ private fun CollectionNovelPage(
                 loadStates = userBookmarksNovels.loadState,
                 itemCount = userBookmarksNovels.itemCount,
                 onRetry = userBookmarksNovels::retry,
-                modifier = Modifier.padding(bottom = if (userBookmarksNovels.itemCount > 0) 136.dp else 0.dp),
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (userBookmarksNovels.itemCount > 0) 136.dp else 0.dp,
+                ),
             )
             VerticalScrollbar(
                 state = lazyListState,

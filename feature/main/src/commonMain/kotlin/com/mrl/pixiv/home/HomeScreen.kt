@@ -2,6 +2,7 @@ package com.mrl.pixiv.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
@@ -72,7 +75,6 @@ fun HomeScreen(
     val mangaLazyStaggeredGridState = viewModel.mangaLazyStaggeredGridState
     val lazyListState = viewModel.lazyListState
     val imageFeedMode = viewModel.imageFeedMode
-    val scope = rememberCoroutineScope()
     val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
     val onRefresh = { viewModel.refresh(appViewMode) }
     val scrollToTop = suspend {
@@ -86,40 +88,21 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            HomeTopBar(
-                onRecommendedUsers = navigationManager::navigateToRecommendedUsers,
-                onRefresh = {
-                    scope.launch { scrollToTop() }
-                    onRefresh()
-                },
-            )
-        },
-        floatingActionButton = {
-            Column {
-                BackToTopButton(
-                    visibility = when (appViewMode) {
-                        AppViewMode.ILLUST -> when (imageFeedMode) {
-                            HomeImageFeedMode.Illust -> lazyStaggeredGridState.canScrollBackward
-                            HomeImageFeedMode.Manga -> mangaLazyStaggeredGridState.canScrollBackward
-                        }
-
-                        AppViewMode.NOVEL -> lazyListState.canScrollBackward
-                    },
-                    modifier = Modifier,
-                    onBackToTop = scrollToTop,
-                    onRefresh = onRefresh
-                )
-                8.VSpacer
-                ViewModeToggleButton(
-                    currentMode = appViewMode,
-                    onModeChange = viewModel::switchViewMode
-                )
+    HomeScaffold(
+        appViewMode = appViewMode,
+        canScrollBackward = when (appViewMode) {
+            AppViewMode.ILLUST -> when (imageFeedMode) {
+                HomeImageFeedMode.Illust -> lazyStaggeredGridState.canScrollBackward
+                HomeImageFeedMode.Manga -> mangaLazyStaggeredGridState.canScrollBackward
             }
+
+            AppViewMode.NOVEL -> lazyListState.canScrollBackward
         },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
+        onRecommendedUsers = navigationManager::navigateToRecommendedUsers,
+        onBackToTop = scrollToTop,
+        onRefresh = onRefresh,
+        onModeChange = viewModel::switchViewMode,
+        modifier = modifier,
     ) { paddingValues ->
         when (appViewMode) {
             AppViewMode.ILLUST -> {
@@ -141,6 +124,49 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Composable
+internal fun HomeScaffold(
+    appViewMode: AppViewMode,
+    canScrollBackward: Boolean,
+    onRecommendedUsers: () -> Unit,
+    onBackToTop: suspend () -> Unit,
+    onRefresh: () -> Unit,
+    onModeChange: (AppViewMode) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            HomeTopBar(
+                onRecommendedUsers = onRecommendedUsers,
+                onRefresh = {
+                    scope.launch { onBackToTop() }
+                    onRefresh()
+                },
+            )
+        },
+        floatingActionButton = {
+            Column(modifier = Modifier.padding(bottom = LocalMainNavigationBottomInset.current)) {
+                BackToTopButton(
+                    visibility = canScrollBackward,
+                    onBackToTop = onBackToTop,
+                    onRefresh = onRefresh
+                )
+                8.VSpacer
+                ViewModeToggleButton(
+                    currentMode = appViewMode,
+                    onModeChange = onModeChange
+                )
+            }
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
+        content = content,
+    )
 }
 
 @Composable
@@ -248,7 +274,10 @@ private fun HomeImageFeedPage(
                 loadStates = recommendImageList.loadState,
                 itemCount = recommendImageList.itemCount,
                 onRetry = recommendImageList::retry,
-                modifier = Modifier.padding(bottom = if (recommendImageList.itemCount > 0) 136.dp else 0.dp),
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (recommendImageList.itemCount > 0) 136.dp else 0.dp,
+                ),
             )
             VerticalScrollbar(
                 state = lazyStaggeredGridState,
@@ -297,6 +326,7 @@ private fun NovelMode(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = lazyListState,
+            contentPadding = PaddingValues().withMainNavigationBottomInset(),
         ) {
             items(
                 count = recommendNovelList.itemCount,
@@ -339,7 +369,10 @@ private fun NovelMode(
             loadStates = recommendNovelList.loadState,
             itemCount = recommendNovelList.itemCount,
             onRetry = recommendNovelList::retry,
-            modifier = Modifier.padding(bottom = if (recommendNovelList.itemCount > 0) 136.dp else 0.dp),
+            modifier = Modifier.padding(
+                bottom = LocalMainNavigationBottomInset.current +
+                        if (recommendNovelList.itemCount > 0) 136.dp else 0.dp,
+            ),
         )
     }
 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
@@ -101,7 +102,7 @@ fun LatestScreen(
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            Column {
+            Column(Modifier.padding(bottom = LocalMainNavigationBottomInset.current)) {
                 BackToTopButton(
                     visibility = scrollState.canScrollBackward,
                     modifier = Modifier,

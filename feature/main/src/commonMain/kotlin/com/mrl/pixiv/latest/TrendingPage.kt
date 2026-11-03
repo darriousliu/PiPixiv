@@ -26,6 +26,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
@@ -123,7 +125,10 @@ private fun TrendingIllustPage(
                 columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
                 state = lazyGridState,
-                contentPadding = PaddingValues(horizontal = 5.dp, vertical = 10.dp),
+                contentPadding = PaddingValues(
+                    horizontal = 5.dp,
+                    vertical = 10.dp
+                ).withMainNavigationBottomInset(),
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,
             ) {
@@ -179,7 +184,10 @@ private fun TrendingIllustPage(
                 loadStates = illustsFollowing.loadState,
                 itemCount = illustsFollowing.itemCount,
                 onRetry = illustsFollowing::retry,
-                modifier = Modifier.padding(bottom = if (illustsFollowing.itemCount > 0) 136.dp else 0.dp),
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (illustsFollowing.itemCount > 0) 136.dp else 0.dp,
+                ),
             )
             VerticalScrollbar(
                 state = lazyGridState,
@@ -253,7 +261,7 @@ private fun TrendingNovelPage(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
-                contentPadding = PaddingValues(vertical = 50.dp),
+                contentPadding = PaddingValues(vertical = 50.dp).withMainNavigationBottomInset(),
             ) {
                 items(
                     count = novelsFollowing.itemCount,
@@ -296,7 +304,10 @@ private fun TrendingNovelPage(
                 loadStates = novelsFollowing.loadState,
                 itemCount = novelsFollowing.itemCount,
                 onRetry = novelsFollowing::retry,
-                modifier = Modifier.padding(bottom = if (novelsFollowing.itemCount > 0) 136.dp else 0.dp),
+                modifier = Modifier.padding(
+                    bottom = LocalMainNavigationBottomInset.current +
+                            if (novelsFollowing.itemCount > 0) 136.dp else 0.dp,
+                ),
             )
             VerticalScrollbar(
                 state = lazyListState,

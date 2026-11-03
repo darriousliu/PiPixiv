@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.ui.ContentEmptyState
 import com.mrl.pixiv.common.compose.ui.ContentErrorState
 import com.mrl.pixiv.common.compose.ui.ContentLoadingState
@@ -142,7 +143,11 @@ internal fun SearchPreviewContent(
             )
         },
         floatingActionButton = {
-            ViewModeToggleButton(currentMode = appViewMode, onModeChange = onModeChange)
+            ViewModeToggleButton(
+                currentMode = appViewMode,
+                onModeChange = onModeChange,
+                modifier = Modifier.padding(bottom = LocalMainNavigationBottomInset.current),
+            )
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) { innerPadding ->
@@ -161,8 +166,10 @@ internal fun SearchPreviewContent(
                     start = 16.dp,
                     top = 8.dp,
                     end = 16.dp,
-                    bottom = 88.dp + WindowInsets.navigationBars.asPaddingValues()
-                        .calculateBottomPadding(),
+                    bottom = 88.dp + maxOf(
+                        LocalMainNavigationBottomInset.current,
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                    ),
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

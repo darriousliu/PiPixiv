@@ -45,6 +45,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
 import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.PagingAppendState
@@ -245,7 +246,10 @@ internal fun MangaListColumn(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = state,
-                contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(
+                    top = 4.dp,
+                    bottom = 24.dp
+                ).withMainNavigationBottomInset(),
                 content = content,
             )
             VerticalScrollbar(state = state, modifier = Modifier.align(Alignment.CenterEnd))

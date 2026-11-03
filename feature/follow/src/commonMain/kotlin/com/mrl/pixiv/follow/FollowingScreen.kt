@@ -51,9 +51,11 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.isWidthCompact
+import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.compose.rememberThrottleClick
@@ -280,7 +282,7 @@ fun FollowingScreenBody(
                     top = 10.dp,
                     end = 16.dp,
                     bottom = 20.dp
-                ),
+                ).withMainNavigationBottomInset(),
                 horizontalArrangement = layoutParams.horizontalArrangement,
                 verticalArrangement = layoutParams.verticalArrangement,
             ) {
@@ -329,7 +331,7 @@ fun FollowingScreenBody(
                     top = 10.dp,
                     end = 16.dp,
                     bottom = 20.dp
-                ),
+                ).withMainNavigationBottomInset(),
                 verticalArrangement = 10f.spaceBy,
             ) {
                 items(
@@ -375,9 +377,12 @@ fun FollowingScreenBody(
             onRetry = followingUsers::retry,
             modifier = Modifier.fillMaxSize().padding(
                 bottom = if (followingUsers.itemCount > 0) {
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 88.dp
+                    maxOf(
+                        LocalMainNavigationBottomInset.current,
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                    ) + 88.dp
                 } else {
-                    0.dp
+                    LocalMainNavigationBottomInset.current
                 },
             ),
             emptyMessage = stringResource(RStrings.community_empty_users),
