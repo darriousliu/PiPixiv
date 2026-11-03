@@ -21,9 +21,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
@@ -43,6 +47,7 @@ import com.mrl.pixiv.strings.novel_new
 import com.mrl.pixiv.strings.novel_watchlist
 import com.mrl.pixiv.strings.reading_manga_watchlist
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -54,6 +59,7 @@ fun LatestScreen(
 ) {
     val userInfo by requireUserInfoFlow.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val paneSizeClass = currentPaneLayoutInfo().sizeClass
     val refreshFlow = remember { MutableSharedFlow<LatestPage>() }
     val isWidthAtLeastMedium = paneSizeClass.isWidthAtLeastMedium
@@ -91,12 +97,16 @@ fun LatestScreen(
         LatestPage.MangaWatchlist -> viewModel.watchlistMangaLazyListState
     }
 
-
-    LaunchedEffect(pagerState.currentPage, pages) {
-        logEvent("screen_view", buildMap {
-            put("screen_name", "Latest")
-            put("page_name", page.name)
-        })
+    LaunchedEffect(lifecycleOwner, pagerState, pages) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            snapshotFlow { pages[pagerState.currentPage.coerceIn(pages.indices)] }
+                .collectLatest { visiblePage ->
+                    logEvent("screen_view", buildMap {
+                        put("screen_name", "Latest")
+                        put("page_name", visiblePage.name)
+                    })
+                }
+        }
     }
 
     Scaffold(

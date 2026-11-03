@@ -17,6 +17,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -28,7 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -47,7 +52,7 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
-internal val mainNavigationItems = listOf(
+internal val mainNavigationItems: List<Pair<MainPage, StringResource>> = listOf(
     MainPage.Home to RStrings.home,
     MainPage.Ranking to RStrings.ranking,
     MainPage.Latest to RStrings.new_artworks,
@@ -70,7 +75,11 @@ internal fun MainNavigationLayout(
     content: @Composable () -> Unit,
 ) {
     val floatingNavigation = layoutType.isBottomNavigation
-    val backdrop = if (isRuntimeShaderSupported()) rememberLayerBackdrop() else null
+    val recordingBackground = MaterialTheme.colorScheme.background.copy(alpha = 1f)
+    val contentLayer = rememberGraphicsLayer()
+    val backdrop = if (isRuntimeShaderSupported()) {
+        rememberLayerBackdrop { drawLayer(contentLayer) }
+    } else null
     var navigationHeightPx by remember { mutableIntStateOf(0) }
     val bottomInset = with(LocalDensity.current) {
         if (floatingNavigation) navigationHeightPx.toDp() else 0.dp
@@ -97,6 +106,17 @@ internal fun MainNavigationLayout(
                     Modifier.fillMaxSize().then(
                         if (floatingNavigation && backdrop != null) {
                             Modifier.layerBackdrop(backdrop)
+                                .drawWithContent {
+                                    // Share one recording between the screen and glass sampling.
+                                    // The Scaffold's background is outside this source, so record
+                                    // an opaque base even when a page has no content to draw yet.
+                                    contentLayer.record {
+                                        drawRect(recordingBackground)
+                                        this@drawWithContent.drawContent()
+                                    }
+                                    drawLayer(contentLayer)
+                                }
+                                .graphicsLayer()
                         } else Modifier
                     )
                 ) {

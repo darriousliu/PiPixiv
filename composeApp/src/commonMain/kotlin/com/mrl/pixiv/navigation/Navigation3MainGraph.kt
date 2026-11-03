@@ -10,7 +10,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.separatingVerticalHingeBounds
 import androidx.compose.runtime.Composable
@@ -37,8 +36,6 @@ import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
 import com.mrl.pixiv.comment.BlockCommentsScreen
 import com.mrl.pixiv.comment.CommentScreen
-import com.mrl.pixiv.community.CommunityUsersScreen
-import com.mrl.pixiv.community.NotificationScreen
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
@@ -59,6 +56,8 @@ import com.mrl.pixiv.common.toast.ToastMessage
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.result.LocalResultEventBus
 import com.mrl.pixiv.common.util.result.ResultEventBus
+import com.mrl.pixiv.community.CommunityUsersScreen
+import com.mrl.pixiv.community.NotificationScreen
 import com.mrl.pixiv.follow.FollowingScreen
 import com.mrl.pixiv.history.HistoryScreen
 import com.mrl.pixiv.image.preview.ImagePreviewScreen
@@ -66,12 +65,12 @@ import com.mrl.pixiv.login.LoginOptionScreen
 import com.mrl.pixiv.login.LoginScreen
 import com.mrl.pixiv.login.oauth.OAuthLoginScreen
 import com.mrl.pixiv.login.oauth.WebCookieLoginScreen
-import com.mrl.pixiv.novel.NovelScreen
-import com.mrl.pixiv.novel.readlater.NovelReadLaterScreen
-import com.mrl.pixiv.novel.series.NovelSeriesScreen
 import com.mrl.pixiv.manga.MangaSeriesScreen
 import com.mrl.pixiv.manga.MangaWatchlistScreen
 import com.mrl.pixiv.manga.UserMangaSeriesScreen
+import com.mrl.pixiv.novel.NovelScreen
+import com.mrl.pixiv.novel.readlater.NovelReadLaterScreen
+import com.mrl.pixiv.novel.series.NovelSeriesScreen
 import com.mrl.pixiv.picture.HorizontalSwipePictureScreen
 import com.mrl.pixiv.picture.PictureDeeplinkScreen
 import com.mrl.pixiv.profile.detail.ProfileDetailScreen
@@ -106,7 +105,6 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun Navigation3MainGraph(
     startDestination: Destination,
@@ -132,7 +130,7 @@ fun Navigation3MainGraph(
         inputState.dividerFocused = false
     }
     val pictureCacheDecorator = rememberPictureCacheDecorator(navigationManager)
-    val destinationEntryProvider = entryProvider<Destination> {
+    val destinationEntryProvider = entryProvider {
         entry<Destination.LoginOption> {
             LoginOptionScreen()
         }

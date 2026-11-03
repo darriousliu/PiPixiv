@@ -1,10 +1,5 @@
 package com.mrl.pixiv
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -75,13 +70,12 @@ fun MainScreen(
 ) {
     val navigationManager = currentNavigationManager()
     val page = navigationManager.currentMainPage
-    AnimatedContent(
-        targetState = page,
+    MainPageContent(
+        selectedPage = page,
+        usePager = NavigationSuiteScaffoldDefaults.navigationSuiteType(
+            currentWindowAdaptiveInfoV2()
+        ).isBottomNavigation,
         modifier = modifier,
-        transitionSpec = {
-            fadeIn(animationSpec = tween(220, delayMillis = 90))
-                .togetherWith(fadeOut(animationSpec = tween(90)))
-        }
     ) {
         when (it) {
             MainPage.Home -> HomeScreen()

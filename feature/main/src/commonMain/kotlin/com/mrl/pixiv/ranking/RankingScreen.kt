@@ -42,6 +42,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
@@ -76,9 +79,6 @@ import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.confirm
 import com.mrl.pixiv.strings.r18
 import com.mrl.pixiv.strings.ranking
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Instant
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -89,6 +89,9 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 
 @Composable
 fun RankingScreen(
@@ -98,6 +101,7 @@ fun RankingScreen(
 ) {
     val state = viewModel.asState()
     val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val appViewMode by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appViewMode }
     val availableModes = state.availableModes(appViewMode)
 
@@ -173,10 +177,19 @@ fun RankingScreen(
                 if (state.currentMode != mode) {
                     viewModel.selectMode(mode)
                 }
-                logEvent("screen_view", buildMap {
-                    put("screen_name", "Ranking")
-                    put("mode", mode.value)
-                })
+            }
+        }
+    }
+
+    LaunchedEffect(lifecycleOwner, pagerState, availableModes) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            snapshotFlow { pagerState.currentPage }.collectLatest { page ->
+                availableModes.getOrNull(page)?.let { mode ->
+                    logEvent("screen_view", buildMap {
+                        put("screen_name", "Ranking")
+                        put("mode", mode.value)
+                    })
+                }
             }
         }
     }
