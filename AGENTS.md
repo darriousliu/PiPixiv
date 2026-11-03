@@ -6,6 +6,19 @@
 - 保留工作区中已有的用户修改；提交前检查暂存差异和 `git diff --check`。
 - 提交信息使用中文，遵循 Conventional Commits，例如 `feat(ui): 统一漫画与发现页面样式`。
 
+## Git Flow 发布流程
+
+后续版本发布统一使用 Git Flow：生产分支为 `master`，开发分支为 `develop`，发布分支为 `release/vX.Y.Z`，正式版本使用注释标签 `vX.Y.Z`。
+
+1. 发布前检查工作区、远端分支及目标标签和 Release 的状态，保留用户已有修改。从最新的 `develop` 创建 `release/vX.Y.Z`；使用 Git Flow 命令时执行 `git flow release start vX.Y.Z`，当前配置的版本标签前缀为空，版本参数本身须包含 `v`。
+2. 在发布分支更新并提交版本：同步 `gradle.properties` 的 `versionName` / `versionCode`、`iosApp/Configuration/Config.xcconfig` 的 `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION`，以及 `README.md`、`.github/README-en.md` 的当前源码版本。Gradle 与 iOS 的版本名、构建号须一致，构建号沿用项目现有编码，例如 `2.6.0 → 20600`。提交信息使用 `chore(release): 升级版本至 X.Y.Z`。
+3. 完成版本配置检查及受影响的验证，检查暂存差异并运行 `git diff --check`，再将发布分支以 `--no-ff` 合并到 `master`，提交信息使用 `chore(release): 发布 vX.Y.Z`。
+4. 在 `master` 的发布合并提交上创建注释标签 `vX.Y.Z`，标签必须指向该发布提交，不直接指向 `develop` 或发布分支的 tip。随后将该标签以 `--no-ff` 合并回 `develop`，提交信息使用 `chore(release): 将 vX.Y.Z 发布结果合并回开发分支`。
+5. 正常推送 `master`、`develop` 与版本标签，并核对远端合并关系及标签指向。正常发布不重写已推送的分支历史，已发布的版本标签不得移动或覆盖；已有同名标签或 Release 时先核对其状态和提交，避免重复发布。
+6. 按历史 GitHub Release 格式整理中英双语的新功能、问题修复、Issue 处理情况、下载表及完整变更链接，内容以自上一正式版本以来的实际变更为准。`.github/workflows/release.yml` 同时响应 `master` 和 `v*` 标签推送，须根据版本标签和发布提交 SHA 识别正式标签构建；只有标签构建会汇总 Release 附件。
+7. 正式发布前等待标签流水线及最终 Release 汇总任务全部成功，核对 Android Default / FOSS APK、iOS IPA、Windows x86_64 MSI、macOS arm64 DMG、Linux x86_64 tar.gz 六个附件均已上传且版本正确。流水线会将 Release 写为草稿并使用 `Release vX.Y.Z` 占位正文，因此须在汇总结束后写回最终双语正文，再正式发布为最新稳定版，避免正文或发布状态被流水线覆盖。
+8. 发布后核对公开 Release 的正文、附件和最新稳定版状态，再清理本次临时发布分支，保留正式标签及 `master` / `develop` 的合并记录。构建或发布失败时保留草稿和发布分支，处理问题后继续，不将未完成的发布报告为已完成。
+
 ## 测试范围
 
 - 新增或调整测试时，不添加过多防御性测试，只保留与本次改动直接相关的关键边界和实际回归测试，例如配置兼容、重要状态切换与恢复、导航层级等。
