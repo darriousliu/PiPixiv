@@ -120,6 +120,10 @@ fun ContentErrorState(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    message: String? = null,
+    description: String? = null,
+    icon: ImageVector = Icons.Rounded.CloudOff,
+    action: (@Composable () -> Unit)? = null,
 ) {
     if (compact) {
         Surface(
@@ -133,36 +137,44 @@ fun ContentErrorState(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Icon(
-                    Icons.Rounded.CloudOff,
+                    icon,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp),
                 )
                 Text(
-                    stringResource(RStrings.content_error_title),
+                    message ?: stringResource(RStrings.content_error_title),
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                TextButton(onClick = onRetry) { Text(stringResource(RStrings.retry)) }
+                if (action != null) {
+                    action()
+                } else {
+                    TextButton(onClick = onRetry) { Text(stringResource(RStrings.retry)) }
+                }
             }
         }
     } else {
         ContentStateLayout(modifier) {
-            ContentStateIcon(Icons.Rounded.CloudOff)
+            ContentStateIcon(icon)
             Text(
-                stringResource(RStrings.content_error_title),
+                message ?: stringResource(RStrings.content_error_title),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
             )
             Text(
-                stringResource(RStrings.content_error_description),
+                description ?: stringResource(RStrings.content_error_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-            FilledTonalButton(onClick = onRetry) {
-                Icon(Icons.Rounded.Refresh, null, Modifier.size(18.dp))
-                Text(stringResource(RStrings.retry), Modifier.padding(start = 8.dp))
+            if (action != null) {
+                action()
+            } else {
+                FilledTonalButton(onClick = onRetry) {
+                    Icon(Icons.Rounded.Refresh, null, Modifier.size(18.dp))
+                    Text(stringResource(RStrings.retry), Modifier.padding(start = 8.dp))
+                }
             }
         }
     }

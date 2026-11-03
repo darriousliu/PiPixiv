@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">वेब से साइन इन फ़िलहाल उपलब्ध नहीं है। टोकन या कुकी जैसे किसी दूसरे तरीके से साइन इन करें।</string>
+    <string name="webview_runtime_required">WebView2 रनटाइम नहीं मिला, इसलिए वेब से साइन इन करना या पंजीकरण करना संभव नहीं है। इसे इंस्टॉल करके फिर कोशिश करें, या साइन इन करने का कोई दूसरा तरीका चुनें।</string>
+    <string name="login_other_methods">साइन इन करने का दूसरा तरीका चुनें</string>
+</resources>

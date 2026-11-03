@@ -6,4 +6,6 @@
     <string name="content_empty_downloads">Заданий на загрузку пока нет</string>
     <string name="content_error_title">Сейчас не удаётся загрузить</string>
     <string name="content_error_description">Попробуйте чуть позже</string>
+    <string name="page_unavailable_title">Страница временно недоступна</string>
+    <string name="page_unavailable_message">На этой странице возникла проблема, поэтому продолжить пока нельзя. Вернитесь назад и повторите попытку.</string>
 </resources>

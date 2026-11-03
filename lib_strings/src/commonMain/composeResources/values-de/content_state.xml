@@ -6,4 +6,6 @@
     <string name="content_empty_downloads">Noch keine Downloads</string>
     <string name="content_error_title">Laden derzeit nicht möglich</string>
     <string name="content_error_description">Bitte versuche es in einem Moment erneut</string>
+    <string name="page_unavailable_title">Seite vorübergehend nicht verfügbar</string>
+    <string name="page_unavailable_message">Auf dieser Seite ist ein Problem aufgetreten, sodass du derzeit nicht fortfahren kannst. Gehe zurück und versuche es erneut.</string>
 </resources>

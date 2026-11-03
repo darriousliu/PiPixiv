@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">ウェブでのログインは一時的に利用できません。トークンやCookieなど、別のログイン方法をお試しください。</string>
+    <string name="webview_runtime_required">WebView2 ランタイムが見つからないため、ウェブでのログインや新規登録を利用できません。インストールして再試行するか、別のログイン方法をお試しください。</string>
+    <string name="login_other_methods">別の方法でログイン</string>
+</resources>

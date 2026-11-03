@@ -6,4 +6,6 @@
     <string name="content_empty_downloads">ダウンロードはまだありません</string>
     <string name="content_error_title">現在読み込めません</string>
     <string name="content_error_description">しばらくしてからもう一度お試しください</string>
+    <string name="page_unavailable_title">このページは一時的に利用できません</string>
+    <string name="page_unavailable_message">このページで問題が発生したため、続行できません。戻ってからもう一度お試しください。</string>
 </resources>

@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">Web üzerinden giriş geçici olarak kullanılamıyor. Token veya çerez gibi başka bir giriş yöntemini deneyin.</string>
+    <string name="webview_runtime_required">WebView2 çalışma zamanı bulunamadığı için web üzerinden giriş veya kayıt yapılamıyor. Yükleyip tekrar deneyin ya da başka bir giriş yöntemi kullanın.</string>
+    <string name="login_other_methods">Başka bir giriş yöntemi kullan</string>
+</resources>

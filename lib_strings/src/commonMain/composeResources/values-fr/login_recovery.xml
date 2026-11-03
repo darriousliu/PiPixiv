@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">La connexion web est temporairement indisponible. Essayez une autre méthode, par exemple avec un Token ou un Cookie.</string>
+    <string name="webview_runtime_required">Le runtime WebView2 est introuvable. La connexion web et l’inscription sont indisponibles. Installez-le et réessayez, ou utilisez une autre méthode de connexion.</string>
+    <string name="login_other_methods">Utiliser une autre méthode de connexion</string>
+</resources>

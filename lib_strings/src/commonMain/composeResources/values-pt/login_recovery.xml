@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">O login pela web está temporariamente indisponível. Tente outro método, como Token ou Cookie.</string>
+    <string name="webview_runtime_required">O WebView2 Runtime não foi encontrado. Não é possível entrar nem se cadastrar pela web. Instale-o e tente novamente ou use outro método de login.</string>
+    <string name="login_other_methods">Usar outro método de login</string>
+</resources>

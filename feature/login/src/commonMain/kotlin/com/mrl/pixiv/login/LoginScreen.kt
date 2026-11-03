@@ -19,24 +19,33 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import co.touchlab.kermit.Logger
+import com.mrl.pixiv.common.analytics.logException
+import com.mrl.pixiv.common.compose.ui.ContentCrashState
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.Platform
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.strings.login_other_methods
+import com.mrl.pixiv.strings.login_webview_failed
 import dev.nucleusframework.webview.request.RequestInterceptor
 import dev.nucleusframework.webview.request.WebRequest
 import dev.nucleusframework.webview.request.WebRequestInterceptResult
 import dev.nucleusframework.webview.web.LoadingState
 import dev.nucleusframework.webview.web.NativeWebView
-import dev.nucleusframework.webview.web.WebView
 import dev.nucleusframework.webview.web.WebViewNavigator
 import dev.nucleusframework.webview.web.rememberWebViewNavigator
 import dev.nucleusframework.webview.web.rememberWebViewState
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -47,6 +56,7 @@ fun LoginScreen(
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
     val state = viewModel.asState()
+    var webViewFailed by rememberSaveable(startUrl) { mutableStateOf(false) }
     val nativeDesktopOverlay = platform is Platform.Desktop
     val webViewState = rememberWebViewState(url = startUrl)
     val webViewNavigator = rememberWebViewNavigator(
@@ -87,7 +97,7 @@ fun LoginScreen(
                     navigationIcon = {
                         IconButton(
                             onClick = { navigationManager.popBackStack() },
-                            enabled = !state.loading,
+                            enabled = webViewFailed || !state.loading,
                             shapes = IconButtonDefaults.shapes(),
                         ) {
                             Icon(
@@ -97,12 +107,21 @@ fun LoginScreen(
                         }
                     },
                 )
-                if (nativeDesktopOverlay && state.loading) {
+                if (!webViewFailed && nativeDesktopOverlay && state.loading) {
                     LoginLoadingOverlay(Modifier.matchParentSize(), showIndicator = false)
                 }
             }
         }
     ) {
+        if (webViewFailed) {
+            ContentCrashState(
+                message = stringResource(RStrings.login_webview_failed),
+                onAction = navigationManager::navigateToLoginOptionScreen,
+                modifier = Modifier.padding(it),
+                actionText = stringResource(RStrings.login_other_methods),
+            )
+            return@Scaffold
+        }
         Column(
             modifier = Modifier
                 .padding(it)
@@ -117,10 +136,16 @@ fun LoginScreen(
                     progress = { loadingState.progress }
                 )
             }
-            WebView(
+            LoginWebView(
                 modifier = Modifier.fillMaxSize(1f),
                 state = webViewState,
                 navigator = webViewNavigator,
+                onError = { error ->
+                    if (!webViewFailed) {
+                        webViewFailed = true
+                        logException(error)
+                    }
+                },
                 onCreated = { webview ->
                     webview.setUp()
                 },
@@ -131,7 +156,7 @@ fun LoginScreen(
             )
         }
     }
-    if (!nativeDesktopOverlay && state.loading) {
+    if (!webViewFailed && !nativeDesktopOverlay && state.loading) {
         LoginLoadingOverlay()
     }
 }
