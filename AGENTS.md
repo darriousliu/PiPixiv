@@ -23,6 +23,8 @@
 
 ## Compose UI 开发与视觉验证
 
+Composable 函数声明 `modifier: Modifier = Modifier` 时，必须将其作为第一个可选参数（带默认值的参数），放在必填业务参数之后、其他可选参数之前；内容 lambda 可保留在末尾以支持尾随 lambda。调整参数顺序时，同步检查调用点，避免位置参数错位。
+
 新增或调整页面、列表条目、按钮、筛选面板等 UI 时，沿用项目的 Material Expressive 主题、排版、间距、圆角和导航习惯，并通过带 mock 数据的 Compose Preview 检查最终布局。预览代码仅在验证期间临时创建，完成后删除，不纳入提交。
 
 分页页面复用 `ContentPullToRefreshBox`、`PagingContentState` 和 `PagingAppendState`：首载或零数据重试使用页面状态，有内容时刷新使用下拉指示器，追加分页使用底部状态。传入真实 `isRefreshing`，仅控制指示器可见性，避免破坏加载中禁止重复刷新的行为。分页状态项只在需要时加入列表，错误提示应保留已有内容并避开底部按钮。普通空态、异常态复用 `ContentEmptyState` / `ContentErrorState`；空态的操作按钮通过 `action` 插槽放在文案下方。
