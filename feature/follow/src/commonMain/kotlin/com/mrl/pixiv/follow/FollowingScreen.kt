@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
@@ -36,6 +37,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -94,18 +96,54 @@ fun FollowingScreen(
     viewModel: FollowingViewModel = koinViewModel { parametersOf(uid) },
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
-    val scope = rememberCoroutineScope()
     val pages = viewModel.pages
     val pagerState = viewModel.pagerState
+    // Collect each available page at a stable call site, independent of the selected tab.
+    val followingUsers = pages.map { page ->
+        key(page) {
+            val source = when (page) {
+                FollowingPage.Public -> viewModel.publicFollowingPageSource
+                FollowingPage.Private -> viewModel.privateFollowingPageSource
+            }
+            source.collectAsLazyPagingItems()
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        logEvent("screen_view", buildMap {
+            put("screen_name", "Following")
+            put("page_name", pages[pagerState.currentPage].name)
+        })
+    }
+
+    FollowingScreenContent(
+        pages = pages,
+        followingUsers = followingUsers,
+        pagerState = pagerState,
+        lazyListStates = viewModel.lazyListState,
+        lazyGridStates = viewModel.lazyGridState,
+        onBack = { navigationManager.popBackStack() },
+        navToPictureScreen = navigationManager::navigateToPictureScreen,
+        navToUserProfile = navigationManager::navigateToProfileDetailScreen,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun FollowingScreenContent(
+    pages: List<FollowingPage>,
+    followingUsers: List<LazyPagingItems<UserPreview>>,
+    pagerState: PagerState,
+    lazyListStates: List<LazyListState>,
+    lazyGridStates: List<LazyGridState>,
+    onBack: () -> Unit,
+    navToPictureScreen: NavigateToHorizontalPictureScreen,
+    navToUserProfile: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val scope = rememberCoroutineScope()
     val paneSizeClass = currentPaneLayoutInfo().sizeClass
     val isWidthAtLeastMedium = paneSizeClass.isWidthAtLeastMedium
-    val lazyListStates = viewModel.lazyListState
-    val lazyGridStates = viewModel.lazyGridState
-    val page = pages[pagerState.currentPage]
-    val followingUsers = when (page) {
-        FollowingPage.Public -> viewModel.publicFollowingPageSource.collectAsLazyPagingItems()
-        FollowingPage.Private -> viewModel.privateFollowingPageSource.collectAsLazyPagingItems()
-    }
     val controller = remember(isWidthAtLeastMedium, pagerState.currentPage) {
         if (isWidthAtLeastMedium) {
             val lazyGridState = lazyGridStates[pagerState.currentPage]
@@ -131,9 +169,7 @@ fun FollowingScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = rememberThrottleClick {
-                            navigationManager.popBackStack()
-                        },
+                        onClick = rememberThrottleClick(onClick = onBack),
                         shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(
@@ -160,7 +196,7 @@ fun FollowingScreen(
                     }
                 },
                 onRefresh = {
-                    followingUsers.refresh()
+                    followingUsers[pagerState.currentPage].refresh()
                 }
             )
         },
@@ -190,21 +226,15 @@ fun FollowingScreen(
                     }
                 }
             }
-            LaunchedEffect(pagerState.currentPage) {
-                logEvent("screen_view", buildMap {
-                    put("screen_name", "Following")
-                    put("page_name", FollowingPage.entries[pagerState.currentPage].name)
-                })
-            }
-
             HorizontalPager(
                 state = pagerState,
-                modifier = modifier.weight(1f),
+                modifier = Modifier.weight(1f),
+                key = { pages[it] },
             ) { index ->
                 FollowingScreenBody(
-                    followingUsers = followingUsers,
-                    navToPictureScreen = navigationManager::navigateToPictureScreen,
-                    navToUserProfile = navigationManager::navigateToProfileDetailScreen,
+                    followingUsers = followingUsers[index],
+                    navToPictureScreen = navToPictureScreen,
+                    navToUserProfile = navToUserProfile,
                     lazyListState = lazyListStates[index],
                     lazyGridState = lazyGridStates[index],
                 )
