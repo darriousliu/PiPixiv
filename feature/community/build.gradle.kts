@@ -15,6 +15,7 @@ kotlin {
             implementation(project(":common:ui"))
             implementation(project(":common:core"))
             implementation(libs.bundles.androidx.paging)
+            implementation(libs.html.converter)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

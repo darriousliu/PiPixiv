@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -208,6 +209,9 @@ private fun NotificationRow(
     onViewMore: (Long, String?) -> Unit,
     onClick: () -> Unit,
 ) {
+    val text = remember(notification.content.text) {
+        notificationTextToAnnotatedString(notification.content.text)
+    }
     Column(
         Modifier.fillMaxWidth().background(
             if (notification.isRead) MaterialTheme.colorScheme.surface
@@ -241,7 +245,7 @@ private fun NotificationRow(
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    notification.content.text.ifBlank { stringResource(RStrings.community_notification) },
+                    text.ifBlank { AnnotatedString(stringResource(RStrings.community_notification)) },
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis,
