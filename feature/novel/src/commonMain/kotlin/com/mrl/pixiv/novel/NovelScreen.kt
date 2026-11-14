@@ -215,11 +215,6 @@ fun NovelScreen(
     }
     var showBookmarkBottomSheet by remember { mutableStateOf(false) }
     var showMetadataBottomSheet by remember(state.novel?.id) { mutableStateOf(false) }
-    var translationListAnchor by remember(state.novel?.id) {
-        mutableStateOf<NovelTranslationListAnchor?>(null)
-    }
-    var wasTranslating by remember(state.novel?.id) { mutableStateOf(false) }
-
     LaunchedEffect(state.loading, state.novel?.id, readLaterTargetLanguage) {
         if (!state.loading &&
             state.novel?.id == novelId &&
@@ -290,7 +285,6 @@ fun NovelScreen(
 
     val latestState = rememberUpdatedState(state)
     val latestParagraphLayouts = rememberUpdatedState(paragraphLayouts)
-    var handledRestoreVersion by remember(state.novel?.id) { mutableStateOf(-1L) }
     val saveReadingProgress = remember(listState, viewModel, state.novel?.id) {
         val chapterId = state.novel?.id
         {
@@ -299,7 +293,7 @@ fun NovelScreen(
             if (novel.id != chapterId || currentState.isTranslating ||
                 currentState.paragraphs.isEmpty() || resizeReadingAnchor != null ||
                 (currentState.restoreProgress != null &&
-                        handledRestoreVersion != currentState.restoreVersion)
+                        viewModel.handledRestoreVersion != currentState.restoreVersion)
             ) {
                 return@remember
             }
@@ -342,7 +336,7 @@ fun NovelScreen(
     }
 
     LaunchedEffect(state.restoreVersion, state.novel?.id, state.isTranslating, state.paragraphs) {
-        if (handledRestoreVersion == state.restoreVersion) return@LaunchedEffect
+        if (viewModel.handledRestoreVersion == state.restoreVersion) return@LaunchedEffect
         if (state.isTranslating) return@LaunchedEffect
         val novel = state.novel ?: return@LaunchedEffect
         val resolvedProgress = state.restoreProgress ?: return@LaunchedEffect
@@ -397,7 +391,7 @@ fun NovelScreen(
         } finally {
             // 等待滚动后的最后一帧，避免将恢复过程中的临时位置保存为阅读进度。
             withFrameNanos { }
-            handledRestoreVersion = state.restoreVersion
+            viewModel.handledRestoreVersion = state.restoreVersion
         }
     }
 
@@ -438,8 +432,8 @@ fun NovelScreen(
 
     LaunchedEffect(state.novel?.id, state.isTranslating) {
         val novel = state.novel ?: return@LaunchedEffect
-        val previouslyTranslating = wasTranslating
-        wasTranslating = state.isTranslating
+        val previouslyTranslating = viewModel.streamingTranslationNovelId == novel.id
+        viewModel.streamingTranslationNovelId = novel.id.takeIf { state.isTranslating }
         if (!previouslyTranslating && state.isTranslating) {
             val paragraphStartIndex =
                 paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
@@ -452,8 +446,7 @@ fun NovelScreen(
                 isTranslated = state.isTranslated,
             )
         ) {
-            val anchorToRestore = translationListAnchor
-            translationListAnchor = null
+            val anchorToRestore = viewModel.translationListAnchor
             anchorToRestore
                 ?.takeIf { it.novelId == novel.id }
                 ?.let { anchor ->
@@ -479,7 +472,7 @@ fun NovelScreen(
         }
 
         if (previouslyTranslating && !state.isTranslating) {
-            translationListAnchor = null
+            viewModel.translationListAnchor = null
         }
     }
 
@@ -491,7 +484,7 @@ fun NovelScreen(
 
     val requestTranslation: () -> Unit = request@{
         val novel = state.novel ?: return@request
-        translationListAnchor = NovelTranslationListAnchor(
+        viewModel.translationListAnchor = NovelTranslationListAnchor(
             novelId = novel.id,
             itemIndex = listState.firstVisibleItemIndex,
             scrollOffset = listState.firstVisibleItemScrollOffset,
@@ -659,6 +652,12 @@ fun NovelScreen(
                             },
                             onPixivImageClick = { illustId ->
                                 navigationManager.navigateToSinglePictureScreen(illustId)
+                            },
+                            onUploadedImageClick = { url ->
+                                navigationManager.navigateToImagePreviewScreen(
+                                    imageUrls = listOf(url),
+                                    initialIndex = 0,
+                                )
                             },
                             onAuthorClick = { userId ->
                                 navigationManager.navigateToProfileDetailScreen(userId)

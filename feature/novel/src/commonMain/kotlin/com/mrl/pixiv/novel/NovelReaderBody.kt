@@ -2,6 +2,7 @@ package com.mrl.pixiv.novel
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,13 +16,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
@@ -85,6 +91,7 @@ internal fun NovelParagraph(
     onParagraphTextLayout: (Int, TextLayoutResult) -> Unit,
     onContentClick: () -> Unit,
     onPixivImageClick: (Long) -> Unit,
+    onUploadedImageClick: (String) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
     val linkColor = MaterialTheme.colorScheme.primary
@@ -92,13 +99,16 @@ internal fun NovelParagraph(
         fontSize = fontSize.sp,
         lineHeight = (fontSize + lineSpacingSp + 8).sp
     )
-    val renderData = remember(span, linkColor, uriHandler, onPixivImageClick, paragraphIndex) {
+    val renderData = remember(
+        span, linkColor, uriHandler, onPixivImageClick, onUploadedImageClick, paragraphIndex,
+    ) {
         buildParagraphRenderData(
             span = span,
             paragraphIndex = paragraphIndex,
             linkColor = linkColor,
             uriHandler = uriHandler,
             onPixivImageClick = onPixivImageClick,
+            onUploadedImageClick = onUploadedImageClick,
             textStyle = textStyle,
         )
     }
@@ -141,6 +151,7 @@ private fun buildParagraphRenderData(
     linkColor: Color,
     uriHandler: UriHandler,
     onPixivImageClick: (Long) -> Unit,
+    onUploadedImageClick: (String) -> Unit,
     textStyle: TextStyle,
 ): ParagraphRenderData {
     val inlineContentMap = mutableMapOf<String, InlineTextContent>()
@@ -211,22 +222,36 @@ private fun buildParagraphRenderData(
                         placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                     )
                 ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalPlatformContext.current)
-                            .data(span.url)
-                            .build(),
-                        contentDescription = span.url,
-                        contentScale = ContentScale.FillBounds,
-                        placeholder = rememberVectorPainter(Icons.Rounded.Refresh),
-                        error = rememberVectorPainter(Icons.Rounded.ErrorOutline),
+                    var statusIcon by remember(span.url) {
+                        mutableStateOf<ImageVector?>(Icons.Rounded.Refresh)
+                    }
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .combinedClickable(
                                 interactionSource = null,
                                 indication = null,
-                                onClick = { uriHandler.openUri(span.url) }
+                                onClick = { onUploadedImageClick(span.previewUrl) }
                             ),
-                    )
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AsyncImage(
+                            model = span.url,
+                            contentDescription = span.url,
+                            contentScale = ContentScale.Fit,
+                            onLoading = { statusIcon = Icons.Rounded.Refresh },
+                            onSuccess = { statusIcon = null },
+                            onError = { statusIcon = Icons.Rounded.ErrorOutline },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        statusIcon?.let { icon ->
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
             }
 

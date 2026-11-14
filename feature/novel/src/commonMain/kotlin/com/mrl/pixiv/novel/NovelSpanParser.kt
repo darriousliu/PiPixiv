@@ -3,6 +3,7 @@ package com.mrl.pixiv.novel
 import androidx.compose.runtime.Immutable
 import com.mrl.pixiv.common.data.novel.NovelIllusts
 import com.mrl.pixiv.common.data.novel.NovelTextResp
+import com.mrl.pixiv.common.data.novel.NovelUrls
 
 @Immutable
 sealed interface NovelSpanData {
@@ -24,6 +25,7 @@ sealed interface NovelSpanData {
 
     data class UploadedImage(
         val url: String,
+        val previewUrl: String = url,
     ) : NovelSpanData
 }
 
@@ -111,16 +113,7 @@ internal object NovelSpanParser {
             spanStr.startsWith("[uploadedimage:") -> {
                 val flag = "[uploadedimage:"
                 val now = spanStr.substring(flag.length, spanStr.indexOf("]"))
-                val image = webResponse?.images?.get(now)
-                val url = image?.urls?.the128X128
-                    ?.takeIf { it.isNotBlank() }
-                    ?: image?.urls?.the1200X1200?.takeIf { it.isBlank().not() }
-                    ?: image?.urls?.original?.takeIf { it.isBlank().not() }
-                if (url != null) {
-                    NovelSpanData.UploadedImage(url)
-                } else {
-                    NovelSpanData.Text(now)
-                }
+                webResponse?.images?.get(now)?.urls?.toUploadedImage() ?: NovelSpanData.Text(now)
             }
 
             spanStr.startsWith("[[jumpuri:") -> {
@@ -149,6 +142,27 @@ internal object NovelSpanParser {
                 NovelSpanData.Text(spanStr)
             }
         }
+    }
+
+    private fun NovelUrls.toUploadedImage(): NovelSpanData.UploadedImage? {
+        val thumbnail = the128X128?.validUploadedImageUrl()
+        val large = the1200X1200?.validUploadedImageUrl()
+        val fullSize = original?.validUploadedImageUrl()
+        val smaller = the480Mw?.validUploadedImageUrl() ?: the240Mw?.validUploadedImageUrl()
+        val inlineUrl = thumbnail ?: large ?: fullSize ?: smaller ?: return null
+        return NovelSpanData.UploadedImage(
+            url = inlineUrl,
+            previewUrl = fullSize ?: large ?: smaller ?: inlineUrl,
+        )
+    }
+
+    private fun String.validUploadedImageUrl(): String? {
+        val url = trim()
+        if (url.any { it.isWhitespace() || it.code < 0x20 || it == '\\' }) return null
+        val scheme = url.substringBefore("://", missingDelimiterValue = "").lowercase()
+        if (scheme != "http" && scheme != "https") return null
+        if (!hasValidNovelHttpAuthority(url.substringAfter("://"))) return null
+        return url.replaceRange(0, scheme.length, scheme)
     }
 
     private fun parsePixivImage(

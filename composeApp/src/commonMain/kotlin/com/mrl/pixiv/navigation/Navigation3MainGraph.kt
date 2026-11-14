@@ -50,6 +50,7 @@ import com.mrl.pixiv.common.repository.IllustCacheRepo
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.LocalNavigationManager
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.router.paneSpec
 import com.mrl.pixiv.common.router.rememberNavigationState
 import com.mrl.pixiv.common.toast.ToastMessage
@@ -188,7 +189,7 @@ fun Navigation3MainGraph(
                 imageUrls = it.imageUrls,
                 initialIndex = it.initialIndex,
                 sharedElementKey = it.sharedElementKey,
-                onBack = navigationManager::popBackStack,
+                onBack = currentNavigationManager()::popBackStack,
             )
         }
 
@@ -387,7 +388,7 @@ fun Navigation3MainGraph(
             UserMangaSeriesScreen(userId = it.userId)
         }
         entry<Destination.Notifications> { destination ->
-            val entryNavigation = com.mrl.pixiv.common.router.currentNavigationManager()
+            val entryNavigation = currentNavigationManager()
             NotificationScreen(
                 notificationId = destination.notificationId,
                 title = destination.title,

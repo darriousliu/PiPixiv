@@ -155,10 +155,15 @@ class NovelViewModel(
 ), KoinComponent {
     private var lastHistoryNovelId: Long? = null
     private val progressSession = NovelProgressSession()
+    // The navigation entry retains this ViewModel while a full-screen preview covers the reader.
+    internal var handledRestoreVersion = -1L
+    internal var streamingTranslationNovelId: Long? = null
+    internal var translationListAnchor: NovelTranslationListAnchor? = null
     private var progressWriteJob: Job? = null
     private var sourceNovelText: String = ""
     private var translatedNovelText: String = ""
     private val initialNovelId = novelId
+    private var readLaterTranslationRequested = false
     private var markerPageToRestore = markerPage.takeIf { it > 0 }
     private var translationJob: Job? = null
     private var translationRunToken: Any? = null
@@ -198,6 +203,9 @@ class NovelViewModel(
     }
 
     private fun loadNovelDetail(novelId: Long) {
+        readLaterTranslationRequested = false
+        streamingTranslationNovelId = null
+        translationListAnchor = null
         launchIO(
             onError = { e ->
                 sourceNovelText = ""
@@ -799,9 +807,12 @@ class NovelViewModel(
     }
 
     private fun applyReadLaterTranslation(targetLanguage: String) {
-        val novel = uiState.value.novel ?: return
-        val sourceText = sourceNovelText.trim().ifBlank { uiState.value.novelText.trim() }
+        val state = uiState.value
+        val novel = state.novel ?: return
+        if (state.loading || novel.id != initialNovelId || readLaterTranslationRequested) return
+        val sourceText = sourceNovelText.trim().ifBlank { state.novelText.trim() }
         if (sourceText.isBlank()) return
+        readLaterTranslationRequested = true
         val config = requireUserPreferenceValue.aiTranslationConfig.normalized()
         val metadataSourceMd5 = buildNovelTranslationMetadataSourceHash(
             title = novel.title,

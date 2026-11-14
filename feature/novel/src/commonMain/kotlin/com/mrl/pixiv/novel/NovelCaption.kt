@@ -32,22 +32,17 @@ internal fun resolveNovelCaptionLink(rawUrl: String): NovelCaptionLinkTarget? {
     val remainder = rawUrl.substring(schemeSeparatorIndex + 3)
     return when (scheme) {
         "pixiv" -> resolvePixivCaptionLink(remainder)
-        "http", "https" -> {
-            val authority = remainder.substringBefore('/')
-                .substringBefore('?')
-                .substringBefore('#')
-            if (isValidHttpAuthority(authority)) {
-                NovelCaptionLinkTarget.External(rawUrl)
-            } else {
-                null
-            }
-        }
+        "http", "https" -> rawUrl.takeIf { hasValidNovelHttpAuthority(remainder) }
+            ?.let { NovelCaptionLinkTarget.External(it) }
 
         else -> null
     }
 }
 
-private fun isValidHttpAuthority(authority: String): Boolean {
+internal fun hasValidNovelHttpAuthority(urlRemainder: String): Boolean {
+    val authority = urlRemainder.substringBefore('/')
+        .substringBefore('?')
+        .substringBefore('#')
     if (authority.isBlank() || authority.any { it.code < 0x21 }) return false
 
     val hostAndPort = authority.substringAfterLast('@')
