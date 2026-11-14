@@ -40,6 +40,7 @@ internal class PredictiveBackCardTransition(
 internal fun PredictiveBackCard(
     sceneKey: Any,
     card: PredictiveBackCardTransition?,
+    isActive: (PredictiveBackCardTransition) -> Boolean,
     onFinished: (PredictiveBackCardTransition) -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -84,7 +85,11 @@ internal fun PredictiveBackCard(
                 }
                 .drawWithContent {
                     drawContent()
-                    if (showDestinationScrim) drawRect(destinationScrim)
+                    // 离开场景可在本帧组合结束时清理手势。绘制时读取最新状态，
+                    // 避免目的页使用组合阶段捕获的旧值，多绘制一帧全屏蒙层。
+                    if (showDestinationScrim && card != null && isActive(card)) {
+                        drawRect(destinationScrim)
+                    }
                 }
                 .background(if (card != null) background else Color.Transparent),
             propagateMinConstraints = true,
