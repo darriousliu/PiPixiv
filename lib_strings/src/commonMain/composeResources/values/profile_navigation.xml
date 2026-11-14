@@ -9,4 +9,6 @@
     <string name="profile_view_homepage">查看个人主页</string>
     <string name="settings_section_general">通用</string>
     <string name="unblock_item">解除屏蔽</string>
+    <string name="liquid_glass_navigation">液态玻璃导航</string>
+    <string name="liquid_glass_navigation_desc">关闭后使用标准底部导航栏。</string>
 </resources>

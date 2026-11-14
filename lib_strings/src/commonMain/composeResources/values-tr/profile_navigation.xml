@@ -9,4 +9,6 @@
     <string name="profile_view_homepage">Profili görüntüle</string>
     <string name="settings_section_general">Genel</string>
     <string name="unblock_item">Engeli kaldır</string>
+    <string name="liquid_glass_navigation">Liquid Glass efektli gezinme</string>
+    <string name="liquid_glass_navigation_desc">Standart alt gezinme çubuğunu kullanmak için bu seçeneği kapatın.</string>
 </resources>

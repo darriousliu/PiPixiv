@@ -17,6 +17,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -36,11 +37,13 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.isImeVisible
 import com.mrl.pixiv.strings.home
 import com.mrl.pixiv.strings.my
 import com.mrl.pixiv.strings.new_artworks
@@ -70,32 +73,46 @@ internal fun MainNavigationLayout(
     selectedPage: MainPage,
     hasNewVersion: Boolean,
     layoutType: NavigationSuiteType,
+    useLiquidGlassNavigation: Boolean,
     onSelectPage: (MainPage) -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val floatingNavigation = layoutType.isBottomNavigation
-    val recordingBackground = MaterialTheme.colorScheme.background.copy(alpha = 1f)
-    val contentLayer = rememberGraphicsLayer()
-    val backdrop = if (isRuntimeShaderSupported()) {
-        rememberLayerBackdrop { drawLayer(contentLayer) }
-    } else null
-    var navigationHeightPx by remember { mutableIntStateOf(0) }
-    val bottomInset = with(LocalDensity.current) {
-        if (floatingNavigation) navigationHeightPx.toDp() else 0.dp
+    val isBottomNavigation = layoutType.isBottomNavigation
+    val showBottomNavigation = isBottomNavigation && !WindowInsets.isImeVisible
+    val floatingNavigation = showBottomNavigation && useLiquidGlassNavigation
+    val scaffoldType = when {
+        !isBottomNavigation -> layoutType
+        !showBottomNavigation || floatingNavigation -> NavigationSuiteType.None
+        else -> NavigationSuiteType.NavigationBar
     }
+    val contentLayer = if (floatingNavigation && isRuntimeShaderSupported()) {
+        rememberGraphicsLayer()
+    } else null
+    val backdrop = contentLayer?.let { layer -> rememberLayerBackdrop { drawLayer(layer) } }
+    var navigationHeightPx by remember(floatingNavigation) { mutableIntStateOf(0) }
+    val bottomInset = with(LocalDensity.current) { navigationHeightPx.toDp() }
 
     // Keep the content in the same composition when switching between a bar and a rail.
     NavigationSuiteScaffold(
         modifier = modifier,
-        layoutType = if (floatingNavigation) NavigationSuiteType.None else layoutType,
+        layoutType = scaffoldType,
         navigationSuiteItems = {
             mainNavigationItems.forEach { (page, title) ->
                 item(
                     selected = selectedPage == page,
                     onClick = { onSelectPage(page) },
                     icon = { MainNavigationIcon(page, hasNewVersion) },
-                    label = { Text(stringResource(title), textAlign = TextAlign.Center) },
+                    label = {
+                        val style = LocalTextStyle.current
+                        Text(
+                            text = stringResource(title),
+                            textAlign = TextAlign.Center,
+                            style = if (scaffoldType == NavigationSuiteType.NavigationBar) {
+                                style.copy(hyphens = Hyphens.Auto)
+                            } else style,
+                        )
+                    },
                 )
             }
         },
@@ -104,7 +121,8 @@ internal fun MainNavigationLayout(
             CompositionLocalProvider(LocalMainNavigationBottomInset provides bottomInset) {
                 Box(
                     Modifier.fillMaxSize().then(
-                        if (floatingNavigation && backdrop != null) {
+                        if (backdrop != null && contentLayer != null) {
+                            val recordingBackground = MaterialTheme.colorScheme.background.copy(alpha = 1f)
                             Modifier.layerBackdrop(backdrop)
                                 .drawWithContent {
                                     // Share one recording between the screen and glass sampling.

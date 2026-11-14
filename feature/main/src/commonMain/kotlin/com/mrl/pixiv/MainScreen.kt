@@ -9,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.MainPage
@@ -30,9 +32,13 @@ fun MainNavigationScaffold(
 ) {
     val page = navigationManager.currentMainPage
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
+    val useLiquidGlassNavigation by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle {
+        useLiquidGlassNavigation
+    }
     MainNavigationLayout(
         selectedPage = page,
         hasNewVersion = hasNewVersion,
+        useLiquidGlassNavigation = useLiquidGlassNavigation,
         onSelectPage = { screen ->
             if (page != screen) navigationManager.switchMainPage(screen)
         },

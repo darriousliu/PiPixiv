@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.AddLink
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Block
+import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Image
@@ -39,6 +40,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -60,11 +62,18 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.rememberThrottleClick
+import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.VersionManager
+import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -81,6 +90,8 @@ import com.mrl.pixiv.strings.download_settings_title
 import com.mrl.pixiv.strings.export_token
 import com.mrl.pixiv.strings.history_setting
 import com.mrl.pixiv.strings.label_default
+import com.mrl.pixiv.strings.liquid_glass_navigation
+import com.mrl.pixiv.strings.liquid_glass_navigation_desc
 import com.mrl.pixiv.strings.network_setting
 import com.mrl.pixiv.strings.new_version_available
 import com.mrl.pixiv.strings.privacy_setting
@@ -110,6 +121,7 @@ fun SettingScreen(
     val labelDefault = stringResource(RStrings.label_default)
     val languages = remember { getLanguages() }
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
+    val userPreference by requireUserPreferenceFlow.collectAsStateWithLifecycle()
     var currentLanguage by remember(labelDefault) {
         mutableStateOf(getInitialLanguages() ?: labelDefault)
     }
@@ -121,7 +133,11 @@ fun SettingScreen(
         currentLanguage = currentLanguage,
         languages = languages,
         hasNewVersion = hasNewVersion,
+        useLiquidGlassNavigation = userPreference.useLiquidGlassNavigation,
         onLanguageChange = { currentLanguage = it },
+        onUseLiquidGlassNavigationChange = { enabled ->
+            SettingRepository.updateSettings { copy(useLiquidGlassNavigation = enabled) }
+        },
         onBack = navigationManager::popBackStack,
         onNavigate = { page ->
             when (page) {
@@ -155,7 +171,9 @@ internal fun SettingContent(
     currentLanguage: String,
     languages: List<Language>,
     hasNewVersion: Boolean,
+    useLiquidGlassNavigation: Boolean,
     onLanguageChange: (String) -> Unit,
+    onUseLiquidGlassNavigationChange: (Boolean) -> Unit,
     onBack: () -> Unit,
     onNavigate: (SettingPage) -> Unit,
     onExportToken: () -> Unit,
@@ -205,6 +223,12 @@ internal fun SettingContent(
                     currentLanguage = currentLanguage,
                     languages = languages,
                     onLanguageChange = onLanguageChange,
+                )
+            }
+            item("liquid_glass_navigation") {
+                LiquidGlassNavigationSetting(
+                    checked = useLiquidGlassNavigation,
+                    onCheckedChange = onUseLiquidGlassNavigationChange,
                 )
             }
             item("network") {
@@ -343,6 +367,27 @@ internal fun SignOutConfirmationDialog(
             }
         },
     )
+}
+
+@Composable
+internal fun LiquidGlassNavigationSetting(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    ListItem(
+        onClick = { onCheckedChange(!checked) },
+        modifier = Modifier.semantics {
+            role = Role.Switch
+            toggleableState = ToggleableState(checked)
+        },
+        shapes = ListItemDefaults.shapes(shape = MaterialTheme.shapes.large),
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        leadingContent = { Icon(Icons.Rounded.BlurOn, contentDescription = null) },
+        supportingContent = { Text(stringResource(RStrings.liquid_glass_navigation_desc)) },
+        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
+    ) {
+        Text(stringResource(RStrings.liquid_glass_navigation))
+    }
 }
 
 @Composable

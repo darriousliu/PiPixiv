@@ -9,4 +9,6 @@
     <string name="profile_view_homepage">View profile</string>
     <string name="settings_section_general">General</string>
     <string name="unblock_item">Unblock</string>
+    <string name="liquid_glass_navigation">Liquid glass navigation</string>
+    <string name="liquid_glass_navigation_desc">Turn off to use a standard bottom navigation bar.</string>
 </resources>
