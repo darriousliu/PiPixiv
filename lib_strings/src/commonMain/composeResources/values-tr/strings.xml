@@ -94,6 +94,7 @@
     <string name="allow_open_link">Uygulamanın ilgili bağlantıyı açmasına izin ver</string>
     <string name="network_error">Ağ hatası, lütfen ağ bağlantını kontrol et</string>
     <string name="sign_out">Çıkış yap</string>
+    <string name="sign_out_confirmation">Çıkış yapmak istiyor musunuz?</string>
     <string name="copy_to_clipboard">Panoya kopyala</string>
     <string name="export_token">Token Dışa Aktar</string>
     <string name="new_artworks">Yeni eserler</string>

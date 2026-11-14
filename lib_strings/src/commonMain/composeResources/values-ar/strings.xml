@@ -94,6 +94,7 @@
     <string name="allow_open_link">السماح للتطبيق بفتح الرابط المقابل</string>
     <string name="network_error">خطأ في الشبكة، يرجى التحقق من الاتصال</string>
     <string name="sign_out">تسجيل الخروج</string>
+    <string name="sign_out_confirmation">هل تريد تسجيل الخروج؟</string>
     <string name="copy_to_clipboard">نسخ إلى الحافظة</string>
     <string name="export_token">تصدير الرمز</string>
     <string name="new_artworks">أعمال جديدة</string>

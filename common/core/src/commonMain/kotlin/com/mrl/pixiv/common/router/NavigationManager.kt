@@ -34,6 +34,9 @@ class NavigationManager(
     val currentDestination: Destination
         get() = backStack.last().destination
 
+    val topEntryId: String?
+        get() = backStack.lastOrNull()?.entryId
+
     val currentMainPage: MainPage
         get() = store.currentMainPage
 

@@ -94,6 +94,7 @@
     <string name="allow_open_link">Der Anwendung erlauben, den entsprechenden Link zu öffnen</string>
     <string name="network_error">Netzwerkfehler, bitte Verbindung überprüfen</string>
     <string name="sign_out">Abmelden</string>
+    <string name="sign_out_confirmation">Jetzt abmelden?</string>
     <string name="copy_to_clipboard">In Zwischenablage kopieren</string>
     <string name="export_token">Token exportieren</string>
     <string name="new_artworks">Neue Kunstwerke</string>

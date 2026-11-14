@@ -94,6 +94,7 @@
     <string name="allow_open_link">アプリが対応するリンクを開くことを許可</string>
     <string name="network_error">ネットワークエラー、接続を確認してください</string>
     <string name="sign_out">ログアウト</string>
+    <string name="sign_out_confirmation">ログアウトしますか？</string>
     <string name="copy_to_clipboard">クリップボードにコピー</string>
     <string name="export_token">トークンをエクスポート</string>
     <string name="new_artworks">新着作品</string>

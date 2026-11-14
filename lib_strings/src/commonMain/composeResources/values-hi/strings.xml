@@ -94,6 +94,7 @@
     <string name="allow_open_link">एप्लिकेशन को संबंधित लिंक खोलने की अनुमति दें</string>
     <string name="network_error">नेटवर्क त्रुटि, कृपया नेटवर्क की जांच करें</string>
     <string name="sign_out">साइन आउट करें</string>
+    <string name="sign_out_confirmation">क्या आप साइन आउट करना चाहते हैं?</string>
     <string name="copy_to_clipboard">क्लिपबोर्ड पर कॉपी करें</string>
     <string name="export_token">टोकन निर्यात करें</string>
     <string name="new_artworks">नई कलाकृतियाँ</string>

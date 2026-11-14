@@ -94,6 +94,7 @@
     <string name="allow_open_link">Permitir que o aplicativo abra o link correspondente</string>
     <string name="network_error">Erro de rede, por favor verifique a conexão</string>
     <string name="sign_out">Sair</string>
+    <string name="sign_out_confirmation">Deseja sair da conta?</string>
     <string name="copy_to_clipboard">Copiar para a área de transferência</string>
     <string name="export_token">Exportar Token</string>
     <string name="new_artworks">Novas obras</string>

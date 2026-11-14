@@ -94,6 +94,7 @@
     <string name="allow_open_link">앱이 해당 링크를 열 수 있도록 허용</string>
     <string name="network_error">네트워크 오류, 연결을 확인해주세요</string>
     <string name="sign_out">로그아웃</string>
+    <string name="sign_out_confirmation">로그아웃하시겠어요?</string>
     <string name="copy_to_clipboard">클립보드에 복사</string>
     <string name="export_token">토큰 내보내기</string>
     <string name="new_artworks">신작</string>

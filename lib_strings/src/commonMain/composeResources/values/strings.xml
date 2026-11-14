@@ -100,6 +100,7 @@
     <string name="token" translatable="false">Token</string>
     <string name="network_error">网络错误，请检查网络</string>
     <string name="sign_out">登出</string>
+    <string name="sign_out_confirmation">确定要登出吗？</string>
     <string name="copy_to_clipboard">复制到剪切板</string>
     <string name="export_token">导出Token</string>
     <string name="new_artworks">新作</string>

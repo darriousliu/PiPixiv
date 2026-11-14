@@ -95,6 +95,7 @@
     <string name="allow_open_link">Allow the application to open the corresponding link</string>
     <string name="network_error">Network error, please check the network</string>
     <string name="sign_out">Sign Out</string>
+    <string name="sign_out_confirmation">Sign out?</string>
     <string name="copy_to_clipboard">Copy to clipboard</string>
     <string name="export_token">Export Token</string>
     <string name="new_artworks">New Artworks</string>

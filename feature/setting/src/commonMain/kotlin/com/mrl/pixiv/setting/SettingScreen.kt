@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.Translate
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -39,16 +40,26 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,6 +74,7 @@ import com.mrl.pixiv.strings.allow_open_link
 import com.mrl.pixiv.strings.app_language
 import com.mrl.pixiv.strings.block_settings
 import com.mrl.pixiv.strings.browsing_setting
+import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.data_storage_title
 import com.mrl.pixiv.strings.default_open
 import com.mrl.pixiv.strings.download_settings_title
@@ -79,6 +91,7 @@ import com.mrl.pixiv.strings.settings_section_app
 import com.mrl.pixiv.strings.settings_section_content
 import com.mrl.pixiv.strings.settings_section_general
 import com.mrl.pixiv.strings.sign_out
+import com.mrl.pixiv.strings.sign_out_confirmation
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -103,6 +116,7 @@ fun SettingScreen(
     LaunchedEffect(currentLanguage, labelDefault) {
         triggerLocaleChange(currentLanguage, labelDefault)
     }
+    val topEntryId = navigationManager.topEntryId
     SettingContent(
         currentLanguage = currentLanguage,
         languages = languages,
@@ -125,11 +139,14 @@ fun SettingScreen(
         },
         onExportToken = { viewModel.dispatch(SettingAction.ExportToken) },
         onSignOut = {
-            viewModel.logout()
-            navigationManager.navigateToLoginOptionScreen()
+            if (topEntryId != null && navigationManager.topEntryId == topEntryId) {
+                viewModel.logout()
+                navigationManager.navigateToLoginOptionScreen()
+            }
         },
         appLinks = { appLinkItem() },
         modifier = modifier,
+        topEntryId = topEntryId,
     )
 }
 
@@ -143,10 +160,27 @@ internal fun SettingContent(
     onNavigate: (SettingPage) -> Unit,
     onExportToken: () -> Unit,
     onSignOut: () -> Unit,
+    topEntryId: String?,
     modifier: Modifier = Modifier,
     appLinks: LazyListScope.() -> Unit = {},
     listState: LazyListState = rememberLazyListState(),
 ) {
+    // 设置页在分栏导航中可能一直可见，弹窗只属于打开时的导航位置。
+    var showSignOutConfirmation by key(topEntryId) {
+        rememberSaveable { mutableStateOf(false) }
+    }
+    if (showSignOutConfirmation) {
+        SignOutConfirmationDialog(
+            onDismissRequest = { showSignOutConfirmation = false },
+            onConfirm = {
+                if (showSignOutConfirmation) {
+                    showSignOutConfirmation = false
+                    onSignOut()
+                }
+            },
+        )
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -271,12 +305,44 @@ internal fun SettingContent(
                     Icons.AutoMirrored.Rounded.Logout,
                     showArrow = false
                 ) {
-                    onSignOut()
+                    showSignOutConfirmation = true
                 }
             }
             item("bottom_spacing") { Column(Modifier.padding(bottom = 16.dp)) {} }
         }
     }
+}
+
+@Composable
+internal fun SignOutConfirmationDialog(
+    onDismissRequest: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    val cancelFocusRequester = remember { FocusRequester() }
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.onPreviewKeyEvent { event ->
+            if (event.key != Key.Escape) return@onPreviewKeyEvent false
+            // 在 Desktop 的全局返回处理器收到 Escape 之前关闭弹窗。
+            if (event.type == KeyEventType.KeyUp) onDismissRequest()
+            true
+        },
+        title = { Text(stringResource(RStrings.sign_out_confirmation)) },
+        dismissButton = {
+            TextButton(
+                onClick = onDismissRequest,
+                modifier = Modifier.focusRequester(cancelFocusRequester),
+            ) {
+                Text(stringResource(RStrings.cancel))
+            }
+            LaunchedEffect(Unit) { cancelFocusRequester.requestFocus() }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(RStrings.sign_out))
+            }
+        },
+    )
 }
 
 @Composable
