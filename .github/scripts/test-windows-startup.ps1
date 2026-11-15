@@ -35,6 +35,7 @@ $result = [ordered]@{
     installDirectory = $null
     installerExitCode = $null
     nativeLibrary = $null
+    anglePayload = $null
     processId = $null
     launcherPid = $null
     applicationPid = $null
@@ -339,6 +340,33 @@ public static class PiPixivStartupWindow {
         path = $library
         bytes = $libraryInfo.Length
         sha256 = (Get-FileHash -LiteralPath $library -Algorithm SHA256).Hash
+    }
+
+    # Nucleus 2.5.18 extracts ANGLE from the packaged JAR into a per-user
+    # cache. Check the installed payload before running the launcher.
+    # Auto also accepts legacy AWT packages, which do not ship these entries.
+    if ($ExpectedWindowBackend -eq 'Tao') {
+        $jarPath = Join-Path $installDirectory 'app/desktopApp.jar'
+        $result.anglePayload = [ordered]@{ jar = $jarPath; entries = [ordered]@{} }
+        $jar = [System.IO.Compression.ZipFile]::OpenRead($jarPath)
+        try {
+            foreach ($name in @('libEGL.dll', 'libGLESv2.dll', 'nucleus_tao_gl.dll')) {
+                $entryPath = "nucleus/native/win32-x64/$name"
+                $entry = $jar.GetEntry($entryPath)
+                if ($null -eq $entry -or $entry.Length -eq 0) {
+                    throw "Installed ANGLE payload is missing or empty: $entryPath in $jarPath"
+                }
+                $stream = $entry.Open()
+                try {
+                    $result.anglePayload.entries[$entryPath] = [ordered]@{
+                        bytes = $entry.Length
+                        sha256 = (Get-FileHash -InputStream $stream -Algorithm SHA256).Hash
+                    }
+                }
+                finally { $stream.Dispose() }
+            }
+        }
+        finally { $jar.Dispose() }
     }
 
     $startup = [System.Diagnostics.Stopwatch]::StartNew()
