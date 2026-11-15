@@ -8,7 +8,6 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
@@ -27,7 +26,7 @@ internal fun <T : HttpClientEngineConfig> httpClient(
 
         engine { config() }
 
-        install(HttpCache)
+        // Keep API responses out of Ktor's default unbounded in-memory HTTP cache.
 
         install(HttpTimeout) {
             requestTimeoutMillis = 30000
