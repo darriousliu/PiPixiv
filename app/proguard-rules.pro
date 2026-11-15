@@ -40,8 +40,3 @@
 -keep class com.mrl.pixiv.common.network.ApiClient
 -keep class com.mrl.pixiv.common.network.AuthClient
 -keep class com.mrl.pixiv.common.network.ImageClient
-
--assumevalues public class androidx.compose.runtime.ComposeRuntimeFlags {
-    # Keep Android release aligned with Initialization.initComposeRuntimeFlags().
-    static boolean isLinkBufferComposerEnabled return false;
-}
