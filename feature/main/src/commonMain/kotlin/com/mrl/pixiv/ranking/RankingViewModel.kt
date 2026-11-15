@@ -15,6 +15,7 @@ import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.paging.IllustRankingPagingSource
 import com.mrl.pixiv.common.repository.paging.NovelRankingPagingSource
+import com.mrl.pixiv.common.repository.paging.novelFilterPagingFlow
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -104,9 +105,9 @@ class RankingViewModel : BaseMviViewModel<RankingState, ViewIntent>(
     fun getNovelRankingFlow(mode: RankingMode): Flow<PagingData<Novel>> {
         return novelRankingList.getOrPut(mode) {
             val queryDate = getNovelRankingDate(mode)?.format(LocalDate.Formats.ISO)
-            Pager(PagingConfig(pageSize = 30)) {
+            novelFilterPagingFlow(PagingConfig(pageSize = 30)) {
                 NovelRankingPagingSource(mode.value, queryDate)
-            }.flow.cachedIn(viewModelScope)
+            }.cachedIn(viewModelScope)
         }
     }
 

@@ -42,5 +42,6 @@
 -keep class com.mrl.pixiv.common.network.ImageClient
 
 -assumevalues public class androidx.compose.runtime.ComposeRuntimeFlags {
-    static boolean isLinkBufferComposerEnabled return true;
+    # Keep Android release aligned with Initialization.initComposeRuntimeFlags().
+    static boolean isLinkBufferComposerEnabled return false;
 }

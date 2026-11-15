@@ -21,6 +21,7 @@ import com.mrl.pixiv.common.repository.isSelf
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.paging.CollectionIllustPagingSource
 import com.mrl.pixiv.common.repository.paging.CollectionNovelPagingSource
+import com.mrl.pixiv.common.repository.paging.novelFilterPagingFlow
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
@@ -97,9 +98,9 @@ class CollectionViewModel(
         if (uid.isSelf && query.requiresBookmarkSearch) {
             Pager(PagingConfig(pageSize = 30)) { CollectionSearchNovelPagingSource(query) }.flow
         } else {
-            Pager(PagingConfig(pageSize = 30)) {
+            novelFilterPagingFlow(PagingConfig(pageSize = 30)) {
                 CollectionNovelPagingSource(query.toUserBookmarksQuery(uid))
-            }.flow
+            }
         }
     }.cachedIn(viewModelScope)
 

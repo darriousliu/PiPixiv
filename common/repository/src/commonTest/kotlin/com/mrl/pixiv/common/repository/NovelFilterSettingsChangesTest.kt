@@ -1,10 +1,21 @@
 package com.mrl.pixiv.common.repository
 
+import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.setting.BrowsingSettings
 import com.mrl.pixiv.common.data.setting.PreviewImageQuality
-import com.mrl.pixiv.common.repository.paging.invalidateOnNovelFilterSettingsChanges
+import com.mrl.pixiv.common.repository.paging.novelFilterPagingFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -46,23 +57,35 @@ class NovelFilterSettingsChangesTest {
     }
 
     @Test
-    fun activeNovelPagingSourceIsInvalidatedAfterRelevantChange() {
-        val source = TestPagingSource().apply {
-            invalidateOnNovelFilterSettingsChanges()
-        }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun settingsRefreshOnlyTheActivePagingGenerationUntilItsCacheScopeIsCancelled() = runTest {
+        val pagingJob = Job(backgroundScope.coroutineContext.job)
+        val pagingScope = CoroutineScope(backgroundScope.coroutineContext + pagingJob)
+        val sources = mutableListOf<TestPagingSource>()
+        val pages = novelFilterPagingFlow(PagingConfig(pageSize = 20)) {
+            TestPagingSource().also { sources.add(it) }
+        }.cachedIn(pagingScope)
+        backgroundScope.launch { pages.collect() }
+        runCurrent()
+        val firstSource = sources.single()
         val initial = BrowsingSettings()
 
         NovelFilterSettingsChanges.notifyIfChanged(
             initial,
-            initial.copy(autoHidePreviewControls = false),
+            initial.copy(previewImageQuality = PreviewImageQuality.HIGH),
         )
-        assertFalse(source.invalid)
+        assertFalse(firstSource.invalid)
 
-        NovelFilterSettingsChanges.notifyIfChanged(
-            initial,
-            initial.copy(maxNovelTagLength = initial.maxNovelTagLength + 1),
-        )
-        assertTrue(source.invalid)
+        val updated = initial.copy(maxNovelTagLength = initial.maxNovelTagLength + 1)
+        NovelFilterSettingsChanges.notifyIfChanged(initial, updated)
+        runCurrent()
+        assertTrue(firstSource.invalid)
+        assertEquals(2, sources.size)
+        val activeSource = sources.last()
+
+        pagingJob.cancelAndJoin()
+        NovelFilterSettingsChanges.notifyIfChanged(updated, initial)
+        assertFalse(activeSource.invalid)
     }
 }
 

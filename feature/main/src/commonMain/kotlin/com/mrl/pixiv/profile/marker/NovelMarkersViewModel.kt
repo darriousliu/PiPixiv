@@ -2,12 +2,12 @@ package com.mrl.pixiv.profile.marker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.mrl.pixiv.common.repository.NovelMarkerChanges
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.paging.NovelMarkerPagingSource
+import com.mrl.pixiv.common.repository.paging.novelFilterPagingFlow
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.strings.novel_marker_delete_success
@@ -25,11 +25,11 @@ class NovelMarkersViewModel : ViewModel() {
     private var activePagingSource: NovelMarkerPagingSource? = null
     private val deletingNovelIds = mutableSetOf<Long>()
 
-    val markers = Pager(
+    val markers = novelFilterPagingFlow(
         config = PagingConfig(pageSize = 30),
     ) {
         NovelMarkerPagingSource().also { activePagingSource = it }
-    }.flow.cachedIn(viewModelScope)
+    }.cachedIn(viewModelScope)
 
     init {
         viewModelScope.launch {

@@ -17,10 +17,6 @@ class SearchNovelPagingSource(
     // 手动翻页和无限滚动共用筛选逻辑，翻页时保留当前搜索的全部条件。
     private val source: FeedSource<Novel> = SearchNovelFeedSource(query, isPremium, isIdSearch),
 ) : PagingSource<SearchNovelQuery, Novel>() {
-    init {
-        invalidateOnNovelFilterSettingsChanges()
-    }
-
     override fun getRefreshKey(state: PagingState<SearchNovelQuery, Novel>): SearchNovelQuery? = null
 
     override suspend fun load(params: LoadParams<SearchNovelQuery>): LoadResult<SearchNovelQuery, Novel> = try {

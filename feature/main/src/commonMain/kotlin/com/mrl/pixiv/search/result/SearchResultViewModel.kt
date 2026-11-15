@@ -23,6 +23,7 @@ import com.mrl.pixiv.common.repository.hasDifferentNovelFilterSettings
 import com.mrl.pixiv.common.repository.paging.SearchIllustPagingSource
 import com.mrl.pixiv.common.repository.paging.SearchNovelPagingSource
 import com.mrl.pixiv.common.repository.paging.SearchUserPagingSource
+import com.mrl.pixiv.common.repository.paging.novelFilterPagingFlow
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.repository.requireUserInfoValue
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
@@ -219,7 +220,7 @@ class SearchResultViewModel(
             val filter = state.searchFilter
             val startDate = state.searchDateRange?.start
             val endDate = state.searchDateRange?.endInclusive
-            Pager(config = PagingConfig(pageSize = 20)) {
+            novelFilterPagingFlow(config = PagingConfig(pageSize = 20)) {
                 SearchNovelPagingSource(
                     SearchNovelQuery(
                         word = words,
@@ -236,7 +237,7 @@ class SearchResultViewModel(
                     isPremium = isPremium,
                     isIdSearch = isIdSearch
                 )
-            }.flow
+            }
         }.cachedIn(viewModelScope)
     }
 

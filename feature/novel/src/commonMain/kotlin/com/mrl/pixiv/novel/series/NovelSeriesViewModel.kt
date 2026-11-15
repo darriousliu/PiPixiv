@@ -3,7 +3,6 @@ package com.mrl.pixiv.novel.series
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.mrl.pixiv.common.data.novel.NovelSeriesDetail
@@ -12,6 +11,7 @@ import com.mrl.pixiv.common.repository.NovelSeriesProgressRepository
 import com.mrl.pixiv.common.repository.NovelSeriesReadingProgress
 import com.mrl.pixiv.common.repository.PixivRepository
 import com.mrl.pixiv.common.repository.paging.NovelSeriesPagingSource
+import com.mrl.pixiv.common.repository.paging.novelFilterPagingFlow
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.strings.load_failed
@@ -49,7 +49,7 @@ class NovelSeriesViewModel(
         }
     }
 
-    val novels = Pager(
+    val novels = novelFilterPagingFlow(
         config = PagingConfig(
             pageSize = 30,
             enablePlaceholders = false,
@@ -62,7 +62,7 @@ class NovelSeriesViewModel(
                 },
             )
         },
-    ).flow.cachedIn(viewModelScope)
+    ).cachedIn(viewModelScope)
 
     fun toggleWatchlist() {
         val detail = state.value.detail ?: return

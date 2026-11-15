@@ -16,6 +16,7 @@ import com.mrl.pixiv.common.repository.UserManager
 import com.mrl.pixiv.common.repository.paging.IllustRecommendedPagingSource
 import com.mrl.pixiv.common.repository.paging.MangaRecommendedPagingSource
 import com.mrl.pixiv.common.repository.paging.NovelRecommendedPagingSource
+import com.mrl.pixiv.common.repository.paging.novelFilterPagingFlow
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
@@ -60,9 +61,9 @@ class HomeViewModel : BaseMviViewModel<HomeState, HomeAction>(
 
     val lazyListState by lazy { LazyListState() }
     val recommendNovelList by lazy {
-        Pager(PagingConfig(pageSize = 30)) {
+        novelFilterPagingFlow(PagingConfig(pageSize = 30)) {
             NovelRecommendedPagingSource()
-        }.flow.cachedIn(viewModelScope)
+        }.cachedIn(viewModelScope)
     }
 
     init {

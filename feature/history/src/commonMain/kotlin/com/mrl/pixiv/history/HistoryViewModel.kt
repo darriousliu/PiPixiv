@@ -18,6 +18,7 @@ import com.mrl.pixiv.common.repository.paging.HistoryIllustPagingSource
 import com.mrl.pixiv.common.repository.paging.HistoryNovelPagingSource
 import com.mrl.pixiv.common.repository.paging.LocalHistoryIllustPagingSource
 import com.mrl.pixiv.common.repository.paging.LocalHistoryNovelPagingSource
+import com.mrl.pixiv.common.repository.paging.novelFilterPagingFlow
 import com.mrl.pixiv.common.repository.requireUserInfoFlow
 import com.mrl.pixiv.common.repository.requireUserInfoValue
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
@@ -77,9 +78,9 @@ class HistoryViewModel(
         get<HistoryIllustPagingSource>()
     }.flow
 
-    private val cloudNovelsSource = Pager(PagingConfig(pageSize = 20)) {
+    private val cloudNovelsSource = novelFilterPagingFlow(PagingConfig(pageSize = 20)) {
         HistoryNovelPagingSource()
-    }.flow
+    }
 
     private val localIllustsSource = localIllustCount.flatMapLatest {
         Pager(PagingConfig(pageSize = 20)) {
@@ -88,9 +89,9 @@ class HistoryViewModel(
     }
 
     private val localNovelsSource = localNovelCount.flatMapLatest {
-        Pager(PagingConfig(pageSize = 20)) {
+        novelFilterPagingFlow(PagingConfig(pageSize = 20)) {
             LocalHistoryNovelPagingSource(browsingHistoryRepository)
-        }.flow
+        }
     }
 
     val cloudIllusts = cloudIllustsSource
