@@ -229,6 +229,7 @@
     <string name="illust">Illustration</string>
     <string name="series">Série</string>
     <string name="word_count">Nombre de mots</string>
+    <string name="view_count">Vues</string>
     <string name="export_txt">Exporter en TXT</string>
     <string name="font_size">Taille de police</string>
     <string name="line_spacing">Interligne</string>
@@ -253,6 +254,7 @@
     <string name="date_range">Plage de dates</string>
     <string name="bookmark_range">Plage de signets</string>
     <string name="more">Plus</string>
+    <string name="view_more">Voir plus</string>
     <string name="cover">Couverture</string>
     <string name="clear">Effacer</string>
     <string name="bookmark_cancelled">Signet supprimé</string>

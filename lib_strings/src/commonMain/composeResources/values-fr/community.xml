@@ -5,7 +5,6 @@
     <string name="community_unread">Notifications non lues</string>
     <string name="community_unread_failed">Impossible de mettre à jour l’état de lecture</string>
     <string name="community_empty_notifications">Aucune notification pour le moment</string>
-    <string name="community_view_more">Voir plus</string>
     <string name="community_unknown_link">Le lien de cette notification ne peut pas encore être ouvert</string>
     <string name="community_recommended_users">Artistes recommandés</string>
     <string name="community_related_users">Artistes similaires</string>

@@ -229,6 +229,7 @@
     <string name="illust">Illustration</string>
     <string name="series">Serie</string>
     <string name="word_count">Wortanzahl</string>
+    <string name="view_count">Aufrufe</string>
     <string name="export_txt">Als TXT exportieren</string>
     <string name="font_size">Schriftgröße</string>
     <string name="line_spacing">Zeilenabstand</string>
@@ -253,6 +254,7 @@
     <string name="date_range">Datumsbereich</string>
     <string name="bookmark_range">Lesezeichenbereich</string>
     <string name="more">Mehr</string>
+    <string name="view_more">Mehr anzeigen</string>
     <string name="cover">Cover</string>
     <string name="clear">Leeren</string>
     <string name="bookmark_cancelled">Lesezeichen entfernt</string>

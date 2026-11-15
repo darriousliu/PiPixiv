@@ -229,6 +229,7 @@
     <string name="illust">일러스트</string>
     <string name="series">시리즈</string>
     <string name="word_count">글자 수</string>
+    <string name="view_count">조회수</string>
     <string name="export_txt">TXT로 내보내기</string>
     <string name="font_size">글꼴 크기</string>
     <string name="line_spacing">줄 간격</string>
@@ -253,6 +254,7 @@
     <string name="date_range">날짜 범위</string>
     <string name="bookmark_range">북마크 범위</string>
     <string name="more">더보기</string>
+    <string name="view_more">더 보기</string>
     <string name="cover">표지</string>
     <string name="clear">지우기</string>
     <string name="bookmark_cancelled">북마크 취소됨</string>

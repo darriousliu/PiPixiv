@@ -229,6 +229,7 @@
     <string name="illust">चित्रण</string>
     <string name="series">श्रृंखला</string>
     <string name="word_count">शब्द गणना</string>
+    <string name="view_count">देखे जाने की संख्या</string>
     <string name="export_txt">TXT के रूप में निर्यात करें</string>
     <string name="font_size">फ़ॉन्ट आकार</string>
     <string name="line_spacing">पंक्ति अंतर</string>
@@ -253,6 +254,7 @@
     <string name="date_range">तिथि सीमा</string>
     <string name="bookmark_range">बुकमार्क सीमा</string>
     <string name="more">अधिक</string>
+    <string name="view_more">और देखें</string>
     <string name="cover">कवर</string>
     <string name="clear">साफ़ करें</string>
     <string name="bookmark_cancelled">बुकमार्क हटाया गया</string>

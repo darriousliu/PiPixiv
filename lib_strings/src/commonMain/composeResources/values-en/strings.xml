@@ -230,6 +230,7 @@
     <string name="illust">Illustration</string>
     <string name="series">Series</string>
     <string name="word_count">Word Count</string>
+    <string name="view_count">Views</string>
     <string name="export_txt">Export as TXT</string>
     <string name="font_size">Font Size</string>
     <string name="line_spacing">Line Spacing</string>
@@ -254,6 +255,7 @@
     <string name="date_range">Date Range</string>
     <string name="bookmark_range">Bookmark Range</string>
     <string name="more">More</string>
+    <string name="view_more">View more</string>
     <string name="cover">Cover</string>
     <string name="clear">Clear</string>
     <string name="bookmark_cancelled">Bookmark Cancelled</string>

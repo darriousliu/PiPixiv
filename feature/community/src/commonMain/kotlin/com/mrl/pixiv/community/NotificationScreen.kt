@@ -65,8 +65,8 @@ import com.mrl.pixiv.strings.community_notifications
 import com.mrl.pixiv.strings.community_refresh
 import com.mrl.pixiv.strings.community_unknown_link
 import com.mrl.pixiv.strings.community_unread_failed
-import com.mrl.pixiv.strings.community_view_more
 import com.mrl.pixiv.strings.retry
+import com.mrl.pixiv.strings.view_more
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -279,7 +279,7 @@ private fun NotificationRow(
                 modifier = Modifier.padding(start = 68.dp, bottom = 8.dp),
             ) {
                 Text(
-                    more.title.ifBlank { stringResource(RStrings.community_view_more) },
+                    more.title.ifBlank { stringResource(RStrings.view_more) },
                     modifier = Modifier.weight(1f, fill = false),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

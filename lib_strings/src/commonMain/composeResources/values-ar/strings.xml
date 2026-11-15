@@ -229,6 +229,7 @@
     <string name="illust">رسم توضيحي</string>
     <string name="series">سلسلة</string>
     <string name="word_count">عدد الكلمات</string>
+    <string name="view_count">عدد المشاهدات</string>
     <string name="export_txt">TXT تصدير كـ</string>
     <string name="font_size">حجم الخط</string>
     <string name="line_spacing">تباعد الأسطر</string>
@@ -253,6 +254,7 @@
     <string name="date_range">النطاق الزمني</string>
     <string name="bookmark_range">نطاق الإشارات المرجعية</string>
     <string name="more">المزيد</string>
+    <string name="view_more">عرض المزيد</string>
     <string name="cover">غلاف</string>
     <string name="clear">مسح</string>
     <string name="bookmark_cancelled">تمت إزالة الإشارة المرجعية</string>

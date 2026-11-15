@@ -1,6 +1,7 @@
 package com.mrl.pixiv.novel
 
 import androidx.compose.runtime.Immutable
+import com.mrl.pixiv.common.compose.ui.novel.hasValidNovelHttpAuthority
 import com.mrl.pixiv.common.data.novel.NovelIllusts
 import com.mrl.pixiv.common.data.novel.NovelTextResp
 import com.mrl.pixiv.common.data.novel.NovelUrls

@@ -229,6 +229,7 @@
     <string name="illust">イラスト</string>
     <string name="series">シリーズ</string>
     <string name="word_count">文字数</string>
+    <string name="view_count">閲覧数</string>
     <string name="export_txt">TXTとしてエクスポート</string>
     <string name="font_size">フォントサイズ</string>
     <string name="line_spacing">行間</string>
@@ -253,6 +254,7 @@
     <string name="date_range">期間</string>
     <string name="bookmark_range">ブックマーク範囲</string>
     <string name="more">もっと見る</string>
+    <string name="view_more">もっと見る</string>
     <string name="cover">カバー</string>
     <string name="clear">クリア</string>
     <string name="bookmark_cancelled">ブックマークを解除しました</string>

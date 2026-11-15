@@ -229,6 +229,7 @@
     <string name="illust">插畫</string>
     <string name="series">系列</string>
     <string name="word_count">字數</string>
+    <string name="view_count">閱讀量</string>
     <string name="export_txt">匯出為TXT</string>
     <string name="font_size">字型大小</string>
     <string name="line_spacing">行距</string>
@@ -253,6 +254,7 @@
     <string name="date_range">日期範圍</string>
     <string name="bookmark_range">收藏範圍</string>
     <string name="more">更多</string>
+    <string name="view_more">查看更多</string>
     <string name="cover">封面</string>
     <string name="clear">清除</string>
     <string name="bookmark_cancelled">已取消收藏</string>

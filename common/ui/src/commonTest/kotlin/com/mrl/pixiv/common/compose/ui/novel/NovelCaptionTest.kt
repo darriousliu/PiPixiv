@@ -1,4 +1,4 @@
-package com.mrl.pixiv.novel
+package com.mrl.pixiv.common.compose.ui.novel
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.LinkAnnotation

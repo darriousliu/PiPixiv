@@ -92,7 +92,10 @@ import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
+import com.mrl.pixiv.common.compose.ui.novel.NovelCaptionLinkTarget
+import com.mrl.pixiv.common.compose.ui.novel.NovelMetadataBottomSheet
 import com.mrl.pixiv.common.compose.ui.novel.NovelReadLaterListItem
+import com.mrl.pixiv.common.compose.ui.novel.resolveNovelCaptionLink
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
@@ -820,48 +823,9 @@ fun NovelScreen(
         NovelMetadataBottomSheet(
             novel = state.novel,
             onDismissRequest = { showMetadataBottomSheet = false },
-            onAuthorClick = { userId ->
-                showMetadataBottomSheet = false
-                navigationManager.navigateToProfileDetailScreen(userId)
-            },
-            onSeriesClick = { seriesId ->
-                showMetadataBottomSheet = false
-                navigationManager.navigateToNovelSeriesScreen(seriesId)
-            },
-            onTagClick = { tag ->
-                showMetadataBottomSheet = false
-                navigationManager.navigateToSearchResultScreen(
-                    searchWord = tag,
-                    isIdSearch = false,
-                    searchMode = AppViewMode.NOVEL
-                )
-            },
-            onCaptionLinkClick = { url ->
-                showMetadataBottomSheet = false
-                when (val target = resolveNovelCaptionLink(url)) {
-                    is NovelCaptionLinkTarget.Illust ->
-                        navigationManager.navigateToSinglePictureScreen(target.id)
-
-                    is NovelCaptionLinkTarget.Novel ->
-                        navigationManager.navigateToNovelDetailScreen(target.id)
-
-                    is NovelCaptionLinkTarget.User ->
-                        navigationManager.navigateToProfileDetailScreen(target.id)
-
-                    is NovelCaptionLinkTarget.External ->
-                        runCatching { uriHandler.openUri(target.url) }
-
-                    null -> Unit
-                }
-            },
-            onCommentClick = {
-                saveReadingProgress()
-                showMetadataBottomSheet = false
-                navigationManager.navigateToCommentScreen(
-                    state.novel.id,
-                    CommentType.NOVEL
-                )
-            },
+            onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
+            navigationManager = navigationManager,
+            onBeforeCommentClick = { saveReadingProgress() },
         )
     }
 
