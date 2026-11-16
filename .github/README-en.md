@@ -129,7 +129,13 @@ Dependency versions are defined in the [version catalog](../gradle/libs.versions
 
 ## ⭐ Star History
 
-[![Star History](https://starchart.cc/darriousliu/PiPixiv.svg?variant=adaptive)](https://starchart.cc/darriousliu/PiPixiv)
+<a href="https://www.star-history.com/?repos=darriousliu%2FPiPixiv&amp;type=date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=darriousliu/PiPixiv&amp;type=Date&amp;theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=darriousliu/PiPixiv&amp;type=Date" />
+    <img alt="PiPixiv's GitHub star growth curve" src="https://api.star-history.com/svg?repos=darriousliu/PiPixiv&amp;type=Date" width="800" />
+  </picture>
+</a>
 
 ## 🙏 Acknowledgments
 
