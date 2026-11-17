@@ -4,6 +4,8 @@
 <img src="../.idea/icon.svg" width="80" alt="PiPixiv Logo">
 </a>
 
+### [简体中文 README](../README.md)
+
 # PiPixiv [App](#)
 
 ### Third-party Pixiv Client
@@ -11,22 +13,22 @@
 A cross-platform third-party Pixiv App entirely written
 by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.4.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
-![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-1.12.1-blue)
+[![Kotlin 2.4.21](https://img.shields.io/badge/Kotlin-2.4.21-blue?logo=kotlin)](https://kotlinlang.org)
+[![Compose Multiplatform 1.12.2](https://img.shields.io/badge/Compose_Multiplatform-1.12.2-blue)](https://www.jetbrains.com/compose-multiplatform/)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/darriousliu/PiPixiv/release.yml)](https://github.com/darriousliu/PiPixiv/actions/workflows/release.yml)
-[![License: Apache-2.0](https://img.shields.io/github/license/darriousliu/PiPixiv?labelColor=27303D&color=0877d2)](/LICENSE)
+[![License: Apache-2.0](https://img.shields.io/github/license/darriousliu/PiPixiv?labelColor=27303D&color=0877d2)](../LICENSE)
 
 ## 📥 Download
 
 Current source version: **2.6.1**. See GitHub Release below for published versions.
 
-[![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=Stable)](https://github.com/darriousliu/PiPixiv/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=Stable)](https://github.com/darriousliu/PiPixiv/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
 [![F-Droid Version](https://img.shields.io/f-droid/v/com.mrl.pixiv)](https://f-droid.org/packages/com.mrl.pixiv/)
 
 ## 📸 App Preview
 
-<img width="100%" alt="preview" src="docs/preview.png" />
+<img width="100%" alt="preview" src="../docs/preview.png" />
 
 ### 📱 Supported Platforms
 
@@ -48,6 +50,7 @@ Current source version: **2.6.1**. See GitHub Release below for published versio
 
 * 🔐 Log in with Pixiv account (OAuth authentication).
 * 🍪 Log in via web Cookie (PHPSESSID) without manually entering a token.
+* 🔒 Confirm before signing out.
 
 ### 🏠 Content Browsing
 
@@ -66,7 +69,8 @@ Current source version: **2.6.1**. See GitHub Release below for published versio
 
 * 📖 Switch between illustration/novel view across Home, Feed, Collection, Ranking, and Search pages; preference is persisted.
 * 📝 Immersive novel reading with adjustable font size and line spacing, plus a draggable scrollbar. Back-to-top and chapter navigation buttons are stacked vertically, and your reading position is preserved when changing the layout.
-* ℹ️ View the synopsis, tags, and series information while reading, and open the author's profile or series contents.
+* ℹ️ Select **View more** on a novel card to see the full title, tags, synopsis, publication date, and statistics. In the reader, view series information and open the author's profile or the series contents.
+* 🖼️ Open and zoom in on embedded novel images in the app.
 * ▶️ Continue reading from the series contents, with the last-read chapter title and progress percentage displayed separately.
 * 🤖 AI novel translation with OpenAI / Claude / Gemini and compatible endpoints, including local network services; configure the model, timeout, and request parameters. Supports fetching available models, global concurrency limits, and translating novel text, titles, and synopses.
 * 🌐 Stream translated text, cache translations locally, and switch between the original and translation.
@@ -83,7 +87,7 @@ Current source version: **2.6.1**. See GitHub Release below for published versio
 
 ### 👤 User & Social
 
-* 👤 View author bios, profile and workspace details, illustration/manga/novel submissions, and public bookmarks; open novels directly from their previews.
+* 👤 View author bios, profile and workspace details, illustration, manga, and novel submissions, and public bookmarks. Tap an avatar to enlarge it or a novel preview to start reading.
 * 👥 View following lists, with public/private tabs for your own follows.
 * 💬 View and post comments.
 
@@ -95,7 +99,8 @@ Current source version: **2.6.1**. See GitHub Release below for published versio
 ### ⚙️ Settings & System
 
 * ⚙️ App settings (language, image source, grid columns, private bookmarks, etc.).
-* 🌐 Use the system proxy by default, or choose a direct connection or manual HTTP / SOCKS proxy. Restart the app after changing the network mode. Android and desktop platforms also offer SNI mode.
+* 🧭 Switch between the floating liquid-glass bar and the standard bottom navigation bar.
+* 🌐 Use the system proxy by default, or choose a direct connection or manual HTTP / SOCKS proxy. Restart the app after changing the network mode. Android and desktop platforms also offer ECH mode.
 * 🔒 Privacy settings control R-18 content visibility and clipboard reading when opening search.
 * 🚫 Block artworks, users, and tags, and filter long novel tags by length and segment count.
 * 🔗 Deep link support.
@@ -119,9 +124,11 @@ Current source version: **2.6.1**. See GitHub Release below for published versio
 
 <div align="left">
 
-* Kotlin **2.4.20**, Compose Multiplatform **1.12.1**, and Android Gradle Plugin **9.4.1**.
-* Gradle Wrapper **9.6.1** and JDK toolchain **25**; Android compile/target SDK **37**, minimum SDK **26**.
+* Kotlin **2.4.21**, Compose Multiplatform **1.12.2**, and Android Gradle Plugin **9.5.1**.
+* Gradle Wrapper **9.9.1** and JDK toolchain **25**.
+* Android app compile SDK **37.2**, target SDK **37**, and minimum SDK **26**.
 * iOS uses Swift Export with an **iOS 18.0** deployment target.
+* Main dependencies include AndroidX Compose BOM Beta **2026.11.00**, Navigation 3 (Android **1.2.1**, JetBrains **1.2.0**), Ktor **3.6.1**, Koin **4.2.2**, and Coil **3.6.3**.
 
 Dependency versions are defined in the [version catalog](../gradle/libs.versions.toml). App versions are set in [gradle.properties](../gradle.properties) and the [iOS configuration](../iosApp/Configuration/Config.xcconfig).
 
