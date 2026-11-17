@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,12 +48,16 @@ import com.mrl.pixiv.common.data.AiType
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.HSpacer
+import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isPrivateBookmark
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.allowRgb565
 import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
+import com.mrl.pixiv.strings.view_more
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -81,17 +86,85 @@ fun NovelItem(
     compactMarkerLayout: Boolean = false,
     readLaterAction: @Composable () -> Unit = { NovelReadLaterButton(novel = novel) },
 ) {
+    val isBookmarked = novel.isBookmark
+    val isNovelBlocked = BlockingRepositoryV2.collectNovelBlockAsState(novel.id)
+    var showBookmarkSheet by rememberSaveable { mutableStateOf(false) }
+    var showMetadata by rememberSaveable(novel.id, isNovelBlocked) { mutableStateOf(false) }
+
+    NovelItemContent(
+        novel = novel,
+        onNovelClick = onNovelClick,
+        onSeriesClick = onSeriesClick,
+        onBookmarkClick = {
+            val restrict = if (requireUserPreferenceValue.defaultPrivateBookmark) {
+                Restrict.PRIVATE
+            } else {
+                Restrict.PUBLIC
+            }
+            onBookmarkClick(isBookmarked, restrict, null)
+        },
+        onBookmarkLongClick = { showBookmarkSheet = true },
+        onMetadataClick = if (isNovelBlocked) null else ({ showMetadata = true }),
+        readLaterAction = readLaterAction,
+        modifier = modifier,
+        markerPageLabel = markerPageLabel,
+        onMarkerClick = onMarkerClick,
+        compactTitle = compactTitle,
+        compactMarkerLayout = compactMarkerLayout,
+    )
+
+    if (showMetadata && !isNovelBlocked) {
+        NovelMetadataBottomSheet(
+            novel = novel,
+            onDismissRequest = { showMetadata = false },
+            onSeriesClick = onSeriesClick,
+        )
+    }
+
+    if (showBookmarkSheet) {
+        val bottomSheetState = rememberBottomSheetState(
+            initialValue = SheetValue.Hidden,
+            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+        )
+        NovelBottomBookmarkSheet(
+            hideBottomSheet = { showBookmarkSheet = false },
+            novel = novel,
+            bottomSheetState = bottomSheetState,
+            onBookmarkClick = { restrict, tags, isEdit ->
+                if (isEdit || !isBookmarked) {
+                    BookmarkState.bookmarkNovel(novel.id, restrict, tags)
+                } else {
+                    BookmarkState.deleteBookmarkNovel(novel.id)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+internal fun NovelItemContent(
+    novel: Novel,
+    onNovelClick: (Long) -> Unit,
+    onSeriesClick: (Long) -> Unit,
+    onBookmarkClick: () -> Unit,
+    onBookmarkLongClick: () -> Unit,
+    onMetadataClick: (() -> Unit)?,
+    readLaterAction: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    markerPageLabel: String? = null,
+    onMarkerClick: (() -> Unit)? = null,
+    compactTitle: Boolean = false,
+    compactMarkerLayout: Boolean = false,
+) {
     val context = LocalPlatformContext.current
     val isBookmarked = novel.isBookmark
     val isAI = novel.novelAiType == AiType.AiGeneratedWorks
-    val seriesId = novel.series.id?.takeIf { it > 0L }
-    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
+    val seriesId = validNovelSeriesId(novel.series.id)
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clickable { onNovelClick(novel.id) },
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
@@ -100,6 +173,7 @@ fun NovelItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onNovelClick(novel.id) }
                 .height(IntrinsicSize.Min)
         ) {
             // 左侧封面
@@ -288,15 +362,8 @@ fun NovelItem(
             ) {
                 readLaterAction()
                 IconButton(
-                    onClick = {
-                        val restrict = if (requireUserPreferenceValue.defaultPrivateBookmark) {
-                            Restrict.PRIVATE
-                        } else {
-                            Restrict.PUBLIC
-                        }
-                        onBookmarkClick(isBookmarked, restrict, null)
-                    },
-                    onLongClick = { showBottomSheet = true }
+                    onClick = onBookmarkClick,
+                    onLongClick = onBookmarkLongClick,
                 ) {
                     BookmarkIcon(
                         isBookmarked = isBookmarked,
@@ -324,24 +391,13 @@ fun NovelItem(
                 }
             }
         }
-    }
-
-    if (showBottomSheet) {
-        val bottomSheetState = rememberBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
-        )
-        NovelBottomBookmarkSheet(
-            hideBottomSheet = { showBottomSheet = false },
-            novel = novel,
-            bottomSheetState = bottomSheetState,
-            onBookmarkClick = { restrict, tags, isEdit ->
-                if (isEdit || !isBookmarked) {
-                    BookmarkState.bookmarkNovel(novel.id, restrict, tags)
-                } else {
-                    BookmarkState.deleteBookmarkNovel(novel.id)
-                }
+        if (onMetadataClick != null) {
+            TextButton(
+                onClick = onMetadataClick,
+                modifier = Modifier.align(Alignment.End).padding(end = 8.dp),
+            ) {
+                Text(stringResource(RStrings.view_more))
             }
-        )
+        }
     }
 }

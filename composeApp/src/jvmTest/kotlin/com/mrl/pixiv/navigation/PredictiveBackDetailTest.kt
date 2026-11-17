@@ -146,12 +146,20 @@ class PredictiveBackDetailTest {
                         fixture.input.backCompleted()
                     }
 
-                    // 短促手势须及时完成，不能等待预览动画的剩余时间。
-                    repeat(3) {
+                    // 逐帧检查完成后的画面，不能跳过可能出现空白或旧场景回闪的前三帧。
+                    repeat(6) { frame ->
                         mainClock.advanceTimeByFrame()
                         waitForIdle()
+                        assertPanes(
+                            if (hasPreviousDetail) NetworkDetailArgb else DetailSourceArgb,
+                            "on quick return frame ${frame + 1}",
+                        )
+                        runOnIdle {
+                            assertSame(rememberedState, fixture.sourceRememberedState)
+                            assertSame(saveableState, fixture.sourceSaveableState)
+                            assertEquals(0, fixture.sourceDisposals, "Source disposed on quick return frame ${frame + 1}")
+                        }
                     }
-                    assertPanes(if (hasPreviousDetail) NetworkDetailArgb else DetailSourceArgb, "after a quick return")
                     onNodeWithTag(originalStack.last().entryId).assertDoesNotExist()
                     runOnIdle {
                         assertEquals(originalStack.dropLast(1), fixture.backStack.toList())
@@ -252,9 +260,9 @@ class PredictiveBackDetailTest {
 
     private fun DesktopComposeUiTest.assertPanes(expectedRight: Int?, phase: String = "initially") {
         val image = captureToImage().toAwtImage()
-        assertEquals(DetailSourceArgb, image.getRGB(100, 400), "The source must stay visible $phase")
+        assertEquals(DetailSourceArgb, image.getRGB(100, 400), "The source pixel (100, 400) must stay visible $phase")
         if (expectedRight != null) {
-            assertEquals(expectedRight, image.getRGB(1_000, 400), "The right side must show the expected opaque page $phase")
+            assertEquals(expectedRight, image.getRGB(1_000, 400), "The detail pixel (1000, 400) must stay opaque $phase")
         }
     }
 

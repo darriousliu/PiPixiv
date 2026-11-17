@@ -4,7 +4,6 @@
     <string name="community_unread">有未读通知</string>
     <string name="community_unread_failed">未能更新未读状态</string>
     <string name="community_empty_notifications">暂无通知</string>
-    <string name="community_view_more">查看更多</string>
     <string name="community_unknown_link">暂不支持打开这条通知的链接</string>
     <string name="community_recommended_users">推荐作者</string>
     <string name="community_related_users">相似作者</string>

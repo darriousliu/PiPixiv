@@ -1,7 +1,5 @@
 package com.mrl.pixiv.di
 
-import androidx.compose.runtime.ComposeRuntimeFlags
-import androidx.compose.runtime.ExperimentalComposeApi
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import com.ctrip.flight.mmkv.MMKVLogLevel
@@ -23,12 +21,6 @@ object Initialization {
             modules(allModule)
         }
         BlockingRepositoryV2.migrate()
-        initComposeRuntimeFlags()
-    }
-
-    @OptIn(ExperimentalComposeApi::class)
-    fun initComposeRuntimeFlags() {
-        ComposeRuntimeFlags.isLinkBufferComposerEnabled = true
     }
 }
 

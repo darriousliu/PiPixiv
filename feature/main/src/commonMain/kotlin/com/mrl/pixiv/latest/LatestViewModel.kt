@@ -19,6 +19,7 @@ import com.mrl.pixiv.common.repository.paging.IllustFollowingPagingSource
 import com.mrl.pixiv.common.repository.paging.MangaWatchlistPagingSource
 import com.mrl.pixiv.common.repository.paging.NovelNewPagingSource
 import com.mrl.pixiv.common.repository.paging.NovelWatchlistPagingSource
+import com.mrl.pixiv.common.repository.paging.novelFilterPagingFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
@@ -53,13 +54,13 @@ class LatestViewModel : ViewModel() {
         IllustFollowingPagingSource(restrict = trendingFilter.value)
     }.flow.cachedIn(viewModelScope)
 
-    val novelsFollowing = Pager(PagingConfig(pageSize = 30)) {
+    val novelsFollowing = novelFilterPagingFlow(PagingConfig(pageSize = 30)) {
         FollowNovelPagingSource(restrict = trendingFilter.value)
-    }.flow.cachedIn(viewModelScope)
+    }.cachedIn(viewModelScope)
 
-    val newNovels = Pager(PagingConfig(pageSize = 30)) {
+    val newNovels = novelFilterPagingFlow(PagingConfig(pageSize = 30)) {
         NovelNewPagingSource()
-    }.flow.cachedIn(viewModelScope)
+    }.cachedIn(viewModelScope)
 
     val novelWatchlist = Pager(PagingConfig(pageSize = 30)) {
         NovelWatchlistPagingSource().also { activeNovelWatchlistSource = it }

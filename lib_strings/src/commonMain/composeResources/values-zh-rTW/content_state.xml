@@ -5,4 +5,6 @@
     <string name="content_empty_downloads">暫無下載工作</string>
     <string name="content_error_title">暫時無法載入</string>
     <string name="content_error_description">請稍後重試</string>
+    <string name="page_unavailable_title">頁面暫時無法使用</string>
+    <string name="page_unavailable_message">此頁面發生問題，暫時無法繼續。請返回後再試。</string>
 </resources>

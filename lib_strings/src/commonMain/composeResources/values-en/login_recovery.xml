@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">Web sign-in is temporarily unavailable. Try another method, such as Token or Cookie.</string>
+    <string name="webview_runtime_required">WebView2 Runtime was not found. Web sign-in and registration are unavailable. Install it and try again, or use another sign-in method.</string>
+    <string name="login_other_methods">Use another sign-in method</string>
+</resources>

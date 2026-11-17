@@ -31,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -41,6 +40,8 @@ import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.rememberNavigationSharedContentState
 import kotlin.math.abs
+
+private enum class ImageLoadState { Loading, Loaded, Failed }
 
 @Composable
 fun ImagePreviewScreen(
@@ -61,8 +62,7 @@ fun ImagePreviewScreen(
         initialPage = initialIndex.coerceIn(0, imageUrls.lastIndex),
         pageCount = { imageUrls.size }
     )
-    val errorImage = rememberVectorPainter(Icons.Rounded.ErrorOutline)
-    val pageLoadingStates = remember(imageUrls) { mutableStateMapOf<Int, Boolean>() }
+    val pageLoadStates = remember(imageUrls) { mutableStateMapOf<Int, ImageLoadState>() }
     val sharedTransitionScope = LocalSharedTransitionScope.current
     val animatedContentScope = LocalNavAnimatedContentScope.current
     val safeInitialIndex = initialIndex.coerceIn(0, imageUrls.lastIndex)
@@ -106,7 +106,7 @@ fun ImagePreviewScreen(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
-                val isPageLoading = pageLoadingStates[page] ?: true
+                val loadState = pageLoadStates[page] ?: ImageLoadState.Loading
                 val imageModifier = with(sharedTransitionScope) {
                     Modifier
                         .fillMaxSize()
@@ -127,21 +127,28 @@ fun ImagePreviewScreen(
                         contentDescription = null,
                         modifier = imageModifier,
                         contentScale = ContentScale.Fit,
-                        error = errorImage,
                         onLoading = {
-                            pageLoadingStates[page] = true
+                            pageLoadStates[page] = ImageLoadState.Loading
                         },
                         onSuccess = {
-                            pageLoadingStates[page] = false
+                            pageLoadStates[page] = ImageLoadState.Loaded
                         },
                         onError = {
-                            pageLoadingStates[page] = false
+                            pageLoadStates[page] = ImageLoadState.Failed
                         },
                     )
-                    if (isPageLoading) {
-                        CircularWavyProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
+                    when (loadState) {
+                        ImageLoadState.Loading -> CircularWavyProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = Color.White,
                         )
+                        ImageLoadState.Failed -> Icon(
+                            imageVector = Icons.Rounded.ErrorOutline,
+                            contentDescription = null,
+                            modifier = Modifier.align(Alignment.Center),
+                            tint = Color.White,
+                        )
+                        ImageLoadState.Loaded -> Unit
                     }
                 }
             }

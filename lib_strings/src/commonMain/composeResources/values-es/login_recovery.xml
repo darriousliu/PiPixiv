@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">El inicio de sesión web no está disponible temporalmente. Prueba otro método, como Token o Cookie.</string>
+    <string name="webview_runtime_required">No se ha encontrado el entorno de ejecución de WebView2. No se puede iniciar sesión ni registrarse desde la web. Instálalo y vuelve a intentarlo, o utiliza otro método para iniciar sesión.</string>
+    <string name="login_other_methods">Usar otro método de inicio de sesión</string>
+</resources>

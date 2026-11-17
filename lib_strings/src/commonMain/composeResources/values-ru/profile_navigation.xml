@@ -9,4 +9,6 @@
     <string name="profile_view_homepage">Посмотреть профиль</string>
     <string name="settings_section_general">Общие</string>
     <string name="unblock_item">Разблокировать</string>
+    <string name="liquid_glass_navigation">Навигация с эффектом жидкого стекла</string>
+    <string name="liquid_glass_navigation_desc">Отключите этот параметр, чтобы использовать стандартную нижнюю панель навигации.</string>
 </resources>

@@ -6,4 +6,6 @@
     <string name="content_empty_downloads">Aucun téléchargement pour le moment</string>
     <string name="content_error_title">Chargement momentanément impossible</string>
     <string name="content_error_description">Veuillez réessayer dans un instant</string>
+    <string name="page_unavailable_title">Page temporairement indisponible</string>
+    <string name="page_unavailable_message">Cette page a rencontré un problème et ne peut pas continuer pour le moment. Revenez en arrière et réessayez.</string>
 </resources>

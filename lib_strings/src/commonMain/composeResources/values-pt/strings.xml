@@ -94,6 +94,7 @@
     <string name="allow_open_link">Permitir que o aplicativo abra o link correspondente</string>
     <string name="network_error">Erro de rede, por favor verifique a conexão</string>
     <string name="sign_out">Sair</string>
+    <string name="sign_out_confirmation">Deseja sair da conta?</string>
     <string name="copy_to_clipboard">Copiar para a área de transferência</string>
     <string name="export_token">Exportar Token</string>
     <string name="new_artworks">Novas obras</string>
@@ -228,6 +229,7 @@
     <string name="illust">Ilustração</string>
     <string name="series">Série</string>
     <string name="word_count">Contagem de palavras</string>
+    <string name="view_count">Visualizações</string>
     <string name="export_txt">Exportar como TXT</string>
     <string name="font_size">Tamanho da fonte</string>
     <string name="line_spacing">Espaçamento entre linhas</string>
@@ -252,6 +254,7 @@
     <string name="date_range">Intervalo de datas</string>
     <string name="bookmark_range">Intervalo de marcadores</string>
     <string name="more">Mais</string>
+    <string name="view_more">Ver mais</string>
     <string name="cover">Capa</string>
     <string name="clear">Limpar</string>
     <string name="bookmark_cancelled">Marcador removido</string>

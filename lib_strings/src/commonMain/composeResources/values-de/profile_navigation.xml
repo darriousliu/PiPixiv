@@ -9,4 +9,6 @@
     <string name="profile_view_homepage">Profil ansehen</string>
     <string name="settings_section_general">Allgemein</string>
     <string name="unblock_item">Sperrung aufheben</string>
+    <string name="liquid_glass_navigation">Liquid-Glass-Navigation</string>
+    <string name="liquid_glass_navigation_desc">Ohne Effekt erscheint unten die Standardleiste.</string>
 </resources>

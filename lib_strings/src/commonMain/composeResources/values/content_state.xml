@@ -5,4 +5,6 @@
     <string name="content_empty_downloads">暂无下载任务</string>
     <string name="content_error_title">暂时无法加载</string>
     <string name="content_error_description">请稍后重试</string>
+    <string name="page_unavailable_title">页面暂时无法使用</string>
+    <string name="page_unavailable_message">此页面遇到问题，暂时无法继续。请返回后重试。</string>
 </resources>

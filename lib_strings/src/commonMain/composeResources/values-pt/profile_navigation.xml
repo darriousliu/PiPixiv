@@ -9,4 +9,6 @@
     <string name="profile_view_homepage">Ver perfil</string>
     <string name="settings_section_general">Geral</string>
     <string name="unblock_item">Desbloquear</string>
+    <string name="liquid_glass_navigation">Navegação com Liquid Glass</string>
+    <string name="liquid_glass_navigation_desc">Desative esta opção para usar a barra de navegação inferior padrão.</string>
 </resources>

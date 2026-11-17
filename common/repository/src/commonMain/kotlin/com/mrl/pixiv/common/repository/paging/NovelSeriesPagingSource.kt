@@ -32,10 +32,6 @@ class NovelSeriesPagingSource(
         it.filterBlockedTags()
     },
 ) : PagingSource<String, Novel>() {
-    init {
-        invalidateOnNovelFilterSettingsChanges()
-    }
-
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Novel> = try {
         val response = if (params.key.isNullOrBlank()) {
             loadInitial(seriesId).also { onSeriesDetail(it.novelSeriesDetail) }

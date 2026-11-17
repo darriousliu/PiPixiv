@@ -11,10 +11,6 @@ import com.mrl.pixiv.common.repository.util.filterNormalNovel
 class LocalHistoryNovelPagingSource(
     private val browsingHistoryRepository: BrowsingHistoryRepository,
 ) : PagingSource<Int, Novel>() {
-    init {
-        invalidateOnNovelFilterSettingsChanges()
-    }
-
     override fun getRefreshKey(state: PagingState<Int, Novel>): Int? {
         return null
     }

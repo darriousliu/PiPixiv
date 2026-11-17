@@ -94,6 +94,7 @@
     <string name="allow_open_link">앱이 해당 링크를 열 수 있도록 허용</string>
     <string name="network_error">네트워크 오류, 연결을 확인해주세요</string>
     <string name="sign_out">로그아웃</string>
+    <string name="sign_out_confirmation">로그아웃하시겠어요?</string>
     <string name="copy_to_clipboard">클립보드에 복사</string>
     <string name="export_token">토큰 내보내기</string>
     <string name="new_artworks">신작</string>
@@ -228,6 +229,7 @@
     <string name="illust">일러스트</string>
     <string name="series">시리즈</string>
     <string name="word_count">글자 수</string>
+    <string name="view_count">조회수</string>
     <string name="export_txt">TXT로 내보내기</string>
     <string name="font_size">글꼴 크기</string>
     <string name="line_spacing">줄 간격</string>
@@ -252,6 +254,7 @@
     <string name="date_range">날짜 범위</string>
     <string name="bookmark_range">북마크 범위</string>
     <string name="more">더보기</string>
+    <string name="view_more">더 보기</string>
     <string name="cover">표지</string>
     <string name="clear">지우기</string>
     <string name="bookmark_cancelled">북마크 취소됨</string>

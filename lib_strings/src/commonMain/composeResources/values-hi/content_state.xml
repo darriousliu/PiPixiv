@@ -6,4 +6,6 @@
     <string name="content_empty_downloads">अभी कोई डाउनलोड नहीं है</string>
     <string name="content_error_title">अभी लोड नहीं किया जा सकता</string>
     <string name="content_error_description">कृपया थोड़ी देर बाद फिर से प्रयास करें</string>
+    <string name="page_unavailable_title">पेज फ़िलहाल उपलब्ध नहीं है</string>
+    <string name="page_unavailable_message">इस पेज पर समस्या आ गई है, इसलिए फ़िलहाल आगे नहीं बढ़ सकते। वापस जाएँ और फिर कोशिश करें।</string>
 </resources>

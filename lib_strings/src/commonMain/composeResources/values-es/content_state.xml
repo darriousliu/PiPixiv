@@ -6,4 +6,6 @@
     <string name="content_empty_downloads">Aún no hay descargas</string>
     <string name="content_error_title">No se puede cargar en este momento</string>
     <string name="content_error_description">Inténtalo de nuevo en unos instantes</string>
+    <string name="page_unavailable_title">Página temporalmente no disponible</string>
+    <string name="page_unavailable_message">Esta página ha encontrado un problema y no puede continuar por ahora. Vuelve atrás e inténtalo de nuevo.</string>
 </resources>

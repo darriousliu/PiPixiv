@@ -63,13 +63,13 @@ fun TagItem(
     ) {
         Text(
             text = "#" + tag.name,
-            modifier = Modifier,
+            modifier = Modifier.alignByBaseline(),
             color = MaterialTheme.colorScheme.primary,
             style = TextStyle(fontSize = 13.sp, color = deepBlue),
         )
         Text(
             text = tag.translatedName,
-            modifier = Modifier,
+            modifier = Modifier.alignByBaseline(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = TextStyle(fontSize = 13.sp)

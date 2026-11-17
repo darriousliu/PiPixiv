@@ -92,7 +92,10 @@ import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
+import com.mrl.pixiv.common.compose.ui.novel.NovelCaptionLinkTarget
+import com.mrl.pixiv.common.compose.ui.novel.NovelMetadataBottomSheet
 import com.mrl.pixiv.common.compose.ui.novel.NovelReadLaterListItem
+import com.mrl.pixiv.common.compose.ui.novel.resolveNovelCaptionLink
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
@@ -215,11 +218,6 @@ fun NovelScreen(
     }
     var showBookmarkBottomSheet by remember { mutableStateOf(false) }
     var showMetadataBottomSheet by remember(state.novel?.id) { mutableStateOf(false) }
-    var translationListAnchor by remember(state.novel?.id) {
-        mutableStateOf<NovelTranslationListAnchor?>(null)
-    }
-    var wasTranslating by remember(state.novel?.id) { mutableStateOf(false) }
-
     LaunchedEffect(state.loading, state.novel?.id, readLaterTargetLanguage) {
         if (!state.loading &&
             state.novel?.id == novelId &&
@@ -290,7 +288,6 @@ fun NovelScreen(
 
     val latestState = rememberUpdatedState(state)
     val latestParagraphLayouts = rememberUpdatedState(paragraphLayouts)
-    var handledRestoreVersion by remember(state.novel?.id) { mutableStateOf(-1L) }
     val saveReadingProgress = remember(listState, viewModel, state.novel?.id) {
         val chapterId = state.novel?.id
         {
@@ -299,7 +296,7 @@ fun NovelScreen(
             if (novel.id != chapterId || currentState.isTranslating ||
                 currentState.paragraphs.isEmpty() || resizeReadingAnchor != null ||
                 (currentState.restoreProgress != null &&
-                        handledRestoreVersion != currentState.restoreVersion)
+                        viewModel.handledRestoreVersion != currentState.restoreVersion)
             ) {
                 return@remember
             }
@@ -342,7 +339,7 @@ fun NovelScreen(
     }
 
     LaunchedEffect(state.restoreVersion, state.novel?.id, state.isTranslating, state.paragraphs) {
-        if (handledRestoreVersion == state.restoreVersion) return@LaunchedEffect
+        if (viewModel.handledRestoreVersion == state.restoreVersion) return@LaunchedEffect
         if (state.isTranslating) return@LaunchedEffect
         val novel = state.novel ?: return@LaunchedEffect
         val resolvedProgress = state.restoreProgress ?: return@LaunchedEffect
@@ -397,7 +394,7 @@ fun NovelScreen(
         } finally {
             // 等待滚动后的最后一帧，避免将恢复过程中的临时位置保存为阅读进度。
             withFrameNanos { }
-            handledRestoreVersion = state.restoreVersion
+            viewModel.handledRestoreVersion = state.restoreVersion
         }
     }
 
@@ -438,8 +435,8 @@ fun NovelScreen(
 
     LaunchedEffect(state.novel?.id, state.isTranslating) {
         val novel = state.novel ?: return@LaunchedEffect
-        val previouslyTranslating = wasTranslating
-        wasTranslating = state.isTranslating
+        val previouslyTranslating = viewModel.streamingTranslationNovelId == novel.id
+        viewModel.streamingTranslationNovelId = novel.id.takeIf { state.isTranslating }
         if (!previouslyTranslating && state.isTranslating) {
             val paragraphStartIndex =
                 paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
@@ -452,8 +449,7 @@ fun NovelScreen(
                 isTranslated = state.isTranslated,
             )
         ) {
-            val anchorToRestore = translationListAnchor
-            translationListAnchor = null
+            val anchorToRestore = viewModel.translationListAnchor
             anchorToRestore
                 ?.takeIf { it.novelId == novel.id }
                 ?.let { anchor ->
@@ -479,7 +475,7 @@ fun NovelScreen(
         }
 
         if (previouslyTranslating && !state.isTranslating) {
-            translationListAnchor = null
+            viewModel.translationListAnchor = null
         }
     }
 
@@ -491,7 +487,7 @@ fun NovelScreen(
 
     val requestTranslation: () -> Unit = request@{
         val novel = state.novel ?: return@request
-        translationListAnchor = NovelTranslationListAnchor(
+        viewModel.translationListAnchor = NovelTranslationListAnchor(
             novelId = novel.id,
             itemIndex = listState.firstVisibleItemIndex,
             scrollOffset = listState.firstVisibleItemScrollOffset,
@@ -660,6 +656,12 @@ fun NovelScreen(
                             onPixivImageClick = { illustId ->
                                 navigationManager.navigateToSinglePictureScreen(illustId)
                             },
+                            onUploadedImageClick = { url ->
+                                navigationManager.navigateToImagePreviewScreen(
+                                    imageUrls = listOf(url),
+                                    initialIndex = 0,
+                                )
+                            },
                             onAuthorClick = { userId ->
                                 navigationManager.navigateToProfileDetailScreen(userId)
                             },
@@ -821,48 +823,9 @@ fun NovelScreen(
         NovelMetadataBottomSheet(
             novel = state.novel,
             onDismissRequest = { showMetadataBottomSheet = false },
-            onAuthorClick = { userId ->
-                showMetadataBottomSheet = false
-                navigationManager.navigateToProfileDetailScreen(userId)
-            },
-            onSeriesClick = { seriesId ->
-                showMetadataBottomSheet = false
-                navigationManager.navigateToNovelSeriesScreen(seriesId)
-            },
-            onTagClick = { tag ->
-                showMetadataBottomSheet = false
-                navigationManager.navigateToSearchResultScreen(
-                    searchWord = tag,
-                    isIdSearch = false,
-                    searchMode = AppViewMode.NOVEL
-                )
-            },
-            onCaptionLinkClick = { url ->
-                showMetadataBottomSheet = false
-                when (val target = resolveNovelCaptionLink(url)) {
-                    is NovelCaptionLinkTarget.Illust ->
-                        navigationManager.navigateToSinglePictureScreen(target.id)
-
-                    is NovelCaptionLinkTarget.Novel ->
-                        navigationManager.navigateToNovelDetailScreen(target.id)
-
-                    is NovelCaptionLinkTarget.User ->
-                        navigationManager.navigateToProfileDetailScreen(target.id)
-
-                    is NovelCaptionLinkTarget.External ->
-                        runCatching { uriHandler.openUri(target.url) }
-
-                    null -> Unit
-                }
-            },
-            onCommentClick = {
-                saveReadingProgress()
-                showMetadataBottomSheet = false
-                navigationManager.navigateToCommentScreen(
-                    state.novel.id,
-                    CommentType.NOVEL
-                )
-            },
+            onSeriesClick = navigationManager::navigateToNovelSeriesScreen,
+            navigationManager = navigationManager,
+            onBeforeCommentClick = { saveReadingProgress() },
         )
     }
 

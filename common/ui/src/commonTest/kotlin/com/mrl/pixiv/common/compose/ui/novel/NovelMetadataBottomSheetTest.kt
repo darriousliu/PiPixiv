@@ -1,4 +1,4 @@
-package com.mrl.pixiv.novel
+package com.mrl.pixiv.common.compose.ui.novel
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

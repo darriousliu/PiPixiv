@@ -41,10 +41,6 @@
 }
 -keepattributes RuntimeVisibleAnnotations,AnnotationDefault,Signature
 
--assumevalues public class androidx.compose.runtime.ComposeRuntimeFlags {
-    static boolean isLinkBufferComposerEnabled return true;
-}
-
 # -printmapping mappings-desktop-currentOS.txt
 
 -printconfiguration build/compose/binaries/main-release/proguard/configuration.txt

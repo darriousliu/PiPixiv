@@ -28,5 +28,8 @@ kotlin {
         jvmMain.dependencies {
             implementation(libs.filekit.core)
         }
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }

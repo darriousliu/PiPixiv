@@ -57,6 +57,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -170,6 +171,12 @@ fun ProfileDetailScreen(
                     isBlocked = isBlocked,
                     isUpdatingFollow = isUpdatingFollow,
                     onBack = navigationManager::popBackStack,
+                    onAvatarClick = { url ->
+                        navigationManager.navigateToImagePreviewScreen(
+                            imageUrls = listOf(url),
+                            initialIndex = 0,
+                        )
+                    },
                     onPrivateFollow = { userId ->
                         viewModel.followUser(userId, Restrict.PRIVATE)
                     },
@@ -490,16 +497,18 @@ private fun ProfileDetailRow(label: String, value: String) {
 }
 
 @Composable
-private fun ProfileDetailAppBar(
+internal fun ProfileDetailAppBar(
     userInfo: UserDetailResp,
     scrollBehavior: TopAppBarScrollBehavior,
     isBlocked: Boolean,
     isUpdatingFollow: Boolean,
     onBack: () -> Unit,
+    onAvatarClick: (String) -> Unit,
     onPrivateFollow: (Long) -> Unit,
     onBlockUser: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val avatarUrl = userInfo.user.profileImageUrls.medium
     val avatarSize = 50.dp
     val expandedHeight = TopAppBarDefaults.MediumAppBarExpandedHeight + avatarSize
     val backgroundHeight = TopAppBarDefaults.MediumAppBarExpandedHeight +
@@ -540,13 +549,21 @@ private fun ProfileDetailAppBar(
                 verticalAlignment = CenterVertically
             ) {
                 UserAvatar(
-                    url = userInfo.user.profileImageUrls.medium,
+                    url = avatarUrl,
                     modifier = Modifier.size(avatarSize * (2 - scrollBehavior.state.collapsedFraction)),
+                    onClick = {
+                        if (avatarUrl.isNotBlank()) {
+                            onAvatarClick(avatarUrl)
+                        }
+                    },
+                    contentDescription = userInfo.user.name,
                 )
                 if (scrollBehavior.state.collapsedFraction == 1f) {
                     Text(
                         modifier = Modifier.padding(start = 10.dp),
                         text = userInfo.user.name,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Medium,

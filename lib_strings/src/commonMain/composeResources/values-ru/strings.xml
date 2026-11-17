@@ -94,6 +94,7 @@
     <string name="allow_open_link">Разрешить приложению открывать соответствующую ссылку</string>
     <string name="network_error">Ошибка сети, пожалуйста, проверьте соединение</string>
     <string name="sign_out">Выйти</string>
+    <string name="sign_out_confirmation">Выйти из аккаунта?</string>
     <string name="copy_to_clipboard">Скопировать в буфер обмена</string>
     <string name="export_token">Экспортировать токен</string>
     <string name="new_artworks">Новые работы</string>
@@ -228,6 +229,7 @@
     <string name="illust">Иллюстрация</string>
     <string name="series">Серия</string>
     <string name="word_count">Количество слов</string>
+    <string name="view_count">Просмотры</string>
     <string name="export_txt">Экспортировать в TXT</string>
     <string name="font_size">Размер шрифта</string>
     <string name="line_spacing">Межстрочный интервал</string>
@@ -252,6 +254,7 @@
     <string name="date_range">Диапазон дат</string>
     <string name="bookmark_range">Диапазон закладок</string>
     <string name="more">Еще</string>
+    <string name="view_more">Показать больше</string>
     <string name="cover">Обложка</string>
     <string name="clear">Очистить</string>
     <string name="bookmark_cancelled">Закладка удалена</string>

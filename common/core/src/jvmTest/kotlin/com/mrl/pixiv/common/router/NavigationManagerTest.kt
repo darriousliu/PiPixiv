@@ -173,6 +173,25 @@ class NavigationManagerTest {
     }
 
     @Test
+    fun repeatedImagePreviewTapsFromNovelKeepOnePreviewAndReturnToTheSameVisit() {
+        val navigation = NavigationManager(Destination.Main)
+        navigation.navigateToNovelDetailScreen(42)
+        val readingStack = navigation.backStack
+        val reader = navigation.forEntry(readingStack.last().entryId)
+        val imageUrls = listOf("https://i.pximg.net/image.png")
+
+        reader.navigateToImagePreviewScreen(imageUrls, initialIndex = 0)
+        reader.navigateToImagePreviewScreen(imageUrls, initialIndex = 0)
+
+        assertEquals(readingStack.size + 1, navigation.backStack.size)
+        assertEquals(Destination.ImagePreview(imageUrls, 0), navigation.currentDestination)
+        val preview = navigation.forEntry(navigation.backStack.last().entryId)
+        preview.popBackStack()
+        preview.popBackStack()
+        assertEquals(readingStack, navigation.backStack)
+    }
+
+    @Test
     fun staleEntryCallbacksCannotNavigateOrPopTheActiveContext() {
         val navigation = NavigationManager(Destination.Following(1))
         val source = navigation.backStack.last()

@@ -100,6 +100,7 @@
     <string name="token" translatable="false">Token</string>
     <string name="network_error">网络错误，请检查网络</string>
     <string name="sign_out">登出</string>
+    <string name="sign_out_confirmation">确定要登出吗？</string>
     <string name="copy_to_clipboard">复制到剪切板</string>
     <string name="export_token">导出Token</string>
     <string name="new_artworks">新作</string>
@@ -235,6 +236,7 @@
     <string name="illust">插画</string>
     <string name="series">系列</string>
     <string name="word_count">字数</string>
+    <string name="view_count">阅读量</string>
     <string name="export_txt">导出为TXT</string>
     <string name="font_size">字号</string>
     <string name="line_spacing">行间距</string>
@@ -259,6 +261,7 @@
     <string name="date_range">日期范围</string>
     <string name="bookmark_range">收藏范围</string>
     <string name="more">更多</string>
+    <string name="view_more">查看更多</string>
     <string name="cover">封面</string>
     <string name="clear">清除</string>
     <string name="bookmark_cancelled">已取消收藏</string>

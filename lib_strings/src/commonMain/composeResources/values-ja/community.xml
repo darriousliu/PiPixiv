@@ -5,7 +5,6 @@
     <string name="community_unread">未読の通知があります</string>
     <string name="community_unread_failed">未読状態を更新できませんでした</string>
     <string name="community_empty_notifications">通知はまだありません</string>
-    <string name="community_view_more">もっと見る</string>
     <string name="community_unknown_link">この通知のリンクにはまだ対応していません</string>
     <string name="community_recommended_users">おすすめの作者</string>
     <string name="community_related_users">関連する作者</string>

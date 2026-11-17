@@ -9,4 +9,6 @@
     <string name="profile_view_homepage">프로필 보기</string>
     <string name="settings_section_general">일반</string>
     <string name="unblock_item">차단 해제</string>
+    <string name="liquid_glass_navigation">리퀴드 글래스 탐색</string>
+    <string name="liquid_glass_navigation_desc">끄면 기본 하단 탐색 메뉴를 사용합니다.</string>
 </resources>

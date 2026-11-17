@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">تسجيل الدخول عبر الويب غير متاح مؤقتًا. جرّب طريقة أخرى، مثل تسجيل الدخول باستخدام رمز أو Cookie.</string>
+    <string name="webview_runtime_required">لم يتم العثور على بيئة تشغيل WebView2، لذلك لا يمكن تسجيل الدخول أو إنشاء حساب عبر الويب. ثبّتها ثم حاول مجددًا، أو استخدم طريقة أخرى لتسجيل الدخول.</string>
+    <string name="login_other_methods">استخدام طريقة أخرى لتسجيل الدخول</string>
+</resources>

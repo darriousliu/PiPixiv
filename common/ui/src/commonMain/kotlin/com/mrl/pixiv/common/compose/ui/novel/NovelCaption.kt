@@ -1,4 +1,4 @@
-package com.mrl.pixiv.novel
+package com.mrl.pixiv.common.compose.ui.novel
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -10,7 +10,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import be.digitalia.compose.htmlconverter.HtmlStyle
 import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
 
-internal sealed interface NovelCaptionLinkTarget {
+sealed interface NovelCaptionLinkTarget {
     data class Illust(val id: Long) : NovelCaptionLinkTarget
 
     data class Novel(val id: Long) : NovelCaptionLinkTarget
@@ -20,7 +20,7 @@ internal sealed interface NovelCaptionLinkTarget {
     data class External(val url: String) : NovelCaptionLinkTarget
 }
 
-internal fun resolveNovelCaptionLink(rawUrl: String): NovelCaptionLinkTarget? {
+fun resolveNovelCaptionLink(rawUrl: String): NovelCaptionLinkTarget? {
     if (rawUrl.isEmpty() || rawUrl.any { it.isWhitespace() || it.code < 0x20 }) {
         return null
     }
@@ -32,22 +32,17 @@ internal fun resolveNovelCaptionLink(rawUrl: String): NovelCaptionLinkTarget? {
     val remainder = rawUrl.substring(schemeSeparatorIndex + 3)
     return when (scheme) {
         "pixiv" -> resolvePixivCaptionLink(remainder)
-        "http", "https" -> {
-            val authority = remainder.substringBefore('/')
-                .substringBefore('?')
-                .substringBefore('#')
-            if (isValidHttpAuthority(authority)) {
-                NovelCaptionLinkTarget.External(rawUrl)
-            } else {
-                null
-            }
-        }
+        "http", "https" -> rawUrl.takeIf { hasValidNovelHttpAuthority(remainder) }
+            ?.let { NovelCaptionLinkTarget.External(it) }
 
         else -> null
     }
 }
 
-private fun isValidHttpAuthority(authority: String): Boolean {
+fun hasValidNovelHttpAuthority(urlRemainder: String): Boolean {
+    val authority = urlRemainder.substringBefore('/')
+        .substringBefore('?')
+        .substringBefore('#')
     if (authority.isBlank() || authority.any { it.code < 0x21 }) return false
 
     val hostAndPort = authority.substringAfterLast('@')
@@ -91,7 +86,7 @@ private fun resolvePixivCaptionLink(remainder: String): NovelCaptionLinkTarget? 
     }
 }
 
-internal fun novelCaptionToAnnotatedString(
+fun novelCaptionToAnnotatedString(
     html: String,
     linkColor: Color,
     onLinkClick: (String) -> Unit,

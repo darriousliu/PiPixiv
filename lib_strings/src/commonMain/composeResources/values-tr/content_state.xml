@@ -6,4 +6,6 @@
     <string name="content_empty_downloads">Henüz indirme görevi yok</string>
     <string name="content_error_title">Şu anda yüklenemiyor</string>
     <string name="content_error_description">Lütfen biraz sonra tekrar deneyin</string>
+    <string name="page_unavailable_title">Sayfa geçici olarak kullanılamıyor</string>
+    <string name="page_unavailable_message">Bu sayfada bir sorun oluştuğu için şu anda devam edilemiyor. Geri dönüp tekrar deneyin.</string>
 </resources>

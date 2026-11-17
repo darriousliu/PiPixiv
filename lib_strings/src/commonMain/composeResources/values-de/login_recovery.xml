@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">Die Webanmeldung ist vorübergehend nicht verfügbar. Versuche eine andere Anmeldemethode, etwa Token oder Cookie.</string>
+    <string name="webview_runtime_required">Die WebView2-Runtime wurde nicht gefunden. Webanmeldung und Registrierung sind nicht verfügbar. Installiere sie und versuche es erneut, oder nutze eine andere Anmeldemethode.</string>
+    <string name="login_other_methods">Andere Anmeldemethode verwenden</string>
+</resources>

@@ -9,4 +9,6 @@
     <string name="profile_view_homepage">عرض الملف الشخصي</string>
     <string name="settings_section_general">عام</string>
     <string name="unblock_item">إلغاء الحظر</string>
+    <string name="liquid_glass_navigation">التنقّل بتأثير الزجاج السائل</string>
+    <string name="liquid_glass_navigation_desc">أوقف هذا الخيار لاستخدام شريط التنقّل السفلي القياسي.</string>
 </resources>

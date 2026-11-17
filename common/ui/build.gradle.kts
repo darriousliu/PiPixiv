@@ -13,6 +13,7 @@ kotlin {
             implementation(project(":common:data"))
             implementation(project(":common:repository"))
             implementation(project(":common:core"))
+            implementation(libs.html.converter)
 
             // Paging
             implementation(libs.bundles.androidx.paging)

@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">Вход через веб временно недоступен. Попробуйте другой способ входа, например с помощью токена или Cookie.</string>
+    <string name="webview_runtime_required">Среда выполнения WebView2 не найдена, поэтому вход и регистрация через веб недоступны. Установите её и повторите попытку или используйте другой способ входа.</string>
+    <string name="login_other_methods">Другой способ входа</string>
+</resources>

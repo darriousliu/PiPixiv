@@ -13,16 +13,16 @@
 一个完全由 [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) 编写的跨平台第三方
 Pixiv 应用
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.4.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
-![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-1.12.1-blue)
+[![Kotlin 2.4.21](https://img.shields.io/badge/Kotlin-2.4.21-blue?logo=kotlin)](https://kotlinlang.org)
+[![Compose Multiplatform 1.12.2](https://img.shields.io/badge/Compose_Multiplatform-1.12.2-blue)](https://www.jetbrains.com/compose-multiplatform/)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/darriousliu/PiPixiv/release.yml)](https://github.com/darriousliu/PiPixiv/actions/workflows/release.yml)
-[![License: Apache-2.0](https://img.shields.io/github/license/darriousliu/PiPixiv?labelColor=27303D&color=0877d2)](/LICENSE)
+[![License: Apache-2.0](https://img.shields.io/github/license/darriousliu/PiPixiv?labelColor=27303D&color=0877d2)](./LICENSE)
 
 ## 📥 下载
 
-当前源码版本：**2.6.0**。已发布版本请查看下方 GitHub Release。
+当前源码版本：**2.6.1**。已发布版本请查看下方 GitHub Release。
 
-[![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=稳定版)](https://github.com/darriousliu/PiPixiv/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=稳定版)](https://github.com/darriousliu/PiPixiv/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=下载量&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
 [![F-Droid Version](https://img.shields.io/f-droid/v/com.mrl.pixiv)](https://f-droid.org/packages/com.mrl.pixiv/)
 
@@ -50,6 +50,7 @@ Pixiv 应用
 
 * 🔐 使用 Pixiv 账号登录（OAuth 认证）。
 * 🍪 通过网页端 Cookie（PHPSESSID）登录，无需手动填写 Token。
+* 🔒 登出前二次确认。
 
 ### 🏠 内容浏览
 
@@ -68,7 +69,8 @@ Pixiv 应用
 
 * 📖 插画/小说视图一键切换，首页、动态、收藏、排行榜、搜索页均支持，偏好设置持久化保存。
 * 📝 沉浸式小说阅读，支持调节字体大小与行距、拖动滚动条定位；回到顶部与章节切换按钮纵向排列，调整排版时保持阅读位置。
-* ℹ️ 阅读时查看作品简介、标签和系列信息，跳转作者主页或系列目录。
+* ℹ️ 从小说卡片的「查看更多」查看完整标题、标签、简介、发布时间和统计数据。阅读时可查看系列信息，并跳转作者主页或系列目录。
+* 🖼️ 在应用内放大查看小说内嵌图片。
 * ▶️ 系列目录提供继续阅读入口，分别显示上次阅读的章节标题与进度百分比。
 * 🤖 小说 AI 翻译：支持 OpenAI / Claude / Gemini 和兼容接口，可配置局域网服务、模型、超时及请求参数；支持获取可用模型列表、限制全局并发，以及正文、标题和简介翻译。
 * 🌐 译文支持流式显示、本地缓存和原文/译文切换。
@@ -85,7 +87,7 @@ Pixiv 应用
 
 ### 👤 用户与社交
 
-* 👤 查看作者简介、个人资料和工作环境，以及插画、漫画、小说投稿和公开收藏；小说预览可直接打开阅读。
+* 👤 查看作者简介、个人资料和工作环境，以及插画、漫画、小说投稿和公开收藏。点击头像可放大查看，点击小说预览可直接阅读。
 * 👥 查看关注列表，自己的关注支持公开/私密分类。
 * 💬 查看和发表评论。
 
@@ -97,6 +99,7 @@ Pixiv 应用
 ### ⚙️ 设置与系统
 
 * ⚙️ 应用设置（语言、图片来源、网格列数、私密收藏等）。
+* 🧭 可在悬浮液态玻璃与标准底部导航栏之间切换。
 * 🌐 默认使用系统代理，可切换为直连或手动 HTTP / SOCKS 代理，修改网络模式后重启应用生效；Android 和桌面端另提供 ECH 模式。
 * 🔒 隐私设置支持控制 R-18 内容显示、进入搜索页时读取剪贴板。
 * 🚫 屏蔽作品、用户和标签，可按长度与分段数量过滤小说长标签。
@@ -121,9 +124,11 @@ Pixiv 应用
 
 <div align="left">
 
-* Kotlin **2.4.20**、Compose Multiplatform **1.12.1**、Android Gradle Plugin **9.4.1**。
-* Gradle Wrapper **9.6.1**、JDK 工具链 **25**；Android 编译/目标 SDK **37**，最低 SDK **26**。
+* Kotlin **2.4.21**、Compose Multiplatform **1.12.2**、Android Gradle Plugin **9.5.1**。
+* Gradle Wrapper **9.9.1**，JDK 工具链 **25**。
+* Android 应用编译 SDK **37.2**、目标 SDK **37**、最低 SDK **26**。
 * iOS 使用 Swift Export，部署目标为 **iOS 18.0**。
+* 主要依赖包括 AndroidX Compose BOM Beta **2026.11.00**、Navigation 3（Android **1.2.1**、JetBrains **1.2.0**）、Ktor **3.6.1**、Koin **4.2.2** 和 Coil **3.6.3**。
 
 依赖版本以 [版本目录](./gradle/libs.versions.toml) 为准，应用版本见 [gradle.properties](./gradle.properties) 与 [iOS 配置](./iosApp/Configuration/Config.xcconfig)。
 
@@ -131,7 +136,13 @@ Pixiv 应用
 
 ## ⭐ 星标历史
 
-[![Star History](https://starchart.cc/darriousliu/PiPixiv.svg?variant=adaptive)](https://starchart.cc/darriousliu/PiPixiv)
+<a href="https://www.star-history.com/?repos=darriousliu%2FPiPixiv&amp;type=date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=darriousliu/PiPixiv&amp;type=Date&amp;theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=darriousliu/PiPixiv&amp;type=Date" />
+    <img alt="PiPixiv 的 GitHub Star 增长曲线" src="https://api.star-history.com/svg?repos=darriousliu/PiPixiv&amp;type=Date" width="800" />
+  </picture>
+</a>
 
 ## 🙏 鸣谢
 

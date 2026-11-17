@@ -5,4 +5,6 @@
     <string name="content_empty_downloads">No downloads here yet</string>
     <string name="content_error_title">Unable to load right now</string>
     <string name="content_error_description">Please try again in a moment</string>
+    <string name="page_unavailable_title">Page temporarily unavailable</string>
+    <string name="page_unavailable_message">This page encountered a problem and cannot continue right now. Go back and try again.</string>
 </resources>

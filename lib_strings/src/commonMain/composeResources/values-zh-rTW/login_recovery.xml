@@ -1,0 +1,5 @@
+<resources>
+    <string name="login_webview_failed">網頁登入暫時無法使用，請嘗試使用 Token 或 Cookie 等其他登入方式。</string>
+    <string name="webview_runtime_required">未偵測到 WebView2 執行階段，無法使用網頁登入或註冊。請安裝後再試，或使用其他登入方式。</string>
+    <string name="login_other_methods">使用其他登入方式</string>
+</resources>

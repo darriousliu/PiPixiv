@@ -87,6 +87,9 @@ internal class AdaptivePaneTransitionState(
     fun backCardFor(scene: AdaptiveScene): PredictiveBackCardTransition? =
         backCard?.takeIf { it.contains(scene.key) }
 
+    fun isBackCardActive(transition: PredictiveBackCardTransition): Boolean =
+        backCard === transition
+
     fun finishBackCard(transition: PredictiveBackCardTransition) {
         // 被中断手势的场景移除时，不能清除后续手势的状态。
         if (backCard === transition) backCard = null
@@ -163,6 +166,7 @@ internal data class AdaptiveScene(
             PredictiveBackCard(
                 sceneKey = key,
                 card = paneTransitionState.backCardFor(this),
+                isActive = paneTransitionState::isBackCardActive,
                 onFinished = paneTransitionState::finishBackCard,
             ) {
                 PaneHost(PaneRole.Single, isSplit = false) { top.Content() }

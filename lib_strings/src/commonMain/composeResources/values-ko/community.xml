@@ -5,7 +5,6 @@
     <string name="community_unread">읽지 않은 알림이 있습니다</string>
     <string name="community_unread_failed">읽지 않음 상태를 업데이트하지 못했습니다</string>
     <string name="community_empty_notifications">아직 알림이 없습니다</string>
-    <string name="community_view_more">더 보기</string>
     <string name="community_unknown_link">이 알림의 링크는 아직 지원하지 않습니다</string>
     <string name="community_recommended_users">추천 작가</string>
     <string name="community_related_users">비슷한 작가</string>

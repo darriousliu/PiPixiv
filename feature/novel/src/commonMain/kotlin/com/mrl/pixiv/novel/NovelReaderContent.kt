@@ -51,6 +51,7 @@ import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
+import com.mrl.pixiv.common.compose.ui.novel.novelCaptionToAnnotatedString
 import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
@@ -83,17 +84,18 @@ internal fun NovelReaderContent(
     state: NovelState,
     listState: LazyListState,
     readingProgressFraction: Float,
-    modifier: Modifier = Modifier,
     onParagraphTextLayout: (Int, TextLayoutResult) -> Unit,
     paragraphLayoutCacheKey: ParagraphLayoutCacheKey,
     onContentWidthChanged: (Int) -> Unit,
-    onContentClick: () -> Unit = {},
     onTagClick: (String) -> Unit,
     onPixivImageClick: (Long) -> Unit,
+    onUploadedImageClick: (String) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onSeriesClick: (Long) -> Unit,
     onCaptionLinkClick: (String) -> Unit,
     onCommentClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onContentClick: () -> Unit = {},
 ) {
     val novel = state.novel ?: return
     val density = LocalDensity.current
@@ -394,6 +396,7 @@ internal fun NovelReaderContent(
                                 onParagraphTextLayout = onParagraphTextLayout,
                                 onContentClick = onContentClick,
                                 onPixivImageClick = onPixivImageClick,
+                                onUploadedImageClick = onUploadedImageClick,
                             )
                         }
                     }
@@ -425,6 +428,7 @@ internal fun NovelReaderContent(
                             onParagraphTextLayout = { _, _ -> },
                             onContentClick = onContentClick,
                             onPixivImageClick = onPixivImageClick,
+                            onUploadedImageClick = onUploadedImageClick,
                         )
                     }
 

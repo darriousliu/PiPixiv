@@ -111,7 +111,7 @@ class PredictiveBackCardTest {
         holdProgress(fixture, NavigationEvent.EDGE_RIGHT, 1f)
         assertSameColorPreview(pageColor, NavigationEvent.EDGE_RIGHT, exposedColor)
         runOnIdle { fixture.input.backCompleted() }
-        settle()
+        assertCompletionFrames(pageColor, frameCount = 30)
         assertFullPage(pageColor)
         onNodeWithTag("detail").assertDoesNotExist()
         runOnIdle {
@@ -132,7 +132,7 @@ class PredictiveBackCardTest {
         waitForIdle()
         assertSameColorPreview(pageColor, NavigationEvent.EDGE_LEFT, exposedColor)
         runOnIdle { fixture.input.backCompleted() }
-        advanceCommitFrames()
+        assertCompletionFrames(pageColor, frameCount = 6)
         assertFullPage(pageColor)
         onNodeWithTag("detail").assertDoesNotExist()
         runOnIdle {
@@ -190,8 +190,26 @@ class PredictiveBackCardTest {
             assertTrue(onNodeWithTag("detail").fetchSemanticsNode().boundsInRoot.width < CardWidth)
             onNodeWithTag("root").assertExists()
             runOnIdle { fixture.input.backCompleted() }
-            advanceCommitFrames()
-            assertFullPage(CardRootArgb)
+            // 原先跳过前三帧再检查，会漏掉完成瞬间的空白、蒙层残留或旧页面回闪。
+            repeat(6) { frame ->
+                mainClock.advanceTimeByFrame()
+                waitForIdle()
+                val image = captureToImage().toAwtImage()
+                for (y in listOf(2, CardSampleY, CardHeight - 3)) {
+                    for (x in 2 until CardWidth - 2) {
+                        assertEquals(
+                            CardRootArgb,
+                            image.getRGB(x, y),
+                            "Quick return frame ${frame + 1}, edge $edge: destination pixel ($x, $y)",
+                        )
+                    }
+                }
+                assertEquals(
+                    CardMarkerArgb,
+                    image.getRGB(CardWidth / 2, CardHeight / 2),
+                    "Quick return frame ${frame + 1}, edge $edge: shared image must remain visible",
+                )
+            }
             onNodeWithTag("detail").assertDoesNotExist()
             runOnIdle {
                 assertEquals(listOf(fixture.root), fixture.backStack.toList())
@@ -392,6 +410,26 @@ class PredictiveBackCardTest {
         repeat(3) {
             mainClock.advanceTimeByFrame()
             waitForIdle()
+        }
+    }
+
+    private fun DesktopComposeUiTest.assertCompletionFrames(pageColor: Int, frameCount: Int) {
+        repeat(frameCount) { frame ->
+            mainClock.advanceTimeByFrame()
+            waitForIdle()
+            val image = captureToImage().toAwtImage()
+            // 两页背景相同，正常收尾的中心像素应始终保持原色。
+            // 卡片消失后若蒙层迟一帧移除，这里会捕获目的页面的亮度突变。
+            assertEquals(
+                pageColor,
+                image.getRGB(CardWidth / 2, CardSampleY),
+                "Completion frame ${frame + 1}: page pixel (${CardWidth / 2}, $CardSampleY)",
+            )
+            assertEquals(
+                CardMarkerArgb,
+                image.getRGB(CardWidth / 2, CardHeight / 2),
+                "Completion frame ${frame + 1}: shared image pixel (${CardWidth / 2}, ${CardHeight / 2})",
+            )
         }
     }
 

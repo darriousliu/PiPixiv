@@ -9,4 +9,6 @@
     <string name="profile_view_homepage">プロフィールを見る</string>
     <string name="settings_section_general">一般</string>
     <string name="unblock_item">ブロックを解除</string>
+    <string name="liquid_glass_navigation">リキッドガラスのナビゲーション</string>
+    <string name="liquid_glass_navigation_desc">オフにすると、標準の下部ナビゲーションバーを使用します。</string>
 </resources>
