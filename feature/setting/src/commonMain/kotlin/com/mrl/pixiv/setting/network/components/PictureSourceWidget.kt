@@ -3,9 +3,9 @@ package com.mrl.pixiv.setting.network.components
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,7 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.mrl.pixiv.common.data.Constants.IMAGE_HOST
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.setting.components.DropDownSelector
+import com.mrl.pixiv.setting.components.SettingDropdownRow
 import com.mrl.pixiv.strings.image_source
 import com.mrl.pixiv.strings.label_default
 import com.mrl.pixiv.strings.self_defined_source
@@ -54,45 +54,40 @@ fun PictureSourceWidget(
         )
     }
 
-    ListItem(
-        headlineContent = {
-            Text(text = stringResource(RStrings.image_source))
-        },
+    SettingDropdownRow(
+        title = stringResource(RStrings.image_source),
+        icon = Icons.Rounded.Image,
+        current = sources[selectedHost] ?: selectedHost,
+        expanded = expanded,
+        onClick = { expanded = !expanded },
+        onDismissRequest = { expanded = false },
         modifier = modifier,
-        trailingContent = {
-            DropDownSelector(
-                onClick = { expanded = !expanded },
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                current = sources[selectedHost] ?: selectedHost,
-            ) {
-                sources.forEach { (host, label) ->
-                    DropdownMenuItem(
-                        text = { Text(text = label) },
-                        trailingIcon = {
-                            if (host == selectedHost) {
-                                Icon(Icons.Rounded.Check, contentDescription = null)
-                            }
-                        },
-                        onClick = {
-                            savePictureSourceHost(host)
-                            expanded = false
-                        }
-                    )
-                }
-                DropdownMenuItem(
-                    text = { Text(text = stringResource(RStrings.self_defined_source)) },
-                    trailingIcon = {
-                        if (isCustomSource) {
-                            Icon(Icons.Rounded.Check, contentDescription = null)
-                        }
-                    },
-                    onClick = {
-                        expanded = false
-                        showCustomSourceDialog = true
+    ) {
+        sources.forEach { (host, label) ->
+            DropdownMenuItem(
+                text = { Text(text = label) },
+                trailingIcon = {
+                    if (host == selectedHost) {
+                        Icon(Icons.Rounded.Check, contentDescription = null)
                     }
-                )
-            }
+                },
+                onClick = {
+                    savePictureSourceHost(host)
+                    expanded = false
+                },
+            )
         }
-    )
+        DropdownMenuItem(
+            text = { Text(text = stringResource(RStrings.self_defined_source)) },
+            trailingIcon = {
+                if (isCustomSource) {
+                    Icon(Icons.Rounded.Check, contentDescription = null)
+                }
+            },
+            onClick = {
+                expanded = false
+                showCustomSourceDialog = true
+            },
+        )
+    }
 }

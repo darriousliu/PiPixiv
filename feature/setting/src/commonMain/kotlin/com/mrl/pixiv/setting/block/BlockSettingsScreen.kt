@@ -2,7 +2,9 @@ package com.mrl.pixiv.setting.block
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -10,6 +12,8 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -21,7 +25,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -96,7 +104,15 @@ internal fun BlockSettingsContent(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(RStrings.block_settings)) },
+                title = {
+                    Text(
+                        text = stringResource(RStrings.block_settings),
+                        style = LocalTextStyle.current.copy(
+                            hyphens = Hyphens.Auto,
+                            lineBreak = LineBreak.Heading,
+                        ),
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack, shapes = IconButtonDefaults.shapes()) {
                         Icon(
@@ -109,7 +125,18 @@ internal fun BlockSettingsContent(
         },
     ) { innerPadding ->
         Column(Modifier.padding(innerPadding).fillMaxSize()) {
-            PrimaryScrollableTabRow(selectedTabIndex = pagerState.currentPage, edgePadding = 8.dp) {
+            PrimaryScrollableTabRow(
+                selectedTabIndex = pagerState.currentPage,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .widthIn(max = 720.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .clip(MaterialTheme.shapes.large),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                edgePadding = 8.dp,
+                divider = {},
+            ) {
                 BlockCategory.entries.forEach { tab ->
                     Tab(
                         selected = tab.ordinal == pagerState.currentPage,

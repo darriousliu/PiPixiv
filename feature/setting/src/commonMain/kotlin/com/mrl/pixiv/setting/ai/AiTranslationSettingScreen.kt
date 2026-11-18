@@ -1,32 +1,25 @@
 package com.mrl.pixiv.setting.ai
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -43,8 +36,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.ai.AiEndpointError
@@ -58,7 +54,10 @@ import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.setting.components.DropDownSelector
+import com.mrl.pixiv.setting.components.SettingChoiceRow
+import com.mrl.pixiv.setting.components.SettingPageColumn
+import com.mrl.pixiv.setting.components.SettingRow
+import com.mrl.pixiv.setting.components.SettingSectionTitle
 import com.mrl.pixiv.strings.ai_api_key
 import com.mrl.pixiv.strings.ai_endpoint
 import com.mrl.pixiv.strings.ai_endpoint_credentials_not_allowed
@@ -110,8 +109,30 @@ fun AiTranslationSettingScreen(
     modelCatalogService: AiModelCatalogService = koinInject(),
 ) {
     val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
-    val currentConfig = userPreference.aiTranslationConfig
 
+    AiTranslationSettingContent(
+        currentConfig = userPreference.aiTranslationConfig,
+        onBack = navigationManager::popBackStack,
+        onSave = { config, isLocalNetwork ->
+            SettingRepository.setAiTranslationConfig(config)
+            if (isLocalNetwork) {
+                AiLocalNetworkAccessGate.requestAccess(retryDenied = true)
+            }
+            navigationManager.popBackStack()
+        },
+        fetchModels = modelCatalogService::fetchModels,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun AiTranslationSettingContent(
+    currentConfig: AiTranslationConfig,
+    onBack: () -> Unit,
+    onSave: (AiTranslationConfig, Boolean) -> Unit,
+    fetchModels: suspend (AiTranslationConfig) -> List<String>,
+    modifier: Modifier = Modifier,
+) {
     var providerName by rememberSaveable { mutableStateOf(currentConfig.provider.name) }
     var endpoint by rememberSaveable { mutableStateOf(currentConfig.endpoint) }
     var apiKey by rememberSaveable { mutableStateOf(currentConfig.apiKey) }
@@ -169,14 +190,28 @@ fun AiTranslationSettingScreen(
         }
     }
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(RStrings.ai_translation_setting))
+                    BoxWithConstraints {
+                        val titleStyle = if (maxWidth < 160.dp * LocalDensity.current.fontScale) {
+                            MaterialTheme.typography.titleMedium
+                        } else {
+                            LocalTextStyle.current
+                        }
+                        Text(
+                            text = stringResource(RStrings.ai_translation_setting),
+                            style = titleStyle.copy(
+                                hyphens = Hyphens.Auto,
+                                lineBreak = LineBreak.Heading,
+                            ),
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = navigationManager::popBackStack,
+                        onClick = onBack,
                         shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
@@ -200,7 +235,7 @@ fun AiTranslationSettingScreen(
                                 extraBodyError = true
                                 return@TextButton
                             }
-                            SettingRepository.setAiTranslationConfig(
+                            onSave(
                                 AiTranslationConfig(
                                     provider = selectedProvider,
                                     endpoint = requireNotNull(
@@ -214,12 +249,9 @@ fun AiTranslationSettingScreen(
                                     extraBody = extraBody.trim(),
                                     generationTimeoutSeconds = generationTimeoutSeconds,
                                     maxConcurrentRequests = maxConcurrentRequests,
-                                )
+                                ),
+                                endpointValidation.isLocalNetwork,
                             )
-                            if (endpointValidation.isLocalNetwork) {
-                                AiLocalNetworkAccessGate.requestAccess(retryDenied = true)
-                            }
-                            navigationManager.popBackStack()
                         }
                     ) {
                         Text(text = stringResource(RStrings.save))
@@ -228,17 +260,14 @@ fun AiTranslationSettingScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = modifier
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .imePadding(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            ProviderItem(
-                provider = selectedProvider,
-                onProviderChange = change@{ nextProvider ->
+        SettingPageColumn(paddingValues) {
+            val fieldShape = MaterialTheme.shapes.medium
+            SettingChoiceRow(
+                title = stringResource(RStrings.ai_provider),
+                icon = Icons.Rounded.Translate,
+                selected = selectedProvider,
+                options = AiProvider.entries,
+                onSelectionChange = change@{ nextProvider ->
                     if (nextProvider == selectedProvider) return@change
                     resetModelCatalog()
                     providerName = nextProvider.name
@@ -247,106 +276,114 @@ fun AiTranslationSettingScreen(
                     apiKey = ""
                     extraBody = ""
                     extraBodyError = false
-                }
+                },
+                optionLabel = { it.toDisplayName() },
             )
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = endpoint,
-                onValueChange = {
-                    resetModelCatalog()
-                    endpoint = it
-                    endpointError = null
-                },
-                label = { Text(text = stringResource(RStrings.ai_endpoint)) },
-                supportingText = endpointError?.let { error ->
-                    {
-                        Text(text = error.label())
-                    }
-                },
-                isError = endpointError != null,
-                singleLine = true,
-            )
+            Column(
+                modifier = Modifier.padding(top = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = fieldShape,
+                    value = endpoint,
+                    onValueChange = {
+                        resetModelCatalog()
+                        endpoint = it
+                        endpointError = null
+                    },
+                    label = { Text(text = stringResource(RStrings.ai_endpoint)) },
+                    supportingText = endpointError?.let { error ->
+                        {
+                            Text(text = error.label())
+                        }
+                    },
+                    isError = endpointError != null,
+                    singleLine = true,
+                )
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = apiKey,
-                onValueChange = {
-                    resetModelCatalog()
-                    apiKey = it
-                },
-                label = { Text(text = stringResource(RStrings.ai_api_key)) },
-                visualTransformation = PasswordVisualTransformation(),
-                singleLine = true,
-            )
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = fieldShape,
+                    value = apiKey,
+                    onValueChange = {
+                        resetModelCatalog()
+                        apiKey = it
+                    },
+                    label = { Text(text = stringResource(RStrings.ai_api_key)) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                )
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = model,
-                onValueChange = { model = it },
-                label = { Text(stringResource(RStrings.ai_model)) },
-                singleLine = true,
-            )
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = fieldShape,
+                    value = model,
+                    onValueChange = { model = it },
+                    label = { Text(stringResource(RStrings.ai_model)) },
+                    singleLine = true,
+                )
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = generationTimeoutInput,
-                onValueChange = { generationTimeoutInput = it },
-                label = {
-                    Text(text = stringResource(RStrings.ai_generation_timeout_seconds))
-                },
-                supportingText = {
-                    Text(
-                        text = stringResource(
-                            if (generationTimeoutSeconds == null) {
-                                RStrings.ai_generation_timeout_invalid
-                            } else {
-                                RStrings.ai_generation_timeout_desc
-                            },
-                            AiTranslationConfig.GENERATION_TIMEOUT_MIN_SECONDS,
-                            AiTranslationConfig.GENERATION_TIMEOUT_MAX_SECONDS,
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = fieldShape,
+                    value = generationTimeoutInput,
+                    onValueChange = { generationTimeoutInput = it },
+                    label = {
+                        Text(text = stringResource(RStrings.ai_generation_timeout_seconds))
+                    },
+                    supportingText = {
+                        Text(
+                            text = stringResource(
+                                if (generationTimeoutSeconds == null) {
+                                    RStrings.ai_generation_timeout_invalid
+                                } else {
+                                    RStrings.ai_generation_timeout_desc
+                                },
+                                AiTranslationConfig.GENERATION_TIMEOUT_MIN_SECONDS,
+                                AiTranslationConfig.GENERATION_TIMEOUT_MAX_SECONDS,
+                            )
                         )
-                    )
-                },
-                isError = generationTimeoutSeconds == null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-            )
+                    },
+                    isError = generationTimeoutSeconds == null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                )
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = maxConcurrentRequestsInput,
-                onValueChange = { maxConcurrentRequestsInput = it },
-                label = {
-                    Text(text = stringResource(RStrings.ai_max_concurrent_requests))
-                },
-                supportingText = {
-                    Text(
-                        text = stringResource(
-                            if (maxConcurrentRequests == null) {
-                                RStrings.ai_max_concurrent_requests_invalid
-                            } else {
-                                RStrings.ai_max_concurrent_requests_desc
-                            },
-                            AiTranslationConfig.MAX_CONCURRENT_REQUESTS_MIN,
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = fieldShape,
+                    value = maxConcurrentRequestsInput,
+                    onValueChange = { maxConcurrentRequestsInput = it },
+                    label = {
+                        Text(text = stringResource(RStrings.ai_max_concurrent_requests))
+                    },
+                    supportingText = {
+                        Text(
+                            text = stringResource(
+                                if (maxConcurrentRequests == null) {
+                                    RStrings.ai_max_concurrent_requests_invalid
+                                } else {
+                                    RStrings.ai_max_concurrent_requests_desc
+                                },
+                                AiTranslationConfig.MAX_CONCURRENT_REQUESTS_MIN,
+                            )
                         )
-                    )
-                },
-                isError = maxConcurrentRequests == null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-            )
+                    },
+                    isError = maxConcurrentRequests == null,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                )
+            }
 
             if (selectedProvider == AiProvider.OPENAI) {
-                ListItem(
+                SettingRow(
+                    title = stringResource(RStrings.ai_openai_use_response_api),
+                    icon = Icons.Rounded.Code,
+                    modifier = Modifier.padding(top = 8.dp),
                     onClick = rememberThrottleClick {
                         responseApi = !responseApi
-                    },
-                    shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    content = {
-                        Text(text = stringResource(RStrings.ai_openai_use_response_api))
                     },
                     trailingContent = {
                         Checkbox(
@@ -360,7 +397,8 @@ fun AiTranslationSettingScreen(
             }
 
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                shape = fieldShape,
                 value = extraBody,
                 onValueChange = {
                     extraBody = it
@@ -378,10 +416,7 @@ fun AiTranslationSettingScreen(
                 maxLines = 12,
             )
 
-            Text(
-                text = stringResource(RStrings.ai_extra_body_presets),
-                style = MaterialTheme.typography.labelLarge,
-            )
+            SettingSectionTitle(stringResource(RStrings.ai_extra_body_presets))
 
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -407,14 +442,16 @@ fun AiTranslationSettingScreen(
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = stringResource(RStrings.ai_model_suggestions),
                     style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 16.dp, end = 8.dp),
                 )
                 TextButton(
                     enabled = !isRefreshingModels,
@@ -437,7 +474,7 @@ fun AiTranslationSettingScreen(
                         modelRefreshJob?.cancel()
                         modelRefreshJob = coroutineScope.launch {
                             try {
-                                val models = modelCatalogService.fetchModels(refreshConfig)
+                                val models = fetchModels(refreshConfig)
                                 if (modelRefreshVersion == refreshVersion) {
                                     fetchedModels = models
                                 }
@@ -467,7 +504,10 @@ fun AiTranslationSettingScreen(
                             contentDescription = null,
                         )
                     }
-                    Text(text = stringResource(RStrings.ai_refresh_models))
+                    Text(
+                        text = stringResource(RStrings.ai_refresh_models),
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
                 }
             }
 
@@ -493,8 +533,6 @@ fun AiTranslationSettingScreen(
                     )
                 }
             }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         }
     }
 }
@@ -664,50 +702,6 @@ private fun JsonObject.mergeWith(other: JsonObject): JsonObject {
         }
     }
     return JsonObject(merged)
-}
-
-@Composable
-private fun ProviderItem(
-    provider: AiProvider,
-    onProviderChange: (AiProvider) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ListItem(
-        headlineContent = {
-            Text(text = stringResource(RStrings.ai_provider))
-        },
-        leadingContent = {
-            Icon(imageVector = Icons.Rounded.Translate, contentDescription = null)
-        },
-        trailingContent = {
-            DropDownSelector(
-                onClick = {
-                    expanded = !expanded
-                },
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                current = provider.toDisplayName(),
-            ) {
-                AiProvider.entries.forEach { item ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(text = item.toDisplayName())
-                        },
-                        onClick = {
-                            onProviderChange(item)
-                            expanded = false
-                        },
-                        trailingIcon = {
-                            if (item == provider) {
-                                Icon(imageVector = Icons.Rounded.Check, contentDescription = null)
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    )
 }
 
 @Composable

@@ -1,52 +1,52 @@
 package com.mrl.pixiv.setting.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 
 @Composable
 fun DropDownSelector(
-    modifier: Modifier = Modifier,
     expanded: Boolean,
     onClick: () -> Unit,
     onDismissRequest: () -> Unit,
     current: String,
-    items: @Composable ColumnScope.() -> Unit
+    modifier: Modifier = Modifier,
+    maxValueWidth: Dp = 96.dp,
+    items: @Composable ColumnScope.() -> Unit,
 ) {
-    Box {
-        Row(
-            modifier = modifier
-                .clip(MaterialTheme.shapes.small)
-                .clickable(onClick = rememberThrottleClick(onClick = onClick))
-                .background(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    MaterialTheme.shapes.small
-                )
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+    val colors = MaterialTheme.colorScheme
+    Box(modifier) {
+        Surface(
+            onClick = rememberThrottleClick(onClick = onClick),
+            modifier = Modifier.semantics { role = Role.Button },
+            shape = MaterialTheme.shapes.small,
+            color = colors.secondaryContainer,
+            contentColor = colors.onSecondaryContainer,
         ) {
-            Text(text = current, style = MaterialTheme.typography.bodyMedium)
-            Icon(imageVector = Icons.Rounded.ArrowDropDown, contentDescription = null)
+            SettingChoiceValue(
+                value = current,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                maxValueWidth = maxValueWidth,
+                contentColor = LocalContentColor.current,
+            )
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
-            items()
-        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = onDismissRequest,
+            containerColor = colors.surfaceContainerHigh,
+            content = items,
+        )
     }
 }

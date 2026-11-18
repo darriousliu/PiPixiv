@@ -1,22 +1,20 @@
 package com.mrl.pixiv.setting.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +38,6 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.mrl.pixiv.common.compose.rememberThrottleClick
 
 @Composable
 internal fun SettingSectionTitle(title: String) {
@@ -123,6 +120,43 @@ internal fun <T> SettingChoiceRow(
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    SettingDropdownRow(
+        title = title,
+        icon = icon,
+        current = optionLabel(selected),
+        expanded = expanded,
+        onClick = { expanded = !expanded },
+        onDismissRequest = { expanded = false },
+        modifier = modifier,
+    ) {
+        options.forEach { option ->
+            DropdownMenuItem(
+                text = { Text(optionLabel(option)) },
+                trailingIcon = if (option == selected) {
+                    { Icon(Icons.Rounded.Check, contentDescription = null) }
+                } else {
+                    null
+                },
+                onClick = {
+                    onSelectionChange(option)
+                    expanded = false
+                },
+            )
+        }
+    }
+}
+
+@Composable
+internal fun SettingDropdownRow(
+    title: String,
+    icon: ImageVector,
+    current: String,
+    expanded: Boolean,
+    onClick: () -> Unit,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    items: @Composable ColumnScope.() -> Unit,
+) {
     BoxWithConstraints(modifier) {
         val stackValue = maxWidth < 350.dp * LocalDensity.current.fontScale
         val valueWidth = if (stackValue) {
@@ -131,43 +165,14 @@ internal fun <T> SettingChoiceRow(
             (maxWidth * 0.34f).coerceAtMost(176.dp)
         }
         val choice: @Composable () -> Unit = {
-            val colors = MaterialTheme.colorScheme
-            Box {
-                Surface(
-                    onClick = rememberThrottleClick { expanded = !expanded },
-                    modifier = Modifier.semantics { role = Role.Button },
-                    shape = MaterialTheme.shapes.small,
-                    color = colors.secondaryContainer,
-                    contentColor = colors.onSecondaryContainer,
-                ) {
-                    SettingChoiceValue(
-                        value = optionLabel(selected),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        maxValueWidth = valueWidth,
-                        contentColor = LocalContentColor.current,
-                    )
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    containerColor = colors.surfaceContainerHigh,
-                ) {
-                    options.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(optionLabel(option)) },
-                            trailingIcon = if (option == selected) {
-                                { Icon(Icons.Rounded.Check, contentDescription = null) }
-                            } else {
-                                null
-                            },
-                            onClick = {
-                                onSelectionChange(option)
-                                expanded = false
-                            },
-                        )
-                    }
-                }
-            }
+            DropDownSelector(
+                expanded = expanded,
+                onClick = onClick,
+                onDismissRequest = onDismissRequest,
+                current = current,
+                maxValueWidth = valueWidth,
+                items = items,
+            )
         }
         SettingRow(
             title = title,

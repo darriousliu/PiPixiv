@@ -6,23 +6,27 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
+import androidx.compose.material.icons.rounded.Numbers
+import androidx.compose.material.icons.rounded.Router
+import androidx.compose.material.icons.rounded.SwapHoriz
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,10 +43,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.data.setting.UserPreference
-import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.isIOS
 import com.mrl.pixiv.common.util.platform
+import com.mrl.pixiv.setting.components.SettingRow
+import com.mrl.pixiv.setting.components.SettingSectionTitle
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.ech_doh_url
 import com.mrl.pixiv.strings.network_advanced_settings
@@ -125,94 +130,94 @@ internal fun BypassSettingContent(
     onEditDoh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
-        Text(
-            text = stringResource(RStrings.network_plan),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
-        )
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        SettingSectionTitle(stringResource(RStrings.network_plan))
 
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = 8.spaceBy
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
         ) {
-            val types = remember {
-                listOfNotNull(
-                    UserPreference.BypassSetting.System,
-                    UserPreference.BypassSetting.Direct,
-                    UserPreference.BypassSetting.Proxy(),
-                    if (platform.isIOS()) null else UserPreference.BypassSetting.ECH()
-                )
-            }
-
-            types.forEach { type ->
-                val selected = when (bypassSetting) {
-                    UserPreference.BypassSetting.System -> type == UserPreference.BypassSetting.System
-                    UserPreference.BypassSetting.Direct -> type == UserPreference.BypassSetting.Direct
-                    is UserPreference.BypassSetting.Proxy -> type is UserPreference.BypassSetting.Proxy
-                    is UserPreference.BypassSetting.ECH -> type is UserPreference.BypassSetting.ECH
-                }
-
-                FilterChip(
-                    selected = selected,
-                    onClick = {
-                        if (!selected) {
-                            onUpdate(type)
-                        }
-                    },
-                    label = {
-                        Text(
-                            text = stringResource(
-                                when (type) {
-                                    UserPreference.BypassSetting.System -> RStrings.use_system_proxy
-                                    UserPreference.BypassSetting.Direct -> RStrings.use_none
-                                    is UserPreference.BypassSetting.Proxy -> RStrings.use_proxy
-                                    is UserPreference.BypassSetting.ECH -> RStrings.use_ech
-                                }
-                            )
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val types = remember {
+                        listOfNotNull(
+                            UserPreference.BypassSetting.System,
+                            UserPreference.BypassSetting.Direct,
+                            UserPreference.BypassSetting.Proxy(),
+                            if (platform.isIOS()) null else UserPreference.BypassSetting.ECH(),
                         )
                     }
+
+                    types.forEach { type ->
+                        val selected = when (bypassSetting) {
+                            UserPreference.BypassSetting.System -> type == UserPreference.BypassSetting.System
+                            UserPreference.BypassSetting.Direct -> type == UserPreference.BypassSetting.Direct
+                            is UserPreference.BypassSetting.Proxy -> type is UserPreference.BypassSetting.Proxy
+                            is UserPreference.BypassSetting.ECH -> type is UserPreference.BypassSetting.ECH
+                        }
+
+                        FilterChip(
+                            selected = selected,
+                            onClick = {
+                                if (!selected) {
+                                    onUpdate(type)
+                                }
+                            },
+                            label = {
+                                Text(
+                                    text = stringResource(
+                                        when (type) {
+                                            UserPreference.BypassSetting.System -> RStrings.use_system_proxy
+                                            UserPreference.BypassSetting.Direct -> RStrings.use_none
+                                            is UserPreference.BypassSetting.Proxy -> RStrings.use_proxy
+                                            is UserPreference.BypassSetting.ECH -> RStrings.use_ech
+                                        }
+                                    ),
+                                )
+                            },
+                            shape = MaterialTheme.shapes.extraLarge,
+                        )
+                    }
+                }
+                Text(
+                    text = stringResource(
+                        when (bypassSetting) {
+                            UserPreference.BypassSetting.System -> RStrings.use_system_proxy_desc
+                            UserPreference.BypassSetting.Direct -> RStrings.use_none_desc
+                            is UserPreference.BypassSetting.Proxy -> RStrings.use_proxy_desc
+                            is UserPreference.BypassSetting.ECH -> RStrings.use_ech_desc
+                        }
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
 
-        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            AnimatedContent(
-                targetState = bypassSetting::class,
-                transitionSpec = { slideInVertically() togetherWith slideOutVertically() },
-                label = "bypass_setting_content"
-            ) {
-                when (bypassSetting) {
-                    UserPreference.BypassSetting.System, UserPreference.BypassSetting.Direct -> {}
-                    is UserPreference.BypassSetting.Proxy -> {
-                        ProxyEditor(bypassSetting, onUpdate)
-                    }
+        AnimatedContent(
+            targetState = bypassSetting::class,
+            transitionSpec = { slideInVertically() togetherWith slideOutVertically() },
+            label = "bypass_setting_content",
+        ) {
+            when (bypassSetting) {
+                UserPreference.BypassSetting.System, UserPreference.BypassSetting.Direct -> {}
+                is UserPreference.BypassSetting.Proxy -> {
+                    ProxyEditor(bypassSetting, onUpdate)
+                }
 
-                    is UserPreference.BypassSetting.ECH -> {
-                        EchEditor(
-                            dohUrl = bypassSetting.url,
-                            advancedExpanded = advancedExpanded,
-                            onToggleAdvanced = onToggleAdvanced,
-                            onEditDoh = onEditDoh,
-                        )
-                    }
+                is UserPreference.BypassSetting.ECH -> {
+                    EchEditor(
+                        dohUrl = bypassSetting.url,
+                        advancedExpanded = advancedExpanded,
+                        onToggleAdvanced = onToggleAdvanced,
+                        onEditDoh = onEditDoh,
+                    )
                 }
             }
-            Text(
-                text = stringResource(
-                    when (bypassSetting) {
-                        UserPreference.BypassSetting.System -> RStrings.use_system_proxy_desc
-                        UserPreference.BypassSetting.Direct -> RStrings.use_none_desc
-                        is UserPreference.BypassSetting.Proxy -> RStrings.use_proxy_desc
-                        is UserPreference.BypassSetting.ECH -> RStrings.use_ech_desc
-                    }
-                ),
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
         }
     }
 }
@@ -298,29 +303,23 @@ fun ProxyEditor(
         )
     }
 
-    Column {
-        ListItem(
-            onClick = {
-                showEditHost = true
-            },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-            content = { Text(text = stringResource(RStrings.proxy_host)) },
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        SettingRow(
+            title = stringResource(RStrings.proxy_host),
+            icon = Icons.Rounded.Router,
+            onClick = { showEditHost = true },
             supportingContent = { Text(text = setting.host) },
         )
-        ListItem(
-            onClick = {
-                showEditPort = true
-            },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-            content = { Text(text = stringResource(RStrings.proxy_port)) },
+        SettingRow(
+            title = stringResource(RStrings.proxy_port),
+            icon = Icons.Rounded.Numbers,
+            onClick = { showEditPort = true },
             supportingContent = { Text(text = setting.port.toString()) },
         )
-        ListItem(
-            onClick = {
-                showEditType = true
-            },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-            content = { Text(text = stringResource(RStrings.proxy_type)) },
+        SettingRow(
+            title = stringResource(RStrings.proxy_type),
+            icon = Icons.Rounded.SwapHoriz,
+            onClick = { showEditType = true },
             supportingContent = {
                 Text(
                     text = stringResource(
@@ -343,9 +342,13 @@ private fun EchEditor(
     onEditDoh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
-        ListItem(
-            onClick = onToggleAdvanced,
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        SettingRow(
+            title = stringResource(RStrings.network_advanced_settings),
+            icon = Icons.Rounded.Tune,
             modifier = Modifier.semantics {
                 if (advancedExpanded) {
                     collapse {
@@ -359,8 +362,7 @@ private fun EchEditor(
                     }
                 }
             },
-            shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-            content = { Text(text = stringResource(RStrings.network_advanced_settings)) },
+            onClick = onToggleAdvanced,
             supportingContent = {
                 Text(text = stringResource(RStrings.network_advanced_settings_desc))
             },
@@ -372,10 +374,10 @@ private fun EchEditor(
             },
         )
         AnimatedVisibility(visible = advancedExpanded) {
-            ListItem(
+            SettingRow(
+                title = stringResource(RStrings.ech_doh_url),
+                icon = Icons.Rounded.Dns,
                 onClick = onEditDoh,
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-                content = { Text(text = stringResource(RStrings.ech_doh_url)) },
                 supportingContent = { Text(text = dohUrl) },
             )
         }

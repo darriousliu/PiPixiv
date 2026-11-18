@@ -1,10 +1,5 @@
 package com.mrl.pixiv.setting.network
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
@@ -16,14 +11,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.LocalToaster
+import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.setting.SettingViewModel
+import com.mrl.pixiv.setting.components.SettingPageColumn
 import com.mrl.pixiv.setting.network.components.BypassSettingEditor
 import com.mrl.pixiv.setting.network.components.PictureSourceWidget
 import com.mrl.pixiv.strings.network_setting
@@ -39,6 +35,32 @@ fun NetworkSettingScreen(
 ) {
     val userPreference by requireUserPreferenceFlow.collectAsStateWithLifecycle()
     val toaster = LocalToaster.current
+
+    NetworkSettingContent(
+        bypassSetting = userPreference.bypassSetting,
+        pictureSourceHost = userPreference.imageHost,
+        onBypassSettingChange = { setting ->
+            viewModel.updateBypassSetting(setting)
+            toaster.show(RStrings.restart_app_to_take_effect)
+        },
+        onPictureSourceHostChange = { host ->
+            viewModel.savePictureSourceHost(host)
+            toaster.show(RStrings.restart_app_to_take_effect)
+        },
+        onBack = navigationManager::popBackStack,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun NetworkSettingContent(
+    bypassSetting: BypassSetting,
+    pictureSourceHost: String,
+    onBypassSettingChange: (BypassSetting) -> Unit,
+    onPictureSourceHostChange: (String) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -48,41 +70,24 @@ fun NetworkSettingScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = navigationManager::popBackStack,
+                        onClick = onBack,
                         shapes = IconButtonDefaults.shapes(),
                     ) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
                     }
-                }
+                },
             )
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(it)
-                .imePadding()
-        ) {
-            val itemModifier = Modifier.padding(horizontal = 8.dp)
-
+        },
+    ) { innerPadding ->
+        SettingPageColumn(innerPadding) {
             BypassSettingEditor(
-                modifier = itemModifier,
-                bypassSetting = userPreference.bypassSetting,
-                onUpdate = { setting ->
-                    viewModel.updateBypassSetting(setting)
-                    toaster.show(RStrings.restart_app_to_take_effect)
-                }
+                bypassSetting = bypassSetting,
+                onUpdate = onBypassSettingChange,
             )
-
             PictureSourceWidget(
-                modifier = itemModifier,
-                currentSelected = userPreference.imageHost,
-                savePictureSourceHost = { host ->
-                    viewModel.savePictureSourceHost(host)
-                    toaster.show(RStrings.restart_app_to_take_effect)
-                }
+                currentSelected = pictureSourceHost,
+                savePictureSourceHost = onPictureSourceHostChange,
             )
         }
     }
 }
-

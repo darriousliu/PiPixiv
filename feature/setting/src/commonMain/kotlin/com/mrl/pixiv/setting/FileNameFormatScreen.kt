@@ -4,18 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Folder
@@ -27,24 +20,27 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.setting.components.SettingPageColumn
+import com.mrl.pixiv.setting.components.SettingSwitchRow
 import com.mrl.pixiv.strings.download_settings_title
 import com.mrl.pixiv.strings.download_single_folder_by_user_desc
 import com.mrl.pixiv.strings.download_single_folder_by_user_title
@@ -95,9 +91,18 @@ internal fun FileNameFormatContent(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(RStrings.download_settings_title)) },
+                title = {
+                    Text(
+                        text = stringResource(RStrings.download_settings_title),
+                        style = LocalTextStyle.current.copy(
+                            hyphens = Hyphens.Auto,
+                            lineBreak = LineBreak.Heading,
+                        ),
+                    )
+                },
                 navigationIcon = {
                     IconButton(
                         onClick = onBack,
@@ -124,61 +129,43 @@ internal fun FileNameFormatContent(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = modifier
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-        ) {
-            ListItem(
-                onClick = rememberThrottleClick {
-                    onFolderByUserChange(!downloadSubFolderByUser)
-                },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-                content = {
-                    Text(text = stringResource(RStrings.download_single_folder_by_user_title))
-                },
-                supportingContent = {
-                    Text(text = stringResource(RStrings.download_single_folder_by_user_desc))
-                },
-                modifier = Modifier
-                    .height(IntrinsicSize.Min),
-                leadingContent = {
-                    Column(
-                        modifier = Modifier.fillMaxHeight(),
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Icon(imageVector = Icons.Rounded.Folder, contentDescription = null)
-                    }
-                },
-                trailingContent = {
-                    Column(
-                        modifier = Modifier.fillMaxHeight(),
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Switch(
-                            checked = downloadSubFolderByUser,
-                            onCheckedChange = onFolderByUserChange,
-                        )
-                    }
-                },
+        SettingPageColumn(innerPadding) {
+            SettingSwitchRow(
+                title = stringResource(RStrings.download_single_folder_by_user_title),
+                icon = Icons.Rounded.Folder,
+                checked = downloadSubFolderByUser,
+                onCheckedChange = onFolderByUserChange,
+                supportingText = stringResource(RStrings.download_single_folder_by_user_desc),
             )
+            FileNameFormatEditor(format)
+            FileNameFormatLegend()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+private fun FileNameFormatEditor(format: TextFieldState) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             OutlinedTextField(
                 state = format,
                 label = { Text(text = stringResource(RStrings.file_name_format_title)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
             )
-
-            val chips = listOf(
-                "title", "_", "index", "illust_id", "user_id", "user_name"
-            )
-
             FlowRow(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                chips.forEach { key ->
+                val tokens = listOf("title", "_", "index", "illust_id", "user_id", "user_name")
+                tokens.forEach { key ->
                     FilterChip(
                         selected = false,
                         onClick = {
@@ -188,42 +175,50 @@ internal fun FileNameFormatContent(
                                 replace(cursor, selection.end, tag)
                             }
                         },
-                        label = { Text(text = key) }
+                        label = { Text(text = key) },
                     )
                 }
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Text(
-                    text = stringResource(RStrings.legend_template),
-                    modifier = Modifier.weight(1f)
-                )
-                Text(text = stringResource(RStrings.legend_meaning), modifier = Modifier.weight(1f))
-            }
-            val legends = listOf(
-                "{illust_id}" to RStrings.legend_illust_id,
-                "{title}" to RStrings.legend_title,
-                "{user_id}" to RStrings.legend_user_id,
-                "{user_name}" to RStrings.legend_user_name,
-                "{index}" to RStrings.legend_index,
+@Composable
+private fun FileNameFormatLegend() {
+    val legends = listOf(
+        UserPreference.TEMPLATE_ILLUST_ID to RStrings.legend_illust_id,
+        UserPreference.TEMPLATE_TITLE to RStrings.legend_title,
+        UserPreference.TEMPLATE_USER_ID to RStrings.legend_user_id,
+        UserPreference.TEMPLATE_USER_NAME to RStrings.legend_user_name,
+        UserPreference.TEMPLATE_INDEX to RStrings.legend_index,
+    )
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+            FileNameLegendRow(
+                key = stringResource(RStrings.legend_template),
+                meaning = stringResource(RStrings.legend_meaning),
+                header = true,
             )
-
             legends.forEach { (key, res) ->
                 HorizontalDivider()
-                ListItem(
-                    headlineContent = {
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Text(text = key, modifier = Modifier.weight(1f))
-                            Text(text = stringResource(res), modifier = Modifier.weight(1f))
-                        }
-                    }
-                )
+                FileNameLegendRow(key = key, meaning = stringResource(res))
             }
         }
+    }
+}
+
+@Composable
+private fun FileNameLegendRow(key: String, meaning: String, header: Boolean = false) {
+    val style = if (header) MaterialTheme.typography.labelLarge else MaterialTheme.typography.bodyMedium
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(text = key, modifier = Modifier.weight(1f), style = style)
+        Text(text = meaning, modifier = Modifier.weight(1f), style = style)
     }
 }

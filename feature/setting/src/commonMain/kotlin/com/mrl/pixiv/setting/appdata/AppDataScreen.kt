@@ -1,23 +1,23 @@
 package com.mrl.pixiv.setting.appdata
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Upload
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.rememberThrottleClick
@@ -34,14 +35,18 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
-import com.mrl.pixiv.strings.data_storage_title
+import com.mrl.pixiv.setting.components.SettingPageColumn
+import com.mrl.pixiv.setting.components.SettingRow
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.clear_cache
 import com.mrl.pixiv.strings.confirm
+import com.mrl.pixiv.strings.data_storage_title
 import com.mrl.pixiv.strings.export_data
 import com.mrl.pixiv.strings.history_import_user_mismatch_desc
 import com.mrl.pixiv.strings.history_import_user_mismatch_title
 import com.mrl.pixiv.strings.import_data
+import com.mrl.pixiv.strings.migrate_data_desc
+import com.mrl.pixiv.strings.migrate_data_title
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
@@ -93,78 +98,25 @@ fun AppDataScreen(
         file?.let { viewModel.importData(it) }
     }
 
-
-    Scaffold(
+    AppDataContent(
+        cacheSize = viewModel.cacheDirSize,
+        onExport = {
+            val fileName = "pixiv_data_backup_${
+                Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                    .format(LocalDateTime.Formats.ISO)
+            }"
+            exportLauncher.launch(suggestedName = fileName, defaultExtension = "zip")
+        },
+        onImport = { importLauncher.launch() },
+        onClearCache = viewModel::clearCache,
+        onBack = navigationManager::popBackStack,
         modifier = modifier,
-        topBar = {
-            AppDataTopAppBar(onBack = navigationManager::popBackStack)
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .padding(horizontal = 8.dp)
-                .verticalScroll(rememberScrollState())
-                .imePadding()
-        ) {
-            MigrationCard(
-                state = state,
-                migrateData = viewModel::migrateData,
-                viewModel = viewModel
-            )
-
-            ListItem(
-                onClick = {
-                    val fileName = "pixiv_data_backup_${
-                        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                            .format(LocalDateTime.Formats.ISO)
-                    }"
-                    exportLauncher.launch(suggestedName = fileName, defaultExtension = "zip")
-                },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-                content = {
-                    Text(text = stringResource(RStrings.export_data))
-                },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Rounded.Upload,
-                        contentDescription = null
-                    )
-                },
-            )
-
-            ListItem(
-                onClick = {
-                    importLauncher.launch()
-                },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-                content = {
-                    Text(text = stringResource(RStrings.import_data))
-                },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Rounded.Download,
-                        contentDescription = null
-                    )
-                },
-            )
-
-            ListItem(
-                onClick = rememberThrottleClick {
-                    viewModel.clearCache()
-                },
-                shapes = ListItemDefaults.shapes(shape = RoundedCornerShape(percent = 5)),
-                content = {
-                    Text(text = stringResource(RStrings.clear_cache, viewModel.cacheDirSize))
-                },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Rounded.Delete,
-                        contentDescription = null
-                    )
-                },
-            )
-        }
+    ) {
+        MigrationCard(
+            state = state,
+            migrateData = viewModel::migrateData,
+            viewModel = viewModel,
+        )
     }
 
     dialogData?.let { data ->
@@ -207,8 +159,70 @@ fun AppDataScreen(
             }
         )
     }
+}
 
+@Composable
+internal fun AppDataContent(
+    cacheSize: String,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
+    onClearCache: () -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    migrationContent: @Composable () -> Unit = {},
+) {
+    Scaffold(
+        modifier = modifier,
+        topBar = { AppDataTopAppBar(onBack = onBack) },
+    ) { paddingValues ->
+        SettingPageColumn(paddingValues) {
+            migrationContent()
+            SettingRow(
+                title = stringResource(RStrings.export_data),
+                icon = Icons.Rounded.Upload,
+                onClick = onExport,
+            )
+            SettingRow(
+                title = stringResource(RStrings.import_data),
+                icon = Icons.Rounded.Download,
+                onClick = onImport,
+            )
+            SettingRow(
+                title = stringResource(RStrings.clear_cache, cacheSize),
+                icon = Icons.Rounded.Delete,
+                onClick = rememberThrottleClick(onClick = onClearCache),
+            )
+        }
+    }
+}
 
+@Composable
+internal fun AppDataMigrationNotice(oldImageCount: Int, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(Icons.Rounded.Warning, contentDescription = null)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(RStrings.migrate_data_title),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = stringResource(RStrings.migrate_data_desc, oldImageCount),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+    }
 }
 
 @Composable
