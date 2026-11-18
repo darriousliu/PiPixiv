@@ -14,6 +14,7 @@ kotlin {
             implementation(project(":common:ai"))
             implementation(project(":common:data"))
             implementation(project(":common:datasource-local"))
+            implementation(project(":common:network"))
             implementation(project(":common:repository"))
             implementation(project(":common:ui"))
             implementation(project(":common:core"))

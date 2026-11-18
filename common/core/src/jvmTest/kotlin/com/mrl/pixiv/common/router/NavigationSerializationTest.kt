@@ -74,6 +74,7 @@ class NavigationSerializationTest {
             Destination.SearchResults("query", true, AppViewMode.NOVEL),
             Destination.Setting,
             Destination.NetworkSetting,
+            Destination.NetworkDiagnostic,
             Destination.BrowsingSetting,
             Destination.SearchSetting,
             Destination.HistorySetting,

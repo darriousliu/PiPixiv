@@ -98,6 +98,7 @@ val Destination.paneSpec: DestinationPaneSpec
         is Destination.Comment,
         is Destination.Report,
         Destination.NetworkSetting,
+        Destination.NetworkDiagnostic,
         Destination.BrowsingSetting,
         Destination.SearchSetting,
         Destination.HistorySetting,

@@ -58,6 +58,13 @@ internal object NetworkUtil : KoinComponent {
     }
 
     suspend fun addAuthHeader(request: HttpRequestBuilder) {
+        addAppHeaders(request)
+        if (!request.url.encodedPath.contains("/auth/token")) {
+            request.headers["Authorization"] = "Bearer ${requireUserAccessToken()}"
+        }
+    }
+
+    fun addAppHeaders(request: HttpRequestBuilder) {
         val locale = Locale.current
         val instantNow = Clock.System.now()
         val timeZone = TimeZone.currentSystemDefault()
@@ -82,9 +89,6 @@ internal object NetworkUtil : KoinComponent {
                 "User-Agent",
                 "Pixiv${DeviceInfo.PLATFORM.replaceFirstChar { it.uppercase() }}App/${DeviceInfo.APP_VERSION} (${DeviceInfo.PLATFORM} ${DeviceInfo.VERSION}; ${DeviceInfo.MODEL})"
             )
-            if (!request.url.encodedPath.contains("/auth/token")) {
-                set("Authorization", "Bearer ${requireUserAccessToken()}")
-            }
             // zh_CN
             set("Accept-Language", locale.toLanguageTag().replace("-", "_"))
             // zh-hans
@@ -94,9 +98,7 @@ internal object NetworkUtil : KoinComponent {
             set("App-Version", DeviceInfo.APP_VERSION)
             set("X-Client-Time", isoDate)
             set("X-Client-Hash", encode("$isoDate$HashSalt"))
-//            set("Host", request.host)
         }
-
     }
 
     suspend fun requireUserAccessToken() = networkFeature.provideUserAccessToken()

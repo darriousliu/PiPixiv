@@ -22,3 +22,9 @@ internal actual fun baseImageHttpClient(setting: BypassSetting): HttpClient = im
 }
 
 actual val httpEngineFactory: HttpClientEngineFactory<*> = OkHttp
+
+internal actual fun diagnosticHttpClient(
+    settings: NetworkSettings,
+    image: Boolean,
+    trace: NetworkDiagnosticTrace,
+): HttpClient = createOkHttpDiagnosticClient(settings, image, trace)

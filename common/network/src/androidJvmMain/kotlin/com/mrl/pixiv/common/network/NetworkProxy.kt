@@ -17,6 +17,7 @@ internal fun OkHttpClient.Builder.configureNetworkRouting(
     setting: BypassSetting,
     usePixivEch: Boolean,
     dohClient: OkHttpClient? = null,
+    observeDns: ((List<NetworkDiagnosticResolver>) -> Unit)? = null,
 ): OkHttpClient.Builder = apply {
     // 代理由 OkHttp 选择，底层 TCP 不应再次套用 JVM 的系统 SOCKS 代理。
     socketFactory(DirectSocketFactory)
@@ -35,7 +36,7 @@ internal fun OkHttpClient.Builder.configureNetworkRouting(
         )
         is BypassSetting.ECH -> {
             if (usePixivEch) {
-                if (dohClient == null) bypassECH(setting.url) else bypassECH(setting.url, dohClient)
+                bypassECH(setting.url, dohClient ?: OkHttpClient(), observeDns)
             } else {
                 // AI 与更新检查沿用直连，避免把 Pixiv 的 DNS、ECH 和证书策略用于其他服务。
                 proxy(Proxy.NO_PROXY)
@@ -52,6 +53,7 @@ private object DirectProxySelector : ProxySelector() {
 internal fun OkHttpConfig.configureProxyOrECH(
     setting: BypassSetting,
     usePixivEch: Boolean = true,
+    observeDns: ((List<NetworkDiagnosticResolver>) -> Unit)? = null,
 ) {
     val pool = ConnectionPool()
     val dispatcher = Dispatcher()
@@ -63,7 +65,7 @@ internal fun OkHttpConfig.configureProxyOrECH(
     config {
         connectionPool(pool)
         dispatcher(dispatcher)
-        configureNetworkRouting(setting, usePixivEch, dohClient)
+        configureNetworkRouting(setting, usePixivEch, dohClient, observeDns)
     }
 }
 

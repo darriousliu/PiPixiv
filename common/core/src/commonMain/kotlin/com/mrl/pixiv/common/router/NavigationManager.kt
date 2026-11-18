@@ -276,6 +276,10 @@ class NavigationManager(
         navigate(destination = Destination.NetworkSetting)
     }
 
+    fun navigateToNetworkDiagnosticScreen() {
+        navigate(destination = Destination.NetworkDiagnostic)
+    }
+
     fun navigateToBrowsingSettingScreen() {
         navigate(destination = Destination.BrowsingSetting)
     }

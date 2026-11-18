@@ -3,6 +3,7 @@ package com.mrl.pixiv.common.network
 import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.data.Constants.IMAGE_HOST
 import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
+import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.plugin
 import io.ktor.http.URLBuilder
@@ -14,10 +15,14 @@ import org.koin.core.annotation.Single
 @ImageClient
 fun imageHttpClient() = routedPixivClient(::createImageClient)
 
-private fun createImageClient(setting: BypassSetting) = baseImageHttpClient(setting).apply {
+private fun createImageClient(setting: BypassSetting) = baseImageHttpClient(setting)
+    .applyPixivImageRequests {
+        (currentNetworkPreference() ?: NetworkUtil.networkSettings()).imageHost
+    }
+
+internal fun HttpClient.applyPixivImageRequests(imageHost: suspend () -> String) = apply {
     plugin(HttpSend).intercept { request ->
-        val preference = currentNetworkPreference() ?: NetworkUtil.networkSettings()
-        request.url.applyImageSource(preference.imageHost)
+        request.url.applyImageSource(imageHost())
         request.headers["Referer"] = Constants.PIXIV_API_BASE_URL
         execute(request)
     }

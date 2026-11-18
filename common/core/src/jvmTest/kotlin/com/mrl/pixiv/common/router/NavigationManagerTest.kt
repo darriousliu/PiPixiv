@@ -204,10 +204,17 @@ class NavigationManagerTest {
         settings.navigateToNetworkSettingScreen()
         assertNull(source.ownerEntryId)
         assertEquals(source.entryId, settings.backStack.last().ownerEntryId)
+        settings.forEntry(settings.backStack.last().entryId).navigateToNetworkDiagnosticScreen()
+        assertEquals(source.entryId, settings.backStack.last().ownerEntryId)
 
         val authentication = NavigationManager(Destination.LoginOption)
         authentication.navigateToNetworkSettingScreen()
         assertNull(authentication.backStack.last().ownerEntryId)
+        val networkEntry = authentication.backStack.last()
+        authentication.forEntry(networkEntry.entryId).navigateToNetworkDiagnosticScreen()
+        assertEquals(Destination.NetworkDiagnostic, authentication.currentDestination)
+        authentication.popBackStack()
+        assertEquals(networkEntry, authentication.backStack.last())
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.mrl.pixiv.setting.network
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.NetworkCheck
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -21,8 +22,10 @@ import com.mrl.pixiv.common.util.isIOS
 import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.setting.SettingViewModel
 import com.mrl.pixiv.setting.components.SettingPageColumn
+import com.mrl.pixiv.setting.components.SettingRow
 import com.mrl.pixiv.setting.network.components.BypassSettingEditor
 import com.mrl.pixiv.setting.network.components.PictureSourceWidget
+import com.mrl.pixiv.strings.network_diagnostic_title
 import com.mrl.pixiv.strings.network_setting
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -39,6 +42,7 @@ fun NetworkSettingScreen(
         pictureSourceHost = userPreference.imageHost,
         onBypassSettingChange = viewModel::updateBypassSetting,
         onPictureSourceHostChange = viewModel::savePictureSourceHost,
+        onOpenDiagnostic = navigationManager::navigateToNetworkDiagnosticScreen,
         onBack = navigationManager::popBackStack,
         supportsEch = !platform.isIOS(),
         modifier = modifier,
@@ -51,6 +55,7 @@ internal fun NetworkSettingContent(
     pictureSourceHost: String,
     onBypassSettingChange: (BypassSetting) -> Unit,
     onPictureSourceHostChange: (String) -> Unit,
+    onOpenDiagnostic: () -> Unit,
     onBack: () -> Unit,
     supportsEch: Boolean,
     modifier: Modifier = Modifier,
@@ -74,6 +79,11 @@ internal fun NetworkSettingContent(
         },
     ) { innerPadding ->
         SettingPageColumn(innerPadding) {
+            SettingRow(
+                title = stringResource(RStrings.network_diagnostic_title),
+                icon = Icons.Rounded.NetworkCheck,
+                onClick = onOpenDiagnostic,
+            )
             BypassSettingEditor(
                 bypassSetting = bypassSetting,
                 onUpdate = onBypassSettingChange,

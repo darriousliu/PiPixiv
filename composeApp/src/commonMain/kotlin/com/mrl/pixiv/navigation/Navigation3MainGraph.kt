@@ -95,6 +95,7 @@ import com.mrl.pixiv.setting.block.BlockTagScreen
 import com.mrl.pixiv.setting.block.BlockUserScreen
 import com.mrl.pixiv.setting.block.CloudMuteScreen
 import com.mrl.pixiv.setting.download.DownloadScreen
+import com.mrl.pixiv.setting.network.NetworkDiagnosticScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.InternalSerializationApi
@@ -214,6 +215,10 @@ fun Navigation3MainGraph(
         // 网络设置页
         entry<Destination.NetworkSetting> {
             NetworkSettingScreen()
+        }
+
+        entry<Destination.NetworkDiagnostic> {
+            NetworkDiagnosticScreen()
         }
 
         entry<Destination.BrowsingSetting> {
