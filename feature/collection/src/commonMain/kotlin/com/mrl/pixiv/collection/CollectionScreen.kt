@@ -206,6 +206,7 @@ fun CollectionScreen(
                             illustGrid(
                                 illusts = userBookmarksIllusts,
                                 navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                sharedElementGroup = "bookmarks",
                             )
 
                             if (

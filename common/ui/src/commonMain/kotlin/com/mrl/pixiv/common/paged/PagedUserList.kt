@@ -42,6 +42,7 @@ fun LazyListScope.PagedUserList(
         val userPreview = state.items[index]
         PagedUserItem(
             userPreview = userPreview,
+            rowIndex = index,
             navToPictureScreen = navToPictureScreen,
             navToUserProfile = { navToUserProfile(userPreview.user.id) },
             isUpdatingFollow = FollowState.isUpdating(userPreview.user.id),
@@ -53,6 +54,7 @@ fun LazyListScope.PagedUserList(
 @Composable
 private fun PagedUserItem(
     userPreview: UserPreview,
+    rowIndex: Int,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     navToUserProfile: () -> Unit,
     isUpdatingFollow: Boolean,
@@ -72,6 +74,7 @@ private fun PagedUserItem(
                         allIllusts = illusts,
                         index = index,
                         navToPictureScreen = navToPictureScreen,
+                        sharedElementSlot = "paged-user-preview:$rowIndex:${user.id}:$index",
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -117,6 +120,7 @@ private fun PreviewIllust(
     allIllusts: List<Illust>,
     index: Int,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
+    sharedElementSlot: String,
     modifier: Modifier = Modifier,
 ) {
     val isBookmarked = illust.isBookmark
@@ -130,9 +134,10 @@ private fun PreviewIllust(
                 BookmarkState.deleteBookmarkIllust(illust.id)
             }
         },
-        navToPictureScreen = { prefix, enableTransition ->
-            navToPictureScreen(allIllusts, index, prefix, enableTransition)
+        navToPictureScreen = { cover ->
+            navToPictureScreen(allIllusts, index, cover)
         },
+        sharedElementSlot = sharedElementSlot,
         modifier = modifier,
         elevation = 0.dp,
         shape = RectangleShape,

@@ -35,10 +35,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
-import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
-import com.mrl.pixiv.common.compose.rememberNavigationSharedContentState
+import com.mrl.pixiv.common.compose.navigationSharedImage
+import com.mrl.pixiv.common.router.PictureImageKey
 import kotlin.math.abs
 
 private enum class ImageLoadState { Loading, Loaded, Failed }
@@ -47,9 +46,9 @@ private enum class ImageLoadState { Loading, Loaded, Failed }
 fun ImagePreviewScreen(
     imageUrls: List<String>,
     initialIndex: Int,
-    sharedElementKey: String?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    sharedImage: PictureImageKey? = null,
 ) {
     if (imageUrls.isEmpty()) {
         LaunchedEffect(Unit) {
@@ -63,8 +62,6 @@ fun ImagePreviewScreen(
         pageCount = { imageUrls.size }
     )
     val pageLoadStates = remember(imageUrls) { mutableStateMapOf<Int, ImageLoadState>() }
-    val sharedTransitionScope = LocalSharedTransitionScope.current
-    val animatedContentScope = LocalNavAnimatedContentScope.current
     val safeInitialIndex = initialIndex.coerceIn(0, imageUrls.lastIndex)
     val dismissDistance = with(LocalDensity.current) { 120.dp.toPx() }
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
@@ -107,25 +104,16 @@ fun ImagePreviewScreen(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 val loadState = pageLoadStates[page] ?: ImageLoadState.Loading
-                val imageModifier = with(sharedTransitionScope) {
-                    Modifier
-                        .fillMaxSize()
-                        .then(
-                            if (sharedElementKey != null && page == safeInitialIndex) {
-                                Modifier.sharedElement(
-                                    sharedContentState = rememberNavigationSharedContentState(sharedElementKey),
-                                    animatedVisibilityScope = animatedContentScope,
-                                )
-                            } else {
-                                Modifier
-                            }
-                        )
+                val transitionKey = sharedImage?.takeIf {
+                    page == safeInitialIndex && page == pagerState.currentPage
                 }
                 Box(modifier = Modifier.fillMaxSize()) {
                     CoilZoomAsyncImage(
                         model = imageUrls[page],
                         contentDescription = null,
-                        modifier = imageModifier,
+                        modifier = Modifier
+                            .navigationSharedImage(transitionKey)
+                            .fillMaxSize(),
                         contentScale = ContentScale.Fit,
                         onLoading = {
                             pageLoadStates[page] = ImageLoadState.Loading

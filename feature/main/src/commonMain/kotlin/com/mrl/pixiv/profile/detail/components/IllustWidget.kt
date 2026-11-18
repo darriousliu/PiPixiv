@@ -37,6 +37,7 @@ fun IllustWidget(
     endText: String,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     illusts: List<Illust>,
+    sharedElementGroup: String,
     modifier: Modifier = Modifier,
     onAllClick: () -> Unit = {},
 ) {
@@ -96,9 +97,10 @@ fun IllustWidget(
                             BookmarkState.deleteBookmarkIllust(illust.id)
                         }
                     },
-                    navToPictureScreen = { prefix, enableTransition ->
-                        navToPictureScreen(takenIllusts, index, prefix, enableTransition)
+                    navToPictureScreen = { cover ->
+                        navToPictureScreen(takenIllusts, index, cover)
                     },
+                    sharedElementSlot = "$sharedElementGroup:$index",
                     modifier = Modifier.weight(1f)
                 )
             }

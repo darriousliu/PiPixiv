@@ -26,6 +26,7 @@ fun RecommendGrid(
     recommendImageList: LazyPagingItems<Illust>,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     lazyStaggeredGridState: LazyStaggeredGridState,
+    sharedElementGroup: String,
 ) {
     val layoutParams = RecommendGridDefaults.coverLayoutParameters()
 
@@ -40,16 +41,15 @@ fun RecommendGrid(
         items(
             count = recommendImageList.itemCount,
             key = recommendImageList.itemIndexKey { index, item -> "${index}_${item.id}" }
-        ) {
-            val illust = recommendImageList[it] ?: return@items
+        ) { index ->
+            val illust = recommendImageList[index] ?: return@items
             val isBookmarked = illust.isBookmark
             RectangleIllustItem(
-                navToPictureScreen = { prefix, enableTransition ->
+                navToPictureScreen = { cover ->
                     navToPictureScreen(
                         recommendImageList.itemSnapshotList.items,
-                        it,
-                        prefix,
-                        enableTransition
+                        index,
+                        cover,
                     )
                 },
                 illust = illust,
@@ -61,6 +61,7 @@ fun RecommendGrid(
                         BookmarkState.deleteBookmarkIllust(illust.id)
                     }
                 },
+                sharedElementSlot = "$sharedElementGroup:$index",
                 enableTransition = true
             )
         }

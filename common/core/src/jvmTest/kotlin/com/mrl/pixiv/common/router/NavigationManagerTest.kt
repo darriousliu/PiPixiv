@@ -1,6 +1,12 @@
 package com.mrl.pixiv.common.router
 
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.ImageUrls
+import com.mrl.pixiv.common.data.MetaSinglePage
+import com.mrl.pixiv.common.data.Type
+import com.mrl.pixiv.common.data.User
+import com.mrl.pixiv.common.repository.IllustCacheRepo
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -83,11 +89,57 @@ class NavigationManagerTest {
     }
 
     @Test
+    fun reopeningTheSameCoverDoesNotOverwriteThePreviousPictureSnapshot() {
+        val navigation = NavigationManager(Destination.Main)
+        val sourceId = navigation.backStack.single().entryId
+        val source = navigation.forEntry(sourceId)
+        val cover = PictureCoverSource(PictureImageKey(sourceId, "grid:0", 99), "thumbnail")
+        val work = Illust(
+            id = 99,
+            title = "Work",
+            type = Type.Illust,
+            imageUrls = ImageUrls(),
+            user = User(),
+            width = 1,
+            height = 1,
+            metaSinglePage = MetaSinglePage(),
+            totalView = 0,
+            totalBookmarks = 0,
+            isBookmarked = false,
+        )
+        val feed = mutableListOf(work)
+        val openedCacheKeys = mutableListOf<String>()
+        try {
+            source.navigateToPictureScreen(feed, 0, cover)
+            val firstVisit = navigation.backStack.last()
+            val first = firstVisit.destination as Destination.Picture
+            openedCacheKeys += first.cacheKey
+            navigation.popBackStack()
+
+            val updatedWork = work.copy(title = "Updated work")
+            feed[0] = updatedWork
+            source.navigateToPictureScreen(feed, 0, cover)
+            val secondVisit = navigation.backStack.last()
+            val second = secondVisit.destination as Destination.Picture
+            openedCacheKeys += second.cacheKey
+
+            assertNotEquals(first.cacheKey, second.cacheKey)
+            assertEquals(firstVisit.entryId, first.cacheKey)
+            assertEquals(secondVisit.entryId, second.cacheKey)
+            assertEquals(cover, second.cover)
+            assertEquals(listOf(work), IllustCacheRepo[first.cacheKey])
+            assertEquals(listOf(updatedWork), IllustCacheRepo[second.cacheKey])
+        } finally {
+            openedCacheKeys.forEach(IllustCacheRepo::removeList)
+        }
+    }
+
+    @Test
     fun pictureOwnsItsSidePagesAndLeavesThePriorSplitBoundaryIntact() {
         val navigation = NavigationManager(Destination.Following(1))
         navigation.navigateToProfileDetailScreen(2)
         val priorSplit = navigation.backStack
-        navigation.navigate(Destination.Picture(0, "pictures", false))
+        navigation.navigate(Destination.Picture(0, "pictures"))
         val picture = navigation.backStack.last()
         val pictureNavigation = navigation.forEntry(picture.entryId)
 

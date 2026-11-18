@@ -191,7 +191,7 @@ class PicturePagerViewModelTest {
                                 pager = rememberPagerState { works.size }
                                 val scope = rememberCoroutineScope()
                                 selectPage = { index -> scope.launch { pager.scrollToPage(index) } }
-                                PicturePager(works, pager, Modifier.fillMaxSize().testTag("picture-pager")) { work ->
+                                PicturePager(works, pager, Modifier.fillMaxSize().testTag("picture-pager")) { _, work ->
                                     val model = rememberPictureViewModel(work)
                                     val state by model.uiState.collectAsState()
                                     val related = model.relatedIllusts.collectAsLazyPagingItems()

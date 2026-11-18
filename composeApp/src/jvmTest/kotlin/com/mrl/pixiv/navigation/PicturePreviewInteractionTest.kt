@@ -2,7 +2,6 @@ package com.mrl.pixiv.navigation
 
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -45,18 +44,18 @@ import androidx.compose.ui.test.v2.runDesktopComposeUiTest
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.metadata
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
-import com.mrl.pixiv.common.animation.DefaultAnimationDuration
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.PaneInputState
 import com.mrl.pixiv.common.compose.layout.SplitPaneState
+import com.mrl.pixiv.common.compose.navigationSharedImage
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationRecord
+import com.mrl.pixiv.common.router.PictureImageKey
 import com.mrl.pixiv.common.util.conditionally
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.image.preview.ImagePreviewScreen
@@ -126,12 +125,19 @@ class PicturePreviewInteractionTest {
                 saveScreenshot("$screenshotPrefix-before")
                 runOnIdle {
                     assertFalse(
-                        fixture.imageSharedState.isMatchFound,
-                        "A picture image must not match a duplicate modifier on itself before preview opens",
+                        fixture.sharedScope.isTransitionActive,
+                        "The image transition must wait for the preview to open",
                     )
                 }
 
                 onNodeWithTag("picture-image").performMouseInput { click() }
+                waitUntil(
+                    conditionDescription = "the preview image matches the detail image",
+                    timeoutMillis = 2_000,
+                ) {
+                    mainClock.advanceTimeByFrame()
+                    runOnIdle { fixture.sharedScope.isTransitionActive }
+                }
                 advanceFrames()
                 saveScreenshot("$screenshotPrefix-preview")
                 runOnIdle {
@@ -200,15 +206,12 @@ class PicturePreviewInteractionTest {
 
 private const val ImageArgb = 0xffbc2649.toInt()
 private const val DetailsArgb = 0xffe6d37b.toInt()
-private const val ImageKey = "preview-test-image-5-0"
 
 private fun LazyListState.hasScrolled() = firstVisibleItemIndex > 0 || firstVisibleItemScrollOffset > 0
 
 /**
- * Picture 测试保留生产代码的修饰符顺序和宽屏布局：
- * 卡片 sharedBounds -> 等权重分栏 -> LazyColumn -> fillMaxWidth -> 按条件启用的
- * 图片 sharedElement(AnimatedSize) -> 点击处理 -> 按条件启用的桌面指针处理。
- * 目标页面、导航场景、预览页面和条件修饰符辅助函数均使用生产代码。
+ * 用双栏详情夹具验证图片共享元素、点击和桌面指针处理。
+ * 导航场景、图片共享修饰符和预览页均使用生产代码。
  */
 private class PictureFixture(
     bitmap: BufferedImage,
@@ -216,9 +219,14 @@ private class PictureFixture(
     private val desktopPointerHandler: Boolean,
 ) {
     private val picture = NavigationRecord("picture", Destination.PictureDeeplink(5))
+    private val imageKey = PictureImageKey(picture.entryId, "detail:0", illustId = 5)
     private val preview = NavigationRecord(
         "preview",
-        Destination.ImagePreview(listOf(imageFile.absolutePath), 0, ImageKey),
+        Destination.ImagePreview(
+            imageUrls = listOf(imageFile.absolutePath),
+            initialIndex = 0,
+            sharedImage = imageKey,
+        ),
     )
     val backStack = mutableStateListOf(picture)
     val leftState = LazyListState()
@@ -226,7 +234,6 @@ private class PictureFixture(
     private val imageUrl = imageFile.absolutePath
     private val placeholder = BitmapPainter(bitmap.toComposeImageBitmap())
     lateinit var sharedScope: SharedTransitionScope
-    lateinit var imageSharedState: SharedTransitionScope.SharedContentState
     var previewOpens = 0
     var leftClicks = 0
     var detailClicks = 0
@@ -266,7 +273,7 @@ private class PictureFixture(
                                         is Destination.ImagePreview -> ImagePreviewScreen(
                                             imageUrls = destination.imageUrls,
                                             initialIndex = destination.initialIndex,
-                                            sharedElementKey = destination.sharedElementKey,
+                                            sharedImage = destination.sharedImage,
                                             onBack = { backStack.removeLast() },
                                             modifier = Modifier.testTag("preview"),
                                         )
@@ -282,20 +289,8 @@ private class PictureFixture(
     }
 
     @Composable
-    private fun Picture() = with(LocalSharedTransitionScope.current) {
-        val animatedScope = LocalNavAnimatedContentScope.current
-        imageSharedState = rememberSharedContentState(ImageKey)
-        Scaffold(
-            modifier = Modifier.fillMaxSize().conditionally(true) {
-                sharedBounds(
-                    rememberSharedContentState("preview-test-card-5"),
-                    animatedScope,
-                    enter = fadeIn(DefaultFloatAnimationSpec),
-                    exit = fadeOut(DefaultFloatAnimationSpec),
-                    boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
-                )
-            },
-        ) {
+    private fun Picture() {
+        Scaffold(modifier = Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     LazyColumn(state = leftState, modifier = Modifier.fillMaxSize().testTag("picture-left")) {
@@ -309,14 +304,9 @@ private class PictureFixture(
                                     contentDescription = null,
                                     contentScale = ContentScale.FillWidth,
                                     placeholder = placeholder,
-                                    modifier = Modifier.fillMaxWidth()
-                                        .conditionally(true) {
-                                            sharedElement(
-                                                imageSharedState,
-                                                animatedVisibilityScope = animatedScope,
-                                                placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
-                                            )
-                                        }
+                                    modifier = Modifier
+                                        .navigationSharedImage(imageKey)
+                                        .fillMaxWidth()
                                         .throttleClick(
                                             onClick = {
                                                 previewOpens++

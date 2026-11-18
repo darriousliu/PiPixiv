@@ -78,7 +78,7 @@ class PicturePaneResizeTest {
             runDesktopComposeUiTest(width = 1580, height = 800, testTimeout = 30.seconds) {
                 var containerWidth by mutableStateOf(initialWidth)
                 var observedPane: PaneLayoutInfo? = null
-                val record = NavigationRecord("picture", Destination.Picture(0, "resize-fixture", true))
+                val record = NavigationRecord("picture", Destination.Picture(0, "resize-fixture"))
                 val backStack = mutableStateListOf(record)
                 setContent {
                     MaterialTheme {

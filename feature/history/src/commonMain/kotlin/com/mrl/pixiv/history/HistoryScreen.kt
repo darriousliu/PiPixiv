@@ -74,6 +74,7 @@ import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
+import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -187,6 +188,7 @@ fun HistoryScreen(
                                 showDisabledShortcut = !historyEnabled && localIllustCount == 0,
                                 onOpenHistorySettings = navigationManager::navigateToHistorySettingScreen,
                                 navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                source = HistorySource.Local,
                             )
                         }
 
@@ -221,6 +223,7 @@ fun HistoryScreen(
                                     showDisabledShortcut = false,
                                     onOpenHistorySettings = navigationManager::navigateToHistorySettingScreen,
                                     navToPictureScreen = navigationManager::navigateToPictureScreen,
+                                    source = HistorySource.Cloud,
                                 )
                             }
 
@@ -284,7 +287,8 @@ private fun IllustHistoryPage(
     isActive: Boolean,
     showDisabledShortcut: Boolean,
     onOpenHistorySettings: () -> Unit,
-    navToPictureScreen: (List<Illust>, Int, String, Boolean) -> Unit,
+    navToPictureScreen: NavigateToHorizontalPictureScreen,
+    source: HistorySource,
 ) {
     val controller = remember(lazyGridState) {
         keyboardScrollerController(lazyGridState) {
@@ -314,6 +318,7 @@ private fun IllustHistoryPage(
             illustGrid(
                 illusts = illusts,
                 navToPictureScreen = navToPictureScreen,
+                sharedElementGroup = "history:${source.name}",
                 enableLoading = false,
             )
             if (

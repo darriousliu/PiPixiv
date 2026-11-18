@@ -241,6 +241,7 @@ internal fun FollowingScreenContent(
                     followingUsers = followingUsers[index],
                     navToPictureScreen = navToPictureScreen,
                     navToUserProfile = navToUserProfile,
+                    sharedElementGroup = "following:${pages[index].name}",
                     lazyListState = lazyListStates[index],
                     lazyGridState = lazyGridStates[index],
                 )
@@ -254,6 +255,7 @@ fun FollowingScreenBody(
     followingUsers: LazyPagingItems<UserPreview>,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     navToUserProfile: (Long) -> Unit,
+    sharedElementGroup: String,
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
     lazyGridState: LazyGridState = rememberLazyGridState(),
@@ -288,8 +290,8 @@ fun FollowingScreenBody(
                 items(
                     followingUsers.itemCount,
                     key = followingUsers.itemIndexKey { index, user -> "${index}_${user.user.id}" }
-                ) {
-                    val userPreview = followingUsers[it] ?: return@items
+                ) { index ->
+                    val userPreview = followingUsers[index] ?: return@items
                     FollowingUserCard(
                         illusts = userPreview.illusts.toImmutableList(),
                         userName = userPreview.user.name,
@@ -300,6 +302,7 @@ fun FollowingScreenBody(
                         navToUserProfile = {
                             navToUserProfile(userPreview.user.id)
                         },
+                        sharedElementGroup = "$sharedElementGroup:$index:${userPreview.user.id}",
                         showIllusts = showIllusts
                     )
                 }
@@ -336,8 +339,8 @@ fun FollowingScreenBody(
                 items(
                     count = followingUsers.itemCount,
                     key = followingUsers.itemIndexKey { index, item -> "${index}_${item.user.id}" }
-                ) {
-                    val userPreview = followingUsers[it] ?: return@items
+                ) { index ->
+                    val userPreview = followingUsers[index] ?: return@items
                     FollowingUserCard(
                         illusts = userPreview.illusts.toImmutableList(),
                         userName = userPreview.user.name,
@@ -348,6 +351,7 @@ fun FollowingScreenBody(
                         navToUserProfile = {
                             navToUserProfile(userPreview.user.id)
                         },
+                        sharedElementGroup = "$sharedElementGroup:$index:${userPreview.user.id}",
                         showIllusts = showIllusts
                     )
                 }
@@ -400,6 +404,7 @@ fun FollowingUserCard(
     isFollowed: Boolean,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     navToUserProfile: () -> Unit,
+    sharedElementGroup: String,
     modifier: Modifier = Modifier,
     showIllusts: Boolean = true,
     isUpdatingFollow: Boolean = FollowState.isUpdating(userId),
@@ -423,9 +428,10 @@ fun FollowingUserCard(
                                 BookmarkState.deleteBookmarkIllust(it.id)
                             }
                         },
-                        navToPictureScreen = { prefix, enableTransition ->
-                            navToPictureScreen(illusts, index, prefix, enableTransition)
+                        navToPictureScreen = { cover ->
+                            navToPictureScreen(illusts, index, cover)
                         },
+                        sharedElementSlot = "$sharedElementGroup:$index",
                         modifier = Modifier.weight(1f),
                         elevation = 0.dp,
                         shape = RectangleShape
@@ -476,7 +482,8 @@ private fun FollowingUserCardPreview() {
         userId = 0,
         userAvatar = "http://iph.href.lu/200x200",
         isFollowed = false,
-        navToPictureScreen = { _, _, _, _ -> },
+        navToPictureScreen = { _, _, _ -> },
         navToUserProfile = { },
+        sharedElementGroup = "following-preview",
     )
 }

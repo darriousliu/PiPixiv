@@ -269,6 +269,7 @@ private fun HomeImageFeedPage(
                 recommendImageList = recommendImageList,
                 navToPictureScreen = navigateToPictureScreen,
                 lazyStaggeredGridState = lazyStaggeredGridState,
+                sharedElementGroup = "home:${mode.name}",
             )
             PagingContentState(
                 loadStates = recommendImageList.loadState,

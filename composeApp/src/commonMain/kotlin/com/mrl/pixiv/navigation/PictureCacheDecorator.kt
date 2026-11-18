@@ -15,20 +15,22 @@ internal fun rememberPictureCacheDecorator(
     navigationManager: NavigationManager,
 ): NavEntryDecorator<NavigationRecord> {
     return remember(navigationManager) {
-        val prefixes = mutableMapOf<Any, String>()
+        val cacheKeys = mutableMapOf<Any, String>()
         NavEntryDecorator(
             onPop = { key ->
-                prefixes.remove(key)?.let { prefix ->
+                // Newly opened pictures use their content key even if their UI never composed.
+                val cacheKey = cacheKeys.remove(key) ?: key as? String
+                if (cacheKey != null) {
                     val stillUsed = navigationManager.backStack.any {
-                        (it.destination as? Destination.Picture)?.prefix == prefix
-                    } || prefix in prefixes.values
-                    if (!stillUsed) IllustCacheRepo.removeList(prefix)
+                        (it.destination as? Destination.Picture)?.cacheKey == cacheKey
+                    } || cacheKey in cacheKeys.values
+                    if (!stillUsed) IllustCacheRepo.removeList(cacheKey)
                 }
             },
         ) { entry ->
-            val prefix = (entry.record.destination as? Destination.Picture)?.prefix
+            val cacheKey = (entry.record.destination as? Destination.Picture)?.cacheKey
             DisposableEffect(entry.contentKey) {
-                if (prefix != null) prefixes[entry.contentKey] = prefix
+                if (cacheKey != null) cacheKeys[entry.contentKey] = cacheKey
                 onDispose { }
             }
             entry.Content()

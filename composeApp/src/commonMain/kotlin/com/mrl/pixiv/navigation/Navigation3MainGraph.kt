@@ -38,7 +38,6 @@ import com.mrl.pixiv.comment.BlockCommentsScreen
 import com.mrl.pixiv.comment.CommentScreen
 import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
-import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.LocalToaster
 import com.mrl.pixiv.common.compose.layout.PaneInputScope
@@ -188,7 +187,7 @@ fun Navigation3MainGraph(
             ImagePreviewScreen(
                 imageUrls = it.imageUrls,
                 initialIndex = it.initialIndex,
-                sharedElementKey = it.sharedElementKey,
+                sharedImage = it.sharedImage,
                 onBack = currentNavigationManager()::popBackStack,
             )
         }
@@ -299,16 +298,12 @@ fun Navigation3MainGraph(
                         ) + fadeOut(DefaultFloatAnimationSpec)
                     }
         ) {
-            val illusts = remember { IllustCacheRepo[it.prefix] }
-            CompositionLocalProvider(
-                LocalSharedKeyPrefix provides it.prefix
-            ) {
-                HorizontalSwipePictureScreen(
-                    illusts = illusts.toImmutableList(),
-                    index = it.index,
-                    enableTransition = it.enableTransition,
-                )
-            }
+            val illusts = remember(it.cacheKey) { IllustCacheRepo[it.cacheKey].toImmutableList() }
+            HorizontalSwipePictureScreen(
+                illusts = illusts,
+                index = it.index,
+                cover = it.cover,
+            )
         }
 
         entry<Destination.UserArtwork> {
@@ -573,8 +568,7 @@ private fun LogScreen(
 
                 is Destination.Picture -> {
                     put("index", currentDestination.index.toString())
-                    put("prefix", currentDestination.prefix)
-                    put("enable_transition", currentDestination.enableTransition.toString())
+                    put("enable_transition", (currentDestination.cover != null).toString())
                 }
 
                 is Destination.Collection -> {

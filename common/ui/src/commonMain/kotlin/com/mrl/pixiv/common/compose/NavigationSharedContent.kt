@@ -7,9 +7,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import com.mrl.pixiv.common.router.PictureImageKey
 
 /** 允许导航场景控制共享元素动画，使内容始终位于预测性返回卡片内部。 */
 val LocalNavigationSharedContentEnabled = compositionLocalOf { true }
+
+@Composable
+fun Modifier.navigationSharedImage(key: PictureImageKey?): Modifier {
+    if (key == null) return this
+    val animatedScope = LocalNavAnimatedContentScope.current
+    return with(LocalSharedTransitionScope.current) {
+        this@navigationSharedImage.sharedElement(
+            sharedContentState = rememberNavigationSharedContentState(key),
+            animatedVisibilityScope = animatedScope,
+        )
+    }
+}
 
 @Composable
 fun SharedTransitionScope.rememberNavigationSharedContentState(key: Any): SharedContentState {

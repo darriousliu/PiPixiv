@@ -367,7 +367,8 @@ private fun IllustMode(
         ) {
             illustGrid(
                 illusts = rankingList,
-                navToPictureScreen = navigateToPictureScreen
+                navToPictureScreen = navigateToPictureScreen,
+                sharedElementGroup = "ranking:${mode.value}",
             )
 
             if (

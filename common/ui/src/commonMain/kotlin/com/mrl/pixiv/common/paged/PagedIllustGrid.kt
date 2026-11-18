@@ -13,6 +13,7 @@ import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
 fun LazyGridScope.PagedIllustGrid(
     state: PagedFeedState<Illust>,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
+    sharedElementGroup: String,
 ) {
     items(
         count = state.items.size,
@@ -30,9 +31,10 @@ fun LazyGridScope.PagedIllustGrid(
                     BookmarkState.deleteBookmarkIllust(illust.id)
                 }
             },
-            navToPictureScreen = { prefix, enableTransition ->
-                navToPictureScreen(state.items, index, prefix, enableTransition)
+            navToPictureScreen = { cover ->
+                navToPictureScreen(state.items, index, cover)
             },
+            sharedElementSlot = "$sharedElementGroup:$index",
             shouldShowTip = index == 0,
         )
     }
@@ -41,6 +43,7 @@ fun LazyGridScope.PagedIllustGrid(
 fun LazyStaggeredGridScope.PagedIllustGrid(
     state: PagedFeedState<Illust>,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
+    sharedElementGroup: String,
 ) {
     items(
         count = state.items.size,
@@ -58,9 +61,10 @@ fun LazyStaggeredGridScope.PagedIllustGrid(
                     BookmarkState.deleteBookmarkIllust(illust.id)
                 }
             },
-            navToPictureScreen = { prefix, enableTransition ->
-                navToPictureScreen(state.items, index, prefix, enableTransition)
+            navToPictureScreen = { cover ->
+                navToPictureScreen(state.items, index, cover)
             },
+            sharedElementSlot = "$sharedElementGroup:$index",
             shouldShowTip = index == 0,
         )
     }

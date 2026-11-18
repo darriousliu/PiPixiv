@@ -150,7 +150,6 @@ object TaoImagePreviewSmokeHarness {
                                         ImagePreviewScreen(
                                             imageUrls = listOf(imageFile.absolutePath),
                                             initialIndex = 0,
-                                            sharedElementKey = null,
                                             onBack = {
                                                 backClicks.incrementAndGet()
                                                 previewVisible = false

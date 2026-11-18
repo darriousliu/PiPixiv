@@ -93,6 +93,7 @@ fun FollowingPage(
             followingUsers = followingUsers,
             navToPictureScreen = navigationManager::navigateToPictureScreen,
             navToUserProfile = navigationManager::navigateToProfileDetailScreen,
+            sharedElementGroup = "latest-following:${viewModel.pages[pageIndex].name}",
             modifier = Modifier.weight(1f),
             lazyListState = listState,
             lazyGridState = gridState,

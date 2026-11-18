@@ -44,8 +44,8 @@ sealed class Destination : NavKey {
     @Serializable
     data class Picture(
         val index: Int,
-        val prefix: String,
-        val enableTransition: Boolean,
+        val cacheKey: String,
+        val cover: PictureCoverSource? = null,
     ) : Destination()
 
     @Serializable
@@ -57,7 +57,7 @@ sealed class Destination : NavKey {
     data class ImagePreview(
         val imageUrls: List<String>,
         val initialIndex: Int,
-        val sharedElementKey: String? = null,
+        val sharedImage: PictureImageKey? = null,
     ) : Destination()
 
     @Serializable
@@ -207,6 +207,21 @@ sealed class Destination : NavKey {
     @Serializable
     data class UserMangaSeries(val userId: Long) : Destination()
 }
+
+/** [slot] identifies an artwork occurrence within one navigation entry. */
+@Serializable
+data class PictureImageKey(
+    val entryId: String,
+    val slot: String,
+    val illustId: Long,
+    val page: Int = 0,
+)
+
+@Serializable
+data class PictureCoverSource(
+    val key: PictureImageKey,
+    val thumbnailUrl: String,
+)
 
 @Serializable
 sealed class MainPage(

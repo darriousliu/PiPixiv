@@ -29,7 +29,7 @@ class AdaptiveSceneStrategyTest {
     @Test
     fun fullWidthPicturesNeverBecomeDetailsEvenWithAnInvalidOwner() {
         val source = entry("list", Destination.Following(1))
-        for (destination in listOf(Destination.Picture(0, "images", false), Destination.PictureDeeplink(5))) {
+        for (destination in listOf(Destination.Picture(0, "images"), Destination.PictureDeeplink(5))) {
             val picture = entry("picture", destination, "list")
             val scene = scene(listOf(source, picture), width = 2000.dp)
 

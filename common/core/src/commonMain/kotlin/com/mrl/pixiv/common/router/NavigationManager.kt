@@ -4,20 +4,17 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.repository.IllustCacheRepo
 import org.koin.core.annotation.Single
-import kotlin.time.measureTime
 import kotlin.uuid.Uuid
 
 typealias NavigateToHorizontalPictureScreen = (
     illusts: List<Illust>,
     index: Int,
-    prefix: String,
-    enableTransition: Boolean
+    cover: PictureCoverSource?,
 ) -> Unit
 
 @Single
@@ -36,6 +33,10 @@ class NavigationManager(
 
     val topEntryId: String?
         get() = backStack.lastOrNull()?.entryId
+
+    /** Identity of the entry that owns this scoped manager. */
+    val entryId: String?
+        get() = sourceEntryId
 
     val currentMainPage: MainPage
         get() = store.currentMainPage
@@ -93,9 +94,15 @@ class NavigationManager(
     }
 
     fun navigate(destination: Destination) {
+        pushDestination { destination }
+    }
+
+    private inline fun pushDestination(createDestination: (entryId: String) -> Destination) {
         val records = backStack
         val source = activeSource(records)
         if (sourceEntryId != null && source == null) return
+        val entryId = Uuid.random().toHexString()
+        val destination = createDestination(entryId)
         val spec = destination.paneSpec
         val ownerEntryId = when {
             spec.preferredFullWidth -> null
@@ -114,7 +121,7 @@ class NavigationManager(
         } else {
             records
         }
-        store.records = history + newRecord(destination, ownerEntryId)
+        store.records = history + NavigationRecord(entryId, destination, ownerEntryId)
     }
 
     /** Explicitly opens a new independent visit, for example full-width novel reading. */
@@ -164,14 +171,15 @@ class NavigationManager(
     fun navigateToPictureScreen(
         illusts: List<Illust>,
         index: Int,
-        prefix: String,
-        enableTransition: Boolean,
+        cover: PictureCoverSource? = null,
     ) {
-        measureTime {
-            IllustCacheRepo[prefix] = illusts
-            navigate(Destination.Picture(index, prefix, enableTransition))
-        }.let {
-            Logger.i(tag = "Navigation") { "navigateToPictureScreen cost: $it" }
+        pushDestination { entryId ->
+            IllustCacheRepo[entryId] = illusts.toList()
+            Destination.Picture(
+                index = index,
+                cacheKey = entryId,
+                cover = cover,
+            )
         }
     }
 
@@ -182,14 +190,14 @@ class NavigationManager(
     fun navigateToImagePreviewScreen(
         imageUrls: List<String>,
         initialIndex: Int,
-        sharedElementKey: String? = null,
+        sharedImage: PictureImageKey? = null,
     ) {
         if (imageUrls.isEmpty()) return
         navigate(
             Destination.ImagePreview(
                 imageUrls = imageUrls,
                 initialIndex = initialIndex.coerceIn(0, imageUrls.lastIndex),
-                sharedElementKey = sharedElementKey,
+                sharedImage = sharedImage,
             )
         )
     }
@@ -365,8 +373,7 @@ private class NavigationStore(initialDestinations: List<Destination>) {
     var currentMainPage by mutableStateOf<MainPage>(MainPage.Home)
 }
 
-private fun newRecord(destination: Destination, ownerEntryId: String? = null) = NavigationRecord(
+private fun newRecord(destination: Destination) = NavigationRecord(
     entryId = Uuid.random().toHexString(),
     destination = destination,
-    ownerEntryId = ownerEntryId,
 )
