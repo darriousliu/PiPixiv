@@ -233,10 +233,14 @@ internal fun PictureScreen(
     val popBackToHomeScreen = navigationManager::popBackToMainScreen
     val navToUserDetailScreen = navigationManager::navigateToProfileDetailScreen
     val state = pictureViewModel.asState()
-    val relatedLayoutParams = IllustGridDefaults.relatedLayoutParameters()
-    val userLayoutParams = IllustGridDefaults.userLayoutParameters()
-    val density = LocalDensity.current
     val paneLayoutInfo = currentPaneLayoutInfo()
+    // Keep both image and details panes usable; medium widths need the single-column layout.
+    val useTwoPaneLayout = paneLayoutInfo.sizeClass.isWidthAtLeastExpanded
+    val relatedLayoutParams = IllustGridDefaults.relatedLayoutParameters(
+        if (useTwoPaneLayout) paneLayoutInfo.copy(isSplit = true) else paneLayoutInfo,
+    )
+    val userLayoutParams = IllustGridDefaults.userLayoutParameters(paneLayoutInfo)
+    val density = LocalDensity.current
     val userSpanCount = with(userLayoutParams.gridCells) {
         with(density) {
             density.calculateCrossAxisCellSizes(
@@ -260,8 +264,6 @@ internal fun PictureScreen(
     }
 
     val lazyListState = rememberLazyListState()
-    // Keep both image and details panes usable; medium widths need the single-column layout.
-    val useTwoPaneLayout = paneLayoutInfo.sizeClass.isWidthAtLeastExpanded
     val pictureSplitState = rememberSplitPaneState(key = illust.id, initialFraction = 0.5f)
     val rightListState = rememberLazyListState()
     val currPage by remember {
