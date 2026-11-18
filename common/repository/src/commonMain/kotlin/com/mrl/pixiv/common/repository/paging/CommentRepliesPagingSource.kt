@@ -13,25 +13,15 @@ import kotlinx.coroutines.CancellationException
 class CommentRepliesPagingSource internal constructor(
     private val commentId: Long,
     private val type: CommentType,
-    private val api: PixivApi,
+    private val api: PixivApi?,
     private val filterComments: (List<Comment>) -> List<Comment> = { it.filterBlocked() },
 ) : PagingSource<String, Comment>() {
-    constructor(commentId: Long, type: CommentType) : this(commentId, type, PixivRepository.apiApi)
+    constructor(commentId: Long, type: CommentType) : this(commentId, type, null)
 
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Comment> {
         return try {
-            val resp = if (params.key.isNullOrEmpty()) {
-                when (type) {
-                    CommentType.ILLUST -> api.getIllustCommentReplies(commentId)
-                    CommentType.NOVEL -> api.getNovelCommentReplies(commentId)
-                }
-            } else {
-                val query = params.key.orEmpty().queryParams
-                when (type) {
-                    CommentType.ILLUST -> api.loadMoreIllustCommentReplies(query)
-                    CommentType.NOVEL -> api.loadMoreNovelCommentReplies(query)
-                }
-            }
+            val resp = api?.let { loadReplies(it, params.key) }
+                ?: PixivRepository.withApi { loadReplies(it, params.key) }
             LoadResult.Page(
                 data = filterComments(resp.comments),
                 prevKey = null,
@@ -41,6 +31,19 @@ class CommentRepliesPagingSource internal constructor(
             throw e
         } catch (e: Exception) {
             LoadResult.Error(e)
+        }
+    }
+
+    private suspend fun loadReplies(api: PixivApi, key: String?) = if (key.isNullOrEmpty()) {
+        when (type) {
+            CommentType.ILLUST -> api.getIllustCommentReplies(commentId)
+            CommentType.NOVEL -> api.getNovelCommentReplies(commentId)
+        }
+    } else {
+        val query = key.orEmpty().queryParams
+        when (type) {
+            CommentType.ILLUST -> api.loadMoreIllustCommentReplies(query)
+            CommentType.NOVEL -> api.loadMoreNovelCommentReplies(query)
         }
     }
 

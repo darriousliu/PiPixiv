@@ -23,6 +23,24 @@ interface DownloadDao {
     @Query("UPDATE download SET progress = :progress WHERE illustId = :illustId AND `index` = :index")
     suspend fun updateProgress(illustId: Long, index: Int, progress: Float)
 
+    @Query(
+        """
+        UPDATE download SET status = :status, progress = COALESCE(:progress, progress),
+        filePath = COALESCE(:filePath, filePath), fileUri = COALESCE(:fileUri, fileUri)
+        WHERE illustId = :illustId AND `index` = :index AND createTime = :createTime
+        AND status IN (0, 1)
+        """
+    )
+    suspend fun updateActiveAttempt(
+        illustId: Long,
+        index: Int,
+        createTime: Long,
+        status: Int,
+        progress: Float? = null,
+        filePath: String? = null,
+        fileUri: String? = null,
+    ): Int
+
     @Delete
     suspend fun delete(entity: DownloadEntity)
 

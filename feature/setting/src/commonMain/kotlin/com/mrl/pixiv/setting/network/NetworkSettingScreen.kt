@@ -12,18 +12,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mrl.pixiv.common.compose.LocalToaster
 import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.isIOS
+import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.setting.SettingViewModel
 import com.mrl.pixiv.setting.components.SettingPageColumn
 import com.mrl.pixiv.setting.network.components.BypassSettingEditor
 import com.mrl.pixiv.setting.network.components.PictureSourceWidget
 import com.mrl.pixiv.strings.network_setting
-import com.mrl.pixiv.strings.restart_app_to_take_effect
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -34,20 +34,13 @@ fun NetworkSettingScreen(
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
     val userPreference by requireUserPreferenceFlow.collectAsStateWithLifecycle()
-    val toaster = LocalToaster.current
-
     NetworkSettingContent(
         bypassSetting = userPreference.bypassSetting,
         pictureSourceHost = userPreference.imageHost,
-        onBypassSettingChange = { setting ->
-            viewModel.updateBypassSetting(setting)
-            toaster.show(RStrings.restart_app_to_take_effect)
-        },
-        onPictureSourceHostChange = { host ->
-            viewModel.savePictureSourceHost(host)
-            toaster.show(RStrings.restart_app_to_take_effect)
-        },
+        onBypassSettingChange = viewModel::updateBypassSetting,
+        onPictureSourceHostChange = viewModel::savePictureSourceHost,
         onBack = navigationManager::popBackStack,
+        supportsEch = !platform.isIOS(),
         modifier = modifier,
     )
 }
@@ -59,6 +52,7 @@ internal fun NetworkSettingContent(
     onBypassSettingChange: (BypassSetting) -> Unit,
     onPictureSourceHostChange: (String) -> Unit,
     onBack: () -> Unit,
+    supportsEch: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -83,6 +77,7 @@ internal fun NetworkSettingContent(
             BypassSettingEditor(
                 bypassSetting = bypassSetting,
                 onUpdate = onBypassSettingChange,
+                supportsEch = supportsEch,
             )
             PictureSourceWidget(
                 currentSelected = pictureSourceHost,

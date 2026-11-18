@@ -4,6 +4,7 @@ import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.network.httpEngineFactory
 import com.mrl.pixiv.common.network.configureNetworkProxy
 import com.mrl.pixiv.common.network.NetworkFeature
+import com.mrl.pixiv.common.network.RoutedHttpClient
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.HttpTimeout
@@ -19,10 +20,19 @@ internal const val AI_CONNECT_TIMEOUT_MILLIS = 60_000L
 
 @Single
 class AiHttpClientHolder(networkFeature: NetworkFeature) {
-    val client = HttpClient(httpEngineFactory) {
-        configureNetworkProxy(networkFeature.provideUserPreference().bypassSetting)
-        configureAiHttpClient()
-    }
+    private val clients = RoutedHttpClient(
+        readSetting = { networkFeature.provideUserPreference().bypassSetting },
+        create = { setting ->
+            HttpClient(httpEngineFactory) {
+                configureNetworkProxy(setting)
+                configureAiHttpClient()
+            }
+        },
+        close = HttpClient::close,
+    )
+
+    internal suspend fun <T> withClient(block: suspend (HttpClient) -> T): T =
+        clients.withClient(block)
 }
 
 internal fun HttpClientConfig<*>.configureAiHttpClient() {

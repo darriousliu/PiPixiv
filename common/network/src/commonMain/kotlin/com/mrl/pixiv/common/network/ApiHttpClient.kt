@@ -1,19 +1,16 @@
 package com.mrl.pixiv.common.network
 
-import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.HttpRequestRetry
-import io.ktor.client.plugins.HttpResponseValidator
+import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
 import io.ktor.client.plugins.HttpSend
-import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.plugin
-import io.ktor.client.request.accept
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import org.koin.core.annotation.Single
 
-@Single(createdAtStart = true)
+@Single
 @ApiClient
-fun apiHttpClient() = baseHttpClient.apply {
+fun apiHttpClient() = routedPixivClient(::createApiClient)
+
+private fun createApiClient(setting: BypassSetting) = baseHttpClient(setting).apply {
     plugin(HttpSend).apply {
         intercept { request ->
             NetworkUtil.addAuthHeader(request)
@@ -27,24 +24,6 @@ fun apiHttpClient() = baseHttpClient.apply {
                 call = execute(request)
             }
             call
-        }
-    }
-    config {
-        defaultRequest {
-            accept(ContentType.Application.Json)
-        }
-        HttpResponseValidator {
-            handleResponseExceptionWithRequest { cause, _ ->
-                val tokenExpiredException = cause as? ClientRequestException
-                    ?: return@handleResponseExceptionWithRequest
-                if (tokenExpiredException.response.status in HttpStatusCode.BadRequest..HttpStatusCode.RequestHeaderFieldTooLarge) {
-                    NetworkUtil.requireUserAccessToken()
-                }
-            }
-        }
-        install(HttpRequestRetry) {
-            retryOnServerErrors(maxRetries = 3)
-            exponentialDelay()
         }
     }
 }

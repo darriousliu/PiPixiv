@@ -21,6 +21,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -53,6 +54,8 @@ import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.RDrawables
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ShareUtil
+import com.mrl.pixiv.common.util.ToastUtil
+import com.mrl.pixiv.common.util.selectSaveFile
 import com.mrl.pixiv.setting.components.SettingPageColumn
 import com.mrl.pixiv.setting.components.SettingRow
 import com.mrl.pixiv.strings.about
@@ -61,6 +64,9 @@ import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.check_update
 import com.mrl.pixiv.strings.current_version
 import com.mrl.pixiv.strings.download
+import com.mrl.pixiv.strings.download_failed
+import com.mrl.pixiv.strings.download_success
+import com.mrl.pixiv.strings.export_failed
 import com.mrl.pixiv.strings.feedback
 import com.mrl.pixiv.strings.feedback_content
 import com.mrl.pixiv.strings.ic_launcher
@@ -69,6 +75,9 @@ import com.mrl.pixiv.strings.project_url
 import com.mrl.pixiv.strings.recommend_content
 import com.mrl.pixiv.strings.recommend_this_app
 import com.mrl.pixiv.strings.share_app
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -83,6 +92,7 @@ fun AboutScreen(
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
     val latestVersionInfo by VersionManager.latestVersionInfo.collectAsStateWithLifecycle()
     var showUpdateDialog by retain { mutableStateOf(false) }
+    var downloadJob by remember { mutableStateOf<Job?>(null) }
 
     AboutContent(
         versionName = AppUtil.versionName,
@@ -104,52 +114,84 @@ fun AboutScreen(
         modifier = modifier,
     )
 
-    if (showUpdateDialog && latestVersionInfo != null) {
-        val latestVersionInfo = latestVersionInfo!!
-        val asset = latestVersionInfo.getCurrentFlavorAsset()
-        val releaseNotes = remember(latestVersionInfo.body) {
-            normalizeReleaseNotesLineEndings(latestVersionInfo.body.orEmpty())
+    val release = latestVersionInfo
+    if (showUpdateDialog && release != null) {
+        val asset = release.getCurrentFlavorAsset()
+        val releaseNotes = remember(release.body) {
+            normalizeReleaseNotesLineEndings(release.body.orEmpty())
         }
-        AlertDialog(
-            onDismissRequest = { showUpdateDialog = false },
-            confirmButton = {
-                TextButton(
-                    onClick = click@{
-                        val url = asset?.downloadUrl
-                            ?: run {
-                                VersionManager.checkUpdate()
-                                uriHandler.openUri(Constants.GITHUB_RELEASE_URL)
-                                return@click
+        UpdateReleaseDialog(
+            title = asset?.name ?: release.tagName,
+            releaseNotes = releaseNotes,
+            isDownloading = downloadJob != null,
+            onDownload = {
+                if (asset == null) {
+                    uriHandler.openUri(Constants.GITHUB_RELEASE_URL)
+                } else if (downloadJob == null) {
+                    downloadJob = coroutineScope.launch(start = CoroutineStart.LAZY) {
+                        try {
+                            val saved = VersionManager.saveUpdateAsset(asset) { suggestedName ->
+                                selectSaveFile(suggestedName, null, RStrings.export_failed)
                             }
-                        uriHandler.openUri(url)
+                            if (saved) {
+                                showUpdateDialog = false
+                                ToastUtil.safeShortToast(RStrings.download_success)
+                            }
+                        } catch (cancelled: CancellationException) {
+                            throw cancelled
+                        } catch (_: Exception) {
+                            ToastUtil.safeShortToast(RStrings.download_failed)
+                        } finally {
+                            downloadJob = null
+                        }
                     }
-                ) {
-                    Text(text = stringResource(RStrings.download))
+                    downloadJob?.start()
                 }
             },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showUpdateDialog = false
-                    }
-                ) {
-                    Text(text = stringResource(RStrings.cancel))
+            onDismiss = {
+                downloadJob?.cancel()
+                showUpdateDialog = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun UpdateReleaseDialog(
+    title: String,
+    releaseNotes: String,
+    isDownloading: Boolean,
+    onDownload: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDownload, enabled = !isDownloading) {
+                Text(text = stringResource(RStrings.download))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(RStrings.cancel))
+            }
+        },
+        title = { Text(title) },
+        text = {
+            Column {
+                if (isDownloading) {
+                    LinearProgressIndicator(Modifier.fillMaxWidth().padding(bottom = 12.dp))
                 }
-            },
-            title = {
-                Text(text = asset?.name ?: latestVersionInfo.tagName)
-            },
-            text = {
                 Markdown(
                     content = releaseNotes,
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 400.dp)
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(rememberScrollState()),
                 )
             }
-        )
-    }
+        },
+    )
 }
 
 @Composable

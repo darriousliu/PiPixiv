@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">고급 설정</string>
     <string name="network_advanced_settings_desc">DNS 조회 서비스 사용자 지정</string>
     <string name="ech_doh_url">DoH 주소</string>
-    <string name="restart_app_to_take_effect">앱 재시작 시 적용</string>
     <string name="image_source">이미지 소스</string>
     <string name="self_defined_source">사용자 정의 이미지 소스</string>
     <string name="default_open">기본 링크 열기</string>

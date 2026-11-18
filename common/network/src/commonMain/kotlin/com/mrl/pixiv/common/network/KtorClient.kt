@@ -76,9 +76,9 @@ internal fun <T : HttpClientEngineConfig> imageHttpClient(
     }
 }
 
-internal expect val baseHttpClient: HttpClient
+internal expect fun baseHttpClient(setting: UserPreference.BypassSetting): HttpClient
 
-internal expect val baseImageHttpClient: HttpClient
+internal expect fun baseImageHttpClient(setting: UserPreference.BypassSetting): HttpClient
 
 expect val httpEngineFactory: HttpClientEngineFactory<*>
 
@@ -86,3 +86,8 @@ expect val httpEngineFactory: HttpClientEngineFactory<*>
 expect fun HttpClientConfig<*>.configureNetworkProxy(
     setting: UserPreference.BypassSetting = NetworkUtil.bypassSetting,
 )
+
+expect fun HttpClientConfig<*>.configurePixivNetworkProxy(setting: UserPreference.BypassSetting)
+
+internal fun routedPixivClient(create: (UserPreference.BypassSetting) -> HttpClient) =
+    RoutedHttpClient(NetworkUtil::bypassSetting, create, HttpClient::close, NetworkUtil::networkSettings)

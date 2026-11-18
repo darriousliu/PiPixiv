@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">進階設定</string>
     <string name="network_advanced_settings_desc">自訂 DNS 解析服務</string>
     <string name="ech_doh_url">DoH 位址</string>
-    <string name="restart_app_to_take_effect">重啟 App 後生效</string>
     <string name="image_source">圖源</string>
     <string name="self_defined_source">自定義圖源</string>
     <string name="default_open">預設開啟連結</string>

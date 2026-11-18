@@ -4,7 +4,7 @@ import com.mrl.pixiv.common.data.discovery.CommunityUsersKind
 import com.mrl.pixiv.common.data.discovery.CommunityUsersResponse
 import com.mrl.pixiv.common.data.notification.NotificationsResponse
 import com.mrl.pixiv.common.data.notification.UnreadNotificationsResponse
-import com.mrl.pixiv.common.datasource.remote.createCommunityApi
+import com.mrl.pixiv.common.datasource.remote.CommunityApi
 import io.ktor.http.Url
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,43 +13,52 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 object CommunityRepository {
-    private val api by lazy { PixivRepository.apiKtorfit.createCommunityApi() }
+    private suspend fun <T> withApi(block: suspend (CommunityApi) -> T): T =
+        PixivRepository.withApiServices { block(it.community) }
 
     private val unreadStore = NotificationUnreadStore(
         currentAccountId = { requireUserInfoValue.user.id },
-        fetch = { api.getUnreadNotifications() },
+        fetch = { withApi { it.getUnreadNotifications() } },
     )
     val unreadState = unreadStore.state
 
     suspend fun refreshUnread() = unreadStore.refresh()
 
     suspend fun getNotifications(notificationId: Long? = null): NotificationsResponse =
-        if (notificationId == null) api.getNotifications() else api.getNotificationGroup(notificationId)
+        withApi { api ->
+            if (notificationId == null) api.getNotifications() else api.getNotificationGroup(notificationId)
+        }
 
     suspend fun getNotificationsNext(
         notificationId: Long?,
         query: Map<String, String>,
-    ): NotificationsResponse = if (notificationId == null) {
-        api.getNotificationsNext(query)
-    } else {
-        api.getNotificationGroupNext(query + ("notification_id" to notificationId.toString()))
+    ): NotificationsResponse = withApi { api ->
+        if (notificationId == null) {
+            api.getNotificationsNext(query)
+        } else {
+            api.getNotificationGroupNext(query + ("notification_id" to notificationId.toString()))
+        }
     }
 
     suspend fun getUsers(kind: CommunityUsersKind, seedUserId: Long?): CommunityUsersResponse =
-        when (kind) {
-            CommunityUsersKind.RECOMMENDED -> api.getRecommendedUsers()
-            CommunityUsersKind.RELATED -> api.getRelatedUsers(requireNotNull(seedUserId).also {
-                require(it > 0) { "A valid author is required" }
-            })
-            CommunityUsersKind.FOLLOWERS -> api.getMyFollowers()
+        withApi { api ->
+            when (kind) {
+                CommunityUsersKind.RECOMMENDED -> api.getRecommendedUsers()
+                CommunityUsersKind.RELATED -> api.getRelatedUsers(requireNotNull(seedUserId).also {
+                    require(it > 0) { "A valid author is required" }
+                })
+                CommunityUsersKind.FOLLOWERS -> api.getMyFollowers()
+            }
         }
 
     suspend fun getUsersNext(kind: CommunityUsersKind, query: Map<String, String>): CommunityUsersResponse =
-        when (kind) {
-            CommunityUsersKind.RECOMMENDED -> api.getRecommendedUsersNext(query)
-            CommunityUsersKind.FOLLOWERS -> api.getMyFollowersNext(query)
-            // The related-user response has no next_url in the official contract.
-            CommunityUsersKind.RELATED -> error("Related users do not support pagination")
+        withApi { api ->
+            when (kind) {
+                CommunityUsersKind.RECOMMENDED -> api.getRecommendedUsersNext(query)
+                CommunityUsersKind.FOLLOWERS -> api.getMyFollowersNext(query)
+                // The related-user response has no next_url in the official contract.
+                CommunityUsersKind.RELATED -> error("Related users do not support pagination")
+            }
         }
 }
 

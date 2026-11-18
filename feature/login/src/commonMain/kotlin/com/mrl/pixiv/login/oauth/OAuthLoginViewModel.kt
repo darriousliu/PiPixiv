@@ -1,7 +1,11 @@
 package com.mrl.pixiv.login.oauth
 
 import androidx.compose.runtime.Stable
+import com.mrl.pixiv.common.network.configurePixivNetworkProxy
+import com.mrl.pixiv.common.network.networkSettings
+import com.mrl.pixiv.common.network.withNetworkPreference
 import com.mrl.pixiv.common.repository.AuthManager
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.serialize.JSON
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
@@ -32,8 +36,6 @@ sealed class OAuthLoginAction : ViewIntent {
 class OAuthLoginViewModel : BaseMviViewModel<OAuthLoginState, OAuthLoginAction>(
     initialState = OAuthLoginState(),
 ) {
-    private val cookieAuthHelper by lazy { PixivCookieAuthHelper() }
-
     override suspend fun handleIntent(intent: OAuthLoginAction) {
         when (intent) {
             is OAuthLoginAction.Login -> login(intent.refreshToken)
@@ -72,8 +74,11 @@ class OAuthLoginViewModel : BaseMviViewModel<OAuthLoginState, OAuthLoginAction>(
                     httpOnly = obj["httpOnly"]?.jsonPrimitive?.booleanOrNull ?: false,
                 )
             }
-            cookieAuthHelper.login(cookies)
-            cookieAuthHelper.close()
+            withNetworkPreference({ requireUserPreferenceValue.networkSettings() }) { preference ->
+                PixivCookieAuthHelper {
+                    configurePixivNetworkProxy(preference.bypassSetting)
+                }.use { helper -> helper.login(cookies) }
+            }
             updateState { copy(isLogin = true, loading = false) }
         }
     }

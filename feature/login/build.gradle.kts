@@ -10,7 +10,9 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":lib_strings"))
+            implementation(project(":common:data"))
             implementation(project(":common:repository"))
+            implementation(project(":common:network"))
             implementation(project(":common:ui"))
             implementation(project(":common:core"))
 
@@ -25,6 +27,9 @@ kotlin {
             implementation(libs.html.converter)
         }
 
+        androidMain.dependencies {
+            implementation(libs.androidx.webkit)
+        }
         jvmMain.dependencies {
             implementation(libs.filekit.core)
         }

@@ -9,10 +9,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import coil3.PlatformContext
-import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.mrl.pixiv.common.analytics.FLAVOR
 import com.mrl.pixiv.common.compose.LocalKeyEventFlow
 import com.mrl.pixiv.common.network.ImageClient
+import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.network.imageNetworkFetcher
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.BindDesktopWindowServices
@@ -79,13 +80,13 @@ fun main(args: Array<String>) {
                                 color = LocalTitleBarStyle.current.colors.content
                             )
                         }
-                        val imageHttpClient = koinInject<HttpClient>(named<ImageClient>())
+                        val imageHttpClient = koinInject<RoutedHttpClient<HttpClient>>(named<ImageClient>())
 
                         App(
                             darkTheme = darkTheme,
                             imageLoaderBuilder = {
                                 this.components {
-                                    add(KtorNetworkFetcherFactory(imageHttpClient))
+                                    add(imageNetworkFetcher(imageHttpClient))
                                 }
                             }
                         )

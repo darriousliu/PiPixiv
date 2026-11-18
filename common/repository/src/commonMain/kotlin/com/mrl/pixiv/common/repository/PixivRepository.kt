@@ -7,323 +7,351 @@ import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.auth.AuthTokenFieldReq
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.data.search.SearchNovelQuery
+import com.mrl.pixiv.common.datasource.remote.AuthApi
+import com.mrl.pixiv.common.datasource.remote.PixivApi
 import com.mrl.pixiv.common.datasource.remote.createAuthApi
+import com.mrl.pixiv.common.datasource.remote.createCollectionSearchApi
+import com.mrl.pixiv.common.datasource.remote.createCommunityApi
+import com.mrl.pixiv.common.datasource.remote.createReadingApi
 import com.mrl.pixiv.common.datasource.remote.createPixivApi
 import com.mrl.pixiv.common.network.ApiClient
 import com.mrl.pixiv.common.network.AuthClient
+import com.mrl.pixiv.common.network.RoutedHttpClient
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
+import io.ktor.util.AttributeKey
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 
 object PixivRepository : KoinComponent {
-    private val authHttpClient by inject<HttpClient>(named<AuthClient>())
-    private val apiHttpClient by inject<HttpClient>(named<ApiClient>())
+    private val authHttpClient by inject<RoutedHttpClient<HttpClient>>(named<AuthClient>())
+    private val apiHttpClient by inject<RoutedHttpClient<HttpClient>>(named<ApiClient>())
+    private val authApiKey = AttributeKey<AuthApi>("PixivAuthApi")
+    private val apiServicesKey = AttributeKey<ApiServices>("PixivApiServices")
 
-    private val authKtorfit = Ktorfit.Builder()
-        .baseUrl(
-            "https://$AUTH_HOST/"
+    internal class ApiServices(ktorfit: Ktorfit) {
+        val pixiv = ktorfit.createPixivApi()
+        val collection = ktorfit.createCollectionSearchApi()
+        val community = ktorfit.createCommunityApi()
+        val reading = ktorfit.createReadingApi()
+    }
+
+    internal suspend fun <T> withApiServices(block: suspend (ApiServices) -> T): T =
+        apiHttpClient.withClient { client ->
+            val services = client.attributes.computeIfAbsent(apiServicesKey) {
+                ApiServices(createKtorfit(API_HOST, client))
+            }
+            block(services)
+        }
+
+    internal suspend fun <T> withApi(block: suspend (PixivApi) -> T): T =
+        withApiServices { block(it.pixiv) }
+
+    private suspend fun <T> withAuth(block: suspend (AuthApi) -> T): T =
+        authHttpClient.withClient { client ->
+            val auth = client.attributes.computeIfAbsent(authApiKey) {
+                createKtorfit(AUTH_HOST, client).createAuthApi()
+            }
+            block(auth)
+        }
+
+    private fun createKtorfit(host: String, client: HttpClient) =
+        Ktorfit.Builder().baseUrl("https://$host/").httpClient(client).build()
+
+    suspend fun refreshToken(authTokenFieldReq: AuthTokenFieldReq) = withAuth {
+        it.refreshToken(
+            authTokenFieldReq.clientId,
+            authTokenFieldReq.clientSecret,
+            authTokenFieldReq.grantType,
+            authTokenFieldReq.refreshToken,
+            authTokenFieldReq.getSecureUrl,
+            authTokenFieldReq.includePolicy
         )
-        .httpClient(authHttpClient)
-        .build()
+    }
 
-    internal val apiKtorfit = Ktorfit.Builder()
-        .baseUrl(
-            "https://$API_HOST/"
+    suspend fun login(authTokenFieldReq: AuthTokenFieldReq) = withAuth {
+        it.login(
+            authTokenFieldReq.clientId,
+            authTokenFieldReq.clientSecret,
+            authTokenFieldReq.grantType,
+            authTokenFieldReq.redirectUri,
+            authTokenFieldReq.code,
+            authTokenFieldReq.codeVerifier,
+            authTokenFieldReq.getSecureUrl,
+            authTokenFieldReq.includePolicy
         )
-        .httpClient(apiHttpClient)
-        .build()
-
-    private val authApi = authKtorfit.createAuthApi()
-
-    internal val apiApi = apiKtorfit.createPixivApi()
-
-    suspend fun refreshToken(authTokenFieldReq: AuthTokenFieldReq) = authApi.refreshToken(
-        authTokenFieldReq.clientId,
-        authTokenFieldReq.clientSecret,
-        authTokenFieldReq.grantType,
-        authTokenFieldReq.refreshToken,
-        authTokenFieldReq.getSecureUrl,
-        authTokenFieldReq.includePolicy
-    )
-
-    suspend fun login(authTokenFieldReq: AuthTokenFieldReq) = authApi.login(
-        authTokenFieldReq.clientId,
-        authTokenFieldReq.clientSecret,
-        authTokenFieldReq.grantType,
-        authTokenFieldReq.redirectUri,
-        authTokenFieldReq.code,
-        authTokenFieldReq.codeVerifier,
-        authTokenFieldReq.getSecureUrl,
-        authTokenFieldReq.includePolicy
-    )
+    }
 
     suspend fun getIllustRecommended(
         filter: String,
         includeRankingIllusts: Boolean,
         includePrivacyPolicy: Boolean,
-    ) = apiApi.getIllustRecommended(filter, includeRankingIllusts, includePrivacyPolicy)
+    ) = withApi { it.getIllustRecommended(filter, includeRankingIllusts, includePrivacyPolicy) }
 
     suspend fun loadMoreIllustRecommended(queryMap: Map<String, String>) =
-        apiApi.loadMoreIllustRecommended(queryMap)
+        withApi { it.loadMoreIllustRecommended(queryMap) }
 
     suspend fun getMangaRecommended(
         filter: String,
         includeRankingIllusts: Boolean,
         includePrivacyPolicy: Boolean,
-    ) = apiApi.getMangaRecommended(filter, includeRankingIllusts, includePrivacyPolicy)
+    ) = withApi { it.getMangaRecommended(filter, includeRankingIllusts, includePrivacyPolicy) }
 
     suspend fun loadMoreMangaRecommended(queryMap: Map<String, String>) =
-        apiApi.loadMoreMangaRecommended(queryMap)
+        withApi { it.loadMoreMangaRecommended(queryMap) }
 
     suspend fun getIllustRanking(
         mode: String,
         filter: Filter = Filter.ANDROID,
         date: String? = null,
         offset: Int? = null
-    ) = apiApi.getIllustRanking(mode, filter.value, date, offset)
+    ) = withApi { it.getIllustRanking(mode, filter.value, date, offset) }
 
     suspend fun loadMoreIllustRanking(queryMap: Map<String, String>) =
-        apiApi.loadMoreIllustRanking(queryMap)
+        withApi { it.loadMoreIllustRanking(queryMap) }
 
     suspend fun postIllustBookmarkAdd(
         illustId: Long,
         restrict: Restrict = Restrict.PUBLIC,
         tags: List<String>? = null,
-    ) = apiApi.postIllustBookmarkAdd(illustId, restrict.value, tags)
+    ) = withApi { it.postIllustBookmarkAdd(illustId, restrict.value, tags) }
 
     suspend fun postIllustBookmarkDelete(illustId: Long) =
-        apiApi.postIllustBookmarkDelete(illustId)
+        withApi { it.postIllustBookmarkDelete(illustId) }
 
     suspend fun getIllustRelated(illustId: Long, filter: String) =
-        apiApi.getIllustRelated(illustId, filter)
+        withApi { it.getIllustRelated(illustId, filter) }
 
     suspend fun loadMoreIllustRelated(queryMap: Map<String, String>) =
-        apiApi.loadMoreIllustRelated(queryMap)
+        withApi { it.loadMoreIllustRelated(queryMap) }
 
     suspend fun getIllustDetail(illustId: Long, filter: String) =
-        apiApi.getIllustDetail(illustId, filter)
+        withApi { it.getIllustDetail(illustId, filter) }
 
     suspend fun getIllustBookmarkDetail(illustId: Long) =
-        apiApi.getIllustBookmarkDetail(illustId)
+        withApi { it.getIllustBookmarkDetail(illustId) }
 
-    suspend fun searchIllust(query: SearchIllustQuery) = apiApi.searchIllust(query.toMap())
+    suspend fun searchIllust(query: SearchIllustQuery) = withApi { it.searchIllust(query.toMap()) }
 
     suspend fun searchIllustNext(queryMap: Map<String, String>) =
-        apiApi.searchIllustNext(queryMap)
+        withApi { it.searchIllustNext(queryMap) }
 
     suspend fun searchUser(word: String, offset: Int? = null) =
-        apiApi.searchUser(word = word, offset = offset)
+        withApi { it.searchUser(word = word, offset = offset) }
 
-    suspend fun searchUserNext(queryMap: Map<String, String>) = apiApi.searchUserNext(queryMap)
+    suspend fun searchUserNext(queryMap: Map<String, String>) = withApi { it.searchUserNext(queryMap) }
 
     suspend fun getSearchOptions(word: String, searchTarget: String, searchAiTypes: Int) =
-        apiApi.getSearchOptions(word, searchTarget, searchAiTypes)
+        withApi { it.getSearchOptions(word, searchTarget, searchAiTypes) }
 
     suspend fun searchAutoComplete(word: String, mergePlainKeywordResults: Boolean = true) =
-        apiApi.searchAutoComplete(word, mergePlainKeywordResults)
+        withApi { it.searchAutoComplete(word, mergePlainKeywordResults) }
 
-    suspend fun trendingTags(filter: Filter) = apiApi.trendingTags(filter.value)
+    suspend fun trendingTags(filter: Filter) = withApi { it.trendingTags(filter.value) }
 
-    suspend fun getUgoiraMetadata(illustId: Long) = apiApi.getUgoiraMetadata(illustId)
+    suspend fun getUgoiraMetadata(illustId: Long) = withApi { it.getUgoiraMetadata(illustId) }
 
     suspend fun getUserDetail(
         filter: Filter = Filter.ANDROID,
         userId: Long
-    ) = apiApi.getUserDetail(filter.value, userId)
+    ) = withApi { it.getUserDetail(filter.value, userId) }
 
     suspend fun getUserIllusts(
         filter: Filter = Filter.ANDROID,
         userId: Long,
         type: String
-    ) = apiApi.getUserIllusts(filter.value, userId, type)
+    ) = withApi { it.getUserIllusts(filter.value, userId, type) }
 
     suspend fun loadMoreUserIllusts(queryMap: Map<String, String>) =
-        apiApi.getUserIllusts(queryMap)
+        withApi { it.getUserIllusts(queryMap) }
 
     suspend fun getUserBookmarksIllust(
         restrict: Restrict,
         userId: Long,
         tag: String? = null,
         maxBookmarkId: Long? = null
-    ) = apiApi.getUserBookmarksIllust(restrict.value, userId, tag, maxBookmarkId)
+    ) = withApi { it.getUserBookmarksIllust(restrict.value, userId, tag, maxBookmarkId) }
 
     suspend fun loadMoreUserBookmarksIllust(queryMap: Map<String, String>) =
-        apiApi.loadMoreUserBookmarksIllust(queryMap)
+        withApi { it.loadMoreUserBookmarksIllust(queryMap) }
 
     suspend fun getUserBookmarksNovels(
         restrict: Restrict,
         userId: Long,
         tag: String? = null,
         maxBookmarkId: Long? = null
-    ) = apiApi.getUserBookmarksNovels(restrict.value, userId, tag, maxBookmarkId)
+    ) = withApi { it.getUserBookmarksNovels(restrict.value, userId, tag, maxBookmarkId) }
 
     suspend fun loadMoreUserBookmarksNovel(queryMap: Map<String, String>) =
-        apiApi.loadMoreUserBookmarksNovel(queryMap)
+        withApi { it.loadMoreUserBookmarksNovel(queryMap) }
 
     suspend fun followUser(
         userId: Long,
         restrict: Restrict
-    ) = apiApi.followUser(userId, restrict.value)
+    ) = withApi { it.followUser(userId, restrict.value) }
 
     suspend fun unFollowUser(
         userId: Long
-    ) = apiApi.unFollowUser(userId)
+    ) = withApi { it.unFollowUser(userId) }
 
-    suspend fun getUserBrowsingHistoryIllusts() = apiApi.getUserBrowsingHistoryIllusts()
+    suspend fun getUserBrowsingHistoryIllusts() = withApi { it.getUserBrowsingHistoryIllusts() }
 
     suspend fun loadMoreUserBrowsingHistoryIllusts(queryMap: Map<String, String>) =
-        apiApi.loadMoreUserBrowsingHistoryIllusts(queryMap)
+        withApi { it.loadMoreUserBrowsingHistoryIllusts(queryMap) }
 
-    suspend fun getUserBrowsingHistoryNovels() = apiApi.getUserBrowsingHistoryNovels()
+    suspend fun getUserBrowsingHistoryNovels() = withApi { it.getUserBrowsingHistoryNovels() }
 
     suspend fun loadMoreUserBrowsingHistoryNovels(queryMap: Map<String, String>) =
-        apiApi.loadMoreUserBrowsingHistoryNovels(queryMap)
+        withApi { it.loadMoreUserBrowsingHistoryNovels(queryMap) }
 
     suspend fun getUserBookmarkTagsIllust(
         userId: Long,
         restrict: String
-    ) = apiApi.getUserBookmarkTagsIllust(userId, restrict)
+    ) = withApi { it.getUserBookmarkTagsIllust(userId, restrict) }
 
     suspend fun getUserBookmarkTagsNovel(
         userId: Long,
         restrict: String
-    ) = apiApi.getUserBookmarkTagsNovel(userId, restrict)
+    ) = withApi { it.getUserBookmarkTagsNovel(userId, restrict) }
 
     suspend fun loadMoreUserBookmarkTagsIllust(queryMap: Map<String, String>) =
-        apiApi.loadMoreUserBookmarkTagsIllust(queryMap)
+        withApi { it.loadMoreUserBookmarkTagsIllust(queryMap) }
 
     suspend fun loadMoreUserBookmarkTagsNovel(queryMap: Map<String, String>) =
-        apiApi.loadMoreUserBookmarkTagsNovel(queryMap)
+        withApi { it.loadMoreUserBookmarkTagsNovel(queryMap) }
 
     suspend fun getUserFollowing(
         filter: Filter = Filter.ANDROID,
         userId: Long,
         restrict: Restrict = Restrict.PUBLIC,
         offset: Int? = null
-    ) = apiApi.getUserFollowing(filter.value, userId, restrict.value, offset)
+    ) = withApi { it.getUserFollowing(filter.value, userId, restrict.value, offset) }
 
     suspend fun loadMoreUserFollowing(
         queryMap: Map<String, String>
-    ) = apiApi.loadMoreUserFollowing(queryMap)
+    ) = withApi { it.loadMoreUserFollowing(queryMap) }
 
     suspend fun getFollowingIllusts(
         restrict: Restrict = Restrict.ALL,
         offset: Long? = null
-    ) = apiApi.getFollowingIllusts(restrict.value, offset)
+    ) = withApi { it.getFollowingIllusts(restrict.value, offset) }
 
-    suspend fun getMuteList() = apiApi.getMuteList()
+    suspend fun getMuteList() = withApi { it.getMuteList() }
 
     suspend fun postMuteSetting(
         addUserIds: List<Long>? = null,
         deleteUserIds: List<Long>? = null,
         addTags: List<String>? = null,
         deleteTags: List<String>? = null
-    ) = apiApi.postMuteSetting(addUserIds, deleteUserIds, addTags, deleteTags)
+    ) = withApi { it.postMuteSetting(addUserIds, deleteUserIds, addTags, deleteTags) }
 
     suspend fun addIllustBrowsingHistory(vararg illustIds: Long) =
-        apiApi.addIllustBrowsingHistory(illustIds.toList())
+        withApi { it.addIllustBrowsingHistory(illustIds.toList()) }
 
     suspend fun addIllustBrowsingHistory(illustIds: List<Long>) =
-        apiApi.addIllustBrowsingHistory(illustIds)
+        withApi { it.addIllustBrowsingHistory(illustIds) }
 
     suspend fun addNovelBrowsingHistory(vararg novelIds: Long) =
-        apiApi.addNovelBrowsingHistory(novelIds.toList())
+        withApi { it.addNovelBrowsingHistory(novelIds.toList()) }
 
     suspend fun addNovelBrowsingHistory(novelIds: List<Long>) =
-        apiApi.addNovelBrowsingHistory(novelIds)
+        withApi { it.addNovelBrowsingHistory(novelIds) }
 
     suspend fun searchPopularPreviewIllust(query: SearchIllustQuery) =
-        apiApi.searchPopularPreviewIllust(
-            query.filter.value,
-            query.includeTranslatedTagResults,
-            query.mergePlainKeywordResults,
-            query.word,
-            query.searchTarget.value,
-            query.searchAiType.value,
-        )
+        withApi {
+            it.searchPopularPreviewIllust(
+                query.filter.value,
+                query.includeTranslatedTagResults,
+                query.mergePlainKeywordResults,
+                query.word,
+                query.searchTarget.value,
+                query.searchAiType.value,
+            )
+        }
 
     suspend fun searchPopularPreviewNovel(query: SearchNovelQuery) =
-        apiApi.searchPopularPreviewNovel(
-            query.filter.value,
-            query.includeTranslatedTagResults,
-            query.mergePlainKeywordResults,
-            query.word,
-            query.searchTarget.value,
-            query.searchAiType.value,
-        )
+        withApi {
+            it.searchPopularPreviewNovel(
+                query.filter.value,
+                query.includeTranslatedTagResults,
+                query.mergePlainKeywordResults,
+                query.word,
+                query.searchTarget.value,
+                query.searchAiType.value,
+            )
+        }
 
     suspend fun getIllustComments(illustId: Long, offset: Int? = null) =
-        apiApi.getIllustComments(illustId, offset)
+        withApi { it.getIllustComments(illustId, offset) }
 
     suspend fun loadMoreIllustComments(queryMap: Map<String, String>) =
-        apiApi.loadMoreIllustComments(queryMap)
+        withApi { it.loadMoreIllustComments(queryMap) }
 
     suspend fun getIllustCommentReplies(commentId: Long, offset: Int? = null) =
-        apiApi.getIllustCommentReplies(commentId, offset)
+        withApi { it.getIllustCommentReplies(commentId, offset) }
 
     suspend fun loadMoreIllustCommentReplies(queryMap: Map<String, String>) =
-        apiApi.loadMoreIllustCommentReplies(queryMap)
+        withApi { it.loadMoreIllustCommentReplies(queryMap) }
 
     suspend fun getNovelComments(novelId: Long, offset: Int? = null) =
-        apiApi.getNovelComments(novelId, offset)
+        withApi { it.getNovelComments(novelId, offset) }
 
     suspend fun loadMoreNovelComments(queryMap: Map<String, String>) =
-        apiApi.loadMoreNovelComments(queryMap)
+        withApi { it.loadMoreNovelComments(queryMap) }
 
     suspend fun getNovelCommentReplies(commentId: Long, offset: Int? = null) =
-        apiApi.getNovelCommentReplies(commentId, offset)
+        withApi { it.getNovelCommentReplies(commentId, offset) }
 
     suspend fun loadMoreNovelCommentReplies(queryMap: Map<String, String>) =
-        apiApi.loadMoreNovelCommentReplies(queryMap)
+        withApi { it.loadMoreNovelCommentReplies(queryMap) }
 
-    suspend fun getEmojis() = apiApi.getEmojis()
+    suspend fun getEmojis() = withApi { it.getEmojis() }
 
-    suspend fun getStamps() = apiApi.getStamps()
+    suspend fun getStamps() = withApi { it.getStamps() }
 
     suspend fun addIllustComment(
         illustId: Long,
         comment: String,
         stampId: Int? = null,
         parentCommentId: Long? = null
-    ) = apiApi.addIllustComment(illustId, comment, stampId, parentCommentId)
+    ) = withApi { it.addIllustComment(illustId, comment, stampId, parentCommentId) }
 
-    suspend fun deleteIllustComment(commentId: Long) = apiApi.deleteIllustComment(commentId)
+    suspend fun deleteIllustComment(commentId: Long) = withApi { it.deleteIllustComment(commentId) }
 
     suspend fun addNovelComment(
         novelId: Long,
         comment: String,
         stampId: Int? = null,
         parentCommentId: Long? = null
-    ) = apiApi.addNovelComment(novelId, comment, stampId, parentCommentId)
+    ) = withApi { it.addNovelComment(novelId, comment, stampId, parentCommentId) }
 
-    suspend fun deleteNovelComment(commentId: Long) = apiApi.deleteNovelComment(commentId)
+    suspend fun deleteNovelComment(commentId: Long) = withApi { it.deleteNovelComment(commentId) }
 
-    suspend fun getUserReportTopicList() = apiApi.getUserReportTopicList()
+    suspend fun getUserReportTopicList() = withApi { it.getUserReportTopicList() }
 
-    suspend fun getIllustReportTopicList() = apiApi.getIllustReportTopicList()
+    suspend fun getIllustReportTopicList() = withApi { it.getIllustReportTopicList() }
 
-    suspend fun getNovelReportTopicList() = apiApi.getNovelReportTopicList()
+    suspend fun getNovelReportTopicList() = withApi { it.getNovelReportTopicList() }
 
-    suspend fun getIllustCommentReportTopicList() = apiApi.getIllustCommentReportTopicList()
+    suspend fun getIllustCommentReportTopicList() = withApi { it.getIllustCommentReportTopicList() }
 
-    suspend fun getNovelCommentReportTopicList() = apiApi.getNovelCommentReportTopicList()
+    suspend fun getNovelCommentReportTopicList() = withApi { it.getNovelCommentReportTopicList() }
 
     suspend fun reportUser(userId: Long, topicId: Int, description: String) =
-        apiApi.reportUser(userId, topicId, description)
+        withApi { it.reportUser(userId, topicId, description) }
 
     suspend fun reportIllust(illustId: Long, topicId: Int, description: String) =
-        apiApi.reportIllust(illustId, topicId, description)
+        withApi { it.reportIllust(illustId, topicId, description) }
 
     suspend fun reportNovel(novelId: Long, topicId: Int, description: String) =
-        apiApi.reportNovel(novelId, topicId, description)
+        withApi { it.reportNovel(novelId, topicId, description) }
 
     suspend fun reportIllustComment(commentId: Long, topicId: Int, description: String) =
-        apiApi.reportIllustComment(commentId, topicId, description)
+        withApi { it.reportIllustComment(commentId, topicId, description) }
 
     suspend fun reportNovelComment(commentId: Long, topicId: Int, description: String) =
-        apiApi.reportNovelComment(commentId, topicId, description)
+        withApi { it.reportNovelComment(commentId, topicId, description) }
 
     // ==================== Novel Repository Methods ====================
 
@@ -331,96 +359,96 @@ object PixivRepository : KoinComponent {
         filter: Filter = Filter.ANDROID,
         userId: Long,
         offset: Int? = null
-    ) = apiApi.getUserNovels(filter.value, userId, offset)
+    ) = withApi { it.getUserNovels(filter.value, userId, offset) }
 
     suspend fun loadMoreUserNovels(queryMap: Map<String, String>) =
-        apiApi.loadMoreUserNovels(queryMap)
+        withApi { it.loadMoreUserNovels(queryMap) }
 
     suspend fun getNovelSeries(
         seriesId: Long,
         filter: Filter = Filter.ANDROID,
         offset: Int? = null
-    ) = apiApi.getNovelSeries(seriesId, filter.value, offset)
+    ) = withApi { it.getNovelSeries(seriesId, filter.value, offset) }
 
     suspend fun loadMoreNovelSeries(queryMap: Map<String, String>) =
-        apiApi.loadMoreNovelSeries(queryMap)
+        withApi { it.loadMoreNovelSeries(queryMap) }
 
-    suspend fun getNovelWatchlist() = apiApi.getNovelWatchlist()
+    suspend fun getNovelWatchlist() = withApi { it.getNovelWatchlist() }
 
     suspend fun loadMoreNovelWatchlist(queryMap: Map<String, String>) =
-        apiApi.loadMoreNovelWatchlist(queryMap)
+        withApi { it.loadMoreNovelWatchlist(queryMap) }
 
     suspend fun addNovelSeriesToWatchlist(seriesId: Long) =
-        apiApi.addNovelSeriesToWatchlist(seriesId)
+        withApi { it.addNovelSeriesToWatchlist(seriesId) }
 
     suspend fun deleteNovelSeriesFromWatchlist(seriesId: Long) =
-        apiApi.deleteNovelSeriesFromWatchlist(seriesId)
+        withApi { it.deleteNovelSeriesFromWatchlist(seriesId) }
 
-    suspend fun getNovelDetail(novelId: Long) = apiApi.getNovelDetail(novelId)
+    suspend fun getNovelDetail(novelId: Long) = withApi { it.getNovelDetail(novelId) }
 
     suspend fun getTrendingNovelTags(filter: Filter = Filter.ANDROID) =
-        apiApi.getTrendingNovelTags(filter.value)
+        withApi { it.getTrendingNovelTags(filter.value) }
 
-    suspend fun searchNovel(query: SearchNovelQuery) = apiApi.searchNovel(query.toMap())
+    suspend fun searchNovel(query: SearchNovelQuery) = withApi { it.searchNovel(query.toMap()) }
 
     suspend fun searchNovelNext(queryMap: Map<String, String>) =
-        apiApi.searchNovelNext(queryMap)
+        withApi { it.searchNovelNext(queryMap) }
 
     suspend fun getNovelRecommended(
         filter: Filter = Filter.ANDROID,
         includeRankingNovels: Boolean = true,
         includePrivacyPolicy: Boolean = false
-    ) = apiApi.getNovelRecommended(filter.value, includeRankingNovels, includePrivacyPolicy)
+    ) = withApi { it.getNovelRecommended(filter.value, includeRankingNovels, includePrivacyPolicy) }
 
     suspend fun loadMoreNovelRecommended(queryMap: Map<String, String>) =
-        apiApi.loadMoreNovelRecommended(queryMap)
+        withApi { it.loadMoreNovelRecommended(queryMap) }
 
     suspend fun getNovelRanking(
         mode: String,
         filter: Filter = Filter.ANDROID,
         date: String? = null,
         offset: Int? = null
-    ) = apiApi.getNovelRanking(mode, filter.value, date, offset)
+    ) = withApi { it.getNovelRanking(mode, filter.value, date, offset) }
 
     suspend fun loadMoreNovelRanking(queryMap: Map<String, String>) =
-        apiApi.loadMoreNovelRanking(queryMap)
+        withApi { it.loadMoreNovelRanking(queryMap) }
 
     suspend fun getNovelNew(
         filter: Filter = Filter.ANDROID,
         offset: Int? = null
-    ) = apiApi.getNovelNew(filter.value, offset)
+    ) = withApi { it.getNovelNew(filter.value, offset) }
 
     suspend fun loadMoreNovelNew(queryMap: Map<String, String>) =
-        apiApi.loadMoreNovelNew(queryMap)
+        withApi { it.loadMoreNovelNew(queryMap) }
 
     suspend fun getFollowNovels(
         restrict: Restrict = Restrict.ALL,
         offset: Long? = null
-    ) = apiApi.getFollowNovels(restrict.value, offset)
+    ) = withApi { it.getFollowNovels(restrict.value, offset) }
 
     suspend fun loadMoreFollowNovels(queryMap: Map<String, String>) =
-        apiApi.loadMoreFollowNovels(queryMap)
+        withApi { it.loadMoreFollowNovels(queryMap) }
 
     suspend fun postNovelBookmarkAdd(
         novelId: Long,
         restrict: Restrict = Restrict.PUBLIC,
         tags: List<String>? = null
-    ) = apiApi.postNovelBookmarkAdd(novelId, restrict.value, tags)
+    ) = withApi { it.postNovelBookmarkAdd(novelId, restrict.value, tags) }
 
     suspend fun postNovelBookmarkDelete(novelId: Long) =
-        apiApi.postNovelBookmarkDelete(novelId)
+        withApi { it.postNovelBookmarkDelete(novelId) }
 
-    suspend fun getNovelContent(novelId: Long) = apiApi.getNovelContent(novelId)
-    suspend fun getNovelBookmarkDetail(novelId: Long) = apiApi.getNovelBookmarkDetail(novelId)
+    suspend fun getNovelContent(novelId: Long) = withApi { it.getNovelContent(novelId) }
+    suspend fun getNovelBookmarkDetail(novelId: Long) = withApi { it.getNovelBookmarkDetail(novelId) }
 
-    suspend fun getNovelMarkers() = apiApi.getNovelMarkers()
+    suspend fun getNovelMarkers() = withApi { it.getNovelMarkers() }
 
     suspend fun loadMoreNovelMarkers(queryMap: Map<String, String>) =
-        apiApi.loadMoreNovelMarkers(queryMap)
+        withApi { it.loadMoreNovelMarkers(queryMap) }
 
     suspend fun postNovelMarkerAdd(novelId: Long, page: Int) =
-        apiApi.postNovelMarkerAdd(novelId, page)
+        withApi { it.postNovelMarkerAdd(novelId, page) }
 
     suspend fun postNovelMarkerDelete(novelId: Long) =
-        apiApi.postNovelMarkerDelete(novelId)
+        withApi { it.postNovelMarkerDelete(novelId) }
 }

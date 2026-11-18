@@ -1,5 +1,6 @@
 package com.mrl.pixiv.login
 
+import com.mrl.pixiv.common.network.httpEngineFactory
 import com.mrl.pixiv.common.repository.AuthManager
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -65,7 +66,7 @@ class PixivCookieAuthHelper(
 
     private val cookieStorage = AcceptAllCookiesStorage()
 
-    private val client: HttpClient = HttpClient {
+    private val client: HttpClient = HttpClient(httpEngineFactory) {
         install(ContentNegotiation) { json(json) }
         install(HttpCookies) { storage = cookieStorage }
         install(HttpTimeout) {

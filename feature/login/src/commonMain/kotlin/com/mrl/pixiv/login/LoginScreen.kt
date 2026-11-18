@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -28,6 +29,9 @@ import androidx.compose.ui.Modifier
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.analytics.logException
 import com.mrl.pixiv.common.compose.ui.ContentCrashState
+import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
+import com.mrl.pixiv.common.network.networkSettings
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.Platform
@@ -37,6 +41,7 @@ import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.login_other_methods
 import com.mrl.pixiv.strings.login_webview_failed
+import com.mrl.pixiv.strings.login_webview_route_unavailable
 import dev.nucleusframework.webview.request.RequestInterceptor
 import dev.nucleusframework.webview.request.WebRequest
 import dev.nucleusframework.webview.request.WebRequestInterceptResult
@@ -45,8 +50,14 @@ import dev.nucleusframework.webview.web.NativeWebView
 import dev.nucleusframework.webview.web.WebViewNavigator
 import dev.nucleusframework.webview.web.rememberWebViewNavigator
 import dev.nucleusframework.webview.web.rememberWebViewState
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+
+private enum class LoginWebViewFailure(val message: StringResource) {
+    Runtime(RStrings.login_webview_failed),
+    NetworkRoute(RStrings.login_webview_route_unavailable),
+}
 
 @Composable
 fun LoginScreen(
@@ -56,7 +67,13 @@ fun LoginScreen(
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
     val state = viewModel.asState()
-    var webViewFailed by rememberSaveable(startUrl) { mutableStateOf(false) }
+    var webViewFailure by rememberSaveable(startUrl) { mutableStateOf<LoginWebViewFailure?>(null) }
+    val webViewFailed = webViewFailure != null
+    val networkPreference = remember(startUrl) { requireUserPreferenceValue.networkSettings() }
+    val bypassSetting = when (val configured = networkPreference.bypassSetting) {
+        is BypassSetting.ECH -> BypassSetting.Direct
+        else -> configured
+    }
     val nativeDesktopOverlay = platform is Platform.Desktop
     val webViewState = rememberWebViewState(url = startUrl)
     val webViewNavigator = rememberWebViewNavigator(
@@ -68,7 +85,7 @@ fun LoginScreen(
                 Logger.d(tag = "LoginScreen") { "shouldOverrideUrlLoading: ${request.url}" }
                 val codePair = checkUri(request.url)
                 if (codePair != null) {
-                    viewModel.dispatch(LoginAction.Login(codePair.first, codePair.second))
+                    viewModel.dispatch(LoginAction.Login(codePair.first, codePair.second, networkPreference))
                     return WebRequestInterceptResult.Reject
                 }
                 return WebRequestInterceptResult.Allow
@@ -113,12 +130,12 @@ fun LoginScreen(
             }
         }
     ) {
-        if (webViewFailed) {
-            ContentCrashState(
-                message = stringResource(RStrings.login_webview_failed),
-                onAction = navigationManager::navigateToLoginOptionScreen,
+        val failure = webViewFailure
+        if (failure != null) {
+            LoginWebViewError(
+                message = failure.message,
+                onTryOtherMethods = navigationManager::navigateToLoginOptionScreen,
                 modifier = Modifier.padding(it),
-                actionText = stringResource(RStrings.login_other_methods),
             )
             return@Scaffold
         }
@@ -140,10 +157,15 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxSize(1f),
                 state = webViewState,
                 navigator = webViewNavigator,
+                bypassSetting = bypassSetting,
                 onError = { error ->
-                    if (!webViewFailed) {
-                        webViewFailed = true
-                        logException(error)
+                    if (webViewFailure == null) {
+                        webViewFailure = if (error is WebLoginRouteUnavailableException) {
+                            LoginWebViewFailure.NetworkRoute
+                        } else {
+                            logException(error)
+                            LoginWebViewFailure.Runtime
+                        }
                     }
                 },
                 onCreated = { webview ->
@@ -159,6 +181,20 @@ fun LoginScreen(
     if (!webViewFailed && !nativeDesktopOverlay && state.loading) {
         LoginLoadingOverlay()
     }
+}
+
+@Composable
+internal fun LoginWebViewError(
+    message: StringResource,
+    onTryOtherMethods: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ContentCrashState(
+        message = stringResource(message),
+        onAction = onTryOtherMethods,
+        modifier = modifier,
+        actionText = stringResource(RStrings.login_other_methods),
+    )
 }
 
 @Composable

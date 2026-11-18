@@ -92,7 +92,6 @@
     <string name="ech_doh_url">DoH 地址</string>
     <string name="protocol_http" translatable="false">HTTP</string>
     <string name="protocol_socks" translatable="false">SOCKS</string>
-    <string name="restart_app_to_take_effect">重启App生效</string>
     <string name="image_source">图源</string>
     <string name="self_defined_source">自定义图源</string>
     <string name="default_open">默认打开链接</string>

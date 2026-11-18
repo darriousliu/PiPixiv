@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">Configurações avançadas</string>
     <string name="network_advanced_settings_desc">Personalizar o serviço de resolução DNS</string>
     <string name="ech_doh_url">Endereço DoH</string>
-    <string name="restart_app_to_take_effect">Reinicie o aplicativo para aplicar as alterações</string>
     <string name="image_source">Fonte de imagem</string>
     <string name="self_defined_source">Fonte de imagem personalizada</string>
     <string name="default_open">Link de abertura padrão</string>

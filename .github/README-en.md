@@ -100,7 +100,7 @@ Current source version: **2.6.1**. See GitHub Release below for published versio
 
 * ⚙️ App settings (language, image source, grid columns, private bookmarks, etc.).
 * 🧭 Switch between the floating liquid-glass bar and the standard bottom navigation bar.
-* 🌐 Use the system proxy by default, or choose a direct connection or manual HTTP / SOCKS proxy. Restart the app after changing the network mode. Android and desktop platforms also offer ECH mode.
+* 🌐 Use the system proxy by default, or choose a direct connection or manual HTTP / SOCKS proxy. New network requests use the saved settings immediately. Android and desktop platforms also offer ECH mode. The connection modes available for web sign-in vary by platform.
 * 🔒 Privacy settings control R-18 content visibility and clipboard reading when opening search.
 * 🚫 Block artworks, users, and tags, and filter long novel tags by length and segment count.
 * 🔗 Deep link support.

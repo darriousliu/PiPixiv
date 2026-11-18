@@ -9,6 +9,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
 import dev.nucleusframework.webview.web.ActualWebView
 import dev.nucleusframework.webview.web.NativeWebView
 import dev.nucleusframework.webview.web.WebView
@@ -59,11 +60,19 @@ private inline fun recoverLoginWebViewFailure(onError: (Throwable) -> Unit, oper
 internal actual fun LoginWebView(
     state: WebViewState,
     navigator: WebViewNavigator,
+    bypassSetting: BypassSetting,
     onError: (Throwable) -> Unit,
     modifier: Modifier,
     onCreated: (NativeWebView) -> Unit,
     content: @Composable () -> Unit,
 ) {
+    val currentOnError by rememberUpdatedState(onError)
+    if (bypassSetting != BypassSetting.System) {
+        LaunchedEffect(state, bypassSetting) {
+            currentOnError(WebLoginRouteUnavailableException())
+        }
+        return
+    }
     if (!System.getProperty("os.name").startsWith("Windows")) {
         WebView(
             state = state,
@@ -75,7 +84,6 @@ internal actual fun LoginWebView(
         return
     }
     var availability by remember(state) { mutableStateOf<WebLoginAvailability?>(null) }
-    val currentOnError by rememberUpdatedState(onError)
     val currentOnCreated by rememberUpdatedState(onCreated)
     LaunchedEffect(state) {
         availability = checkWebLoginAvailability()

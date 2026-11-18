@@ -43,6 +43,8 @@ import com.mrl.pixiv.common.datasource.local.dao.BrowsingHistoryDao
 import com.mrl.pixiv.common.network.ApiClient
 import com.mrl.pixiv.common.network.AuthClient
 import com.mrl.pixiv.common.network.ImageClient
+import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
 import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.util.JvmZipUtil
 import com.mrl.pixiv.common.util.ToastUtil
@@ -152,9 +154,9 @@ class PicturePagerViewModelTest {
         val history = BrowsingHistoryRepository(unusedHistoryDao())
         startKoin {
             modules(module {
-                single<HttpClient>(named<ApiClient>()) { client }
-                single<HttpClient>(named<AuthClient>()) { client }
-                single<HttpClient>(named<ImageClient>()) { imageClient }
+                single(named<ApiClient>()) { RoutedHttpClient({ BypassSetting.System }, { client }, HttpClient::close) }
+                single(named<AuthClient>()) { RoutedHttpClient({ BypassSetting.System }, { client }, HttpClient::close) }
+                single(named<ImageClient>()) { RoutedHttpClient({ BypassSetting.System }, { imageClient }, HttpClient::close) }
                 viewModel {
                     parameters -> PictureViewModel(
                         parameters.getOrNull<Illust>(), parameters.getOrNull<Long>(), JvmZipUtil(), history,

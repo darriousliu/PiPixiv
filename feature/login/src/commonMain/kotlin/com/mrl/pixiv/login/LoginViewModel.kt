@@ -1,6 +1,8 @@
 package com.mrl.pixiv.login
 
 import androidx.compose.runtime.Stable
+import com.mrl.pixiv.common.network.NetworkSettings
+import com.mrl.pixiv.common.network.withNetworkPreference
 import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
@@ -13,7 +15,11 @@ data class LoginState(
 )
 
 sealed class LoginAction : ViewIntent {
-    data class Login(val code: String, val codeVerifier: String) : LoginAction()
+    data class Login(
+        val code: String,
+        val codeVerifier: String,
+        val networkPreference: NetworkSettings,
+    ) : LoginAction()
 }
 
 sealed class LoginEvent : SideEffect {
@@ -26,14 +32,16 @@ class LoginViewModel : BaseMviViewModel<LoginState, LoginAction>(
 ) {
     override suspend fun handleIntent(intent: LoginAction) {
         when (intent) {
-            is LoginAction.Login -> login(intent.code, intent.codeVerifier)
+            is LoginAction.Login -> login(intent)
         }
     }
 
-    private fun login(code: String, codeVerifier: String) =
+    private fun login(intent: LoginAction.Login) =
         launchIO {
             updateState { copy(loading = true) }
-            AuthManager.login(code, codeVerifier)
+            withNetworkPreference({ intent.networkPreference }) {
+                AuthManager.login(intent.code, intent.codeVerifier)
+            }
             sendEffect(LoginEvent.NavigateToMain)
         }
 }

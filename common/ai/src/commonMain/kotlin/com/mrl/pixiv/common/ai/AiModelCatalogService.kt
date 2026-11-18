@@ -28,7 +28,7 @@ class AiModelCatalogService(
     private val httpClientHolder: AiHttpClientHolder,
 ) {
     suspend fun fetchModels(config: AiTranslationConfig): List<String> {
-        return fetchModels(config, httpClientHolder.client)
+        return httpClientHolder.withClient { fetchModels(config, it) }
     }
 
     internal suspend fun fetchModels(

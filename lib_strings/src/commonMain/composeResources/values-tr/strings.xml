@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">Gelişmiş ayarlar</string>
     <string name="network_advanced_settings_desc">DNS çözümleyicisini özelleştirin</string>
     <string name="ech_doh_url">DoH adresi</string>
-    <string name="restart_app_to_take_effect">Etkili olması için uygulamayı yeniden başlat</string>
     <string name="image_source">Görsel Kaynağı</string>
     <string name="self_defined_source">Özel Görsel Kaynağı</string>
     <string name="default_open">Varsayılan Olarak Bağlantıyı Aç</string>

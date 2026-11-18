@@ -43,73 +43,76 @@ class OpenAiTextClient(
 ) : AiTextProviderClient {
     override val provider: AiProvider = AiProvider.OPENAI
 
-    override suspend fun generateText(request: AiTextRequest): AiTextResponse {
-        val apiType =
-            if (request.responseApi) OpenAiApiType.RESPONSES else OpenAiApiType.CHAT_COMPLETIONS
-        val response = httpClientHolder.client.post {
-            url(openAiUrl(request.endpoint, apiType))
-            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            if (request.apiKey.isNotBlank()) {
-                header(HttpHeaders.Authorization, "Bearer ${request.apiKey}")
-            }
-            configureAiGenerationTimeout(request.generationTimeoutMillis)
-            setBody(
-                when (apiType) {
-                    OpenAiApiType.CHAT_COMPLETIONS -> buildChatCompletionsBody(request)
-                        .withExtraBody(
-                            extraBody = request.extraBody,
-                            reservedKeys = setOf("model", "messages"),
-                            providerName = provider.name,
-                        )
-                        .toString()
-
-                    OpenAiApiType.RESPONSES -> buildResponsesBody(request)
-                        .withExtraBody(
-                            extraBody = request.extraBody,
-                            reservedKeys = setOf("model", "input"),
-                            providerName = provider.name,
-                        )
-                        .toString()
-                }
-            )
-        }
-
-        val payload = response.toJsonObject(providerName = provider.name)
-        val text = when (apiType) {
-            OpenAiApiType.CHAT_COMPLETIONS -> parseChatCompletionsText(payload)
-            OpenAiApiType.RESPONSES -> parseResponsesText(payload)
-        }.trim()
-
-        require(text.isNotBlank()) {
-            "AI returned empty text response."
-        }
-        return AiTextResponse(text = text)
-    }
-
-    override fun generateTextStream(request: AiTextRequest): Flow<AiTextStreamEvent> = flow {
-        val apiType =
-            if (request.responseApi) OpenAiApiType.RESPONSES else OpenAiApiType.CHAT_COMPLETIONS
-
-        httpClientHolder.client.serverSentEvents(
-            request = {
-                method = HttpMethod.Post
+    override suspend fun generateText(request: AiTextRequest): AiTextResponse =
+        httpClientHolder.withClient { client ->
+            val apiType =
+                if (request.responseApi) OpenAiApiType.RESPONSES else OpenAiApiType.CHAT_COMPLETIONS
+            val response = client.post {
                 url(openAiUrl(request.endpoint, apiType))
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 if (request.apiKey.isNotBlank()) {
                     header(HttpHeaders.Authorization, "Bearer ${request.apiKey}")
                 }
-                configureAiGenerationTimeout(
-                    generationTimeoutMillis = request.generationTimeoutMillis,
-                    streaming = true,
+                configureAiGenerationTimeout(request.generationTimeoutMillis)
+                setBody(
+                    when (apiType) {
+                        OpenAiApiType.CHAT_COMPLETIONS -> buildChatCompletionsBody(request)
+                            .withExtraBody(
+                                extraBody = request.extraBody,
+                                reservedKeys = setOf("model", "messages"),
+                                providerName = provider.name,
+                            )
+                            .toString()
+
+                        OpenAiApiType.RESPONSES -> buildResponsesBody(request)
+                            .withExtraBody(
+                                extraBody = request.extraBody,
+                                reservedKeys = setOf("model", "input"),
+                                providerName = provider.name,
+                            )
+                            .toString()
+                    }
                 )
-                setBody(buildStreamingBody(request, apiType).toString())
             }
-        ) {
-            openAiStreamEvents(
-                dataFrames = incoming.mapNotNull { it.data },
-                apiType = apiType,
-            ).collect { event ->
-                this@flow.emit(event)
+
+            val payload = response.toJsonObject(providerName = provider.name)
+            val text = when (apiType) {
+                OpenAiApiType.CHAT_COMPLETIONS -> parseChatCompletionsText(payload)
+                OpenAiApiType.RESPONSES -> parseResponsesText(payload)
+            }.trim()
+
+            require(text.isNotBlank()) {
+                "AI returned empty text response."
+            }
+            AiTextResponse(text = text)
+        }
+
+    override fun generateTextStream(request: AiTextRequest): Flow<AiTextStreamEvent> = flow {
+        val apiType =
+            if (request.responseApi) OpenAiApiType.RESPONSES else OpenAiApiType.CHAT_COMPLETIONS
+
+        httpClientHolder.withClient { client ->
+            client.serverSentEvents(
+                request = {
+                    method = HttpMethod.Post
+                    url(openAiUrl(request.endpoint, apiType))
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    if (request.apiKey.isNotBlank()) {
+                        header(HttpHeaders.Authorization, "Bearer ${request.apiKey}")
+                    }
+                    configureAiGenerationTimeout(
+                        generationTimeoutMillis = request.generationTimeoutMillis,
+                        streaming = true,
+                    )
+                    setBody(buildStreamingBody(request, apiType).toString())
+                }
+            ) {
+                openAiStreamEvents(
+                    dataFrames = incoming.mapNotNull { it.data },
+                    apiType = apiType,
+                ).collect { event ->
+                    this@flow.emit(event)
+                }
             }
         }
     }

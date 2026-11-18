@@ -22,11 +22,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import co.touchlab.kermit.Logger
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
-import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.allowRgb565
 import com.mrl.pixiv.common.activity.BaseActivity
 import com.mrl.pixiv.common.compose.LocalKeyEventFlow
 import com.mrl.pixiv.common.network.ImageClient
+import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.network.imageNetworkFetcher
 import com.mrl.pixiv.common.viewmodel.state
 import com.mrl.pixiv.splash.SplashViewModel
 import io.ktor.client.HttpClient
@@ -42,7 +43,7 @@ import androidx.compose.ui.input.key.KeyEvent as ComposeKeyEvent
 
 class MainActivity : BaseActivity() {
     private val splashViewModel: SplashViewModel by viewModel()
-    private val imageHttpClient: HttpClient by inject(named<ImageClient>())
+    private val imageHttpClient: RoutedHttpClient<HttpClient> by inject(named<ImageClient>())
     private val flow = MutableSharedFlow<ComposeKeyEvent>()
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -84,7 +85,7 @@ class MainActivity : BaseActivity() {
                             } else {
                                 add(GifDecoder.Factory())
                             }
-                            add(KtorNetworkFetcherFactory(imageHttpClient))
+                            add(imageNetworkFetcher(imageHttpClient))
                         }
                 },
                 splashViewModel = splashViewModel

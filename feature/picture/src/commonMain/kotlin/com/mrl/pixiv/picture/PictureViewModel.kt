@@ -16,6 +16,9 @@ import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
+import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.network.networkSettings
+import com.mrl.pixiv.common.network.withNetworkPreference
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.repository.DownloadManager
@@ -123,7 +126,7 @@ class PictureViewModel(
 ) : BaseMviViewModel<PictureState, PictureAction>(
     initialState = PictureState(illust = illust),
 ), KoinComponent {
-    private val imageOkHttpClient: HttpClient by inject(named<ImageClient>())
+    private val imageHttpClient: RoutedHttpClient<HttpClient> by inject(named<ImageClient>())
     private val downloadManager: DownloadManager by inject()
     val relatedIllusts = Pager(PagingConfig(pageSize = 20)) {
         RelatedIllustPaging(illust?.id ?: illustId!!)
@@ -166,38 +169,15 @@ class PictureViewModel(
 
     private fun downloadUgoira(illustId: Long) {
         launchIO {
-            updateState { copy(ugoiraState = ugoiraState.copy(loading = true)) }
-            val resp = PixivRepository.getUgoiraMetadata(illustId)
-            cachedUgoiraMetadata = resp.ugoiraMetadata
-            if (!ugoiraDir.exists()) ugoiraDir.createDirectories()
-            val file = ugoiraDir / "$illustId.zip"
-            if (file.exists() && file.size() > 0) {
-                val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
-                    img.readBytes().decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
-                }
-                Logger.e(tag = TAG) { "downloadUgoira: $imageFiles" }
-                updateState {
-                    copy(
-                        ugoiraState = ugoiraState.copy(
-                            ugoiraImages = imageFiles.toImmutableList(),
-                            loading = false,
-                            isPlaying = true
-                        )
-                    )
-                }
-            } else {
-                val zipUrl = resp.ugoiraMetadata.zipUrls.medium
-                val response = imageOkHttpClient.request {
-                    url.takeFrom(zipUrl)
-                }
-                if (response.status.isSuccess()) {
-                    response.bodyAsChannel().asSource().buffered().use { source ->
-                        file.write(source.readByteArray())
-                    }
-                    // 解压
+            withNetworkPreference({ requireUserPreferenceValue.networkSettings() }) {
+                updateState { copy(ugoiraState = ugoiraState.copy(loading = true)) }
+                val resp = PixivRepository.getUgoiraMetadata(illustId)
+                cachedUgoiraMetadata = resp.ugoiraMetadata
+                if (!ugoiraDir.exists()) ugoiraDir.createDirectories()
+                val file = ugoiraDir / "$illustId.zip"
+                if (file.exists() && file.size() > 0) {
                     val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
-                        img.readBytes()
-                            .decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
+                        img.readBytes().decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
                     }
                     Logger.e(tag = TAG) { "downloadUgoira: $imageFiles" }
                     updateState {
@@ -208,6 +188,36 @@ class PictureViewModel(
                                 isPlaying = true
                             )
                         )
+                    }
+                } else {
+                    val zipUrl = resp.ugoiraMetadata.zipUrls.medium
+                    val downloaded = imageHttpClient.withClient { client ->
+                        val response = client.request { url.takeFrom(zipUrl) }
+                        if (response.status.isSuccess()) {
+                            response.bodyAsChannel().asSource().buffered().use { source ->
+                                file.write(source.readByteArray())
+                            }
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    if (downloaded) {
+                        // 解压
+                        val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
+                            img.readBytes()
+                                .decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
+                        }
+                        Logger.e(tag = TAG) { "downloadUgoira: $imageFiles" }
+                        updateState {
+                            copy(
+                                ugoiraState = ugoiraState.copy(
+                                    ugoiraImages = imageFiles.toImmutableList(),
+                                    loading = false,
+                                    isPlaying = true
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -359,12 +369,13 @@ class PictureViewModel(
 
     private suspend fun calculateImageSize(url: String): Long {
         return try {
-            val response = imageOkHttpClient.request {
-                method = HttpMethod.Head
-                url(url)
+            imageHttpClient.withClient { client ->
+                val response = client.request {
+                    method = HttpMethod.Head
+                    url(url)
+                }
+                response.contentLength() ?: 0
             }
-            val contentLength = response.contentLength() ?: 0
-            return contentLength
         } catch (e: Exception) {
             e.printStackTrace()
             0
@@ -429,16 +440,18 @@ class PictureViewModel(
         launchProcess(Dispatchers.IO) {
             try {
                 showLoading(true)
-                val response = imageOkHttpClient.request {
-                    url(imageUrl)
-                }
-                if (response.status.isSuccess()) {
-                    val bytes =
-                        response.bodyAsChannel().asSource().buffered().use { it.readByteArray() }
-                    file.write(bytes)
-                    ToastUtil.safeShortToast(RStrings.download_success)
-                } else {
-                    ToastUtil.safeShortToast(RStrings.download_failed)
+                imageHttpClient.withClient { client ->
+                    val response = client.request {
+                        url(imageUrl)
+                    }
+                    if (response.status.isSuccess()) {
+                        val bytes =
+                            response.bodyAsChannel().asSource().buffered().use { it.readByteArray() }
+                        file.write(bytes)
+                        ToastUtil.safeShortToast(RStrings.download_success)
+                    } else {
+                        ToastUtil.safeShortToast(RStrings.download_failed)
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -29,69 +29,70 @@ class ClaudeTextClient(
 ) : AiTextProviderClient {
     override val provider: AiProvider = AiProvider.CLAUDE
 
-    override suspend fun generateText(request: AiTextRequest): AiTextResponse {
-        val systemPrompt = request.messages
-            .filter { it.role == AiMessageRole.SYSTEM }
-            .joinToString(separator = "\n\n") { it.content }
-            .trim()
+    override suspend fun generateText(request: AiTextRequest): AiTextResponse =
+        httpClientHolder.withClient { client ->
+            val systemPrompt = request.messages
+                .filter { it.role == AiMessageRole.SYSTEM }
+                .joinToString(separator = "\n\n") { it.content }
+                .trim()
 
-        val messages = request.messages.filter { it.role != AiMessageRole.SYSTEM }
-        require(messages.isNotEmpty()) {
-            "Claude request requires at least one non-system message."
-        }
-
-        val resolvedModel = request.model
-        val response = httpClientHolder.client.post {
-            url(claudeUrl(request.endpoint))
-            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header("anthropic-version", ANTHROPIC_VERSION)
-            if (request.apiKey.isNotBlank()) {
-                header("x-api-key", request.apiKey)
+            val messages = request.messages.filter { it.role != AiMessageRole.SYSTEM }
+            require(messages.isNotEmpty()) {
+                "Claude request requires at least one non-system message."
             }
-            configureAiGenerationTimeout(request.generationTimeoutMillis)
-            setBody(
-                buildJsonObject {
-                    put("model", resolvedModel)
-                    put("max_tokens", request.maxOutputTokens ?: DEFAULT_MAX_OUTPUT_TOKENS)
-                    if (systemPrompt.isNotBlank()) {
-                        put("system", systemPrompt)
-                    }
-                    putJsonArray("messages") {
-                        messages.forEach { message ->
-                            add(
-                                buildJsonObject {
-                                    put("role", message.role.toClaudeRole())
-                                    put("content", message.content)
-                                }
-                            )
+
+            val resolvedModel = request.model
+            val response = client.post {
+                url(claudeUrl(request.endpoint))
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header("anthropic-version", ANTHROPIC_VERSION)
+                if (request.apiKey.isNotBlank()) {
+                    header("x-api-key", request.apiKey)
+                }
+                configureAiGenerationTimeout(request.generationTimeoutMillis)
+                setBody(
+                    buildJsonObject {
+                        put("model", resolvedModel)
+                        put("max_tokens", request.maxOutputTokens ?: DEFAULT_MAX_OUTPUT_TOKENS)
+                        if (systemPrompt.isNotBlank()) {
+                            put("system", systemPrompt)
+                        }
+                        putJsonArray("messages") {
+                            messages.forEach { message ->
+                                add(
+                                    buildJsonObject {
+                                        put("role", message.role.toClaudeRole())
+                                        put("content", message.content)
+                                    }
+                                )
+                            }
                         }
                     }
-                }
-                    .withExtraBody(
-                        extraBody = request.extraBody,
-                        reservedKeys = setOf("model", "messages", "system"),
-                        providerName = provider.name,
-                    )
-                    .toString()
-            )
-        }
-
-        val payload = response.toJsonObject(providerName = provider.name)
-        val text = payload["content"]?.jsonArrayOrNull()
-            ?.mapNotNull { item ->
-                val obj = item.jsonObjectOrNull() ?: return@mapNotNull null
-                if (obj["type"].stringOrNull() != "text") return@mapNotNull null
-                obj["text"].stringOrNull()
+                        .withExtraBody(
+                            extraBody = request.extraBody,
+                            reservedKeys = setOf("model", "messages", "system"),
+                            providerName = provider.name,
+                        )
+                        .toString()
+                )
             }
-            ?.joinToString(separator = "")
-            ?.trim()
-            .orEmpty()
 
-        require(text.isNotBlank()) {
-            "AI returned empty text response."
+            val payload = response.toJsonObject(providerName = provider.name)
+            val text = payload["content"]?.jsonArrayOrNull()
+                ?.mapNotNull { item ->
+                    val obj = item.jsonObjectOrNull() ?: return@mapNotNull null
+                    if (obj["type"].stringOrNull() != "text") return@mapNotNull null
+                    obj["text"].stringOrNull()
+                }
+                ?.joinToString(separator = "")
+                ?.trim()
+                .orEmpty()
+
+            require(text.isNotBlank()) {
+                "AI returned empty text response."
+            }
+            AiTextResponse(text = text)
         }
-        return AiTextResponse(text = text)
-    }
 
     private fun claudeUrl(endpoint: String): String {
         val base = normalizeBaseUrl(endpoint)

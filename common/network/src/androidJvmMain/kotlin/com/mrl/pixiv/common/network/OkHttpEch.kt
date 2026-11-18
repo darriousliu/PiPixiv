@@ -49,14 +49,15 @@ private data class DnsJsonAnswer(
 
 fun OkHttpClient.Builder.bypassECH(
     queryUrl: String,
+    dohClient: OkHttpClient = OkHttpClient(),
 ): OkHttpClient.Builder {
-    val dohResolver = DnsJsonResolver(queryUrl)
+    val dohResolver = DnsJsonResolver(queryUrl, baseClient = dohClient)
     val originResolver = RacingOriginDnsResolver(
         timeoutSeconds = DOH_TIMEOUT_SECONDS,
         dohLookup = dohResolver::lookup,
         systemLookup = Dns.SYSTEM::lookup,
     )
-    val echBootstrapResolver = DnsJsonResolver(ECH.DEFAULT_DOH_URL)
+    val echBootstrapResolver = DnsJsonResolver(ECH.DEFAULT_DOH_URL, baseClient = dohClient)
     val echConfig = PixivEchConfigCache(
         lookup = {
             try {

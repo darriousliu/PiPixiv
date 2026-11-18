@@ -2,7 +2,6 @@ package com.mrl.pixiv.common.network
 
 import androidx.compose.ui.text.intl.Locale
 import com.mrl.pixiv.common.data.Constants.HashSalt
-import com.mrl.pixiv.common.data.Constants.IMAGE_HOST
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.util.DeviceInfo
 import io.ktor.client.request.HttpRequestBuilder
@@ -29,8 +28,7 @@ interface NetworkFeature {
 
 internal object NetworkUtil : KoinComponent {
     private val networkFeature by inject<NetworkFeature>()
-    val imageHost: String
-        get() = networkFeature.provideUserPreference().imageHost.ifEmpty { IMAGE_HOST }
+    fun networkSettings(): NetworkSettings = networkFeature.provideUserPreference().networkSettings()
 
     val bypassSetting: UserPreference.BypassSetting
         get() = networkFeature.provideUserPreference().bypassSetting

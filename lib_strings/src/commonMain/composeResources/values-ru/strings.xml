@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">Расширенные настройки</string>
     <string name="network_advanced_settings_desc">Настроить службу разрешения имён DNS</string>
     <string name="ech_doh_url">Адрес DoH</string>
-    <string name="restart_app_to_take_effect">Перезапустите приложение для применения изменений</string>
     <string name="image_source">Источник изображения</string>
     <string name="self_defined_source">Пользовательский источник изображения</string>
     <string name="default_open">Открыть ссылку по умолчанию</string>

@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">Erweiterte Einstellungen</string>
     <string name="network_advanced_settings_desc">DNS-Auflösungsdienst anpassen</string>
     <string name="ech_doh_url">DoH-Adresse</string>
-    <string name="restart_app_to_take_effect">App neu starten, um Änderungen zu übernehmen</string>
     <string name="image_source">Bildquelle</string>
     <string name="self_defined_source">Benutzerdefinierte Bildquelle</string>
     <string name="default_open">Standard-Link öffnen</string>

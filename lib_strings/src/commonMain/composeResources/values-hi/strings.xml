@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">उन्नत सेटिंग</string>
     <string name="network_advanced_settings_desc">DNS रिज़ॉल्वर को अनुकूलित करें</string>
     <string name="ech_doh_url">DoH पता</string>
-    <string name="restart_app_to_take_effect">प्रभावी होने के लिए ऐप को पुनरारंभ करें</string>
     <string name="image_source">छवि स्रोत</string>
     <string name="self_defined_source">स्व-परिभाषित छवि स्रोत</string>
     <string name="default_open">डिफ़ॉल्ट ओपन लिंक</string>
