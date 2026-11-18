@@ -8,6 +8,12 @@
     <string name="settings_section_account">帳號</string>
     <string name="profile_view_homepage">查看個人主頁</string>
     <string name="settings_section_general">一般</string>
+    <string name="settings_section_work_grid">作品網格</string>
+    <string name="settings_section_image_preview">圖片預覽</string>
+    <string name="settings_section_novel_tags">小說標籤</string>
+    <string name="settings_section_search_defaults">預設搜尋</string>
+    <string name="settings_section_result_display">結果顯示</string>
+    <string name="settings_section_content_filters">內容篩選</string>
     <string name="unblock_item">解除封鎖</string>
     <string name="liquid_glass_navigation">液態玻璃導覽</string>
     <string name="liquid_glass_navigation_desc">關閉後使用標準底部導覽列。</string>

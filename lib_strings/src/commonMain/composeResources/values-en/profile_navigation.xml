@@ -8,6 +8,12 @@
     <string name="settings_section_account">Account</string>
     <string name="profile_view_homepage">View profile</string>
     <string name="settings_section_general">General</string>
+    <string name="settings_section_work_grid">Artwork grid</string>
+    <string name="settings_section_image_preview">Image preview</string>
+    <string name="settings_section_novel_tags">Novel tags</string>
+    <string name="settings_section_search_defaults">Search defaults</string>
+    <string name="settings_section_result_display">Result display</string>
+    <string name="settings_section_content_filters">Content filters</string>
     <string name="unblock_item">Unblock</string>
     <string name="liquid_glass_navigation">Liquid glass navigation</string>
     <string name="liquid_glass_navigation_desc">Turn off to use a standard bottom navigation bar.</string>

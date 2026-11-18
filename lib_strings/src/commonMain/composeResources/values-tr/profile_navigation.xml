@@ -8,6 +8,12 @@
     <string name="settings_section_account">Hesap</string>
     <string name="profile_view_homepage">Profili görüntüle</string>
     <string name="settings_section_general">Genel</string>
+    <string name="settings_section_work_grid">Eser ızgarası</string>
+    <string name="settings_section_image_preview">Görsel önizlemesi</string>
+    <string name="settings_section_novel_tags">Roman etiketleri</string>
+    <string name="settings_section_search_defaults">Varsayılan arama</string>
+    <string name="settings_section_result_display">Sonuç görünümü</string>
+    <string name="settings_section_content_filters">İçerik filtreleri</string>
     <string name="unblock_item">Engeli kaldır</string>
     <string name="liquid_glass_navigation">Liquid Glass efektli gezinme</string>
     <string name="liquid_glass_navigation_desc">Standart alt gezinme çubuğunu kullanmak için bu seçeneği kapatın.</string>

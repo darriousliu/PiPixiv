@@ -8,6 +8,12 @@
     <string name="settings_section_account">खाता</string>
     <string name="profile_view_homepage">प्रोफ़ाइल देखें</string>
     <string name="settings_section_general">सामान्य</string>
+    <string name="settings_section_work_grid">कृतियों का ग्रिड</string>
+    <string name="settings_section_image_preview">छवि पूर्वावलोकन</string>
+    <string name="settings_section_novel_tags">उपन्यास टैग</string>
+    <string name="settings_section_search_defaults">डिफ़ॉल्ट खोज</string>
+    <string name="settings_section_result_display">परिणामों का प्रदर्शन</string>
+    <string name="settings_section_content_filters">सामग्री फ़िल्टर</string>
     <string name="unblock_item">अनब्लॉक करें</string>
     <string name="liquid_glass_navigation">लिक्विड ग्लास नेविगेशन</string>
     <string name="liquid_glass_navigation_desc">नीचे मौजूद सामान्य नेविगेशन बार का इस्तेमाल करने के लिए इसे बंद करें।</string>

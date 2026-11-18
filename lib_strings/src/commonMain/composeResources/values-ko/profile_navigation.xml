@@ -8,6 +8,12 @@
     <string name="settings_section_account">계정</string>
     <string name="profile_view_homepage">프로필 보기</string>
     <string name="settings_section_general">일반</string>
+    <string name="settings_section_work_grid">작품 격자</string>
+    <string name="settings_section_image_preview">이미지 미리보기</string>
+    <string name="settings_section_novel_tags">소설 태그</string>
+    <string name="settings_section_search_defaults">기본 검색</string>
+    <string name="settings_section_result_display">검색 결과 표시</string>
+    <string name="settings_section_content_filters">콘텐츠 필터</string>
     <string name="unblock_item">차단 해제</string>
     <string name="liquid_glass_navigation">리퀴드 글래스 탐색</string>
     <string name="liquid_glass_navigation_desc">끄면 기본 하단 탐색 메뉴를 사용합니다.</string>

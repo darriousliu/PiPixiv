@@ -8,6 +8,12 @@
     <string name="settings_section_account">Cuenta</string>
     <string name="profile_view_homepage">Ver perfil</string>
     <string name="settings_section_general">General</string>
+    <string name="settings_section_work_grid">Cuadrícula de obras</string>
+    <string name="settings_section_image_preview">Vista previa de imágenes</string>
+    <string name="settings_section_novel_tags">Etiquetas de novelas</string>
+    <string name="settings_section_search_defaults">Búsqueda predeterminada</string>
+    <string name="settings_section_result_display">Visualización de resultados</string>
+    <string name="settings_section_content_filters">Filtros de contenido</string>
     <string name="unblock_item">Desbloquear</string>
     <string name="liquid_glass_navigation">Navegación con Liquid Glass</string>
     <string name="liquid_glass_navigation_desc">Desactiva esta opción para usar la barra de navegación inferior estándar.</string>
