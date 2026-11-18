@@ -331,7 +331,7 @@ class PicturePagerViewModelTest {
             saveGate.complete(Unit)
             try {
                 runBlocking {
-                    withTimeout(10_000) {
+                    withTimeout(10.seconds) {
                         if (savingModel != null) {
                             saveStarted.await()
                             savingModel.uiState.first { !it.loading }

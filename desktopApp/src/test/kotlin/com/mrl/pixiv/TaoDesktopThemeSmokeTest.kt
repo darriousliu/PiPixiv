@@ -30,6 +30,8 @@ import org.junit.Assume.assumeTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class TaoDesktopThemeSmokeTest {
     @Test
@@ -95,9 +97,9 @@ object TaoDesktopThemeSmokeHarness {
             }
             LaunchedEffect(Unit) {
                 withContext(Dispatchers.Main) {
-                    withTimeout(20_000) {
+                    withTimeout(20.seconds) {
                         suspend fun awaitTheme(expected: Boolean, scenario: String) {
-                            while (observedTheme.get() != (expected to expected)) delay(20)
+                            while (observedTheme.get() != (expected to expected)) delay(20.milliseconds)
                             println("$scenario：${observedTheme.get()}")
                         }
                         awaitTheme(initialSystemDark, "读取实际系统主题")

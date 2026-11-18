@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class NetworkDiagnosticStage { DNS, CONNECT, PROXY, TLS, HTTP, BODY }
 
@@ -55,7 +56,7 @@ internal class NetworkDiagnosticTrace {
 
     suspend fun awaitPlatformObservation() {
         // URLSession metrics can arrive after a deliberately bounded response is closed.
-        withTimeoutOrNull(300) { pendingRequests.first { it == 0 } }
+        withTimeoutOrNull(300.milliseconds) { pendingRequests.first { it == 0 } }
     }
 }
 

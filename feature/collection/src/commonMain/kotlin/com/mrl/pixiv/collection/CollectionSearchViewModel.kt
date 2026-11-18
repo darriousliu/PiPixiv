@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class CollectionSyncState { CHECKING, SYNCING, READY, FAILED, NOT_OWNER }
 
@@ -107,7 +108,7 @@ class CollectionSearchViewModel(private val uid: Long) : ViewModel() {
         val query = state.value.draft
         optionsJob = viewModelScope.launch {
             _state.update { it.copy(optionsLoading = true, optionsFailed = false) }
-            if (debounce) delay(300)
+            if (debounce) delay(300.milliseconds)
             try {
                 val (bookmarkResult, workResult, periodResult) = coroutineScope {
                     val bookmarks = async { CollectionSearchRepository.tags(query, true) }

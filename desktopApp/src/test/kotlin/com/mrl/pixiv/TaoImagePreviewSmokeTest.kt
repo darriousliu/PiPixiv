@@ -52,6 +52,8 @@ import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /** The native event loop needs its own first JVM thread; a Swing UI test cannot cover this bug. */
 class TaoImagePreviewSmokeTest {
@@ -187,9 +189,9 @@ object TaoImagePreviewSmokeHarness {
                     // Native input flushes Compose work. Keep the driver off Compose's own
                     // FlushCoroutineDispatcher so an injected event cannot re-enter this effect.
                     withContext(Dispatchers.Main) {
-                        withTimeout(20_000) {
+                        withTimeout(20.seconds) {
                             while (true) {
-                                delay(100)
+                                delay(100.milliseconds)
                                 if (drawnFrames.get() == 0) continue
                                 val image = captureLayer.toImageBitmap().toAwtImage()
                                 if (image.getRGB(image.width / 2, image.height / 2) != PreviewImageArgb) continue
@@ -211,28 +213,28 @@ object TaoImagePreviewSmokeHarness {
                             val coordinate = (32f * density * 1024f).roundToInt()
                             taoWindow.dispatchSmokePointer(TaoEventCode.CURSOR_MOVED, coordinate, coordinate)
                             taoWindow.dispatchSmokePointer(TaoEventCode.MOUSE_DOWN, TaoMouseButton.LEFT, 0)
-                            delay(80)
+                            delay(80.milliseconds)
                             taoWindow.dispatchSmokePointer(TaoEventCode.MOUSE_UP, TaoMouseButton.LEFT, 0)
-                            while (closedFrames.get() == 0) delay(50)
+                            while (closedFrames.get() == 0) delay(50.milliseconds)
                             check(backClicks.get() == 1) { "The real preview back button did not receive one click" }
                             // Wait for AnimatedContent's outgoing preview to finish before probing the list.
-                            delay(400)
+                            delay(400.milliseconds)
                             taoWindow.dispatchSmokePointer(
                                 TaoEventCode.CURSOR_MOVED,
                                 (256f * density * 1024f).roundToInt(),
                                 (40f * density * 1024f).roundToInt(),
                             )
                             taoWindow.dispatchSmokePointer(TaoEventCode.MOUSE_DOWN, TaoMouseButton.LEFT, 0)
-                            delay(80)
+                            delay(80.milliseconds)
                             taoWindow.dispatchSmokePointer(TaoEventCode.MOUSE_UP, TaoMouseButton.LEFT, 0)
-                            while (closedItemClicks.get() == 0) delay(50)
+                            while (closedItemClicks.get() == 0) delay(50.milliseconds)
                             check(closedItemClicks.get() == 1) { "Returned list did not receive one click" }
 
                             // Native wheel deltas use hundredths of a line; negative native Y scrolls down.
                             taoWindow.dispatchSmokePointer(TaoEventCode.SCROLL_LINE, 0, -1200)
                             while (closedListState.firstVisibleItemIndex == 0 &&
                                 closedListState.firstVisibleItemScrollOffset == 0
-                            ) delay(50)
+                            ) delay(50.milliseconds)
                             println(
                                 "TAO_PREVIEW_SMOKE_OK frames=${drawnFrames.get()} back=${backClicks.get()} " +
                                     "listClicks=${closedItemClicks.get()} " +

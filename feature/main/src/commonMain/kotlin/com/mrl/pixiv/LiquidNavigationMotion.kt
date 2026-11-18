@@ -27,6 +27,7 @@ import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.math.sign
+import kotlin.time.Duration.Companion.milliseconds
 
 /** Positions and velocities are expressed in logical tab slots, independently of layout direction. */
 @Stable
@@ -68,7 +69,7 @@ internal class LiquidNavigationMotion(
         beginPress()
         settleAt(confirmedIndex)
         releaseJob = scope.launch {
-            delay(110)
+            delay(110.milliseconds)
             releaseJob = null
             releasePress()
         }
@@ -119,7 +120,7 @@ internal class LiquidNavigationMotion(
         velocity = if (position == value) slotsPerSecond else 0f
         val dragVelocity = velocity
         velocityDecayJob = scope.launch {
-            delay(40)
+            delay(40.milliseconds)
             animate(
                 initialValue = dragVelocity,
                 targetValue = 0f,

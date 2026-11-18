@@ -40,6 +40,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 import kotlinx.io.IOException
 import kotlinx.serialization.decodeFromString
@@ -414,9 +415,7 @@ class NovelReadLaterRepository(
                         ownedJob = launch(start = CoroutineStart.LAZY) {
                             if (claimedItem.retryCount > 0) {
                                 delay(
-                                    NovelReadLaterQueuePolicy.retryDelayMillis(
-                                        claimedItem.retryCount
-                                    )
+                                    NovelReadLaterQueuePolicy.retryDelayMillis(claimedItem.retryCount).milliseconds,
                                 )
                             }
                             processItem(claimedItem)

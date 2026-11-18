@@ -25,6 +25,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.koin.core.annotation.Single
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
 enum class NetworkDiagnosticTarget { APP_API, WEB, LOGIN, IMAGE }
@@ -97,7 +98,7 @@ class NetworkDiagnostics internal constructor(
         val state = ProbeProgress(if (image) settings.imageHost.ifEmpty { requestedHost } else requestedHost)
         var failureStage: NetworkDiagnosticStage? = null
         val status = try {
-            withTimeoutOrNull(PROBE_TIMEOUT_MS) {
+            withTimeoutOrNull(PROBE_TIMEOUT) {
                 clientFactory(settings, image, trace).use { client ->
                     when (target) {
                         NetworkDiagnosticTarget.APP_API -> probeApi(client, url, state)
@@ -320,7 +321,7 @@ private class ProbeError(
     val stage: NetworkDiagnosticStage?,
 ) : Exception()
 
-private const val PROBE_TIMEOUT_MS = 14_000L
+private val PROBE_TIMEOUT = 14.seconds
 private const val MAX_WEB_REDIRECTS = 3
 private const val MAX_IMAGE_BYTES = 1024 * 1024L
 private const val MAX_TEXT_BYTES = 64 * 1024L

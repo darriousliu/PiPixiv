@@ -22,16 +22,17 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 
 class NovelTranslationStreamingTest {
     @Test
     fun appendsConcurrentChunksOnlyInSourceOrder() = runTest {
         val second = async {
-            delay(50)
+            delay(50.milliseconds)
             "B"
         }
         val third = async {
-            delay(1)
+            delay(1.milliseconds)
             "C"
         }
 
