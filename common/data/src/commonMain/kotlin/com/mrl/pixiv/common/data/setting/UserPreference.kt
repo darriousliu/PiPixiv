@@ -30,7 +30,6 @@ data class UserPreference(
     val searchSettings: SearchSettings = SearchSettings(),
     val historySettings: HistorySettings = HistorySettings(),
     val novelReaderSettings: NovelReaderSettings = NovelReaderSettings(),
-    // 新字段追加在末尾，保留旧版 ProtoBuf 的隐式字段编号。
     val useLiquidGlassNavigation: Boolean = true,
 ) {
     companion object {

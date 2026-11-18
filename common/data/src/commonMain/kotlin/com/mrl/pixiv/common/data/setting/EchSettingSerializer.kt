@@ -9,7 +9,6 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
-import kotlinx.serialization.protobuf.ProtoNumber
 
 internal object EchSettingSerializer : KSerializer<ECH> {
     override val descriptor: SerialDescriptor = StoredEchSetting.serializer().descriptor
@@ -27,13 +26,13 @@ internal object EchSettingSerializer : KSerializer<ECH> {
     }
 }
 
-// JSON 丢弃旧 IP 池、非严格 SSL 和超时字段；ProtoBuf 按原字段号读取 URL，跳过其他字段。
+// 读取旧版 JSON 设置和备份时，忽略已移除的 IP 池、非严格 SSL 和超时字段。
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @SerialName("sni")
 @JsonIgnoreUnknownKeys
 private data class StoredEchSetting(
-    @ProtoNumber(1) val url: String = ECH.DEFAULT_DOH_URL,
+    val url: String = ECH.DEFAULT_DOH_URL,
 )
 
 private fun normalizeDohUrl(value: String): String {

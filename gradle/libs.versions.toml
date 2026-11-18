@@ -237,7 +237,6 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-serialization-json-okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "serialization" }
-kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization" }
 
 #serialization-xml-core = { module = "io.github.pdvrieze.xmlutil:core-android", version.ref = "xml_serialization" }
 #serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization-android", version.ref = "xml_serialization" }
@@ -289,7 +288,7 @@ compose-lifecycle = ["compose-lifecycle-common", "compose-lifecycle-runtime-comp
 
 # Kotlin
 kotlinx-coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-android"]
-kotlinx-serialization = ["kotlinx-serialization-json", "kotlinx-serialization-json-okio", "kotlinx-serialization-protobuf"]
+kotlinx-serialization = ["kotlinx-serialization-json", "kotlinx-serialization-json-okio"]
 kotlinx-ktor = ["kotlinx-ktor-client-core", "kotlinx-ktor-client-logging", "kotlinx-ktor-client-content-negotiation", "kotlinx-ktor-serialization-kotlinx-json", "kotlinx-ktorfit-lite"]
 
 [plugins]

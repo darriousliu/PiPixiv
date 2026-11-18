@@ -1,15 +1,8 @@
-@file:OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
-
 package com.mrl.pixiv.common.data.setting
 
 import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.protobuf.ProtoBuf
-import kotlinx.serialization.protobuf.ProtoNumber
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -25,15 +18,6 @@ class NetworkSettingsSerializationTest {
         val preference = Json.decodeFromString<UserPreference>(
             """{"theme":"DARK","bypassSetting":{"type":"none"}}""",
         )
-        assertEquals(BypassSetting.System, preference.bypassSetting)
-        assertEquals("DARK", preference.theme)
-    }
-
-    @Test
-    fun legacyProtobufNoneRetainsCompatibility() {
-        val bytes = ProtoBuf { encodeDefaults = true }
-            .encodeToByteArray(LegacyPreference.serializer(), LegacyPreference())
-        val preference = ProtoBuf.decodeFromByteArray(UserPreference.serializer(), bytes)
         assertEquals(BypassSetting.System, preference.bypassSetting)
         assertEquals("DARK", preference.theme)
     }
@@ -88,42 +72,6 @@ class NetworkSettingsSerializationTest {
     }
 
     @Test
-    fun legacySniProtobufMigratesWithoutWritingRemovedFieldsBack() {
-        val protoBuf = ProtoBuf { encodeDefaults = true }
-        for (savedUrl in listOf("https://doh.pub/dns-query", "https://dns.example/query")) {
-            val legacy = LegacyPreference(
-                bypassSetting = LegacyBypassSetting.Sni(
-                    url = savedUrl,
-                    fallback = mapOf("app-api.pixiv.net" to "210.140.139.155"),
-                    nonStrictSSL = true,
-                    dohTimeout = 99,
-                ),
-            )
-            val restored = protoBuf.decodeFromByteArray(
-                UserPreference.serializer(),
-                protoBuf.encodeToByteArray(LegacyPreference.serializer(), legacy),
-            )
-            val expectedUrl = if (savedUrl == "https://doh.pub/dns-query") {
-                BypassSetting.ECH.DEFAULT_DOH_URL
-            } else {
-                savedUrl
-            }
-            assertEquals(BypassSetting.ECH(expectedUrl), restored.bypassSetting)
-            assertEquals("DARK", restored.theme)
-
-            val saved = protoBuf.decodeFromByteArray(
-                LegacyBypassSetting.Sni.serializer(),
-                protoBuf.encodeToByteArray(
-                    BypassSetting.ECH.serializer(),
-                    restored.bypassSetting as BypassSetting.ECH,
-                ),
-            )
-            // 使用旧结构读取新数据时，已移除的字段只能得到旧结构的默认值。
-            assertEquals(LegacyBypassSetting.Sni(url = expectedUrl), saved)
-        }
-    }
-
-    @Test
     fun everyModeSurvivesPreferenceAndBackupRoundTrips() {
         val modes = listOf(
             BypassSetting.System,
@@ -141,26 +89,4 @@ class NetworkSettingsSerializationTest {
             }
         }
     }
-}
-
-@Serializable
-private data class LegacyPreference(
-    @ProtoNumber(2) val theme: String = "DARK",
-    @ProtoNumber(4) val bypassSetting: LegacyBypassSetting = LegacyBypassSetting.None,
-)
-
-@Serializable
-private sealed interface LegacyBypassSetting {
-    @Serializable
-    @SerialName("none")
-    data object None : LegacyBypassSetting
-
-    @Serializable
-    @SerialName("sni")
-    data class Sni(
-        val url: String = "https://doh.pub/dns-query",
-        val fallback: Map<String, String> = emptyMap(),
-        val nonStrictSSL: Boolean = false,
-        val dohTimeout: Int = 0,
-    ) : LegacyBypassSetting
 }

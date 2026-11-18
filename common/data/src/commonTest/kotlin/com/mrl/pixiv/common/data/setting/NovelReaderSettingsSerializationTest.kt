@@ -1,20 +1,13 @@
 package com.mrl.pixiv.common.data.setting
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.protobuf.ProtoBuf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalSerializationApi::class)
 class NovelReaderSettingsSerializationTest {
     private val json = Json {
         encodeDefaults = false
         ignoreUnknownKeys = true
-    }
-    private val protoBuf = ProtoBuf {
-        encodeDefaults = false
     }
 
     @Test
@@ -44,38 +37,16 @@ class NovelReaderSettingsSerializationTest {
             preference,
             json.decodeFromString<UserPreference>(json.encodeToString(preference)),
         )
-        assertEquals(
-            preference,
-            protoBuf.decodeFromByteArray(
-                UserPreference.serializer(),
-                protoBuf.encodeToByteArray(UserPreference.serializer(), preference),
-            ),
-        )
     }
 
     @Test
-    fun `legacy user preference uses default reader settings`() {
-        val legacyBytes = protoBuf.encodeToByteArray(
-            LegacyUserPreference.serializer(),
-            LegacyUserPreference(
-                appLanguage = "ja",
-                theme = SettingTheme.DARK.name,
-            ),
-        )
-
-        val decoded = protoBuf.decodeFromByteArray(
-            UserPreference.serializer(),
-            legacyBytes,
+    fun `old json user preference uses default reader settings`() {
+        val decoded = json.decodeFromString<UserPreference>(
+            """{"appLanguage":"ja","theme":"DARK"}""",
         )
 
         assertEquals("ja", decoded.appLanguage)
         assertEquals(SettingTheme.DARK.name, decoded.theme)
         assertEquals(NovelReaderSettings(), decoded.novelReaderSettings)
     }
-
-    @Serializable
-    private data class LegacyUserPreference(
-        val appLanguage: String? = null,
-        val theme: String = SettingTheme.SYSTEM.name,
-    )
 }
