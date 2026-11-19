@@ -1,0 +1,68 @@
+name: 问题反馈 / Bug report
+description: 报告崩溃、异常或现有功能的问题。 Report crashes or unexpected behavior.
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请检查是否已有相同反馈。 Please check for duplicate reports before submitting.
+        [搜索已有 Issue / Search existing issues](https://github.com/darriousliu/PiPixiv/issues?q=is%3Aissue)
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 受影响的平台 / Affected platforms
+      multiple: true
+      options:
+        - Android
+        - iOS
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: PiPixiv 版本 / PiPixiv version
+      description: 从源码构建时可填写提交 SHA。 For source builds, you can provide the commit SHA.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: 设备与系统 / Device and OS
+      description: 可附上设备型号、系统版本、安装来源或 Android 构建类型（Default 或 FOSS）。 Include the device model, OS version, install source, or Android build variant (Default or FOSS) if relevant.
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      description: 请列出操作步骤。若问题偶尔发生，请说明出现时的操作和频率。 List the steps. If the issue is intermittent, describe what you were doing and how often it happens.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: 实际结果 / Actual behavior
+      description: 请描述实际发生了什么，包括看到的错误提示。 Describe what happened and include any error message you saw.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 预期结果 / Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: attachments
+    attributes:
+      label: 截图、录屏或日志 / Screenshots, recordings, or logs
+      description: 分享前请移除账号信息、Cookie（PHPSESSID）、Token 和 API Key。 Remove account details, cookies (PHPSESSID), tokens, and API keys before sharing.
