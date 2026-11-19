@@ -4,9 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +35,7 @@ internal fun ReadingProgressIndicator(
         .coerceIn(0, 100)
     val density = LocalDensity.current
     val bottomPadding = with(density) {
-        WindowInsets.systemBars.getBottom(this).toDp()
+        novelReaderContentInsets().getBottom(this).toDp()
     }
 
     AnimatedVisibility(

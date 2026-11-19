@@ -99,6 +99,9 @@ internal fun NovelReaderContent(
 ) {
     val novel = state.novel ?: return
     val density = LocalDensity.current
+    // 系统栏显隐时保持列表坐标稳定，避免重复进入正文时累加恢复偏移。
+    val verticalContentPadding = novelReaderContentInsets().only(WindowInsetsSides.Vertical)
+        .asPaddingValues()
     // Measurement bookkeeping is deliberately not snapshot state: it must not request remeasure.
     val lastMeasuredContentWidth = remember { intArrayOf(-1) }
     val displayedTitle = resolveNovelMetadataText(
@@ -141,9 +144,7 @@ internal fun NovelReaderContent(
                 layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
             },
             state = listState,
-            // 系统栏显隐时保持列表坐标稳定，避免重复进入正文时累加恢复偏移。
-            contentPadding = novelReaderContentInsets().only(WindowInsetsSides.Vertical)
-                .asPaddingValues(),
+            contentPadding = verticalContentPadding,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // 封面图
@@ -443,7 +444,7 @@ internal fun NovelReaderContent(
             VerticalScrollbar(
                 state = scrollbarState,
                 modifier = Modifier.align(Alignment.CenterEnd)
-                    .padding(novelReaderContentInsets().only(WindowInsetsSides.Vertical).asPaddingValues()),
+                    .padding(verticalContentPadding),
             )
             ReadingProgressIndicator(
                 progress = readingProgressFraction,

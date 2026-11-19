@@ -7,16 +7,13 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -53,7 +50,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -498,6 +494,7 @@ fun NovelScreen(
         )
     }
 
+    val readerInsets = novelReaderContentInsets()
     Scaffold(
         modifier = modifier.fillMaxSize(),
         floatingActionButton = {
@@ -506,7 +503,7 @@ fun NovelScreen(
                 Column(
                     modifier = Modifier
                         .padding(
-                            WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues()
+                            readerInsets.only(WindowInsetsSides.Bottom).asPaddingValues()
                         )
                         .padding(bottom = 8.dp),
                     horizontalAlignment = Alignment.End,
@@ -566,12 +563,7 @@ fun NovelScreen(
                 }
             }
         },
-        contentWindowInsets = if (platform is Platform.Apple.IPhoneOS) {
-            // 适配横屏灵动岛
-            ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Horizontal)
-        } else {
-            ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.systemBars)
-        }
+        contentWindowInsets = novelReaderScaffoldInsets(),
     ) { paddingValues ->
         when {
             state.loading -> {
@@ -700,6 +692,11 @@ fun NovelScreen(
                         exit = slideOutVertically(targetOffsetY = { -it })
                     ) {
                         val topBarColor = MaterialTheme.colorScheme.surface
+                        val topBarInsets = if (platform is Platform.Android) {
+                            readerInsets
+                        } else {
+                            TopAppBarDefaults.windowInsets
+                        }
                         TopAppBar(
                             title = {},
                             modifier = Modifier.dropShadow(RectangleShape) {
@@ -791,7 +788,7 @@ fun NovelScreen(
                                     }
                                 }
                             },
-                            windowInsets = TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Top),
+                            windowInsets = topBarInsets.only(WindowInsetsSides.Top),
                             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                         )
                     }
