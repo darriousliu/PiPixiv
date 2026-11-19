@@ -15,6 +15,7 @@ kotlin {
             implementation(project(":common:network"))
             implementation(project(":common:ui"))
             implementation(project(":common:core"))
+            implementation(project(":common:icons"))
 
             // Navigation3
             implementation(libs.compose.androidx.navigation3.runtime)

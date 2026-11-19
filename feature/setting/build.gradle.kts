@@ -18,6 +18,7 @@ kotlin {
             implementation(project(":common:repository"))
             implementation(project(":common:ui"))
             implementation(project(":common:core"))
+            implementation(project(":common:icons"))
 
             implementation(project.dependencies.platform(libs.coil3.bom))
             implementation(libs.bundles.coil3)

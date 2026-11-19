@@ -14,6 +14,7 @@ kotlin {
             implementation(project(":common:repository"))
             implementation(project(":common:ui"))
             implementation(project(":common:core"))
+            implementation(project(":common:icons"))
             implementation(libs.bundles.androidx.paging)
             implementation(libs.html.converter)
         }
