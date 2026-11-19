@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">Выберите страницы для скачивания</string>
+    <string name="artwork_download_all_originals">Скачать все оригиналы</string>
+    <string name="artwork_download_selected">Скачать выбранные оригиналы</string>
+    <string name="artwork_download_selection_count">Выбрано %1$d из %2$d</string>
+    <string name="artwork_download_page">Страница %1$d</string>
+    <string name="select_all">Выбрать все</string>
+    <string name="artwork_download_clear_selection">Снять выделение</string>
+</resources>

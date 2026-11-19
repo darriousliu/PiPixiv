@@ -9,18 +9,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -42,9 +42,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -74,6 +71,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -94,7 +92,6 @@ import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.layout.rememberSplitPaneState
 import com.mrl.pixiv.common.compose.navigationSharedImage
 import com.mrl.pixiv.common.compose.ui.BlockSurface
-import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.FollowButton
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.compose.ui.TagItem
@@ -206,7 +203,6 @@ private const val KEY_ILLUST_AUTHOR = "illust_author"
 private const val KEY_ILLUST_AUTHOR_OTHER_WORKS = "illust_author_other_works"
 private const val KEY_VIEW_COMMENTS = "view_comments"
 private const val KEY_ILLUST_RELATED_TITLE = "illust_related_title"
-private const val KEY_SPACER = "spacer"
 
 @Composable
 internal fun rememberPictureViewModel(illust: Illust): PictureViewModel =
@@ -273,8 +269,6 @@ internal fun PictureScreen(
         }
     }
     val isBarVisible by remember { derivedStateOf { lazyListState.firstVisibleItemIndex <= illust.pageCount } }
-    val isUserInfoFullyVisible = if (useTwoPaneLayout) true
-    else lazyListState.isItemFullyVisible(KEY_ILLUST_TITLE)
 
     val isBookmarked = illust.isBookmark
     val browsingSettings by requireUserPreferenceFlow.collectAsStateWithLifecycle {
@@ -296,6 +290,7 @@ internal fun PictureScreen(
     val errorImage = rememberVectorPainter(Icons.Rounded.ErrorOutline)
 
     var showAdvancedBookmark by rememberSaveable { mutableStateOf(false) }
+    var showDownloadPicker by rememberSaveable(illust.id) { mutableStateOf(false) }
     val bottomSheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
         enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
@@ -398,6 +393,55 @@ internal fun PictureScreen(
         null
     }
     val coroutineScope = rememberCoroutineScope()
+    val downloadPages = remember(illust.metaPages, illust.pageCount) {
+        if (illust.pageCount < 2) {
+            emptyList()
+        } else {
+            illust.metaPages.orEmpty().take(illust.pageCount).mapIndexedNotNull { index, page ->
+                val urls = page.imageUrls ?: return@mapIndexedNotNull null
+                if (urls.original.isBlank()) return@mapIndexedNotNull null
+                ArtworkDownloadPage(
+                    index = index,
+                    thumbnailUrl = urls.preferredThumbnailUrl,
+                )
+            }
+        }
+    }
+    val artworkActions: @Composable (Modifier) -> Unit = { toolbarModifier ->
+        ArtworkActionToolbar(
+            isBookmarked = isBookmarked,
+            isPrivateBookmark = illust.isPrivateBookmark,
+            canDownload = !state.loading && when {
+                illust.type == Type.Ugoira -> true
+                illust.pageCount > 1 -> downloadPages.isNotEmpty()
+                else -> !getOriginalUrl(0).isNullOrBlank()
+            },
+            onDownload = throttleClick {
+                when {
+                    illust.type == Type.Ugoira -> pictureViewModel.downloadUgoiraAsGIF()
+                    illust.pageCount > 1 -> showDownloadPicker = true
+                    else -> pictureViewModel.downloadOriginalPages(illust.id, listOf(0))
+                }
+            },
+            onBookmark = throttleClick {
+                val restrict = if (requireUserPreferenceValue.defaultPrivateBookmark) {
+                    Restrict.PRIVATE
+                } else {
+                    Restrict.PUBLIC
+                }
+                onBookmarkClick(restrict, null)
+            },
+            onEditBookmark = { showAdvancedBookmark = true },
+            onShare = throttleClick {
+                coroutineScope.launch {
+                    ShareUtil.shareText(
+                        "${illust.title} | ${illust.user.name} #pixiv https://www.pixiv.net/artworks/${illust.id}",
+                    )
+                }
+            },
+            modifier = toolbarModifier.navigationBarsPadding(),
+        )
+    }
     fun saveAsImage(url: String) {
         val (fileName, extension) = extractFileNameAndExtension(url)
         if (mobileSaveAsLauncher != null) {
@@ -745,29 +789,6 @@ internal fun PictureScreen(
                 }
             }
         },
-        floatingActionButton = {
-            if (!isAnyBlocked && showPreviewControls) {
-                IconButton(
-                    onClick = throttleClick {
-                        val restrict =
-                            if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
-                        onBookmarkClick(restrict, null)
-                    },
-                    onLongClick = { showAdvancedBookmark = true },
-                    modifier = Modifier.size(50.dp),
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    )
-                ) {
-                    BookmarkIcon(
-                        isBookmarked = isBookmarked,
-                        isPrivate = illust.isPrivateBookmark,
-                        iconSize = 35.dp,
-                        tint = if (isBookmarked) Color.Red else LocalContentColor.current,
-                    )
-                }
-            }
-        },
     ) {
         if (isAnyBlocked) {
             BlockSurface(
@@ -809,7 +830,7 @@ internal fun PictureScreen(
                     Box(modifier = Modifier.fillMaxSize()) {
                         LazyColumn(
                             state = lazyListState,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
                         ) {
                             illustImageItems()
                         }
@@ -836,6 +857,7 @@ internal fun PictureScreen(
                 detail = {
                     // Right pane: details and related works
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                        var controlsHeight by remember { mutableIntStateOf(0) }
                         val rightPaneWidth = maxWidth
                         val rightRelatedSpanCount = with(relatedLayoutParams.gridCells) {
                             with(density) {
@@ -861,52 +883,43 @@ internal fun PictureScreen(
                             }
                         LazyColumn(
                             state = rightListState,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = with(density) { controlsHeight.toDp() }),
                         ) {
                             illustDetailItems(
                                 currentUserSpanCount = rightUserSpanCount,
                                 currentRelatedSpanCount = rightRelatedSpanCount,
                                 currentRelatedRowCount = rightRelatedRowCount,
                             )
-                            item(key = KEY_SPACER) {
-                                Spacer(modifier = Modifier.height(70.dp))
-                            }
                         }
+                        artworkActions(
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .onSizeChanged { controlsHeight = it.height },
+                        )
                     }
                 },
             )
         } else {
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                illustImageItems()
-                illustDetailItems(
-                    currentUserSpanCount = userSpanCount,
-                    currentRelatedSpanCount = relatedSpanCount,
-                    currentRelatedRowCount = relatedRowCount,
-                )
-                item(key = KEY_SPACER) {
-                    Spacer(modifier = Modifier.height(70.dp))
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                AnimatedVisibility(
-                    visible = !isUserInfoFullyVisible,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
+            Box(modifier = Modifier.fillMaxSize()) {
+                var controlsHeight by remember { mutableIntStateOf(0) }
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = with(density) { controlsHeight.toDp() }),
                 ) {
-                    UserInfo(
-                        illust = illust,
-                        navToUserDetailScreen = navToUserDetailScreen,
+                    illustImageItems()
+                    illustDetailItems(
+                        currentUserSpanCount = userSpanCount,
+                        currentRelatedSpanCount = relatedSpanCount,
+                        currentRelatedRowCount = relatedRowCount,
                     )
                 }
+                artworkActions(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .onSizeChanged { controlsHeight = it.height },
+                )
             }
         }
         if (state.bottomSheetState != null) {
@@ -947,6 +960,19 @@ internal fun PictureScreen(
                 )
             }
         }
+    }
+
+    if (showDownloadPicker && !isAnyBlocked && isActivePage()) {
+        ArtworkDownloadPagePicker(
+            pages = downloadPages,
+            onDismissRequest = { showDownloadPicker = false },
+            onDownload = { pageIndices ->
+                if (showDownloadPicker) {
+                    showDownloadPicker = false
+                    pictureViewModel.downloadOriginalPages(illust.id, pageIndices)
+                }
+            },
+        )
     }
 
     if (showAdvancedBookmark) {
@@ -1169,7 +1195,6 @@ private fun PictureTopBar(
     modifier: Modifier = Modifier,
 ) {
     var showBottomMenu by rememberSaveable { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
     TopAppBar(
         title = {},
         modifier = modifier,
@@ -1197,7 +1222,6 @@ private fun PictureTopBar(
                     )
                 }
                 if (!isIllustBlocked && !isUserBlocked) {
-                    // 分享按钮
                     Icon(
                         imageVector = Icons.Rounded.MoreVert,
                         contentDescription = null,
@@ -1237,24 +1261,6 @@ private fun PictureTopBar(
                     illust = illust,
                     navToUserDetailScreen = navToUserDetailScreen,
                     isFollowed = illust.user.isFollowing
-                )
-                BottomMenuItem(
-                    onClick = {
-                        coroutineScope.launch {
-                            ShareUtil.shareText(
-                                "${illust.title} | ${illust.user.name} #pixiv https://www.pixiv.net/artworks/${illust.id}"
-                            )
-                            showBottomMenu = false
-                        }
-                    },
-                    text = stringResource(RStrings.share),
-                    modifier = Modifier.padding(vertical = 15.dp),
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Share,
-                            contentDescription = null,
-                        )
-                    }
                 )
                 BottomMenuItem(
                     onClick = {
@@ -1343,23 +1349,4 @@ private fun UserInfo(
             }
         }
     }
-}
-
-
-@Composable
-private fun LazyListState.isItemFullyVisible(key: String): Boolean {
-    val fullyVisible by remember(key) {
-        derivedStateOf {
-            val item = layoutInfo.visibleItemsInfo.firstOrNull { it.key == key }
-                ?: return@derivedStateOf false
-
-            val viewportStart = layoutInfo.viewportStartOffset
-            val viewportEnd = layoutInfo.viewportEndOffset
-            val itemStart = item.offset
-            val itemEnd = item.offset + item.size
-
-            itemStart >= viewportStart && itemEnd <= viewportEnd
-        }
-    }
-    return fullyVisible
 }

@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">Elegir las páginas para descargar</string>
+    <string name="artwork_download_all_originals">Descargar todas las imágenes originales</string>
+    <string name="artwork_download_selected">Descargar las imágenes originales seleccionadas</string>
+    <string name="artwork_download_selection_count">%1$d de %2$d seleccionadas</string>
+    <string name="artwork_download_page">Página %1$d</string>
+    <string name="select_all">Seleccionar todo</string>
+    <string name="artwork_download_clear_selection">Deseleccionar todo</string>
+</resources>

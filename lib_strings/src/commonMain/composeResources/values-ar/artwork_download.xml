@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">اختيار الصفحات المراد تنزيلها</string>
+    <string name="artwork_download_all_originals">تنزيل جميع الصور الأصلية</string>
+    <string name="artwork_download_selected">تنزيل الصور الأصلية المحددة</string>
+    <string name="artwork_download_selection_count">المحدد %1$d من %2$d</string>
+    <string name="artwork_download_page">الصفحة %1$d</string>
+    <string name="select_all">تحديد الكل</string>
+    <string name="artwork_download_clear_selection">إلغاء تحديد الكل</string>
+</resources>

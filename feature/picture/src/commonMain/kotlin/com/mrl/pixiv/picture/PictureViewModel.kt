@@ -11,6 +11,7 @@ import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.ImageUrls
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
@@ -63,14 +64,26 @@ import io.ktor.utils.io.asSource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.io.buffered
 import kotlinx.io.readByteArray
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
+
+internal val ImageUrls.preferredThumbnailUrl: String
+    get() = squareMedium.ifBlank { medium.ifBlank { large } }
+
+internal fun Illust.downloadThumbnailUrl(index: Int): String = if (pageCount > 1) {
+    metaPages?.getOrNull(index)?.imageUrls?.preferredThumbnailUrl.orEmpty()
+} else {
+    imageUrls.preferredThumbnailUrl
+}
 
 @Stable
 data class PictureState(
@@ -133,6 +146,7 @@ class PictureViewModel(
     }.flow.cachedIn(viewModelScope)
 
     private val cachedDownloadSize = mutableMapOf<Int, Long>()
+    private val batchDownloadMutex = Mutex()
     private val ugoiraDir = FileKit.cacheDir / "ugoira"
     private var cachedUgoiraMetadata: UgoiraMetadata? = null
 
@@ -272,32 +286,81 @@ class PictureViewModel(
     ) {
         launchIO {
             val illust = state.illust ?: return@launchIO
-            val title = illust.title
-            val userId = illust.user.id
-            val userName = illust.user.name
-            val thumbnailUrl = illust.imageUrls.squareMedium
-
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
                 illust.user.id.toString()
             } else {
                 null
             }
-
-            val enqueued = downloadManager.enqueueDownload(
-                illustId = illustId,
-                index = index,
-                title = title,
-                userId = userId,
-                userName = userName,
-                thumbnailUrl = thumbnailUrl,
-                originalUrl = originalUrl,
-                subFolder = subFolder
-            )
+            val enqueued = enqueueOriginalPage(illust, illustId, index, originalUrl, subFolder)
 
             closeBottomSheet()
             if (enqueued) ToastUtil.safeShortToast(RStrings.download_add_to_queue)
         }
     }
+
+    fun downloadOriginalPages(illustId: Long, pageIndices: List<Int>) {
+        val illust = state.illust ?: return
+        if (illust.id != illustId || illust.type == Type.Ugoira) return
+
+        val pageCount = illust.pageCount.coerceAtLeast(1)
+        val pages = pageIndices.filter { it in 0 until pageCount }.distinct().sorted().mapNotNull { index ->
+            val originalUrl = if (illust.pageCount > 1) {
+                illust.metaPages?.getOrNull(index)?.imageUrls?.original
+            } else {
+                illust.metaSinglePage.originalImageURL
+            }
+            if (originalUrl.isNullOrBlank()) null else index to originalUrl
+        }
+        if (pages.isEmpty()) return
+
+        launchProcess(Dispatchers.IO) {
+            batchDownloadMutex.withLock {
+                val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
+                    illust.user.id.toString()
+                } else {
+                    null
+                }
+                var enqueued = false
+                for ((index, originalUrl) in pages) {
+                    try {
+                        // The download strategy reports denied storage permission itself.
+                        if (!enqueueOriginalPage(illust, illustId, index, originalUrl, subFolder)) {
+                            return@withLock
+                        }
+                        enqueued = true
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: Exception) {
+                        Logger.e(throwable = error, tag = TAG) {
+                            "Unable to enqueue original page $index for artwork $illustId"
+                        }
+                    }
+                }
+                ToastUtil.safeShortToast(
+                    if (enqueued) RStrings.download_add_to_queue else RStrings.download_failed,
+                )
+            }
+        }
+    }
+
+    private suspend fun enqueueOriginalPage(
+        illust: Illust,
+        illustId: Long,
+        index: Int,
+        originalUrl: String,
+        subFolder: String?,
+        listener: DownloadManager.DownloadManagerListener? = null,
+    ): Boolean = downloadManager.enqueueDownload(
+        illustId = illustId,
+        index = index,
+        title = illust.title,
+        userId = illust.user.id,
+        userName = illust.user.name,
+        thumbnailUrl = illust.downloadThumbnailUrl(index),
+        originalUrl = originalUrl,
+        subFolder = subFolder,
+        downloadManagerListener = listener,
+    )
 
     private fun unBookmark(illustId: Long) {
         BookmarkState.deleteBookmarkIllust(illustId)
@@ -407,13 +470,10 @@ class PictureViewModel(
             } else {
                 null
             }
-            downloadManager.enqueueDownload(
+            enqueueOriginalPage(
+                illust = illust,
                 illustId = illust.id,
                 index = index,
-                title = illust.title,
-                userId = illust.user.id,
-                userName = illust.user.name,
-                thumbnailUrl = illust.imageUrls.squareMedium,
                 originalUrl = downloadUrl,
                 subFolder = subFolder,
             ) { entity ->
@@ -479,40 +539,39 @@ class PictureViewModel(
 
     fun downloadUgoiraAsGIF() {
         launchIO {
-            showLoading(true)
             val illust = state.illust ?: return@launchIO
-            val illustId = illust.id
-            val title = illust.title
-            val userId = illust.user.id
-            val userName = illust.user.name
-            val thumbnailUrl = illust.imageUrls.squareMedium
-
-            val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
-                state.illust?.user?.id?.toString()
-            } else {
-                null
-            }
-
-            val metadata = cachedUgoiraMetadata
-                ?: PixivRepository.getUgoiraMetadata(illustId).ugoiraMetadata.also {
-                    cachedUgoiraMetadata = it
+            showLoading(true)
+            try {
+                val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
+                    illust.user.id.toString()
+                } else {
+                    null
                 }
-            val zipUrl = metadata.zipUrls.medium
+                val metadata = cachedUgoiraMetadata
+                    ?: PixivRepository.getUgoiraMetadata(illust.id).ugoiraMetadata.also {
+                        cachedUgoiraMetadata = it
+                    }
+                val enqueued = downloadManager.enqueueDownload(
+                    illustId = illust.id,
+                    index = 0,
+                    title = illust.title,
+                    userId = illust.user.id,
+                    userName = illust.user.name,
+                    thumbnailUrl = illust.imageUrls.squareMedium,
+                    originalUrl = metadata.zipUrls.medium,
+                    subFolder = subFolder,
+                )
 
-            val enqueued = downloadManager.enqueueDownload(
-                illustId = illustId,
-                index = 0,
-                title = title,
-                userId = userId,
-                userName = userName,
-                thumbnailUrl = thumbnailUrl,
-                originalUrl = zipUrl,
-                subFolder = subFolder
-            )
-
-            closeBottomSheet()
-            showLoading(false)
-            if (enqueued) ToastUtil.safeShortToast(RStrings.download_add_to_queue)
+                closeBottomSheet()
+                if (enqueued) ToastUtil.safeShortToast(RStrings.download_add_to_queue)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Logger.e(throwable = error, tag = TAG) { "Unable to enqueue Ugoira ${illust.id}" }
+                ToastUtil.safeShortToast(RStrings.download_failed)
+            } finally {
+                showLoading(false)
+            }
         }
     }
 

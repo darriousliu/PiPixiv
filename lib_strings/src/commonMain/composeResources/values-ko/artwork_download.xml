@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">다운로드할 페이지 선택</string>
+    <string name="artwork_download_all_originals">모든 원본 이미지 다운로드</string>
+    <string name="artwork_download_selected">선택한 원본 이미지 다운로드</string>
+    <string name="artwork_download_selection_count">%2$d페이지 중 %1$d페이지 선택</string>
+    <string name="artwork_download_page">%1$d페이지</string>
+    <string name="select_all">모두 선택</string>
+    <string name="artwork_download_clear_selection">모두 선택 해제</string>
+</resources>

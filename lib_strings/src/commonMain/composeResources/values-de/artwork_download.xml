@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">Seiten auswählen</string>
+    <string name="artwork_download_all_originals">Alle Originale laden</string>
+    <string name="artwork_download_selected">Auswahl laden</string>
+    <string name="artwork_download_selection_count">%1$d von %2$d ausgewählt</string>
+    <string name="artwork_download_page">Seite %1$d</string>
+    <string name="select_all">Alle auswählen</string>
+    <string name="artwork_download_clear_selection">Auswahl aufheben</string>
+</resources>

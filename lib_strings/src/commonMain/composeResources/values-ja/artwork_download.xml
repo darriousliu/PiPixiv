@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">ダウンロードするページを選択</string>
+    <string name="artwork_download_all_originals">元画像をすべてダウンロード</string>
+    <string name="artwork_download_selected">選択した元画像をダウンロード</string>
+    <string name="artwork_download_selection_count">%1$d / %2$d ページを選択中</string>
+    <string name="artwork_download_page">%1$d ページ</string>
+    <string name="select_all">すべて選択</string>
+    <string name="artwork_download_clear_selection">選択をすべて解除</string>
+</resources>
