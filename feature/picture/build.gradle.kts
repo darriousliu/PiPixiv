@@ -48,8 +48,7 @@ kotlin {
             implementation(libs.kotlinx.ktor.serialization.kotlinx.json)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.mmkv.kotlin)
-            implementation("org.jetbrains.compose.ui:ui-test:${libs.versions.composeMultiplatform.get()}")
-            implementation(compose.desktop.currentOs)
+            implementation(libs.compose.jetbrains.ui.test)
             runtimeOnly(when {
                 System.getProperty("os.name") == "Mac OS X" -> libs.mmkv.kotlin.nativelib.macos
                 System.getProperty("os.name").startsWith("Windows") -> libs.mmkv.kotlin.nativelib.windows

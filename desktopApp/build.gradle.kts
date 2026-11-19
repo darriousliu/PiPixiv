@@ -73,7 +73,6 @@ dependencies {
     implementation(project(":common:repository"))
     implementation(project(":common:ui"))
     implementation(project(":lib_strings"))
-    implementation(compose.desktop.currentOs)
     implementation(libs.bundles.compose.baselibs)
     implementation(libs.compose.jetbrains.compose.resources)
     implementation(libs.nucleus.application)
