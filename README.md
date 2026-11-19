@@ -25,6 +25,7 @@ Pixiv 应用
 [![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=稳定版)](https://github.com/darriousliu/PiPixiv/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=下载量&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
 [![F-Droid Version](https://img.shields.io/f-droid/v/com.mrl.pixiv)](https://f-droid.org/packages/com.mrl.pixiv/)
+[![Telegram @PiPixivChannel](https://img.shields.io/badge/Telegram-%40PiPixivChannel-26A5E4?logo=telegram&logoColor=white)](https://t.me/PiPixivChannel)
 
 ## 📸 应用预览
 
