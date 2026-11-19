@@ -43,6 +43,12 @@ class SettingViewModel : BaseMviViewModel<SettingState, SettingAction>(
         SettingRepository.setPictureSourceHost(host)
     }
 
+    fun saveAppApiProxyHost(host: String) {
+        SettingRepository.updateSettings {
+            copy(appApiProxyHost = host)
+        }
+    }
+
     fun updateBypassSetting(setting: UserPreference.BypassSetting) {
         SettingRepository.updateSettings {
             copy(bypassSetting = setting)

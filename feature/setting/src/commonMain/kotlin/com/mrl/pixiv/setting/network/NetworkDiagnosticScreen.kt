@@ -65,6 +65,8 @@ import com.mrl.pixiv.common.util.isIOS
 import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.setting.components.SettingPageColumn
 import com.mrl.pixiv.setting.components.SettingRow
+import com.mrl.pixiv.setting.network.components.appApiProxyHostLabel
+import com.mrl.pixiv.strings.app_api_proxy_title
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.image_source
 import com.mrl.pixiv.strings.login_webview_route_unavailable
@@ -293,6 +295,10 @@ private fun DiagnosticRunCard(
                     stringResource(RStrings.image_source) + "  " + settings.imageHost.ifEmpty { IMAGE_HOST },
                     style = MaterialTheme.typography.bodyMedium,
                 )
+            }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(RStrings.app_api_proxy_title), style = MaterialTheme.typography.bodyMedium)
+                Text(appApiProxyHostLabel(settings.appApiProxyHost), style = MaterialTheme.typography.bodyMedium)
             }
             if (iosEch) {
                 Text(stringResource(RStrings.network_diagnostic_effective_direct))

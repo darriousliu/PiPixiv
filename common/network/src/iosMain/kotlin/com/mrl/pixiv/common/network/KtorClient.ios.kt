@@ -7,7 +7,10 @@ import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.engine.darwin.DarwinClientEngineConfig
 
-internal actual fun baseHttpClient(setting: BypassSetting): HttpClient = httpClient(Darwin) {
+internal actual fun baseHttpClient(
+    setting: BypassSetting,
+    allowRedirects: Boolean,
+): HttpClient = httpClient(Darwin) {
     configureRequest { setAllowsCellularAccess(true) }
     configureProxy(setting)
 }

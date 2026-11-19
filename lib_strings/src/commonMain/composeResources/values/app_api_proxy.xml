@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_api_proxy_title">App API 代理</string>
+    <string name="app_api_proxy_custom">自定义域名</string>
+    <string name="app_api_proxy_address">代理域名</string>
+    <string name="app_api_proxy_credentials">代理可以读取 App API 的访问令牌。请使用你控制的服务。</string>
+    <string name="app_api_proxy_invalid">请输入域名，不含协议、端口或路径。</string>
+</resources>

@@ -342,7 +342,10 @@ class IosDownloadStrategy(
         downloadDao.getDownload(key.illustId, key.index)?.takeIf {
             it.createTime == createTime && it.isActive()
         }?.let { entity ->
-            BackgroundDownload(entity, NetworkSettings(route, Constants.IMAGE_HOST))
+            BackgroundDownload(
+                entity,
+                NetworkSettings(route, Constants.IMAGE_HOST, requireUserPreferenceValue.appApiProxyHost),
+            )
         }
     }
 

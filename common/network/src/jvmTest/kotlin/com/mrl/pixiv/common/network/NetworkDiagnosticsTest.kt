@@ -31,6 +31,42 @@ import kotlin.time.Duration.Companion.seconds
 
 class NetworkDiagnosticsTest {
     @Test
+    fun appApiDiagnosisUsesTheReverseProxyWithoutChangingTheOtherProbes() = runBlocking {
+        DiagnosticsOrigin().use { origin ->
+            NetworkDiagnosticsProxyFixture(ProxyType.HTTP, origin.port).use { transportProxy ->
+                val settings = NetworkSettings(
+                    bypassSetting = transportProxy.setting,
+                    imageHost = "localhost",
+                    appApiProxyHost = "127.0.0.1",
+                )
+                val diagnostics = origin.diagnostics(
+                    appApi = "https://${Constants.API_HOST}:${origin.port}/v1/illust/ranking?mode=day",
+                )
+
+                val results = runDiagnostics(diagnostics, settings)
+                assertSuccessfulChecks(results, origin)
+                assertObservedRoutes(results, NetworkDiagnosticRouteMode.HTTP, transportProxy.setting.port)
+                assertEquals("127.0.0.1", results.getValue(NetworkDiagnosticTarget.APP_API).host)
+                assertEquals(
+                    listOf(
+                        "127.0.0.1" to origin.port,
+                        "localhost" to origin.port,
+                        "localhost" to origin.port,
+                        "localhost" to origin.port,
+                    ),
+                    transportProxy.destinations,
+                )
+                val requests = origin.requests(4)
+                assertEquals(
+                    listOf("/v1/illust/ranking?mode=day", "/web", "/login", "/image.png"),
+                    requests.map { it.target },
+                )
+                assertTrue(requests.all { it.headers["Authorization"] == null && it.headers["Cookie"] == null })
+            }
+        }
+    }
+
+    @Test
     fun httpToSocksSwitchUsesNextRunsSettingsAndDownloadsTheWholeImageAnonymously() = runBlocking {
         DiagnosticsOrigin().use { origin ->
             NetworkDiagnosticsProxyFixture(ProxyType.HTTP, origin.port).use { httpProxy ->
@@ -326,7 +362,7 @@ class NetworkDiagnosticsTest {
             useHttps(serverCertificates.sslSocketFactory())
             dispatcher = object : Dispatcher() {
                 override fun dispatch(request: RecordedRequest): MockResponse = when (request.url.encodedPath) {
-                    "/api" -> MockResponse.Builder()
+                    "/api", "/v1/illust/ranking" -> MockResponse.Builder()
                         .code(400)
                         .addHeader("Content-Type", "application/json")
                         .body(
@@ -353,9 +389,12 @@ class NetworkDiagnosticsTest {
         val requestCount: Int
             get() = server.requestCount
 
-        fun diagnostics(loginHost: String = "localhost") = NetworkDiagnostics(
+        fun diagnostics(
+            loginHost: String = "localhost",
+            appApi: String = "https://localhost:$port/api",
+        ) = NetworkDiagnostics(
             endpoints = NetworkDiagnosticEndpoints(
-                appApi = "https://localhost:$port/api",
+                appApi = appApi,
                 web = "https://localhost:$port/web",
                 login = "https://$loginHost:$port/login",
                 image = "https://i.pximg.net:$port/image.png",

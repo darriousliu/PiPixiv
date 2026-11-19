@@ -14,6 +14,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import co.touchlab.kermit.Logger as KermitLogger
 
@@ -40,6 +41,7 @@ internal fun <T : HttpClientEngineConfig> httpClient(
 
         install(Logging) {
             level = if (isDebug) LogLevel.ALL else LogLevel.NONE
+            sanitizeHeader { it.equals(HttpHeaders.Authorization, ignoreCase = true) }
             logger =
                 object : Logger {
                     override fun log(message: String) {
@@ -76,7 +78,10 @@ internal fun <T : HttpClientEngineConfig> imageHttpClient(
     }
 }
 
-internal expect fun baseHttpClient(setting: UserPreference.BypassSetting): HttpClient
+internal expect fun baseHttpClient(
+    setting: UserPreference.BypassSetting,
+    allowRedirects: Boolean = true,
+): HttpClient
 
 internal expect fun baseImageHttpClient(setting: UserPreference.BypassSetting): HttpClient
 

@@ -57,10 +57,16 @@ internal object NetworkUtil : KoinComponent {
         return ""
     }
 
-    suspend fun addAuthHeader(request: HttpRequestBuilder) {
+    suspend fun addAuthHeader(request: HttpRequestBuilder) =
+        addAuthHeader(request) { requireUserAccessToken() }
+
+    suspend fun addAuthHeader(
+        request: HttpRequestBuilder,
+        readAccessToken: suspend () -> String,
+    ) {
         addAppHeaders(request)
         if (!request.url.encodedPath.contains("/auth/token")) {
-            request.headers["Authorization"] = "Bearer ${requireUserAccessToken()}"
+            request.headers["Authorization"] = "Bearer ${readAccessToken()}"
         }
     }
 

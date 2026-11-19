@@ -5,9 +5,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.okhttp.OkHttp
 
-internal actual fun baseHttpClient(setting: BypassSetting): HttpClient = httpClient(OkHttp) {
+internal actual fun baseHttpClient(
+    setting: BypassSetting,
+    allowRedirects: Boolean,
+): HttpClient = httpClient(OkHttp) {
     config {
-        followRedirects(true)
+        followRedirects(allowRedirects)
         retryOnConnectionFailure(true)
     }
     configureProxyOrECH(setting)

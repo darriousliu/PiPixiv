@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_api_proxy_title">App API 프록시</string>
+    <string name="app_api_proxy_custom">맞춤 도메인</string>
+    <string name="app_api_proxy_address">프록시 도메인</string>
+    <string name="app_api_proxy_credentials">프록시는 App API 액세스 토큰을 읽을 수 있습니다. 직접 관리하는 서비스를 사용하세요.</string>
+    <string name="app_api_proxy_invalid">스킴, 포트, 경로 없이 도메인을 입력하세요.</string>
+</resources>

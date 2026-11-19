@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_api_proxy_title">App API プロキシ</string>
+    <string name="app_api_proxy_custom">カスタムドメイン</string>
+    <string name="app_api_proxy_address">プロキシのドメイン</string>
+    <string name="app_api_proxy_credentials">プロキシは App API のアクセストークンを読み取れます。自身で管理するサービスを使用してください。</string>
+    <string name="app_api_proxy_invalid">スキーム、ポート、パスを含まないドメインを入力してください。</string>
+</resources>

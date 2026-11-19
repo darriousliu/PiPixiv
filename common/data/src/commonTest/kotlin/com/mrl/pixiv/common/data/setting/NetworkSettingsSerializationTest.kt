@@ -10,7 +10,10 @@ class NetworkSettingsSerializationTest {
     @Test
     fun newAndMissingSettingsDefaultToSystemProxy() {
         assertEquals(BypassSetting.System, UserPreference().bypassSetting)
-        assertEquals(BypassSetting.System, Json.decodeFromString<UserPreference>("{}").bypassSetting)
+        assertEquals("", UserPreference().appApiProxyHost)
+        val restored = Json.decodeFromString<UserPreference>("{}")
+        assertEquals(BypassSetting.System, restored.bypassSetting)
+        assertEquals("", restored.appApiProxyHost)
     }
 
     @Test
@@ -84,7 +87,10 @@ class NetworkSettingsSerializationTest {
         for (encodeDefaults in listOf(false, true)) {
             val json = Json { this.encodeDefaults = encodeDefaults }
             for (mode in modes) {
-                val preference = UserPreference(bypassSetting = mode)
+                val preference = UserPreference(
+                    bypassSetting = mode,
+                    appApiProxyHost = "proxy.example.com",
+                )
                 assertEquals(preference, json.decodeFromString<UserPreference>(json.encodeToString(preference)))
             }
         }

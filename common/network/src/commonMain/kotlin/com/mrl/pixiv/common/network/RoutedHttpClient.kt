@@ -10,9 +10,14 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
-data class NetworkSettings(val bypassSetting: BypassSetting, val imageHost: String)
+data class NetworkSettings(
+    val bypassSetting: BypassSetting,
+    val imageHost: String,
+    val appApiProxyHost: String = "",
+)
 
-fun UserPreference.networkSettings(): NetworkSettings = NetworkSettings(bypassSetting, imageHost)
+fun UserPreference.networkSettings(): NetworkSettings =
+    NetworkSettings(bypassSetting, imageHost, appApiProxyHost)
 
 class RoutedHttpClient<T : Any>(
     private val readSetting: () -> BypassSetting,

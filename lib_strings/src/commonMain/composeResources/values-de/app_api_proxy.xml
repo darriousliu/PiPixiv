@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_api_proxy_title">Proxy für die App-API</string>
+    <string name="app_api_proxy_custom">Benutzerdefinierte Domain</string>
+    <string name="app_api_proxy_address">Proxy-Domain</string>
+    <string name="app_api_proxy_credentials">Der Proxy kann App-API-Zugriffstoken lesen. Nutze einen Dienst, den du selbst kontrollierst.</string>
+    <string name="app_api_proxy_invalid">Gib eine Domain ohne Schema, Port oder Pfad ein.</string>
+</resources>

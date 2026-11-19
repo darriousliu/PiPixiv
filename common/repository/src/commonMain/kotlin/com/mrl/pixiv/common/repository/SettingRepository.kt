@@ -149,6 +149,9 @@ object SettingRepository : MMKVUser {
     }
 
     fun restore(preference: UserPreference) {
-        userPreference.value = preference
+        // Restoring app data must preserve the destination already confirmed on this device.
+        userPreference.update { current ->
+            preference.copy(appApiProxyHost = current.appApiProxyHost)
+        }
     }
 }

@@ -23,6 +23,7 @@ import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.setting.SettingViewModel
 import com.mrl.pixiv.setting.components.SettingPageColumn
 import com.mrl.pixiv.setting.components.SettingRow
+import com.mrl.pixiv.setting.network.components.AppApiProxySetting
 import com.mrl.pixiv.setting.network.components.BypassSettingEditor
 import com.mrl.pixiv.setting.network.components.PictureSourceWidget
 import com.mrl.pixiv.strings.network_diagnostic_title
@@ -40,8 +41,10 @@ fun NetworkSettingScreen(
     NetworkSettingContent(
         bypassSetting = userPreference.bypassSetting,
         pictureSourceHost = userPreference.imageHost,
+        appApiProxyHost = userPreference.appApiProxyHost,
         onBypassSettingChange = viewModel::updateBypassSetting,
         onPictureSourceHostChange = viewModel::savePictureSourceHost,
+        onAppApiProxyHostChange = viewModel::saveAppApiProxyHost,
         onOpenDiagnostic = navigationManager::navigateToNetworkDiagnosticScreen,
         onBack = navigationManager::popBackStack,
         supportsEch = !platform.isIOS(),
@@ -53,8 +56,10 @@ fun NetworkSettingScreen(
 internal fun NetworkSettingContent(
     bypassSetting: BypassSetting,
     pictureSourceHost: String,
+    appApiProxyHost: String,
     onBypassSettingChange: (BypassSetting) -> Unit,
     onPictureSourceHostChange: (String) -> Unit,
+    onAppApiProxyHostChange: (String) -> Unit,
     onOpenDiagnostic: () -> Unit,
     onBack: () -> Unit,
     supportsEch: Boolean,
@@ -88,6 +93,10 @@ internal fun NetworkSettingContent(
                 bypassSetting = bypassSetting,
                 onUpdate = onBypassSettingChange,
                 supportsEch = supportsEch,
+            )
+            AppApiProxySetting(
+                proxyHost = appApiProxyHost,
+                onSave = onAppApiProxyHostChange,
             )
             PictureSourceWidget(
                 currentSelected = pictureSourceHost,

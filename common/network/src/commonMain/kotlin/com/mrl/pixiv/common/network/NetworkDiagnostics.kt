@@ -99,9 +99,16 @@ class NetworkDiagnostics internal constructor(
         var failureStage: NetworkDiagnosticStage? = null
         val status = try {
             withTimeoutOrNull(PROBE_TIMEOUT) {
+                val effectiveUrl = if (target == NetworkDiagnosticTarget.APP_API) {
+                    resolveAppApiUrl(url, settings.appApiProxyHost).also {
+                        state.nextRequest(Url(it).host, firstEvent = 0)
+                    }
+                } else {
+                    url
+                }
                 clientFactory(settings, image, trace).use { client ->
                     when (target) {
-                        NetworkDiagnosticTarget.APP_API -> probeApi(client, url, state)
+                        NetworkDiagnosticTarget.APP_API -> probeApi(client, effectiveUrl, state)
                         NetworkDiagnosticTarget.WEB, NetworkDiagnosticTarget.LOGIN ->
                             probeWeb(client, url, state, trace)
                         NetworkDiagnosticTarget.IMAGE -> probeImage(client, url, state, trace)

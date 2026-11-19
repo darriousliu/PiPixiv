@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_api_proxy_title">App API 代理</string>
+    <string name="app_api_proxy_custom">自訂網域</string>
+    <string name="app_api_proxy_address">代理網域</string>
+    <string name="app_api_proxy_credentials">代理可以讀取 App API 的存取權杖。請使用自己控制的服務。</string>
+    <string name="app_api_proxy_invalid">請輸入網域名稱，無須包含通訊協定、連接埠或路徑。</string>
+</resources>
