@@ -40,10 +40,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownTypography
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.repository.VersionManager
@@ -182,12 +185,24 @@ private fun UpdateReleaseDialog(
                 if (isDownloading) {
                     LinearProgressIndicator(Modifier.fillMaxWidth().padding(bottom = 12.dp))
                 }
+                val typography = MaterialTheme.typography
                 Markdown(
                     content = releaseNotes,
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 400.dp)
                         .verticalScroll(rememberScrollState()),
+                    typography = markdownTypography(
+                        h1 = typography.titleLarge,
+                        h2 = typography.titleMedium.copy(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                        h3 = typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                        h4 = typography.titleSmall,
+                        h5 = typography.titleSmall,
+                        h6 = typography.titleSmall,
+                    ),
                 )
             }
         },
