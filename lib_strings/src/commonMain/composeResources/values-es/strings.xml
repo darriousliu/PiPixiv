@@ -164,6 +164,7 @@
     <string name="check_update">Verificar actualización</string>
     <string name="already_updated">Ya la ultima version</string>
     <string name="project_url">URL del proyecto</string>
+    <string name="telegram_channel">Canal de actualizaciones en Telegram</string>
     <string name="feedback">Comentarios</string>
     <string name="feedback_content">Bienvenido a comentarios de problemas y co-desarrollo</string>
     <string name="share_app">Compartir aplicación</string>

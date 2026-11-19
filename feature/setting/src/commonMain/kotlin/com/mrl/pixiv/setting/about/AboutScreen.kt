@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Feedback
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Refresh
@@ -78,6 +79,7 @@ import com.mrl.pixiv.strings.project_url
 import com.mrl.pixiv.strings.recommend_content
 import com.mrl.pixiv.strings.recommend_this_app
 import com.mrl.pixiv.strings.share_app
+import com.mrl.pixiv.strings.telegram_channel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -102,6 +104,7 @@ fun AboutScreen(
         hasNewVersion = hasNewVersion,
         onBack = navigationManager::popBackStack,
         onOpenProject = { uriHandler.openUri(Constants.GITHUB_URL) },
+        onOpenTelegramChannel = { uriHandler.openUri(Constants.TELEGRAM_CHANNEL_URL) },
         onFeedback = { uriHandler.openUri(Constants.GITHUB_ISSUE_URL) },
         onShare = {
             coroutineScope.launch {
@@ -215,6 +218,7 @@ internal fun AboutContent(
     hasNewVersion: Boolean,
     onBack: () -> Unit,
     onOpenProject: () -> Unit,
+    onOpenTelegramChannel: () -> Unit,
     onFeedback: () -> Unit,
     onShare: () -> Unit,
     onCheckUpdate: () -> Unit,
@@ -259,6 +263,12 @@ internal fun AboutContent(
                 icon = Icons.Rounded.Link,
                 onClick = rememberThrottleClick(onClick = onOpenProject),
                 supportingContent = { Text(Constants.GITHUB_URL) },
+            )
+            SettingRow(
+                title = stringResource(RStrings.telegram_channel),
+                icon = Icons.AutoMirrored.Rounded.Send,
+                onClick = rememberThrottleClick(onClick = onOpenTelegramChannel),
+                supportingContent = { Text(Constants.TELEGRAM_CHANNEL_URL) },
             )
             SettingRow(
                 title = stringResource(RStrings.feedback),

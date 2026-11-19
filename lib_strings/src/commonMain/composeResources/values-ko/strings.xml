@@ -164,6 +164,7 @@
     <string name="check_update">업데이트 확인</string>
     <string name="already_updated">이미 최신 버전임</string>
     <string name="project_url">프로젝트 URL</string>
+    <string name="telegram_channel">텔레그램 업데이트 채널</string>
     <string name="feedback">피드백</string>
     <string name="feedback_content">문제 피드백 및 공동 개발을 환영합니다</string>
     <string name="share_app">앱 공유</string>

@@ -164,6 +164,7 @@
     <string name="check_update">檢查更新</string>
     <string name="already_updated">已經是最新版本</string>
     <string name="project_url">專案地址</string>
+    <string name="telegram_channel">Telegram 更新頻道</string>
     <string name="feedback">回饋</string>
     <string name="feedback_content">歡迎回饋問題與共同開發</string>
     <string name="share_app">分享應用程式</string>

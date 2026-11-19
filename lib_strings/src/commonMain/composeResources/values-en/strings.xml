@@ -165,6 +165,7 @@
     <string name="check_update">Check Update</string>
     <string name="already_updated">Already the latest version</string>
     <string name="project_url">Project URL</string>
+    <string name="telegram_channel">Telegram updates channel</string>
     <string name="feedback">Feedback</string>
     <string name="feedback_content">Welcome to feedback issues and co-develop</string>
     <string name="share_app">Share App</string>

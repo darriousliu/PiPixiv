@@ -164,6 +164,7 @@
     <string name="check_update">Güncellemeleri kontrol et</string>
     <string name="already_updated">Zaten son sürümdesin</string>
     <string name="project_url">Proje Bağlantısı</string>
+    <string name="telegram_channel">Telegram güncelleme kanalı</string>
     <string name="feedback">Geri bildirim</string>
     <string name="feedback_content">Sorunları bildirmek ve birlikte geliştirmek için geri bildirimde bulun</string>
     <string name="share_app">Uygulamayı Paylaş</string>

@@ -164,6 +164,7 @@
     <string name="check_update">更新を確認</string>
     <string name="already_updated">すでに最新バージョン</string>
     <string name="project_url">プロジェクトURL</string>
+    <string name="telegram_channel">Telegramの更新情報チャンネル</string>
     <string name="feedback">フィードバック</string>
     <string name="feedback_content">問題のフィードバックと共同開発を歓迎します</string>
     <string name="share_app">アプリを共有</string>
