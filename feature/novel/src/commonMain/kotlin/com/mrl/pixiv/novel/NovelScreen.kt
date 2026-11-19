@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.List
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
@@ -38,6 +37,7 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.unfilled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -772,7 +772,7 @@ fun NovelScreen(
                                         onClick = { showMetadataBottomSheet = true }
                                     ) {
                                         Icon(
-                                            Icons.Outlined.Info,
+                                            Icons.Rounded.Info,
                                             contentDescription = stringResource(
                                                 RStrings.novel_work_information
                                             )

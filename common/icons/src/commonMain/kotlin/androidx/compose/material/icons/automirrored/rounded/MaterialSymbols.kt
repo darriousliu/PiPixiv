@@ -6,10 +6,12 @@ import com.mrl.pixiv.common.icons.rounded.ArrowBack
 import com.mrl.pixiv.common.icons.rounded.ArrowBackIos
 import com.mrl.pixiv.common.icons.rounded.ArrowForward
 import com.mrl.pixiv.common.icons.rounded.ArrowForwardIos
+import com.mrl.pixiv.common.icons.rounded.Comment
 import com.mrl.pixiv.common.icons.rounded.KeyboardArrowRight
 import com.mrl.pixiv.common.icons.rounded.List
 import com.mrl.pixiv.common.icons.rounded.Logout
 import com.mrl.pixiv.common.icons.rounded.MenuBook
+import com.mrl.pixiv.common.icons.rounded.Send
 import com.mrl.pixiv.common.icons.rounded.Sort
 import com.mrl.pixiv.common.icons.rounded.ViewList
 import com.mrl.pixiv.common.icons.Icons as MaterialSymbols
@@ -26,6 +28,9 @@ val Icons.AutoMirrored.Rounded.ArrowForward: ImageVector
 val Icons.AutoMirrored.Rounded.ArrowForwardIos: ImageVector
     get() = MaterialSymbols.Rounded.ArrowForwardIos
 
+val Icons.AutoMirrored.Rounded.Comment: ImageVector
+    get() = MaterialSymbols.Rounded.Comment
+
 val Icons.AutoMirrored.Rounded.KeyboardArrowRight: ImageVector
     get() = MaterialSymbols.Rounded.KeyboardArrowRight
 
@@ -37,6 +42,9 @@ val Icons.AutoMirrored.Rounded.Logout: ImageVector
 
 val Icons.AutoMirrored.Rounded.MenuBook: ImageVector
     get() = MaterialSymbols.Rounded.MenuBook
+
+val Icons.AutoMirrored.Rounded.Send: ImageVector
+    get() = MaterialSymbols.Rounded.Send
 
 val Icons.AutoMirrored.Rounded.Sort: ImageVector
     get() = MaterialSymbols.Rounded.Sort

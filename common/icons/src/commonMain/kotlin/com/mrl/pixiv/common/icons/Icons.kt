@@ -1,8 +1,6 @@
 package com.mrl.pixiv.common.icons
 
-/** Google Material Symbols, grouped by their design family. */
+/** Rounded Material Symbols used by the app. */
 object Icons {
-    object Outlined
     object Rounded
-    object Sharp
 }

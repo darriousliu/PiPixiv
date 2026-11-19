@@ -33,6 +33,8 @@ import com.mrl.pixiv.common.icons.rounded.Delete
 import com.mrl.pixiv.common.icons.rounded.Deselect
 import com.mrl.pixiv.common.icons.rounded.Dns
 import com.mrl.pixiv.common.icons.rounded.Download
+import com.mrl.pixiv.common.icons.rounded.EditCalendar
+import com.mrl.pixiv.common.icons.rounded.EmojiEmotions
 import com.mrl.pixiv.common.icons.rounded.Equalizer
 import com.mrl.pixiv.common.icons.rounded.Error
 import com.mrl.pixiv.common.icons.rounded.ErrorOutline
@@ -58,6 +60,7 @@ import com.mrl.pixiv.common.icons.rounded.Info
 import com.mrl.pixiv.common.icons.rounded.Language
 import com.mrl.pixiv.common.icons.rounded.Link
 import com.mrl.pixiv.common.icons.rounded.Lock
+import com.mrl.pixiv.common.icons.rounded.MoreHoriz
 import com.mrl.pixiv.common.icons.rounded.MoreVert
 import com.mrl.pixiv.common.icons.rounded.NetworkCheck
 import com.mrl.pixiv.common.icons.rounded.NetworkWifi
@@ -187,6 +190,12 @@ val Icons.Rounded.Dns: ImageVector
 val Icons.Rounded.Download: ImageVector
     get() = MaterialSymbols.Rounded.Download
 
+val Icons.Rounded.EditCalendar: ImageVector
+    get() = MaterialSymbols.Rounded.EditCalendar
+
+val Icons.Rounded.EmojiEmotions: ImageVector
+    get() = MaterialSymbols.Rounded.EmojiEmotions
+
 val Icons.Rounded.Equalizer: ImageVector
     get() = MaterialSymbols.Rounded.Equalizer
 
@@ -261,6 +270,9 @@ val Icons.Rounded.Link: ImageVector
 
 val Icons.Rounded.Lock: ImageVector
     get() = MaterialSymbols.Rounded.Lock
+
+val Icons.Rounded.MoreHoriz: ImageVector
+    get() = MaterialSymbols.Rounded.MoreHoriz
 
 val Icons.Rounded.MoreVert: ImageVector
     get() = MaterialSymbols.Rounded.MoreVert

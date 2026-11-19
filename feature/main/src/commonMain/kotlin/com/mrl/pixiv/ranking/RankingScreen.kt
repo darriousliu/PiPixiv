@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.rounded.EditCalendar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Icon
@@ -249,7 +249,7 @@ fun RankingScreen(
                         onClick = { showDatePicker = true }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.EditCalendar,
+                            imageVector = Icons.Rounded.EditCalendar,
                             contentDescription = null
                         )
                     }

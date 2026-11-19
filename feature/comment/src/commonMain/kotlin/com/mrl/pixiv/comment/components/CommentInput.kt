@@ -30,9 +30,9 @@ import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.maxLength
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.EmojiEmotions
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -125,12 +125,12 @@ fun CommentInputPlaceholder(
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 )
                 Icon(
-                    imageVector = Icons.Default.EmojiEmotions,
+                    imageVector = Icons.Rounded.EmojiEmotions,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Send,
+                    imageVector = Icons.AutoMirrored.Rounded.Send,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -215,7 +215,7 @@ fun CommentInput(
                         onClick = onClearReplyTarget
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Close,
+                            imageVector = Icons.Rounded.Close,
                             contentDescription = null
                         )
                     }
@@ -344,7 +344,7 @@ fun CommentInput(
                     }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.EmojiEmotions,
+                        imageVector = Icons.Rounded.EmojiEmotions,
                         contentDescription = null,
                         tint = if (showEmojiPicker) MaterialTheme.colorScheme.primary else LocalContentColor.current
                     )
@@ -369,7 +369,7 @@ fun CommentInput(
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Send,
+                            imageVector = Icons.AutoMirrored.Rounded.Send,
                             contentDescription = null
                         )
                     }
