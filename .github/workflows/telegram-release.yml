@@ -1,0 +1,50 @@
+name: Telegram Release Announcement
+
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+jobs:
+  announce:
+    if: ${{ !github.event.release.draft && !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post release announcement to Telegram
+        shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Skipping tag outside PiPixiv's stable version format."
+            exit 0
+          fi
+
+          if [[ -z "$TELEGRAM_BOT_TOKEN" ]]; then
+            echo "::error::Configure the TELEGRAM_BOT_TOKEN repository secret."
+            exit 1
+          fi
+
+          payload=$(jq --arg tag "$RELEASE_TAG" --arg url "$RELEASE_URL" '
+            ([
+              "# PiPixiv \($tag)",
+              "稳定版已发布 · Stable release is now available.",
+              "[下载与更新说明 · Downloads and release notes](\($url))"
+            ] | join("\n\n")) as $intro
+            | (.release.body // "") as $notes
+            | ($intro + "\n\n" + $notes) as $announcement
+            | {
+                chat_id: "@PiPixivChannel",
+                rich_message: {
+                  markdown: (if ($announcement | length) <= 32768 then $announcement else $intro end)
+                }
+              }
+          ' "$GITHUB_EVENT_PATH")
+
+          curl --fail --silent --show-error --max-time 30 \
+            --json "$payload" \
+            "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendRichMessage" \
+            | jq --exit-status '.ok == true'
