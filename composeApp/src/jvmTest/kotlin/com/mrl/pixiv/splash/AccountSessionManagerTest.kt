@@ -31,7 +31,6 @@ import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
-import com.mrl.pixiv.navigation.leaveCurrentScreen
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -148,7 +147,7 @@ class AccountSessionManagerTest {
     }
 
     @Test
-    fun successfulLoginOpensFlaggedRecoveryUntilTheUserLeaves() = withSessionManager { sessions, _, navigation ->
+    fun successfulLoginClearsRecoveryFlagWhenOpeningRecovery() = withSessionManager { sessions, _, navigation ->
         AccountStore.storage.setRecoverAfterLogin(true)
 
         sessions.addOrUpdate(response(FIRST))
@@ -157,13 +156,9 @@ class AccountSessionManagerTest {
             listOf(Destination.Main, Destination.DataRecovery(afterLogin = true)),
             navigation.backStack.map { it.destination },
         )
-        assertTrue(AccountStore.storage.recoverAfterLogin.value)
-
-        navigation.leaveCurrentScreen { AccountStore.storage.setRecoverAfterLogin(false) }
-
         assertFalse(AccountStore.storage.recoverAfterLogin.value)
-        assertEquals(Destination.Main, navigation.backStack.single().destination)
 
+        AccountStore.storage.reloadRecoverAfterLogin()
         sessions.addOrUpdate(response(FIRST))
         assertEquals(Destination.Main, navigation.backStack.single().destination)
     }

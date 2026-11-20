@@ -9,6 +9,7 @@ import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.serialize.JSON
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.MockRequestHandler
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.forms.FormDataContent
@@ -25,6 +26,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -37,75 +39,101 @@ class AccountTokenRefreshTest {
     fun refreshResponsesAffectOnlyTheAccountThatStartedTheRequest() = runBlocking {
         initializeMigrationTestStorage()
         val requests = Channel<Pair<String, CompletableDeferred<RefreshReply>>>()
-        val engine = MockEngine { request ->
-            val token = assertNotNull(assertIs<FormDataContent>(request.body).formData["refresh_token"])
-            val pending = CompletableDeferred<RefreshReply>()
-            requests.send(token to pending)
-            val reply = pending.await()
-            respond(reply.body, reply.status, headersOf(HttpHeaders.ContentType, "application/json"))
-        }
-        val client = HttpClient(engine) {
-            install(ContentNegotiation) { json(JSON) }
-        }
-        val route = RoutedHttpClient({ BypassSetting.Direct }, { client }, HttpClient::close)
-        val authModule = module { single(named<AuthClient>()) { route } }
-        startKoin { modules(authModule) }
         try {
-            withTimeout(10.seconds) {
-                val first = AccountSession(
-                    userId = 430001L,
-                    name = "Reader One",
-                    account = "reader-one",
-                    refreshToken = "old-refresh-one",
-                    accessToken = "old-access-one",
-                    accessTokenExpiresAt = 0L,
-                )
-                val second = first.copy(
-                    userId = 430002L,
-                    name = "Reader Two",
-                    account = "reader-two",
-                    refreshToken = "refresh-two",
-                    accessToken = "access-two",
-                    accessTokenExpiresAt = Long.MAX_VALUE,
-                )
-                AccountStore.saveAndActivate(second)
-                AccountStore.saveAndActivate(first)
+            withMockAccountRefresh(handler = { request ->
+                val token = assertNotNull(assertIs<FormDataContent>(request.body).formData["refresh_token"])
+                val pending = CompletableDeferred<RefreshReply>()
+                requests.send(token to pending)
+                val reply = pending.await()
+                respond(reply.body, reply.status, headersOf(HttpHeaders.ContentType, "application/json"))
+            }) {
+                withTimeout(10.seconds) {
+                    val first = AccountSession(
+                        userId = 430001L,
+                        name = "Reader One",
+                        account = "reader-one",
+                        refreshToken = "old-refresh-one",
+                        accessToken = "old-access-one",
+                        accessTokenExpiresAt = 0L,
+                    )
+                    val second = first.copy(
+                        userId = 430002L,
+                        name = "Reader Two",
+                        account = "reader-two",
+                        refreshToken = "refresh-two",
+                        accessToken = "access-two",
+                        accessTokenExpiresAt = Long.MAX_VALUE,
+                    )
+                    AccountStore.saveAndActivate(second)
+                    AccountStore.saveAndActivate(first)
 
-                val refresh = async { AuthManager.requireUserAccessToken() }
-                val (oldToken, success) = requests.receive()
-                assertEquals(first.refreshToken, oldToken)
-                AccountStore.saveAndActivate(second)
-                success.complete(RefreshReply(HttpStatusCode.OK, """
-                    {"access_token":"new-access-one","refresh_token":"new-refresh-one",
-                     "expires_in":3600,"user":{"id":"${first.userId}"}}
-                """.trimIndent()))
+                    val refresh = async { AuthManager.requireUserAccessToken() }
+                    val (oldToken, success) = requests.receive()
+                    assertEquals(first.refreshToken, oldToken)
+                    AccountStore.saveAndActivate(second)
+                    success.complete(RefreshReply(HttpStatusCode.OK, """
+                        {"access_token":"new-access-one","refresh_token":"new-refresh-one",
+                         "expires_in":3600,"user":{"id":"${first.userId}"}}
+                    """.trimIndent()))
 
-                assertEquals("new-access-one", refresh.await())
-                val refreshed = assertNotNull(AccountStore.find(first.userId))
-                assertEquals("new-refresh-one", refreshed.refreshToken)
-                assertEquals(second, AccountStore.current)
+                    assertEquals("new-access-one", refresh.await())
+                    val refreshed = assertNotNull(AccountStore.find(first.userId))
+                    assertEquals("new-refresh-one", refreshed.refreshToken)
+                    assertEquals(second, AccountStore.current)
 
-                AccountStore.saveAndActivate(refreshed)
-                val invalidation = async { AuthManager.requireUserAccessToken(force = true) }
-                val (rotatedToken, invalidGrant) = requests.receive()
-                assertEquals(refreshed.refreshToken, rotatedToken)
-                AccountStore.saveAndActivate(second)
-                invalidGrant.complete(RefreshReply(HttpStatusCode.BadRequest, """{"error":"invalid_grant"}"""))
+                    AccountStore.saveAndActivate(refreshed)
+                    val invalidation = async { AuthManager.requireUserAccessToken(force = true) }
+                    val (rotatedToken, invalidGrant) = requests.receive()
+                    assertEquals(refreshed.refreshToken, rotatedToken)
+                    AccountStore.saveAndActivate(second)
+                    invalidGrant.complete(RefreshReply(HttpStatusCode.BadRequest, """{"error":"invalid_grant"}"""))
 
-                assertEquals("", invalidation.await())
-                assertTrue(assertNotNull(AccountStore.find(first.userId)).needsRelogin)
-                assertEquals(second, AccountStore.current)
+                    assertEquals("", invalidation.await())
+                    assertTrue(assertNotNull(AccountStore.find(first.userId)).needsRelogin)
+                    assertEquals(second, AccountStore.current)
+                }
             }
         } finally {
             for (userId in listOf(430001L, 430002L)) {
                 AccountStore.storage.remove(userId, replacementUserId = null, lastUsedAt = 0L, discardLocalData = false)
             }
-            stopKoin()
             requests.cancel()
-            client.close()
-            engine.close()
         }
     }
 
     private data class RefreshReply(val status: HttpStatusCode, val body: String)
+}
+
+private val activeRefreshHandler = AtomicReference<MockRequestHandler?>(null)
+
+// PixivRepository caches the injected route, so the JVM tests reuse it with a scoped handler.
+private val mockRefreshRoute = RoutedHttpClient(
+    readSetting = { BypassSetting.Direct },
+    create = {
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { request -> checkNotNull(activeRefreshHandler.get()).invoke(this, request) }
+            }
+            install(ContentNegotiation) { json(JSON) }
+        }
+    },
+    close = HttpClient::close,
+)
+
+internal suspend fun <T> withMockAccountRefresh(
+    handler: MockRequestHandler,
+    block: suspend () -> T,
+): T {
+    check(activeRefreshHandler.compareAndSet(null, handler))
+    val authModule = module { single(named<AuthClient>()) { mockRefreshRoute } }
+    try {
+        startKoin { modules(authModule) }
+        try {
+            return block()
+        } finally {
+            stopKoin()
+        }
+    } finally {
+        activeRefreshHandler.set(null)
+    }
 }

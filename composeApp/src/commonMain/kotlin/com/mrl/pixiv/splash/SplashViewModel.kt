@@ -1,12 +1,14 @@
 package com.mrl.pixiv.splash
 
 import androidx.compose.runtime.Stable
+import com.mrl.pixiv.common.coroutine.CancelException
 import com.mrl.pixiv.common.datasource.local.AccountDatabaseProvider
 import com.mrl.pixiv.common.mmkv.AccountStore
 import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.annotation.KoinViewModel
 
@@ -56,16 +58,19 @@ class SplashViewModel(
     private fun refreshAccessToken(userId: Long) {
         launchIO(
             onError = {
-                routeToLogin()
+                if (it !is CancellationException && it !is CancelException) routeAfterRefresh()
             }
         ) {
             AuthManager.requireUserAccessToken(userId)
-            val session = AccountStore.current
-            if (session != null && session.hasUsableCredentials() && !session.hasExpired()) {
-                routeToHome()
-            } else {
-                routeToLogin()
-            }
+            routeAfterRefresh()
+        }
+    }
+
+    private fun routeAfterRefresh() {
+        if (AccountStore.current?.hasUsableCredentials() == true) {
+            routeToHome()
+        } else {
+            routeToLogin()
         }
     }
 

@@ -75,6 +75,5 @@ class DataRecoveryViewModelTest {
         override suspend fun importLegacyPackage(source: PlatformFile, targetUserId: Long, item: MigrationItem): ItemStatus =
             error("Unexpected import")
         override suspend fun abandonAll(): Unit = error("Unexpected abandon")
-        override fun clearRecoverAfterLogin(): Unit = error("Unexpected marker change")
     }
 }

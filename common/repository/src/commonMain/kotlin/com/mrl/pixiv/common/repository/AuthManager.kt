@@ -17,9 +17,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 object AuthManager {
     private val refreshLocks = MutableStateFlow<Map<Long, Mutex>>(emptyMap())
+    private val refreshErrorToastLock = Mutex()
+    private var lastRefreshErrorToast: TimeMark? = null
 
     val userRefreshToken: String get() = AccountStore.current?.refreshToken.orEmpty()
 
@@ -49,11 +54,21 @@ object AuthManager {
                 } catch (error: CancellationException) {
                     throw error
                 } catch (_: Exception) {
-                    ToastUtil.safeShortToast(RStrings.network_error)
+                    showRefreshErrorToast()
                     ""
                 }
             }
         }
+    }
+
+    private suspend fun showRefreshErrorToast() {
+        val shouldShow = refreshErrorToastLock.withLock {
+            val lastToast = lastRefreshErrorToast
+            if (lastToast != null && lastToast.elapsedNow() < 10.seconds) return@withLock false
+            lastRefreshErrorToast = TimeSource.Monotonic.markNow()
+            true
+        }
+        if (shouldShow) ToastUtil.safeShortToast(RStrings.network_error)
     }
 
     suspend fun login(code: String, codeVerifier: String): AuthTokenResp =

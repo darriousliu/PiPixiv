@@ -229,10 +229,6 @@ class StartupDataRecoveryRepository(
         migration.awaitReady()
         migration.abandonAll(migration.storage)
     }
-
-    override fun clearRecoverAfterLogin() {
-        migration.storage.preferences.sessions.setRecoverAfterLogin(false)
-    }
 }
 
 private const val archiveDirectory = "pipixiv-legacy"

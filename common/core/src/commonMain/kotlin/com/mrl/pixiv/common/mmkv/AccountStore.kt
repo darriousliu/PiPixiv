@@ -77,6 +77,13 @@ class AccountSessionStorage(private val owner: MMKVOwner) {
         mutableRecoverAfterLogin.value = value
     }
 
+    /** Clears the persisted recovery request and returns whether it was set. */
+    fun consumeRecoverAfterLogin(): Boolean = withAccountStorageLock {
+        val pending = recoveryOnLogin.read(owner, RECOVER_AFTER_LOGIN_KEY)
+        if (pending) setRecoverAfterLogin(false)
+        pending
+    }
+
     private fun read(): StoredAccounts = readOrNull() ?: StoredAccounts()
 
     fun hasCorruptState() = withAccountStorageLock { readOrNull() == null }

@@ -135,9 +135,6 @@ fun Navigation3MainGraph(
     val toastState = rememberToasterState()
     val resultBus = remember { ResultEventBus() }
     val recovery: DataRecoveryRepository = koinInject()
-    val navigateBack = {
-        navigationManager.leaveCurrentScreen(recovery::clearRecoverAfterLogin)
-    }
 
     rememberNavigationState(navigationManager)
     val inputState = remember { PaneInputState() }
@@ -383,16 +380,9 @@ fun Navigation3MainGraph(
             AppDataScreen()
         }
         entry<Destination.DataRecovery> { destination ->
-            val entryNavigation = currentNavigationManager()
             DataRecoveryScreen(
                 afterLogin = destination.afterLogin,
-                onBack = {
-                    if (destination.afterLogin) {
-                        if (entryNavigation.entryId == navigationManager.topEntryId) navigateBack()
-                    } else {
-                        entryNavigation.popBackStack()
-                    }
-                },
+                onBack = currentNavigationManager()::popBackStack,
             )
         }
         entry<Destination.Download> {
@@ -456,9 +446,7 @@ fun Navigation3MainGraph(
 
     HandleDeeplink(navigationManager)
     LogScreen(navigationManager)
-    EscBackHandler {
-        navigateBack()
-    }
+    EscBackHandler(navigationManager::popBackStack)
     SharedTransitionLayout {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,
@@ -505,7 +493,7 @@ fun Navigation3MainGraph(
                     PredictiveBackNavDisplay(
                         backStack = navigationManager.backStack,
                         modifier = Modifier.fillMaxSize(),
-                        onBack = navigateBack,
+                        onBack = navigationManager::popBackStack,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         entryDecorators = listOf(
                             // Add the default decorators for managing scenes and saving state
@@ -548,13 +536,6 @@ fun Navigation3MainGraph(
             }
         }
     }
-}
-
-internal fun NavigationManager.leaveCurrentScreen(clearRecoverAfterLogin: () -> Unit) {
-    if ((backStack.lastOrNull()?.destination as? Destination.DataRecovery)?.afterLogin == true) {
-        clearRecoverAfterLogin()
-    }
-    popBackStack()
 }
 
 @Composable

@@ -53,5 +53,4 @@ interface DataRecoveryRepository {
     suspend fun importLegacyPackage(source: PlatformFile, targetUserId: Long)
     suspend fun importLegacyPackage(source: PlatformFile, targetUserId: Long, item: MigrationItem): ItemStatus
     suspend fun abandonAll()
-    fun clearRecoverAfterLogin()
 }

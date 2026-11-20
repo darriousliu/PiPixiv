@@ -109,7 +109,7 @@ class AccountSessionManager(
             navigationManager.navigateToLoginOptionScreen()
         } else {
             navigationManager.loginToMainScreen(
-                showDataRecovery = afterLogin && AccountStore.storage.recoverAfterLogin.value,
+                showDataRecovery = afterLogin && AccountStore.storage.consumeRecoverAfterLogin(),
             )
             profileRefreshes.remove(session.userId)?.cancel()
             profileRefreshes[session.userId] = UserManager.updateUserInfo(userId = session.userId)
