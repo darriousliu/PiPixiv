@@ -49,6 +49,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.analytics.recordCrashTab
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
@@ -115,11 +116,12 @@ fun FollowingScreen(
         }
     }
 
-    LaunchedEffect(pagerState.currentPage) {
-        logEvent("screen_view", buildMap {
-            put("screen_name", "Following")
-            put("page_name", pages[pagerState.currentPage].name)
-        })
+    val currentPage = pages.getOrNull(pagerState.currentPage)
+    LaunchedEffect(currentPage) {
+        if (currentPage != null) {
+            recordCrashTab("Following", currentPage)
+            logEvent("screen_view", mapOf("screen_name" to "Following", "page_name" to currentPage.name))
+        }
     }
 
     FollowingScreenContent(

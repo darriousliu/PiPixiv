@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.repository
 
 import co.touchlab.kermit.Logger
+import com.mrl.pixiv.common.analytics.recordCrashOperation
 import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
@@ -202,6 +203,7 @@ class IosDownloadStrategy(
             val attempt = BackgroundDownloadAttempt(sessionId, newTask.taskIdentifier, createTime)
             store(state.copy(attempts = state.attempts + (key.description to attempt)))
             if (downloadDao.updateActiveAttempt(key.illustId, key.index, createTime, DownloadStatus.RUNNING.value) > 0) {
+                recordCrashOperation("DownloadStarted")
                 newTask.resume()
                 return
             }
@@ -367,6 +369,11 @@ class IosDownloadStrategy(
             fileUri = localId?.let { "ph://$it" },
         )
         if (status != DownloadStatus.RUNNING) {
+            when (status) {
+                DownloadStatus.SUCCESS -> recordCrashOperation("DownloadSucceeded")
+                DownloadStatus.FAILED -> recordCrashOperation("DownloadFailed")
+                else -> Unit
+            }
             if (sessionId == LEGACY_SESSION_ID) {
                 legacyDownloads = legacyDownloads - key.description
             } else {

@@ -26,8 +26,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.analytics.logException
+import com.mrl.pixiv.common.analytics.recordCrashOperation
 import com.mrl.pixiv.common.compose.ui.ContentCrashState
 import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
 import com.mrl.pixiv.common.network.networkSettings
@@ -82,7 +82,6 @@ fun LoginScreen(
                 request: WebRequest,
                 navigator: WebViewNavigator
             ): WebRequestInterceptResult {
-                Logger.d(tag = "LoginScreen") { "shouldOverrideUrlLoading: ${request.url}" }
                 val codePair = checkUri(request.url)
                 if (codePair != null) {
                     viewModel.dispatch(LoginAction.Login(codePair.first, codePair.second, networkPreference))
@@ -160,6 +159,7 @@ fun LoginScreen(
                 bypassSetting = bypassSetting,
                 onError = { error ->
                     if (webViewFailure == null) {
+                        recordCrashOperation("LoginWebViewFailed")
                         webViewFailure = if (error is WebLoginRouteUnavailableException) {
                             LoginWebViewFailure.NetworkRoute
                         } else {

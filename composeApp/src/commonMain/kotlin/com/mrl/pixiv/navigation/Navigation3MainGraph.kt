@@ -37,6 +37,7 @@ import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
 import com.mrl.pixiv.comment.BlockCommentsScreen
 import com.mrl.pixiv.comment.CommentScreen
 import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.analytics.recordCrashScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.LocalToaster
@@ -529,90 +530,14 @@ internal expect fun HandleDeeplink(
 private fun LogScreen(
     navigationManager: NavigationManager,
 ) {
-    LaunchedEffect(navigationManager.currentDestination) {
-        // Get current destination
-        val currentDestination = navigationManager.currentDestination
-
-        // Log screen view event
-        logEvent("screen_view", buildMap {
-            val screenName = currentDestination::class.serializer().descriptor.serialName
-                .split(".")
-                .lastOrNull()
-                .orEmpty()
-            put("screen_name", screenName)
-            put("screen_class", screenName)
-
-            // Add additional parameters for specific destinations
-            when (currentDestination) {
-                is Destination.Login -> {
-                    put("start_url", currentDestination.startUrl)
-                }
-
-                is Destination.Main -> {
-                    val screenName =
-                        navigationManager.currentMainPage::class.serializer().descriptor.serialName
-                            .split(".")
-                            .lastOrNull()
-                            .orEmpty()
-                    put("current_main_page", screenName)
-                }
-
-                is Destination.ProfileDetail -> {
-                    put("user_id", currentDestination.userId.toString())
-                }
-
-                is Destination.PictureDeeplink -> {
-                    put("illust_id", currentDestination.illustId.toString())
-                }
-
-                is Destination.SearchResults -> {
-                    put("search_words", currentDestination.searchWords)
-                    put("is_id_search", currentDestination.isIdSearch.toString())
-                    put("search_mode", currentDestination.searchMode.name)
-                }
-
-                is Destination.Picture -> {
-                    put("index", currentDestination.index.toString())
-                    put("enable_transition", (currentDestination.cover != null).toString())
-                }
-
-                is Destination.Collection -> {
-                    put("user_id", currentDestination.userId.toString())
-                    put("is_novel", currentDestination.isNovel.toString())
-                }
-
-                is Destination.Following -> {
-                    put("user_id", currentDestination.userId.toString())
-                }
-
-                is Destination.UserArtwork -> {
-                    put("user_id", currentDestination.userId.toString())
-                }
-
-                is Destination.UserNovels -> {
-                    put("user_id", currentDestination.userId.toString())
-                }
-
-                is Destination.Comment -> {
-                    put("id", currentDestination.id.toString())
-                    put("type", currentDestination.type.toString())
-                }
-
-                is Destination.Report -> {
-                    put("id", currentDestination.id.toString())
-                    put("type", currentDestination.type.toString())
-                }
-
-                is Destination.NovelDetail -> {
-                    put("novel_id", currentDestination.novelId.toString())
-                }
-
-                is Destination.NovelSeries -> {
-                    put("series_id", currentDestination.seriesId.toString())
-                }
-
-                else -> Unit
-            }
-        })
+    val destination = navigationManager.currentDestination
+    val mainPage = if (destination == Destination.Main) navigationManager.currentMainPage else null
+    LaunchedEffect(navigationManager.topEntryId, mainPage) {
+        val screen = mainPage ?: destination
+        recordCrashScreen(screen::class.serializer().descriptor.serialName.substringAfterLast('.'))
+    }
+    LaunchedEffect(destination) {
+        val screenName = destination::class.serializer().descriptor.serialName.substringAfterLast('.')
+        logEvent("screen_view", mapOf("screen_name" to screenName, "screen_class" to screenName))
     }
 }

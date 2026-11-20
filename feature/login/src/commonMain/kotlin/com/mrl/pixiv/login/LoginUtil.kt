@@ -1,6 +1,8 @@
 package com.mrl.pixiv.login
 
+import com.mrl.pixiv.common.analytics.recordCrashOperation
 import io.ktor.http.Url
+import kotlinx.coroutines.CancellationException
 import okio.ByteString.Companion.toByteString
 import kotlin.io.encoding.Base64
 import kotlin.random.Random
@@ -30,10 +32,28 @@ fun generateWebViewUrl(create: Boolean) =
     }
 
 fun checkUri(url: String): Pair<String, String>? {
-    val url = Url(url)
+    val url = try {
+        Url(url)
+    } catch (_: Exception) {
+        return null
+    }
     if (url.protocol.name == "pixiv" && url.host == "account") {
         val code = url.parameters["code"]
         return if (code != null) code to codeVerifier else null
     }
     return null
+}
+
+internal suspend fun recordLoginAttempt(login: suspend () -> Unit): Boolean {
+    recordCrashOperation("LoginStarted")
+    try {
+        login()
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        recordCrashOperation("LoginFailed")
+        return false
+    }
+    recordCrashOperation("LoginSucceeded")
+    return true
 }

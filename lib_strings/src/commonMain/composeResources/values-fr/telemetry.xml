@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">Statistiques d’utilisation anonymes</string>
+    <string name="usage_analytics_description">Compte les écrans et fonctionnalités utilisés pour nous aider à améliorer l’app.</string>
+    <string name="crash_diagnostics">Rapports de plantage</string>
+    <string name="crash_diagnostics_description">Si l’app plante ou rencontre une erreur, elle envoie automatiquement les détails de l’erreur, la version de l’app et des informations sur l’appareil pour nous aider à identifier et corriger le problème.</string>
+    <string name="crash_diagnostics_switch_note">L’interrupteur ci-dessus n’affecte pas les rapports de plantage.</string>
+    <string name="privacy_not_collected_description">Nous ne collectons pas vos recherches, les informations de votre compte, les œuvres que vous consultez ni les fichiers que vous téléchargez.</string>
+</resources>

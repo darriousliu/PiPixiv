@@ -1,12 +1,16 @@
 package com.mrl.pixiv.login
 
 import androidx.compose.runtime.Stable
+import androidx.lifecycle.viewModelScope
 import com.mrl.pixiv.common.network.NetworkSettings
 import com.mrl.pixiv.common.network.withNetworkPreference
 import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @Stable
@@ -37,11 +41,17 @@ class LoginViewModel : BaseMviViewModel<LoginState, LoginAction>(
     }
 
     private fun login(intent: LoginAction.Login) =
-        launchIO {
+        viewModelScope.launch(Dispatchers.IO) {
             updateState { copy(loading = true) }
-            withNetworkPreference({ intent.networkPreference }) {
-                AuthManager.login(intent.code, intent.codeVerifier)
+            val loggedIn = recordLoginAttempt {
+                withNetworkPreference({ intent.networkPreference }) {
+                    AuthManager.login(intent.code, intent.codeVerifier)
+                }
             }
-            sendEffect(LoginEvent.NavigateToMain)
+            if (loggedIn) {
+                sendEffect(LoginEvent.NavigateToMain)
+            } else {
+                updateState { copy(loading = false) }
+            }
         }
 }

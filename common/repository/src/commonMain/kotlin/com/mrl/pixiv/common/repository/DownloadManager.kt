@@ -1,7 +1,9 @@
 package com.mrl.pixiv.common.repository
 
+import co.touchlab.kermit.Logger
 import coil3.annotation.InternalCoilApi
 import coil3.util.MimeTypeMap
+import com.mrl.pixiv.common.analytics.recordCrashOperation
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
@@ -9,6 +11,7 @@ import com.mrl.pixiv.common.repository.util.generateFileName
 import com.mrl.pixiv.common.util.PictureType
 import com.mrl.pixiv.common.util.currentTimeMillis
 import com.mrl.pixiv.common.util.isImageExists
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -44,7 +47,9 @@ class DownloadManager(
         subFolder: String? = null,
         downloadManagerListener: DownloadManagerListener? = null
     ): Boolean {
+        recordCrashOperation("DownloadRequested")
         if (!downloadStrategy.prepareDownload()) {
+            recordCrashOperation("DownloadPermissionDenied")
             downloadManagerListener?.onDownloadCompleted(null)
             return false
         }
@@ -92,6 +97,7 @@ class DownloadManager(
             )
             downloadDao.insert(entity)
 
+            recordCrashOperation("DownloadQueued")
             downloadStrategy.enqueue(illustId, index, originalUrl, subFolder)
             null
         }
@@ -101,7 +107,10 @@ class DownloadManager(
         }
 
         if (downloadManagerListener != null) {
-            scope.launch {
+            val exceptionHandler = CoroutineExceptionHandler { _, error ->
+                Logger.e(throwable = error, tag = "Download") { "Unable to deliver the download result" }
+            }
+            scope.launch(exceptionHandler) {
                 downloadStrategy.getDownloadState(illustId, index).collect { state ->
                     when (state) {
                         DownloadState.SUCCEEDED -> {

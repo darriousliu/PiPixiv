@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">Anonymous usage statistics</string>
+    <string name="usage_analytics_description">Counts which screens and features are used to help us improve the app.</string>
+    <string name="crash_diagnostics">Crash reports</string>
+    <string name="crash_diagnostics_description">When the app crashes or hits an error, it automatically sends the error details, app version, and device information so we can find and fix the problem.</string>
+    <string name="crash_diagnostics_switch_note">The switch above doesn’t affect crash reports.</string>
+    <string name="privacy_not_collected_description">We don’t collect your search terms, account details, the artworks you view, or the files you download.</string>
+</resources>

@@ -1,7 +1,7 @@
 package com.mrl.pixiv
 
-import com.mrl.pixiv.common.analytics.flushDesktopAnalytics
 import com.mrl.pixiv.common.analytics.captureDesktopFatalException
+import com.mrl.pixiv.common.analytics.flushDesktopAnalytics
 import dev.nucleusframework.window.tao.TaoApplication
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Handler
@@ -47,9 +47,9 @@ internal class TaoFatalErrorHandler(
         if (!reported.compareAndSet(false, true)) return
         try {
             report(error)
-        } catch (reportingFailure: Throwable) {
+        } catch (_: Throwable) {
             // Reporting must never prevent Tao from finishing its fatal exit.
-            System.err.println("Failed to report Tao fatal error: ${reportingFailure.message}")
+            System.err.println("Failed to report Tao fatal error")
         }
     }
 

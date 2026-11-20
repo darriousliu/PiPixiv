@@ -50,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.analytics.recordCrashTab
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
@@ -236,10 +237,9 @@ fun SearchResultsScreen(
     KeyEventListener(controller)
 
     LaunchedEffect(pagerState.currentPage) {
-        logEvent("screen_view", buildMap {
-            put("screen_name", "SearchResults")
-            put("page_name", SearchResultsPage.entries[pagerState.currentPage].name)
-        })
+        val page = SearchResultsPage.entries[pagerState.currentPage]
+        recordCrashTab("SearchResults", page)
+        logEvent("screen_view", mapOf("screen_name" to "SearchResults", "page_name" to page.name))
     }
 
     Scaffold(

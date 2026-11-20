@@ -12,7 +12,7 @@ fun captureDesktopFatalException(error: Throwable) {
     }
     val event = SentryEvent(ExceptionMechanismException(mechanism, error, Thread.currentThread()))
         .apply { level = SentryLevel.FATAL }
-    // Uses the same Java SDK scopes initialized by the existing KMP Sentry.init.
+    // The desktop SDK applies the same app and runtime context as for non-fatal errors.
     io.sentry.Sentry.captureEvent(event)
 }
 

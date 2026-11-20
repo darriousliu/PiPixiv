@@ -8,6 +8,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import co.touchlab.kermit.Logger
+import com.mrl.pixiv.common.analytics.recordCrashOperation
+import com.mrl.pixiv.common.coroutine.ProcessLifecycleScope
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
@@ -65,8 +67,11 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.buffered
@@ -182,7 +187,7 @@ class PictureViewModel(
     }
 
     private fun downloadUgoira(illustId: Long) {
-        launchIO {
+        viewModelScope.launchImageOperation("Unable to load Ugoira") {
             withNetworkPreference({ requireUserPreferenceValue.networkSettings() }) {
                 updateState { copy(ugoiraState = ugoiraState.copy(loading = true)) }
                 val resp = PixivRepository.getUgoiraMetadata(illustId)
@@ -193,7 +198,6 @@ class PictureViewModel(
                     val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
                         img.readBytes().decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
                     }
-                    Logger.e(tag = TAG) { "downloadUgoira: $imageFiles" }
                     updateState {
                         copy(
                             ugoiraState = ugoiraState.copy(
@@ -222,7 +226,6 @@ class PictureViewModel(
                             img.readBytes()
                                 .decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
                         }
-                        Logger.e(tag = TAG) { "downloadUgoira: $imageFiles" }
                         updateState {
                             copy(
                                 ugoiraState = ugoiraState.copy(
@@ -284,8 +287,8 @@ class PictureViewModel(
         index: Int,
         originalUrl: String,
     ) {
-        launchIO {
-            val illust = state.illust ?: return@launchIO
+        viewModelScope.launchImageOperation("Unable to enqueue original page") {
+            val illust = state.illust ?: return@launchImageOperation
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
                 illust.user.id.toString()
             } else {
@@ -313,7 +316,7 @@ class PictureViewModel(
         }
         if (pages.isEmpty()) return
 
-        launchProcess(Dispatchers.IO) {
+        ProcessLifecycleScope.launchImageOperation("Unable to enqueue original pages") {
             batchDownloadMutex.withLock {
                 val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
                     illust.user.id.toString()
@@ -331,9 +334,7 @@ class PictureViewModel(
                     } catch (error: CancellationException) {
                         throw error
                     } catch (error: Exception) {
-                        Logger.e(throwable = error, tag = TAG) {
-                            "Unable to enqueue original page $index for artwork $illustId"
-                        }
+                        Logger.e(throwable = error, tag = TAG) { "Unable to enqueue original page" }
                     }
                 }
                 ToastUtil.safeShortToast(
@@ -439,8 +440,10 @@ class PictureViewModel(
                 }
                 response.contentLength() ?: 0
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (error: Exception) {
+            if (error !is CancellationException) {
+                Logger.e(throwable = error, tag = TAG) { "Unable to determine image size" }
+            }
             0
         }
     }
@@ -462,7 +465,7 @@ class PictureViewModel(
         downloadUrl: String,
         illust: Illust,
     ) {
-        launchIO {
+        viewModelScope.launchImageOperation("Unable to share image") {
             showLoading(true)
             closeBottomSheet()
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
@@ -497,7 +500,8 @@ class PictureViewModel(
 
     fun saveAsImage(imageUrl: String, file: PlatformFile) {
         // 用户已确认的保存任务应在滑出作品页后继续完成。
-        launchProcess(Dispatchers.IO) {
+        ProcessLifecycleScope.launchImageOperation("Unable to save image") {
+            recordCrashOperation("ImageSaveStarted")
             try {
                 showLoading(true)
                 imageHttpClient.withClient { client ->
@@ -508,13 +512,18 @@ class PictureViewModel(
                         val bytes =
                             response.bodyAsChannel().asSource().buffered().use { it.readByteArray() }
                         file.write(bytes)
+                        recordCrashOperation("ImageSaveSucceeded")
                         ToastUtil.safeShortToast(RStrings.download_success)
                     } else {
+                        recordCrashOperation("ImageSaveFailed")
                         ToastUtil.safeShortToast(RStrings.download_failed)
                     }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            } catch (error: Exception) {
+                if (error !is CancellationException) {
+                    recordCrashOperation("ImageSaveFailed")
+                    Logger.e(throwable = error, tag = TAG) { "Unable to save image" }
+                }
                 ToastUtil.safeShortToast(RStrings.download_failed)
             } finally {
                 showLoading(false)
@@ -538,8 +547,8 @@ class PictureViewModel(
     }
 
     fun downloadUgoiraAsGIF() {
-        launchIO {
-            val illust = state.illust ?: return@launchIO
+        viewModelScope.launchImageOperation("Unable to enqueue Ugoira") {
+            val illust = state.illust ?: return@launchImageOperation
             showLoading(true)
             try {
                 val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
@@ -567,12 +576,19 @@ class PictureViewModel(
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
-                Logger.e(throwable = error, tag = TAG) { "Unable to enqueue Ugoira ${illust.id}" }
+                Logger.e(throwable = error, tag = TAG) { "Unable to enqueue Ugoira" }
                 ToastUtil.safeShortToast(RStrings.download_failed)
             } finally {
                 showLoading(false)
             }
         }
+    }
+
+    private fun CoroutineScope.launchImageOperation(failureMessage: String, block: suspend CoroutineScope.() -> Unit) {
+        val exceptionHandler = CoroutineExceptionHandler { _, error ->
+            Logger.e(throwable = error, tag = TAG) { failureMessage }
+        }
+        launch(Dispatchers.IO + exceptionHandler, block = block)
     }
 
     fun toggleUgoiraPlayState() {

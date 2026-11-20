@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">अनाम उपयोग आँकड़े</string>
+    <string name="usage_analytics_description">ऐप को बेहतर बनाने के लिए गिनता है कि कौन-सी स्क्रीन और सुविधाएँ इस्तेमाल होती हैं।</string>
+    <string name="crash_diagnostics">क्रैश रिपोर्ट</string>
+    <string name="crash_diagnostics_description">ऐप क्रैश होने या कोई गड़बड़ी आने पर, समस्या ढूँढ़ने और ठीक करने के लिए गड़बड़ी की जानकारी, ऐप वर्ज़न और डिवाइस की जानकारी अपने-आप भेजी जाती है।</string>
+    <string name="crash_diagnostics_switch_note">ऊपर वाला स्विच क्रैश रिपोर्ट पर असर नहीं डालता।</string>
+    <string name="privacy_not_collected_description">हम आपके खोज शब्द, खाते की जानकारी, देखी गई कलाकृतियाँ या डाउनलोड की गई फ़ाइलें इकट्ठा नहीं करते।</string>
+</resources>

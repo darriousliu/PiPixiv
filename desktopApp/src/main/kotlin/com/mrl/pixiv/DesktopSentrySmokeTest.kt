@@ -17,7 +17,14 @@ internal fun runDesktopSentryMappingSmokeTest(): String {
     }
 
     println("SENTRY_SMOKE_TEST marker=$marker release=$release environment=$environment")
-    val eventId = captureDesktopSentrySmokeTest(dsn, release, environment, marker, exception)
+    val eventId = captureDesktopSentrySmokeTest(
+        dsn = dsn,
+        appVersion = AppUtil.versionName,
+        appBuild = AppUtil.versionCode,
+        environment = environment,
+        marker = marker,
+        exception = exception,
+    )
     println("SENTRY_SMOKE_TEST event_id=$eventId marker=$marker flush_requested=true")
     return eventId
 }

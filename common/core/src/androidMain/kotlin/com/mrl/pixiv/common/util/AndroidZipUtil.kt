@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.util
 
 import androidx.core.net.toUri
+import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import java.io.File
 import java.io.InputStream
@@ -115,8 +116,8 @@ class AndroidZipUtil : ZipUtil {
                     }
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (error: Exception) {
+            Logger.e(throwable = error, tag = "ZipUtil") { "Unable to list ZIP entries" }
         }
         return entryList
     }
@@ -141,8 +142,8 @@ class AndroidZipUtil : ZipUtil {
                     null
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (error: Exception) {
+            Logger.e(throwable = error, tag = "ZipUtil") { "Unable to read ZIP entry" }
             null
         }
     }

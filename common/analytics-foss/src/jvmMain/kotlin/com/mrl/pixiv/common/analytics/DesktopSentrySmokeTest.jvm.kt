@@ -3,7 +3,8 @@ package com.mrl.pixiv.common.analytics
 @Suppress("UNUSED_PARAMETER")
 fun captureDesktopSentrySmokeTest(
     dsn: String,
-    release: String,
+    appVersion: String,
+    appBuild: Int,
     environment: String,
     marker: String,
     exception: Throwable,

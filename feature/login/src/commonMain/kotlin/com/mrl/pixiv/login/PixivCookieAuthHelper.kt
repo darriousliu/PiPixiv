@@ -176,7 +176,7 @@ class PixivCookieAuthHelper(
         }
         // Step 5: 拿到 post-redirect的 URL
         val postRedirectLink = requireNotNull(accountSelected.location()) {
-            "未能从 account-selected 获取跳转地址（期望跳转至 $POST_REDIRECT_URL）"
+            "未能获取账号确认后的跳转地址"
         }
         // Step 6: 进入 redirect() 逻辑 —— 处理 POST_REDIRECT_URL 链路
         return resolvePostRedirect(postRedirectLink)
@@ -206,11 +206,11 @@ class PixivCookieAuthHelper(
         }
         // https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback?state=xxx&code=xxx
         val usersAuthPixivCallbackUrl = requireNotNull(codeResp.location()) {
-            "未能获取 pixiv:// 跳转地址，OAuth 授权失败"
+            "未能获取 OAuth 授权回调地址"
         }
 
         return usersAuthPixivCallbackUrl.parameters["code"]
-            ?: throw NoSuchElementException("pixiv:// URL 中未找到 code 参数，完整 URL: $usersAuthPixivCallbackUrl")
+            ?: throw NoSuchElementException("OAuth 授权回调缺少 code 参数")
     }
 
     // ── 工具函数 ───────────────────────────────────────────────────────────────

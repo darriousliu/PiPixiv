@@ -4,23 +4,17 @@ import io.sentry.kotlin.multiplatform.Sentry
 
 fun captureDesktopSentrySmokeTest(
     dsn: String,
-    release: String,
+    appVersion: String,
+    appBuild: Int,
     environment: String,
     marker: String,
     exception: Throwable,
 ): String {
     require(dsn.isNotBlank()) { "Sentry DSN is not configured for the desktop mapping smoke test" }
-    Sentry.init { options ->
-        options.dsn = dsn
-        options.release = release
+    Sentry.initWithPlatformOptions { options ->
+        options.configureDesktopCrashReports(dsn, appVersion, appBuild, cacheDir = null)
         options.environment = environment
-        options.enableAutoSessionTracking = false
-        options.sendDefaultPii = false
-        options.attachThreads = false
-        options.maxBreadcrumbs = 0
         options.sampleRate = 1.0
-        options.tracesSampleRate = 0.0
-        options.debug = false
     }
     try {
         check(Sentry.isEnabled()) { "Sentry is disabled for the desktop mapping smoke test" }

@@ -6,6 +6,7 @@ import androidx.work.WorkerParameters
 import co.touchlab.kermit.Logger
 import coil3.annotation.InternalCoilApi
 import coil3.util.MimeTypeMap
+import com.mrl.pixiv.common.analytics.recordCrashOperation
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
@@ -28,6 +29,7 @@ import io.ktor.http.contentLength
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.copyTo
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -64,6 +66,7 @@ class DownloadWorker(
         entity = entity.copy(status = DownloadStatus.RUNNING.value, progress = 0f)
         downloadDao.update(entity)
 
+        recordCrashOperation("DownloadStarted")
         return try {
             withNetworkPreference({ requireUserPreferenceValue.networkSettings() }) {
                 if (url.endsWith(".zip")) {
@@ -71,9 +74,12 @@ class DownloadWorker(
                 } else {
                     handleImage(entity, url, illustId, subFolder)
                 }
-            }
+            }.also { recordCrashOperation("DownloadSucceeded") }
         } catch (e: Exception) {
-            e.printStackTrace()
+            if (e !is CancellationException) {
+                recordCrashOperation("DownloadFailed")
+                Logger.e(throwable = e, tag = "Download") { "Download failed" }
+            }
             entity = entity.copy(status = DownloadStatus.FAILED.value)
             downloadDao.update(entity)
             if (runAttemptCount < 1) {
@@ -211,7 +217,7 @@ class DownloadWorker(
                     }
                 }.execute { response ->
                     if (!response.status.isSuccess()) {
-                        throw Exception("Request failed: ${response.status}")
+                        throw Exception("Request failed: ${response.status.value}")
                     }
 
                     var mimeType = response.contentType()?.withoutParameters()?.toString()

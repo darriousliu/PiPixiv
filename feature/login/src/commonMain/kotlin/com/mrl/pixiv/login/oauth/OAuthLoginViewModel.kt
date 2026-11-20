@@ -1,6 +1,7 @@
 package com.mrl.pixiv.login.oauth
 
 import androidx.compose.runtime.Stable
+import androidx.lifecycle.viewModelScope
 import com.mrl.pixiv.common.network.configurePixivNetworkProxy
 import com.mrl.pixiv.common.network.networkSettings
 import com.mrl.pixiv.common.network.withNetworkPreference
@@ -12,9 +13,13 @@ import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.ViewIntent
 import com.mrl.pixiv.login.PixivCookieAuthHelper
+import com.mrl.pixiv.login.recordLoginAttempt
 import com.mrl.pixiv.strings.cookies_parse_error
 import io.ktor.http.Cookie
 import io.ktor.util.date.GMTDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonArray
@@ -43,25 +48,11 @@ class OAuthLoginViewModel : BaseMviViewModel<OAuthLoginState, OAuthLoginAction>(
     }
 
     private fun login(refreshToken: String) {
-        launchIO(
-            onError = {
-                updateState { copy(loading = false) }
-            }
-        ) {
-            updateState { copy(loading = true) }
-            AuthManager.login(refreshToken)
-            updateState { copy(isLogin = true, loading = false) }
-        }
+        launchLogin { AuthManager.login(refreshToken) }
     }
 
     fun loginWithCookies(cookieString: String) {
-        launchIO(
-            onError = {
-                updateState { copy(loading = false) }
-                ToastUtil.safeShortToast(RStrings.cookies_parse_error)
-            }
-        ) {
-            updateState { copy(loading = true) }
+        launchLogin(onFailure = { ToastUtil.safeShortToast(RStrings.cookies_parse_error) }) {
             val cookies = JSON.parseToJsonElement(cookieString.replace("\\_", "_")).jsonArray.map {
                 val obj = it.jsonObject
                 Cookie(
@@ -79,7 +70,15 @@ class OAuthLoginViewModel : BaseMviViewModel<OAuthLoginState, OAuthLoginAction>(
                     configurePixivNetworkProxy(preference.bypassSetting)
                 }.use { helper -> helper.login(cookies) }
             }
-            updateState { copy(isLogin = true, loading = false) }
+        }
+    }
+
+    private fun launchLogin(onFailure: () -> Unit = {}, login: suspend () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            updateState { copy(loading = true) }
+            val loggedIn = recordLoginAttempt(login)
+            updateState { copy(isLogin = isLogin || loggedIn, loading = false) }
+            if (!loggedIn) onFailure()
         }
     }
 }

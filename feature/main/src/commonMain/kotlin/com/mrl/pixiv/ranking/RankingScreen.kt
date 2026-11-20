@@ -48,6 +48,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.analytics.recordCrashTab
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
@@ -183,12 +184,10 @@ fun RankingScreen(
 
     LaunchedEffect(lifecycleOwner, pagerState, availableModes) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            snapshotFlow { pagerState.currentPage }.collectLatest { page ->
-                availableModes.getOrNull(page)?.let { mode ->
-                    logEvent("screen_view", buildMap {
-                        put("screen_name", "Ranking")
-                        put("mode", mode.value)
-                    })
+            snapshotFlow { availableModes.getOrNull(pagerState.currentPage) }.collectLatest { mode ->
+                if (mode != null) {
+                    recordCrashTab("Ranking", mode)
+                    logEvent("screen_view", mapOf("screen_name" to "Ranking", "mode" to mode.value))
                 }
             }
         }

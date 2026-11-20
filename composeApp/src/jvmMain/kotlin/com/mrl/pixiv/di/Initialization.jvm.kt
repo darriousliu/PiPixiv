@@ -45,7 +45,7 @@ private fun resolveMMKVNativeLibrary(): String {
         .toAbsolutePath()
         .normalize()
     check(Files.isRegularFile(libraryPath)) {
-        "MMKV native library does not exist: $libraryPath"
+        "MMKV native library is missing"
     }
     return libraryPath.toRealPath().toString()
 }

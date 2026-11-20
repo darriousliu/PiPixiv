@@ -1,7 +1,9 @@
 package com.mrl.pixiv.common.repository
 
+import co.touchlab.kermit.Logger
 import coil3.annotation.InternalCoilApi
 import coil3.util.MimeTypeMap
+import com.mrl.pixiv.common.analytics.recordCrashOperation
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
@@ -64,7 +66,8 @@ class JvmDownloadStrategy(
                 }
             } catch (e: Exception) {
                 if (e !is CancellationException) {
-                    e.printStackTrace()
+                    recordCrashOperation("DownloadFailed")
+                    Logger.e(throwable = e, tag = "Download") { "Download failed" }
                     updateStatus(illustId, index, DownloadStatus.FAILED)
                 }
             } finally {
@@ -81,6 +84,7 @@ class JvmDownloadStrategy(
         subFolder: String?
     ) {
         var entity = downloadDao.getDownload(illustId, index) ?: return
+        recordCrashOperation("DownloadStarted")
         entity = entity.copy(status = DownloadStatus.RUNNING.value, progress = 0f)
         downloadDao.update(entity)
 
@@ -89,6 +93,7 @@ class JvmDownloadStrategy(
         } else {
             handleImage(entity, url, subFolder)
         }
+        recordCrashOperation("DownloadSucceeded")
     }
 
     private suspend fun handleImage(entity: DownloadEntity, url: String, subFolder: String?) {
@@ -189,7 +194,7 @@ class JvmDownloadStrategy(
         }
 
         if (!response.status.isSuccess()) {
-            throw Exception("Request failed: ${response.status}")
+            throw Exception("Request failed: ${response.status.value}")
         }
 
         val bytes = response.readRawBytes()

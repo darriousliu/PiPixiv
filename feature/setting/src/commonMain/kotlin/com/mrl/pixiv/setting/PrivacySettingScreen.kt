@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ContentPaste
+import androidx.compose.material.icons.rounded.Equalizer
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded._18UpRating
 import androidx.compose.material3.AlertDialog
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,20 +38,30 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
+import com.mrl.pixiv.common.analytics.FLAVOR
+import com.mrl.pixiv.common.analytics.isUsageAnalyticsAvailable
+import com.mrl.pixiv.common.repository.AppRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.setting.components.SettingSectionTitle
 import com.mrl.pixiv.setting.components.SettingSwitchRow
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.confirm
+import com.mrl.pixiv.strings.crash_diagnostics
+import com.mrl.pixiv.strings.crash_diagnostics_description
+import com.mrl.pixiv.strings.crash_diagnostics_switch_note
 import com.mrl.pixiv.strings.default_private_bookmark
+import com.mrl.pixiv.strings.privacy_not_collected_description
 import com.mrl.pixiv.strings.privacy_setting
 import com.mrl.pixiv.strings.r18
 import com.mrl.pixiv.strings.r18_alert_message
 import com.mrl.pixiv.strings.read_clipboard_on_search
 import com.mrl.pixiv.strings.read_clipboard_on_search_desc
 import com.mrl.pixiv.strings.tips
+import com.mrl.pixiv.strings.usage_analytics
+import com.mrl.pixiv.strings.usage_analytics_description
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -58,14 +70,19 @@ fun PrivacySettingScreen(
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
     val userPreference by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle()
+    val usageAnalyticsEnabled by AppRepository.usageAnalyticsEnabled.collectAsStateWithLifecycle()
 
     PrivacySettingContent(
         isR18Enabled = userPreference.isR18Enabled,
         defaultPrivateBookmark = userPreference.defaultPrivateBookmark,
         readClipboardOnSearch = userPreference.readClipboardOnSearch,
+        showUsageAnalytics = isUsageAnalyticsAvailable,
+        showCrashReporting = FLAVOR == "default",
+        usageAnalyticsEnabled = usageAnalyticsEnabled,
         onR18EnabledChange = SettingRepository::setIsR18Enabled,
         onDefaultPrivateBookmarkChange = SettingRepository::setDefaultPrivateBookmark,
         onReadClipboardOnSearchChange = SettingRepository::setReadClipboardOnSearch,
+        onUsageAnalyticsEnabledChange = AppRepository::setUsageAnalyticsEnabled,
         onBack = navigationManager::popBackStack,
         modifier = modifier,
     )
@@ -76,9 +93,13 @@ internal fun PrivacySettingContent(
     isR18Enabled: Boolean,
     defaultPrivateBookmark: Boolean,
     readClipboardOnSearch: Boolean,
+    showUsageAnalytics: Boolean,
+    showCrashReporting: Boolean,
+    usageAnalyticsEnabled: Boolean,
     onR18EnabledChange: (Boolean) -> Unit,
     onDefaultPrivateBookmarkChange: (Boolean) -> Unit,
     onReadClipboardOnSearchChange: (Boolean) -> Unit,
+    onUsageAnalyticsEnabledChange: (Boolean) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -166,7 +187,61 @@ internal fun PrivacySettingContent(
                     onCheckedChange = onReadClipboardOnSearchChange,
                     supportingText = stringResource(RStrings.read_clipboard_on_search_desc),
                 )
+                if (showUsageAnalytics || showCrashReporting) {
+                    PrivacyDiagnostics(
+                        showUsageAnalytics = showUsageAnalytics,
+                        showCrashReporting = showCrashReporting,
+                        usageAnalyticsEnabled = usageAnalyticsEnabled,
+                        onUsageAnalyticsEnabledChange = onUsageAnalyticsEnabledChange,
+                        modifier = Modifier.padding(top = 12.dp),
+                    )
+                }
             }
         }
     }
+}
+
+@Composable
+internal fun PrivacyDiagnostics(
+    showUsageAnalytics: Boolean,
+    showCrashReporting: Boolean,
+    usageAnalyticsEnabled: Boolean,
+    onUsageAnalyticsEnabledChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        if (showUsageAnalytics) {
+            SettingSwitchRow(
+                title = stringResource(RStrings.usage_analytics),
+                icon = Icons.Rounded.Equalizer,
+                checked = usageAnalyticsEnabled,
+                onCheckedChange = onUsageAnalyticsEnabledChange,
+                supportingText = stringResource(RStrings.usage_analytics_description),
+            )
+        }
+        if (showCrashReporting) {
+            SettingSectionTitle(stringResource(RStrings.crash_diagnostics))
+            PrivacyDiagnosticsText(stringResource(RStrings.crash_diagnostics_description))
+            if (showUsageAnalytics) {
+                PrivacyDiagnosticsText(stringResource(RStrings.crash_diagnostics_switch_note))
+            }
+        }
+        PrivacyDiagnosticsText(
+            text = stringResource(RStrings.privacy_not_collected_description),
+            modifier = Modifier.padding(top = 8.dp),
+        )
+    }
+}
+
+@Composable
+private fun PrivacyDiagnosticsText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = text,
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.bodyMedium.copy(
+            hyphens = Hyphens.Auto,
+            lineBreak = LineBreak.Paragraph,
+        ),
+    )
 }

@@ -1,15 +1,9 @@
 package com.mrl.pixiv.common.analytics
 
-import io.sentry.kotlin.multiplatform.Sentry
+fun initializeSentry(isDebug: Boolean, dsn: String, appVersion: String, appBuild: Int) {
+    if (isDebug || dsn.isBlank()) return
 
-fun initializeSentry(isDebug: Boolean, dsn: String, displayName: String) {
-    if (!isDebug) {
-        Sentry.init { options ->
-            options.dsn = dsn
-            options.sendDefaultPii = false
-        }
-        Sentry.configureScope { scope ->
-            scope.setTag("deviceName", displayName)
-        }
-    }
+    initializePlatformSentry(dsn, appVersion, appBuild)
 }
+
+internal expect fun initializePlatformSentry(dsn: String, appVersion: String, appBuild: Int)

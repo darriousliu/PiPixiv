@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">Анонимная статистика использования</string>
+    <string name="usage_analytics_description">Подсчитывает, какие экраны и функции используются, чтобы мы могли улучшать приложение.</string>
+    <string name="crash_diagnostics">Отчёты о сбоях</string>
+    <string name="crash_diagnostics_description">Если приложение аварийно завершается или возникает ошибка, оно автоматически отправляет сведения об ошибке, версию приложения и данные об устройстве, чтобы мы могли найти и исправить проблему.</string>
+    <string name="crash_diagnostics_switch_note">Переключатель выше не влияет на отчёты о сбоях.</string>
+    <string name="privacy_not_collected_description">Мы не собираем ваши поисковые запросы, данные аккаунта, просмотренные работы и скачанные файлы.</string>
+</resources>
