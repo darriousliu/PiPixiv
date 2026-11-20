@@ -1,6 +1,11 @@
 package com.mrl.pixiv.common.mmkv
 
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlin.text.CharacterCodingException
 
 @Serializable
 data class AccountSession(
@@ -25,7 +30,7 @@ private data class StoredAccounts(
 )
 
 object AccountStore : MMKVApp {
-    private val storage = AccountSessionStorage(this)
+    val storage = AccountSessionStorage(this)
 
     val sessions get() = storage.sessions
     val activeUserId get() = storage.activeUserId
@@ -43,10 +48,53 @@ object AccountStore : MMKVApp {
 
 class AccountSessionStorage(private val owner: MMKVOwner) {
     private val accounts = owner.mmkvSerializable(StoredAccounts())
+    private val recoveryOnLogin = owner.mmkvBool()
+    private val mutableRecoverAfterLogin = MutableStateFlow(false)
+    val recoverAfterLogin = mutableRecoverAfterLogin.asStateFlow()
 
-    private fun read() = accounts.readStrict(owner, "accountStoreState")
+    fun reloadRecoverAfterLogin() = withAccountStorageLock {
+        mutableRecoverAfterLogin.value = recoveryOnLogin.read(owner, RECOVER_AFTER_LOGIN_KEY)
+    }
 
-    private fun write(state: StoredAccounts) = accounts.write(owner, "accountStoreState", state)
+    fun setRecoverAfterLogin(value: Boolean) = withAccountStorageLock {
+        if (recoveryOnLogin.read(owner, RECOVER_AFTER_LOGIN_KEY) != value) {
+            recoveryOnLogin.write(owner, RECOVER_AFTER_LOGIN_KEY, value)
+            owner.sync()
+        }
+        mutableRecoverAfterLogin.value = value
+    }
+
+    private fun read(): StoredAccounts = readOrNull() ?: StoredAccounts()
+
+    fun hasCorruptState() = withAccountStorageLock { readOrNull() == null }
+
+    private fun readOrNull(): StoredAccounts? {
+        val raw = owner.accessMMKV { getByteArray(ACCOUNT_STORE_KEY) }
+        if (raw == null) {
+            if (!owner.contains(ACCOUNT_STORE_KEY)) return StoredAccounts()
+            setRecoverAfterLogin(true)
+            return null
+        }
+        try {
+            return accounts.decode(raw)
+        } catch (_: CharacterCodingException) {
+            preserveCorruptState(raw)
+        } catch (_: SerializationException) {
+            preserveCorruptState(raw)
+        }
+        return null
+    }
+
+    private fun preserveCorruptState(raw: ByteArray) {
+        if (!owner.contains(CORRUPT_ACCOUNT_STORE_KEY)) {
+            owner.mmkvBytes().write(owner, CORRUPT_ACCOUNT_STORE_KEY, raw)
+            owner.sync()
+            Logger.w(tag = "AccountStore") { "Preserved unreadable account session data" }
+        }
+        setRecoverAfterLogin(true)
+    }
+
+    private fun write(state: StoredAccounts) = accounts.write(owner, ACCOUNT_STORE_KEY, state)
 
     val sessions get() = withAccountStorageLock { read().sessions }
 
@@ -63,6 +111,15 @@ class AccountSessionStorage(private val owner: MMKVOwner) {
         require(session.userId > 0)
         val others = read().sessions.filterNot { it.userId == session.userId }
         write(StoredAccounts(others + session, session.userId))
+    }
+
+    fun addMigratedAccount(session: AccountSession) = withAccountStorageLock {
+        require(session.userId > 0)
+        val state = read()
+        if (state.sessions.none { it.userId == session.userId }) {
+            val activeUserId = state.activeUserId.takeIf { it > 0 } ?: session.userId
+            write(StoredAccounts(state.sessions + session, activeUserId))
+        }
     }
 
     fun removeCurrent() = withAccountStorageLock {
@@ -83,4 +140,23 @@ class AccountSessionStorage(private val owner: MMKVOwner) {
             }
             updated
         }
+
+    fun saveRefreshedTokens(previous: AccountSession, refreshed: AccountSession): AccountSession? {
+        check(refreshed.userId == previous.userId) { "The refreshed token belongs to a different account" }
+        return update(previous.userId) { current ->
+            if (current.refreshToken != previous.refreshToken || current.accessToken != previous.accessToken) {
+                current
+            } else {
+                current.copy(
+                    refreshToken = refreshed.refreshToken,
+                    accessToken = refreshed.accessToken,
+                    accessTokenExpiresAt = refreshed.accessTokenExpiresAt,
+                )
+            }
+        }
+    }
 }
+
+private const val ACCOUNT_STORE_KEY = "accountStoreState"
+private const val CORRUPT_ACCOUNT_STORE_KEY = "$ACCOUNT_STORE_KEY.corrupt"
+private const val RECOVER_AFTER_LOGIN_KEY = "recoverAfterLogin"

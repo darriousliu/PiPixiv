@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_export_insufficient_space">Espaço de armazenamento insuficiente para exportar a cópia de segurança</string>
+    <string name="backup_import_insufficient_space">Espaço de armazenamento insuficiente para importar a cópia de segurança</string>
+    <string name="backup_import_file_too_large">O arquivo da cópia de segurança é grande demais para ser importado</string>
+    <string name="backup_import_translation_incomplete">Os dados foram importados, mas parte do cache de traduções não pôde ser importada.</string>
+</resources>

@@ -8,8 +8,13 @@ import androidx.room3.immediateTransaction
 import androidx.room3.useWriterConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
+import kotlinx.io.files.Path
 
 object AppDatabaseBackup {
     suspend fun export(global: PixivDatabase, account: AccountHandle, globalPath: String, accountPath: String) {
@@ -39,9 +44,9 @@ object AppDatabaseBackup {
         accountPath: String,
         backupUserId: Long,
         includeAccountData: Boolean,
-    ) {
+    ): Boolean {
         require(backupUserId > 0) { "Invalid backup account" }
-        global.useWriterConnection { globalConnection ->
+        val hasTranslations = global.useWriterConnection { globalConnection ->
             globalConnection.withBackup(globalPath, globalTables) {
                 if (includeAccountData) {
                     account.db.useWriterConnection { accountConnection ->
@@ -58,7 +63,24 @@ object AppDatabaseBackup {
                 } else {
                     globalConnection.immediateTransaction { restoreGlobalTables() }
                 }
+                try {
+                    globalConnection.validateBackup(listOf(translationTable))
+                    true
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    false
+                }
             }
+        }
+        if (!hasTranslations) return false
+        return try {
+            global.restoreTranslations(globalPath)
+            true
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            false
         }
     }
 
@@ -71,11 +93,11 @@ object AppDatabaseBackup {
         }
     }
 
-    private suspend fun Transactor.withBackup(
+    private suspend fun <T> Transactor.withBackup(
         path: String,
         expectedTables: List<BackupTable>,
-        block: suspend () -> Unit,
-    ) {
+        block: suspend () -> T,
+    ): T {
         val trustedSchema = usePrepared("PRAGMA trusted_schema") { statement ->
             check(statement.step())
             statement.getLong(0)
@@ -83,11 +105,11 @@ object AppDatabaseBackup {
         executeSQL("PRAGMA trusted_schema = OFF")
         try {
             usePrepared("ATTACH DATABASE ? AS backup") { statement ->
-                statement.bindText(1, path)
+                statement.bindText(1, Path(path).toReadOnlyDatabaseUri())
                 statement.step()
             }
-            try {
-                validateBackup(expectedTables)
+            return try {
+                if (expectedTables.isNotEmpty()) validateBackup(expectedTables)
                 block()
             } finally {
                 withContext(NonCancellable) { executeSQL("DETACH DATABASE backup") }
@@ -113,20 +135,57 @@ object AppDatabaseBackup {
 
     private suspend fun PooledConnection.restoreGlobalTables() {
         globalTables.forEach { table ->
-            val select = "SELECT ${table.columns} FROM backup.${table.name}"
-            val newerTranslation = if (table.name == "novel_translation") {
-                """
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM main.novel_translation AS current
-                    WHERE current.novelId = backup.novel_translation.novelId
-                        AND current.targetLanguage = backup.novel_translation.targetLanguage
-                        AND current.updatedAtMillis > backup.novel_translation.updatedAtMillis
-                )
-                """.trimIndent()
-            } else {
-                ""
-            }
-            executeSQL("INSERT OR REPLACE INTO main.${table.name} (${table.columns}) $select $newerTranslation")
+            executeSQL(
+                "INSERT OR REPLACE INTO main.${table.name} (${table.columns}) " +
+                    "SELECT ${table.columns} FROM backup.${table.name}",
+            )
+        }
+    }
+
+    private suspend fun PixivDatabase.restoreTranslations(path: String) {
+        var firstRowId = Long.MIN_VALUE
+        while (true) {
+            currentCoroutineContext().ensureActive()
+            // Release Room's writer lease between batches so the app can write concurrently.
+            val lastRowId = useWriterConnection { connection ->
+                connection.withBackup(path, emptyList()) {
+                    val end = connection.usePrepared(
+                        """
+                        SELECT max(rowid) FROM (
+                            SELECT rowid FROM backup.novel_translation
+                            WHERE rowid >= ? ORDER BY rowid LIMIT 64
+                        )
+                        """.trimIndent(),
+                    ) {
+                        it.bindLong(1, firstRowId)
+                        if (it.step() && !it.isNull(0)) it.getLong(0) else null
+                    } ?: return@withBackup null
+                    connection.immediateTransaction { restoreTranslationBatch(firstRowId, end) }
+                    end
+                }
+            } ?: return
+            if (lastRowId == Long.MAX_VALUE) return
+            firstRowId = lastRowId + 1
+            yield()
+        }
+    }
+
+    private suspend fun PooledConnection.restoreTranslationBatch(firstRowId: Long, lastRowId: Long) {
+        usePrepared(
+            """
+            INSERT OR REPLACE INTO main.novel_translation (${translationTable.columns})
+            SELECT ${translationTable.columns} FROM backup.novel_translation
+            WHERE rowid BETWEEN ? AND ? AND NOT EXISTS (
+                SELECT 1 FROM main.novel_translation AS current
+                WHERE current.novelId = backup.novel_translation.novelId
+                    AND current.targetLanguage = backup.novel_translation.targetLanguage
+                    AND current.updatedAtMillis > backup.novel_translation.updatedAtMillis
+            )
+            """.trimIndent(),
+        ) {
+            it.bindLong(1, firstRowId)
+            it.bindLong(2, lastRowId)
+            it.step()
         }
     }
 
@@ -165,11 +224,12 @@ object AppDatabaseBackup {
         BackupTable("block_user", "userId, name"),
         BackupTable("block_tag", "tag, isRegex"),
         BackupTable("block_comment", "commentId, commentJson"),
-        BackupTable(
-            "novel_translation",
-            "novelId, targetLanguage, provider, model, configFingerprint, sourceMd5, translatedText, " +
-                "updatedAtMillis, translatedTitle, translatedCaption, metadataSourceMd5",
-        ),
+    )
+
+    private val translationTable = BackupTable(
+        "novel_translation",
+        "novelId, targetLanguage, provider, model, configFingerprint, sourceMd5, translatedText, " +
+            "updatedAtMillis, translatedTitle, translatedCaption, metadataSourceMd5",
     )
 
     private val accountTables = listOf(

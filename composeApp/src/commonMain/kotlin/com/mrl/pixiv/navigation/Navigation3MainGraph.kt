@@ -100,6 +100,7 @@ import com.mrl.pixiv.setting.block.CloudMuteScreen
 import com.mrl.pixiv.setting.download.DownloadScreen
 import com.mrl.pixiv.setting.network.NetworkDiagnosticScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
+import com.mrl.pixiv.splash.StartupMigration
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
@@ -153,6 +154,8 @@ fun Navigation3MainGraph(
         }
 
         entry<Destination.Main> {
+            val migration: StartupMigration = koinInject()
+            LaunchedEffect(migration) { migration.onHomeEntered() }
             MainScreen()
         }
 

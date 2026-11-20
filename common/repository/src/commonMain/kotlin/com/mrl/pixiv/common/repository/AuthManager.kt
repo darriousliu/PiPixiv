@@ -85,19 +85,8 @@ object AuthManager : KoinComponent {
 
     private suspend fun refresh(session: AccountSession): String {
         val updated = requestRefresh(session.refreshToken).toSession()
-        check(updated.userId == session.userId) { "The refreshed token belongs to a different account" }
-
         return withAccountStorageLock {
-            val saved = AccountStore.update(session.userId) { current ->
-                if (current.refreshToken != session.refreshToken ||
-                    current.accessToken != session.accessToken ||
-                    current.lastUsedAt != session.lastUsedAt
-                ) {
-                    current
-                } else {
-                    updated.copy(lastUsedAt = current.lastUsedAt)
-                }
-            }
+            val saved = AccountStore.storage.saveRefreshedTokens(session, updated)
             if (saved != null && saved.needsRelogin.not()) {
                 UserManager.updateUserInfo(saved)
                 saved.accessToken

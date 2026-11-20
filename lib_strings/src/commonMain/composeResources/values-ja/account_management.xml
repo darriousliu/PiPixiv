@@ -3,10 +3,6 @@
     <string name="migration_progress">ローカルデータをアップグレードしています…</string>
     <string name="migration_failure">ローカルデータをアップグレードできませんでした</string>
     <string name="migration_storage_failure">空き容量が不足しています。空き容量を増やしてから再試行してください。</string>
-    <string name="migration_backup_failure">ローカルデータベースをバックアップできませんでした。</string>
-    <string name="migration_preferences_failure">アカウント情報または設定を移行できませんでした。</string>
-    <string name="migration_database_failure">ローカルデータベースを開けませんでした。</string>
-    <string name="migration_split_failure">一部のアカウントデータの移行が完了していません。次回起動時に再試行します。</string>
+    <string name="migration_database_failure">ローカルストレージにアクセスできません。端末のストレージを確認してから、もう一度お試しください。</string>
     <string name="migration_export_logs">ログをエクスポート</string>
-    <string name="migration_continue">ひとまず続ける</string>
 </resources>

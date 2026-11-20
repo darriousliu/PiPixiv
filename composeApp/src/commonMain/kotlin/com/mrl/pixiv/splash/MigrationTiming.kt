@@ -2,8 +2,17 @@ package com.mrl.pixiv.splash
 
 import co.touchlab.kermit.Severity
 import com.mrl.pixiv.common.logs.AppLogStore
+import com.mrl.pixiv.common.repository.recovery.ItemStatus
+import com.mrl.pixiv.common.repository.recovery.MigrationItem
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.DeviceInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.Serializable
@@ -11,12 +20,14 @@ import kotlinx.serialization.json.Json
 
 @Serializable
 internal data class MigrationTiming(
-    val schemaVersion: Int = 1,
+    val schemaVersion: Int = 2,
     val platform: String,
     val osVersion: String,
     val deviceModel: String?,
     val appVersion: String,
     val outcome: String,
+    val items: Map<MigrationItem, ItemStatus> = emptyMap(),
+    val degraded: Boolean = false,
     val steps: List<MigrationStep>,
     val totalMs: Long,
     val slowUiShown: Boolean,
@@ -41,9 +52,10 @@ internal data class MigrationFiles(
     val accountDatabaseBytes: List<Long>,
     val accountSidecarBytes: Long,
     val temporaryBackupBytes: Long,
+    val legacyBytes: Long = 0,
 ) {
     val totalBytes get() = globalBytes + walBytes + shmBytes + backupBytes + temporaryBackupBytes +
-        accountDatabaseBytes.sum() + accountSidecarBytes
+        accountDatabaseBytes.sum() + accountSidecarBytes + legacyBytes
 }
 
 private val timingJson = Json { encodeDefaults = true }
@@ -59,6 +71,8 @@ internal fun writeMigrationTiming(
     availableBytes: Long? = null,
     mmkvCounts: Map<String, Long> = emptyMap(),
     memory: MigrationMemory? = null,
+    items: Map<MigrationItem, ItemStatus> = emptyMap(),
+    degraded: Boolean = false,
 ) {
     val device = DeviceInfo.appLogDetails()
     val timing = MigrationTiming(
@@ -67,6 +81,8 @@ internal fun writeMigrationTiming(
         deviceModel = device.model,
         appVersion = AppUtil.versionName,
         outcome = outcome,
+        items = items,
+        degraded = degraded,
         steps = steps,
         totalMs = totalMs,
         slowUiShown = slowUiShown,
@@ -93,6 +109,7 @@ internal fun migrationFiles(storage: MigrationStorage): MigrationFiles {
         globalBytes = global(""),
         walBytes = global("-wal"),
         shmBytes = global("-shm"),
+        legacyBytes = global(".legacy") + global(".legacy-wal") + global(".legacy-shm"),
         backupBytes = global(".bak") + global("-wal.bak") + global("-shm.bak"),
         temporaryBackupBytes = global(".bak.tmp") + global("-wal.bak.tmp") + global("-shm.bak.tmp"),
         accountDatabaseBytes = databases.map(::size).sorted(),
@@ -114,5 +131,40 @@ internal class MigrationMemory {
     }
 }
 
-internal expect fun migrationAvailableBytes(path: String): Long
 internal expect fun migrationMemoryBytes(): Long?
+
+internal class MigrationMetrics(private val storage: MigrationStorage, private val scope: CoroutineScope) {
+    var before: MigrationFiles? = null
+    var after: MigrationFiles? = null
+    var available: Long? = null
+    var memory: MigrationMemory? = null
+    val peakDisk = MutableStateFlow(0L)
+    private var sampler: Job? = null
+
+    fun start() {
+        before = migrationFiles(storage)
+        peakDisk.value = before?.totalBytes ?: 0L
+        val stats = MigrationMemory().also { memory = it }
+        sampler = scope.launch {
+            while (true) {
+                delay(100)
+                stats.sample()
+                runCatching { sampleDisk() }
+            }
+        }
+    }
+
+    fun sampleDisk() {
+        val files = migrationFiles(storage)
+        after = files
+        peakDisk.update { maxOf(it, files.totalBytes) }
+    }
+
+    suspend fun stop() {
+        sampler?.cancelAndJoin()
+        if (before != null) {
+            runCatching { sampleDisk() }
+            memory?.sample()
+        }
+    }
+}

@@ -3,10 +3,6 @@
     <string name="migration_progress">Yerel veriler yükseltiliyor…</string>
     <string name="migration_failure">Yerel veriler yükseltilemedi</string>
     <string name="migration_storage_failure">Depolama alanı yetersiz. Yer açıp yeniden deneyin.</string>
-    <string name="migration_backup_failure">Yerel veritabanı yedeklenemedi.</string>
-    <string name="migration_preferences_failure">Hesap bilgileri veya ayarlar taşınamadı.</string>
-    <string name="migration_database_failure">Yerel veritabanı açılamadı.</string>
-    <string name="migration_split_failure">Bazı hesap verileri henüz taşınmadı. Uygulama bir sonraki açılışta yeniden deneyecek.</string>
+    <string name="migration_database_failure">Yerel depolamaya erişilemiyor. Cihazınızın depolama alanını kontrol edip tekrar deneyin.</string>
     <string name="migration_export_logs">Günlükleri dışa aktar</string>
-    <string name="migration_continue">Şimdilik devam et</string>
 </resources>

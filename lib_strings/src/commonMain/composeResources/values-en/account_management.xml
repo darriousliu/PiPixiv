@@ -3,10 +3,6 @@
     <string name="migration_progress">Upgrading local data…</string>
     <string name="migration_failure">Couldn’t upgrade local data</string>
     <string name="migration_storage_failure">Not enough storage. Free up space and try again.</string>
-    <string name="migration_backup_failure">Couldn’t back up the local database.</string>
-    <string name="migration_preferences_failure">Couldn’t migrate account information or settings.</string>
-    <string name="migration_database_failure">Couldn’t open the local database.</string>
-    <string name="migration_split_failure">Some account data still needs to be migrated. The app will retry on next launch.</string>
+    <string name="migration_database_failure">Local storage is unavailable. Check your device storage and try again.</string>
     <string name="migration_export_logs">Export logs</string>
-    <string name="migration_continue">Continue for now</string>
 </resources>

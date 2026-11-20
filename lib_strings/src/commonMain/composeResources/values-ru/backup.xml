@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_export_insufficient_space">Недостаточно места для экспорта резервной копии</string>
+    <string name="backup_import_insufficient_space">Недостаточно места для импорта резервной копии</string>
+    <string name="backup_import_file_too_large">Файл резервной копии слишком большой для импорта</string>
+    <string name="backup_import_translation_incomplete">Данные импортированы. Не удалось импортировать часть кэша переводов.</string>
+</resources>

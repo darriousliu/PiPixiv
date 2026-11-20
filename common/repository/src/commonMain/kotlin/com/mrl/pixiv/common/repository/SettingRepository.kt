@@ -24,6 +24,9 @@ import com.mrl.pixiv.common.mmkv.AccountMMKVProperty
 import com.mrl.pixiv.common.mmkv.AccountScoped
 import com.mrl.pixiv.common.mmkv.AccountStore
 import com.mrl.pixiv.common.mmkv.MMKVApp
+import com.mrl.pixiv.common.mmkv.MMKVOwner
+import com.mrl.pixiv.common.mmkv.MMKVStorageException
+import com.mrl.pixiv.common.mmkv.mmkvOwner
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
 import com.mrl.pixiv.common.mmkv.withAccountStorageLock
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,17 +45,35 @@ val requireUserPreferenceFlow
 internal const val DEVICE_PREFERENCE_KEY = "devicePreference"
 internal const val ACCOUNT_PREFERENCE_KEY = "accountPreference"
 
+fun readDevicePreference(app: MMKVOwner, legacy: MMKVOwner): DevicePreference =
+    if (app.contains(DEVICE_PREFERENCE_KEY)) {
+        app.mmkvSerializable(DevicePreference()).read(app, DEVICE_PREFERENCE_KEY)
+    } else {
+        legacy.mmkvSerializable(UserPreference()).read(legacy, "userPreference").toDevicePreference()
+    }
+
+private val accountPreferenceField = AccountStore.mmkvSerializable(AccountPreference())
+
+fun readAccountPreference(owner: MMKVOwner): AccountPreference =
+    accountPreferenceField.read(owner, ACCOUNT_PREFERENCE_KEY)
+
 object SettingRepository : MMKVApp, AccountScoped {
     private val deviceField = mmkvSerializable(DevicePreference())
+    private val legacy = mmkvOwner("pixiv.user")
     private val accountPreference = AccountMMKVProperty(
-        mmkvSerializable(AccountPreference()), ACCOUNT_PREFERENCE_KEY, AccountPreference(),
+        accountPreferenceField, ACCOUNT_PREFERENCE_KEY, AccountPreference(),
     )
-    private var devicePreference = deviceField.read(this, DEVICE_PREFERENCE_KEY)
+    private var devicePreference = try {
+        readDevicePreference(this, legacy)
+    } catch (_: MMKVStorageException) {
+        // Splash can still render the storage failure and retry actions.
+        DevicePreference()
+    }
     private val userPreference = MutableStateFlow(devicePreference.toUserPreference(AccountPreference()))
     val userPreferenceFlow = userPreference.asStateFlow()
 
     override fun reload() = withAccountStorageLock {
-        devicePreference = deviceField.read(this, DEVICE_PREFERENCE_KEY)
+        devicePreference = readDevicePreference(this, legacy)
         accountPreference.reload(AccountStore.activeUserId)
         publish()
     }

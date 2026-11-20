@@ -13,11 +13,13 @@ import kotlinx.io.files.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 class AppDatabaseBackupTest {
     @Test
-    fun `restore remaps the account and refreshes observers`() = runTest(timeout = 15.seconds) {
+    fun `a failed translation batch keeps restored data and a retry fills the remaining cache`() = runTest(timeout = 15.seconds) {
         val dir = Files.createTempDirectory("pipixiv-backup").toFile()
         val sourceGlobal = buildGlobalDatabase(Path(dir.resolve("source-global.db").absolutePath))
         val sourceAccount = buildAccountDatabase(Path(dir.resolve("source-account.db").absolutePath))
@@ -43,9 +45,22 @@ class AppDatabaseBackupTest {
                 translatedText = "old",
                 updatedAtMillis = 100,
             )
-            sourceGlobal.novelTranslationDao().upsert(translation)
+            for (novelId in 20L..85L) {
+                sourceGlobal.novelTranslationDao().upsert(translation.copy(novelId = novelId))
+            }
             val newerTranslation = translation.copy(translatedText = "new", updatedAtMillis = 200)
             targetGlobal.novelTranslationDao().upsert(newerTranslation)
+            targetGlobal.useWriterConnection {
+                it.executeSQL(
+                    """
+                    CREATE TRIGGER fail_translation_batch BEFORE INSERT ON novel_translation
+                    WHEN new.novelId = 85
+                    BEGIN
+                        SELECT RAISE(ABORT, 'simulated translation batch failure');
+                    END
+                    """.trimIndent(),
+                )
+            }
 
             val globalBackup = dir.resolve("pixiv_db").absolutePath
             val accountBackup = dir.resolve("account.db").absolutePath
@@ -67,7 +82,7 @@ class AppDatabaseBackupTest {
             assertEquals(0, observedHistory.receive())
             assertEquals(emptyList(), observedBlockedUsers.receive())
 
-            AppDatabaseBackup.restore(
+            val complete = AppDatabaseBackup.restore(
                 global = targetGlobal,
                 account = AccountHandle(3, targetAccount),
                 globalPath = globalBackup,
@@ -75,11 +90,28 @@ class AppDatabaseBackupTest {
                 backupUserId = 1,
                 includeAccountData = true,
             )
+            assertFalse(complete)
             assertEquals(1, observedHistory.receive())
             assertEquals(listOf(BlockUserEntity(7, "Author")), observedBlockedUsers.receive())
             observedHistory.cancel()
             observedBlockedUsers.cancel()
             assertEquals(listOf(history.copy(userId = 3)), targetAccount.browsingHistoryDao().getAllNovels(3))
+            assertEquals(newerTranslation, targetGlobal.novelTranslationDao().getByNovelIdAndLanguage(20, "en"))
+            assertEquals(translation.copy(novelId = 21), targetGlobal.novelTranslationDao().getByNovelIdAndLanguage(21, "en"))
+            assertNull(targetGlobal.novelTranslationDao().getByNovelIdAndLanguage(85, "en"))
+
+            targetGlobal.useWriterConnection { it.executeSQL("DROP TRIGGER fail_translation_batch") }
+            assertTrue(
+                AppDatabaseBackup.restore(
+                    global = targetGlobal,
+                    account = AccountHandle(3, targetAccount),
+                    globalPath = globalBackup,
+                    accountPath = accountBackup,
+                    backupUserId = 1,
+                    includeAccountData = true,
+                ),
+            )
+            assertEquals(translation.copy(novelId = 85), targetGlobal.novelTranslationDao().getByNovelIdAndLanguage(85, "en"))
             assertEquals(newerTranslation, targetGlobal.novelTranslationDao().getByNovelIdAndLanguage(20, "en"))
         } finally {
             sourceGlobal.close()

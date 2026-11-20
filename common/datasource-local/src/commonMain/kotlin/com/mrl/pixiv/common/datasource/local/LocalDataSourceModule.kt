@@ -2,7 +2,11 @@ package com.mrl.pixiv.common.datasource.local
 
 import androidx.room3.RoomDatabase
 import androidx.room3.useReaderConnection
+import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.driver.bundled.SQLITE_OPEN_CREATE
+import androidx.sqlite.driver.bundled.SQLITE_OPEN_READWRITE
+import androidx.sqlite.driver.bundled.SQLITE_OPEN_URI
 import com.mrl.pixiv.common.datasource.local.dao.BlockContentDao
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelTranslationDao
@@ -25,7 +29,10 @@ internal expect fun getGlobalDatabaseBuilder(path: String): RoomDatabase.Builder
 internal expect fun getAccountDatabaseBuilder(path: String): RoomDatabase.Builder<AccountDatabase>
 
 @Single
-fun provideDatabase(): PixivDatabase = buildGlobalDatabase()
+fun provideGlobalDatabaseProvider(): GlobalDatabaseProvider = GlobalDatabaseProvider()
+
+@Single
+fun provideDatabase(provider: GlobalDatabaseProvider): PixivDatabase = provider.requireOpen()
 
 fun buildGlobalDatabase(path: Path = globalDatabasePath()): PixivDatabase {
     path.parent?.let { SystemFileSystem.createDirectories(it) }
@@ -50,8 +57,14 @@ fun buildAccountDatabase(path: Path): AccountDatabase {
     return getAccountDatabaseBuilder(path.toString()).configure().build()
 }
 
-private fun <T : RoomDatabase> RoomDatabase.Builder<T>.configure(): RoomDatabase.Builder<T> =
-    setDriver(BundledSQLiteDriver()).setQueryCoroutineContext(Dispatchers.IO)
+private fun <T : RoomDatabase> RoomDatabase.Builder<T>.configure(): RoomDatabase.Builder<T> {
+    val driver = BundledSQLiteDriver()
+    return setDriver(object : SQLiteDriver by driver {
+        // Enable URI parameters on ATTACH so that legacy and backup files are opened read-only.
+        override fun open(fileName: String) =
+            driver.open(fileName, SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE or SQLITE_OPEN_URI)
+    }).setQueryCoroutineContext(Dispatchers.IO)
+}
 
 suspend fun PixivDatabase.openForMigration() {
     useReaderConnection { /* Acquiring a connection opens the file and runs Room migrations. */ }
@@ -64,8 +77,8 @@ fun provideAccountDatabaseProvider(): AccountDatabaseProvider = AccountDatabaseP
 fun provideBlockContentDao(database: PixivDatabase): BlockContentDao = database.blockContentDao()
 
 @Single
-fun provideDownloadDao(database: PixivDatabase): DownloadDao = database.downloadDao()
+fun provideDownloadDao(provider: GlobalDatabaseProvider): DownloadDao = StartupDownloadDao(provider)
 
 @Single
-fun provideNovelTranslationDao(database: PixivDatabase): NovelTranslationDao =
-    database.novelTranslationDao()
+fun provideNovelTranslationDao(provider: GlobalDatabaseProvider): NovelTranslationDao =
+    StartupNovelTranslationDao(provider)

@@ -12,7 +12,6 @@ import kotlin.io.buffered
 import kotlin.io.copyTo
 import kotlin.io.inputStream
 import kotlin.io.outputStream
-import kotlin.io.readBytes
 import kotlin.use
 
 @Single
@@ -100,61 +99,21 @@ class JvmZipUtil : ZipUtil {
         }
     }
 
-    override fun getZipEntryList(zipFilePath: String): List<Pair<String, Boolean>> {
-        val entryList = mutableListOf<Pair<String, Boolean>>()
-        try {
-            val inputStream = getInputStream(zipFilePath)
+    override fun getZipEntryList(zipFilePath: String): List<Pair<String, Boolean>> =
+        getZipEntryMetadata(zipFilePath).orEmpty().map { it.name to it.isDirectory }
 
-            inputStream.use { fis ->
-                ZipInputStream(fis.buffered()).use { zis ->
-                    var entry = zis.nextEntry
-                    while (entry != null) {
-                        entryList.add(entry.name to entry.isDirectory)
-                        zis.closeEntry()
-                        entry = zis.nextEntry
-                    }
-                }
-            }
-        } catch (error: Exception) {
-            Logger.e(throwable = error, tag = "ZipUtil") { "Unable to list ZIP entries" }
-        }
-        return entryList
-    }
+    override fun getZipEntryMetadata(zipFilePath: String): List<ZipEntryMetadata>? =
+        localZipEntryMetadata(zipFilePath)
 
-    override fun getZipEntryContent(
+    override fun getZipEntryContent(zipFilePath: String, entryName: String, maxBytes: Int): ByteArray? =
+        localZipEntryContent(zipFilePath, entryName, maxBytes)
+
+    override fun extractZipEntry(
         zipFilePath: String,
         entryName: String,
-    ): ByteArray? = withZipEntry(zipFilePath, entryName) { it.readBytes() }
-
-    override fun extractZipEntry(zipFilePath: String, entryName: String, outputPath: String): Boolean =
-        withZipEntry(zipFilePath, entryName) { input ->
-            File(outputPath).outputStream().buffered().use { output -> input.copyTo(output) }
-            true
-        } == true
-
-    private fun <T> withZipEntry(
-        zipFilePath: String,
-        entryName: String,
-        read: (ZipInputStream) -> T,
-    ): T? =
-        try {
-            getInputStream(zipFilePath).use { fis ->
-                ZipInputStream(fis.buffered()).use { zis ->
-                    var entry = zis.nextEntry
-                    while (entry != null) {
-                        if (entry.name == entryName && !entry.isDirectory) {
-                            return@use read(zis)
-                        }
-                        zis.closeEntry()
-                        entry = zis.nextEntry
-                    }
-                    null
-                }
-            }
-        } catch (error: Exception) {
-            Logger.e(throwable = error, tag = "ZipUtil") { "Unable to read ZIP entry" }
-            null
-        }
+        outputPath: String,
+        maxBytes: Long,
+    ): Boolean = extractLocalZipEntry(zipFilePath, entryName, outputPath, maxBytes)
 
     private fun getInputStream(path: String): InputStream {
         return File(path).inputStream()

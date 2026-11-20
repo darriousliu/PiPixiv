@@ -16,10 +16,12 @@ class MMKVProperty<V>(
         thisRef.kv.encode(property.name, value)
     }
 
-    override fun read(owner: MMKVOwner, key: String): V = owner.kv.decode(key, defaultValue)
+    override fun read(owner: MMKVOwner, key: String): V = owner.accessMMKV { decode(key, defaultValue) }
 
     override fun write(owner: MMKVOwner, key: String, value: V) {
-        check(owner.kv.encode(key, value)) { "Could not persist MMKV field $key" }
+        if (!owner.accessMMKV { encode(key, value) }) {
+            throw MMKVStorageException("Could not persist MMKV field $key")
+        }
     }
 }
 

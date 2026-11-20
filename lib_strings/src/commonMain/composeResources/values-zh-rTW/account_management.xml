@@ -3,10 +3,6 @@
     <string name="migration_progress">正在升級本機資料…</string>
     <string name="migration_failure">無法升級本機資料</string>
     <string name="migration_storage_failure">儲存空間不足。請釋放空間後再試一次。</string>
-    <string name="migration_backup_failure">無法備份本機資料庫。</string>
-    <string name="migration_preferences_failure">無法移轉帳號資訊或設定。</string>
-    <string name="migration_database_failure">無法開啟本機資料庫。</string>
-    <string name="migration_split_failure">部分帳號資料尚未移轉。下次啟動時會再試一次。</string>
+    <string name="migration_database_failure">無法存取本機儲存空間。請檢查裝置的儲存空間後再試一次。</string>
     <string name="migration_export_logs">匯出記錄</string>
-    <string name="migration_continue">先繼續使用</string>
 </resources>

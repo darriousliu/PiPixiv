@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_export_insufficient_space">Not enough storage to export the backup</string>
+    <string name="backup_import_insufficient_space">Not enough storage to import the backup</string>
+    <string name="backup_import_file_too_large">The backup file is too large to import</string>
+    <string name="backup_import_translation_incomplete">Data imported. Some of the translation cache could not be imported.</string>
+</resources>

@@ -4,6 +4,7 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
+import androidx.room3.Transaction
 import com.mrl.pixiv.common.datasource.local.entity.BlockCommentEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockIllustEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockNovelEntity
@@ -13,6 +14,36 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BlockContentDao {
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertMissingIllusts(entities: List<BlockIllustEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertMissingNovels(entities: List<BlockNovelEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertMissingUsers(entities: List<BlockUserEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertMissingTags(entities: List<BlockTagEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertMissingComments(entities: List<BlockCommentEntity>)
+
+    @Transaction
+    suspend fun insertMissing(
+        illusts: List<BlockIllustEntity>,
+        novels: List<BlockNovelEntity>,
+        users: List<BlockUserEntity>,
+        tags: List<BlockTagEntity>,
+        comments: List<BlockCommentEntity>,
+    ) {
+        insertMissingIllusts(illusts)
+        insertMissingNovels(novels)
+        insertMissingUsers(users)
+        insertMissingTags(tags)
+        insertMissingComments(comments)
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertIllust(entity: BlockIllustEntity)
 

@@ -14,6 +14,7 @@ import com.mrl.pixiv.common.datasource.local.PixivDatabase
 import com.mrl.pixiv.common.datasource.local.entity.BlockIllustEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockUserEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
+import com.mrl.pixiv.common.datasource.local.globalDatabasePath
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.NovelReadLaterRepository
@@ -21,8 +22,10 @@ import com.mrl.pixiv.common.repository.NovelSeriesProgressRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.UserManager
+import com.mrl.pixiv.common.util.BackupSpaceException
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
+import com.mrl.pixiv.common.util.ZipEntryTooLargeException
 import com.mrl.pixiv.common.util.ZipUtil
 import com.mrl.pixiv.common.util.adaptiveFileSize1
 import com.mrl.pixiv.common.util.calculateSize
@@ -30,6 +33,10 @@ import com.mrl.pixiv.common.util.deleteRecursively
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import com.mrl.pixiv.strings.backup_export_insufficient_space
+import com.mrl.pixiv.strings.backup_import_file_too_large
+import com.mrl.pixiv.strings.backup_import_insufficient_space
+import com.mrl.pixiv.strings.backup_import_translation_incomplete
 import com.mrl.pixiv.strings.cache_cleared
 import com.mrl.pixiv.strings.export_failed
 import com.mrl.pixiv.strings.export_success
@@ -39,14 +46,11 @@ import com.mrl.pixiv.strings.import_success
 import com.mrl.pixiv.strings.importing
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
-import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.cacheDir
 import io.github.vinceglb.filekit.createDirectories
 import io.github.vinceglb.filekit.delete
 import io.github.vinceglb.filekit.div
 import io.github.vinceglb.filekit.list
-import io.github.vinceglb.filekit.write
-import io.github.vinceglb.filekit.writeString
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -75,11 +79,6 @@ data class AppDataState(
     val loadingMessage: StringResource? = null
 )
 
-private const val jsonDataFile = "data.json"
-private const val backupDirectory = "pipixiv-backup"
-private const val globalDatabaseFile = "pixiv_db"
-private const val accountDatabaseFile = "account.db"
-
 data class ConfirmHistoryImportEffect(
     val requestId: Long,
     val currentUserId: Long,
@@ -92,7 +91,7 @@ class AppDataViewModel(
     private val accountDatabaseProvider: AccountDatabaseProvider,
     private val readLaterRepository: NovelReadLaterRepository,
     private val seriesProgressRepository: NovelSeriesProgressRepository,
-    private val zipUtil: ZipUtil,
+    zipUtil: ZipUtil,
 ) : BaseMviViewModel<AppDataState, ViewIntent>(
     initialState = AppDataState(),
 ) {
@@ -102,6 +101,7 @@ class AppDataViewModel(
         encodeDefaults = true
         exceptionsWithDebugInfo = false
     }
+    private val backupFiles = AppBackupFiles(zipUtil)
     private val backupMutex = Mutex()
     private var historyImportRequestId = 0L
     private val historyImportResultFlow = MutableSharedFlow<HistoryImportResult>(replay = 1)
@@ -125,7 +125,12 @@ class AppDataViewModel(
     }
 
     fun exportData(file: PlatformFile) {
-        runBackupAction(RStrings.exporting, RStrings.export_success, RStrings.export_failed) { workDir ->
+        runBackupAction(
+            loading = RStrings.exporting,
+            success = RStrings.export_success,
+            failure = RStrings.export_failed,
+            spaceFailure = RStrings.backup_export_insufficient_space,
+        ) { workDir ->
             val account = accountDatabaseProvider.requireCurrent()
             val userId = account.userId
             val history = SearchRepository.historyForAccount(userId)
@@ -145,53 +150,44 @@ class AppDataViewModel(
                 userInfo = UserManager.profileForAccount(userId),
             )
 
-            val source = (workDir / backupDirectory).also { it.createDirectories() }
-            (source / jsonDataFile).writeString(json.encodeToString(AppExportDataV4.serializer(), data))
-            AppDatabaseBackup.export(
+            backupFiles.exportV4(
+                metadata = json.encodeToString(AppExportDataV4.serializer(), data),
                 global = database,
                 account = account,
-                globalPath = (source / globalDatabaseFile).absolutePath(),
-                accountPath = (source / accountDatabaseFile).absolutePath(),
+                globalDatabasePath = globalDatabasePath().toString(),
+                accountDatabasePath = accountDatabaseProvider.databasePath(userId).toString(),
+                workDir = workDir,
+                destination = file,
             )
-            val archive = workDir / "backup.zip"
-            check(zipUtil.compress(source.absolutePath(), archive.absolutePath())) {
-                "Unable to create backup ZIP"
-            }
-            file.write(archive)
+            null
         }
     }
 
     fun importData(file: PlatformFile) {
-        runBackupAction(RStrings.importing, RStrings.import_success, RStrings.import_failed) { workDir ->
+        runBackupAction(
+            loading = RStrings.importing,
+            success = RStrings.import_success,
+            failure = RStrings.import_failed,
+            spaceFailure = RStrings.backup_import_insufficient_space,
+        ) { workDir ->
             val account = accountDatabaseProvider.requireCurrent()
             historyImportConfirmCache.clear()
-            // ZIP readers need a local path. FileKit copies document-provider files by streaming.
-            val archive = workDir / "backup.zip"
-            archive.write(file)
-            val path = archive.absolutePath()
-            val currentBackup = zipUtil.getZipEntryContent(path, "$backupDirectory/$jsonDataFile")?.let { bytes ->
-                val data = json.decodeFromString<AppExportDataV4>(bytes.decodeToString())
-                require(data.version == 4 && data.userId > 0) { "Unsupported app backup" }
-                for (name in listOf(globalDatabaseFile, accountDatabaseFile)) {
-                    check(zipUtil.extractZipEntry(path, "$backupDirectory/$name", (workDir / name).absolutePath())) {
-                        "Missing or invalid $name in backup"
-                    }
+            when (val backup = backupFiles.read(file, workDir)) {
+                is AppBackupContents.V4 -> {
+                    val data = json.decodeFromString<AppExportDataV4>(backup.metadata)
+                    require(data.version == 4 && data.userId > 0) { "Unsupported app backup" }
+                    if (importV4Data(data, account, backup)) null else RStrings.backup_import_translation_incomplete
                 }
-                data
-            }
-
-            if (currentBackup != null) {
-                importV4Data(currentBackup, account, workDir)
-            } else {
-                val jsonString = zipUtil.getZipEntryContent(path, jsonDataFile)?.decodeToString()
-                    ?: error("No data.json in ZIP file")
-                val rootObject = json.parseToJsonElement(jsonString).jsonObject
-                val isGroupedExport = "version" in rootObject ||
-                    "settings" in rootObject || "search" in rootObject || "blocking" in rootObject
-                if (isGroupedExport) {
-                    importV3Data(parseV3ImportData(json, rootObject), account)
-                } else {
-                    importV1Data(json.decodeFromJsonElement<AppExportData>(rootObject), account.userId)
+                is AppBackupContents.Legacy -> {
+                    val rootObject = json.parseToJsonElement(backup.metadata).jsonObject
+                    val isGroupedExport = "version" in rootObject ||
+                        "settings" in rootObject || "search" in rootObject || "blocking" in rootObject
+                    if (isGroupedExport) {
+                        importV3Data(parseV3ImportData(json, rootObject), account)
+                    } else {
+                        importV1Data(json.decodeFromJsonElement<AppExportData>(rootObject), account.userId)
+                    }
+                    null
                 }
             }
         }
@@ -201,7 +197,8 @@ class AppDataViewModel(
         loading: StringResource,
         success: StringResource,
         failure: StringResource,
-        action: suspend (PlatformFile) -> Unit,
+        spaceFailure: StringResource,
+        action: suspend (PlatformFile) -> StringResource?,
     ) {
         launchIO {
             if (!backupMutex.tryLock()) return@launchIO
@@ -211,10 +208,18 @@ class AppDataViewModel(
                 val directory = FileKit.cacheDir / "app-data-${Uuid.random()}"
                 workDir = directory
                 directory.createDirectories()
-                action(directory)
-                ToastUtil.safeShortToast(success)
+                val warning = action(directory)
+                if (warning == null) {
+                    ToastUtil.safeShortToast(success)
+                } else {
+                    ToastUtil.safeShortToast(warning)
+                }
             } catch (cancelled: CancellationException) {
                 throw cancelled
+            } catch (_: BackupSpaceException) {
+                ToastUtil.safeShortToast(spaceFailure)
+            } catch (_: ZipEntryTooLargeException) {
+                ToastUtil.safeShortToast(RStrings.backup_import_file_too_large)
             } catch (error: Exception) {
                 Logger.e(throwable = error, tag = "AppData") { "App data backup operation failed" }
                 ToastUtil.safeShortToast(failure, error.message.orEmpty())
@@ -233,17 +238,21 @@ class AppDataViewModel(
         }
     }
 
-    private suspend fun importV4Data(data: AppExportDataV4, account: AccountHandle, workDir: PlatformFile) {
-        val includeAccountHistory = data.userId == account.userId ||
-            requestHistoryImportConfirm(currentUserId = account.userId, importUserId = data.userId)
+    private suspend fun importV4Data(
+        data: AppExportDataV4,
+        account: AccountHandle,
+        backup: AppBackupContents.V4,
+    ): Boolean {
+        val includeAccountHistory = confirmBackupAccountImport(data.userId, account.userId, ::requestHistoryImportConfirm)
+        var translationsComplete = true
 
         // Restored tasks must see the restored translation settings when they are claimed.
         readLaterRepository.withQueueClaimsPaused {
-            AppDatabaseBackup.restore(
+            translationsComplete = AppDatabaseBackup.restore(
                 global = database,
                 account = account,
-                globalPath = (workDir / globalDatabaseFile).absolutePath(),
-                accountPath = (workDir / accountDatabaseFile).absolutePath(),
+                globalPath = backup.globalPath,
+                accountPath = backup.accountPath,
                 backupUserId = data.userId,
                 includeAccountData = includeAccountHistory,
             )
@@ -257,6 +266,7 @@ class AppDataViewModel(
                 UserManager.restoreProfileForAccount(account.userId, it)
             }
         }
+        return translationsComplete
     }
 
     @Suppress("DEPRECATION")

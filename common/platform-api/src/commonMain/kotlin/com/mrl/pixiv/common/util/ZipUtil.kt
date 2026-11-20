@@ -7,9 +7,24 @@ interface ZipUtil {
 
     fun getZipEntryList(zipFilePath: String): List<Pair<String, Boolean>>
 
-    fun getZipEntryContent(zipFilePath: String, entryName: String): ByteArray?
+    fun getZipEntryMetadata(zipFilePath: String): List<ZipEntryMetadata>?
 
-    fun extractZipEntry(zipFilePath: String, entryName: String, outputPath: String): Boolean
+    fun getZipEntryContent(
+        zipFilePath: String,
+        entryName: String,
+        maxBytes: Int = Int.MAX_VALUE,
+    ): ByteArray?
+
+    fun extractZipEntry(
+        zipFilePath: String,
+        entryName: String,
+        outputPath: String,
+        maxBytes: Long = Long.MAX_VALUE,
+    ): Boolean
 }
+
+class ZipEntryMetadata(val name: String, val size: Long, val isDirectory: Boolean)
+
+class ZipEntryTooLargeException : IllegalArgumentException("ZIP entry exceeds the size limit")
 
 fun createByteArray(size: Int, initializer: (Int) -> Byte): ByteArray = ByteArray(size, initializer)

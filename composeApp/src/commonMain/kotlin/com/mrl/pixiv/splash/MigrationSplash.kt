@@ -24,16 +24,13 @@ import com.mrl.pixiv.common.compose.ui.ContentErrorState
 import com.mrl.pixiv.common.icons.Icons
 import com.mrl.pixiv.common.icons.rounded.Storage
 import com.mrl.pixiv.common.logs.AppLogStore
+import com.mrl.pixiv.common.repository.recovery.MigrationReason
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.setting.applog.exportAppLogs
-import com.mrl.pixiv.strings.migration_backup_failure
-import com.mrl.pixiv.strings.migration_continue
 import com.mrl.pixiv.strings.migration_database_failure
 import com.mrl.pixiv.strings.migration_export_logs
 import com.mrl.pixiv.strings.migration_failure
-import com.mrl.pixiv.strings.migration_preferences_failure
 import com.mrl.pixiv.strings.migration_progress
-import com.mrl.pixiv.strings.migration_split_failure
 import com.mrl.pixiv.strings.migration_storage_failure
 import com.mrl.pixiv.strings.retry
 import kotlinx.coroutines.launch
@@ -52,7 +49,6 @@ internal fun MigrationSplash(
     MigrationSplashContent(
         state = state,
         onRetry = { viewModel.dispatch(SplashAction.RetryMigration) },
-        onContinue = { viewModel.dispatch(SplashAction.ContinueAfterFailure) },
         onExport = {
             scope.launch {
                 val logs = AppLogStore.state.value
@@ -67,7 +63,6 @@ internal fun MigrationSplash(
 internal fun MigrationSplashContent(
     state: MigrationState,
     onRetry: () -> Unit,
-    onContinue: () -> Unit,
     onExport: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -86,28 +81,22 @@ internal fun MigrationSplashContent(
                 )
             }
 
-            is MigrationState.Failed -> Column(
+            is MigrationState.Blocked -> Column(
                 modifier = Modifier.fillMaxSize().safeDrawingPadding().verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center,
             ) {
                 ContentErrorState(
                     onRetry = onRetry,
                     message = stringResource(RStrings.migration_failure),
-                    description = stringResource(when (state.step) {
-                        MigrationFailure.StorageSpace -> RStrings.migration_storage_failure
-                        MigrationFailure.Backup -> RStrings.migration_backup_failure
-                        MigrationFailure.Preferences -> RStrings.migration_preferences_failure
-                        MigrationFailure.OpenDatabase -> RStrings.migration_database_failure
-                        MigrationFailure.SplitAccounts -> RStrings.migration_split_failure
-                    }),
+                    description = stringResource(
+                        if (state.reason == MigrationReason.StorageSpace) RStrings.migration_storage_failure
+                        else RStrings.migration_database_failure
+                    ),
                     icon = Icons.Rounded.Storage,
                     action = {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             FilledTonalButton(onClick = onRetry) { Text(stringResource(RStrings.retry)) }
                             TextButton(onClick = onExport) { Text(stringResource(RStrings.migration_export_logs)) }
-                            if (state.step == MigrationFailure.SplitAccounts) {
-                                TextButton(onClick = onContinue) { Text(stringResource(RStrings.migration_continue)) }
-                            }
                         }
                     },
                 )

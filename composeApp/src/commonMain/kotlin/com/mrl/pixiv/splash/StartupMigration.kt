@@ -2,27 +2,40 @@ package com.mrl.pixiv.splash
 
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.datasource.local.AccountDatabaseProvider
+import com.mrl.pixiv.common.datasource.local.GlobalDatabaseProvider
 import com.mrl.pixiv.common.datasource.local.LegacyAccountDataSplitter
+import com.mrl.pixiv.common.datasource.local.LegacyAccountTableGroup
+import com.mrl.pixiv.common.datasource.local.LegacyGlobalDatabaseMigration
 import com.mrl.pixiv.common.datasource.local.PixivDatabase
 import com.mrl.pixiv.common.datasource.local.accountStorageRoot
 import com.mrl.pixiv.common.datasource.local.globalDatabasePath
+import com.mrl.pixiv.common.datasource.local.legacyGlobalDatabasePath
 import com.mrl.pixiv.common.datasource.local.migration.DatabaseStartupGate
-import com.mrl.pixiv.common.datasource.local.openForMigration
 import com.mrl.pixiv.common.mmkv.AccountStore
-import com.mrl.pixiv.common.mmkv.MMKVApp
-import com.mrl.pixiv.common.mmkv.MMKVOwner
+import com.mrl.pixiv.common.mmkv.MMKVStorageException
+import com.mrl.pixiv.common.mmkv.mmkvOwner
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.LegacyAccountPreferencesMigration
+import com.mrl.pixiv.common.repository.LegacyPreferenceOutcome
+import com.mrl.pixiv.common.repository.LegacyPreferenceResult
+import com.mrl.pixiv.common.repository.recovery.ItemStatus
+import com.mrl.pixiv.common.repository.recovery.MigrationItem
+import com.mrl.pixiv.common.repository.recovery.MigrationReason
+import com.mrl.pixiv.common.repository.recovery.isResolved
 import com.mrl.pixiv.common.repository.reloadAccountPreferences
+import com.mrl.pixiv.common.util.isDebug
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.filesDir
+import io.github.vinceglb.filekit.toKotlinxIoPath
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -30,6 +43,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.io.buffered
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readString
 import org.koin.core.annotation.Single
 import kotlin.time.TimeSource
 
@@ -37,35 +51,41 @@ sealed interface MigrationState {
     data object Idle : MigrationState
     data object Running : MigrationState
     data object Slow : MigrationState
-    data class Failed(val step: MigrationFailure) : MigrationState
+    data class Blocked(val reason: MigrationReason) : MigrationState
     data object Done : MigrationState
-}
-
-enum class MigrationFailure {
-    StorageSpace, Backup, Preferences, OpenDatabase, SplitAccounts
 }
 
 @Single
 class StartupMigration(
-    private val database: PixivDatabase,
+    private val database: GlobalDatabaseProvider,
     private val accounts: AccountDatabaseProvider,
 ) {
     private val lock = Mutex()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutableState = MutableStateFlow<MigrationState>(MigrationState.Idle)
     val state = mutableState.asStateFlow()
+
+    private val mutableItems = MutableStateFlow<Map<MigrationItem, ItemStatus>>(pendingItems)
+    internal val items = mutableItems.asStateFlow()
+    private val mutableHasPending = MutableStateFlow(false)
+    internal val hasPending = mutableHasPending.asStateFlow()
+
     private val slowUiShown = MutableStateFlow(false)
-    private val storage by lazy {
+    private var enteredHome = false
+    private var retryOnHome: Set<MigrationItem>? = null
+    internal val storage by lazy {
+        val legacy = mmkvOwner("pixiv.user")
         MigrationStorage(
-            marker = MigrationMarker,
+            marker = AccountStore,
+            legacy = legacy,
             databasePath = ::globalDatabasePath,
             accountRoot = ::accountStorageRoot,
-            migratePreferences = LegacyAccountPreferencesMigration::migrate,
-            publish = {
-                reloadAccountPreferences()
-                accounts.publish(AccountStore.activeUserId.takeIf { it > 0 })
-                BlockingRepositoryV2.migrate()
-                DatabaseStartupGate.markReady()
-            },
+            filesRoot = { FileKit.filesDir.toKotlinxIoPath() },
+            preferences = LegacyAccountPreferencesMigration(legacy = legacy),
+            reloadPreferences = { reloadAccountPreferences() },
+            observeBlocks = { BlockingRepositoryV2.startObservingDatabase() },
+            migrateBlocks = { BlockingRepositoryV2.importLegacyBlocks(BlockingRepositoryV2.readLegacyBlocks(legacy)) },
+            debug = isDebug,
         )
     }
 
@@ -76,8 +96,8 @@ class StartupMigration(
             lock.withLock {
                 when (state.value) {
                     MigrationState.Done -> true
-                    is MigrationState.Failed -> retry && migrate(storage)
-                    else -> migrate(storage)
+                    is MigrationState.Blocked -> retry && migrate(storage, showImmediately = true)
+                    else -> migrate(storage, showImmediately = retry)
                 }
             }
         }
@@ -88,195 +108,465 @@ class StartupMigration(
         if (state.value == MigrationState.Slow) slowUiShown.value = true
     }
 
-    suspend fun continueAfterSplitFailure(): Boolean = withContext(Dispatchers.IO) {
-        lock.withLock {
-            if (state.value == MigrationState.Done) return@withLock true
-            if (state.value != MigrationState.Failed(MigrationFailure.SplitAccounts)) return@withLock false
-            publish(storage)
+    fun onHomeEntered() {
+        scope.launch {
+            awaitReady()
+            lock.withLock { maintainAfterHome(storage) }
         }
     }
 
-    private suspend fun migrate(storage: MigrationStorage): Boolean = coroutineScope {
-        val start = TimeSource.Monotonic.markNow()
-        val checkpoint = try {
-            storage.marker.kv.getInt(checkpointKey)
+    internal suspend fun maintainAfterHome(storage: MigrationStorage): Long? {
+        if (enteredHome) return null
+        enteredHome = true
+        val allResolved = items.value.values.all(ItemStatus::isResolved)
+        var cleanupMs: Long? = null
+        try {
+            if (allResolved && storage.cleanupEligible() && !storage.cleanupDone()) {
+                val start = TimeSource.Monotonic.markNow()
+                safeStep(storage, "cleanup") {
+                    cleanup(storage)
+                    storage.markCleanupDone()
+                }
+                cleanupMs = start.elapsedNow().inWholeMilliseconds
+                Logger.i(tag = migrationTag) { "Migration cleanup took ${cleanupMs}ms" }
+            }
+            val debug = readDebug(storage)
+            for (item in retryOnHome.orEmpty()) {
+                val status = items.value.getValue(item)
+                if (status is ItemStatus.Failed && status.attempts == 1) {
+                    migrateItem(storage, item, debug, automatic = true)
+                }
+            }
+            if (items.value.values.all(ItemStatus::isResolved)) storage.markCleanupEligible()
         } catch (error: Exception) {
             if (error is CancellationException) throw error
-            val failure = fail(MigrationFailure.Preferences, error)
-            writeMigrationTiming(outcome = failure.name, totalMs = start.elapsedNow().inWholeMilliseconds)
-            return@coroutineScope false
+            logMigrationError(storage, "background maintenance", error)
         }
-        if (checkpoint == complete) {
-            val ready = publish(storage)
-            if (!ready) writeMigrationTiming(
-                outcome = MigrationFailure.OpenDatabase.name,
-                totalMs = start.elapsedNow().inWholeMilliseconds,
-            )
-            return@coroutineScope ready
+        return cleanupMs
+    }
+
+    internal suspend fun retryItem(storage: MigrationStorage, item: MigrationItem, targetUserId: Long?): ItemStatus =
+        lock.withLock {
+            require(targetUserId == null || targetUserId > 0)
+            if (items.value.getValue(item).isResolved) return@withLock items.value.getValue(item)
+            val status = migrateItem(storage, item, readDebug(storage), targetUserId, manual = true)
+            if (enteredHome && items.value.values.all(ItemStatus::isResolved)) storage.markCleanupEligible()
+            status
         }
 
+    internal suspend fun abandonAll(storage: MigrationStorage) = lock.withLock {
+        storeItems(storage, items.value.mapValues { (_, status) ->
+            if (status.isResolved) status else ItemStatus.Abandoned
+        })
+        storage.preferences.sessions.setRecoverAfterLogin(false)
+        if (enteredHome) storage.markCleanupEligible()
+    }
+
+    internal suspend fun <T> withRecoveryStorage(block: suspend (PixivDatabase, AccountDatabaseProvider) -> T): T =
+        lock.withLock { block(database.requireOpen(), accounts) }
+
+    private suspend fun migrate(storage: MigrationStorage, showImmediately: Boolean): Boolean = coroutineScope {
+        val start = TimeSource.Monotonic.markNow()
         slowUiShown.value = false
-        mutableState.value = MigrationState.Running
+        mutableState.value = if (showImmediately) MigrationState.Slow else MigrationState.Running
         val slow = launch {
             delay(500)
             mutableState.compareAndSet(MigrationState.Running, MigrationState.Slow)
         }
-        val memory = MigrationMemory()
-        val peakDisk = MutableStateFlow(0L)
-        val sampler = launch {
-            while (true) {
-                delay(100)
-                memory.sample()
-                runCatching { migrationFiles(storage).totalBytes }.getOrNull()?.let { bytes ->
-                    peakDisk.update { maxOf(it, bytes) }
+        val steps = mutableListOf<MigrationStep>()
+        val counts = mutableMapOf("skippedCorrupted" to 0L)
+        val metrics = MigrationMetrics(storage, this)
+        var completed = false
+        val outcome = try {
+            val persisted = storage.readItems()
+            if (retryOnHome == null) {
+                retryOnHome = persisted.filterValues { it is ItemStatus.Failed && it.attempts == 1 }.keys
+            }
+            updateItems(persisted)
+            storage.verifyWritable()
+            storage.preferences.sessions.reloadRecoverAfterLogin()
+            // Inspect even on an already-migrated installation so a damaged account store is retained.
+            storage.preferences.sessions.current
+            val firstAttempt = items.value.getValue(MigrationItem.GlobalDatabase) is ItemStatus.Pending
+            val debug = readDebug(storage)
+            completed = !firstAttempt && items.value.values.none { it is ItemStatus.Pending && it.reason == null }
+            if (!completed) safeStep(storage, "startMetrics") { metrics.start() }
+            val pending = items.value.filterValues { it is ItemStatus.Pending && it.reason == null }.keys
+            for (item in preferenceItems) {
+                if (item in pending) migrateItem(storage, item, debug, steps = steps, counts = counts)
+            }
+            if (firstAttempt) {
+                openAndMigrateGlobalDatabase(storage, debug, metrics, steps)
+            } else {
+                steps.measure("openGlobalDatabase") { openUsableGlobalDatabase(storage) }
+            }
+            safeStep(storage, "observeBlocks") {
+                steps.measure("observeBlocks") { storage.observeBlocks() }
+            }
+            for (item in databaseItems) {
+                if (item in pending && items.value.getValue(item) == ItemStatus.Pending()) {
+                    migrateItem(storage, item, debug, steps = steps, sampleDisk = metrics::sampleDisk)
+                }
+            }
+            val activeUserId = storage.preferences.sessions.activeUserId.takeIf { it > 0 }
+            safeStep(storage, "reloadPreferences") {
+                steps.measure("reloadPreferences") { storage.reloadPreferences(activeUserId) }
+            }
+            steps.measure("publishAccountDatabase") {
+                accounts.publish(activeUserId) { logMigrationError(storage, "publishAccountDatabase", it) }
+            }
+            DatabaseStartupGate.markReady()
+            mutableState.value = MigrationState.Done
+            if (completed) "alreadyComplete" else "success"
+        } catch (error: Exception) {
+            when (error) {
+                is CancellationException -> {
+                    mutableState.value = MigrationState.Idle
+                    throw error
+                }
+                is MMKVStorageException, is GlobalStorageUnavailable -> {
+                    logMigrationError(storage, "startup", error)
+                    mutableState.value = MigrationState.Blocked(migrationReason(error))
+                    "blocked"
+                }
+                else -> throw error
+            }
+        } finally {
+            slow.cancel()
+            metrics.stop()
+        }
+        val totalMs = start.elapsedNow().inWholeMilliseconds
+        if (outcome != "alreadyComplete" || storage.debug || totalMs > 20) {
+            writeMigrationTiming(
+                outcome = outcome,
+                totalMs = totalMs,
+                slowUiShown = slowUiShown.value,
+                steps = steps,
+                before = metrics.before,
+                after = metrics.after,
+                peakDiskBytes = metrics.peakDisk.value,
+                availableBytes = metrics.available,
+                mmkvCounts = if (completed) emptyMap() else counts,
+                memory = metrics.memory,
+                items = items.value,
+                degraded = runCatching { SystemFileSystem.exists(legacyGlobalDatabasePath(storage.databasePath())) }.getOrDefault(false),
+            )
+        }
+        outcome != "blocked"
+    }
+
+    private suspend fun openAndMigrateGlobalDatabase(
+        storage: MigrationStorage,
+        debug: MigrationDebug,
+        metrics: MigrationMetrics,
+        steps: MutableList<MigrationStep>,
+    ) {
+        val path = storage.databasePath()
+        val legacy = legacyGlobalDatabasePath(path)
+        val savedReason = (items.value.getValue(MigrationItem.TranslationCache) as? ItemStatus.Pending)?.reason
+        var degradedReason = savedReason ?: MigrationReason.Corrupted.takeIf { SystemFileSystem.exists(legacy) }
+        if (degradedReason == null) {
+            try {
+                if (SystemFileSystem.exists(path) && storage.checkpoint() < 1) {
+                    steps.measure("checkFreeSpace") {
+                        val before = metrics.before ?: migrationFiles(storage)
+                        val free = debug.availableBytes ?: storage.availableBytes(requireNotNull(path.parent).toString())
+                        metrics.available = free
+                        val required = 3 * (before.globalBytes + before.walBytes) + 50 * 1024 * 1024
+                        if (free < required) throw InsufficientMigrationSpace()
+                    }
+                    steps.measure("backup") { backupDatabase(path) }
+                    storage.markBackupReady()
+                    metrics.sampleDisk()
+                }
+                steps.measure("openGlobalDatabase") {
+                    debug.checkFailure(MigrationItem.GlobalDatabase)
+                    database.open()
+                }
+            } catch (error: Exception) {
+                if (error is CancellationException || error is MMKVStorageException) throw error
+                logMigrationError(storage, "openGlobalDatabase", error)
+                degradedReason = fallbackReason(error)
+            }
+        }
+        if (degradedReason != null) {
+            setItem(storage, MigrationItem.TranslationCache, ItemStatus.Pending(degradedReason))
+            val fallback = try {
+                steps.measure("openEmptyGlobalDatabase") { database.openFallback() }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                throw GlobalStorageUnavailable(error)
+            }
+            if (SystemFileSystem.exists(legacy)) {
+                val status = execute(storage, MigrationItem.GlobalDatabase) {
+                    steps.measureRows("restoreGlobalTables") {
+                        LegacyGlobalDatabaseMigration(fallback).restoreGlobalTables(legacy)
+                    }
+                    ItemStatus.Done
+                }
+                setItem(storage, MigrationItem.GlobalDatabase, status)
+                return
+            }
+        }
+        setItem(storage, MigrationItem.TranslationCache, ItemStatus.Skipped)
+        setItem(storage, MigrationItem.GlobalDatabase, ItemStatus.Done)
+    }
+
+    private suspend fun openUsableGlobalDatabase(storage: MigrationStorage) {
+        val path = storage.databasePath()
+        val legacy = legacyGlobalDatabasePath(path)
+        val reason = try {
+            if (!SystemFileSystem.exists(path) && SystemFileSystem.exists(legacy)) {
+                MigrationReason.Corrupted
+            } else {
+                database.open()
+                return
+            }
+        } catch (error: Exception) {
+            if (error is CancellationException) throw error
+            logMigrationError(storage, "reopenGlobalDatabase", error)
+            fallbackReason(error)
+        }
+
+        try {
+            database.openFallback()
+        } catch (error: Exception) {
+            if (error is CancellationException) throw error
+            throw GlobalStorageUnavailable(error)
+        }
+        if (SystemFileSystem.exists(legacy)) {
+            setItem(storage, MigrationItem.TranslationCache, ItemStatus.Pending(reason))
+            setItem(storage, MigrationItem.GlobalDatabase, execute(storage, MigrationItem.GlobalDatabase) {
+                LegacyGlobalDatabaseMigration(database.requireOpen()).restoreGlobalTables(legacy)
+                ItemStatus.Done
+            })
+        }
+    }
+
+    private suspend fun migrateItem(
+        storage: MigrationStorage,
+        item: MigrationItem,
+        debug: MigrationDebug,
+        targetUserId: Long? = null,
+        manual: Boolean = false,
+        automatic: Boolean = false,
+        steps: MutableList<MigrationStep> = mutableListOf(),
+        counts: MutableMap<String, Long> = mutableMapOf(),
+        sampleDisk: () -> Unit = {},
+    ): ItemStatus {
+        val recovering = manual || automatic
+        val status = execute(storage, item, propagateStorageFailure = !recovering) {
+            debug.checkFailure(item)
+            val allowLegacyUserId = manual || items.value.getValue(MigrationItem.Session) == ItemStatus.Done
+            val prefs = storage.preferences
+            when (item) {
+                MigrationItem.Session -> {
+                    val result = steps.preferences(item, counts, prefs::migrateSession)
+                    if (result is ItemStatus.Failed && targetUserId != null && prefs.sessions.find(targetUserId) != null) {
+                        ItemStatus.Skipped
+                    } else {
+                        result
+                    }
+                }
+                MigrationItem.Settings -> steps.preferences(item, counts) {
+                    prefs.migrateSettings(targetUserId, allowLegacyUserId)
+                }
+                MigrationItem.SearchAndTags -> steps.preferences(item, counts) {
+                    prefs.migrateSearchAndTags(targetUserId, allowLegacyUserId)
+                }
+                MigrationItem.SeriesProgress -> steps.preferences(item, counts, prefs::migrateSeriesProgress)
+                MigrationItem.BrowsingHistory, MigrationItem.ReadingProgress, MigrationItem.ReadLater -> {
+                    val present = LegacyAccountDataSplitter(database.requireOpen(), accounts, legacySource(storage))
+                        .split(item.tableGroup) { name, ms, rows ->
+                            steps += MigrationStep(name, ms, rows)
+                            sampleDisk()
+                        }
+                    if (present) ItemStatus.Done else ItemStatus.Skipped
+                }
+                MigrationItem.TranslationCache -> {
+                    val source = legacyGlobalDatabasePath(storage.databasePath())
+                    if (SystemFileSystem.exists(source) &&
+                        LegacyGlobalDatabaseMigration(database.requireOpen()).restoreTranslations(source) != null
+                    ) {
+                        ItemStatus.Done
+                    } else {
+                        ItemStatus.Skipped
+                    }
+                }
+                MigrationItem.LegacyBlocking -> {
+                    var hadBlocks = false
+                    steps.measure(item.name) { hadBlocks = storage.migrateBlocks() }
+                    if (hadBlocks) ItemStatus.Done else ItemStatus.Skipped
+                }
+                MigrationItem.GlobalDatabase -> {
+                    LegacyGlobalDatabaseMigration(database.requireOpen()).restoreGlobalTables(legacySource(storage))
+                    ItemStatus.Done
                 }
             }
         }
-        var available: Long? = null
-        var before: MigrationFiles? = null
-        var after: MigrationFiles? = null
-        var counts = emptyMap<String, Long>()
-        val steps = mutableListOf<MigrationStep>()
-        var step = MigrationFailure.Backup
-        fun sampleDisk() {
-            val files = migrationFiles(storage)
-            after = files
-            peakDisk.update { maxOf(it, files.totalBytes) }
+        if (manual && status is ItemStatus.Pending) {
+            return ItemStatus.Failed(0, MigrationReason.Corrupted)
         }
-        val outcome = try {
-            val path = storage.databasePath()
-            if (checkpoint < backedUp) clearPartialBackup(path)
-            before = migrationFiles(storage)
-            peakDisk.update { maxOf(it, before.totalBytes) }
-            steps.measure("checkFreeSpace") {
-                val folder = requireNotNull(path.parent)
-                SystemFileSystem.createDirectories(folder)
-                val free = storage.availableBytes(folder.toString())
-                available = free
-                val required = 3 * (before.globalBytes + before.walBytes) + 50 * 1024 * 1024
-                if (free < required) throw InsufficientMigrationSpace()
+        if (automatic && status is ItemStatus.Pending) {
+            val failed = ItemStatus.Failed(2, status.reason ?: MigrationReason.Unknown)
+            setItem(storage, item, failed)
+            return failed
+        }
+        setItem(storage, item, status)
+        if (recovering && status == ItemStatus.Done && item in preferencesToReload) {
+            safeStep(storage, "reloadPreferences") {
+                storage.reloadPreferences(storage.preferences.sessions.activeUserId.takeIf { it > 0 })
             }
-            if (checkpoint < backedUp) {
-                steps.measure("backup") { backupDatabase(path) }
-                step = MigrationFailure.Preferences
-                storage.writeCheckpoint(backedUp)
-            }
-            sampleDisk()
-            step = MigrationFailure.Preferences
-            steps.measure("mmkv") { counts = storage.migratePreferences() }
-            step = MigrationFailure.OpenDatabase
-            steps.measure("openGlobalDatabase") { database.openForMigration() }
-            sampleDisk()
-            step = MigrationFailure.SplitAccounts
-            LegacyAccountDataSplitter(database, accounts, path).split { name, elapsedMs, rows ->
-                steps += MigrationStep(name, elapsedMs, rows)
-                sampleDisk()
-            }
-            step = MigrationFailure.Preferences
-            storage.writeCheckpoint(complete)
-            step = MigrationFailure.OpenDatabase
-            storage.publish()
-            mutableState.value = MigrationState.Done
-            "success"
+        }
+        return status
+    }
+
+    private suspend fun execute(
+        storage: MigrationStorage,
+        item: MigrationItem,
+        propagateStorageFailure: Boolean = true,
+        block: suspend () -> ItemStatus,
+    ): ItemStatus {
+        val previous = items.value.getValue(item)
+        val attempts = (previous as? ItemStatus.Failed)?.attempts ?: 0
+        return try {
+            val status = block()
+            if (status is ItemStatus.Failed) status.copy(attempts = attempts + 1) else status
         } catch (error: Exception) {
-            if (error is CancellationException) {
-                mutableState.value = MigrationState.Idle
-                throw error
-            }
-            fail(if (error is InsufficientMigrationSpace) MigrationFailure.StorageSpace else step, error).name
-        } finally {
-            slow.cancel()
-            sampler.cancelAndJoin()
+            if (error is CancellationException || (propagateStorageFailure && error is MMKVStorageException)) throw error
+            logMigrationError(storage, item.name, error)
+            ItemStatus.Failed(attempts + 1, migrationReason(error))
         }
-        runCatching { sampleDisk() }
-        memory.sample()
-        writeMigrationTiming(
-            outcome = outcome,
-            totalMs = start.elapsedNow().inWholeMilliseconds,
-            slowUiShown = slowUiShown.value,
-            steps = steps,
-            before = before,
-            after = after,
-            peakDiskBytes = peakDisk.value,
-            availableBytes = available,
-            mmkvCounts = counts,
-            memory = memory,
-        )
-        outcome == "success"
     }
 
-    private suspend fun publish(storage: MigrationStorage): Boolean = try {
-        storage.publish()
-        mutableState.value = MigrationState.Done
-        true
-    } catch (error: Exception) {
-        if (error is CancellationException) throw error
-        fail(MigrationFailure.OpenDatabase, error)
-        false
+    private suspend fun cleanup(storage: MigrationStorage) {
+        val path = storage.databasePath()
+        val global = database.requireOpen()
+        LegacyAccountDataSplitter(global, accounts, path).dropLegacyTables()
+        for (suffix in databaseSuffixes.reversed()) {
+            SystemFileSystem.delete(databaseSibling(backupSidecar(path, suffix), ".tmp"), mustExist = false)
+            SystemFileSystem.delete(backupSidecar(path, suffix), mustExist = false)
+            SystemFileSystem.delete(databaseSibling(path, ".legacy$suffix"), mustExist = false)
+        }
+        storage.preferences.clearLegacyUser()
     }
 
-    private fun fail(step: MigrationFailure, error: Exception): MigrationFailure {
-        // SQLite errors can include the account database path.
-        Logger.e(tag = "StartupMigration") { "Migration failed at ${step.name} (${error::class.simpleName})" }
-        mutableState.value = MigrationState.Failed(step)
-        return step
+    private fun setItem(storage: MigrationStorage, item: MigrationItem, status: ItemStatus) {
+        if (items.value[item] != status) storeItems(storage, items.value + (item to status))
     }
-}
 
-internal class MigrationStorage(
-    val marker: MMKVOwner,
-    val databasePath: () -> Path,
-    val accountRoot: () -> Path,
-    val migratePreferences: () -> Map<String, Long>,
-    val publish: suspend () -> Unit,
-    val availableBytes: (String) -> Long = ::migrationAvailableBytes,
-) {
-    fun writeCheckpoint(value: Int) {
-        check(marker.kv.set(checkpointKey, value)) { "Unable to store migration checkpoint" }
-        marker.sync()
+    private fun storeItems(storage: MigrationStorage, values: Map<MigrationItem, ItemStatus>) {
+        storage.writeItems(values)
+        updateItems(values)
+    }
+
+    private fun updateItems(values: Map<MigrationItem, ItemStatus>) {
+        mutableItems.value = values
+        mutableHasPending.value = values.values.any { !it.isResolved }
+    }
+
+    private fun readDebug(storage: MigrationStorage): MigrationDebug {
+        if (!storage.debug) return MigrationDebug()
+        val path = Path(storage.filesRoot(), "migration-debug.json")
+        return try {
+            if (!SystemFileSystem.exists(path)) MigrationDebug()
+            else SystemFileSystem.source(path).buffered().use { source ->
+                require(!source.request(4097)) { "Migration debug configuration is too large" }
+                migrationJson.decodeFromString<MigrationDebug>(source.readString())
+            }
+        } catch (error: Exception) {
+            if (error is CancellationException) throw error
+            logMigrationError(storage, "readDebug", error)
+            MigrationDebug()
+        }
     }
 }
 
-private object MigrationMarker : MMKVApp
+private val preferenceItems = listOf(
+    MigrationItem.Session, MigrationItem.Settings, MigrationItem.SearchAndTags, MigrationItem.SeriesProgress,
+)
+private val preferencesToReload = setOf(MigrationItem.Settings, MigrationItem.SearchAndTags)
+private val databaseItems = listOf(
+    MigrationItem.BrowsingHistory, MigrationItem.ReadingProgress, MigrationItem.ReadLater,
+    MigrationItem.TranslationCache, MigrationItem.LegacyBlocking,
+)
 
-private const val checkpointKey = "accountStorageMigrationCheckpoint"
-private const val backedUp = 1
-private const val complete = 2
+internal val MigrationItem.tableGroup: LegacyAccountTableGroup
+    get() = when (this) {
+        MigrationItem.BrowsingHistory -> LegacyAccountTableGroup.BrowsingHistory
+        MigrationItem.ReadingProgress -> LegacyAccountTableGroup.ReadingProgress
+        MigrationItem.ReadLater -> LegacyAccountTableGroup.ReadLater
+        else -> error("Migration item does not have account tables")
+    }
 
-private class InsufficientMigrationSpace : Exception()
+private fun MigrationDebug.checkFailure(item: MigrationItem) {
+    if (item.name in fail) throw SimulatedMigrationFailure(item)
+}
 
-private suspend inline fun MutableList<MigrationStep>.measure(name: String, block: () -> Unit) {
-    val start = TimeSource.Monotonic.markNow()
+private class SimulatedMigrationFailure(item: MigrationItem) : Exception("Injected failure for ${item.name}")
+private class GlobalStorageUnavailable(cause: Exception) : Exception("Local database storage unavailable", cause)
+private class InsufficientMigrationSpace : Exception("Insufficient storage space")
+
+private fun fallbackReason(error: Exception): MigrationReason =
+    if (migrationReason(error) == MigrationReason.StorageSpace) MigrationReason.StorageSpace else MigrationReason.Corrupted
+
+private fun migrationReason(error: Exception): MigrationReason {
+    val message = generateSequence<Throwable>(error) { it.cause }.joinToString(" ") { it.message.orEmpty() }
+    return when {
+        error is InsufficientMigrationSpace || Regex("SQLITE_FULL|disk is full|no space left", RegexOption.IGNORE_CASE).containsMatchIn(message) ->
+            MigrationReason.StorageSpace
+        Regex("SQLITE_CORRUPT|SQLITE_NOTADB|malformed|not a database", RegexOption.IGNORE_CASE).containsMatchIn(message) ->
+            MigrationReason.Corrupted
+        error is MMKVStorageException || error is GlobalStorageUnavailable || error is kotlinx.io.IOException ->
+            MigrationReason.Io
+        else -> MigrationReason.Unknown
+    }
+}
+
+private suspend inline fun safeStep(storage: MigrationStorage, step: String, block: () -> Unit) {
     try {
         block()
+    } catch (error: Exception) {
+        if (error is CancellationException) throw error
+        logMigrationError(storage, step, error)
+    }
+}
+
+private inline fun MutableList<MigrationStep>.preferences(
+    item: MigrationItem,
+    counts: MutableMap<String, Long>,
+    migrate: () -> LegacyPreferenceResult,
+): ItemStatus {
+    val start = TimeSource.Monotonic.markNow()
+    val result = try {
+        migrate()
+    } finally {
+        add(MigrationStep(item.name, start.elapsedNow().inWholeMilliseconds))
+    }
+    result.counts.forEach { (key, value) -> counts[key] = (counts[key] ?: 0L) + value }
+    return when (result.outcome) {
+        LegacyPreferenceOutcome.Done -> ItemStatus.Done
+        LegacyPreferenceOutcome.Skipped -> ItemStatus.Skipped
+        LegacyPreferenceOutcome.NeedsUser -> ItemStatus.Pending(MigrationReason.Corrupted)
+        LegacyPreferenceOutcome.Corrupted -> ItemStatus.Failed(1, MigrationReason.Corrupted)
+    }
+}
+
+private suspend inline fun <T> MutableList<MigrationStep>.measure(name: String, block: () -> T): T {
+    val start = TimeSource.Monotonic.markNow()
+    try {
+        return block()
     } finally {
         add(MigrationStep(name, start.elapsedNow().inWholeMilliseconds))
     }
 }
 
-private fun backupDatabase(path: Path) {
-    val folder = requireNotNull(path.parent)
-    for (suffix in listOf("", "-wal", "-shm")) {
-        val source = Path(folder, path.name + suffix)
-        if (!SystemFileSystem.exists(source)) continue
-        val backup = Path(folder, path.name + suffix + ".bak")
-        val temporary = Path(folder, backup.name + ".tmp")
-        try {
-            SystemFileSystem.source(source).buffered().use { input ->
-                SystemFileSystem.sink(temporary).buffered().use { output -> input.transferTo(output) }
-            }
-            SystemFileSystem.atomicMove(temporary, backup)
-        } finally {
-            runCatching { SystemFileSystem.delete(temporary, mustExist = false) }
-        }
+private suspend inline fun MutableList<MigrationStep>.measureRows(name: String, block: () -> Long) {
+    val start = TimeSource.Monotonic.markNow()
+    var rows = 0L
+    try {
+        rows = block()
+    } finally {
+        add(MigrationStep(name, start.elapsedNow().inWholeMilliseconds, rows))
     }
 }
-
-private fun clearPartialBackup(path: Path) {
-    val folder = requireNotNull(path.parent)
-    for (suffix in listOf("", "-wal", "-shm")) {
-        SystemFileSystem.delete(Path(folder, path.name + suffix + ".bak.tmp"), mustExist = false)
-    }
-}
-
-internal const val migrationTimingPrefix = "MigrationTiming "

@@ -10,8 +10,9 @@ import com.mrl.pixiv.common.analytics.isUsageAnalyticsAvailable
 import com.mrl.pixiv.common.analytics.setUsageAnalyticsEnabled
 import com.mrl.pixiv.common.logs.AppLogStore
 import com.mrl.pixiv.common.logs.installAppLogCrashHandler
-import com.mrl.pixiv.common.repository.AppRepository
 import com.mrl.pixiv.common.datasource.local.migration.DatabaseStartupGate
+import com.mrl.pixiv.common.mmkv.MMKVStorageException
+import com.mrl.pixiv.common.repository.AppRepository
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.DeviceInfo
 import com.mrl.pixiv.common.util.isDebug
@@ -40,7 +41,12 @@ object Initialization {
         installAppLogCrashHandler()
         initializeMMKV(logLevel = MMKVLogLevel.LevelInfo)
         if (isUsageAnalyticsAvailable) {
-            setUsageAnalyticsEnabled(AppRepository.usageAnalyticsEnabled.value)
+            val enabled = try {
+                AppRepository.usageAnalyticsEnabled.value
+            } catch (_: MMKVStorageException) {
+                false
+            }
+            setUsageAnalyticsEnabled(enabled)
         }
         val koin = startKoin {
             platformKoinAppDeclaration()

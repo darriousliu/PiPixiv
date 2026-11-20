@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_export_insufficient_space">बैकअप निर्यात करने के लिए पर्याप्त संग्रहण स्थान नहीं है</string>
+    <string name="backup_import_insufficient_space">बैकअप आयात करने के लिए पर्याप्त संग्रहण स्थान नहीं है</string>
+    <string name="backup_import_file_too_large">बैकअप फ़ाइल आयात करने के लिए बहुत बड़ी है</string>
+    <string name="backup_import_translation_incomplete">डेटा आयात हो गया, लेकिन अनुवाद कैश का कुछ हिस्सा आयात नहीं हो सका।</string>
+</resources>

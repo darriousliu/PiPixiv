@@ -38,7 +38,7 @@ import java.nio.file.Files
 import java.security.MessageDigest
 import kotlin.random.Random
 
-private const val generatorVersion = 2
+private const val generatorVersion = 3
 private const val fixtureSeed = 128L
 private const val fixtureDate = "2025-08-05T14:12:09+09:00"
 private const val timestamp = 1754370729000L
@@ -140,7 +140,7 @@ internal object LegacyMigrationFixture {
                 )
             val manifest = FixtureManifest(
                 tier.directory, generatorVersion, fixtureSeed, userIds, totalRows, accountRows,
-                tier.translations - tier.duplicateTranslations, counts, figures.first, figures.second, files,
+                tier.translations - tier.duplicateTranslations, counts + ("skippedCorrupted" to 0L), figures.first, figures.second, files,
             )
             temporary.resolve("manifest.json").writeText(manifestJson.encodeToString(manifest))
             directory.deleteRecursively()

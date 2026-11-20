@@ -3,8 +3,9 @@ package com.mrl.pixiv.common.mmkv
 import com.ctrip.flight.mmkv.MMKV_KMP
 import com.ctrip.flight.mmkv.mmkvWithID
 import io.github.vinceglb.filekit.FileKit
-import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.filesDir
+import io.github.vinceglb.filekit.toKotlinxIoPath
+import kotlinx.coroutines.CancellationException
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.serializer
@@ -13,11 +14,25 @@ interface MMKVOwner {
     val id: String
     val kv: MMKV_KMP
         get() = withAccountStorageLock {
-            defaultInstances.getOrPut(id) { mmkvWithID(id) }
+            defaultInstances.getOrPut(id) { mmkvOperation { mmkvWithID(id) } }
         }
 
-    fun contains(key: String): Boolean = kv.containsKey(key)
-    fun sync() = kv.sync()
+    fun contains(key: String): Boolean = accessMMKV { containsKey(key) }
+    fun sync() = accessMMKV { sync() }
+}
+
+class MMKVStorageException(message: String, cause: Throwable? = null) : IllegalStateException(message, cause)
+
+private inline fun <T> mmkvOperation(block: () -> T): T = try {
+    block()
+} catch (error: Exception) {
+    if (error is CancellationException || error is MMKVStorageException) throw error
+    throw MMKVStorageException("MMKV storage operation failed", error)
+}
+
+internal inline fun <T> MMKVOwner.accessMMKV(block: MMKV_KMP.() -> T): T {
+    val store = kv
+    return mmkvOperation { store.block() }
 }
 
 /**
@@ -41,7 +56,7 @@ class AccountMMKVOwner(
         require(userId > 0)
         val directory = Path(filesDirectory, "accounts", userId.toString(), "mmkv")
         SystemFileSystem.createDirectories(directory)
-        mmkvWithID(id, rootPath = directory.toString())
+        mmkvOperation { mmkvWithID(id, rootPath = directory.toString()) }
     }
 }
 
@@ -51,14 +66,14 @@ private val accountInstances = mutableMapOf<Long, AccountMMKVOwner>()
 fun accountMMKVOwner(userId: Long): MMKVOwner = withAccountStorageLock {
     require(userId > 0)
     accountInstances.getOrPut(userId) {
-        AccountMMKVOwner(userId, FileKit.filesDir.absolutePath())
+        AccountMMKVOwner(userId, FileKit.filesDir.toKotlinxIoPath().toString())
     }
 }
 
 fun mmkvOwner(id: String, rootPath: String? = null): MMKVOwner = object : MMKVOwner {
     override val id = id
     override val kv by lazy {
-        if (rootPath == null) super<MMKVOwner>.kv else mmkvWithID(id, rootPath = rootPath)
+        if (rootPath == null) super<MMKVOwner>.kv else mmkvOperation { mmkvWithID(id, rootPath = rootPath) }
     }
 }
 
@@ -100,5 +115,5 @@ fun <V> MMKVProperty<V>.asMutableStateFlow() = MMKVStateFlowProperty(this)
 
 fun <V> MMKVSerializableProperty<V>.asMutableStateFlow() = MMKVStateFlowSerializableProperty(this)
 
-fun MMKVOwner.clearAll() = kv.clearAll()
+fun MMKVOwner.clearAll() = accessMMKV { clearAll() }
 

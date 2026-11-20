@@ -20,7 +20,6 @@ data class SplashState(
 sealed class SplashAction : ViewIntent {
     data object IsLoginIntent : SplashAction()
     data object RetryMigration : SplashAction()
-    data object ContinueAfterFailure : SplashAction()
 }
 
 @KoinViewModel
@@ -34,7 +33,7 @@ class SplashViewModel(
 
     val keepNativeSplash: Boolean
         get() = uiState.value.isLoading && when (migrationState.value) {
-            MigrationState.Slow, is MigrationState.Failed -> false
+            MigrationState.Slow, is MigrationState.Blocked -> false
             else -> true
         }
 
@@ -50,7 +49,6 @@ class SplashViewModel(
         when (intent) {
             SplashAction.IsLoginIntent -> if (migration.run()) isLogin()
             SplashAction.RetryMigration -> if (migration.run(retry = true)) isLogin()
-            SplashAction.ContinueAfterFailure -> if (migration.continueAfterSplitFailure()) isLogin()
         }
     }
 

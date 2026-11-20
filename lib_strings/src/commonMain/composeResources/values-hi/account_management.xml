@@ -3,10 +3,6 @@
     <string name="migration_progress">स्थानीय डेटा अपग्रेड किया जा रहा है…</string>
     <string name="migration_failure">स्थानीय डेटा अपग्रेड नहीं हो सका</string>
     <string name="migration_storage_failure">स्टोरेज में पर्याप्त जगह नहीं है। जगह खाली करके फिर कोशिश करें।</string>
-    <string name="migration_backup_failure">स्थानीय डेटाबेस का बैकअप नहीं लिया जा सका।</string>
-    <string name="migration_preferences_failure">खाते की जानकारी या सेटिंग स्थानांतरित नहीं हो सकीं।</string>
-    <string name="migration_database_failure">स्थानीय डेटाबेस नहीं खोला जा सका।</string>
-    <string name="migration_split_failure">खाते का कुछ डेटा अभी स्थानांतरित नहीं हुआ है। ऐप अगली बार खुलने पर फिर कोशिश करेगा।</string>
+    <string name="migration_database_failure">स्थानीय स्टोरेज उपलब्ध नहीं है। डिवाइस का स्टोरेज जाँचें और फिर कोशिश करें।</string>
     <string name="migration_export_logs">लॉग निर्यात करें</string>
-    <string name="migration_continue">अभी जारी रखें</string>
 </resources>

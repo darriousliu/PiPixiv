@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.datasource.local
 
 import androidx.room3.useReaderConnection
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +36,10 @@ class AccountDatabaseProvider(
         currentHandle.value = userId?.let { openLocked(it) }
     }
 
+    suspend fun publish(userId: Long?, onFailure: (Exception) -> Unit) = mutex.withLock {
+        currentHandle.value = userId?.let { openForStartup(it, onFailure) }
+    }
+
     fun clearCurrent() {
         currentHandle.value = null
     }
@@ -64,7 +69,9 @@ class AccountDatabaseProvider(
 
     private suspend fun openLocked(userId: Long): AccountHandle =
         handles[userId] ?: withContext(Dispatchers.IO) {
-            val database = buildAccountDatabase(databasePath(userId))
+            val path = databasePath(userId)
+            resumeCorruptionArchive(path)
+            val database = buildAccountDatabase(path)
             try {
                 database.useReaderConnection { }
                 AccountHandle(userId, database).also { handles[userId] = it }
@@ -73,6 +80,28 @@ class AccountDatabaseProvider(
                 throw error
             }
         }
+
+    private suspend fun openForStartup(userId: Long, onFailure: (Exception) -> Unit): AccountHandle? {
+        try {
+            return openLocked(userId)
+        } catch (error: Exception) {
+            if (error is CancellationException) throw error
+            onFailure(error)
+            if (!error.isDatabaseCorruption()) return null
+        }
+
+        return try {
+            withContext(Dispatchers.IO) {
+                val source = databasePath(userId)
+                preserveDatabaseFiles(source, corruptionArchivePath(source))
+            }
+            openLocked(userId)
+        } catch (error: Exception) {
+            if (error is CancellationException) throw error
+            onFailure(error)
+            null
+        }
+    }
 
     private fun deleteAccountDirectory(path: Path) {
         val metadata = SystemFileSystem.metadataOrNull(path)
