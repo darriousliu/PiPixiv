@@ -15,6 +15,8 @@ import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 class CollectionNovelPagingSource(
     private val query: UserBookmarksQuery
 ) : PagingSource<UserBookmarksQuery, Novel>() {
+    private val bookmarkGeneration = BookmarkState.accountGeneration
+
     override suspend fun load(params: LoadParams<UserBookmarksQuery>): LoadResult<UserBookmarksQuery, Novel> {
         return try {
             val resp = if (params.key == null) {
@@ -37,6 +39,7 @@ class CollectionNovelPagingSource(
                         novelId = it.id,
                         isBookmarked = true,
                         restrict = currentRestrict,
+                        generation = bookmarkGeneration,
                     )
                 }
             }

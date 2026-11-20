@@ -65,6 +65,9 @@ kotlin {
             dependencies {
                 implementation(libs.compose.jetbrains.ui.test)
                 implementation(libs.androidx.sqlite.bundled)
+                implementation(libs.kotlinx.ktor.client.mock)
+                implementation(libs.kotlinx.ktor.client.content.negotiation)
+                implementation(libs.kotlinx.ktor.serialization.kotlinx.json)
                 runtimeOnly(when {
                     System.getProperty("os.name") == "Mac OS X" -> libs.mmkv.kotlin.nativelib.macos
                     System.getProperty("os.name").startsWith("Windows") -> libs.mmkv.kotlin.nativelib.windows

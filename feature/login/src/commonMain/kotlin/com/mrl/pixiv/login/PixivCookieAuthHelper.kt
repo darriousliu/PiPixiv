@@ -1,5 +1,6 @@
 package com.mrl.pixiv.login
 
+import com.mrl.pixiv.common.data.auth.AuthTokenResp
 import com.mrl.pixiv.common.network.httpEngineFactory
 import com.mrl.pixiv.common.repository.AuthManager
 import io.ktor.client.HttpClient
@@ -93,7 +94,7 @@ class PixivCookieAuthHelper(
      * @throws IllegalStateException 若 PHPSESSID 缺失或账号未登录
      * @throws IllegalStateException 若任一重定向跳转失败
      */
-    suspend fun login(cookies: List<Cookie>) {
+    suspend fun login(cookies: List<Cookie>): AuthTokenResp {
         // 1. 生成 PKCE 参数
         val (verifier, codeChallenge) = generatePkce()
 
@@ -112,7 +113,7 @@ class PixivCookieAuthHelper(
         val code = fetchAuthorizationCode(redirectUrl)
 
         // 5. 用 code + verifier 换取最终 Token
-        AuthManager.login(code, verifier)
+        return AuthManager.login(code, verifier)
     }
 
     override fun close() = client.close()

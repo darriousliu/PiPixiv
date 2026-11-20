@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.mmkv
 
 import co.touchlab.kermit.Logger
+import com.mrl.pixiv.common.util.currentTimeMillis
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
@@ -20,6 +21,10 @@ data class AccountSession(
     val needsRelogin: Boolean = false,
     val lastUsedAt: Long = 0L,
 ) {
+    fun hasUsableCredentials() = !needsRelogin && refreshToken.isNotEmpty() && accessToken.isNotEmpty()
+
+    fun hasExpired() = accessTokenExpiresAt <= currentTimeMillis()
+
     override fun toString() = "AccountSession"
 }
 
@@ -27,7 +32,11 @@ data class AccountSession(
 private data class StoredAccounts(
     val sessions: List<AccountSession> = emptyList(),
     val activeUserId: Long = 0L,
+    val removedAccounts: Map<Long, RemovedAccountData> = emptyMap(),
 )
+
+@Serializable
+private enum class RemovedAccountData { Retained, PendingDeletion, Deleted }
 
 object AccountStore : MMKVApp {
     val storage = AccountSessionStorage(this)
@@ -100,6 +109,23 @@ class AccountSessionStorage(private val owner: MMKVOwner) {
 
     val activeUserId get() = withAccountStorageLock { read().activeUserId }
 
+    val removedUserIds get() = withAccountStorageLock { read().removedAccounts.keys }
+
+    val discardedLocalUserIds get() = withAccountStorageLock {
+        read().removedAccounts.filterValues { it != RemovedAccountData.Retained }.keys
+    }
+
+    val pendingLocalDeletions get() = withAccountStorageLock {
+        read().removedAccounts.filterValues { it == RemovedAccountData.PendingDeletion }.keys
+    }
+
+    fun completeLocalDeletion(userId: Long) = withAccountStorageLock {
+        val state = read()
+        if (state.removedAccounts[userId] == RemovedAccountData.PendingDeletion) {
+            write(state.copy(removedAccounts = state.removedAccounts + (userId to RemovedAccountData.Deleted)))
+        }
+    }
+
     val current get() = withAccountStorageLock {
         val state = read()
         state.sessions.firstOrNull { it.userId == state.activeUserId }
@@ -109,23 +135,62 @@ class AccountSessionStorage(private val owner: MMKVOwner) {
 
     fun saveAndActivate(session: AccountSession) = withAccountStorageLock {
         require(session.userId > 0)
-        val others = read().sessions.filterNot { it.userId == session.userId }
-        write(StoredAccounts(others + session, session.userId))
+        val state = read()
+        check(state.removedAccounts[session.userId] != RemovedAccountData.PendingDeletion)
+        val others = state.sessions.filterNot { it.userId == session.userId }
+        write(state.copy(sessions = others + session, activeUserId = session.userId))
     }
+
+    fun activate(userId: Long, lastUsedAt: Long) = withAccountStorageLock {
+        val state = read()
+        check(state.sessions.any { it.userId == userId }) { "Account session no longer exists" }
+        write(state.copy(sessions = state.sessions.withLastUsedAt(userId, lastUsedAt), activeUserId = userId))
+    }
+
+    fun remove(
+        userId: Long,
+        replacementUserId: Long?,
+        lastUsedAt: Long,
+        discardLocalData: Boolean,
+    ) = withAccountStorageLock {
+        val state = read()
+        val remaining = state.sessions.filterNot { it.userId == userId }
+        if (remaining.size == state.sessions.size) return@withAccountStorageLock
+
+        // Keep retired sessions out of legacy recovery, with independent progress for filesystem deletion.
+        val localData = if (discardLocalData) RemovedAccountData.PendingDeletion
+        else state.removedAccounts[userId] ?: RemovedAccountData.Retained
+        val updated = state.copy(sessions = remaining, removedAccounts = state.removedAccounts + (userId to localData))
+        if (state.activeUserId == userId) {
+            val nextUserId = replacementUserId ?: 0L
+            check(nextUserId == 0L || remaining.any { it.userId == nextUserId }) {
+                "Replacement account session no longer exists"
+            }
+            write(updated.copy(
+                sessions = remaining.withLastUsedAt(nextUserId, lastUsedAt),
+                activeUserId = nextUserId,
+            ))
+        } else {
+            write(updated)
+        }
+    }
+
+    private fun List<AccountSession>.withLastUsedAt(userId: Long, lastUsedAt: Long) =
+        map { if (it.userId == userId) it.copy(lastUsedAt = lastUsedAt) else it }
 
     fun addMigratedAccount(session: AccountSession) = withAccountStorageLock {
         require(session.userId > 0)
         val state = read()
         if (state.sessions.none { it.userId == session.userId }) {
             val activeUserId = state.activeUserId.takeIf { it > 0 } ?: session.userId
-            write(StoredAccounts(state.sessions + session, activeUserId))
+            write(state.copy(sessions = state.sessions + session, activeUserId = activeUserId))
         }
     }
 
     fun removeCurrent() = withAccountStorageLock {
         val state = read()
         if (state.activeUserId > 0) {
-            write(StoredAccounts(state.sessions.filterNot { it.userId == state.activeUserId }))
+            write(state.copy(sessions = state.sessions.filterNot { it.userId == state.activeUserId }, activeUserId = 0L))
         }
     }
 
@@ -144,17 +209,25 @@ class AccountSessionStorage(private val owner: MMKVOwner) {
     fun saveRefreshedTokens(previous: AccountSession, refreshed: AccountSession): AccountSession? {
         check(refreshed.userId == previous.userId) { "The refreshed token belongs to a different account" }
         return update(previous.userId) { current ->
-            if (current.refreshToken != previous.refreshToken || current.accessToken != previous.accessToken) {
-                current
-            } else {
+            if (current.hasSameCredentials(previous) && !current.needsRelogin) {
                 current.copy(
                     refreshToken = refreshed.refreshToken,
                     accessToken = refreshed.accessToken,
                     accessTokenExpiresAt = refreshed.accessTokenExpiresAt,
                 )
+            } else {
+                current
             }
         }
     }
+
+    fun markNeedsRelogin(previous: AccountSession): AccountSession? = update(previous.userId) { current ->
+        if (current.hasSameCredentials(previous)) current.copy(needsRelogin = true) else current
+    }
+
+    private fun AccountSession.hasSameCredentials(other: AccountSession) =
+        refreshToken == other.refreshToken && accessToken == other.accessToken &&
+            accessTokenExpiresAt == other.accessTokenExpiresAt
 }
 
 private const val ACCOUNT_STORE_KEY = "accountStoreState"

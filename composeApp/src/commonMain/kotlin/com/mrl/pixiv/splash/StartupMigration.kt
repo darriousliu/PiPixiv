@@ -12,6 +12,7 @@ import com.mrl.pixiv.common.datasource.local.globalDatabasePath
 import com.mrl.pixiv.common.datasource.local.legacyGlobalDatabasePath
 import com.mrl.pixiv.common.datasource.local.migration.DatabaseStartupGate
 import com.mrl.pixiv.common.mmkv.AccountStore
+import com.mrl.pixiv.common.mmkv.closeAccountMMKV
 import com.mrl.pixiv.common.mmkv.MMKVStorageException
 import com.mrl.pixiv.common.mmkv.mmkvOwner
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
@@ -114,7 +115,7 @@ class StartupMigration(
     fun onHomeEntered() {
         scope.launch {
             awaitReady()
-            lock.withLock { maintainAfterHome(storage) }
+            lock.withLock { accounts.withAccountFilesLocked { maintainAfterHome(storage) } }
         }
     }
 
@@ -152,7 +153,9 @@ class StartupMigration(
         lock.withLock {
             require(targetUserId == null || targetUserId > 0)
             if (items.value.getValue(item).isResolved) return@withLock items.value.getValue(item)
-            val status = migrateItem(storage, item, readDebug(storage), targetUserId, manual = true)
+            val status = accounts.withAccountFilesLocked {
+                migrateItem(storage, item, readDebug(storage), targetUserId, manual = true)
+            }
             if (enteredHome && items.value.values.all(ItemStatus::isResolved)) storage.markCleanupEligible()
             status
         }
@@ -166,7 +169,7 @@ class StartupMigration(
     }
 
     internal suspend fun <T> withRecoveryStorage(block: suspend (PixivDatabase, AccountDatabaseProvider) -> T): T =
-        lock.withLock { block(database.requireOpen(), accounts) }
+        lock.withLock { accounts.withAccountFilesLocked { block(database.requireOpen(), accounts) } }
 
     private suspend fun migrate(
         storage: MigrationStorage,
@@ -194,6 +197,12 @@ class StartupMigration(
                     updateItems(persisted)
                     storage.verifyWritable()
                     storage.preferences.sessions.reloadRecoverAfterLogin()
+                    for (userId in storage.preferences.sessions.pendingLocalDeletions) {
+                        safeStep(storage, "deleteRemovedAccount") {
+                            accounts.closeAndDelete(userId) { closeAccountMMKV(userId) }
+                            storage.preferences.sessions.completeLocalDeletion(userId)
+                        }
+                    }
                     // Inspect even on an already-migrated installation so a damaged account store is retained.
                     storage.preferences.sessions.current
                     val firstAttempt = items.value.getValue(MigrationItem.GlobalDatabase) is ItemStatus.Pending
@@ -222,7 +231,9 @@ class StartupMigration(
                         steps.measure("reloadPreferences") { storage.reloadPreferences(activeUserId) }
                     }
                     steps.measure("publishAccountDatabase") {
-                        accounts.publish(activeUserId) { logMigrationError(storage, "publishAccountDatabase", it) }
+                        accounts.publish(activeUserId, onFailure = {
+                            logMigrationError(storage, "publishAccountDatabase", it)
+                        })
                     }
                 } finally {
                     slow.cancel()
@@ -393,7 +404,7 @@ class StartupMigration(
                 MigrationItem.SeriesProgress -> steps.preferences(item, counts, prefs::migrateSeriesProgress)
                 MigrationItem.BrowsingHistory, MigrationItem.ReadingProgress, MigrationItem.ReadLater -> {
                     val present = LegacyAccountDataSplitter(database.requireOpen(), accounts, legacySource(storage))
-                        .split(item.tableGroup) { name, ms, rows ->
+                        .split(item.tableGroup, discardedUserIds = prefs.sessions.discardedLocalUserIds) { name, ms, rows ->
                             steps += MigrationStep(name, ms, rows)
                             sampleDisk()
                         }

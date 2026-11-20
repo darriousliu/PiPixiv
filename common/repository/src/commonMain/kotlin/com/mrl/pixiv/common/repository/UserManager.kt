@@ -17,6 +17,8 @@ import com.mrl.pixiv.common.mmkv.mmkvSerializable
 import com.mrl.pixiv.common.mmkv.withAccountStorageLock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 
 val requireUserInfoValue
     get() = UserManager.userInfoFlow.value
@@ -63,21 +65,21 @@ object UserManager : MMKVUser, AccountScoped {
     fun updateUserInfo(
         lifecycleOwner: LifecycleOwner? = null,
         coroutineScope: CoroutineScope? = null,
-    ) {
+        userId: Long = AccountStore.activeUserId,
+    ): Job {
         val scope = coroutineScope ?: lifecycleOwner?.lifecycleScope ?: ProcessLifecycleScope
-        scope.launchCatch(
+        return scope.launchCatch(
             context = Dispatchers.Main.immediate,
-            error = {
-
-            },
-            block = { updateUserInfoAsync() }
+            block = { updateUserInfoAsync(userId) },
         )
     }
 
-    suspend fun updateUserInfoAsync() {
-        val userId = AccountStore.activeUserId.takeIf { it > 0 } ?: return
+    suspend fun updateUserInfoAsync(userId: Long = AccountStore.activeUserId) {
+        if (userId <= 0) return
         withIOContext {
-            val resp = PixivRepository.getUserDetail(userId = userId)
+            val resp = withContext(RequestAccount(userId)) {
+                PixivRepository.getUserDetail(userId = userId)
+            }
             check(resp.user.id == userId) { "The returned user details do not match the requested account" }
             withAccountStorageLock {
                 val account = AccountStore.update(userId) {

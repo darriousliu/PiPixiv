@@ -15,6 +15,8 @@ import com.mrl.pixiv.common.datasource.local.entity.BlockIllustEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockUserEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.datasource.local.globalDatabasePath
+import com.mrl.pixiv.common.mmkv.AccountStore
+import com.mrl.pixiv.common.mmkv.withAccountStorageLock
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BookmarkedTagRepository
 import com.mrl.pixiv.common.repository.NovelReadLaterRepository
@@ -133,22 +135,24 @@ class AppDataViewModel(
         ) { workDir ->
             val account = accountDatabaseProvider.requireCurrent()
             val userId = account.userId
-            val history = SearchRepository.historyForAccount(userId)
-            val data = AppExportDataV4(
-                userId = userId,
-                settings = SettingsData(SettingRepository.preferenceForAccount(userId)),
-                search = SearchData(
-                    illustSearch = history.illustSearch,
-                    illustSearchIds = history.illustSearchIds,
-                    novelSearch = history.novelSearch,
-                    novelSearchIds = history.novelSearchIds,
-                    savedFilter = history.savedFilter,
-                    rememberFilter = history.rememberFilter,
-                ),
-                bookmarks = BookmarksData(BookmarkedTagRepository.tagsForAccount(userId)),
-                seriesProgress = seriesProgressRepository.exportForAccount(userId),
-                userInfo = UserManager.profileForAccount(userId),
-            )
+            val data = withBackupAccount(userId) {
+                val history = SearchRepository.historyForAccount(userId)
+                AppExportDataV4(
+                    userId = userId,
+                    settings = SettingsData(SettingRepository.preferenceForAccount(userId)),
+                    search = SearchData(
+                        illustSearch = history.illustSearch,
+                        illustSearchIds = history.illustSearchIds,
+                        novelSearch = history.novelSearch,
+                        novelSearchIds = history.novelSearchIds,
+                        savedFilter = history.savedFilter,
+                        rememberFilter = history.rememberFilter,
+                    ),
+                    bookmarks = BookmarksData(BookmarkedTagRepository.tagsForAccount(userId)),
+                    seriesProgress = seriesProgressRepository.exportForAccount(userId),
+                    userInfo = UserManager.profileForAccount(userId),
+                )
+            }
 
             backupFiles.exportV4(
                 metadata = json.encodeToString(AppExportDataV4.serializer(), data),
@@ -246,24 +250,27 @@ class AppDataViewModel(
         val includeAccountHistory = confirmBackupAccountImport(data.userId, account.userId, ::requestHistoryImportConfirm)
         var translationsComplete = true
 
-        // Restored tasks must see the restored translation settings when they are claimed.
-        readLaterRepository.withQueueClaimsPaused {
-            translationsComplete = AppDatabaseBackup.restore(
-                global = database,
-                account = account,
-                globalPath = backup.globalPath,
-                accountPath = backup.accountPath,
-                backupUserId = data.userId,
-                includeAccountData = includeAccountHistory,
-            )
-            restorePreferences(data.settings, data.search, data.bookmarks, account.userId, restoreLegacySearchFilters = true)
-        }
-        if (includeAccountHistory) {
-            seriesProgressRepository.restoreForAccount(account.userId, data.seriesProgress)
-        }
-        if (data.userId == account.userId) {
-            data.userInfo?.takeIf { it.user.id == account.userId }?.let {
-                UserManager.restoreProfileForAccount(account.userId, it)
+        accountDatabaseProvider.withAccountFilesLocked {
+            check(AccountStore.find(account.userId) != null) { "The backup account was removed" }
+            // Restored tasks must see the restored translation settings when they are claimed.
+            readLaterRepository.withQueueClaimsPaused {
+                translationsComplete = AppDatabaseBackup.restore(
+                    global = database,
+                    account = account,
+                    globalPath = backup.globalPath,
+                    accountPath = backup.accountPath,
+                    backupUserId = data.userId,
+                    includeAccountData = includeAccountHistory,
+                )
+                restorePreferences(data.settings, data.search, data.bookmarks, account.userId, restoreLegacySearchFilters = true)
+            }
+            if (includeAccountHistory) {
+                seriesProgressRepository.restoreForAccount(account.userId, data.seriesProgress)
+            }
+            if (data.userId == account.userId) {
+                data.userInfo?.takeIf { it.user.id == account.userId }?.let {
+                    UserManager.restoreProfileForAccount(account.userId, it)
+                }
             }
         }
         return translationsComplete
@@ -276,7 +283,7 @@ class AppDataViewModel(
         bookmarks: BookmarksData,
         userId: Long,
         restoreLegacySearchFilters: Boolean = false,
-    ) {
+    ) = withBackupAccount(userId) {
         SettingRepository.restore(settings.userPreference, userId)
         SearchRepository.restore(
             illustSearch = search.illustSearch,
@@ -288,6 +295,11 @@ class AppDataViewModel(
             rememberFilter = search.rememberFilter.takeIf { restoreLegacySearchFilters },
         )
         BookmarkedTagRepository.restore(bookmarks.bookmarkedTags, userId)
+    }
+
+    private fun <T> withBackupAccount(userId: Long, block: () -> T): T = withAccountStorageLock {
+        check(AccountStore.find(userId) != null) { "The backup account was removed" }
+        block()
     }
 
     private fun parseV3ImportData(json: Json, rootObject: JsonObject): AppExportDataV3 {
@@ -344,17 +356,17 @@ class AppDataViewModel(
     }
 
     private suspend fun importV1Data(data: AppExportData, userId: Long) {
-        // Settings
-        SettingRepository.restore(data.userPreference, userId)
-
-        // Search (V1 doesn't have novel search, use empty defaults)
-        SearchRepository.restore(
-            illustSearch = data.searchHistory,
-            searchIds = data.searchIdHistory,
-            novelSearch = NovelSearch(),
-            novelSearchIds = emptySet(),
-            userId = userId,
-        )
+        withBackupAccount(userId) {
+            SettingRepository.restore(data.userPreference, userId)
+            SearchRepository.restore(
+                illustSearch = data.searchHistory,
+                searchIds = data.searchIdHistory,
+                novelSearch = NovelSearch(),
+                novelSearchIds = emptySet(),
+                userId = userId,
+            )
+            BookmarkedTagRepository.restore(data.bookmarkedTags, userId)
+        }
 
         // Blocking
         BlockingRepositoryV2.restore(
@@ -362,9 +374,6 @@ class AppDataViewModel(
             data.blockUsers,
             data.blockComments
         )
-
-        // Bookmarks
-        BookmarkedTagRepository.restore(data.bookmarkedTags, userId)
 
         // Downloads
         if (data.downloads.isNotEmpty()) {

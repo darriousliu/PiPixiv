@@ -30,12 +30,13 @@ internal actual fun LoginWebView(
     state: WebViewState,
     navigator: WebViewNavigator,
     bypassSetting: BypassSetting,
+    addAccount: Boolean,
     onError: (Throwable) -> Unit,
     modifier: Modifier,
     onCreated: (NativeWebView) -> Unit,
     content: @Composable () -> Unit,
 ) {
-    if (bypassSetting == BypassSetting.System) {
+    if (bypassSetting == BypassSetting.System && !addAccount) {
         WebView(
             state = state,
             navigator = navigator,
@@ -46,9 +47,12 @@ internal actual fun LoginWebView(
         return
     }
 
-    val store = remember(state, bypassSetting) {
-        // An empty WKWebsiteDataStore proxy list clears the override and uses the system route.
-        (bypassSetting as? BypassSetting.Proxy)?.createProxyDataStore()
+    val store = remember(state, bypassSetting, addAccount) {
+        when (bypassSetting) {
+            BypassSetting.System -> WKWebsiteDataStore.nonPersistentDataStore()
+            is BypassSetting.Proxy -> bypassSetting.createProxyDataStore()
+            else -> null
+        }
     }
     if (store == null) {
         val currentOnError by rememberUpdatedState(onError)

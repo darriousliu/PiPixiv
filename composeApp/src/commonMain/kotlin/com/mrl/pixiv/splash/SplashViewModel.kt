@@ -2,6 +2,7 @@ package com.mrl.pixiv.splash
 
 import androidx.compose.runtime.Stable
 import com.mrl.pixiv.common.datasource.local.AccountDatabaseProvider
+import com.mrl.pixiv.common.mmkv.AccountStore
 import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
@@ -47,19 +48,20 @@ class SplashViewModel(
 
     override suspend fun handleIntent(intent: SplashAction) {
         when (intent) {
-            SplashAction.IsLoginIntent -> if (migration.run()) isLogin()
-            SplashAction.RetryMigration -> if (migration.run(retry = true)) isLogin()
+            SplashAction.IsLoginIntent -> if (migration.run()) routeFromSession()
+            SplashAction.RetryMigration -> if (migration.run(retry = true)) routeFromSession()
         }
     }
 
-    private fun refreshAccessToken() {
+    private fun refreshAccessToken(userId: Long) {
         launchIO(
             onError = {
                 routeToLogin()
             }
         ) {
-            AuthManager.requireUserAccessToken()
-            if (AuthManager.isLogin) {
+            AuthManager.requireUserAccessToken(userId)
+            val session = AccountStore.current
+            if (session != null && session.hasUsableCredentials() && !session.hasExpired()) {
                 routeToHome()
             } else {
                 routeToLogin()
@@ -67,19 +69,12 @@ class SplashViewModel(
         }
     }
 
-    private fun isNeedRefreshToken() {
-        if (AuthManager.isNeedRefreshToken) {
-            refreshAccessToken()
-        } else {
-            routeToHome()
-        }
-    }
-
-    private fun isLogin() {
-        if (AuthManager.hasTokens) {
-            isNeedRefreshToken()
-        } else {
-            routeToLogin()
+    private fun routeFromSession() {
+        val session = AccountStore.current
+        when {
+            session == null || !session.hasUsableCredentials() -> routeToLogin()
+            session.hasExpired() -> refreshAccessToken(session.userId)
+            else -> routeToHome()
         }
     }
 

@@ -156,11 +156,13 @@ internal fun applyCollectionSearchDraft(state: CollectionSearchState): Collectio
     )
 
 internal class CollectionSearchIllustPagingSource(private val query: CollectionSearchQuery) : PagingSource<String, Illust>() {
+    private val bookmarkGeneration = BookmarkState.accountGeneration
+
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Illust> = try {
         val response = CollectionSearchRepository.illusts(query, params.key)
         val visible = (if (requireUserPreferenceValue.isR18Enabled) response.illusts
             else response.illusts.filterNormalIllust()).filterBlockedTags().distinctBy { it.id }
-        visible.forEach { BookmarkState.updateIllustBookmarkDetail(it.id, true, query.restrict) }
+        visible.forEach { BookmarkState.updateIllustBookmarkDetail(it.id, true, query.restrict, bookmarkGeneration) }
         LoadResult.Page(visible, null, response.nextUrl?.takeIf { it.isNotBlank() && it != params.key })
     } catch (error: CancellationException) { throw error }
     catch (error: Exception) { LoadResult.Error(error) }
@@ -168,11 +170,13 @@ internal class CollectionSearchIllustPagingSource(private val query: CollectionS
 }
 
 internal class CollectionSearchNovelPagingSource(private val query: CollectionSearchQuery) : PagingSource<String, Novel>() {
+    private val bookmarkGeneration = BookmarkState.accountGeneration
+
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Novel> = try {
         val response = CollectionSearchRepository.novels(query, params.key)
         val visible = (if (requireUserPreferenceValue.isR18Enabled) response.novels
             else response.novels.filterNormalNovel()).filterBlockedTags().distinctBy { it.id }
-        visible.forEach { BookmarkState.updateNovelBookmarkDetail(it.id, true, query.restrict) }
+        visible.forEach { BookmarkState.updateNovelBookmarkDetail(it.id, true, query.restrict, bookmarkGeneration) }
         LoadResult.Page(visible, null, response.nextUrl?.takeIf { it.isNotBlank() && it != params.key })
     } catch (error: CancellationException) { throw error }
     catch (error: Exception) { LoadResult.Error(error) }

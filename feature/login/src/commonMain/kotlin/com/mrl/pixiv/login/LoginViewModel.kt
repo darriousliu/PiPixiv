@@ -1,16 +1,16 @@
 package com.mrl.pixiv.login
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.viewModelScope
 import com.mrl.pixiv.common.network.NetworkSettings
 import com.mrl.pixiv.common.network.withNetworkPreference
+import com.mrl.pixiv.common.repository.AccountSessionManager
 import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
-import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.common.viewmodel.ViewIntent
+import com.mrl.pixiv.common.viewmodel.state
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 
 @Stable
@@ -23,15 +23,14 @@ sealed class LoginAction : ViewIntent {
         val code: String,
         val codeVerifier: String,
         val networkPreference: NetworkSettings,
+        val canActivate: () -> Boolean,
     ) : LoginAction()
 }
 
-sealed class LoginEvent : SideEffect {
-    data object NavigateToMain : LoginEvent()
-}
-
 @KoinViewModel
-class LoginViewModel : BaseMviViewModel<LoginState, LoginAction>(
+class LoginViewModel(
+    private val sessions: AccountSessionManager,
+) : BaseMviViewModel<LoginState, LoginAction>(
     initialState = LoginState(),
 ) {
     override suspend fun handleIntent(intent: LoginAction) {
@@ -40,18 +39,20 @@ class LoginViewModel : BaseMviViewModel<LoginState, LoginAction>(
         }
     }
 
-    private fun login(intent: LoginAction.Login) =
-        viewModelScope.launch(Dispatchers.IO) {
-            updateState { copy(loading = true) }
-            val loggedIn = recordLoginAttempt {
-                withNetworkPreference({ intent.networkPreference }) {
-                    AuthManager.login(intent.code, intent.codeVerifier)
+    private suspend fun login(intent: LoginAction.Login) {
+        if (state.loading || !intent.canActivate()) return
+        updateState { copy(loading = true) }
+        try {
+            recordLoginAttempt {
+                val response = withContext(Dispatchers.IO) {
+                    withNetworkPreference({ intent.networkPreference }) {
+                        AuthManager.login(intent.code, intent.codeVerifier)
+                    }
                 }
+                sessions.addOrUpdate(response, intent.canActivate)
             }
-            if (loggedIn) {
-                sendEffect(LoginEvent.NavigateToMain)
-            } else {
-                updateState { copy(loading = false) }
-            }
+        } finally {
+            updateState { copy(loading = false) }
         }
+    }
 }

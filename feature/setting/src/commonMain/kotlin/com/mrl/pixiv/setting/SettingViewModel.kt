@@ -1,6 +1,8 @@
 package com.mrl.pixiv.setting
 
 import com.mrl.pixiv.common.data.setting.UserPreference
+import com.mrl.pixiv.common.mmkv.AccountStore
+import com.mrl.pixiv.common.repository.AccountSessionManager
 import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.util.RStrings
@@ -18,7 +20,9 @@ sealed class SettingAction : ViewIntent {
 }
 
 @KoinViewModel
-class SettingViewModel : BaseMviViewModel<SettingState, SettingAction>(
+class SettingViewModel(
+    private val sessions: AccountSessionManager,
+) : BaseMviViewModel<SettingState, SettingAction>(
     initialState = SettingState,
 ) {
     override suspend fun handleIntent(intent: SettingAction) {
@@ -31,7 +35,10 @@ class SettingViewModel : BaseMviViewModel<SettingState, SettingAction>(
     }
 
     fun logout() {
-        AuthManager.logout()
+        val userId = AccountStore.activeUserId
+        launchUI(onError = ::handleError) {
+            sessions.remove(userId, deleteLocalData = false)
+        }
     }
 
     fun savePictureSourceHost(host: String) {

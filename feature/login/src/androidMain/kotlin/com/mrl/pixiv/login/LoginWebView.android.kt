@@ -1,5 +1,6 @@
 package com.mrl.pixiv.login
 
+import android.webkit.CookieManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import dev.nucleusframework.webview.web.WebViewNavigator
 import dev.nucleusframework.webview.web.WebViewState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.currentCoroutineContext
@@ -42,15 +44,16 @@ internal actual fun LoginWebView(
     state: WebViewState,
     navigator: WebViewNavigator,
     bypassSetting: BypassSetting,
+    addAccount: Boolean,
     onError: (Throwable) -> Unit,
     modifier: Modifier,
     onCreated: (NativeWebView) -> Unit,
     content: @Composable () -> Unit,
 ) {
     val currentOnError by rememberUpdatedState(onError)
-    var routeReady by remember(state, bypassSetting) { mutableStateOf(false) }
-    val released = remember(state, bypassSetting) { CompletableDeferred<Unit>() }
-    LaunchedEffect(state, bypassSetting) {
+    var routeReady by remember(state, bypassSetting, addAccount) { mutableStateOf(false) }
+    val released = remember(state, bypassSetting, addAccount) { CompletableDeferred<Unit>() }
+    LaunchedEffect(state, bypassSetting, addAccount) {
         loginWebViewProxy.withLock {
             var controller: ProxyController? = null
             try {
@@ -61,6 +64,16 @@ internal actual fun LoginWebView(
                 } else if (bypassSetting != BypassSetting.System) {
                     currentOnError(WebLoginRouteUnavailableException())
                     return@withLock
+                }
+                if (addAccount) {
+                    currentCoroutineContext().ensureActive()
+                    try {
+                        withContext(NonCancellable) { clearLoginCookies() }
+                    } catch (error: RuntimeException) {
+                        if (error is CancellationException) throw error
+                        currentOnError(error)
+                        return@withLock
+                    }
                 }
                 currentCoroutineContext().ensureActive()
                 routeReady = true
@@ -90,6 +103,15 @@ internal actual fun LoginWebView(
         onDispose = { released.complete(Unit) },
         content = content,
     )
+}
+
+// Login is the only Android WebView in the app. Wait for the shared store before loading Pixiv.
+private suspend fun clearLoginCookies() {
+    val cookies = CookieManager.getInstance()
+    suspendCancellableCoroutine { continuation ->
+        cookies.removeAllCookies { continuation.resume(Unit) }
+    }
+    withContext(Dispatchers.IO) { cookies.flush() }
 }
 
 private suspend fun ProxyController.restoreSystemRoute() {

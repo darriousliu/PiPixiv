@@ -61,6 +61,7 @@ internal actual fun LoginWebView(
     state: WebViewState,
     navigator: WebViewNavigator,
     bypassSetting: BypassSetting,
+    addAccount: Boolean,
     onError: (Throwable) -> Unit,
     modifier: Modifier,
     onCreated: (NativeWebView) -> Unit,
@@ -73,6 +74,8 @@ internal actual fun LoginWebView(
         }
         return
     }
+    // The native factory reads this before it creates the desktop WebView.
+    state.webSettings.desktopWebSettings.incognito = addAccount
     if (!System.getProperty("os.name").startsWith("Windows")) {
         WebView(
             state = state,

@@ -2,6 +2,7 @@ package com.mrl.pixiv.login
 
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.analytics.recordCrashOperation
+import com.mrl.pixiv.common.router.NavigationManager
 import io.ktor.http.Url
 import kotlinx.coroutines.CancellationException
 import okio.ByteString.Companion.toByteString
@@ -44,6 +45,8 @@ fun checkUri(url: String): Pair<String, String>? {
     }
     return null
 }
+
+internal fun NavigationManager.canFinishLogin(): Boolean = entryId == null || entryId == topEntryId
 
 internal suspend fun recordLoginAttempt(login: suspend () -> Unit): Boolean {
     recordCrashOperation("LoginStarted")

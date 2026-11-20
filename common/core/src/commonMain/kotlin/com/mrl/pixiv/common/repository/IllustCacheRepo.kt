@@ -14,4 +14,6 @@ object IllustCacheRepo {
     fun removeList(key: String) {
         cache.remove(key)
     }
+
+    fun clear() = cache.clear()
 }

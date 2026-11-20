@@ -86,6 +86,9 @@ class LegacyAccountPreferencesMigration(
             return@withAccountStorageLock fields.result(LegacyPreferenceOutcome.Corrupted, "accounts" to 0L)
         }
         val profile = fields.userInfo()
+        if (profile?.user?.id in sessions.removedUserIds) {
+            return@withAccountStorageLock fields.result(LegacyPreferenceOutcome.Skipped, "accounts" to 0L)
+        }
         val refreshToken = fields.token("userRefreshToken")
         val accessToken = fields.token("userAccessToken")
         val expiresAt = fields.expirationTime()
@@ -126,6 +129,9 @@ class LegacyAccountPreferencesMigration(
             val fields = LegacyFields(legacy)
             val preference = fields.read<UserPreference>("userPreference")
                 ?: return@withAccountStorageLock fields.result(fields.emptyOutcome())
+            if (targetUserId == null && legacyUserId() in sessions.discardedLocalUserIds) {
+                return@withAccountStorageLock fields.result(LegacyPreferenceOutcome.Done, copySettings(preference, null))
+            }
             val userId = resolveTarget(targetUserId, allowLegacyUserId)
             val counts = copySettings(preference, userId)
             val needsUser = userId == null &&
@@ -138,6 +144,9 @@ class LegacyAccountPreferencesMigration(
             val fields = LegacyFields(legacy)
             val data = fields.searchAndTags()
             if (!data.hasData()) return@withAccountStorageLock fields.result(fields.emptyOutcome(), data.counts())
+            if (targetUserId == null && legacyUserId() in sessions.discardedLocalUserIds) {
+                return@withAccountStorageLock fields.result(LegacyPreferenceOutcome.Skipped)
+            }
             val userId = resolveTarget(targetUserId, allowLegacyUserId)
                 ?: return@withAccountStorageLock fields.result(LegacyPreferenceOutcome.NeedsUser, data.counts())
             fields.result(LegacyPreferenceOutcome.Done, mergeSearchAndTags(account(userId), data).counts())
@@ -146,7 +155,8 @@ class LegacyAccountPreferencesMigration(
     fun migrateSeriesProgress(): LegacyPreferenceResult = withAccountStorageLock {
         val fields = LegacyFields(app)
         val byAccount = fields.seriesProgress().groupSeriesProgress()
-        val rows = byAccount.entries.sumOf { (userId, progress) ->
+        val discarded = sessions.discardedLocalUserIds
+        val rows = byAccount.filterKeys { it !in discarded }.entries.sumOf { (userId, progress) ->
             mergeSeriesProgress(account(userId), progress)
         }
         fields.result(

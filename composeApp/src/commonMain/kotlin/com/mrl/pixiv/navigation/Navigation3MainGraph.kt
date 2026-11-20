@@ -139,10 +139,12 @@ fun Navigation3MainGraph(
         entry<Destination.LoginOption> {
             LoginOptionScreen()
         }
+        entry<Destination.AddAccount> {
+            LoginOptionScreen(addAccount = true)
+        }
         // 登陆
         entry<Destination.Login> {
-            val startUrl = it.startUrl
-            LoginScreen(startUrl = startUrl)
+            LoginScreen(startUrl = it.startUrl, addAccount = it.addAccount)
         }
         // OAuth token登陆
         entry<Destination.OAuthLogin> {

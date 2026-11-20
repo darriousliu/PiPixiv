@@ -23,6 +23,7 @@ class LegacyAccountDataSplitter(
         item: LegacyAccountTableGroup,
         targetUserId: Long? = null,
         sourceUserId: Long? = null,
+        discardedUserIds: Set<Long> = emptySet(),
         onStep: (name: String, elapsedMs: Long, rows: Long) -> Unit = { _, _, _ -> },
     ): Boolean {
         if (!SystemFileSystem.exists(sourcePath)) return false
@@ -38,6 +39,7 @@ class LegacyAccountDataSplitter(
                 } ?: continue
                 foundTable = true
                 for (range in ranges) {
+                    if (range.userId in discardedUserIds) continue
                     rows += copyTable(table, columns, range, targetUserId)
                 }
             } catch (error: Exception) {

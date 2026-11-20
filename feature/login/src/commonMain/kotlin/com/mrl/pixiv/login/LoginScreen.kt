@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +38,7 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.login_other_methods
 import com.mrl.pixiv.strings.login_webview_failed
 import com.mrl.pixiv.strings.login_webview_route_unavailable
@@ -63,6 +63,7 @@ private enum class LoginWebViewFailure(val message: StringResource) {
 fun LoginScreen(
     startUrl: String,
     modifier: Modifier = Modifier,
+    addAccount: Boolean = false,
     viewModel: LoginViewModel = koinViewModel(),
     navigationManager: NavigationManager = currentNavigationManager(),
 ) {
@@ -84,7 +85,14 @@ fun LoginScreen(
             ): WebRequestInterceptResult {
                 val codePair = checkUri(request.url)
                 if (codePair != null) {
-                    viewModel.dispatch(LoginAction.Login(codePair.first, codePair.second, networkPreference))
+                    viewModel.dispatch(
+                        LoginAction.Login(
+                            codePair.first,
+                            codePair.second,
+                            networkPreference,
+                            navigationManager::canFinishLogin,
+                        )
+                    )
                     return WebRequestInterceptResult.Reject
                 }
                 return WebRequestInterceptResult.Allow
@@ -92,16 +100,6 @@ fun LoginScreen(
         }
     )
     val loadingState = webViewState.loadingState
-
-    LaunchedEffect(Unit) {
-        viewModel.sideEffect.collect {
-            when (it) {
-                is LoginEvent.NavigateToMain -> {
-                    navigationManager.loginToMainScreen()
-                }
-            }
-        }
-    }
 
     Scaffold(
         modifier = modifier
@@ -118,7 +116,7 @@ fun LoginScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                                contentDescription = null,
+                                contentDescription = stringResource(RStrings.back),
                             )
                         }
                     },
@@ -133,7 +131,11 @@ fun LoginScreen(
         if (failure != null) {
             LoginWebViewError(
                 message = failure.message,
-                onTryOtherMethods = navigationManager::navigateToLoginOptionScreen,
+                onTryOtherMethods = if (addAccount) {
+                    navigationManager::popBackStack
+                } else {
+                    navigationManager::navigateToLoginOptionScreen
+                },
                 modifier = Modifier.padding(it),
             )
             return@Scaffold
@@ -157,6 +159,7 @@ fun LoginScreen(
                 state = webViewState,
                 navigator = webViewNavigator,
                 bypassSetting = bypassSetting,
+                addAccount = addAccount,
                 onError = { error ->
                     if (webViewFailure == null) {
                         recordCrashOperation("LoginWebViewFailed")

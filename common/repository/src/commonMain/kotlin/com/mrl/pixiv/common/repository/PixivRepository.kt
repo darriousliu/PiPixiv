@@ -5,6 +5,7 @@ import com.mrl.pixiv.common.data.Constants.AUTH_HOST
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.auth.AuthTokenFieldReq
+import com.mrl.pixiv.common.data.auth.AuthTokenResp
 import com.mrl.pixiv.common.data.search.SearchIllustQuery
 import com.mrl.pixiv.common.data.search.SearchNovelQuery
 import com.mrl.pixiv.common.datasource.remote.AuthApi
@@ -17,9 +18,19 @@ import com.mrl.pixiv.common.datasource.remote.createPixivApi
 import com.mrl.pixiv.common.network.ApiClient
 import com.mrl.pixiv.common.network.AuthClient
 import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.serialize.JSON
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
 import io.ktor.util.AttributeKey
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
@@ -67,7 +78,7 @@ object PixivRepository : KoinComponent {
             authTokenFieldReq.refreshToken,
             authTokenFieldReq.getSecureUrl,
             authTokenFieldReq.includePolicy
-        )
+        ).readRefreshResponse()
     }
 
     suspend fun login(authTokenFieldReq: AuthTokenFieldReq) = withAuth {
@@ -451,4 +462,20 @@ object PixivRepository : KoinComponent {
 
     suspend fun postNovelMarkerDelete(novelId: Long) =
         withApi { it.postNovelMarkerDelete(novelId) }
+}
+
+internal class InvalidRefreshGrantException : IllegalStateException("The refresh token is invalid")
+
+private suspend fun HttpResponse.readRefreshResponse(): AuthTokenResp {
+    if (status.isSuccess()) return body()
+    if (status == HttpStatusCode.BadRequest) {
+        val error = try {
+            val payload = JSON.parseToJsonElement(bodyAsText()) as? JsonObject
+            (payload?.get("error") as? JsonPrimitive)?.contentOrNull
+        } catch (_: SerializationException) {
+            null
+        }
+        if (error == "invalid_grant") throw InvalidRefreshGrantException()
+    }
+    error("Token refresh returned HTTP ${status.value}")
 }

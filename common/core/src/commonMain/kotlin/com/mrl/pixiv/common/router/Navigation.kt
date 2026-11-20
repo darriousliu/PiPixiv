@@ -23,8 +23,12 @@ sealed class Destination : NavKey {
     data object LoginOption : Destination()
 
     @Serializable
+    data object AddAccount : Destination()
+
+    @Serializable
     data class Login(
         val startUrl: String,
+        val addAccount: Boolean = false,
     ) : Destination()
 
     @Serializable

@@ -4,6 +4,7 @@ import com.mrl.pixiv.common.data.auth.AuthTokenResp
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
 import de.jensklingenberg.ktorfit.http.POST
+import io.ktor.client.statement.HttpResponse
 
 interface AuthApi {
     @FormUrlEncoded
@@ -15,7 +16,7 @@ interface AuthApi {
         @Field("refresh_token") refreshToken: String,
         @Field("get_secure_url") getSecureUrl: Int,
         @Field("include_policy") includePolicy: Boolean,
-    ): AuthTokenResp
+    ): HttpResponse
 
     @FormUrlEncoded
     @POST("auth/token")

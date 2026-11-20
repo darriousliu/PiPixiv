@@ -88,6 +88,7 @@ val Destination.paneSpec: DestinationPaneSpec
         is Destination.PictureDeeplink -> picturePaneSpec
 
         Destination.LoginOption,
+        Destination.AddAccount,
         is Destination.Login,
         Destination.OAuthLogin,
         Destination.WebCookieLogin,

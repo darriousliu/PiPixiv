@@ -33,8 +33,8 @@ internal fun HttpClient.applyAppApiRequests(
         NetworkUtil.addAuthHeader(request, readAccessToken)
         var call = execute(request)
         if (call.response.status in HttpStatusCode.BadRequest..HttpStatusCode.RequestHeaderFieldTooLarge) {
-            readAccessToken()
-            NetworkUtil.addAuthHeader(request, readAccessToken)
+            // Keep the original account's credentials when retrying an in-flight request.
+            NetworkUtil.addAppHeaders(request)
             call = execute(request)
         }
         call

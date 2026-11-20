@@ -147,7 +147,6 @@ fun SettingScreen(
         onSignOut = {
             if (topEntryId != null && navigationManager.topEntryId == topEntryId) {
                 viewModel.logout()
-                navigationManager.navigateToLoginOptionScreen()
             }
         },
         appLinks = { appLinkItem() },

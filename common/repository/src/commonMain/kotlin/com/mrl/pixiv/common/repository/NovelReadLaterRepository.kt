@@ -26,8 +26,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -36,7 +39,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -85,6 +88,11 @@ data class NovelReadLaterKey(
 private data class ActiveTask(
     val key: NovelReadLaterKey,
     val attemptToken: String,
+    val job: Job,
+)
+
+private data class AccountQueue(
+    val userId: Long,
     val job: Job,
 )
 
@@ -178,24 +186,45 @@ class NovelReadLaterRepository(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val taskOwnershipMutex = Mutex()
     private var activeTask: ActiveTask? = null
+    private var activeQueue: AccountQueue? = null
 
     suspend fun withQueueClaimsPaused(block: suspend () -> Unit) {
         taskOwnershipMutex.withLock { block() }
+    }
+
+    suspend fun cancelAccountWork(userId: Long) {
+        val job = taskOwnershipMutex.withLock {
+            check(databases.current.value?.userId != userId) { "The account queue is still active." }
+            activeQueue?.takeIf { it.userId == userId }?.job
+        }
+        // The outer queue also restores the interrupted attempt before it finishes.
+        job?.cancelAndJoin()
     }
 
     init {
         scope.launch {
             databases.current.collectLatest { account ->
                 if (account == null) return@collectLatest
-                val dao = account.db.novelReadLaterDao()
-                dao.restoreInterrupted(currentTimeMillis())
-                combine(
-                    dao.observePendingCount(account.userId),
-                    AiLocalNetworkAccessGate.state,
-                ) { pendingCount, _ -> pendingCount }
-                    .collect { pendingCount ->
-                        if (pendingCount > 0) drainQueue(account)
+                val queue = AccountQueue(account.userId, currentCoroutineContext().job)
+                taskOwnershipMutex.withLock {
+                    if (databases.current.value !== account) return@collectLatest
+                    activeQueue = queue
+                }
+                try {
+                    val dao = account.db.novelReadLaterDao()
+                    dao.restoreInterrupted(currentTimeMillis())
+                    combine(
+                        dao.observePendingCount(account.userId),
+                        AiLocalNetworkAccessGate.state,
+                    ) { pendingCount, _ -> pendingCount }
+                        .collect { pendingCount ->
+                            if (pendingCount > 0) drainQueue(account)
+                        }
+                } finally {
+                    withContext(NonCancellable) {
+                        taskOwnershipMutex.withLock { activeQueue = null }
                     }
+                }
             }
         }
     }
@@ -465,7 +494,7 @@ class NovelReadLaterRepository(
                 "AI translation configuration changed. Retry the task to use the new configuration."
             }
 
-            val sourceContent = source.load(item.novelId)
+            val sourceContent = withContext(RequestAccount(item.userId)) { source.load(item.novelId) }
             val sourceText = sourceContent.text.trim()
             val sourceMd5 = buildNovelTranslationSourceHash(
                 sourceText = sourceText,

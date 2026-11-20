@@ -18,6 +18,7 @@ class AccountHandle(val userId: Long, val db: AccountDatabase)
 class AccountDatabaseProvider(
     private val accountsRoot: () -> Path = ::accountStorageRoot,
 ) {
+    private val accountFilesMutex = Mutex()
     private val mutex = Mutex()
     private val handles = mutableMapOf<Long, AccountHandle>()
     private val currentHandle = MutableStateFlow<AccountHandle?>(null)
@@ -32,8 +33,10 @@ class AccountDatabaseProvider(
         openLocked(userId)
     }
 
-    suspend fun publish(userId: Long?) = mutex.withLock {
-        currentHandle.value = userId?.let { openLocked(it) }
+    suspend fun publish(userId: Long?, beforePublish: () -> Unit = {}) = mutex.withLock {
+        val handle = userId?.let { openLocked(it) }
+        beforePublish()
+        currentHandle.value = handle
     }
 
     suspend fun publish(userId: Long?, onFailure: (Exception) -> Unit) = mutex.withLock {
@@ -44,11 +47,15 @@ class AccountDatabaseProvider(
         currentHandle.value = null
     }
 
-    suspend fun closeAndDelete(userId: Long) = withContext(Dispatchers.IO) {
+    suspend fun <T> withAccountFilesLocked(block: suspend () -> T): T =
+        accountFilesMutex.withLock { block() }
+
+    suspend fun closeAndDelete(userId: Long, closeAccountPreferences: () -> Unit = {}) = withContext(Dispatchers.IO) {
         mutex.withLock {
             val directory = accountDirectory(userId)
             if (currentHandle.value?.userId == userId) currentHandle.value = null
             handles.remove(userId)?.db?.close()
+            closeAccountPreferences()
             val parent = checkNotNull(directory.parent)
             if (SystemFileSystem.exists(parent)) {
                 deleteAccountDirectory(Path(SystemFileSystem.resolve(parent), directory.name))

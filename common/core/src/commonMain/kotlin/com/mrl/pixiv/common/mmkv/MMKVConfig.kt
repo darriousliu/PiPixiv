@@ -30,9 +30,12 @@ private inline fun <T> mmkvOperation(block: () -> T): T = try {
     throw MMKVStorageException("MMKV storage operation failed", error)
 }
 
-internal inline fun <T> MMKVOwner.accessMMKV(block: MMKV_KMP.() -> T): T {
-    val store = kv
-    return mmkvOperation { store.block() }
+internal fun <T> MMKVOwner.accessMMKV(block: MMKV_KMP.() -> T): T {
+    fun access(): T {
+        val store = kv
+        return mmkvOperation { store.block() }
+    }
+    return if (this is MMKVUser) withAccountStorageLock(::access) else access()
 }
 
 /**
@@ -52,11 +55,23 @@ class AccountMMKVOwner(
     override val userId: Long,
     private val filesDirectory: String,
 ) : MMKVUser {
-    override val kv: MMKV_KMP by lazy {
+    private var closed = false
+    private val instance = lazy {
         require(userId > 0)
         val directory = Path(filesDirectory, "accounts", userId.toString(), "mmkv")
         SystemFileSystem.createDirectories(directory)
         mmkvOperation { mmkvWithID(id, rootPath = directory.toString()) }
+    }
+
+    override val kv: MMKV_KMP
+        get() = withAccountStorageLock {
+            check(!closed) { "The account MMKV owner has been closed." }
+            instance.value
+        }
+
+    internal fun close() {
+        closed = true
+        if (instance.isInitialized()) mmkvOperation { instance.value.close() }
     }
 }
 
@@ -68,6 +83,14 @@ fun accountMMKVOwner(userId: Long): MMKVOwner = withAccountStorageLock {
     accountInstances.getOrPut(userId) {
         AccountMMKVOwner(userId, FileKit.filesDir.toKotlinxIoPath().toString())
     }
+}
+
+fun openAccountMMKV(userId: Long) {
+    accountMMKVOwner(userId).kv
+}
+
+fun closeAccountMMKV(userId: Long) {
+    withAccountStorageLock { accountInstances.remove(userId)?.close() }
 }
 
 fun mmkvOwner(id: String, rootPath: String? = null): MMKVOwner = object : MMKVOwner {

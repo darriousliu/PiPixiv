@@ -76,6 +76,27 @@ class StartupMigrationTest {
     }
 
     @Test
+    fun automaticRetryDoesNotRestoreDeletedAccountHistory() = withFixture { directory, manifest ->
+        val userId = manifest.userIds.first()
+        MigrationTestRun(directory).useRun { run ->
+            run.debug(MigrationDebug(fail = setOf("BrowsingHistory")))
+            assertTrue(run.start())
+            assertFailed(run, MigrationItem.BrowsingHistory, 1)
+            run.preferences.sessions.remove(userId, null, 0L, discardLocalData = true)
+            assertTrue(run.files.resolve("accounts/$userId").exists())
+        }
+        MigrationTestRun(directory).useRun { run ->
+            run.debug(null)
+            assertTrue(run.start())
+            assertFalse(run.files.resolve("accounts/$userId").exists())
+            run.migration.maintainAfterHome(run.storage)
+
+            assertEquals(ItemStatus.Done, run.status(MigrationItem.BrowsingHistory))
+            assertFalse(run.files.resolve("accounts/$userId").exists())
+        }
+    }
+
+    @Test
     fun cleanupWaitsForResolutionAndAnotherNormalLaunch() = withFixture { directory, _ ->
         MigrationTestRun(directory).useRun { run ->
             run.debug(MigrationDebug(fail = setOf("GlobalDatabase")))

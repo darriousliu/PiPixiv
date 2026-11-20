@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -18,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 private val ioScope by lazy { CoroutineScope(Dispatchers.IO) }
-internal val mainScope by lazy { CoroutineScope(Dispatchers.Main) }
+internal val mainScope by lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main) }
 
 /**
  * ProcessLifecycleScope

@@ -54,7 +54,9 @@ class NavigationSerializationTest {
     fun everyDestinationCanBeSavedAndRestoredWithTheDefaultJsonDiscriminator() {
         val destinations = listOf(
             Destination.LoginOption,
+            Destination.AddAccount,
             Destination.Login("https://example.test/login"),
+            Destination.Login("https://example.test/login", addAccount = true),
             Destination.OAuthLogin,
             Destination.WebCookieLogin,
             Destination.Main,

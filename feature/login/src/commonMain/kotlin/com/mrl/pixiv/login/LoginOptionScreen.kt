@@ -9,15 +9,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,7 +44,9 @@ import com.mrl.pixiv.common.util.Platform
 import com.mrl.pixiv.common.util.RDrawables
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.platform
+import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.ic_launcher
+import com.mrl.pixiv.strings.network_setting
 import com.mrl.pixiv.strings.sign_in
 import com.mrl.pixiv.strings.sign_in_with_cookie
 import com.mrl.pixiv.strings.sign_in_with_token
@@ -54,6 +60,7 @@ import org.jetbrains.compose.resources.stringResource
 fun LoginOptionScreen(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager = currentNavigationManager(),
+    addAccount: Boolean = false,
 ) {
     var availability by remember {
         mutableStateOf(
@@ -71,12 +78,17 @@ fun LoginOptionScreen(
 
     LoginOptionContent(
         availability = availability,
-        onSignIn = { navigationManager.navigate(Destination.Login(generateWebViewUrl(false))) },
-        onSignUp = { navigationManager.navigate(Destination.Login(generateWebViewUrl(true))) },
+        onSignIn = {
+            navigationManager.navigate(Destination.Login(generateWebViewUrl(false), addAccount))
+        },
+        onSignUp = {
+            navigationManager.navigate(Destination.Login(generateWebViewUrl(true), addAccount))
+        },
         onTokenLogin = { navigationManager.navigate(Destination.OAuthLogin) },
         onCookieLogin = { navigationManager.navigate(Destination.WebCookieLogin) },
         onNetworkSettings = navigationManager::navigateToNetworkSettingScreen,
         modifier = modifier,
+        onBack = if (addAccount) navigationManager::popBackStack else null,
     )
 }
 
@@ -89,17 +101,41 @@ internal fun LoginOptionContent(
     onCookieLogin: () -> Unit,
     onNetworkSettings: () -> Unit,
     modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
 ) {
     Scaffold(
         modifier = modifier,
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNetworkSettings,
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Settings,
-                    contentDescription = null
+        topBar = {
+            if (onBack != null) {
+                TopAppBar(
+                    title = {},
+                    navigationIcon = {
+                        IconButton(onClick = onBack, shapes = IconButtonDefaults.shapes()) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                contentDescription = stringResource(RStrings.back),
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = onNetworkSettings, shapes = IconButtonDefaults.shapes()) {
+                            Icon(
+                                imageVector = Icons.Rounded.Settings,
+                                contentDescription = stringResource(RStrings.network_setting),
+                            )
+                        }
+                    },
                 )
+            }
+        },
+        floatingActionButton = {
+            if (onBack == null) {
+                FloatingActionButton(onClick = onNetworkSettings) {
+                    Icon(
+                        imageVector = Icons.Rounded.Settings,
+                        contentDescription = stringResource(RStrings.network_setting),
+                    )
+                }
             }
         }
     ) {
@@ -107,7 +143,12 @@ internal fun LoginOptionContent(
             modifier = Modifier
                 .padding(it)
                 .verticalScroll(rememberScrollState())
-                .padding(start = 16.dp, top = 75.dp, end = 16.dp, bottom = 96.dp),
+                .padding(
+                    start = 16.dp,
+                    top = if (onBack == null) 75.dp else 24.dp,
+                    end = 16.dp,
+                    bottom = if (onBack == null) 96.dp else 24.dp,
+                ),
             verticalArrangement = 10f.spaceBy,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

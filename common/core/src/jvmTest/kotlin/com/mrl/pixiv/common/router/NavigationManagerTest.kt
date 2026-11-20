@@ -218,6 +218,26 @@ class NavigationManagerTest {
     }
 
     @Test
+    fun cancellingAddAccountRestoresTheOriginalSplitVisits() {
+        val navigation = NavigationManager(Destination.Main)
+        navigation.navigateToSettingScreen()
+        val settings = navigation.forEntry(navigation.backStack.last().entryId)
+        settings.navigateToNetworkSettingScreen()
+        val original = navigation.backStack
+
+        settings.navigateToAddAccountScreen()
+        assertEquals(Destination.AddAccount, navigation.currentDestination)
+        assertNull(navigation.backStack.last().ownerEntryId)
+        val addAccount = navigation.forEntry(navigation.backStack.last().entryId)
+        addAccount.navigate(Destination.Login("https://example.test/login", addAccount = true))
+
+        navigation.popBackStack()
+        assertEquals(Destination.AddAccount, navigation.currentDestination)
+        addAccount.popBackStack()
+        assertEquals(original, navigation.backStack)
+    }
+
+    @Test
     fun imagePreviewReturnsToTheSameSplitVisits() {
         val navigation = NavigationManager(Destination.Following(1))
         navigation.navigateToProfileDetailScreen(2)

@@ -256,6 +256,10 @@ class NavigationManager(
         store.records = listOf(newRecord(Destination.LoginOption))
     }
 
+    fun navigateToAddAccountScreen() {
+        navigate(Destination.AddAccount)
+    }
+
     fun navigateToUserIllustScreen(userId: Long, initialType: Type = Type.Illust) {
         navigate(destination = Destination.UserArtwork(userId, initialType))
     }
