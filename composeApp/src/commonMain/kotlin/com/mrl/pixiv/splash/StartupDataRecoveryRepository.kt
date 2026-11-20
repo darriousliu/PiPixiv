@@ -10,8 +10,10 @@ import com.mrl.pixiv.common.repository.LegacyBlocks
 import com.mrl.pixiv.common.repository.LegacyPreferenceOutcome
 import com.mrl.pixiv.common.repository.LegacyPreferencesPackage
 import com.mrl.pixiv.common.repository.recovery.DataRecoveryRepository
+import com.mrl.pixiv.common.repository.recovery.ItemStatus
 import com.mrl.pixiv.common.repository.recovery.MigrationItem
 import com.mrl.pixiv.common.util.BackupArchive
+import com.mrl.pixiv.common.util.BackupSpaceException
 import com.mrl.pixiv.common.util.ZipUtil
 import com.mrl.pixiv.common.util.deleteRecursively
 import io.github.vinceglb.filekit.FileKit
@@ -43,9 +45,14 @@ class StartupDataRecoveryRepository(
     override val hasPending get() = migration.hasPending
     override val recoverAfterLogin get() = migration.storage.preferences.sessions.recoverAfterLogin
 
+    override suspend fun needsTargetAccount(item: MigrationItem): Boolean = withContext(Dispatchers.IO) {
+        migration.awaitReady()
+        item in legacyOwnerItems && migration.storage.preferences.legacyUserId() == null
+    }
+
     override suspend fun retry(item: MigrationItem, targetUserId: Long?) = withContext(Dispatchers.IO) {
         migration.awaitReady()
-        migration.retryItem(migration.storage, item, targetUserId)
+        migration.retryItem(migration.storage, item, targetUserId, requireSavedTarget = true)
     }
 
     override suspend fun exportLegacyData(target: PlatformFile) = withContext(Dispatchers.IO) {
@@ -71,8 +78,8 @@ class StartupDataRecoveryRepository(
                     else -> null
                 }
                 var databaseCounts = emptyMap<String, Long>()
+                checkArchiveExportSpace(work, storage, path, legacyPath, hasLegacy)
                 if (sourceName != null) {
-                    checkArchiveExportSpace(work, storage, path, legacyPath, hasLegacy)
                     val packagedDatabase = (root / archiveDatabase).toKotlinxIoPath()
                     for (suffix in databaseSuffixes) {
                         val source = if (hasLegacy) databaseSibling(legacyPath, suffix) else backupSidecar(path, suffix)
@@ -106,14 +113,39 @@ class StartupDataRecoveryRepository(
         importLegacyPackage(migration.storage, source, targetUserId)
     }
 
+    override suspend fun importLegacyPackage(
+        source: PlatformFile,
+        targetUserId: Long,
+        item: MigrationItem,
+    ): ItemStatus = withContext(Dispatchers.IO) {
+        require(item != MigrationItem.Session) { "Legacy archives do not contain sign-in credentials" }
+        migration.awaitReady()
+        importLegacyPackageItems(migration.storage, source, targetUserId, setOf(item), requireSavedTarget = true)
+            .getValue(item)
+    }
+
     internal suspend fun importLegacyPackage(
         storage: MigrationStorage,
         source: PlatformFile,
         targetUserId: Long,
         importBlocks: suspend (LegacyBlocks) -> Boolean = BlockingRepositoryV2::importLegacyBlocks,
     ) {
+        importLegacyPackageItems(storage, source, targetUserId, legacyPackageItems, importBlocks = importBlocks)
+    }
+
+    internal suspend fun importLegacyPackageItems(
+        storage: MigrationStorage,
+        source: PlatformFile,
+        targetUserId: Long,
+        selectedItems: Set<MigrationItem>,
+        requireSavedTarget: Boolean = false,
+        importBlocks: suspend (LegacyBlocks) -> Boolean = BlockingRepositoryV2::importLegacyBlocks,
+    ): Map<MigrationItem, ItemStatus> {
         require(targetUserId > 0)
-        migration.withRecoveryStorage { database, accounts ->
+        return migration.withRecoveryStorage { database, accounts ->
+            check(!requireSavedTarget || storage.preferences.sessions.find(targetUserId) != null) {
+                "The recovery target account was removed"
+            }
             withWorkDirectory { work ->
                 val archive = BackupArchive.open(source, work / "legacy.zip", zipUtil, storage.availableBytes)
                 val manifest = migrationJson.decodeFromString<LegacyPackageManifest>(
@@ -123,8 +155,12 @@ class StartupDataRecoveryRepository(
                 val mmkv = migrationJson.decodeFromString<LegacyPackagePreferences>(
                     archive.requiredText(archiveMetadata, 16 * 1024 * 1024),
                 )
-                val attached = (work / archiveDatabase).toKotlinxIoPath()
-                val originalIds = if (manifest.sourceDatabase != null) {
+                val attached = (work / archiveDatabase).toKotlinxIoPath().takeIf {
+                    manifest.sourceDatabase != null &&
+                        (selectedItems.any { item -> item in archiveDatabaseItems } ||
+                            MigrationItem.SeriesProgress in selectedItems && mmkv.preferences.sourceUserId == null)
+                }
+                val originalIds = if (attached != null) {
                     archive.extract("$archiveDirectory/$archiveDatabase", work / archiveDatabase)
                     for (suffix in databaseSuffixes.drop(1)) {
                         val name = "$archiveDirectory/$archiveDatabase$suffix"
@@ -138,10 +174,12 @@ class StartupDataRecoveryRepository(
                 val originalId = mmkv.preferences.sourceUserId
                     ?: targetUserId.takeIf { it in originalIds }
                     ?: originalIds.singleOrNull()
+                val imported = mutableMapOf<MigrationItem, ItemStatus>()
                 val failed = mutableSetOf<MigrationItem>()
-                suspend fun importItem(item: MigrationItem, restore: suspend () -> Unit) {
+                suspend fun importItem(item: MigrationItem, restore: suspend () -> Boolean) {
+                    if (item !in selectedItems) return
                     try {
-                        restore()
+                        imported[item] = if (restore()) ItemStatus.Done else ItemStatus.Skipped
                     } catch (error: Exception) {
                         if (error is CancellationException) throw error
                         failed += item
@@ -149,29 +187,40 @@ class StartupDataRecoveryRepository(
                     }
                 }
                 val prefs = storage.preferences
-                importItem(MigrationItem.Settings) { prefs.importSettings(mmkv.preferences, targetUserId) }
-                importItem(MigrationItem.SearchAndTags) { prefs.importSearchAndTags(mmkv.preferences, targetUserId) }
+                importItem(MigrationItem.Settings) {
+                    prefs.importSettings(mmkv.preferences, targetUserId).outcome == LegacyPreferenceOutcome.Done
+                }
+                importItem(MigrationItem.SearchAndTags) {
+                    prefs.importSearchAndTags(mmkv.preferences, targetUserId).outcome == LegacyPreferenceOutcome.Done
+                }
                 importItem(MigrationItem.SeriesProgress) {
                     val status = prefs.importSeriesProgress(mmkv.preferences, targetUserId, originalId)
                     check(status.outcome != LegacyPreferenceOutcome.NeedsUser) { "Legacy series belongs to multiple accounts" }
+                    status.outcome == LegacyPreferenceOutcome.Done
                 }
-                if (manifest.sourceDatabase != null) {
-                    val global = LegacyGlobalDatabaseMigration(database)
-                    importItem(MigrationItem.GlobalDatabase) { global.restoreGlobalTables(attached) }
-                    importItem(MigrationItem.TranslationCache) { global.restoreTranslations(attached) }
-                    val splitter = LegacyAccountDataSplitter(database, accounts, attached)
-                    for (item in archiveAccountItems) {
-                        importItem(item) {
-                            require(originalId != null || originalIds.isEmpty()) {
-                                "Legacy archive has no unique source account"
-                            }
-                            if (originalId != null) splitter.split(item.tableGroup, targetUserId, originalId)
+                val global = LegacyGlobalDatabaseMigration(database)
+                importItem(MigrationItem.GlobalDatabase) {
+                    if (attached == null) false else {
+                        global.restoreGlobalTables(attached)
+                        true
+                    }
+                }
+                importItem(MigrationItem.TranslationCache) {
+                    attached != null && global.restoreTranslations(attached) != null
+                }
+                for (item in archiveAccountItems) {
+                    importItem(item) {
+                        require(originalId != null || originalIds.isEmpty()) {
+                            "Legacy archive has no unique source account"
                         }
+                        attached != null && originalId != null &&
+                            LegacyAccountDataSplitter(database, accounts, attached).split(item.tableGroup, targetUserId, originalId)
                     }
                 }
                 importItem(MigrationItem.LegacyBlocking) { importBlocks(mmkv.blocks) }
                 storage.reloadPreferences(prefs.sessions.activeUserId.takeIf { it > 0 })
                 check(failed.isEmpty()) { "Could not recover: ${failed.joinToString { it.name }}" }
+                imported
             }
         }
     }
@@ -192,6 +241,9 @@ private const val archiveMetadata = "legacy.json"
 private const val archiveDatabase = "pixiv_db"
 
 private val archiveAccountItems = listOf(MigrationItem.BrowsingHistory, MigrationItem.ReadingProgress, MigrationItem.ReadLater)
+private val archiveDatabaseItems = archiveAccountItems + listOf(MigrationItem.GlobalDatabase, MigrationItem.TranslationCache)
+private val legacyPackageItems = MigrationItem.entries.filterNot { it == MigrationItem.Session }.toSet()
+private val legacyOwnerItems = setOf(MigrationItem.Settings, MigrationItem.SearchAndTags)
 
 @Serializable
 private data class LegacyPackageManifest(
@@ -222,15 +274,15 @@ private fun checkArchiveExportSpace(
         SystemFileSystem.metadataOrNull(file)?.size ?: 0L
     }
     val available = storage.availableBytes(work.toKotlinxIoPath().toString())
-    check(available >= 50 * 1024 * 1024 && total <= (available - 50 * 1024 * 1024) / 2) {
-        "Not enough storage to export legacy archive"
+    if (available < 50 * 1024 * 1024 || total > (available - 50 * 1024 * 1024) / 2) {
+        throw BackupSpaceException()
     }
 }
 
-private suspend fun withWorkDirectory(block: suspend (PlatformFile) -> Unit) {
+private suspend fun <T> withWorkDirectory(block: suspend (PlatformFile) -> T): T {
     val work = (FileKit.cacheDir / "legacy-recovery-${Uuid.random()}").also { it.createDirectories() }
     try {
-        block(work)
+        return block(work)
     } finally {
         withContext(NonCancellable) { work.deleteRecursively() }
     }

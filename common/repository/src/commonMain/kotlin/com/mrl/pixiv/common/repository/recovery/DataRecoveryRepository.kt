@@ -47,9 +47,11 @@ interface DataRecoveryRepository {
     val hasPending: StateFlow<Boolean>
     val recoverAfterLogin: StateFlow<Boolean>
 
+    suspend fun needsTargetAccount(item: MigrationItem): Boolean
     suspend fun retry(item: MigrationItem, targetUserId: Long? = null): ItemStatus
     suspend fun exportLegacyData(target: PlatformFile)
     suspend fun importLegacyPackage(source: PlatformFile, targetUserId: Long)
+    suspend fun importLegacyPackage(source: PlatformFile, targetUserId: Long, item: MigrationItem): ItemStatus
     suspend fun abandonAll()
     fun clearRecoverAfterLogin()
 }

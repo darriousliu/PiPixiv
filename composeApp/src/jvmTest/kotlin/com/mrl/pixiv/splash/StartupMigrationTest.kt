@@ -123,6 +123,23 @@ class StartupMigrationTest {
     }
 
     @Test
+    fun abandoningBeforeHomeSchedulesCleanupForTheNextSuccessfulLaunch() = withFixture { directory, _ ->
+        MigrationTestRun(directory).useRun { run ->
+            run.debug(MigrationDebug(fail = setOf("BrowsingHistory")))
+            assertTrue(run.start())
+            run.migration.abandonAll(run.storage)
+            assertEquals(ItemStatus.Abandoned, run.status(MigrationItem.BrowsingHistory))
+            assertTrue(directory.resolve("pixiv_db.bak").exists())
+        }
+        MigrationTestRun(directory).useRun { run ->
+            run.debug(null)
+            assertTrue(run.start())
+            assertNotNull(run.migration.maintainAfterHome(run.storage))
+            assertFalse(directory.resolve("pixiv_db.bak").exists())
+        }
+    }
+
+    @Test
     fun normalCleanupDropsAccountTablesOnlyAfterAnotherNormalLaunch() = withFixture { directory, _ ->
         MigrationTestRun(directory).useRun { run ->
             assertTrue(run.start())
@@ -153,10 +170,20 @@ class StartupMigrationTest {
             assertFalse(metadata.contains(session.accessToken))
             assertFalse(metadata.contains(session.refreshToken))
             val targetId = manifest.userIds.max() + 1
+            val accountFile = File(run.accounts.databasePath(targetId).toString())
+            val selected = run.recovery.importLegacyPackageItems(
+                run.storage,
+                PlatformFile(archive),
+                targetId,
+                selectedItems = setOf(MigrationItem.BrowsingHistory),
+            ) { error("Importing history must not touch legacy blocks") }
+            assertEquals(mapOf(MigrationItem.BrowsingHistory to ItemStatus.Done), selected)
+            BundledSQLiteDriver().open(accountFile.path).use { target ->
+                assertEquals(0L, target.count("SELECT COUNT(*) FROM novel_reading_progress"))
+            }
             repeat(2) {
                 run.recovery.importLegacyPackage(run.storage, PlatformFile(archive), targetId) { false }
             }
-            val accountFile = File(run.accounts.databasePath(targetId).toString())
             BundledSQLiteDriver().open(accountFile.path).use { target ->
                 assertEquals(manifest.accountRows.getValue("browsing_history_illust"),
                     target.count("SELECT COUNT(*) FROM browsing_history_illust WHERE userId = $targetId"))
@@ -175,7 +202,11 @@ class StartupMigrationTest {
             assertFailed(run, MigrationItem.Session, 1)
             assertEquals(ItemStatus.Pending(MigrationReason.Corrupted), run.status(MigrationItem.Settings))
             assertEquals(ItemStatus.Pending(MigrationReason.Corrupted), run.status(MigrationItem.SearchAndTags))
-            assertTrue(run.migration.retryItem(run.storage, MigrationItem.SearchAndTags, null) is ItemStatus.Failed)
+            assertEquals(
+                ItemStatus.Failed(1, MigrationReason.Corrupted),
+                run.migration.retryItem(run.storage, MigrationItem.SearchAndTags, null),
+            )
+            assertFailed(run, MigrationItem.SearchAndTags, 1)
             assertEquals(ItemStatus.Done, run.migration.retryItem(run.storage, MigrationItem.SearchAndTags, manifest.userIds.first()))
         }
     }

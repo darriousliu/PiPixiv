@@ -94,6 +94,8 @@ val Destination.paneSpec: DestinationPaneSpec
         Destination.WebCookieLogin,
         is Destination.ImagePreview -> exclusivePaneSpec
 
+        is Destination.DataRecovery -> if (afterLogin) exclusivePaneSpec else detailPaneSpec
+
         is Destination.ProfileDetail,
         is Destination.NovelDetail,
         is Destination.Comment,
@@ -112,6 +114,7 @@ val Destination.paneSpec: DestinationPaneSpec
         Destination.BlockTag,
         Destination.CloudMute,
         Destination.BlockComments,
+        Destination.AccountManagement,
         Destination.AppData,
         Destination.AppLog,
         Destination.About -> detailPaneSpec

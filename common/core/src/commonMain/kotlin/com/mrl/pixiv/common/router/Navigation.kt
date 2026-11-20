@@ -78,6 +78,9 @@ sealed class Destination : NavKey {
     data object Setting : Destination()
 
     @Serializable
+    data object AccountManagement : Destination()
+
+    @Serializable
     data object NetworkSetting : Destination()
 
     @Serializable
@@ -173,6 +176,9 @@ sealed class Destination : NavKey {
 
     @Serializable
     data object AppData : Destination()
+
+    @Serializable
+    data class DataRecovery(val afterLogin: Boolean = false) : Destination()
 
     @Serializable
     data object Download : Destination()

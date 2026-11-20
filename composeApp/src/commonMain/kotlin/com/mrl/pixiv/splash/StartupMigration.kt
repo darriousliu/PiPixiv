@@ -73,6 +73,7 @@ class StartupMigration(
 
     private val slowUiShown = MutableStateFlow(false)
     private var enteredHome = false
+    private var cleanupDeferredUntilNextLaunch = false
     private var retryOnHome: Set<MigrationItem>? = null
     internal val storage by lazy {
         val legacy = mmkvOwner("pixiv.user")
@@ -125,7 +126,7 @@ class StartupMigration(
         val allResolved = items.value.values.all(ItemStatus::isResolved)
         var cleanupMs: Long? = null
         try {
-            if (allResolved && storage.cleanupEligible() && !storage.cleanupDone()) {
+            if (allResolved && !cleanupDeferredUntilNextLaunch && storage.cleanupEligible() && !storage.cleanupDone()) {
                 val start = TimeSource.Monotonic.markNow()
                 safeStep(storage, "cleanup") {
                     cleanup(storage)
@@ -149,23 +150,35 @@ class StartupMigration(
         return cleanupMs
     }
 
-    internal suspend fun retryItem(storage: MigrationStorage, item: MigrationItem, targetUserId: Long?): ItemStatus =
-        lock.withLock {
-            require(targetUserId == null || targetUserId > 0)
-            if (items.value.getValue(item).isResolved) return@withLock items.value.getValue(item)
-            val status = accounts.withAccountFilesLocked {
-                migrateItem(storage, item, readDebug(storage), targetUserId, manual = true)
+    internal suspend fun retryItem(
+        storage: MigrationStorage,
+        item: MigrationItem,
+        targetUserId: Long?,
+        requireSavedTarget: Boolean = false,
+    ): ItemStatus = lock.withLock {
+        require(targetUserId == null || targetUserId > 0)
+        if (items.value.getValue(item).isResolved) return@withLock items.value.getValue(item)
+        val status = accounts.withAccountFilesLocked {
+            if (requireSavedTarget && targetUserId != null) {
+                check(storage.preferences.sessions.find(targetUserId) != null) { "The recovery target account was removed" }
             }
-            if (enteredHome && items.value.values.all(ItemStatus::isResolved)) storage.markCleanupEligible()
-            status
+            migrateItem(storage, item, readDebug(storage), targetUserId, manual = true)
         }
+        if (items.value.values.all(ItemStatus::isResolved)) deferCleanup(storage)
+        status
+    }
 
     internal suspend fun abandonAll(storage: MigrationStorage) = lock.withLock {
         storeItems(storage, items.value.mapValues { (_, status) ->
             if (status.isResolved) status else ItemStatus.Abandoned
         })
         storage.preferences.sessions.setRecoverAfterLogin(false)
-        if (enteredHome) storage.markCleanupEligible()
+        deferCleanup(storage)
+    }
+
+    private fun deferCleanup(storage: MigrationStorage) {
+        cleanupDeferredUntilNextLaunch = true
+        storage.markCleanupEligible()
     }
 
     internal suspend fun <T> withRecoveryStorage(block: suspend (PixivDatabase, AccountDatabaseProvider) -> T): T =
@@ -382,13 +395,15 @@ class StartupMigration(
         sampleDisk: () -> Unit = {},
     ): ItemStatus {
         val recovering = manual || automatic
-        val status = execute(storage, item, propagateStorageFailure = !recovering) {
+        val result = execute(storage, item, propagateStorageFailure = !recovering) {
             debug.checkFailure(item)
             val allowLegacyUserId = manual || items.value.getValue(MigrationItem.Session) == ItemStatus.Done
             val prefs = storage.preferences
             when (item) {
                 MigrationItem.Session -> {
-                    val result = steps.preferences(item, counts, prefs::migrateSession)
+                    val result = steps.preferences(item, counts) {
+                        prefs.migrateSession(markRecoverAfterLogin = !recovering)
+                    }
                     if (result is ItemStatus.Failed && targetUserId != null && prefs.sessions.find(targetUserId) != null) {
                         ItemStatus.Skipped
                     } else {
@@ -431,13 +446,11 @@ class StartupMigration(
                 }
             }
         }
-        if (manual && status is ItemStatus.Pending) {
-            return ItemStatus.Failed(0, MigrationReason.Corrupted)
-        }
-        if (automatic && status is ItemStatus.Pending) {
-            val failed = ItemStatus.Failed(2, status.reason ?: MigrationReason.Unknown)
-            setItem(storage, item, failed)
-            return failed
+        val status = if (recovering && result is ItemStatus.Pending) {
+            val previousAttempts = (items.value.getValue(item) as? ItemStatus.Failed)?.attempts ?: 0
+            ItemStatus.Failed(previousAttempts + 1, result.reason ?: MigrationReason.Unknown)
+        } else {
+            result
         }
         setItem(storage, item, status)
         if (recovering && status == ItemStatus.Done && item in preferencesToReload) {

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,8 +36,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.mrl.pixiv.common.kts.spaceBy
+import com.mrl.pixiv.common.mmkv.AccountStore
+import com.mrl.pixiv.common.mmkv.withAccountStorageLock
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
@@ -51,6 +55,7 @@ import com.mrl.pixiv.strings.sign_in
 import com.mrl.pixiv.strings.sign_in_with_cookie
 import com.mrl.pixiv.strings.sign_in_with_token
 import com.mrl.pixiv.strings.sign_up
+import com.mrl.pixiv.strings.switch_to_another_account
 import com.mrl.pixiv.strings.webview_runtime_required
 import kotlinx.coroutines.awaitCancellation
 import org.jetbrains.compose.resources.painterResource
@@ -75,6 +80,22 @@ fun LoginOptionScreen(
             awaitCancellation()
         }
     }
+    val onSwitchAccount: (() -> Unit)? = if (addAccount) {
+        null
+    } else {
+        val accountChanges by AccountStore.accountChanges.collectAsStateWithLifecycle()
+        val hasOtherAccounts = remember(accountChanges) {
+            withAccountStorageLock {
+                val activeUserId = AccountStore.activeUserId
+                AccountStore.sessions.any { it.userId != activeUserId }
+            }
+        }
+        if (hasOtherAccounts) {
+            navigationManager::navigateToAccountManagementScreen
+        } else {
+            null
+        }
+    }
 
     LoginOptionContent(
         availability = availability,
@@ -89,6 +110,7 @@ fun LoginOptionScreen(
         onNetworkSettings = navigationManager::navigateToNetworkSettingScreen,
         modifier = modifier,
         onBack = if (addAccount) navigationManager::popBackStack else null,
+        onSwitchAccount = onSwitchAccount,
     )
 }
 
@@ -102,6 +124,7 @@ internal fun LoginOptionContent(
     onNetworkSettings: () -> Unit,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
+    onSwitchAccount: (() -> Unit)? = null,
 ) {
     Scaffold(
         modifier = modifier,
@@ -187,6 +210,18 @@ internal fun LoginOptionContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
+            }
+            if (onSwitchAccount != null) {
+                FilledTonalButton(
+                    onClick = onSwitchAccount,
+                    shapes = ButtonDefaults.shapes(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(RStrings.switch_to_another_account),
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
             OutlinedButton(
                 onClick = onTokenLogin,

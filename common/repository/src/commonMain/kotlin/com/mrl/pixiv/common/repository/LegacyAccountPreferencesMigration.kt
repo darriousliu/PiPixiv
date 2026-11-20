@@ -80,7 +80,7 @@ class LegacyAccountPreferencesMigration(
 
     fun legacyUserId(): Long? = LegacyFields(legacy).userInfo()?.user?.id
 
-    fun migrateSession(): LegacyPreferenceResult = withAccountStorageLock {
+    fun migrateSession(markRecoverAfterLogin: Boolean = true): LegacyPreferenceResult = withAccountStorageLock {
         val fields = LegacyFields(legacy)
         if (sessions.hasCorruptState()) {
             return@withAccountStorageLock fields.result(LegacyPreferenceOutcome.Corrupted, "accounts" to 0L)
@@ -116,7 +116,7 @@ class LegacyAccountPreferencesMigration(
             }
             profile != null || !refreshToken.isNullOrEmpty() || !accessToken.isNullOrEmpty() ||
                 expiresAt != 0L || fields.hasCorruption -> {
-                sessions.setRecoverAfterLogin(true)
+                if (markRecoverAfterLogin) sessions.setRecoverAfterLogin(true)
                 LegacyPreferenceOutcome.Corrupted
             }
             else -> LegacyPreferenceOutcome.Skipped

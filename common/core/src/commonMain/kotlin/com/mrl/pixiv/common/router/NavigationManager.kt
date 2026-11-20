@@ -150,8 +150,14 @@ class NavigationManager(
         }
     }
 
-    fun loginToMainScreen() {
-        store.records = listOf(newRecord(Destination.Main))
+    fun loginToMainScreen(showDataRecovery: Boolean = false) {
+        store.currentMainPage = MainPage.Home
+        val home = newRecord(Destination.Main)
+        store.records = if (showDataRecovery) {
+            listOf(home, newRecord(Destination.DataRecovery(afterLogin = true)))
+        } else {
+            listOf(home)
+        }
     }
 
     fun popBackToMainScreen() {
@@ -250,6 +256,10 @@ class NavigationManager(
 
     fun navigateToSettingScreen() {
         navigate(destination = Destination.Setting)
+    }
+
+    fun navigateToAccountManagementScreen() {
+        navigate(Destination.AccountManagement)
     }
 
     fun navigateToLoginOptionScreen() {

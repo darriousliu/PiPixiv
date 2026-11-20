@@ -44,7 +44,7 @@ class AccountSessionManager(
             databases.withAccountFilesLocked {
                 if (!canActivate()) throw CancellationException("The login screen was closed")
                 finishLocalDeletion(session.userId)
-                publishAccount(session.userId) {
+                publishAccount(session.userId, afterLogin = true) {
                     if (!canActivate()) throw CancellationException("The login screen was closed")
                     withAccountStorageLock {
                         UserManager.updateUserInfo(session)
@@ -63,7 +63,9 @@ class AccountSessionManager(
                 return@withAccountFilesLocked
             }
             if (AccountStore.activeUserId == userId) {
-                val replacement = sessions.filterNot { it.userId == userId }.maxByOrNull { it.lastUsedAt }
+                val remaining = sessions.filterNot { it.userId == userId }
+                val replacement = remaining.filter { it.hasUsableCredentials() }.maxByOrNull { it.lastUsedAt }
+                    ?: remaining.maxByOrNull { it.lastUsedAt }
                 publishAccount(replacement?.userId) {
                     AccountStore.storage.remove(userId, replacement?.userId, currentTimeMillis(), deleteLocalData)
                 }
@@ -85,7 +87,11 @@ class AccountSessionManager(
         AccountStore.storage.completeLocalDeletion(userId)
     }
 
-    private suspend fun publishAccount(userId: Long?, updateSessions: () -> Unit) {
+    private suspend fun publishAccount(
+        userId: Long?,
+        afterLogin: Boolean = false,
+        updateSessions: () -> Unit,
+    ) {
         val context = currentCoroutineContext()
         databases.publish(userId, beforePublish = {
             context.ensureActive()
@@ -102,7 +108,9 @@ class AccountSessionManager(
         if (session == null || !session.hasUsableCredentials()) {
             navigationManager.navigateToLoginOptionScreen()
         } else {
-            navigationManager.loginToMainScreen()
+            navigationManager.loginToMainScreen(
+                showDataRecovery = afterLogin && AccountStore.storage.recoverAfterLogin.value,
+            )
             profileRefreshes.remove(session.userId)?.cancel()
             profileRefreshes[session.userId] = UserManager.updateUserInfo(userId = session.userId)
         }

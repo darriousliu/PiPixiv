@@ -13,6 +13,8 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.hasText
@@ -58,19 +60,20 @@ class SignOutConfirmationTest {
     }
 
     @Test
-    fun restoredDialogSignsOutOnlyOnceAfterExplicitConfirmation() = runSettingsTest {
-        var signOuts = 0
+    fun restoredDialogPassesCheckedLocalDeletionOnlyOnce() = runSettingsTest {
+        val deleteLocalDataArguments = mutableListOf<Boolean>()
         var registry by mutableStateOf(SaveableStateRegistry(null) { true })
         var showSettings by mutableStateOf(true)
         setContent {
             if (showSettings) {
                 CompositionLocalProvider(LocalSaveableStateRegistry provides registry) {
-                    Settings(onSignOut = { signOuts++ })
+                    Settings(onSignOut = { deleteLocalDataArguments.add(it) })
                 }
             }
         }
 
         openConfirmation()
+        onNodeWithText("同时删除该账号的本地数据").performClick()
         val savedState = runOnIdle {
             registry.performSave().also { showSettings = false }
         }
@@ -80,7 +83,8 @@ class SignOutConfirmationTest {
         }
 
         onNodeWithText("确定要登出吗？").assertIsDisplayed()
-        runOnIdle { assertEquals(0, signOuts) }
+        onNodeWithText("同时删除该账号的本地数据").assertIsOn()
+        runOnIdle { assertEquals(emptyList(), deleteLocalDataArguments) }
         onNode(hasText("登出") and hasAnyAncestor(isDialog()))
             .performSemanticsAction(SemanticsActions.OnClick) { click ->
                 click()
@@ -88,7 +92,7 @@ class SignOutConfirmationTest {
             }
 
         onNode(isDialog()).assertDoesNotExist()
-        runOnIdle { assertEquals(1, signOuts) }
+        runOnIdle { assertEquals(listOf(true), deleteLocalDataArguments) }
     }
 
     @Test
@@ -121,15 +125,17 @@ class SignOutConfirmationTest {
         onNode(hasScrollToKeyAction()).performScrollToKey("sign_out")
         onNodeWithText("登出").performClick()
         onNodeWithText("确定要登出吗？").assertIsDisplayed()
+        onNodeWithText("同时删除该账号的本地数据").assertIsOff()
     }
 
     @Composable
-    private fun Settings(topEntryId: String = "settings", onSignOut: () -> Unit) {
+    private fun Settings(topEntryId: String = "settings", onSignOut: (Boolean) -> Unit) {
         MaterialExpressiveTheme {
             SettingContent(
                 currentLanguage = "简体中文",
                 languages = emptyList(),
                 hasNewVersion = false,
+                hasPendingRecovery = false,
                 useLiquidGlassNavigation = true,
                 onLanguageChange = {},
                 onUseLiquidGlassNavigationChange = {},

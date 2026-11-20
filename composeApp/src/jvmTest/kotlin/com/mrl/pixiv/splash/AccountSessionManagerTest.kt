@@ -31,6 +31,7 @@ import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
+import com.mrl.pixiv.navigation.leaveCurrentScreen
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -90,6 +91,15 @@ class AccountSessionManagerTest {
         assertEquals("first search", SearchRepository.searchHistoryFlow.value.searchHistoryList.single().keyword)
         assertEquals(listOf(tag), BookmarkedTagRepository.bookmarkedTags.value)
         assertEquals(listOf(illust), history.getLocalIllusts(10, 0))
+
+        // Splash keeps the active ID when it sends the user to login.
+        databases.clearCurrent()
+        navigation.navigateToLoginOptionScreen()
+        navigation.navigate(Destination.AccountManagement)
+
+        sessions.switchTo(SECOND)
+        assertEquals(SECOND, databases.requireCurrent().userId)
+        assertEquals(Destination.Main, navigation.backStack.single().destination)
     }
 
     @Test
@@ -117,6 +127,47 @@ class AccountSessionManagerTest {
         assertEquals(Destination.LoginOption, navigation.backStack.single().destination)
     }
 
+    @Test
+    fun removingCurrentAccountPrefersUsableCredentialsOverRecency() = withSessionManager { sessions, databases, navigation ->
+        sessions.addOrUpdate(response(FIRST))
+        sessions.addOrUpdate(response(SECOND))
+        sessions.addOrUpdate(response(THIRD))
+        AccountStore.update(FIRST) { it.copy(lastUsedAt = 1L) }
+        AccountStore.update(SECOND) { it.copy(needsRelogin = true, lastUsedAt = 2L) }
+
+        sessions.remove(THIRD, deleteLocalData = true)
+
+        assertEquals(FIRST, AccountStore.activeUserId)
+        assertEquals(FIRST, databases.requireCurrent().userId)
+        assertEquals(Destination.Main, navigation.backStack.single().destination)
+
+        sessions.remove(FIRST, deleteLocalData = true)
+
+        assertEquals(SECOND, AccountStore.activeUserId)
+        assertEquals(Destination.LoginOption, navigation.backStack.single().destination)
+    }
+
+    @Test
+    fun successfulLoginOpensFlaggedRecoveryUntilTheUserLeaves() = withSessionManager { sessions, _, navigation ->
+        AccountStore.storage.setRecoverAfterLogin(true)
+
+        sessions.addOrUpdate(response(FIRST))
+
+        assertEquals(
+            listOf(Destination.Main, Destination.DataRecovery(afterLogin = true)),
+            navigation.backStack.map { it.destination },
+        )
+        assertTrue(AccountStore.storage.recoverAfterLogin.value)
+
+        navigation.leaveCurrentScreen { AccountStore.storage.setRecoverAfterLogin(false) }
+
+        assertFalse(AccountStore.storage.recoverAfterLogin.value)
+        assertEquals(Destination.Main, navigation.backStack.single().destination)
+
+        sessions.addOrUpdate(response(FIRST))
+        assertEquals(Destination.Main, navigation.backStack.single().destination)
+    }
+
     private fun withSessionManager(
         test: suspend (AccountSessionManager, AccountDatabaseProvider, NavigationManager) -> Unit,
     ) = runBlocking {
@@ -139,6 +190,8 @@ class AccountSessionManagerTest {
         } finally {
             sessions.remove(FIRST, deleteLocalData = true)
             sessions.remove(SECOND, deleteLocalData = true)
+            sessions.remove(THIRD, deleteLocalData = true)
+            AccountStore.storage.setRecoverAfterLogin(false)
             databases.close()
             global.close()
             stopKoin()
@@ -171,5 +224,6 @@ class AccountSessionManagerTest {
     private companion object {
         const val FIRST = 440001L
         const val SECOND = 440002L
+        const val THIRD = 440003L
     }
 }

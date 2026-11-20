@@ -9,16 +9,25 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.separatingVerticalHingeBounds
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.entryProvider
@@ -41,12 +50,14 @@ import com.mrl.pixiv.common.analytics.recordCrashScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.LocalToaster
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.PaneInputScope
 import com.mrl.pixiv.common.compose.layout.PaneInputState
 import com.mrl.pixiv.common.compose.layout.SplitPaneDividerWidth
 import com.mrl.pixiv.common.compose.layout.rememberSplitPaneState
 import com.mrl.pixiv.common.compose.listener.EscBackHandler
 import com.mrl.pixiv.common.repository.IllustCacheRepo
+import com.mrl.pixiv.common.repository.recovery.DataRecoveryRepository
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.LocalNavigationManager
 import com.mrl.pixiv.common.router.MainPage
@@ -55,6 +66,7 @@ import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.router.paneSpec
 import com.mrl.pixiv.common.router.rememberNavigationState
 import com.mrl.pixiv.common.toast.ToastMessage
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.result.LocalResultEventBus
 import com.mrl.pixiv.common.util.result.ResultEventBus
@@ -88,6 +100,7 @@ import com.mrl.pixiv.setting.PrivacySettingScreen
 import com.mrl.pixiv.setting.SearchSettingScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
+import com.mrl.pixiv.setting.account.AccountManagementScreen
 import com.mrl.pixiv.setting.ai.AiTranslationSettingScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
 import com.mrl.pixiv.setting.applog.AppLogScreen
@@ -100,7 +113,10 @@ import com.mrl.pixiv.setting.block.CloudMuteScreen
 import com.mrl.pixiv.setting.download.DownloadScreen
 import com.mrl.pixiv.setting.network.NetworkDiagnosticScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
+import com.mrl.pixiv.setting.recovery.DataRecoveryScreen
 import com.mrl.pixiv.splash.StartupMigration
+import com.mrl.pixiv.strings.data_recovery_view
+import com.mrl.pixiv.strings.recovery_pending_notice
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
@@ -118,6 +134,10 @@ fun Navigation3MainGraph(
 ) {
     val toastState = rememberToasterState()
     val resultBus = remember { ResultEventBus() }
+    val recovery: DataRecoveryRepository = koinInject()
+    val navigateBack = {
+        navigationManager.leaveCurrentScreen(recovery::clearRecoverAfterLogin)
+    }
 
     rememberNavigationState(navigationManager)
     val inputState = remember { PaneInputState() }
@@ -157,7 +177,9 @@ fun Navigation3MainGraph(
 
         entry<Destination.Main> {
             val migration: StartupMigration = koinInject()
-            LaunchedEffect(migration) { migration.onHomeEntered() }
+            if (navigationManager.currentDestination == Destination.Main) {
+                LaunchedEffect(migration) { migration.onHomeEntered() }
+            }
             MainScreen()
         }
 
@@ -218,6 +240,10 @@ fun Navigation3MainGraph(
         // 设置页
         entry<Destination.Setting> {
             SettingScreen()
+        }
+
+        entry<Destination.AccountManagement> {
+            AccountManagementScreen()
         }
 
         // 网络设置页
@@ -356,6 +382,19 @@ fun Navigation3MainGraph(
         entry<Destination.AppData> {
             AppDataScreen()
         }
+        entry<Destination.DataRecovery> { destination ->
+            val entryNavigation = currentNavigationManager()
+            DataRecoveryScreen(
+                afterLogin = destination.afterLogin,
+                onBack = {
+                    if (destination.afterLogin) {
+                        if (entryNavigation.entryId == navigationManager.topEntryId) navigateBack()
+                    } else {
+                        entryNavigation.popBackStack()
+                    }
+                },
+            )
+        }
         entry<Destination.Download> {
             DownloadScreen()
         }
@@ -418,8 +457,7 @@ fun Navigation3MainGraph(
     HandleDeeplink(navigationManager)
     LogScreen(navigationManager)
     EscBackHandler {
-        if (navigationManager.backStack.isEmpty()) return@EscBackHandler
-        navigationManager.popBackStack()
+        navigateBack()
     }
     SharedTransitionLayout {
         CompositionLocalProvider(
@@ -467,7 +505,7 @@ fun Navigation3MainGraph(
                     PredictiveBackNavDisplay(
                         backStack = navigationManager.backStack,
                         modifier = Modifier.fillMaxSize(),
-                        onBack = navigationManager::popBackStack,
+                        onBack = navigateBack,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         entryDecorators = listOf(
                             // Add the default decorators for managing scenes and saving state
@@ -497,10 +535,50 @@ fun Navigation3MainGraph(
                             }
                         }
                     )
+                    HomeRecoveryNotice(
+                        visible = topRecord.destination == Destination.Main &&
+                                navigationManager.currentMainPage == MainPage.Home,
+                        recovery = recovery,
+                        onView = { navigationManager.navigate(Destination.DataRecovery()) },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = LocalMainNavigationBottomInset.current),
+                    )
                 }
             }
         }
     }
+}
+
+internal fun NavigationManager.leaveCurrentScreen(clearRecoverAfterLogin: () -> Unit) {
+    if ((backStack.lastOrNull()?.destination as? Destination.DataRecovery)?.afterLogin == true) {
+        clearRecoverAfterLogin()
+    }
+    popBackStack()
+}
+
+@Composable
+private fun HomeRecoveryNotice(
+    visible: Boolean,
+    recovery: DataRecoveryRepository,
+    onView: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val hasPending by recovery.hasPending.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    var shown by rememberSaveable { mutableStateOf(false) }
+    val message = stringResource(RStrings.recovery_pending_notice)
+    val viewLabel = stringResource(RStrings.data_recovery_view)
+    LaunchedEffect(visible, hasPending) {
+        if (!visible || !hasPending || shown) return@LaunchedEffect
+        shown = true
+        if (snackbar.showSnackbar(message, viewLabel, withDismissAction = true) ==
+            SnackbarResult.ActionPerformed
+        ) {
+            onView()
+        }
+    }
+    if (visible && hasPending) SnackbarHost(snackbar, modifier = modifier)
 }
 
 @Composable

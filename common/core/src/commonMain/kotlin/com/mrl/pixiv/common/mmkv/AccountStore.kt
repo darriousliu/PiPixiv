@@ -44,6 +44,7 @@ object AccountStore : MMKVApp {
     val sessions get() = storage.sessions
     val activeUserId get() = storage.activeUserId
     val current get() = storage.current
+    val accountChanges get() = storage.accountChanges
 
     fun find(userId: Long) = storage.find(userId)
 
@@ -57,6 +58,9 @@ object AccountStore : MMKVApp {
 
 class AccountSessionStorage(private val owner: MMKVOwner) {
     private val accounts = owner.mmkvSerializable(StoredAccounts())
+    // Observers re-read the store without retaining a second in-memory copy of the credentials.
+    private val mutableAccountChanges = MutableStateFlow(0L)
+    val accountChanges = mutableAccountChanges.asStateFlow()
     private val recoveryOnLogin = owner.mmkvBool()
     private val mutableRecoverAfterLogin = MutableStateFlow(false)
     val recoverAfterLogin = mutableRecoverAfterLogin.asStateFlow()
@@ -103,7 +107,10 @@ class AccountSessionStorage(private val owner: MMKVOwner) {
         setRecoverAfterLogin(true)
     }
 
-    private fun write(state: StoredAccounts) = accounts.write(owner, ACCOUNT_STORE_KEY, state)
+    private fun write(state: StoredAccounts) {
+        accounts.write(owner, ACCOUNT_STORE_KEY, state)
+        mutableAccountChanges.value += 1
+    }
 
     val sessions get() = withAccountStorageLock { read().sessions }
 

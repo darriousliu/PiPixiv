@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
 import dev.nucleusframework.webview.web.ActualWebView
 import dev.nucleusframework.webview.web.NativeWebView
-import dev.nucleusframework.webview.web.WebView
 import dev.nucleusframework.webview.web.WebViewNavigator
 import dev.nucleusframework.webview.web.WebViewState
 import dev.nucleusframework.webview.web.defaultWebViewFactory
@@ -30,24 +29,12 @@ internal actual fun LoginWebView(
     state: WebViewState,
     navigator: WebViewNavigator,
     bypassSetting: BypassSetting,
-    addAccount: Boolean,
     onError: (Throwable) -> Unit,
     modifier: Modifier,
     onCreated: (NativeWebView) -> Unit,
     content: @Composable () -> Unit,
 ) {
-    if (bypassSetting == BypassSetting.System && !addAccount) {
-        WebView(
-            state = state,
-            navigator = navigator,
-            modifier = modifier,
-            onCreated = onCreated,
-            content = content,
-        )
-        return
-    }
-
-    val store = remember(state, bypassSetting, addAccount) {
+    val store = remember(state, bypassSetting) {
         when (bypassSetting) {
             BypassSetting.System -> WKWebsiteDataStore.nonPersistentDataStore()
             is BypassSetting.Proxy -> bypassSetting.createProxyDataStore()

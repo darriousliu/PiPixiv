@@ -22,7 +22,6 @@ internal expect fun LoginWebView(
     state: WebViewState,
     navigator: WebViewNavigator,
     bypassSetting: BypassSetting,
-    addAccount: Boolean,
     onError: (Throwable) -> Unit,
     modifier: Modifier = Modifier,
     onCreated: (NativeWebView) -> Unit = {},

@@ -24,6 +24,7 @@ import com.mrl.pixiv.common.repository.NovelSeriesProgressRepository
 import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.UserManager
+import com.mrl.pixiv.common.repository.recovery.DataRecoveryRepository
 import com.mrl.pixiv.common.util.BackupSpaceException
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
@@ -93,10 +94,13 @@ class AppDataViewModel(
     private val accountDatabaseProvider: AccountDatabaseProvider,
     private val readLaterRepository: NovelReadLaterRepository,
     private val seriesProgressRepository: NovelSeriesProgressRepository,
+    dataRecoveryRepository: DataRecoveryRepository,
     zipUtil: ZipUtil,
 ) : BaseMviViewModel<AppDataState, ViewIntent>(
     initialState = AppDataState(),
 ) {
+    val hasPendingRecovery = dataRecoveryRepository.hasPending
+
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
         ignoreUnknownKeys = true

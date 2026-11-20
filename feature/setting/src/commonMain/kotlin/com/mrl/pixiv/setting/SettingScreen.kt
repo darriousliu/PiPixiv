@@ -3,6 +3,7 @@ package com.mrl.pixiv.setting
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -22,11 +23,11 @@ import androidx.compose.material.icons.rounded.ImportExport
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.NetworkWifi
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.Translate
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,7 +36,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,24 +45,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.rememberThrottleClick
+import com.mrl.pixiv.common.coroutine.CancelException
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
+import com.mrl.pixiv.common.util.ToastUtil
+import com.mrl.pixiv.common.viewmodel.SideEffect
+import com.mrl.pixiv.setting.account.RemoveAccountDialog
 import com.mrl.pixiv.setting.components.SettingChoiceValue
 import com.mrl.pixiv.setting.components.SettingRow
 import com.mrl.pixiv.setting.components.SettingSectionTitle
@@ -73,7 +73,6 @@ import com.mrl.pixiv.strings.allow_open_link
 import com.mrl.pixiv.strings.app_language
 import com.mrl.pixiv.strings.block_settings
 import com.mrl.pixiv.strings.browsing_setting
-import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.data_storage_title
 import com.mrl.pixiv.strings.default_open
 import com.mrl.pixiv.strings.download_settings_title
@@ -85,6 +84,7 @@ import com.mrl.pixiv.strings.liquid_glass_navigation_desc
 import com.mrl.pixiv.strings.network_setting
 import com.mrl.pixiv.strings.new_version_available
 import com.mrl.pixiv.strings.privacy_setting
+import com.mrl.pixiv.strings.recovery_pending_notice
 import com.mrl.pixiv.strings.search_setting
 import com.mrl.pixiv.strings.setting
 import com.mrl.pixiv.strings.settings_section_account
@@ -93,13 +93,17 @@ import com.mrl.pixiv.strings.settings_section_content
 import com.mrl.pixiv.strings.settings_section_general
 import com.mrl.pixiv.strings.sign_out
 import com.mrl.pixiv.strings.sign_out_confirmation
+import com.mrl.pixiv.strings.switch_account
+import com.mrl.pixiv.strings.unknown_error
+import kotlinx.coroutines.CancellationException
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 const val KEY_DEFAULT_OPEN_LINK = "default_open_link"
 
 internal enum class SettingPage {
-    Network, Browsing, Search, History, Privacy, Download, AiTranslation, Block, AppData, About
+    Network, Browsing, Search, History, Privacy, Download, AiTranslation, Block, AppData, About,
+    AccountManagement,
 }
 
 @Composable
@@ -111,6 +115,7 @@ fun SettingScreen(
     val labelDefault = stringResource(RStrings.label_default)
     val languages = remember { getLanguages() }
     val hasNewVersion by VersionManager.hasNewVersion.collectAsStateWithLifecycle()
+    val hasPendingRecovery by viewModel.hasPendingRecovery.collectAsStateWithLifecycle()
     val userPreference by requireUserPreferenceFlow.collectAsStateWithLifecycle()
     var currentLanguage by remember(labelDefault) {
         mutableStateOf(getInitialLanguages() ?: labelDefault)
@@ -118,11 +123,21 @@ fun SettingScreen(
     LaunchedEffect(currentLanguage, labelDefault) {
         triggerLocaleChange(currentLanguage, labelDefault)
     }
+    LaunchedEffect(viewModel) {
+        viewModel.sideEffect.collect { effect ->
+            if (effect is SideEffect.Error &&
+                effect.throwable !is CancelException && effect.throwable !is CancellationException
+            ) {
+                ToastUtil.safeShortToast(RStrings.unknown_error)
+            }
+        }
+    }
     val topEntryId = navigationManager.topEntryId
     SettingContent(
         currentLanguage = currentLanguage,
         languages = languages,
         hasNewVersion = hasNewVersion,
+        hasPendingRecovery = hasPendingRecovery,
         useLiquidGlassNavigation = userPreference.useLiquidGlassNavigation,
         onLanguageChange = { currentLanguage = it },
         onUseLiquidGlassNavigationChange = { enabled ->
@@ -141,12 +156,13 @@ fun SettingScreen(
                 SettingPage.Block -> navigationManager.navigateToBlockSettings()
                 SettingPage.AppData -> navigationManager.navigateToAppDataScreen()
                 SettingPage.About -> navigationManager.navigateToAboutScreen()
+                SettingPage.AccountManagement -> navigationManager.navigateToAccountManagementScreen()
             }
         },
         onExportToken = { viewModel.dispatch(SettingAction.ExportToken) },
-        onSignOut = {
+        onSignOut = { deleteLocalData ->
             if (topEntryId != null && navigationManager.topEntryId == topEntryId) {
-                viewModel.logout()
+                viewModel.logout(deleteLocalData)
             }
         },
         appLinks = { appLinkItem() },
@@ -160,13 +176,14 @@ internal fun SettingContent(
     currentLanguage: String,
     languages: List<Language>,
     hasNewVersion: Boolean,
+    hasPendingRecovery: Boolean,
     useLiquidGlassNavigation: Boolean,
     onLanguageChange: (String) -> Unit,
     onUseLiquidGlassNavigationChange: (Boolean) -> Unit,
     onBack: () -> Unit,
     onNavigate: (SettingPage) -> Unit,
     onExportToken: () -> Unit,
-    onSignOut: () -> Unit,
+    onSignOut: (Boolean) -> Unit,
     topEntryId: String?,
     modifier: Modifier = Modifier,
     appLinks: LazyListScope.() -> Unit = {},
@@ -177,12 +194,14 @@ internal fun SettingContent(
         rememberSaveable { mutableStateOf(false) }
     }
     if (showSignOutConfirmation) {
-        SignOutConfirmationDialog(
+        RemoveAccountDialog(
+            title = stringResource(RStrings.sign_out_confirmation),
+            confirmLabel = stringResource(RStrings.sign_out),
             onDismissRequest = { showSignOutConfirmation = false },
-            onConfirm = {
+            onConfirm = { deleteLocalData ->
                 if (showSignOutConfirmation) {
                     showSignOutConfirmation = false
-                    onSignOut()
+                    onSignOut(deleteLocalData)
                 }
             },
         )
@@ -289,8 +308,20 @@ internal fun SettingContent(
             }
             item("data") {
                 SettingDestinationItem(
-                    stringResource(RStrings.data_storage_title),
-                    Icons.Rounded.Storage
+                    title = stringResource(RStrings.data_storage_title),
+                    icon = Icons.Rounded.Storage,
+                    trailingContent = if (hasPendingRecovery) {
+                        {
+                            val pendingDescription = stringResource(RStrings.recovery_pending_notice)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Badge(Modifier.semantics { contentDescription = pendingDescription })
+                                Icon(Icons.AutoMirrored.Rounded.ArrowForwardIos, contentDescription = null)
+                            }
+                        }
+                    } else null,
                 ) {
                     onNavigate(SettingPage.AppData)
                 }
@@ -321,41 +352,17 @@ internal fun SettingContent(
                     showSignOutConfirmation = true
                 }
             }
+            item("switch_account") {
+                SettingDestinationItem(
+                    stringResource(RStrings.switch_account),
+                    Icons.Rounded.People,
+                ) {
+                    onNavigate(SettingPage.AccountManagement)
+                }
+            }
             item("bottom_spacing") { Column(Modifier.padding(bottom = 16.dp)) {} }
         }
     }
-}
-
-@Composable
-internal fun SignOutConfirmationDialog(
-    onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    val cancelFocusRequester = remember { FocusRequester() }
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        modifier = Modifier.onPreviewKeyEvent { event ->
-            if (event.key != Key.Escape) return@onPreviewKeyEvent false
-            // 在 Desktop 的全局返回处理器收到 Escape 之前关闭弹窗。
-            if (event.type == KeyEventType.KeyUp) onDismissRequest()
-            true
-        },
-        title = { Text(stringResource(RStrings.sign_out_confirmation)) },
-        dismissButton = {
-            TextButton(
-                onClick = onDismissRequest,
-                modifier = Modifier.focusRequester(cancelFocusRequester),
-            ) {
-                Text(stringResource(RStrings.cancel))
-            }
-            LaunchedEffect(Unit) { cancelFocusRequester.requestFocus() }
-        },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(RStrings.sign_out))
-            }
-        },
-    )
 }
 
 @Composable

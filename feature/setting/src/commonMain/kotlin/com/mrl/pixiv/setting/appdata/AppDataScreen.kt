@@ -30,7 +30,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.rememberThrottleClick
+import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
@@ -47,6 +49,8 @@ import com.mrl.pixiv.strings.history_import_user_mismatch_title
 import com.mrl.pixiv.strings.import_data
 import com.mrl.pixiv.strings.migrate_data_desc
 import com.mrl.pixiv.strings.migrate_data_title
+import com.mrl.pixiv.strings.recovery_pending_notice
+import com.mrl.pixiv.strings.recovery_title
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
@@ -72,6 +76,7 @@ fun AppDataScreen(
     viewModel: AppDataViewModel = koinViewModel(),
 ) {
     val state = viewModel.asState()
+    val hasPendingRecovery by viewModel.hasPendingRecovery.collectAsStateWithLifecycle()
     var dialogData by remember { mutableStateOf<HistoryImportDialogData?>(null) }
 
     LaunchedEffect(Unit) {
@@ -111,6 +116,11 @@ fun AppDataScreen(
         onClearCache = viewModel::clearCache,
         onBack = navigationManager::popBackStack,
         modifier = modifier,
+        onRecover = if (hasPendingRecovery) {
+            { navigationManager.navigate(Destination.DataRecovery()) }
+        } else {
+            null
+        },
     ) {
         MigrationCard(
             state = state,
@@ -169,6 +179,7 @@ internal fun AppDataContent(
     onClearCache: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onRecover: (() -> Unit)? = null,
     migrationContent: @Composable () -> Unit = {},
 ) {
     Scaffold(
@@ -176,6 +187,13 @@ internal fun AppDataContent(
         topBar = { AppDataTopAppBar(onBack = onBack) },
     ) { paddingValues ->
         SettingPageColumn(paddingValues) {
+            if (onRecover != null) {
+                AppDataNotice(
+                    title = stringResource(RStrings.recovery_title),
+                    description = stringResource(RStrings.recovery_pending_notice),
+                    onClick = onRecover,
+                )
+            }
             migrationContent()
             SettingRow(
                 title = stringResource(RStrings.export_data),
@@ -198,6 +216,15 @@ internal fun AppDataContent(
 
 @Composable
 internal fun AppDataMigrationNotice(oldImageCount: Int, onClick: () -> Unit) {
+    AppDataNotice(
+        title = stringResource(RStrings.migrate_data_title),
+        description = stringResource(RStrings.migrate_data_desc, oldImageCount),
+        onClick = onClick,
+    )
+}
+
+@Composable
+private fun AppDataNotice(title: String, description: String, onClick: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
@@ -213,11 +240,11 @@ internal fun AppDataMigrationNotice(oldImageCount: Int, onClick: () -> Unit) {
             Icon(Icons.Rounded.Warning, contentDescription = null)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(RStrings.migrate_data_title),
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    text = stringResource(RStrings.migrate_data_desc, oldImageCount),
+                    text = description,
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

@@ -159,7 +159,6 @@ fun LoginScreen(
                 state = webViewState,
                 navigator = webViewNavigator,
                 bypassSetting = bypassSetting,
-                addAccount = addAccount,
                 onError = { error ->
                     if (webViewFailure == null) {
                         recordCrashOperation("LoginWebViewFailed")

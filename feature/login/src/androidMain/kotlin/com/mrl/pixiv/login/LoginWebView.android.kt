@@ -44,16 +44,15 @@ internal actual fun LoginWebView(
     state: WebViewState,
     navigator: WebViewNavigator,
     bypassSetting: BypassSetting,
-    addAccount: Boolean,
     onError: (Throwable) -> Unit,
     modifier: Modifier,
     onCreated: (NativeWebView) -> Unit,
     content: @Composable () -> Unit,
 ) {
     val currentOnError by rememberUpdatedState(onError)
-    var routeReady by remember(state, bypassSetting, addAccount) { mutableStateOf(false) }
-    val released = remember(state, bypassSetting, addAccount) { CompletableDeferred<Unit>() }
-    LaunchedEffect(state, bypassSetting, addAccount) {
+    var routeReady by remember(state, bypassSetting) { mutableStateOf(false) }
+    val released = remember(state, bypassSetting) { CompletableDeferred<Unit>() }
+    LaunchedEffect(state, bypassSetting) {
         loginWebViewProxy.withLock {
             var controller: ProxyController? = null
             try {
@@ -65,15 +64,13 @@ internal actual fun LoginWebView(
                     currentOnError(WebLoginRouteUnavailableException())
                     return@withLock
                 }
-                if (addAccount) {
-                    currentCoroutineContext().ensureActive()
-                    try {
-                        withContext(NonCancellable) { clearLoginCookies() }
-                    } catch (error: RuntimeException) {
-                        if (error is CancellationException) throw error
-                        currentOnError(error)
-                        return@withLock
-                    }
+                currentCoroutineContext().ensureActive()
+                try {
+                    withContext(NonCancellable) { clearLoginCookies() }
+                } catch (error: RuntimeException) {
+                    if (error is CancellationException) throw error
+                    currentOnError(error)
+                    return@withLock
                 }
                 currentCoroutineContext().ensureActive()
                 routeReady = true
