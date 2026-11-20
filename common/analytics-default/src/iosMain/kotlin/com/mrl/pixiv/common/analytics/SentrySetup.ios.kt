@@ -1,5 +1,8 @@
 package com.mrl.pixiv.common.analytics
 
+import Internal.Sentry.SentryCrashMonitorTypeCPPException
+import Internal.Sentry.sentrycrash_setMonitoring
+import Internal.Sentry.sentrycrashcm_getActiveMonitors
 import io.sentry.kotlin.multiplatform.Sentry
 import io.sentry.kotlin.multiplatform.SentryLevel
 import io.sentry.kotlin.multiplatform.protocol.Breadcrumb
@@ -32,6 +35,12 @@ internal actual fun initializePlatformSentry(dsn: String, appVersion: String, ap
         }
         options.setAttachScreenshot(false)
         options.setAttachViewHierarchy(false)
+    }
+    // Match Sentry KMP's C++ monitor option while keeping the Cocoa-specific privacy settings.
+    // Restoring Kotlin/Native's terminate handler lets both Kotlin exception hooks run.
+    val activeMonitors = sentrycrashcm_getActiveMonitors()
+    if (activeMonitors and SentryCrashMonitorTypeCPPException != 0u) {
+        sentrycrash_setMonitoring(activeMonitors and SentryCrashMonitorTypeCPPException.inv())
     }
 }
 

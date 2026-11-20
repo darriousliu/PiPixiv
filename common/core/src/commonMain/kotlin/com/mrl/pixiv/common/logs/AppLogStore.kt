@@ -3,8 +3,8 @@ package com.mrl.pixiv.common.logs
 import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Severity
 import io.github.vinceglb.filekit.FileKit
-import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.filesDir
+import io.github.vinceglb.filekit.toKotlinxIoPath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -33,7 +33,7 @@ data class AppLogSnapshot(
 
 object AppLogStore {
     private val recorder = AppLogRecorder(CoroutineScope(SupervisorJob() + Dispatchers.IO)) {
-        Path(FileKit.filesDir.absolutePath(), "logs")
+        Path(FileKit.filesDir.toKotlinxIoPath(), "logs")
     }
 
     val state: StateFlow<AppLogSnapshot> get() = recorder.state
