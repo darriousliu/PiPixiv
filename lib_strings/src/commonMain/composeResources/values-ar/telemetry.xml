@@ -5,5 +5,5 @@
     <string name="crash_diagnostics">تقارير الأعطال</string>
     <string name="crash_diagnostics_description">عند تعطل التطبيق أو حدوث خطأ، يُرسل تلقائيًا تفاصيل الخطأ وإصدار التطبيق ومعلومات الجهاز لمساعدتنا على تحديد المشكلة وإصلاحها.</string>
     <string name="crash_diagnostics_switch_note">لا يؤثر المفتاح أعلاه على تقارير الأعطال.</string>
-    <string name="privacy_not_collected_description">لا نجمع عبارات البحث أو معلومات الحساب أو الأعمال التي تشاهدها أو الملفات التي تنزّلها.</string>
+    <string name="privacy_not_collected_description">لا يجمع التطبيق بشكل نشط عبارات بحثك أو معلومات حسابك أو الأعمال التي تشاهدها أو الملفات التي تنزّلها.</string>
 </resources>

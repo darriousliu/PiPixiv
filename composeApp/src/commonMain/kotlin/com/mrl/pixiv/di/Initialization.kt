@@ -13,6 +13,7 @@ import com.mrl.pixiv.common.logs.installAppLogCrashHandler
 import com.mrl.pixiv.common.repository.AppRepository
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.util.AppUtil
+import com.mrl.pixiv.common.util.DeviceInfo
 import com.mrl.pixiv.common.util.isDebug
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
@@ -24,7 +25,13 @@ object Initialization {
         Logger.setLogWriters(if (isDebug) systemWriter else ErrorLogWriter(systemWriter), AppLogStore.writer)
         Logger.setMinSeverity(if (isDebug) Severity.Debug else Severity.Info)
         try {
-            initializeSentry(isDebug, AppUtil.sentryDsn, AppUtil.versionName, AppUtil.versionCode)
+            initializeSentry(
+                isDebug = isDebug,
+                dsn = AppUtil.sentryDsn,
+                appVersion = AppUtil.versionName,
+                appBuild = AppUtil.versionCode,
+                deviceName = { DeviceInfo.DISPLAY_NAME },
+            )
         } catch (error: Throwable) {
             AppLogStore.recordCrash(error, "Sentry", "Crash reporter initialization failed")
             throw error

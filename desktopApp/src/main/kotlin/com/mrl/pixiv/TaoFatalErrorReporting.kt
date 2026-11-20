@@ -51,9 +51,9 @@ internal class TaoFatalErrorHandler(
         if (!reported.compareAndSet(false, true)) return
         try {
             report(error)
-        } catch (_: Throwable) {
+        } catch (reportingFailure: Throwable) {
             // Reporting must never prevent Tao from finishing its fatal exit.
-            System.err.println("Failed to report Tao fatal error")
+            System.err.println("Failed to report Tao fatal error: ${reportingFailure.javaClass.simpleName}")
         }
     }
 

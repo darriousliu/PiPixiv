@@ -26,6 +26,7 @@ internal actual fun initializePlatformSentry(dsn: String, appVersion: String, ap
         options.setTracePropagationTargets(emptyList<Any>())
         options.setEnableAutoPerformanceTracing(false)
         options.setEnableNetworkTracking(false)
+        options.setEnableCaptureFailedRequests(false)
         options.setEnableLogs(true)
         options.sessionReplay().apply {
             setSessionSampleRate(0f)
