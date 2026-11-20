@@ -79,10 +79,11 @@ class CrashDiagnosticsTest {
             assertTrue(configuredPath == cacheDir || configuredPath.parent == cacheDir)
             assertTrue(options.integrations.any { it is SendCachedEnvelopeFireAndForgetIntegration })
             assertTrue(options.isEnableAutoSessionTracking)
+            assertTrue(options.logs.isEnabled)
             with(options.dataCollection) {
                 assertEquals(false, userInfo)
                 assertEquals(KeyValueCollectionBehavior.off(), cookies)
-                assertEquals(setOf(HttpBodyType.OUTGOING_REQUEST, HttpBodyType.INCOMING_RESPONSE), httpBodies)
+                assertEquals(emptySet<HttpBodyType>(), httpBodies)
                 assertEquals(false, databaseQueryData)
                 assertEquals(false, filePaths)
                 assertEquals(false, graphql.document)

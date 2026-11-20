@@ -6,8 +6,11 @@ import co.touchlab.kermit.Severity
 import co.touchlab.kermit.platformLogWriter
 import com.ctrip.flight.mmkv.MMKVLogLevel
 import com.mrl.pixiv.common.analytics.initializeSentry
+import com.mrl.pixiv.common.analytics.isUsageAnalyticsAvailable
+import com.mrl.pixiv.common.analytics.setUsageAnalyticsEnabled
 import com.mrl.pixiv.common.logs.AppLogStore
 import com.mrl.pixiv.common.logs.installAppLogCrashHandler
+import com.mrl.pixiv.common.repository.AppRepository
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.isDebug
@@ -28,6 +31,9 @@ object Initialization {
         }
         installAppLogCrashHandler()
         initializeMMKV(logLevel = MMKVLogLevel.LevelInfo)
+        if (isUsageAnalyticsAvailable) {
+            setUsageAnalyticsEnabled(AppRepository.usageAnalyticsEnabled.value)
+        }
         startKoin {
             platformKoinAppDeclaration()
             modules(allModule)

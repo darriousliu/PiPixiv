@@ -12,14 +12,12 @@ import com.google.firebase.initialize
 private val firebaseAnalytics
     get() = Firebase.analytics
 
-actual val isUsageAnalyticsAvailable: Boolean = true
-
 fun Application.initializeFirebase(isDebug: Boolean) {
     Firebase.initialize(this)
     Firebase.crashlytics.isCrashlyticsCollectionEnabled = !isDebug
 }
 
-actual fun setUsageAnalyticsEnabled(enabled: Boolean) {
+internal actual fun setPlatformUsageAnalyticsEnabled(enabled: Boolean) {
     val analytics = firebaseAnalytics
     val analyticsStorage = if (enabled) ConsentStatus.GRANTED else ConsentStatus.DENIED
     analytics.setConsent(mapOf(ConsentType.ANALYTICS_STORAGE to analyticsStorage))
@@ -27,7 +25,7 @@ actual fun setUsageAnalyticsEnabled(enabled: Boolean) {
     if (!enabled) analytics.resetAnalyticsData()
 }
 
-actual fun logScreenView(screen: String, page: String?) {
+internal actual fun logPlatformScreenView(screen: String, page: String?) {
     firebaseAnalytics.logEvent("screen_view") {
         param("screen_name", screen)
         if (page != null) param("page_name", page)
