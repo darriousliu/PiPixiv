@@ -5,7 +5,10 @@ import io.sentry.Hint
 import io.sentry.HttpBodyType
 import io.sentry.KeyValueCollectionBehavior
 import io.sentry.SendCachedEnvelopeFireAndForgetIntegration
+import io.sentry.SentryLogEvent
+import io.sentry.SentryLogLevel
 import io.sentry.SentryOptions
+import io.sentry.protocol.SentryId
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.test.Test
@@ -94,6 +97,20 @@ class CrashDiagnosticsTest {
         } finally {
             cacheDir.toFile().deleteRecursively()
         }
+    }
+
+    @Test
+    fun addsOperatingSystemToDesktopLogs() {
+        val options = SentryOptions().apply {
+            configureDesktopCrashReports(testDsn, appVersion = "2.6.1", appBuild = 20601, cacheDir = null)
+        }
+        val beforeSendLog = assertNotNull(options.logs.beforeSend)
+        val log = SentryLogEvent(SentryId(), 0.0, "screen_view", SentryLogLevel.INFO)
+
+        val attributes = assertNotNull(assertNotNull(beforeSendLog.execute(log)).attributes)
+        val expectedOsName = System.getProperty("os.name").let { if (it == "Mac OS X") "macOS" else it }
+        assertEquals(expectedOsName, attributes["os.name"]?.value)
+        assertEquals(System.getProperty("os.version"), attributes["os.version"]?.value)
     }
 
     @Test

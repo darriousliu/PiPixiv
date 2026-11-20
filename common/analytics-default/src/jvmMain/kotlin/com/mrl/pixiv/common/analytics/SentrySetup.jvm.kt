@@ -8,7 +8,9 @@ import io.sentry.Hint
 import io.sentry.ScopeType
 import io.sentry.SendCachedEnvelopeFireAndForgetIntegration
 import io.sentry.SendFireAndForgetEnvelopeSender
+import io.sentry.SentryAttributeType
 import io.sentry.SentryEvent
+import io.sentry.SentryLogEventAttributeValue
 import io.sentry.SentryOptions
 import io.sentry.kotlin.multiplatform.Sentry
 import io.sentry.protocol.App
@@ -109,6 +111,13 @@ internal fun SentryOptions.configureDesktopCrashReports(
     val jvmVersion = Runtime.version().toString()
     val jvmVendor = System.getProperty("java.vm.vendor")
     val runtime = Runtime.getRuntime()
+
+    // Java logs carry no OS context. Use the attribute names that Android and iOS logs carry.
+    logs.beforeSend = SentryOptions.Logs.BeforeSendLogCallback { log ->
+        osName?.let { log.setAttribute("os.name", SentryLogEventAttributeValue(SentryAttributeType.STRING, it)) }
+        osVersion?.let { log.setAttribute("os.version", SentryLogEventAttributeValue(SentryAttributeType.STRING, it)) }
+        log
+    }
 
     addEventProcessor(object : EventProcessor {
         override fun process(event: SentryEvent, hint: Hint): SentryEvent {
