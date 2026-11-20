@@ -38,7 +38,7 @@ class IosZipUtil: util.ZipUtilBridge {
                 data.append($0)
             }
         } catch {
-            print("Unable to read ZIP entry")
+            print("Unable to read ZIP entry: \(error)")
             return nil
         }
 
@@ -72,7 +72,7 @@ class IosZipUtil: util.ZipUtilBridge {
             try FileManager.default.unzipItem(at: sourceURL, to: destinationURL)
             return true
         } catch {
-            print("Unable to extract ZIP archive")
+            print("Unable to extract ZIP archive: \(error)")
             return false
         }
     }

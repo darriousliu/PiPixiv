@@ -5,5 +5,5 @@
     <string name="crash_diagnostics">Çökme raporları</string>
     <string name="crash_diagnostics_description">Uygulama çöktüğünde veya bir hata oluştuğunda, sorunu bulup düzeltebilmemiz için hata ayrıntılarını, uygulama sürümünü ve cihaz bilgilerini otomatik olarak gönderir.</string>
     <string name="crash_diagnostics_switch_note">Yukarıdaki anahtar çökme raporlarını etkilemez.</string>
-    <string name="privacy_not_collected_description">Arama terimlerinizi, hesap bilgilerinizi, görüntülediğiniz eserleri veya indirdiğiniz dosyaları toplamayız.</string>
+    <string name="privacy_not_collected_description">Uygulama arama terimlerinizi, hesap bilgilerinizi, görüntülediğiniz eserleri veya indirdiğiniz dosyaları aktif olarak toplamaz.</string>
 </resources>

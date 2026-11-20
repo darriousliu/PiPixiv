@@ -14,7 +14,17 @@ private val firebaseAnalytics
 
 private val usageAnalyticsLock = Any()
 private var usageAnalyticsEnabled = false
-private val screenParameters = setOf("screen_name", "screen_class", "page_name", "mode")
+private val screenParameters = setOf(
+    "screen_name",
+    "screen_class",
+    "page_name",
+    "mode",
+    "is_id_search",
+    "search_mode",
+    "enable_transition",
+    "is_novel",
+    "type",
+)
 
 actual val isUsageAnalyticsAvailable: Boolean = true
 

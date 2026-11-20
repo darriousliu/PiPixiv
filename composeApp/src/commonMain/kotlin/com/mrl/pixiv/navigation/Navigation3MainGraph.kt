@@ -538,6 +538,24 @@ private fun LogScreen(
     }
     LaunchedEffect(destination) {
         val screenName = destination::class.serializer().descriptor.serialName.substringAfterLast('.')
-        logEvent("screen_view", mapOf("screen_name" to screenName, "screen_class" to screenName))
+        logEvent(
+            "screen_view",
+            buildMap {
+                put("screen_name", screenName)
+                put("screen_class", screenName)
+                when (destination) {
+                    is Destination.SearchResults -> {
+                        put("is_id_search", destination.isIdSearch.toString())
+                        put("search_mode", destination.searchMode.name)
+                    }
+
+                    is Destination.Picture -> put("enable_transition", (destination.cover != null).toString())
+                    is Destination.Collection -> put("is_novel", destination.isNovel.toString())
+                    is Destination.Comment -> put("type", destination.type.name)
+                    is Destination.Report -> put("type", destination.type.name)
+                    else -> Unit
+                }
+            },
+        )
     }
 }

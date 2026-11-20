@@ -6,6 +6,7 @@ import com.ctrip.flight.mmkv.MMKVLogLevel
 import com.mrl.pixiv.common.analytics.initializeSentry
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.util.AppUtil
+import com.mrl.pixiv.common.util.DeviceInfo
 import com.mrl.pixiv.common.util.isDebug
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
@@ -13,7 +14,13 @@ import org.koin.dsl.KoinAppDeclaration
 object Initialization {
     fun initKoin(platformKoinAppDeclaration: KoinAppDeclaration = {}) {
         Logger.setMinSeverity(if (isDebug) Severity.Debug else Severity.Error)
-        initializeSentry(isDebug, AppUtil.sentryDsn, AppUtil.versionName, AppUtil.versionCode)
+        initializeSentry(
+            isDebug = isDebug,
+            dsn = AppUtil.sentryDsn,
+            appVersion = AppUtil.versionName,
+            appBuild = AppUtil.versionCode,
+            deviceName = DeviceInfo.DISPLAY_NAME,
+        )
         initializeMMKV(logLevel = MMKVLogLevel.LevelInfo)
         startKoin {
             platformKoinAppDeclaration()

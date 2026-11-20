@@ -5,5 +5,5 @@
     <string name="crash_diagnostics">當機報告</string>
     <string name="crash_diagnostics_description">應用程式當機或發生錯誤時，會自動傳送錯誤資訊、應用程式版本和裝置資訊，協助我們找出並修正問題。</string>
     <string name="crash_diagnostics_switch_note">當機報告不受上方開關影響。</string>
-    <string name="privacy_not_collected_description">不會收集你的搜尋字詞、帳號資訊、瀏覽的作品或下載的檔案。</string>
+    <string name="privacy_not_collected_description">應用程式不會主動收集你的搜尋字詞、帳號資訊、瀏覽的作品或下載的檔案。</string>
 </resources>

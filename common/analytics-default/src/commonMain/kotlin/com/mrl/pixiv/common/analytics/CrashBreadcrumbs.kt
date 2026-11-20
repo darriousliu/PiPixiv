@@ -1,6 +1,5 @@
 package com.mrl.pixiv.common.analytics
 
-internal const val CrashBreadcrumbLimit = 100
 internal const val AppCrashScreenCategory = "app.navigation"
 internal const val AppCrashTabCategory = "app.navigation.tab"
 internal const val AppCrashOperationCategory = "app.operation"

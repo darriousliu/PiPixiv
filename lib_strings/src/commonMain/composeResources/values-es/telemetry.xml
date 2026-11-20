@@ -5,5 +5,5 @@
     <string name="crash_diagnostics">Informes de fallos</string>
     <string name="crash_diagnostics_description">Si la app falla o se produce un error, envía automáticamente los detalles del error, la versión de la app y la información del dispositivo para que podamos encontrar y corregir el problema.</string>
     <string name="crash_diagnostics_switch_note">El interruptor de arriba no afecta a los informes de fallos.</string>
-    <string name="privacy_not_collected_description">No recopilamos tus búsquedas, los datos de tu cuenta, las obras que ves ni los archivos que descargas.</string>
+    <string name="privacy_not_collected_description">La aplicación no recopila de forma activa tus términos de búsqueda, los datos de tu cuenta, las obras que ves ni los archivos que descargas.</string>
 </resources>

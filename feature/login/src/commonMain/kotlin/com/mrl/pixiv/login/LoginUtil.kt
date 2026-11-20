@@ -1,5 +1,6 @@
 package com.mrl.pixiv.login
 
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.analytics.recordCrashOperation
 import io.ktor.http.Url
 import kotlinx.coroutines.CancellationException
@@ -50,7 +51,8 @@ internal suspend fun recordLoginAttempt(login: suspend () -> Unit): Boolean {
         login()
     } catch (cancelled: CancellationException) {
         throw cancelled
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        Logger.e(throwable = e, tag = "Login") { "Login failed" }
         recordCrashOperation("LoginFailed")
         return false
     }

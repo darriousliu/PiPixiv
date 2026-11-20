@@ -10,10 +10,7 @@ internal actual fun initializePlatformSentry(dsn: String, appVersion: String, ap
     Sentry.initWithPlatformOptions { options ->
         options.setDsn(dsn)
         options.setSendDefaultPii(false)
-        options.setEnableAutoSessionTracking(true)
-        options.setEnableAutoBreadcrumbTracking(true)
-        options.setEnableNetworkBreadcrumbs(true)
-        options.setMaxBreadcrumbs(CrashBreadcrumbLimit.toULong())
+        options.setEnableCaptureFailedRequests(false)
         options.setBeforeBreadcrumb { breadcrumb ->
             breadcrumb?.apply {
                 stripHttpBreadcrumbQueryAndFragment(category, type, data) { key, value ->
@@ -21,11 +18,9 @@ internal actual fun initializePlatformSentry(dsn: String, appVersion: String, ap
                 }
             }
         }
-        options.setTracesSampleRate(null)
         options.setTracePropagationTargets(emptyList<Any>())
         options.setEnableAutoPerformanceTracing(false)
         options.setEnableNetworkTracking(false)
-        options.setEnableLogs(false)
         options.sessionReplay().apply {
             setSessionSampleRate(0f)
             setOnErrorSampleRate(0f)
