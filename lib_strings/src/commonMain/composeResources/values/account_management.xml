@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">正在升级本地数据…</string>
+    <string name="migration_failure">无法升级本地数据</string>
+    <string name="migration_storage_failure">存储空间不足。请释放空间后重试。</string>
+    <string name="migration_backup_failure">无法备份本地数据库。</string>
+    <string name="migration_preferences_failure">无法迁移账号信息或设置。</string>
+    <string name="migration_database_failure">无法打开本地数据库。</string>
+    <string name="migration_split_failure">部分账号数据尚未迁移。下次启动时会重试。</string>
+    <string name="migration_export_logs">导出日志</string>
+    <string name="migration_continue">先继续使用</string>
+</resources>

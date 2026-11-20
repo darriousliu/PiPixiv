@@ -112,32 +112,7 @@ fun AppLogScreen(
     val scope = rememberCoroutineScope()
 
     fun exportLogs(entries: List<AppLogEntry>, share: Boolean) {
-        if (entries.isEmpty()) return
-        scope.launch {
-            try {
-                val device = DeviceInfo.appLogDetails()
-                val header = AppLogHeader(
-                    appVersion = AppUtil.versionName,
-                    appBuild = AppUtil.versionCode.toString(),
-                    flavor = FLAVOR,
-                    platform = device.platform,
-                    osVersion = device.osVersion,
-                    deviceModel = device.model ?: getString(RStrings.app_logs_unknown_device),
-                )
-                val omitted = getString(RStrings.app_logs_omitted)
-                val text = withContext(Dispatchers.Default) {
-                    formatCopiedLogs(header, entries) { count -> omitted.replace("%1\$d", count.toString()) }
-                }
-                if (share) ShareUtil.shareText(text) else copyToClipboard(text)
-                if (!share || platform.isDesktop()) {
-                    ToastUtil.safeShortToast(RStrings.app_logs_copied)
-                }
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                ToastUtil.safeShortToast(RStrings.app_logs_export_failed)
-            }
-        }
+        scope.launch { exportAppLogs(entries, share) }
     }
 
     AppLogContent(
@@ -156,6 +131,42 @@ fun AppLogScreen(
         modifier = modifier,
     )
 }
+
+suspend fun exportAppLogs(entries: List<AppLogEntry>, share: Boolean = true) {
+    if (entries.isEmpty()) return
+    try {
+        val device = DeviceInfo.appLogDetails()
+        val header = AppLogHeader(
+            appVersion = AppUtil.versionName,
+            appBuild = AppUtil.versionCode.toString(),
+            flavor = FLAVOR,
+            platform = device.platform,
+            osVersion = device.osVersion,
+            deviceModel = device.model ?: getString(RStrings.app_logs_unknown_device),
+        )
+        val omitted = getString(RStrings.app_logs_omitted)
+        val text = withContext(Dispatchers.Default) {
+            val shareable = entries.map { entry ->
+                if (entry.tag == "StartupMigration" && entry.message.startsWith("MigrationTiming ")) {
+                    entry.copy(message = entry.message.replace(migrationAvailableSpace, "\"availableBytes\":null"))
+                } else {
+                    entry
+                }
+            }
+            formatCopiedLogs(header, shareable) { count -> omitted.replace("%1\$d", count.toString()) }
+        }
+        if (share) ShareUtil.shareText(text) else copyToClipboard(text)
+        if (!share || platform.isDesktop()) {
+            ToastUtil.safeShortToast(RStrings.app_logs_copied)
+        }
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        ToastUtil.safeShortToast(RStrings.app_logs_export_failed)
+    }
+}
+
+private val migrationAvailableSpace = Regex(""""availableBytes":\d+""")
 
 private enum class AppLogFilter(val label: StringResource, val minimum: Severity) {
     All(RStrings.all, Severity.Info),

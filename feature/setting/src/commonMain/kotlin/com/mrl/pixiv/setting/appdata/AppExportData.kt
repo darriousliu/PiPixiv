@@ -8,6 +8,7 @@ import com.mrl.pixiv.common.data.search.IllustSearch
 import com.mrl.pixiv.common.data.search.LocalSearchFilter
 import com.mrl.pixiv.common.data.search.NovelSearch
 import com.mrl.pixiv.common.data.setting.UserPreference
+import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.datasource.local.entity.BlockIllustEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockNovelEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockTagEntity
@@ -15,6 +16,7 @@ import com.mrl.pixiv.common.datasource.local.entity.BlockUserEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.IllustHistoryEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelHistoryEntity
+import com.mrl.pixiv.common.repository.NovelSeriesReadingProgress
 import kotlinx.serialization.Serializable
 
 // V1 - Legacy format (deprecated, kept for backward compatibility)
@@ -56,6 +58,18 @@ data class AppExportDataV3(
     val downloads: DownloadsData = DownloadsData(),
     val novelHistory: NovelHistoryData = NovelHistoryData(),
     val browsingHistory: BrowsingHistoryData = BrowsingHistoryData(),
+)
+
+// The archive holds SQLite snapshots in addition to this metadata.
+@Serializable
+internal data class AppExportDataV4(
+    val version: Int = 4,
+    val userId: Long,
+    val settings: SettingsData,
+    val search: SearchData,
+    val bookmarks: BookmarksData,
+    val seriesProgress: Map<Long, NovelSeriesReadingProgress> = emptyMap(),
+    val userInfo: UserDetailResp? = null,
 )
 
 @Serializable

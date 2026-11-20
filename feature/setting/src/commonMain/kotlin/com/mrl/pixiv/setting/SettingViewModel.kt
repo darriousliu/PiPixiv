@@ -2,9 +2,7 @@ package com.mrl.pixiv.setting
 
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.repository.AuthManager
-import com.mrl.pixiv.common.repository.SearchRepository
 import com.mrl.pixiv.common.repository.SettingRepository
-import com.mrl.pixiv.common.repository.UserManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.copyToClipboard
@@ -34,9 +32,6 @@ class SettingViewModel : BaseMviViewModel<SettingState, SettingAction>(
 
     fun logout() {
         AuthManager.logout()
-        UserManager.logout()
-        SettingRepository.clear()
-        SearchRepository.clear()
     }
 
     fun savePictureSourceHost(host: String) {

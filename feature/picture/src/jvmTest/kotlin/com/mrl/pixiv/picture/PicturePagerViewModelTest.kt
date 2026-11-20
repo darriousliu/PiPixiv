@@ -39,7 +39,7 @@ import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.User
 import com.mrl.pixiv.common.data.user.IllustsWithNextUrl
 import com.mrl.pixiv.common.data.user.UserIllustsResp
-import com.mrl.pixiv.common.datasource.local.dao.BrowsingHistoryDao
+import com.mrl.pixiv.common.datasource.local.AccountDatabaseProvider
 import com.mrl.pixiv.common.network.ApiClient
 import com.mrl.pixiv.common.network.AuthClient
 import com.mrl.pixiv.common.network.ImageClient
@@ -82,7 +82,6 @@ import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import java.io.File
-import java.lang.reflect.Proxy
 import java.nio.file.Files
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -151,7 +150,7 @@ class PicturePagerViewModelTest {
             override val viewModelStore = ViewModelStore()
         }
         val parentSentinel = object : ViewModel() {}
-        val history = BrowsingHistoryRepository(unusedHistoryDao())
+        val history = BrowsingHistoryRepository(AccountDatabaseProvider())
         startKoin {
             modules(module {
                 single(named<ApiClient>()) { RoutedHttpClient({ BypassSetting.System }, { client }, HttpClient::close) }
@@ -363,9 +362,6 @@ class PicturePagerViewModelTest {
         initialize(directory.resolve("mmkv").absolutePath, MMKVCLibLoader { library.absolutePath }, MMKVLogLevel.LevelNone)
     }
 
-    private fun unusedHistoryDao(): BrowsingHistoryDao = Proxy.newProxyInstance(
-        BrowsingHistoryDao::class.java.classLoader, arrayOf(BrowsingHistoryDao::class.java),
-    ) { _, method, _ -> error("Unexpected history access: ${method.name}") } as BrowsingHistoryDao
 
     private fun PictureViewModel.scopeJob(): Job = requireNotNull(viewModelScope.coroutineContext[Job])
 

@@ -28,23 +28,9 @@ class NovelTranslationRepository(
 
     suspend fun getTranslation(
         novelId: Long,
-        targetLanguage: String
-    ): NovelTranslationCache? {
-        val userId = requireUserInfoValue.user.id
-        return getTranslationForUser(
-            userId = userId,
-            novelId = novelId,
-            targetLanguage = targetLanguage,
-        )
-    }
-
-    suspend fun getTranslationForUser(
-        userId: Long,
-        novelId: Long,
         targetLanguage: String,
     ): NovelTranslationCache? {
         return dao.getByNovelIdAndLanguage(
-            userId = userId,
             novelId = novelId,
             targetLanguage = targetLanguage,
         )?.toDomain()
@@ -59,32 +45,8 @@ class NovelTranslationRepository(
         sourceMd5: String,
         translatedText: String,
     ) {
-        val userId = requireUserInfoValue.user.id
-        saveTranslationForUser(
-            userId = userId,
-            novelId = novelId,
-            targetLanguage = targetLanguage,
-            provider = provider,
-            model = model,
-            configFingerprint = configFingerprint,
-            sourceMd5 = sourceMd5,
-            translatedText = translatedText,
-        )
-    }
-
-    suspend fun saveTranslationForUser(
-        userId: Long,
-        novelId: Long,
-        targetLanguage: String,
-        provider: AiProvider,
-        model: String,
-        configFingerprint: String,
-        sourceMd5: String,
-        translatedText: String,
-    ) {
         writeMutex.withLock {
             val existing = dao.getByNovelIdAndLanguage(
-                userId = userId,
                 novelId = novelId,
                 targetLanguage = targetLanguage,
             )
@@ -96,7 +58,6 @@ class NovelTranslationRepository(
             dao.upsert(
                 NovelTranslationEntity(
                     novelId = novelId,
-                    userId = userId,
                     targetLanguage = targetLanguage,
                     provider = provider.name,
                     model = model,
@@ -128,34 +89,8 @@ class NovelTranslationRepository(
         translatedTitle: String,
         translatedCaption: String,
     ) {
-        val userId = requireUserInfoValue.user.id
-        saveMetadataTranslationForUser(
-            userId = userId,
-            novelId = novelId,
-            targetLanguage = targetLanguage,
-            provider = provider,
-            model = model,
-            configFingerprint = configFingerprint,
-            metadataSourceMd5 = metadataSourceMd5,
-            translatedTitle = translatedTitle,
-            translatedCaption = translatedCaption,
-        )
-    }
-
-    suspend fun saveMetadataTranslationForUser(
-        userId: Long,
-        novelId: Long,
-        targetLanguage: String,
-        provider: AiProvider,
-        model: String,
-        configFingerprint: String,
-        metadataSourceMd5: String,
-        translatedTitle: String,
-        translatedCaption: String,
-    ) {
         writeMutex.withLock {
             val existing = dao.getByNovelIdAndLanguage(
-                userId = userId,
                 novelId = novelId,
                 targetLanguage = targetLanguage,
             )
@@ -167,7 +102,6 @@ class NovelTranslationRepository(
             dao.upsert(
                 NovelTranslationEntity(
                     novelId = novelId,
-                    userId = userId,
                     targetLanguage = targetLanguage,
                     provider = provider.name,
                     model = model,
@@ -189,23 +123,9 @@ class NovelTranslationRepository(
 
     suspend fun deleteTranslation(
         novelId: Long,
-        targetLanguage: String
-    ) {
-        val userId = requireUserInfoValue.user.id
-        deleteTranslationForUser(
-            userId = userId,
-            novelId = novelId,
-            targetLanguage = targetLanguage,
-        )
-    }
-
-    suspend fun deleteTranslationForUser(
-        userId: Long,
-        novelId: Long,
         targetLanguage: String,
     ) {
         dao.deleteByNovelIdAndLanguage(
-            userId = userId,
             novelId = novelId,
             targetLanguage = targetLanguage,
         )

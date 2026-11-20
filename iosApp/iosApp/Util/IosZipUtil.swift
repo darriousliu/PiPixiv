@@ -64,6 +64,23 @@ class IosZipUtil: util.ZipUtilBridge {
         return list
     }
 
+    override func extractZipEntry(zipFilePath: String, entryName: String, outputPath: String) -> Bool {
+        let sourceURL = getValidURL(path: zipFilePath)
+        guard let archive = try? Archive(url: sourceURL, accessMode: .read, pathEncoding: nil),
+              let entry = archive[entryName], entry.type == .file
+        else {
+            return false
+        }
+
+        do {
+            let crc = try archive.extract(entry, to: getValidURL(path: outputPath))
+            return crc == entry.checksum
+        } catch {
+            print("Unable to extract ZIP entry")
+            return false
+        }
+    }
+
     override func unzip(sourcePath: String, destinationPath: String) -> Bool {
         let sourceURL = getValidURL(path: sourcePath)
         let destinationURL = getValidURL(path: destinationPath)

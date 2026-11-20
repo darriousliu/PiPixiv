@@ -4,6 +4,7 @@ import io.sentry.kotlin.multiplatform.gradle.SentryExtension
 
 plugins {
     id("pixiv.multiplatform.compose")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 if (findProperty("applyFirebasePlugins") == "true") {
@@ -34,6 +35,7 @@ kotlin {
                 implementation(project(":common:network"))
                 implementation(project(":common:repository"))
                 implementation(project(":common:ui"))
+                implementation(project(":common:icons"))
                 implementation(project(":common:core"))
                 rootDir.resolve("feature").listFiles()?.filter { it.isDirectory }?.forEach {
                     implementation(project(":feature:${it.name}"))
@@ -46,6 +48,7 @@ kotlin {
                 implementation(libs.filekit.core)
                 // MMKV
                 implementation(libs.mmkv.kotlin)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         androidMain {
@@ -57,8 +60,17 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        jvmTest.dependencies {
-            implementation(libs.compose.jetbrains.ui.test)
+        jvmTest {
+            resources.srcDir(project(":common:datasource-local").file("src/jvmTest/resources"))
+            dependencies {
+                implementation(libs.compose.jetbrains.ui.test)
+                implementation(libs.androidx.sqlite.bundled)
+                runtimeOnly(when {
+                    System.getProperty("os.name") == "Mac OS X" -> libs.mmkv.kotlin.nativelib.macos
+                    System.getProperty("os.name").startsWith("Windows") -> libs.mmkv.kotlin.nativelib.windows
+                    else -> libs.mmkv.kotlin.nativelib.linux
+                })
+            }
         }
         iosMain {
             dependencies {
@@ -178,4 +190,9 @@ tasks.register("buildReleaseIpa", BuildIpaTask::class) {
     archiveDir = layout.buildDirectory.dir("archives/release/PiPixiv.xcarchive")
     outputIpa = layout.buildDirectory.file("archives/release/PiPixiv.ipa")
     dependsOn(buildReleaseArchive)
+}
+
+tasks.named<Test>("jvmTest") {
+    systemProperty("pipixiv.benchmark.dir", rootProject.layout.buildDirectory.get().asFile.absolutePath)
+    testLogging.showStandardStreams = providers.environmentVariable("PIPIXIV_MIGRATION_BENCHMARK").orNull == "1"
 }

@@ -16,6 +16,7 @@ import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -28,7 +29,9 @@ import com.mrl.pixiv.common.compose.LocalKeyEventFlow
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.network.RoutedHttpClient
 import com.mrl.pixiv.common.network.imageNetworkFetcher
-import com.mrl.pixiv.common.viewmodel.state
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.util.setAppCompatDelegateThemeMode
 import com.mrl.pixiv.splash.SplashViewModel
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
@@ -51,6 +54,8 @@ class MainActivity : BaseActivity() {
     override fun BuildContent() {
         CompositionLocalProvider(LocalKeyEventFlow provides flow) {
             val darkTheme = isSystemInDarkTheme()
+            val appTheme by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { theme }
+            LaunchedEffect(appTheme) { setAppCompatDelegateThemeMode(SettingRepository.settingTheme) }
             LaunchedEffect(darkTheme) {
                 // Draw edge-to-edge and set system bars color to transparent
                 val lightStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.BLACK)
@@ -96,7 +101,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                splashViewModel.state.isLoading
+                splashViewModel.keepNativeSplash
             }
         }
         super.onCreate(savedInstanceState)

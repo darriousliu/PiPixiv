@@ -6,12 +6,11 @@ import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "novel_translation",
-    primaryKeys = ["novelId", "userId", "targetLanguage"]
+    primaryKeys = ["novelId", "targetLanguage"]
 )
 @Serializable
 data class NovelTranslationEntity(
     val novelId: Long,
-    val userId: Long,
     val targetLanguage: String,
     val provider: String,
     val model: String,

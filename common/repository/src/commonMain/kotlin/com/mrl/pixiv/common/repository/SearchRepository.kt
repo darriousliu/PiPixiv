@@ -6,64 +6,77 @@ import com.mrl.pixiv.common.data.search.IllustSearch
 import com.mrl.pixiv.common.data.search.LocalSearchFilter
 import com.mrl.pixiv.common.data.search.NovelSearch
 import com.mrl.pixiv.common.data.search.SearchHistory
+import com.mrl.pixiv.common.mmkv.AccountMMKVProperty
+import com.mrl.pixiv.common.mmkv.AccountScoped
+import com.mrl.pixiv.common.mmkv.AccountStore
 import com.mrl.pixiv.common.mmkv.MMKVUser
-import com.mrl.pixiv.common.mmkv.asMutableStateFlow
 import com.mrl.pixiv.common.mmkv.mmkvBool
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
 import com.mrl.pixiv.common.mmkv.mmkvStringSet
+import com.mrl.pixiv.common.mmkv.withAccountStorageLock
 import com.mrl.pixiv.common.util.currentTimeMillis
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 
-object SearchRepository : MMKVUser {
+object SearchRepository : MMKVUser, AccountScoped {
     //------------------------------- 插图历史记录 ---------------------------------
-    private val searchHistory by mmkvSerializable(IllustSearch()).asMutableStateFlow()
-    val searchHistoryFlow = searchHistory.asStateFlow()
+    private val searchHistory = AccountMMKVProperty(
+        mmkvSerializable(IllustSearch()), "searchHistory", IllustSearch(),
+    )
+    val searchHistoryFlow = searchHistory.flow
 
-    private val searchIdHistory by mmkvStringSet(emptySet()).asMutableStateFlow()
-    val searchIdHistoryFlow = searchIdHistory.asStateFlow()
+    private val searchIdHistory = AccountMMKVProperty(
+        mmkvStringSet(emptySet()), "searchIdHistory", emptySet(),
+    )
+    val searchIdHistoryFlow = searchIdHistory.flow
 
     //------------------------------- 小说历史记录 ---------------------------------
-    private val novelSearchHistory by mmkvSerializable(NovelSearch()).asMutableStateFlow()
-    val novelSearchHistoryFlow = novelSearchHistory.asStateFlow()
+    private val novelSearchHistory = AccountMMKVProperty(
+        mmkvSerializable(NovelSearch()), "novelSearchHistory", NovelSearch(),
+    )
+    val novelSearchHistoryFlow = novelSearchHistory.flow
 
-    private val novelSearchIdHistory by mmkvStringSet(emptySet()).asMutableStateFlow()
-    val novelSearchIdHistoryFlow = novelSearchIdHistory.asStateFlow()
+    private val novelSearchIdHistory = AccountMMKVProperty(
+        mmkvStringSet(emptySet()), "novelSearchIdHistory", emptySet(),
+    )
+    val novelSearchIdHistoryFlow = novelSearchIdHistory.flow
 
     @Deprecated("Persistent search filter defaults are stored in UserPreference.searchSettings.")
-    private val _savedSearchFilter by mmkvSerializable(LocalSearchFilter()).asMutableStateFlow()
+    private val _savedSearchFilter = AccountMMKVProperty(
+        mmkvSerializable(LocalSearchFilter()), "_savedSearchFilter", LocalSearchFilter(),
+    )
 
     @Deprecated("Use SettingRepository.userPreferenceFlow and SearchSettings.")
     val savedSearchFilterFlow
-        get() = _savedSearchFilter.asStateFlow()
+        get() = _savedSearchFilter.flow
 
     @Deprecated("Persistent search filter defaults are stored in UserPreference.searchSettings.")
-    private val _rememberSearchFilter by mmkvBool(false).asMutableStateFlow()
+    private val _rememberSearchFilter = AccountMMKVProperty(
+        mmkvBool(false), "_rememberSearchFilter", false,
+    )
 
     @Deprecated("Search filter changes are no longer remembered.")
     val rememberSearchFilterFlow
-        get() = _rememberSearchFilter.asStateFlow()
+        get() = _rememberSearchFilter.flow
 
     @Deprecated("Search filter changes are no longer remembered.")
     val rememberSearchFilterValue: Boolean
-        get() = _rememberSearchFilter.value
+        get() = _rememberSearchFilter.flow.value
 
     @Deprecated("Use SettingRepository.userPreferenceFlow and SearchSettings.")
     val savedSearchFilterValue: LocalSearchFilter
-        get() = _savedSearchFilter.value
+        get() = _savedSearchFilter.flow.value
 
     @Deprecated("Search filter changes are no longer remembered.")
     fun setRememberSearchFilter(remember: Boolean) {
-        _rememberSearchFilter.value = remember
+        _rememberSearchFilter.write(AccountStore.activeUserId, remember)
     }
 
     @Deprecated("Use SettingRepository.setSearchSettings instead.")
     fun setSavedSearchFilter(filter: LocalSearchFilter) {
-        _savedSearchFilter.value = filter
+        _savedSearchFilter.write(AccountStore.activeUserId, filter)
     }
 
     fun deleteSearchHistory(searchWords: String) {
-        searchHistory.update {
+        searchHistory.update(AccountStore.activeUserId) {
             val index = it.searchHistoryList.indexOfFirst { it.keyword == searchWords }
             it.copy(
                 searchHistoryList = it.searchHistoryList.toMutableList().apply {
@@ -74,7 +87,7 @@ object SearchRepository : MMKVUser {
     }
 
     fun addSearchHistory(searchWords: String) {
-        searchHistory.update {
+        searchHistory.update(AccountStore.activeUserId) {
             // add to search history if not exist
             val index = it.searchHistoryList.indexOfFirst { it.keyword == searchWords }
             if (index == -1) {
@@ -102,7 +115,7 @@ object SearchRepository : MMKVUser {
     }
 
     fun deleteNovelSearchHistory(searchWords: String) {
-        novelSearchHistory.update {
+        novelSearchHistory.update(AccountStore.activeUserId) {
             val index = it.novelSearchHistory.indexOfFirst { it.keyword == searchWords }
             it.copy(
                 novelSearchHistory = it.novelSearchHistory.toMutableList().apply {
@@ -113,7 +126,7 @@ object SearchRepository : MMKVUser {
     }
 
     fun addNovelSearchHistory(searchWords: String) {
-        novelSearchHistory.update {
+        novelSearchHistory.update(AccountStore.activeUserId) {
             // add to search history if not exist
             val index = it.novelSearchHistory.indexOfFirst { it.keyword == searchWords }
             if (index == -1) {
@@ -141,26 +154,40 @@ object SearchRepository : MMKVUser {
     }
 
     fun addSearchIdHistory(searchId: String) {
-        searchIdHistory.update { (it ?: emptySet()) + searchId }
+        searchIdHistory.update(AccountStore.activeUserId) { (it ?: emptySet()) + searchId }
     }
 
     fun removeSearchIdHistory(searchId: String) {
-        searchIdHistory.update { it?.minus(searchId) }
+        searchIdHistory.update(AccountStore.activeUserId) { it?.minus(searchId) }
     }
 
     fun addNovelSearchIdHistory(searchId: String) {
-        novelSearchIdHistory.update { (it ?: emptySet()) + searchId }
+        novelSearchIdHistory.update(AccountStore.activeUserId) { (it ?: emptySet()) + searchId }
     }
 
     fun removeNovelSearchIdHistory(searchId: String) {
-        novelSearchIdHistory.update { it?.minus(searchId) }
+        novelSearchIdHistory.update(AccountStore.activeUserId) { it?.minus(searchId) }
     }
 
-    fun clear() {
-        searchHistory.update {
-            it.copy(searchHistoryList = emptyList())
-        }
-        searchIdHistory.update { emptySet() }
+    override fun reload() = withAccountStorageLock {
+        val userId = AccountStore.activeUserId
+        searchHistory.reload(userId)
+        searchIdHistory.reload(userId)
+        novelSearchHistory.reload(userId)
+        novelSearchIdHistory.reload(userId)
+        _savedSearchFilter.reload(userId)
+        _rememberSearchFilter.reload(userId)
+    }
+
+    fun historyForAccount(userId: Long): AccountSearchHistory = withAccountStorageLock {
+        AccountSearchHistory(
+            illustSearch = searchHistory.read(userId),
+            illustSearchIds = searchIdHistory.read(userId).orEmpty(),
+            novelSearch = novelSearchHistory.read(userId),
+            novelSearchIds = novelSearchIdHistory.read(userId).orEmpty(),
+            savedFilter = _savedSearchFilter.read(userId),
+            rememberFilter = _rememberSearchFilter.read(userId),
+        )
     }
 
     fun restore(
@@ -168,10 +195,24 @@ object SearchRepository : MMKVUser {
         searchIds: Set<String>,
         novelSearch: NovelSearch,
         novelSearchIds: Set<String>,
-    ) {
-        searchHistory.value = illustSearch
-        searchIdHistory.value = searchIds
-        novelSearchHistory.value = novelSearch
-        novelSearchIdHistory.value = novelSearchIds
+        userId: Long = AccountStore.activeUserId,
+        savedFilter: LocalSearchFilter? = null,
+        rememberFilter: Boolean? = null,
+    ) = withAccountStorageLock {
+        searchHistory.write(userId, illustSearch)
+        searchIdHistory.write(userId, searchIds)
+        novelSearchHistory.write(userId, novelSearch)
+        novelSearchIdHistory.write(userId, novelSearchIds)
+        savedFilter?.let { _savedSearchFilter.write(userId, it) }
+        rememberFilter?.let { _rememberSearchFilter.write(userId, it) }
     }
 }
+
+data class AccountSearchHistory(
+    val illustSearch: IllustSearch,
+    val illustSearchIds: Set<String>,
+    val novelSearch: NovelSearch,
+    val novelSearchIds: Set<String>,
+    val savedFilter: LocalSearchFilter,
+    val rememberFilter: Boolean,
+)

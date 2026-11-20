@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">Actualizando los datos locales…</string>
+    <string name="migration_failure">No se pudieron actualizar los datos locales</string>
+    <string name="migration_storage_failure">No hay suficiente espacio. Libera espacio y vuelve a intentarlo.</string>
+    <string name="migration_backup_failure">No se pudo crear una copia de seguridad de la base de datos local.</string>
+    <string name="migration_preferences_failure">No se pudo migrar la información de la cuenta o la configuración.</string>
+    <string name="migration_database_failure">No se pudo abrir la base de datos local.</string>
+    <string name="migration_split_failure">Aún quedan datos de cuenta por migrar. La aplicación volverá a intentarlo al iniciarse.</string>
+    <string name="migration_export_logs">Exportar registros</string>
+    <string name="migration_continue">Continuar por ahora</string>
+</resources>

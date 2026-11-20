@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">Mise à niveau des données locales…</string>
+    <string name="migration_failure">Impossible de mettre à niveau les données locales</string>
+    <string name="migration_storage_failure">Espace de stockage insuffisant. Libérez de l’espace, puis réessayez.</string>
+    <string name="migration_backup_failure">Impossible de sauvegarder la base de données locale.</string>
+    <string name="migration_preferences_failure">Impossible de transférer les informations du compte ou les paramètres.</string>
+    <string name="migration_database_failure">Impossible d’ouvrir la base de données locale.</string>
+    <string name="migration_split_failure">Certaines données de compte restent à transférer. Un nouvel essai aura lieu au prochain démarrage.</string>
+    <string name="migration_export_logs">Exporter les journaux</string>
+    <string name="migration_continue">Continuer pour le moment</string>
+</resources>

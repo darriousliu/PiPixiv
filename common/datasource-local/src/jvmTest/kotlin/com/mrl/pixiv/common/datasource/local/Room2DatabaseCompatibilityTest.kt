@@ -1,89 +1,175 @@
 package com.mrl.pixiv.common.datasource.local
 
-import androidx.room3.Room
+import androidx.room3.useReaderConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelHistoryEntity
+import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelTranslationEntity
 import java.io.File
 import java.nio.file.Files
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.io.files.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class Room2DatabaseCompatibilityTest {
     @Test
-    fun `room 3 opens room 2 version 9 without losing data and persists new writes`() = runTest {
+    fun `v9 migration keeps the newest translation for each language and preserves global data`() = runTest {
         withLegacyDatabase(version = 9) { file ->
+            BundledSQLiteDriver().open(file.absolutePath).use { connection ->
+                connection.execSQL(
+                    """
+                    INSERT INTO novel_translation
+                    SELECT novelId, 2, targetLanguage, provider, model, configFingerprint,
+                        sourceMd5, 'Latest translation', 200, translatedTitle, translatedCaption,
+                        metadataSourceMd5
+                    FROM novel_translation
+                    WHERE userId = 1
+                    """.trimIndent()
+                )
+                connection.execSQL(
+                    """
+                    INSERT INTO novel_translation
+                    SELECT novelId, 1, 'ja', provider, model, configFingerprint,
+                        sourceMd5, translatedText, updatedAtMillis, translatedTitle, translatedCaption,
+                        metadataSourceMd5
+                    FROM novel_translation
+                    WHERE userId = 1
+                    """.trimIndent()
+                )
+                connection.execSQL("INSERT INTO block_user VALUES (2, 'Blocked user')")
+            }
+            withRoomDatabase(file) { database ->
+                assertEquals(
+                    legacyTranslation.copy(translatedText = "Latest translation", updatedAtMillis = 200L),
+                    database.novelTranslationDao().getByNovelIdAndLanguage(10L, "en"),
+                )
+                assertEquals(
+                    legacyTranslation.copy(targetLanguage = "ja"),
+                    database.novelTranslationDao().getByNovelIdAndLanguage(10L, "ja"),
+                )
+                assertEquals(legacyDownload, database.downloadDao().getDownload(20L, 0))
+                assertEquals("Blocked user", database.tableValue("SELECT name FROM block_user"))
+                assertEquals("1", database.tableValue("SELECT COUNT(*) FROM browsing_history_novel"))
+
+                database.novelTranslationDao().upsert(legacyTranslation)
+                database.downloadDao().updateProgress(20L, 0, 0.75f)
+            }
             withRoomDatabase(file) { database ->
                 assertEquals(
                     legacyTranslation,
-                    database.novelTranslationDao().getByNovelIdAndLanguage(1L, 10L, "en"),
-                )
-                assertLegacyDownloadAndHistory(database)
-
-                database.novelTranslationDao().upsert(
-                    legacyTranslation.copy(translatedText = "Updated with Room 3", updatedAtMillis = 200L)
-                )
-                database.downloadDao().updateProgress(20L, 0, 0.75f)
-                database.browsingHistoryDao().upsertNovel(legacyHistory.copy(novelId = 11L))
-            }
-
-            // Reopen the same on-disk file to check that Room 3 writes are durable.
-            withRoomDatabase(file) { database ->
-                assertEquals(
-                    legacyTranslation.copy(translatedText = "Updated with Room 3", updatedAtMillis = 200L),
-                    database.novelTranslationDao().getByNovelIdAndLanguage(1L, 10L, "en"),
+                    database.novelTranslationDao().getByNovelIdAndLanguage(10L, "en"),
                 )
                 assertEquals(
                     legacyDownload.copy(progress = 0.75f),
                     database.downloadDao().getDownload(20L, 0),
                 )
-                assertEquals(
-                    setOf(10L, 11L),
-                    database.browsingHistoryDao().getAllNovels(1L).map { it.novelId }.toSet(),
-                )
             }
-            assertDatabaseVersion(file, 9L)
+            assertDatabaseVersion(file, 10L)
         }
     }
 
     @Test
-    fun `room 3 automatically migrates version 8 and retains existing data`() = runTest {
+    fun `v8 migration chains through v9 and keeps existing columns and data`() = runTest {
         withLegacyDatabase(version = 8) { file ->
             withRoomDatabase(file) { database ->
-                // Reading through the production builder must execute MIGRATION_8_9 and
-                // validate the entire schema; the test never invokes migrate() directly.
                 val migratedTranslation = assertNotNull(
-                    database.novelTranslationDao().getByNovelIdAndLanguage(1L, 10L, "en")
+                    database.novelTranslationDao().getByNovelIdAndLanguage(10L, "en")
                 )
                 assertEquals(
                     legacyTranslation.copy(translatedTitle = "", translatedCaption = "", metadataSourceMd5 = ""),
                     migratedTranslation,
                 )
-                assertLegacyDownloadAndHistory(database)
-
-                // Exercise the new columns after the registered migration has added them.
+                assertEquals(legacyDownload, database.downloadDao().getDownload(20L, 0))
+                assertEquals("1", database.tableValue("SELECT COUNT(*) FROM browsing_history_novel"))
                 database.novelTranslationDao().upsert(legacyTranslation)
             }
 
             withRoomDatabase(file) { database ->
-                assertEquals(
-                    legacyTranslation,
-                    database.novelTranslationDao().getByNovelIdAndLanguage(1L, 10L, "en"),
-                )
-                assertLegacyDownloadAndHistory(database)
+                assertEquals(legacyTranslation, database.novelTranslationDao().getByNovelIdAndLanguage(10L, "en"))
             }
-            assertDatabaseVersion(file, 9L)
+            assertDatabaseVersion(file, 10L)
         }
     }
 
-    private suspend fun assertLegacyDownloadAndHistory(database: PixivDatabase) {
-        assertEquals(legacyDownload, database.downloadDao().getDownload(20L, 0))
-        assertEquals(listOf(legacyHistory), database.browsingHistoryDao().getAllNovels(1L))
+    @Test
+    fun `splitter moves valid users and preserves newer account data on retry`() = runTest {
+        withLegacyDatabase(version = 9) { file ->
+            val path = Path(file.absolutePath)
+            val root = file.parentFile.resolve("accounts")
+            val provider = AccountDatabaseProvider { Path(root.absolutePath) }
+            try {
+                BundledSQLiteDriver().open(file.absolutePath).use { connection ->
+                    for (uid in listOf(0L, 1L, 2L)) {
+                        connection.execSQL("INSERT INTO browsing_history_illust VALUES (10, $uid, 80, '{}')")
+                        if (uid != 1L) {
+                            connection.execSQL("INSERT INTO browsing_history_novel VALUES (10, $uid, 80, '{}')")
+                        }
+                        connection.execSQL("INSERT INTO novel_reading_progress VALUES (10, $uid, 1, 2, 3, 80)")
+                        connection.execSQL(
+                            """
+                            INSERT INTO novel_read_later VALUES (
+                                10, $uid, 'en', 'Title', '', '', '', '[]', 80, 'OPENAI',
+                                'model', 'https://example.com', 0, '', 'config', 'source',
+                                'READY', '', 0, NULL, 80
+                            )
+                            """.trimIndent()
+                        )
+                    }
+                }
+                val account1 = provider.open(1L)
+                assertNull(provider.current.value)
+                val newerHistory = legacyHistory.copy(viewedAtMillis = 120L)
+                account1.db.browsingHistoryDao().upsertNovel(newerHistory)
+                withRoomDatabase(file) { database ->
+                    val splitter = LegacyAccountDataSplitter(database, provider, path)
+                    splitter.split()
+                    splitter.split()
+
+                    assertEquals(
+                        "0",
+                        database.tableValue(
+                            """
+                            SELECT COUNT(*) FROM sqlite_master WHERE name IN (
+                                'browsing_history_illust', 'browsing_history_novel',
+                                'novel_reading_progress', 'novel_read_later'
+                            )
+                            """.trimIndent()
+                        ),
+                    )
+                }
+                assertNull(provider.current.value)
+                assertEquals(setOf("1", "2"), root.list().orEmpty().toSet())
+                for (uid in 1L..2L) {
+                    val account = provider.open(uid)
+                    assertEquals(1, account.db.browsingHistoryDao().countIllusts(uid))
+                    assertEquals(1, account.db.browsingHistoryDao().countNovels(uid))
+                    assertEquals(
+                        NovelReadingProgressEntity(10L, uid, 1, 2, 3, 80L),
+                        account.db.novelReadingProgressDao().getByNovelId(uid, 10L),
+                    )
+                    assertEquals(10L, account.db.novelReadLaterDao().observeByUserId(uid).first().single().novelId)
+                }
+                assertEquals(newerHistory, account1.db.browsingHistoryDao().getAllNovels(1L).single())
+                provider.publish(1L)
+                assertEquals(account1, provider.requireCurrent())
+            } finally {
+                provider.close()
+            }
+        }
+    }
+
+    private suspend fun PixivDatabase.tableValue(sql: String): String = useReaderConnection { connection ->
+        connection.usePrepared(sql) { statement ->
+            assertTrue(statement.step())
+            statement.getText(0)
+        }
     }
 
     private suspend fun withLegacyDatabase(version: Int, block: suspend (File) -> Unit) {
@@ -160,7 +246,7 @@ class Room2DatabaseCompatibilityTest {
     }
 
     private suspend fun withRoomDatabase(file: File, block: suspend (PixivDatabase) -> Unit) {
-        val database = provideDatabase(Room.databaseBuilder<PixivDatabase>(name = file.absolutePath))
+        val database = buildGlobalDatabase(Path(file.absolutePath))
         try {
             block(database)
         } finally {
@@ -182,7 +268,6 @@ class Room2DatabaseCompatibilityTest {
 
     private val legacyTranslation = NovelTranslationEntity(
         novelId = 10L,
-        userId = 1L,
         targetLanguage = "en",
         provider = "OPENAI",
         model = "legacy-model",

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">Lokale Daten werden aktualisiert …</string>
+    <string name="migration_failure">Lokale Daten konnten nicht aktualisiert werden</string>
+    <string name="migration_storage_failure">Nicht genug Speicherplatz. Gib Speicherplatz frei und versuche es erneut.</string>
+    <string name="migration_backup_failure">Die lokale Datenbank konnte nicht gesichert werden.</string>
+    <string name="migration_preferences_failure">Kontoinformationen oder Einstellungen konnten nicht übertragen werden.</string>
+    <string name="migration_database_failure">Die lokale Datenbank konnte nicht geöffnet werden.</string>
+    <string name="migration_split_failure">Einige Kontodaten müssen noch übertragen werden. Beim nächsten Start wird es erneut versucht.</string>
+    <string name="migration_export_logs">Protokolle exportieren</string>
+    <string name="migration_continue">Vorerst fortfahren</string>
+</resources>

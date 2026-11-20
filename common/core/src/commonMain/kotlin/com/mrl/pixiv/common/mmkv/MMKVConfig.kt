@@ -2,28 +2,64 @@ package com.mrl.pixiv.common.mmkv
 
 import com.ctrip.flight.mmkv.MMKV_KMP
 import com.ctrip.flight.mmkv.mmkvWithID
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.absolutePath
+import io.github.vinceglb.filekit.filesDir
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.serializer
 
 interface MMKVOwner {
     val id: String
-    val kv: MMKV_KMP get() = mmkvWithID(id)
+    val kv: MMKV_KMP
+        get() = withAccountStorageLock {
+            defaultInstances.getOrPut(id) { mmkvWithID(id) }
+        }
+
+    fun contains(key: String): Boolean = kv.containsKey(key)
+    fun sync() = kv.sync()
 }
 
 /**
- * 存储用户无关对数据
+ * 存储设备级数据。
  */
 interface MMKVApp : MMKVOwner {
     override val id get() = "pixiv.app"
-    override val kv get() = mmkvWithID(id)
 }
 
-/**
- * 当前用户级别的key-value存储实现该接口
- * 退出登录后会被清除
- */
 interface MMKVUser : MMKVOwner {
     override val id get() = "pixiv.user"
-    override val kv get() = mmkvWithID(id)
+    val userId: Long get() = AccountStore.activeUserId
+    override val kv: MMKV_KMP get() = accountMMKVOwner(userId).kv
+}
+
+class AccountMMKVOwner(
+    override val userId: Long,
+    private val filesDirectory: String,
+) : MMKVUser {
+    override val kv: MMKV_KMP by lazy {
+        require(userId > 0)
+        val directory = Path(filesDirectory, "accounts", userId.toString(), "mmkv")
+        SystemFileSystem.createDirectories(directory)
+        mmkvWithID(id, rootPath = directory.toString())
+    }
+}
+
+private val defaultInstances = mutableMapOf<String, MMKV_KMP>()
+private val accountInstances = mutableMapOf<Long, AccountMMKVOwner>()
+
+fun accountMMKVOwner(userId: Long): MMKVOwner = withAccountStorageLock {
+    require(userId > 0)
+    accountInstances.getOrPut(userId) {
+        AccountMMKVOwner(userId, FileKit.filesDir.absolutePath())
+    }
+}
+
+fun mmkvOwner(id: String, rootPath: String? = null): MMKVOwner = object : MMKVOwner {
+    override val id = id
+    override val kv by lazy {
+        if (rootPath == null) super<MMKVOwner>.kv else mmkvWithID(id, rootPath = rootPath)
+    }
 }
 
 internal operator fun MMKV_KMP.set(key: String, value: ByteArray?) = if (value == null) {

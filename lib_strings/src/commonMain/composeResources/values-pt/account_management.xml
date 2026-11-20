@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">Atualizando os dados locais…</string>
+    <string name="migration_failure">Não foi possível atualizar os dados locais</string>
+    <string name="migration_storage_failure">Espaço de armazenamento insuficiente. Libere espaço e tente novamente.</string>
+    <string name="migration_backup_failure">Não foi possível fazer backup do banco de dados local.</string>
+    <string name="migration_preferences_failure">Não foi possível migrar as informações da conta ou as configurações.</string>
+    <string name="migration_database_failure">Não foi possível abrir o banco de dados local.</string>
+    <string name="migration_split_failure">Alguns dados da conta ainda precisam ser migrados. O app tentará novamente na próxima inicialização.</string>
+    <string name="migration_export_logs">Exportar registros</string>
+    <string name="migration_continue">Continuar por enquanto</string>
+</resources>

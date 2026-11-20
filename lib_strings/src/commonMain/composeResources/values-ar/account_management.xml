@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">جارٍ ترقية البيانات المحلية…</string>
+    <string name="migration_failure">تعذرت ترقية البيانات المحلية</string>
+    <string name="migration_storage_failure">مساحة التخزين غير كافية. أفرغ بعض المساحة ثم أعد المحاولة.</string>
+    <string name="migration_backup_failure">تعذر إنشاء نسخة احتياطية من قاعدة البيانات المحلية.</string>
+    <string name="migration_preferences_failure">تعذر نقل معلومات الحساب أو الإعدادات.</string>
+    <string name="migration_database_failure">تعذر فتح قاعدة البيانات المحلية.</string>
+    <string name="migration_split_failure">لم تُنقل بعض بيانات الحسابات بعد. ستتم إعادة المحاولة عند التشغيل التالي.</string>
+    <string name="migration_export_logs">تصدير السجلات</string>
+    <string name="migration_continue">المتابعة الآن</string>
+</resources>

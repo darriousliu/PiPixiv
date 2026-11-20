@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">Обновление локальных данных…</string>
+    <string name="migration_failure">Не удалось обновить локальные данные</string>
+    <string name="migration_storage_failure">Недостаточно места. Освободите место и повторите попытку.</string>
+    <string name="migration_backup_failure">Не удалось создать резервную копию локальной базы данных.</string>
+    <string name="migration_preferences_failure">Не удалось перенести сведения об аккаунте или настройки.</string>
+    <string name="migration_database_failure">Не удалось открыть локальную базу данных.</string>
+    <string name="migration_split_failure">Некоторые данные аккаунтов ещё не перенесены. Попытка повторится при следующем запуске.</string>
+    <string name="migration_export_logs">Экспортировать журналы</string>
+    <string name="migration_continue">Пока продолжить</string>
+</resources>

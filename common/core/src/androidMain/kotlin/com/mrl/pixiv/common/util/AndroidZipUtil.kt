@@ -124,17 +124,27 @@ class AndroidZipUtil : ZipUtil {
 
     override fun getZipEntryContent(
         zipFilePath: String,
-        entryName: String
-    ): ByteArray? {
-        return try {
-            val inputStream = getInputStream(zipFilePath)
+        entryName: String,
+    ): ByteArray? = withZipEntry(zipFilePath, entryName) { it.readBytes() }
 
-            return inputStream?.use { fis ->
+    override fun extractZipEntry(zipFilePath: String, entryName: String, outputPath: String): Boolean =
+        withZipEntry(zipFilePath, entryName) { input ->
+            File(outputPath).outputStream().buffered().use { output -> input.copyTo(output) }
+            true
+        } == true
+
+    private fun <T> withZipEntry(
+        zipFilePath: String,
+        entryName: String,
+        read: (ZipInputStream) -> T,
+    ): T? =
+        try {
+            getInputStream(zipFilePath)?.use { fis ->
                 ZipInputStream(fis.buffered()).use { zis ->
                     var entry = zis.nextEntry
                     while (entry != null) {
-                        if (entry.name == entryName) {
-                            return@use zis.readBytes()
+                        if (entry.name == entryName && !entry.isDirectory) {
+                            return@use read(zis)
                         }
                         zis.closeEntry()
                         entry = zis.nextEntry
@@ -146,7 +156,6 @@ class AndroidZipUtil : ZipUtil {
             Logger.e(throwable = error, tag = "ZipUtil") { "Unable to read ZIP entry" }
             null
         }
-    }
 
     private fun getInputStream(path: String): InputStream? {
         return if (path.startsWith("content://") || path.startsWith("file://")) {

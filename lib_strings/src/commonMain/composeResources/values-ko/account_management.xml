@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">로컬 데이터를 업그레이드하는 중…</string>
+    <string name="migration_failure">로컬 데이터를 업그레이드할 수 없습니다</string>
+    <string name="migration_storage_failure">저장 공간이 부족합니다. 공간을 확보한 후 다시 시도하세요.</string>
+    <string name="migration_backup_failure">로컬 데이터베이스를 백업할 수 없습니다.</string>
+    <string name="migration_preferences_failure">계정 정보 또는 설정을 이전할 수 없습니다.</string>
+    <string name="migration_database_failure">로컬 데이터베이스를 열 수 없습니다.</string>
+    <string name="migration_split_failure">일부 계정 데이터의 이전이 완료되지 않았습니다. 다음 실행 시 다시 시도합니다.</string>
+    <string name="migration_export_logs">로그 내보내기</string>
+    <string name="migration_continue">일단 계속 사용</string>
+</resources>

@@ -7,6 +7,7 @@ import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
+import com.mrl.pixiv.common.datasource.local.migration.DatabaseStartupGate
 import com.mrl.pixiv.common.mmkv.MMKVApp
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
 import com.mrl.pixiv.common.network.NetworkSettings
@@ -127,7 +128,10 @@ class IosDownloadStrategy(
     fun reconnectPendingDownloads() {
         scope.launch {
             try {
+                DatabaseStartupGate.awaitReady()
                 mutex.withLock { reconnectPendingDownloadsLocked() }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (failure: Exception) {
                 Logger.e(throwable = failure, tag = "Download") { "Unable to reconnect background downloads" }
             }
@@ -141,6 +145,10 @@ class IosDownloadStrategy(
         }
         scope.launch {
             try {
+                if (!DatabaseStartupGate.prepareInBackground()) {
+                    finishBackgroundEvents(identifier)
+                    return@launch
+                }
                 mutex.withLock {
                     if (identifier !in state.sessions && (identifier != LEGACY_SESSION_ID || state.legacyRetired)) {
                         finishBackgroundEvents(identifier)
@@ -148,6 +156,9 @@ class IosDownloadStrategy(
                         reconnectSessionLocked(identifier)
                     }
                 }
+            } catch (cancelled: CancellationException) {
+                finishBackgroundEvents(identifier)
+                throw cancelled
             } catch (failure: Exception) {
                 Logger.e(throwable = failure, tag = "Download") { "Unable to restore background session" }
                 finishBackgroundEvents(identifier)

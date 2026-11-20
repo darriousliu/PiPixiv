@@ -1,16 +1,10 @@
 package com.mrl.pixiv.common.datasource.local
 
-import android.content.Context
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
-import org.koin.core.annotation.Single
 
-@Single
-fun getDatabaseBuilder(context: Context): RoomDatabase.Builder<PixivDatabase> {
-    val appContext = context.applicationContext
-    return Room.databaseBuilder(
-        context = appContext,
-        PixivDatabase::class.java,
-        "pixiv_db"
-    )
-}
+internal actual fun getGlobalDatabaseBuilder(path: String): RoomDatabase.Builder<PixivDatabase> =
+    Room.databaseBuilder(name = path, factory = PixivDatabaseConstructor::initialize)
+
+internal actual fun getAccountDatabaseBuilder(path: String): RoomDatabase.Builder<AccountDatabase> =
+    Room.databaseBuilder(name = path, factory = AccountDatabaseConstructor::initialize)

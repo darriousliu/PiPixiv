@@ -15,4 +15,7 @@ open class ZipUtilBridge : ZipUtil {
 
     override fun getZipEntryContent(zipFilePath: String, entryName: String): ByteArray? =
         error("ZipUtilBridge must be implemented in Swift")
+
+    override fun extractZipEntry(zipFilePath: String, entryName: String, outputPath: String): Boolean =
+        error("ZipUtilBridge must be implemented in Swift")
 }

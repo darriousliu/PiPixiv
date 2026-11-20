@@ -11,10 +11,11 @@ import com.mrl.pixiv.common.analytics.setUsageAnalyticsEnabled
 import com.mrl.pixiv.common.logs.AppLogStore
 import com.mrl.pixiv.common.logs.installAppLogCrashHandler
 import com.mrl.pixiv.common.repository.AppRepository
-import com.mrl.pixiv.common.repository.BlockingRepositoryV2
+import com.mrl.pixiv.common.datasource.local.migration.DatabaseStartupGate
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.DeviceInfo
 import com.mrl.pixiv.common.util.isDebug
+import com.mrl.pixiv.splash.StartupMigration
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 
@@ -41,11 +42,11 @@ object Initialization {
         if (isUsageAnalyticsAvailable) {
             setUsageAnalyticsEnabled(AppRepository.usageAnalyticsEnabled.value)
         }
-        startKoin {
+        val koin = startKoin {
             platformKoinAppDeclaration()
             modules(allModule)
-        }
-        BlockingRepositoryV2.migrate()
+        }.koin
+        DatabaseStartupGate.install { koin.get<StartupMigration>().run() }
     }
 }
 

@@ -10,6 +10,7 @@ import com.mrl.pixiv.common.analytics.recordCrashOperation
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
+import com.mrl.pixiv.common.datasource.local.migration.DatabaseStartupGate
 import com.mrl.pixiv.common.network.ImageClient
 import com.mrl.pixiv.common.network.RoutedHttpClient
 import com.mrl.pixiv.common.network.networkSettings
@@ -61,6 +62,7 @@ class DownloadWorker(
         val subFolder = inputData.getString("subFolder")
 
         if (illustId == -1L || index == -1) return Result.failure()
+        if (!DatabaseStartupGate.prepareInBackground()) return Result.retry()
 
         var entity = downloadDao.getDownload(illustId, index) ?: return Result.failure()
         entity = entity.copy(status = DownloadStatus.RUNNING.value, progress = 0f)

@@ -159,8 +159,7 @@ class NovelTranslationStreamingTest {
 
         awaitAll(
             async {
-                repository.saveTranslationForUser(
-                    userId = 1L,
+                repository.saveTranslation(
                     novelId = 2L,
                     targetLanguage = "en",
                     provider = AiProvider.OPENAI,
@@ -171,8 +170,7 @@ class NovelTranslationStreamingTest {
                 )
             },
             async {
-                repository.saveMetadataTranslationForUser(
-                    userId = 1L,
+                repository.saveMetadataTranslation(
                     novelId = 2L,
                     targetLanguage = "en",
                     provider = AiProvider.OPENAI,
@@ -185,8 +183,7 @@ class NovelTranslationStreamingTest {
             },
         )
 
-        val cached = repository.getTranslationForUser(
-            userId = 1L,
+        val cached = repository.getTranslation(
             novelId = 2L,
             targetLanguage = "en",
         )
@@ -200,8 +197,7 @@ class NovelTranslationStreamingTest {
     @Test
     fun configurationChangeClearsTheIncompatibleCachedFragment() = runTest {
         val repository = NovelTranslationRepository(FakeNovelTranslationDao())
-        repository.saveMetadataTranslationForUser(
-            userId = 1L,
+        repository.saveMetadataTranslation(
             novelId = 2L,
             targetLanguage = "en",
             provider = AiProvider.OPENAI,
@@ -212,8 +208,7 @@ class NovelTranslationStreamingTest {
             translatedCaption = "old caption",
         )
 
-        repository.saveTranslationForUser(
-            userId = 1L,
+        repository.saveTranslation(
             novelId = 2L,
             targetLanguage = "en",
             provider = AiProvider.CLAUDE,
@@ -223,8 +218,7 @@ class NovelTranslationStreamingTest {
             translatedText = "new body",
         )
 
-        val cached = repository.getTranslationForUser(
-            userId = 1L,
+        val cached = repository.getTranslation(
             novelId = 2L,
             targetLanguage = "en",
         )
@@ -233,8 +227,7 @@ class NovelTranslationStreamingTest {
         assertEquals("", cached?.translatedTitle)
         assertEquals("", cached?.translatedCaption)
 
-        repository.saveMetadataTranslationForUser(
-            userId = 1L,
+        repository.saveMetadataTranslation(
             novelId = 2L,
             targetLanguage = "en",
             provider = AiProvider.GEMINI,
@@ -245,8 +238,7 @@ class NovelTranslationStreamingTest {
             translatedCaption = "latest caption",
         )
 
-        val metadataOnly = repository.getTranslationForUser(
-            userId = 1L,
+        val metadataOnly = repository.getTranslation(
             novelId = 2L,
             targetLanguage = "en",
         )
@@ -265,21 +257,18 @@ class NovelTranslationStreamingTest {
         }
 
         override suspend fun getByNovelIdAndLanguage(
-            userId: Long,
             novelId: Long,
             targetLanguage: String,
         ): NovelTranslationEntity? = entity?.takeIf {
-            it.userId == userId &&
-                    it.novelId == novelId &&
+            it.novelId == novelId &&
                     it.targetLanguage == targetLanguage
         }
 
         override suspend fun deleteByNovelIdAndLanguage(
-            userId: Long,
             novelId: Long,
             targetLanguage: String,
         ) {
-            if (getByNovelIdAndLanguage(userId, novelId, targetLanguage) != null) {
+            if (getByNovelIdAndLanguage(novelId, targetLanguage) != null) {
                 entity = null
             }
         }

@@ -17,11 +17,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class NovelReadLaterDatabaseTest {
-    private lateinit var database: PixivDatabase
+    private lateinit var database: AccountDatabase
 
     @BeforeTest
     fun setUp() {
-        database = Room.inMemoryDatabaseBuilder<PixivDatabase>()
+        database = Room.inMemoryDatabaseBuilder<AccountDatabase>()
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
             .build()

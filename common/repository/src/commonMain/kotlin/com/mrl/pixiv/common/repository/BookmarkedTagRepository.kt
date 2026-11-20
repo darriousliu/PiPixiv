@@ -1,34 +1,37 @@
 package com.mrl.pixiv.common.repository
 
 import com.mrl.pixiv.common.data.Tag
+import com.mrl.pixiv.common.mmkv.AccountMMKVProperty
+import com.mrl.pixiv.common.mmkv.AccountScoped
+import com.mrl.pixiv.common.mmkv.AccountStore
 import com.mrl.pixiv.common.mmkv.MMKVUser
-import com.mrl.pixiv.common.mmkv.asMutableStateFlow
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
-import kotlinx.coroutines.flow.StateFlow
 
-object BookmarkedTagRepository : MMKVUser {
-    private val bookmarkedTagsDelegate by mmkvSerializable<List<Tag>>(emptyList()).asMutableStateFlow()
-    val bookmarkedTags: StateFlow<List<Tag>> = bookmarkedTagsDelegate
+object BookmarkedTagRepository : MMKVUser, AccountScoped {
+    private val bookmarkedTagsDelegate = AccountMMKVProperty(
+        mmkvSerializable<List<Tag>>(emptyList()), "bookmarkedTagsDelegate", emptyList(),
+    )
+    val bookmarkedTags = bookmarkedTagsDelegate.flow
+
+    override fun reload() = bookmarkedTagsDelegate.reload(AccountStore.activeUserId)
 
     fun addTag(tag: Tag) {
-        val current = bookmarkedTagsDelegate.value.toMutableList()
-        if (current.none { it.name == tag.name }) {
-            current.add(0, tag)
-            bookmarkedTagsDelegate.value = current
+        bookmarkedTagsDelegate.update(AccountStore.activeUserId) { current ->
+            if (current.any { it.name == tag.name }) current else listOf(tag) + current
         }
     }
 
     fun removeTag(tag: Tag) {
-        val current = bookmarkedTagsDelegate.value.toMutableList()
-        current.removeAll { it.name == tag.name }
-        bookmarkedTagsDelegate.value = current
+        bookmarkedTagsDelegate.update(AccountStore.activeUserId) { current ->
+            current.filterNot { it.name == tag.name }
+        }
     }
 
-    fun isBookmarked(tag: Tag): Boolean {
-        return bookmarkedTagsDelegate.value.any { it.name == tag.name }
-    }
+    fun isBookmarked(tag: Tag): Boolean =
+        bookmarkedTags.value.any { it.name == tag.name }
 
-    fun restore(tags: List<Tag>) {
-        bookmarkedTagsDelegate.value = tags
-    }
+    fun tagsForAccount(userId: Long): List<Tag> = bookmarkedTagsDelegate.read(userId)
+
+    fun restore(tags: List<Tag>, userId: Long = AccountStore.activeUserId) =
+        bookmarkedTagsDelegate.write(userId, tags)
 }

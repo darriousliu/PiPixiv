@@ -1,6 +1,7 @@
 package com.mrl.pixiv.splash
 
 import androidx.compose.runtime.Stable
+import com.mrl.pixiv.common.datasource.local.AccountDatabaseProvider
 import com.mrl.pixiv.common.repository.AuthManager
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.viewmodel.BaseMviViewModel
@@ -18,12 +19,27 @@ data class SplashState(
 
 sealed class SplashAction : ViewIntent {
     data object IsLoginIntent : SplashAction()
+    data object RetryMigration : SplashAction()
+    data object ContinueAfterFailure : SplashAction()
 }
 
 @KoinViewModel
-class SplashViewModel : BaseMviViewModel<SplashState, SplashAction>(
+class SplashViewModel(
+    private val migration: StartupMigration,
+    private val accounts: AccountDatabaseProvider,
+) : BaseMviViewModel<SplashState, SplashAction>(
     initialState = SplashState(),
 ) {
+    val migrationState = migration.state
+
+    val keepNativeSplash: Boolean
+        get() = uiState.value.isLoading && when (migrationState.value) {
+            MigrationState.Slow, is MigrationState.Failed -> false
+            else -> true
+        }
+
+    fun markSlowUiShown() = migration.markSlowUiShown()
+
     val intent: MutableStateFlow<Intent?> = MutableStateFlow(null)
 
     init {
@@ -32,7 +48,9 @@ class SplashViewModel : BaseMviViewModel<SplashState, SplashAction>(
 
     override suspend fun handleIntent(intent: SplashAction) {
         when (intent) {
-            is SplashAction.IsLoginIntent -> isLogin()
+            SplashAction.IsLoginIntent -> if (migration.run()) isLogin()
+            SplashAction.RetryMigration -> if (migration.run(retry = true)) isLogin()
+            SplashAction.ContinueAfterFailure -> if (migration.continueAfterSplitFailure()) isLogin()
         }
     }
 
@@ -67,14 +85,15 @@ class SplashViewModel : BaseMviViewModel<SplashState, SplashAction>(
         }
     }
 
-    private fun routeToLogin() =
+    private fun routeToLogin() {
+        accounts.clearCurrent()
         updateState {
             copy(
                 isLoading = false,
                 startDestination = Destination.LoginOption
             )
         }
-
+    }
 
     private fun routeToHome() =
         updateState {
