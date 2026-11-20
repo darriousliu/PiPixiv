@@ -13,6 +13,7 @@ class IosZipUtil: util.ZipUtilBridge {
         let sourceURL = getValidURL(path: sourcePath)
         let destinationURL = getValidURL(path: destinationPath)
         do {
+            // Use the default .none for speed because ZIPFoundation 0.9.20 has no compression level setting.
             try FileManager.default.zipItem(at: sourceURL, to: destinationURL)
             return true
         } catch {

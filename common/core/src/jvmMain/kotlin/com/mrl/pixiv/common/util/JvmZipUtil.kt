@@ -5,6 +5,7 @@ import org.koin.core.annotation.Single
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -62,7 +63,7 @@ class JvmZipUtil : ZipUtil {
     override fun compress(
         sourcePath: String,
         destinationPath: String,
-    ): Boolean = compressArchive(sourcePath, destinationPath, compressionLevel = null)
+    ): Boolean = compressArchive(sourcePath, destinationPath, Deflater.BEST_SPEED)
 
     fun compressWithLevel(sourcePath: String, destinationPath: String, compressionLevel: Int): Boolean =
         compressArchive(sourcePath, destinationPath, compressionLevel)
@@ -70,14 +71,14 @@ class JvmZipUtil : ZipUtil {
     private fun compressArchive(
         sourcePath: String,
         destinationPath: String,
-        compressionLevel: Int?,
+        compressionLevel: Int,
     ): Boolean {
         return try {
             val sourceFile = File(sourcePath)
             val destOutputStream = getOutputStream(destinationPath)
 
             ZipOutputStream(destOutputStream.buffered()).use { zos ->
-                if (compressionLevel != null) zos.setLevel(compressionLevel)
+                zos.setLevel(compressionLevel)
                 compressRecursive(sourceFile, sourceFile.name, zos)
             }
             true

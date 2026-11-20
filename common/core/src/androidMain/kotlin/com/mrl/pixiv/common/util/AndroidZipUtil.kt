@@ -6,6 +6,7 @@ import org.koin.core.annotation.Single
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -69,6 +70,7 @@ class AndroidZipUtil : ZipUtil {
             val destOutputStream = getOutputStream(destinationPath)
 
             ZipOutputStream(destOutputStream?.buffered()).use { zos ->
+                zos.setLevel(Deflater.BEST_SPEED)
                 compressRecursive(sourceFile, sourceFile.name, zos)
             }
             true
