@@ -9,6 +9,8 @@ import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelTranslationEntity
 import java.io.File
 import java.nio.file.Files
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.files.Path
@@ -179,18 +181,22 @@ class Room2DatabaseCompatibilityTest {
             val provider = GlobalDatabaseProvider { path }
             val downloads = provideDownloadDao(provider)
             val translations = provideNovelTranslationDao(provider)
+            val blocks = provideBlockContentDao(provider)
             try {
+                val firstBlockedUsers = async(start = CoroutineStart.UNDISPATCHED) { blocks.observeUsers().first() }
                 assertFails { rejected.openForMigration() }
                 rejected.close()
                 assertFails { provider.open() }
+                assertFalse(firstBlockedUsers.isCompleted)
                 val fresh = provider.openFallback()
+                assertTrue(firstBlockedUsers.await().isEmpty())
                 assertFails { rejected.openForMigration() }
 
                 val source = legacyGlobalDatabasePath(path)
                 val migration = LegacyGlobalDatabaseMigration(fresh)
                 assertEquals(2L, migration.restoreGlobalTables(source))
                 assertEquals(legacyDownload, downloads.getDownload(20L, 0))
-                assertEquals("Blocked user", provideBlockContentDao(provider.requireOpen()).getAllUsers().single().name)
+                assertEquals("Blocked user", blocks.getAllUsers().single().name)
                 assertNull(translations.getByNovelIdAndLanguage(10L, "en"))
                 assertEquals(1L, migration.restoreTranslations(source))
                 assertEquals(legacyTranslation, translations.getByNovelIdAndLanguage(10L, "en"))

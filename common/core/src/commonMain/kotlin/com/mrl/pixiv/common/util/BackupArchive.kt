@@ -43,6 +43,7 @@ class BackupArchive private constructor(
             stagingFile: PlatformFile,
             zipUtil: ZipUtil,
             availableBytes: (String) -> Long = ::availableStorageBytes,
+            timing: BackupTiming? = null,
         ): BackupArchive {
             val cachePath = checkNotNull(stagingFile.parent()).toKotlinxIoPath().toString()
             val compressedSize = source.size()
@@ -54,7 +55,9 @@ class BackupArchive private constructor(
             val originalEntries = if (!source.absolutePath().startsWith("content://")) {
                 val accessGranted = source.startAccessingSecurityScopedResource()
                 try {
-                    zipUtil.readDirectory(source.toKotlinxIoPath().toString()).also { directory ->
+                    timing.measureBackupStep(BackupStep.ReadZipDirectory) {
+                        zipUtil.readDirectory(source.toKotlinxIoPath().toString())
+                    }.also { directory ->
                         requireBackupSpace(available, importBudget(compressedSize.coerceAtLeast(0), directory.totalSize))
                     }
                 } finally {
@@ -64,9 +67,13 @@ class BackupArchive private constructor(
                 null
             }
             val stagingBudget = available - backupDiskMargin
-            val copied = source.copyForBackup(stagingFile, stagingBudget)
+            val copied = timing.measureBackupStep(BackupStep.CopyToCache) {
+                source.copyForBackup(stagingFile, stagingBudget)
+            }
             val path = stagingFile.toKotlinxIoPath().toString()
-            val directory = zipUtil.readDirectory(path)
+            val directory = timing.measureBackupStep(BackupStep.ReadZipDirectory) {
+                zipUtil.readDirectory(path)
+            }
             if (originalEntries != null) {
                 check(originalEntries == directory && (compressedSize < 0 || compressedSize == copied)) {
                     "Backup archive changed during import"

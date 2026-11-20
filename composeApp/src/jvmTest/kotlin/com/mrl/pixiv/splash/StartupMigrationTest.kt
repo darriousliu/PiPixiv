@@ -9,6 +9,7 @@ import com.mrl.pixiv.common.repository.recovery.MigrationReason
 import com.mrl.pixiv.common.util.JvmZipUtil
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.files.Path
 import java.io.File
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
@@ -188,6 +189,37 @@ class StartupMigrationTest {
             assertTrue(run.migration.state.value is MigrationState.Blocked)
             assertTrue(file.delete())
             assertTrue(run.start(retry = true))
+            assertEquals(MigrationState.Done, run.migration.state.value)
+        }
+    }
+
+    @Test
+    fun unexpectedExceptionBlocksStartupAndCanRetry() = withStorage { directory ->
+        var fail = true
+        MigrationTestRun(directory, filesRoot = { files ->
+            check(!fail) { "Files directory lookup failed" }
+            Path(files.absolutePath)
+        }).useRun { run ->
+            assertFalse(run.start())
+            assertEquals(MigrationState.Blocked(MigrationReason.Unknown), run.migration.state.value)
+            assertEquals("blocked", lastMigrationTiming().outcome)
+
+            fail = false
+            assertTrue(run.start(retry = true))
+            assertEquals(MigrationState.Done, run.migration.state.value)
+        }
+    }
+
+    @Test
+    fun timingLogFailureKeepsStartupComplete() = withStorage { directory ->
+        MigrationTestRun(directory).useRun { run ->
+            var attemptedLog = false
+            val started = run.migration.run(run.storage) {
+                attemptedLog = true
+                error("Timing writer unavailable")
+            }
+            assertTrue(attemptedLog)
+            assertTrue(started)
             assertEquals(MigrationState.Done, run.migration.state.value)
         }
     }

@@ -31,6 +31,7 @@ internal expect fun getAccountDatabaseBuilder(path: String): RoomDatabase.Builde
 @Single
 fun provideGlobalDatabaseProvider(): GlobalDatabaseProvider = GlobalDatabaseProvider()
 
+// Resolve the raw database only after startup migration completes.
 @Single
 fun provideDatabase(provider: GlobalDatabaseProvider): PixivDatabase = provider.requireOpen()
 
@@ -74,7 +75,7 @@ suspend fun PixivDatabase.openForMigration() {
 fun provideAccountDatabaseProvider(): AccountDatabaseProvider = AccountDatabaseProvider()
 
 @Single
-fun provideBlockContentDao(database: PixivDatabase): BlockContentDao = database.blockContentDao()
+fun provideBlockContentDao(provider: GlobalDatabaseProvider): BlockContentDao = StartupBlockContentDao(provider)
 
 @Single
 fun provideDownloadDao(provider: GlobalDatabaseProvider): DownloadDao = StartupDownloadDao(provider)

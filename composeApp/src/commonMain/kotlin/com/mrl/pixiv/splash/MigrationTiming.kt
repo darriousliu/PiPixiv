@@ -73,6 +73,7 @@ internal fun writeMigrationTiming(
     memory: MigrationMemory? = null,
     items: Map<MigrationItem, ItemStatus> = emptyMap(),
     degraded: Boolean = false,
+    logTiming: (String) -> Unit,
 ) {
     val device = DeviceInfo.appLogDetails()
     val timing = MigrationTiming(
@@ -94,8 +95,11 @@ internal fun writeMigrationTiming(
         memoryStartBytes = memory?.start,
         memoryPeakBytes = memory?.peak,
     )
-    AppLogStore.writer.log(Severity.Info, migrationTimingPrefix + timingJson.encodeToString(timing), "StartupMigration", null)
+    logTiming(migrationTimingPrefix + timingJson.encodeToString(timing))
 }
+
+internal fun logMigrationTiming(message: String) =
+    AppLogStore.writer.log(Severity.Info, message, migrationTag, null)
 
 internal fun migrationFiles(storage: MigrationStorage): MigrationFiles {
     val path = storage.databasePath()
@@ -133,7 +137,7 @@ internal class MigrationMemory {
 
 internal expect fun migrationMemoryBytes(): Long?
 
-internal class MigrationMetrics(private val storage: MigrationStorage, private val scope: CoroutineScope) {
+internal class MigrationMetrics(private val storage: MigrationStorage) {
     var before: MigrationFiles? = null
     var after: MigrationFiles? = null
     var available: Long? = null
@@ -141,7 +145,7 @@ internal class MigrationMetrics(private val storage: MigrationStorage, private v
     val peakDisk = MutableStateFlow(0L)
     private var sampler: Job? = null
 
-    fun start() {
+    fun start(scope: CoroutineScope) {
         before = migrationFiles(storage)
         peakDisk.value = before?.totalBytes ?: 0L
         val stats = MigrationMemory().also { memory = it }

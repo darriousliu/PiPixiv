@@ -18,6 +18,7 @@ import java.io.File
 internal class MigrationTestRun(
     val path: File,
     debug: Boolean = true,
+    filesRoot: (File) -> Path = { Path(it.absolutePath) },
     private val migrateBlocks: suspend () -> Boolean = { false },
 ) {
     val files = path.resolve("files").apply { mkdirs() }
@@ -41,7 +42,7 @@ internal class MigrationTestRun(
         legacy = legacy,
         databasePath = { databasePath },
         accountRoot = { accountsRoot },
-        filesRoot = { Path(files.absolutePath) },
+        filesRoot = { filesRoot(files) },
         preferences = preferences,
         reloadPreferences = { uid ->
             val accountPreference = uid?.let { readAccountPreference(accountPreferences(it)) } ?: AccountPreference()

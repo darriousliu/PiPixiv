@@ -2,11 +2,15 @@ package com.mrl.pixiv.setting.appdata
 
 import com.mrl.pixiv.common.datasource.local.AccountHandle
 import com.mrl.pixiv.common.datasource.local.AppDatabaseBackup
+import com.mrl.pixiv.common.datasource.local.DatabaseBackupTiming
 import com.mrl.pixiv.common.datasource.local.PixivDatabase
 import com.mrl.pixiv.common.util.BackupArchive
+import com.mrl.pixiv.common.util.BackupStep
+import com.mrl.pixiv.common.util.BackupTiming
 import com.mrl.pixiv.common.util.ZipUtil
 import com.mrl.pixiv.common.util.availableStorageBytes
 import com.mrl.pixiv.common.util.checkBackupExportSpace
+import com.mrl.pixiv.common.util.measureBackupStep
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.createDirectories
@@ -44,6 +48,8 @@ class AppBackupFiles(
         accountDatabasePath: String,
         workDir: PlatformFile,
         destination: PlatformFile,
+        timing: BackupTiming? = null,
+        databaseTiming: DatabaseBackupTiming? = null,
     ) {
         checkBackupExportSpace(workDir, listOf(globalDatabasePath, accountDatabasePath), availableBytes)
         val source = (workDir / backupDirectory).also { it.createDirectories() }
@@ -53,22 +59,33 @@ class AppBackupFiles(
             account = account,
             globalPath = (source / globalDatabaseFile).toKotlinxIoPath().toString(),
             accountPath = (source / accountDatabaseFile).toKotlinxIoPath().toString(),
+            timing = databaseTiming,
         )
         val archive = workDir / "backup.zip"
-        check(zipUtil.compress(source.absolutePath(), archive.absolutePath())) {
-            "Unable to create backup ZIP"
+        timing.measureBackupStep(BackupStep.Compress) {
+            check(zipUtil.compress(source.absolutePath(), archive.absolutePath())) {
+                "Unable to create backup ZIP"
+            }
         }
-        destination.write(archive)
+        timing.measureBackupStep(BackupStep.CopyToDestination) {
+            destination.write(archive)
+        }
     }
 
-    suspend fun read(source: PlatformFile, workDir: PlatformFile): AppBackupContents {
-        val archive = BackupArchive.open(source, workDir / "backup.zip", zipUtil, availableBytes)
+    suspend fun read(
+        source: PlatformFile,
+        workDir: PlatformFile,
+        timing: BackupTiming? = null,
+    ): AppBackupContents {
+        val archive = BackupArchive.open(source, workDir / "backup.zip", zipUtil, availableBytes, timing)
         val currentMetadata = archive.read("$backupDirectory/$jsonDataFile", currentJsonLimit)
         if (currentMetadata != null) {
             val globalSnapshot = workDir / globalDatabaseFile
             val accountSnapshot = workDir / accountDatabaseFile
-            archive.extract("$backupDirectory/$globalDatabaseFile", globalSnapshot)
-            archive.extract("$backupDirectory/$accountDatabaseFile", accountSnapshot)
+            timing.measureBackupStep(BackupStep.ExtractSnapshots) {
+                archive.extract("$backupDirectory/$globalDatabaseFile", globalSnapshot)
+                archive.extract("$backupDirectory/$accountDatabaseFile", accountSnapshot)
+            }
             return AppBackupContents.V4(
                 metadata = currentMetadata.decodeToString(),
                 globalPath = globalSnapshot.toKotlinxIoPath().toString(),

@@ -15,17 +15,39 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import kotlinx.io.files.Path
+import kotlin.time.Duration
+import kotlin.time.TimeSource
+
+enum class DatabaseBackupStep {
+    ExportGlobalSnapshot,
+    ExportAccountSnapshot,
+    RestoreGlobalTables,
+    RestoreAccountTables,
+    RestoreTranslations,
+}
+
+typealias DatabaseBackupTiming = (DatabaseBackupStep, Duration) -> Unit
 
 object AppDatabaseBackup {
-    suspend fun export(global: PixivDatabase, account: AccountHandle, globalPath: String, accountPath: String) {
-        global.snapshotTo(globalPath)
+    suspend fun export(
+        global: PixivDatabase,
+        account: AccountHandle,
+        globalPath: String,
+        accountPath: String,
+        timing: DatabaseBackupTiming? = null,
+    ) {
+        timing.measure(DatabaseBackupStep.ExportGlobalSnapshot) {
+            global.snapshotTo(globalPath)
+        }
         BundledSQLiteDriver().open(globalPath).use { snapshot ->
             // A deferred split can leave every account's legacy rows in the global database.
             snapshot.execSQL("PRAGMA secure_delete = ON")
             accountTables.forEach { snapshot.execSQL("DROP TABLE IF EXISTS ${it.name}") }
         }
 
-        account.db.snapshotTo(accountPath)
+        timing.measure(DatabaseBackupStep.ExportAccountSnapshot) {
+            account.db.snapshotTo(accountPath)
+        }
         BundledSQLiteDriver().open(accountPath).use { snapshot ->
             snapshot.execSQL("PRAGMA secure_delete = ON")
             accountTables.forEach { table ->
@@ -44,6 +66,7 @@ object AppDatabaseBackup {
         accountPath: String,
         backupUserId: Long,
         includeAccountData: Boolean,
+        timing: DatabaseBackupTiming? = null,
     ): Boolean {
         require(backupUserId > 0) { "Invalid backup account" }
         val hasTranslations = global.useWriterConnection { globalConnection ->
@@ -53,15 +76,19 @@ object AppDatabaseBackup {
                         accountConnection.withBackup(accountPath, accountTables) {
                             // Validate both snapshots before writing to either database.
                             globalConnection.immediateTransaction {
-                                restoreGlobalTables()
-                                accountConnection.immediateTransaction {
-                                    restoreAccountTables(backupUserId, account.userId)
+                                timing.measure(DatabaseBackupStep.RestoreGlobalTables) { restoreGlobalTables() }
+                                timing.measure(DatabaseBackupStep.RestoreAccountTables) {
+                                    accountConnection.immediateTransaction {
+                                        restoreAccountTables(backupUserId, account.userId)
+                                    }
                                 }
                             }
                         }
                     }
                 } else {
-                    globalConnection.immediateTransaction { restoreGlobalTables() }
+                    timing.measure(DatabaseBackupStep.RestoreGlobalTables) {
+                        globalConnection.immediateTransaction { restoreGlobalTables() }
+                    }
                 }
                 try {
                     globalConnection.validateBackup(listOf(translationTable))
@@ -75,7 +102,7 @@ object AppDatabaseBackup {
         }
         if (!hasTranslations) return false
         return try {
-            global.restoreTranslations(globalPath)
+            timing.measure(DatabaseBackupStep.RestoreTranslations) { global.restoreTranslations(globalPath) }
             true
         } catch (cancelled: CancellationException) {
             throw cancelled
@@ -246,4 +273,12 @@ object AppDatabaseBackup {
                 "sourceMd5, state, attemptToken, retryCount, lastError, updatedAtMillis",
         ),
     )
+}
+
+private inline fun <T> DatabaseBackupTiming?.measure(step: DatabaseBackupStep, block: () -> T): T {
+    if (this == null) return block()
+    val start = TimeSource.Monotonic.markNow()
+    val result = block()
+    invoke(step, start.elapsedNow())
+    return result
 }

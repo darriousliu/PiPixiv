@@ -6,13 +6,18 @@ import com.mrl.pixiv.common.data.search.IllustSearch
 import com.mrl.pixiv.common.data.search.NovelSearch
 import com.mrl.pixiv.common.data.user.UserDetailResp
 import com.mrl.pixiv.common.datasource.local.AppDatabaseBackup
+import com.mrl.pixiv.common.datasource.local.DatabaseBackupStep
+import com.mrl.pixiv.common.datasource.local.DatabaseBackupTiming
 import com.mrl.pixiv.common.datasource.local.GlobalDatabaseProvider
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
 import com.mrl.pixiv.common.mmkv.mmkvStringSet
 import com.mrl.pixiv.common.repository.NovelSeriesReadingProgress
 import com.mrl.pixiv.common.repository.recovery.ItemStatus
 import com.mrl.pixiv.common.repository.recovery.MigrationItem
+import com.mrl.pixiv.common.util.BackupStep
+import com.mrl.pixiv.common.util.BackupTiming
 import com.mrl.pixiv.common.util.JvmZipUtil
+import com.mrl.pixiv.common.util.measureBackupStep
 import com.mrl.pixiv.setting.appdata.AppBackupContents
 import com.mrl.pixiv.setting.appdata.AppBackupFiles
 import com.mrl.pixiv.setting.appdata.BookmarksData
@@ -34,14 +39,16 @@ import org.junit.Assume.assumeTrue
 import java.io.File
 import java.lang.management.ManagementFactory
 import java.util.Locale
-import kotlin.concurrent.thread
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.zip.Deflater
+import kotlin.concurrent.thread
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 import kotlin.time.TimeSource
 
 class StartupMigrationBenchmarkTest {
@@ -60,18 +67,32 @@ class StartupMigrationBenchmarkTest {
         initializeMigrationTestStorage()
         val working = createTempDirectory("pixiv-startup-benchmark-").toFile()
         try {
+            val (warmupFixture, warmupManifest) = LegacyMigrationFixture.export(fixtureRoot, MigrationTier.Typical)
+            val warmupPath = prepareMigrationRun(working, warmupFixture, "typical-warmup")
+            val coldStartup = try {
+                measureRun(warmupPath, warmupManifest, MigrationScenario.Normal).timing
+            } finally {
+                warmupPath.deleteRecursively()
+            }
             val tiers = mutableListOf<TierMeasurement>()
             val backups = mutableListOf<BackupMeasurement>()
             for (tier in MigrationTier.entries) {
                 val (fixture, manifest) = LegacyMigrationFixture.export(fixtureRoot, tier)
                 val scenarios = if (tier == MigrationTier.Heavy) MigrationScenario.entries else listOf(MigrationScenario.Normal)
                 for (scenario in scenarios) {
-                    val runs = List(if (tier == MigrationTier.Extreme) 1 else 3) { index ->
+                    val measureBackups = scenario == MigrationScenario.Normal && tier != MigrationTier.Typical
+                    val backupRuns = mutableListOf<BackupRun>()
+                    var compression = emptyList<CompressionMeasurement>()
+                    val runs = List(benchmarkRuns) { index ->
                         val path = prepareMigrationRun(working, fixture, "${tier.directory}-$scenario-$index")
                         try {
                             val startup = measureRun(path, manifest, scenario)
-                            if (index == 0 && scenario == MigrationScenario.Normal && tier != MigrationTier.Typical) {
-                                backups += measureBackup(path, manifest, tier)
+                            if (measureBackups) {
+                                val exportWork = path.resolve("export-work").apply { mkdirs() }
+                                backupRuns += measureBackup(path, manifest, exportWork)
+                                if (backupRuns.size == benchmarkRuns && compressionDominates(backupRuns)) {
+                                    compression = compareCompression(exportWork.resolve("pipixiv-backup"))
+                                }
                             }
                             startup
                         } finally {
@@ -79,9 +100,13 @@ class StartupMigrationBenchmarkTest {
                         }
                     }
                     tiers += TierMeasurement(tier.directory, scenario, tier.limitMs, manifest.averageIllustJsonBytes, manifest.averageNovelJsonBytes, runs)
+                    if (measureBackups) {
+                        val limitMs = if (tier == MigrationTier.Heavy) 3000L else 10000L
+                        backups += BackupMeasurement(tier.directory, backupRuns, limitMs, compression)
+                    }
                 }
             }
-            val report = BenchmarkReport(tiers, backups)
+            val report = BenchmarkReport(coldStartup, tiers, backups)
             val output = buildDirectory.resolve("reports/migration-benchmark").apply { mkdirs() }
             output.resolve("result.json").writeText(reportJson.encodeToString(report))
             val markdown = report.markdown()
@@ -124,23 +149,27 @@ class StartupMigrationBenchmarkTest {
         return RunMeasurement(timing, migrationResources.extraHeapBytes, finished.first, finished.second.steps, finished.third)
     }
 
-    private suspend fun measureBackup(path: File, manifest: FixtureManifest, tier: MigrationTier): BackupMeasurement =
+    private suspend fun measureBackup(path: File, manifest: FixtureManifest, exportWork: File): BackupRun =
         MigrationTestRun(path).useRun { run ->
             assertTrue(run.start())
             val global = run.database.requireOpen()
             val account = run.accounts.requireCurrent()
             val targetAccount = run.accounts.open(manifest.userIds.max() + 1)
             val paths = AppBackupFiles(JvmZipUtil())
-            val exportWork = path.resolve("export-work").apply { mkdirs() }
             val importWork = path.resolve("import-work").apply { mkdirs() }
             val archive = path.resolve("export.zip")
+            val steps = linkedMapOf<String, Duration>()
+            val timing: BackupTiming = { step, duration -> steps.merge(step.name, duration, Duration::plus) }
+            val databaseTiming: DatabaseBackupTiming = { step, duration -> steps.merge(step.name, duration, Duration::plus) }
             val databaseBytes = databaseBytes(path.resolve("pixiv_db")) +
                 databaseBytes(File(run.accounts.databasePath(account.userId).toString()))
             val (_, export) = measureResources(exportWork, targetBytes = { archive.length() }) {
                 paths.exportV4(
-                    backupMetadata(run, account.userId),
+                    backupMetadata(run, account.userId, timing),
                     global, account, run.databasePath.toString(), run.accounts.databasePath(account.userId).toString(),
                     PlatformFile(exportWork), PlatformFile(archive),
+                    timing = timing,
+                    databaseTiming = databaseTiming,
                 )
             }
             val snapshotSize = exportWork.resolve("pipixiv-backup").allocatedBytes()
@@ -153,7 +182,7 @@ class StartupMigrationBenchmarkTest {
                 val (_, resources) = measureResources(importWork, targetBytes = {
                     (databaseBytes(targetGlobal) + databaseBytes(target) - importBase).coerceAtLeast(0L)
                 }) {
-                    val contents = paths.read(PlatformFile(archive), PlatformFile(importWork)) as AppBackupContents.V4
+                    val contents = paths.read(PlatformFile(archive), PlatformFile(importWork), timing) as AppBackupContents.V4
                     val importedUid = reportJson.parseToJsonElement(contents.metadata)
                         .jsonObject.getValue("userId").jsonPrimitive.long
                     val include = confirmBackupAccountImport(importedUid, targetAccount.userId) { current, source ->
@@ -162,7 +191,8 @@ class StartupMigrationBenchmarkTest {
                         true
                     }
                     assertTrue(AppDatabaseBackup.restore(
-                        destinationDatabase, targetAccount, contents.globalPath, contents.accountPath, account.userId, include
+                        destinationDatabase, targetAccount, contents.globalPath, contents.accountPath, account.userId, include,
+                        timing = databaseTiming,
                     ))
                 }
                 resources
@@ -176,14 +206,29 @@ class StartupMigrationBenchmarkTest {
                 assertEquals(manifest.accountRows.getValue("browsing_history_illust"),
                     restored.count("SELECT COUNT(*) FROM browsing_history_illust WHERE userId = ${targetAccount.userId}"))
             }
-            BackupMeasurement(
-                tier.directory, export, import, archive.length(), snapshotSize,
+            BackupRun(
+                export, import, archive.length(), snapshotSize,
                 databaseBytes * 5 / 2 + diskMargin, archive.length() + 3 * snapshotSize + diskMargin,
-                if (tier == MigrationTier.Heavy) 3000 else 10000,
+                steps.mapValues { (_, duration) -> duration.inWholeMilliseconds },
             )
         }
 
-    private fun backupMetadata(run: MigrationTestRun, userId: Long): String {
+    private fun compressionDominates(runs: List<BackupRun>): Boolean =
+        runs.map { it.stepsMs.getValue(BackupStep.Compress.name) }.median() * 2 >=
+            runs.map { it.export.elapsedMs }.median()
+
+    private fun compareCompression(snapshots: File): List<CompressionMeasurement> {
+        val zip = JvmZipUtil()
+        val archive = snapshots.parentFile.resolve("compression-comparison.zip")
+        return listOf("Default" to Deflater.DEFAULT_COMPRESSION, "BEST_SPEED" to Deflater.BEST_SPEED).map { (name, level) ->
+            val started = TimeSource.Monotonic.markNow()
+            assertTrue(zip.compressWithLevel(snapshots.absolutePath, archive.absolutePath, level))
+            val elapsedMs = started.elapsedNow().inWholeMilliseconds
+            CompressionMeasurement(name, elapsedMs, archive.length())
+        }
+    }
+
+    private fun backupMetadata(run: MigrationTestRun, userId: Long, timing: BackupTiming): String {
         val owner = run.accountPreferences(userId)
         val settings = checkNotNull(run.reloaded)
         val search = SearchData(
@@ -196,15 +241,17 @@ class StartupMigrationBenchmarkTest {
         val progress = owner.mmkvSerializable(emptyMap<Long, NovelSeriesReadingProgress>())
             .read(owner, "novelSeriesProgress")
         val profile = owner.mmkvSerializable<UserDetailResp?>(null).read(owner, "userInfo")
-        return buildJsonObject {
-            put("version", 4)
-            put("userId", userId)
-            put("settings", reportJson.encodeToJsonElement(SettingsData(settings)))
-            put("search", reportJson.encodeToJsonElement(search))
-            put("bookmarks", reportJson.encodeToJsonElement(BookmarksData(tags)))
-            put("seriesProgress", reportJson.encodeToJsonElement(progress))
-            put("userInfo", reportJson.encodeToJsonElement(profile))
-        }.toString()
+        return timing.measureBackupStep(BackupStep.SerializeJson) {
+            buildJsonObject {
+                put("version", 4)
+                put("userId", userId)
+                put("settings", reportJson.encodeToJsonElement(SettingsData(settings)))
+                put("search", reportJson.encodeToJsonElement(search))
+                put("bookmarks", reportJson.encodeToJsonElement(BookmarksData(tags)))
+                put("seriesProgress", reportJson.encodeToJsonElement(progress))
+                put("userInfo", reportJson.encodeToJsonElement(profile))
+            }.toString()
+        }
     }
 
     private fun verifyDatabase(path: File, manifest: FixtureManifest, degraded: Boolean) {
@@ -269,36 +316,59 @@ private data class TierMeasurement(
 )
 
 @Serializable
-private data class ResourceUse(val elapsedMs: Long, val extraHeapBytes: Long, val cachePeak: Long, val targetPeak: Long) {
-    val totalPeak get() = cachePeak + targetPeak
-}
+private data class ResourceUse(
+    val elapsedMs: Long,
+    val extraHeapBytes: Long,
+    val cachePeak: Long,
+    val targetPeak: Long,
+    val totalPeak: Long,
+)
 
 @Serializable
-private data class BackupMeasurement(
-    val tier: String,
+private data class BackupRun(
     val export: ResourceUse,
     val import: ResourceUse,
     val zipBytes: Long,
     val snapshotBytes: Long,
     val exportBudget: Long,
     val importBudget: Long,
-    val limitMs: Long,
+    val stepsMs: Map<String, Long>,
 ) {
-    val passes get() = export.elapsedMs <= limitMs && import.elapsedMs <= limitMs &&
+    fun passes(limitMs: Long): Boolean = export.elapsedMs <= limitMs && import.elapsedMs <= limitMs &&
         export.extraHeapBytes <= heapLimit && import.extraHeapBytes <= heapLimit &&
-        export.cachePeak <= exportBudget && import.totalPeak <= importBudget
+        export.totalPeak <= exportBudget && import.totalPeak <= importBudget
 }
 
 @Serializable
-private data class BenchmarkReport(val tiers: List<TierMeasurement>, val backups: List<BackupMeasurement>) {
+private data class CompressionMeasurement(val level: String, val elapsedMs: Long, val zipBytes: Long)
+
+@Serializable
+private data class BackupMeasurement(
+    val tier: String,
+    val runs: List<BackupRun>,
+    val limitMs: Long,
+    val compression: List<CompressionMeasurement>,
+)
+
+@Serializable
+private data class BenchmarkReport(
+    val coldStartup: MigrationTiming,
+    val tiers: List<TierMeasurement>,
+    val backups: List<BackupMeasurement>,
+) {
     val passes get() = tiers.all { tier ->
         tier.runs.all { run ->
             run.timing.totalMs <= tier.limitMs && run.completedStartupMs <= 5.0 && run.extraHeapBytes <= heapLimit
         }
-    } && backups.all { it.passes }
+    } && backups.all { backup -> backup.runs.all { it.passes(backup.limitMs) } }
 
     fun markdown(): String = buildString {
         appendLine("# JVM migration benchmark")
+        appendLine()
+        appendLine("| Warmup | Total ms | Steps (ms) |")
+        appendLine("| --- | ---: | --- |")
+        val coldSteps = coldStartup.steps.joinToString(", ") { "${it.name}=${it.elapsedMs}" }
+        appendLine("| 冷启动（不计入阈值） | ${coldStartup.totalMs} | $coldSteps |")
         appendLine()
         appendLine("| Tier | Path | Previous ms | Median ms | Max ms | Heap MiB | Peak disk MiB | Max completed ms | Cleanup ms | History JSON bytes (illust / novel) |")
         appendLine("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
@@ -343,19 +413,79 @@ private data class BenchmarkReport(val tiers: List<TierMeasurement>, val backups
         appendLine()
         appendLine("The JVM benchmark measures the V4 archive, JSON serialization/parsing and import into a different account database. Settings from the archive are not published to app repositories.")
         appendLine()
-        appendLine("| Tier | Export ms | Import ms | Extra heap MiB (export / import) | Cache peak MiB (export / import) | Target growth MiB (import) | ZIP / snapshot MiB | ZIP % | Disk budget MiB (export / import) |")
-        appendLine("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
-        backups.forEach { row ->
-            val ratio = "%.1f".format(Locale.ROOT, 100.0 * row.zipBytes / row.snapshotBytes)
-            appendLine("| ${row.tier} | ${row.export.elapsedMs} | ${row.import.elapsedMs} | ${row.export.extraHeapBytes.mib()} / ${row.import.extraHeapBytes.mib()} |" +
-                " ${row.export.cachePeak.mib()} / ${row.import.cachePeak.mib()} | ${row.import.targetPeak.mib()} |" +
-                " ${row.zipBytes.mib()} / ${row.snapshotBytes.mib()} | $ratio% | ${row.exportBudget.mib()} / ${row.importBudget.mib()} |")
+        appendLine("| Tier | Operation | Median ms | Max ms | Limit ms | Max extra heap MiB | Max cache / target / total MiB | Min disk budget MiB | Max ZIP / snapshot MiB | ZIP % |")
+        appendLine("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
+        for (backup in backups) {
+            appendLine(backupRow(backup, "Export", BackupRun::export, BackupRun::exportBudget))
+            appendLine(backupRow(backup, "Import", BackupRun::import, BackupRun::importBudget))
         }
+        appendLine()
+        appendLine("| Tier | Operation | Step | Median ms | Max ms |")
+        appendLine("| --- | --- | --- | ---: | ---: |")
+        for (backup in backups) {
+            for ((operation, steps) in backupSteps) {
+                for ((step, label) in steps) {
+                    val times = backup.runs.map { it.stepsMs.getValue(step.name) }
+                    appendLine("| ${backup.tier} | $operation | $label | ${times.median()} | ${times.max()} |")
+                }
+            }
+        }
+        if (backups.any { it.compression.isNotEmpty() }) {
+            appendLine()
+            appendLine("## JVM compression comparison")
+            appendLine()
+            appendLine("Each level was timed once on the same input snapshots and metadata from the last export of that tier.")
+            appendLine()
+            appendLine("| Tier | Compression level | Time ms | ZIP MiB |")
+            appendLine("| --- | --- | ---: | ---: |")
+            for (backup in backups) {
+                for (run in backup.compression) {
+                    appendLine("| ${backup.tier} | ${run.level} | ${run.elapsedMs} | ${run.zipBytes.mib()} |")
+                }
+            }
+        }
+    }
+
+    private fun backupRow(
+        backup: BackupMeasurement,
+        operation: String,
+        resourceUse: (BackupRun) -> ResourceUse,
+        budget: (BackupRun) -> Long,
+    ): String {
+        val samples = backup.runs.map(resourceUse)
+        val times = samples.map { it.elapsedMs }
+        val zipBytes = backup.runs.maxOf { it.zipBytes }
+        val snapshotBytes = backup.runs.maxOf { it.snapshotBytes }
+        val ratio = "%.1f".format(Locale.ROOT, backup.runs.maxOf { 100.0 * it.zipBytes / it.snapshotBytes })
+        return "| ${backup.tier} | $operation | ${times.median()} | ${times.max()} | ${backup.limitMs} |" +
+            " ${samples.maxOf { it.extraHeapBytes }.mib()} | ${samples.maxOf { it.cachePeak }.mib()} /" +
+            " ${samples.maxOf { it.targetPeak }.mib()} / ${samples.maxOf { it.totalPeak }.mib()} |" +
+            " ${backup.runs.minOf(budget).mib()} | ${zipBytes.mib()} / ${snapshotBytes.mib()} | $ratio% |"
     }
 }
 
+private val backupSteps = listOf(
+    "Export" to listOf(
+        DatabaseBackupStep.ExportGlobalSnapshot to "Global VACUUM INTO",
+        DatabaseBackupStep.ExportAccountSnapshot to "Account VACUUM INTO",
+        BackupStep.SerializeJson to "Serialize JSON",
+        BackupStep.Compress to "Compress ZIP",
+        BackupStep.CopyToDestination to "Copy to destination",
+    ),
+    "Import" to listOf(
+        BackupStep.CopyToCache to "Copy to cache",
+        BackupStep.ReadZipDirectory to "Read ZIP directory",
+        BackupStep.ExtractSnapshots to "Extract snapshots",
+        DatabaseBackupStep.RestoreGlobalTables to "Restore global tables",
+        DatabaseBackupStep.RestoreAccountTables to "Restore account tables",
+        DatabaseBackupStep.RestoreTranslations to "Restore translation batches",
+    ),
+)
+
+private const val benchmarkRuns = 3
 private const val diskMargin = 50L * 1024 * 1024
 private const val heapLimit = 64L * 1024 * 1024
+private fun List<Long>.median(): Long = sorted()[size / 2]
 private fun Long.mib(): String = "%.1f".format(Locale.ROOT, this / 1048576.0)
 private fun File.allocatedBytes() = walkTopDown().filter { it.isFile }.sumOf(File::length)
 private fun databaseBytes(file: File) = file.length() + File(file.path + "-wal").length() + File(file.path + "-shm").length()
@@ -373,10 +503,14 @@ private suspend fun <T> measureResources(
     var maxHeap = startHeap
     var maxDisk = 0L
     var maxTarget = 0L
+    var maxTotalDisk = 0L
     fun sample() {
         maxHeap = maxOf(maxHeap, heap.heapMemoryUsage.used)
-        maxDisk = maxOf(maxDisk, directory.allocatedBytes() - startDisk)
-        maxTarget = maxOf(maxTarget, targetBytes())
+        val cache = directory.allocatedBytes() - startDisk
+        val target = targetBytes()
+        maxDisk = maxOf(maxDisk, cache)
+        maxTarget = maxOf(maxTarget, target)
+        maxTotalDisk = maxOf(maxTotalDisk, cache + target)
     }
     val sampler = thread(isDaemon = true, name = "migration-benchmark-sampler") {
         while (running.get()) {
@@ -395,5 +529,5 @@ private suspend fun <T> measureResources(
         sampler.join()
     }
     sample()
-    return result to ResourceUse(elapsed, maxHeap - startHeap, maxDisk, maxTarget)
+    return result to ResourceUse(elapsed, maxHeap - startHeap, maxDisk, maxTarget, maxTotalDisk)
 }

@@ -61,13 +61,23 @@ class JvmZipUtil : ZipUtil {
 
     override fun compress(
         sourcePath: String,
-        destinationPath: String
+        destinationPath: String,
+    ): Boolean = compressArchive(sourcePath, destinationPath, compressionLevel = null)
+
+    fun compressWithLevel(sourcePath: String, destinationPath: String, compressionLevel: Int): Boolean =
+        compressArchive(sourcePath, destinationPath, compressionLevel)
+
+    private fun compressArchive(
+        sourcePath: String,
+        destinationPath: String,
+        compressionLevel: Int?,
     ): Boolean {
         return try {
             val sourceFile = File(sourcePath)
             val destOutputStream = getOutputStream(destinationPath)
 
             ZipOutputStream(destOutputStream.buffered()).use { zos ->
+                if (compressionLevel != null) zos.setLevel(compressionLevel)
                 compressRecursive(sourceFile, sourceFile.name, zos)
             }
             true

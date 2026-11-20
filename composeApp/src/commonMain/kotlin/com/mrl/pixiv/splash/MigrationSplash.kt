@@ -88,10 +88,11 @@ internal fun MigrationSplashContent(
                 ContentErrorState(
                     onRetry = onRetry,
                     message = stringResource(RStrings.migration_failure),
-                    description = stringResource(
-                        if (state.reason == MigrationReason.StorageSpace) RStrings.migration_storage_failure
-                        else RStrings.migration_database_failure
-                    ),
+                    description = when (state.reason) {
+                        MigrationReason.Unknown -> null
+                        MigrationReason.StorageSpace -> stringResource(RStrings.migration_storage_failure)
+                        else -> stringResource(RStrings.migration_database_failure)
+                    },
                     icon = Icons.Rounded.Storage,
                     action = {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
