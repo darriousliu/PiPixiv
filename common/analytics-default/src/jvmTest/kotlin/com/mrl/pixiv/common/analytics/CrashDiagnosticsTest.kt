@@ -59,17 +59,6 @@ class CrashDiagnosticsTest {
     }
 
     @Test
-    fun acceptsFixedIdentifiersAndRejectsRouteArguments() {
-        assertTrue(isValidAppCrashBreadcrumb(AppCrashScreenCategory, "PictureDeeplink"))
-        assertTrue(isValidAppCrashBreadcrumb(AppCrashTabCategory, "SearchResults/Illustrations"))
-        assertTrue(isValidAppCrashBreadcrumb(AppCrashOperationCategory, "DownloadImage"))
-
-        assertFalse(isValidAppCrashBreadcrumb(AppCrashScreenCategory, "PictureDetail/1234"))
-        assertFalse(isValidAppCrashBreadcrumb(AppCrashTabCategory, "SearchResults/Illustrations?word=private"))
-        assertFalse(isValidAppCrashBreadcrumb(AppCrashOperationCategory, "DownloadImage https://example.org"))
-    }
-
-    @Test
     fun keepsDesktopSessionPrivacyAndCacheOptions() {
         val cacheDir = Files.createTempDirectory("pipixiv-sentry-cache")
         try {

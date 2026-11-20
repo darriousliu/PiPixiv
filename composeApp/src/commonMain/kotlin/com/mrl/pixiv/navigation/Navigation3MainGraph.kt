@@ -36,7 +36,7 @@ import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
 import com.mrl.pixiv.comment.BlockCommentsScreen
 import com.mrl.pixiv.comment.CommentScreen
-import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.analytics.logScreenView
 import com.mrl.pixiv.common.analytics.recordCrashScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
@@ -49,6 +49,7 @@ import com.mrl.pixiv.common.compose.listener.EscBackHandler
 import com.mrl.pixiv.common.repository.IllustCacheRepo
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.LocalNavigationManager
+import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.router.paneSpec
@@ -530,7 +531,6 @@ internal expect fun HandleDeeplink(
     navigationManager: NavigationManager,
 )
 
-@OptIn(InternalSerializationApi::class)
 @Composable
 private fun LogScreen(
     navigationManager: NavigationManager,
@@ -539,10 +539,20 @@ private fun LogScreen(
     val mainPage = if (destination == Destination.Main) navigationManager.currentMainPage else null
     LaunchedEffect(navigationManager.topEntryId, mainPage) {
         val screen = mainPage ?: destination
-        recordCrashScreen(screen::class.serializer().descriptor.serialName.substringAfterLast('.'))
-    }
-    LaunchedEffect(destination) {
-        val screenName = destination::class.serializer().descriptor.serialName.substringAfterLast('.')
-        logEvent("screen_view", mapOf("screen_name" to screenName, "screen_class" to screenName))
+        val name = screenName(screen)
+        recordCrashScreen(name)
+        when (screen) {
+            is MainPage.Home,
+            is MainPage.Ranking,
+            is MainPage.Latest,
+            is Destination.Following,
+            is Destination.SearchResults -> Unit
+
+            else -> logScreenView(name)
+        }
     }
 }
+
+@OptIn(InternalSerializationApi::class)
+private fun screenName(screen: Any): String =
+    screen::class.serializer().descriptor.serialName.substringAfterLast('.')

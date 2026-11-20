@@ -37,10 +37,6 @@ import java.util.Locale
 
 fun main(args: Array<String>) {
     if (runDesktopAotTrainingIfRequested()) return
-    if ("--sentry-mapping-smoke-test" in args) {
-        runDesktopSentryMappingSmokeTest()
-        return
-    }
     configureZoomImageMainThreadChecker()
     FileKit.init(appId = "PiPixiv")
     Initialization.initKoin()

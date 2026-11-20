@@ -165,7 +165,6 @@ if (project.findProperty("applyFirebasePlugins") != "true") {
 
 if (pluginManager.hasPlugin(libs.plugins.sentry.android.get().pluginId)) {
     configure<SentryPluginExtension> {
-        debug.set(true)
         org.set("pipixiv")
         projectName.set("pipixiv")
         authToken.set(System.getenv("SENTRY_AUTH_TOKEN"))
@@ -173,7 +172,6 @@ if (pluginManager.hasPlugin(libs.plugins.sentry.android.get().pluginId)) {
         includeProguardMapping.set(true)
         autoUploadProguardMapping.set(true)
         uploadNativeSymbols.set(false)
-        autoUploadNativeSymbols.set(true)
         includeNativeSources.set(false)
         includeSourceContext.set(false)
         tracingInstrumentation {

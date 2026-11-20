@@ -5,7 +5,6 @@ import com.google.firebase.crashlytics.crashlytics
 import io.sentry.kotlin.multiplatform.Sentry
 
 internal actual fun addPlatformCrashBreadcrumb(category: String, message: String) {
-    addJavaCrashBreadcrumb(category, message)
     val crashlytics = Firebase.crashlytics
     if (!crashlytics.isCrashlyticsCollectionEnabled) return
     crashlytics.log("[$category] $message")

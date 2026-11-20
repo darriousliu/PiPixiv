@@ -5,6 +5,7 @@ import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.filesDir
 import io.sentry.EventProcessor
 import io.sentry.Hint
+import io.sentry.ScopeType
 import io.sentry.SendCachedEnvelopeFireAndForgetIntegration
 import io.sentry.SendFireAndForgetEnvelopeSender
 import io.sentry.SentryEvent
@@ -14,6 +15,7 @@ import io.sentry.protocol.App
 import io.sentry.protocol.Device
 import io.sentry.protocol.OperatingSystem
 import io.sentry.protocol.SentryRuntime
+import io.sentry.protocol.User
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.Path
@@ -41,6 +43,13 @@ internal actual fun initializePlatformSentry(dsn: String, appVersion: String, ap
         JavaSentry.endSession()
         JavaSentry.flush(2_000)
     })
+}
+
+private fun configureCrashScope(userId: String?) {
+    if (userId == null) return
+    JavaSentry.configureScope(ScopeType.ISOLATION) { scope ->
+        scope.user = User().apply { id = userId }
+    }
 }
 
 private fun desktopInstallationId(directory: Path): String? {

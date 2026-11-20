@@ -12,10 +12,6 @@ import com.google.firebase.initialize
 private val firebaseAnalytics
     get() = Firebase.analytics
 
-private val usageAnalyticsLock = Any()
-private var usageAnalyticsEnabled = false
-private val screenParameters = setOf("screen_name", "screen_class", "page_name", "mode")
-
 actual val isUsageAnalyticsAvailable: Boolean = true
 
 fun Application.initializeFirebase(isDebug: Boolean) {
@@ -23,44 +19,17 @@ fun Application.initializeFirebase(isDebug: Boolean) {
     Firebase.crashlytics.isCrashlyticsCollectionEnabled = !isDebug
 }
 
-actual fun setUsageAnalyticsEnabled(enabled: Boolean, clearLocalData: Boolean) {
-    synchronized(usageAnalyticsLock) {
-        usageAnalyticsEnabled = false
-        val analytics = firebaseAnalytics
-        if (!enabled || clearLocalData) {
-            analytics.setAnalyticsCollectionEnabled(false)
-        }
-        val analyticsStorage = if (enabled) ConsentStatus.GRANTED else ConsentStatus.DENIED
-        analytics.setConsent(
-            mapOf(
-                ConsentType.ANALYTICS_STORAGE to analyticsStorage,
-                ConsentType.AD_STORAGE to ConsentStatus.DENIED,
-                ConsentType.AD_USER_DATA to ConsentStatus.DENIED,
-                ConsentType.AD_PERSONALIZATION to ConsentStatus.DENIED,
-            ),
-        )
-        if (clearLocalData) analytics.resetAnalyticsData()
-        if (enabled) {
-            analytics.setAnalyticsCollectionEnabled(true)
-            usageAnalyticsEnabled = true
-        }
-    }
+actual fun setUsageAnalyticsEnabled(enabled: Boolean) {
+    val analytics = firebaseAnalytics
+    val analyticsStorage = if (enabled) ConsentStatus.GRANTED else ConsentStatus.DENIED
+    analytics.setConsent(mapOf(ConsentType.ANALYTICS_STORAGE to analyticsStorage))
+    analytics.setAnalyticsCollectionEnabled(enabled)
+    if (!enabled) analytics.resetAnalyticsData()
 }
 
-actual fun logEvent(
-    event: String,
-    params: Map<String, Any>?,
-) {
-    synchronized(usageAnalyticsLock) {
-        if (!usageAnalyticsEnabled || event != "screen_view" || params == null) return
-        val screen = params["screen_name"] as? String ?: return
-        if (!isDiagnosticIdentifier(screen)) return
-        firebaseAnalytics.logEvent(event) {
-            params.forEach { (key, value) ->
-                if (key in screenParameters && value is String && isDiagnosticIdentifier(value)) {
-                    param(key, value)
-                }
-            }
-        }
+actual fun logScreenView(screen: String, page: String?) {
+    firebaseAnalytics.logEvent("screen_view") {
+        param("screen_name", screen)
+        if (page != null) param("page_name", page)
     }
 }

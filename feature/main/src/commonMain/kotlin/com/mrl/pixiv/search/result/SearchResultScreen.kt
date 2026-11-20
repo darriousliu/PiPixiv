@@ -49,8 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.mrl.pixiv.common.analytics.logEvent
-import com.mrl.pixiv.common.analytics.recordCrashTab
+import com.mrl.pixiv.common.analytics.trackTab
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
@@ -238,8 +237,7 @@ fun SearchResultsScreen(
 
     LaunchedEffect(pagerState.currentPage) {
         val page = SearchResultsPage.entries[pagerState.currentPage]
-        recordCrashTab("SearchResults", page)
-        logEvent("screen_view", mapOf("screen_name" to "SearchResults", "page_name" to page.name))
+        trackTab("SearchResults", page)
     }
 
     Scaffold(

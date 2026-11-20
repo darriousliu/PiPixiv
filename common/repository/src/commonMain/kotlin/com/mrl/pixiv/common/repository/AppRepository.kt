@@ -17,16 +17,7 @@ object AppRepository : MMKVApp {
     fun setUsageAnalyticsEnabled(enabled: Boolean) {
         if (!isUsageAnalyticsAvailable || usageAnalyticsConsent.value == enabled) return
 
-        if (enabled) {
-            usageAnalyticsConsent.value = true
-            applyUsageAnalyticsEnabled(true, clearLocalData = false)
-        } else {
-            // Stop event logging immediately and persist the opt-out even if the SDK call fails.
-            try {
-                applyUsageAnalyticsEnabled(false)
-            } finally {
-                usageAnalyticsConsent.value = false
-            }
-        }
+        usageAnalyticsConsent.value = enabled
+        applyUsageAnalyticsEnabled(enabled)
     }
 }

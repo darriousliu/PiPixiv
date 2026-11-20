@@ -4,8 +4,6 @@ import Internal.Sentry.SentryCrashMonitorTypeCPPException
 import Internal.Sentry.sentrycrash_setMonitoring
 import Internal.Sentry.sentrycrashcm_getActiveMonitors
 import io.sentry.kotlin.multiplatform.Sentry
-import io.sentry.kotlin.multiplatform.SentryLevel
-import io.sentry.kotlin.multiplatform.protocol.Breadcrumb
 import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
@@ -44,11 +42,4 @@ internal actual fun initializePlatformSentry(dsn: String, appVersion: String, ap
     }
 }
 
-internal actual fun addPlatformCrashBreadcrumb(category: String, message: String) {
-    if (!Sentry.isEnabled()) return
-    Sentry.addBreadcrumb(Breadcrumb().apply {
-        this.category = category
-        this.message = message
-        level = SentryLevel.INFO
-    })
-}
+internal actual fun addPlatformCrashBreadcrumb(category: String, message: String) = Unit

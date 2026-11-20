@@ -37,7 +37,7 @@ class App : Application() {
             androidContext(this@App)
         }
         if (isUsageAnalyticsAvailable) {
-            setUsageAnalyticsEnabled(AppRepository.usageAnalyticsEnabled.value, clearLocalData = false)
+            setUsageAnalyticsEnabled(AppRepository.usageAnalyticsEnabled.value)
         }
         setAppCompatDelegateThemeMode(SettingRepository.settingTheme)
     }

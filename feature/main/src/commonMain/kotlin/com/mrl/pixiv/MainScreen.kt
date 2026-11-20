@@ -4,11 +4,9 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mrl.pixiv.common.analytics.logEvent
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.VersionManager
@@ -21,8 +19,6 @@ import com.mrl.pixiv.latest.LatestScreen
 import com.mrl.pixiv.profile.ProfileScreen
 import com.mrl.pixiv.ranking.RankingScreen
 import com.mrl.pixiv.search.preview.SearchPreviewScreen
-import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.serializer
 
 @Composable
 fun MainNavigationScaffold(
@@ -69,7 +65,6 @@ internal inline fun mainNavigationSuiteType(
     }
 }
 
-@OptIn(InternalSerializationApi::class)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
@@ -90,16 +85,5 @@ fun MainScreen(
             MainPage.Search -> SearchPreviewScreen()
             MainPage.Profile -> ProfileScreen()
         }
-    }
-    LaunchedEffect(navigationManager.currentMainPage) {
-        logEvent("screen_view", buildMap {
-            val screenName =
-                navigationManager.currentMainPage::class.serializer().descriptor.serialName
-                    .split(".")
-                    .lastOrNull()
-                    .orEmpty()
-            put("screen_name", screenName)
-            put("screen_class", screenName)
-        })
     }
 }

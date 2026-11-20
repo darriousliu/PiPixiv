@@ -1,6 +1,5 @@
 package com.mrl.pixiv.common.analytics
 
-import io.sentry.Sentry as JavaSentry
 import io.sentry.kotlin.multiplatform.Sentry
 
 internal actual fun initializePlatformSentry(dsn: String, appVersion: String, appBuild: Int) {
@@ -19,5 +18,4 @@ internal actual fun initializePlatformSentry(dsn: String, appVersion: String, ap
         options.sessionReplay.sessionSampleRate = 0.0
         options.sessionReplay.onErrorSampleRate = 0.0
     }
-    configureCrashScope(JavaSentry.getCurrentScopes().options.distinctId)
 }

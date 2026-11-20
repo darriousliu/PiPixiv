@@ -39,8 +39,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.mrl.pixiv.common.analytics.logEvent
-import com.mrl.pixiv.common.analytics.recordCrashTab
+import com.mrl.pixiv.common.analytics.logScreenView
+import com.mrl.pixiv.common.analytics.trackTab
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
@@ -208,8 +208,7 @@ private fun IllustMode(
     LaunchedEffect(lifecycleOwner, pagerState) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             snapshotFlow { HomeImageFeedMode.entries[pagerState.currentPage] }.collectLatest { mode ->
-                recordCrashTab("Home", mode)
-                logEvent("screen_view", mapOf("screen_name" to "Home", "page_name" to mode.name))
+                trackTab("Home", mode)
             }
         }
     }
@@ -313,6 +312,7 @@ private fun NovelMode(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val recommendNovelList = viewModel.recommendNovelList.collectAsLazyPagingItems()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = viewModel.lazyListState
     val pullRefreshState = rememberPullToRefreshState()
     val onRefresh = recommendNovelList::refresh
@@ -324,6 +324,12 @@ private fun NovelMode(
     }
 
     KeyEventListener(controller)
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            logScreenView("Home")
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { sideEffect ->
