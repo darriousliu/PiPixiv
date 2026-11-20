@@ -2,6 +2,7 @@ package com.mrl.pixiv
 
 import com.mrl.pixiv.common.analytics.captureDesktopFatalException
 import com.mrl.pixiv.common.analytics.flushDesktopAnalytics
+import com.mrl.pixiv.common.logs.AppLogStore
 import dev.nucleusframework.window.tao.TaoApplication
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Handler
@@ -19,6 +20,9 @@ internal fun installTaoFatalErrorReporting() {
     // never sees them. Keep its existing logging and native error dialog intact.
     taoFatalLogger.addHandler(
         TaoFatalErrorHandler(taoFatalLogger.name) { error ->
+            runCatching {
+                AppLogStore.recordCrash(error, "Tao", "Desktop window system terminated")
+            }
             captureDesktopFatalException(error)
             flushDesktopAnalytics(2_000)
         },

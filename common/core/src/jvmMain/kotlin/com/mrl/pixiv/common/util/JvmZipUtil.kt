@@ -55,7 +55,7 @@ class JvmZipUtil : ZipUtil {
             }
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(throwable = e, tag = "ZipUtil") { "Unable to extract ZIP archive" }
             false
         }
     }
@@ -73,7 +73,7 @@ class JvmZipUtil : ZipUtil {
             }
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(throwable = e, tag = "ZipUtil") { "Unable to create ZIP archive" }
             false
         }
     }

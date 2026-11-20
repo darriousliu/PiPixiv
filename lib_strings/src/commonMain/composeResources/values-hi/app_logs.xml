@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">ऐप लॉग</string>
+    <string name="app_logs_feedback_hint">फ़ीडबैक भेजते समय कॉपी करके जोड़ें</string>
+    <string name="app_logs_local_notice">लॉग सिर्फ़ इस डिवाइस पर सेव होते हैं और अपने आप कभी अपलोड नहीं होते। आप कॉपी करने से पहले इन्हें देख सकते हैं।</string>
+    <string name="app_logs_warnings">चेतावनी और उससे ऊपर</string>
+    <string name="app_logs_errors">सिर्फ़ गड़बड़ियाँ</string>
+    <string name="app_logs_current">मौजूदा रन</string>
+    <string name="app_logs_previous">पिछला रन</string>
+    <string name="app_logs_copy_all">सभी लॉग कॉपी करें</string>
+    <string name="app_logs_clear">लॉग मिटाएँ</string>
+    <string name="app_logs_clear_confirmation">मौजूदा और पिछले रन के लॉग मिटाएँ?</string>
+    <string name="app_logs_empty">कोई मिलता-जुलता लॉग नहीं</string>
+    <string name="app_logs_expand">स्टैक ट्रेस खोलें</string>
+    <string name="app_logs_collapse">स्टैक ट्रेस समेटें</string>
+    <string name="app_logs_omitted">छोड़ी गई पुरानी एंट्री: %1$d</string>
+    <string name="app_logs_unknown_device">अज्ञात</string>
+    <string name="app_logs_copied">लॉग कॉपी हो गए</string>
+    <string name="app_logs_export_failed">लॉग कॉपी या शेयर नहीं हो सके</string>
+</resources>

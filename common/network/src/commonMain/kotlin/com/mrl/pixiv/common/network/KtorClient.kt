@@ -45,7 +45,7 @@ internal fun <T : HttpClientEngineConfig> httpClient(
             logger =
                 object : Logger {
                     override fun log(message: String) {
-                        KermitLogger.i(tag = "HttpClient") {
+                        KermitLogger.d(tag = "HttpClient") {
                             """
               |---
               |$message

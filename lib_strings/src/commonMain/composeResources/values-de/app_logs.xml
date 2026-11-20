@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">App-Protokoll</string>
+    <string name="app_logs_feedback_hint">Für Feedback kopieren und anhängen</string>
+    <string name="app_logs_local_notice">Protokolle bleiben auf diesem Gerät und werden nie automatisch hochgeladen. Du kannst sie vor dem Kopieren prüfen.</string>
+    <string name="app_logs_warnings">Ab Warnung</string>
+    <string name="app_logs_errors">Nur Fehler</string>
+    <string name="app_logs_current">Dieser Start</string>
+    <string name="app_logs_previous">Letzter Start</string>
+    <string name="app_logs_copy_all">Alle Einträge kopieren</string>
+    <string name="app_logs_clear">Protokolle löschen</string>
+    <string name="app_logs_clear_confirmation">Protokolle dieses und des letzten Starts löschen?</string>
+    <string name="app_logs_empty">Keine passenden Einträge</string>
+    <string name="app_logs_expand">Stacktrace ausklappen</string>
+    <string name="app_logs_collapse">Stacktrace einklappen</string>
+    <string name="app_logs_omitted">Ältere Einträge ausgelassen: %1$d</string>
+    <string name="app_logs_unknown_device">Unbekannt</string>
+    <string name="app_logs_copied">Protokolle kopiert</string>
+    <string name="app_logs_export_failed">Kopieren oder Teilen fehlgeschlagen</string>
+</resources>

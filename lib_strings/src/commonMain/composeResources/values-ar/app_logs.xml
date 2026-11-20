@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">سجلات التطبيق</string>
+    <string name="app_logs_feedback_hint">انسخها وأرفقها عند إرسال ملاحظاتك</string>
+    <string name="app_logs_local_notice">تُحفظ السجلات على هذا الجهاز فقط ولا تُرفع تلقائيًا أبدًا. يمكنك مراجعتها قبل نسخها.</string>
+    <string name="app_logs_warnings">التحذيرات والأخطاء</string>
+    <string name="app_logs_errors">الأخطاء فقط</string>
+    <string name="app_logs_current">التشغيل الحالي</string>
+    <string name="app_logs_previous">التشغيل السابق</string>
+    <string name="app_logs_copy_all">نسخ كل السجلات</string>
+    <string name="app_logs_clear">مسح السجلات</string>
+    <string name="app_logs_clear_confirmation">هل تريد مسح سجلات التشغيل الحالي والسابق؟</string>
+    <string name="app_logs_empty">لا توجد سجلات مطابقة</string>
+    <string name="app_logs_expand">توسيع تتبّع المكدس</string>
+    <string name="app_logs_collapse">طيّ تتبّع المكدس</string>
+    <string name="app_logs_omitted">السجلات الأقدم التي تم تجاوزها: %1$d</string>
+    <string name="app_logs_unknown_device">غير معروف</string>
+    <string name="app_logs_copied">تم نسخ السجلات</string>
+    <string name="app_logs_export_failed">تعذّر نسخ السجلات أو مشاركتها</string>
+</resources>

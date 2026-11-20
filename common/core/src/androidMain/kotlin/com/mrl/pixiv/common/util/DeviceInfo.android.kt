@@ -13,6 +13,8 @@ actual object DeviceInfo {
         get() = Build.MODEL
 
     actual val APP_VERSION = "6.158.0"
+
+    actual fun appLogDetails() = AppLogDeviceDetails(PLATFORM, VERSION, MODEL)
     actual val DISPLAY_NAME by lazy {
         AppUtil.appContext.assets.open("device_mapping.csv").use {
             val reader = it.reader()

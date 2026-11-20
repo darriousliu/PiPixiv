@@ -89,6 +89,7 @@ import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
 import com.mrl.pixiv.setting.ai.AiTranslationSettingScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
+import com.mrl.pixiv.setting.applog.AppLogScreen
 import com.mrl.pixiv.setting.block.BlockIllustScreen
 import com.mrl.pixiv.setting.block.BlockNovelScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
@@ -354,6 +355,10 @@ fun Navigation3MainGraph(
         }
         entry<Destination.About> {
             AboutScreen()
+        }
+
+        entry<Destination.AppLog> {
+            AppLogScreen()
         }
         entry<Destination.Comment> {
             CommentScreen(

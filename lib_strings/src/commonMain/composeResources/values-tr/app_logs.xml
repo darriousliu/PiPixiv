@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">Uygulama günlükleri</string>
+    <string name="app_logs_feedback_hint">Geri bildirim gönderirken kopyalayıp ekleyin</string>
+    <string name="app_logs_local_notice">Günlükler yalnızca bu cihazda saklanır ve asla otomatik olarak yüklenmez. Kopyalamadan önce inceleyebilirsiniz.</string>
+    <string name="app_logs_warnings">Uyarılar ve hatalar</string>
+    <string name="app_logs_errors">Yalnızca hatalar</string>
+    <string name="app_logs_current">Bu çalıştırma</string>
+    <string name="app_logs_previous">Önceki çalıştırma</string>
+    <string name="app_logs_copy_all">Tüm günlükleri kopyala</string>
+    <string name="app_logs_clear">Günlükleri temizle</string>
+    <string name="app_logs_clear_confirmation">Bu ve önceki çalıştırmanın günlükleri temizlensin mi?</string>
+    <string name="app_logs_empty">Eşleşen günlük yok</string>
+    <string name="app_logs_expand">Yığın izini genişlet</string>
+    <string name="app_logs_collapse">Yığın izini daralt</string>
+    <string name="app_logs_omitted">Atlanan eski kayıtlar: %1$d</string>
+    <string name="app_logs_unknown_device">Bilinmiyor</string>
+    <string name="app_logs_copied">Günlükler kopyalandı</string>
+    <string name="app_logs_export_failed">Günlükler kopyalanamadı veya paylaşılamadı</string>
+</resources>

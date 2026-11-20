@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.search.NovelSearch
 import com.mrl.pixiv.common.datasource.local.PixivDatabase
 import com.mrl.pixiv.common.datasource.local.entity.BlockIllustEntity
@@ -43,6 +44,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -76,9 +78,11 @@ class AppDataViewModel(
 ) : BaseMviViewModel<AppDataState, ViewIntent>(
     initialState = AppDataState(),
 ) {
+    @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
+        exceptionsWithDebugInfo = false
     }
     private var historyImportRequestId = 0L
     private val historyImportResultFlow =
@@ -183,7 +187,7 @@ class AppDataViewModel(
                 jsonFile.delete()
                 ToastUtil.safeShortToast(RStrings.export_success)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Logger.e(throwable = e, tag = "AppData") { "Unable to export app data" }
                 ToastUtil.safeShortToast(RStrings.export_failed, e.message.orEmpty())
             } finally {
                 updateState { copy(isLoading = false) }
@@ -198,7 +202,6 @@ class AppDataViewModel(
                 val path = file.absolutePath()
                 val jsonString = zipUtil.getZipEntryContent(path, jsonDataFile)?.decodeToString()
                     ?: throw Exception("No data.json in zip file")
-                val json = Json { ignoreUnknownKeys = true }
                 val rootObject = json.parseToJsonElement(jsonString).jsonObject
                 historyImportConfirmCache.clear()
 
@@ -218,7 +221,7 @@ class AppDataViewModel(
 
                 ToastUtil.safeShortToast(RStrings.import_success)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Logger.e(throwable = e, tag = "AppData") { "Unable to import app data" }
                 ToastUtil.safeShortToast(RStrings.import_failed, e.message.orEmpty())
             } finally {
                 updateState { copy(isLoading = false) }

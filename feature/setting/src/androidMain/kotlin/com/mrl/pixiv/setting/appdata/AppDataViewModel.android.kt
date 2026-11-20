@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.OLD_DOWNLOAD_DIR
 import com.mrl.pixiv.common.util.RStrings
@@ -133,7 +134,7 @@ actual fun androidMigrateData(
                             val rows = resolver.delete(uri, null, null)
                             if (rows > 0) deleteSuccess = true
                         } catch (e: Exception) {
-                            e.printStackTrace()
+                            Logger.e(throwable = e, tag = "AppData") { "Unable to delete the old media entry" }
                         }
                     }
                 }
@@ -147,7 +148,7 @@ actual fun androidMigrateData(
                 successCount++
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(throwable = e, tag = "AppData") { "Unable to migrate a download" }
         }
 
         processedCount++
@@ -201,7 +202,7 @@ actual fun androidMigrateData(
                                 val rows = resolver.delete(uri, null, null)
                                 if (rows > 0) deleteSuccess = true
                             } catch (e: Exception) {
-                                e.printStackTrace()
+                                Logger.e(throwable = e, tag = "AppData") { "Unable to delete the replaced media entry" }
                             }
                         }
                     }
@@ -216,7 +217,7 @@ actual fun androidMigrateData(
             }
             if (renamed) successCount++
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(throwable = e, tag = "AppData") { "Unable to rename a download" }
         }
 
         processedCount++
@@ -283,7 +284,7 @@ private fun getMediaUri(resolver: ContentResolver, file: File, relativePath: Str
             }
         }
     } catch (e: Exception) {
-        e.printStackTrace()
+        Logger.e(throwable = e, tag = "AppData") { "Unable to look up a media entry" }
     }
     return null
 }

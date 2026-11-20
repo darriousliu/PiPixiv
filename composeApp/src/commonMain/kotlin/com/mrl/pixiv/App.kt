@@ -103,24 +103,24 @@ private fun SetUpImageLoaderFactory(imageLoaderBuilder: ImageLoader.Builder.() -
             .decoderCoroutineContext(Dispatchers.IO.limitedParallelism(2))
             .logger(
                 object : CoilLogger {
-                    override var minLevel = CoilLogLevel.Info
+                    override var minLevel = CoilLogLevel.Warn
                     override fun log(
                         tag: String,
                         level: CoilLogLevel,
                         message: String?,
                         throwable: Throwable?,
                     ) {
+                        val exceptionName = throwable?.let { it::class.simpleName }
                         KermitLogger.processLog(
                             severity = when (level) {
                                 CoilLogLevel.Verbose -> Severity.Verbose
                                 CoilLogLevel.Debug -> Severity.Debug
                                 CoilLogLevel.Info -> Severity.Info
-                                CoilLogLevel.Warn -> Severity.Warn
-                                CoilLogLevel.Error -> Severity.Error
+                                CoilLogLevel.Warn, CoilLogLevel.Error -> Severity.Warn
                             },
                             tag = tag,
-                            throwable = throwable,
-                            message = message.orEmpty(),
+                            throwable = null,
+                            message = exceptionName?.let { "Image load failed: $it" } ?: "Image loader reported a problem",
                         )
                     }
                 },

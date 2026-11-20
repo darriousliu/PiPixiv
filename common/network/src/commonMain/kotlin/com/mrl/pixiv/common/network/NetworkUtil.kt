@@ -1,6 +1,7 @@
 package com.mrl.pixiv.common.network
 
 import androidx.compose.ui.text.intl.Locale
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Constants.HashSalt
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.util.DeviceInfo
@@ -52,7 +53,7 @@ internal object NetworkUtil : KoinComponent {
             val md5 = text.toByteArray().toByteString().md5()
             return md5.hex()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(throwable = e, tag = "NetworkUtil") { "Unable to compute the request signature" }
         }
         return ""
     }

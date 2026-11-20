@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.coroutine
 
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.util.ToastUtil
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -77,11 +78,13 @@ fun CoroutineScope.launchCatch(
     start: CoroutineStart = CoroutineStart.DEFAULT,
     loading: MutableStateFlow<Boolean>? = null,
     errorToast: Boolean = false,
-    error: (Throwable) -> Unit = { it.printStackTrace() },
+    error: (Throwable) -> Unit = {},
     block: suspend CoroutineScope.() -> Unit,
 ): Job {
     val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        throwable.printStackTrace()
+        if (throwable !is CancelException && throwable !is CancellationException) {
+            Logger.e(throwable = throwable, tag = "Coroutine") { "Background coroutine failed" }
+        }
         error.invoke(throwable)
         loading?.update { false }
 

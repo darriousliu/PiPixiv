@@ -112,5 +112,6 @@ val Destination.paneSpec: DestinationPaneSpec
         Destination.CloudMute,
         Destination.BlockComments,
         Destination.AppData,
+        Destination.AppLog,
         Destination.About -> detailPaneSpec
     }

@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -124,7 +125,7 @@ suspend fun saveToAlbum(
         uri.toString() to filePath
     } catch (e: Exception) {
         insertedUri?.let { runCatching { resolver.delete(it, null, null) } }
-        e.printStackTrace()
+        Logger.e(throwable = e, tag = "BitmapUtil") { "Unable to save image to the album" }
         null
     }
 }
@@ -133,7 +134,7 @@ fun File.toBitmap(): Bitmap? {
     return try {
         BitmapFactory.decodeFile(absolutePath)
     } catch (e: Exception) {
-        e.printStackTrace()
+        Logger.e(throwable = e, tag = "BitmapUtil") { "Unable to decode image" }
         null
     }
 }

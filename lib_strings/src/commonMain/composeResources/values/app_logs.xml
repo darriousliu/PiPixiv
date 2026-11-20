@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">应用日志</string>
+    <string name="app_logs_feedback_hint">反馈问题时可复制并附上</string>
+    <string name="app_logs_local_notice">日志仅保存在此设备上，绝不会自动上传。复制前可以查看。</string>
+    <string name="app_logs_warnings">警告及以上</string>
+    <string name="app_logs_errors">仅错误</string>
+    <string name="app_logs_current">本次运行</string>
+    <string name="app_logs_previous">上次运行</string>
+    <string name="app_logs_copy_all">复制全部日志</string>
+    <string name="app_logs_clear">清除日志</string>
+    <string name="app_logs_clear_confirmation">要清除本次和上次运行的日志吗？</string>
+    <string name="app_logs_empty">没有符合条件的日志</string>
+    <string name="app_logs_expand">展开堆栈</string>
+    <string name="app_logs_collapse">收起堆栈</string>
+    <string name="app_logs_omitted">已省略 %1$d 条较早的日志。</string>
+    <string name="app_logs_unknown_device">未知</string>
+    <string name="app_logs_copied">已复制日志</string>
+    <string name="app_logs_export_failed">无法复制或分享日志</string>
+</resources>

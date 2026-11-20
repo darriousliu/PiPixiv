@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">Journaux de l’application</string>
+    <string name="app_logs_feedback_hint">À copier et joindre à vos commentaires</string>
+    <string name="app_logs_local_notice">Les journaux restent sur cet appareil et ne sont jamais envoyés automatiquement. Vous pouvez les consulter avant de les copier.</string>
+    <string name="app_logs_warnings">Avertissements et erreurs</string>
+    <string name="app_logs_errors">Erreurs uniquement</string>
+    <string name="app_logs_current">Session actuelle</string>
+    <string name="app_logs_previous">Session précédente</string>
+    <string name="app_logs_copy_all">Copier tous les journaux</string>
+    <string name="app_logs_clear">Effacer les journaux</string>
+    <string name="app_logs_clear_confirmation">Effacer les journaux de ces deux sessions ?</string>
+    <string name="app_logs_empty">Aucune entrée correspondante</string>
+    <string name="app_logs_expand">Développer la trace de pile</string>
+    <string name="app_logs_collapse">Réduire la trace de pile</string>
+    <string name="app_logs_omitted">Entrées anciennes omises : %1$d</string>
+    <string name="app_logs_unknown_device">Inconnu</string>
+    <string name="app_logs_copied">Journaux copiés</string>
+    <string name="app_logs_export_failed">Impossible de copier ou de partager les journaux</string>
+</resources>

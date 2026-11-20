@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Feedback
 import androidx.compose.material.icons.rounded.Link
@@ -50,6 +51,7 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.data.Constants
+import com.mrl.pixiv.common.icons.rounded.List
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.repository.VersionManager.getCurrentFlavorAsset
 import com.mrl.pixiv.common.router.NavigationManager
@@ -63,6 +65,8 @@ import com.mrl.pixiv.common.util.selectSaveFile
 import com.mrl.pixiv.setting.components.SettingPageColumn
 import com.mrl.pixiv.setting.components.SettingRow
 import com.mrl.pixiv.strings.about
+import com.mrl.pixiv.strings.app_logs
+import com.mrl.pixiv.strings.app_logs_feedback_hint
 import com.mrl.pixiv.strings.app_name
 import com.mrl.pixiv.strings.cancel
 import com.mrl.pixiv.strings.check_update
@@ -106,6 +110,7 @@ fun AboutScreen(
         onOpenProject = { uriHandler.openUri(Constants.GITHUB_URL) },
         onOpenTelegramChannel = { uriHandler.openUri(Constants.TELEGRAM_CHANNEL_URL) },
         onFeedback = { uriHandler.openUri(Constants.GITHUB_ISSUE_URL) },
+        onOpenAppLogs = navigationManager::navigateToAppLogScreen,
         onShare = {
             coroutineScope.launch {
                 ShareUtil.shareText(
@@ -220,6 +225,7 @@ internal fun AboutContent(
     onOpenProject: () -> Unit,
     onOpenTelegramChannel: () -> Unit,
     onFeedback: () -> Unit,
+    onOpenAppLogs: () -> Unit,
     onShare: () -> Unit,
     onCheckUpdate: () -> Unit,
     modifier: Modifier = Modifier,
@@ -275,6 +281,12 @@ internal fun AboutContent(
                 icon = Icons.Rounded.Feedback,
                 onClick = rememberThrottleClick(onClick = onFeedback),
                 supportingContent = { Text(stringResource(RStrings.feedback_content)) },
+            )
+            SettingRow(
+                title = stringResource(RStrings.app_logs),
+                icon = Icons.AutoMirrored.Rounded.List,
+                onClick = rememberThrottleClick(onClick = onOpenAppLogs),
+                supportingContent = { Text(stringResource(RStrings.app_logs_feedback_hint)) },
             )
             SettingRow(
                 title = stringResource(RStrings.share_app),

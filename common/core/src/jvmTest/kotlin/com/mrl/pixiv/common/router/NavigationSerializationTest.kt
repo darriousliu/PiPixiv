@@ -99,6 +99,7 @@ class NavigationSerializationTest {
             Destination.AppData,
             Destination.Download,
             Destination.About,
+            Destination.AppLog,
             Destination.Comment(8, CommentType.ILLUST),
             Destination.Report(9, ReportType.USER),
             Destination.NovelDetail(10, markerPage = 3, readLaterTargetLanguage = "zh-CN"),

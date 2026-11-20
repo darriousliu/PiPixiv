@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.SideEffect
@@ -80,7 +81,7 @@ actual fun MigrationCard(
                 }
 
                 is SideEffect.Error -> {
-                    effect.throwable.printStackTrace()
+                    Logger.e(throwable = effect.throwable, tag = "AppData") { "Unable to complete media migration" }
                 }
             }
         }

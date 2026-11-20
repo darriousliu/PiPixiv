@@ -177,7 +177,7 @@ internal class PixivEchDns(
         hostname: String,
         source: String,
     ): List<InetAddress> = distinct().also {
-        Logger.d { "DNS lookup $hostname via $source result: $it" }
+        Logger.d { "DNS lookup $hostname via $source returned ${it.size} addresses" }
     }
 }
 

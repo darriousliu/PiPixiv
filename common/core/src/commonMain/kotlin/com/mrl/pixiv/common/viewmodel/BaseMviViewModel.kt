@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.coroutine.CancelException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -76,6 +77,9 @@ abstract class BaseMviViewModel<State, Intent : ViewIntent>(
             try {
                 handleIntent(intent)
             } catch (e: Exception) {
+                if (e !is CancellationException) {
+                    Logger.w(throwable = e, tag = "BaseMviViewModel") { "Unable to handle view intent" }
+                }
                 // 自动捕获未处理异常并发送错误
                 handleError(e)
             }
@@ -112,7 +116,7 @@ abstract class BaseMviViewModel<State, Intent : ViewIntent>(
 
     protected fun launchIO(
         start: CoroutineStart = CoroutineStart.DEFAULT,
-        onError: (Throwable) -> Unit = { it.printStackTrace() },
+        onError: (Throwable) -> Unit = {},
         block: suspend CoroutineScope.() -> Unit
     ): Job =
         launchCatch(
@@ -125,7 +129,7 @@ abstract class BaseMviViewModel<State, Intent : ViewIntent>(
 
     protected fun launchUI(
         start: CoroutineStart = CoroutineStart.DEFAULT,
-        onError: (Throwable) -> Unit = { it.printStackTrace() },
+        onError: (Throwable) -> Unit = {},
         block: suspend CoroutineScope.() -> Unit
     ): Job =
         launchCatch(
@@ -138,11 +142,13 @@ abstract class BaseMviViewModel<State, Intent : ViewIntent>(
     protected fun launchCatch(
         context: CoroutineContext = EmptyCoroutineContext,
         start: CoroutineStart = CoroutineStart.DEFAULT,
-        onError: (Throwable) -> Unit = { it.printStackTrace() },
+        onError: (Throwable) -> Unit = {},
         block: suspend CoroutineScope.() -> Unit,
     ): Job {
         val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-            throwable.printStackTrace()
+            if (throwable !is CancelException && throwable !is CancellationException) {
+                Logger.e(throwable = throwable, tag = "BaseMviViewModel") { "ViewModel coroutine failed" }
+            }
             onError(throwable)
         }
         return viewModelScope.launch(context + exceptionHandler, start) {

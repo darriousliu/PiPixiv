@@ -312,6 +312,10 @@ class NavigationManager(
         navigate(destination = Destination.About)
     }
 
+    fun navigateToAppLogScreen() {
+        navigate(destination = Destination.AppLog)
+    }
+
     fun navigateToCommentScreen(id: Long, type: CommentType) {
         navigate(destination = Destination.Comment(id, type))
     }

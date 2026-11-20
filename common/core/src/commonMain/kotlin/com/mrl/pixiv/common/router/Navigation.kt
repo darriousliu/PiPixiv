@@ -177,6 +177,9 @@ sealed class Destination : NavKey {
     data object About : Destination()
 
     @Serializable
+    data object AppLog : Destination()
+
+    @Serializable
     data class Comment(
         val id: Long,
         // type 保留给导航类判别字段，业务类型使用独立的序列化名称。

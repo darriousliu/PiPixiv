@@ -134,8 +134,7 @@ class MainActivity : BaseActivity() {
             }
             .forEach { info ->
                 Logger.w(tag = "Android17Compat") {
-                    "Recent process exit may be affected by Android memory limits: " +
-                            "reason=${info.reason}, description=${info.description}"
+                    "Recent process exit may be affected by Android memory limits: reason=${info.reason}"
                 }
             }
     }
