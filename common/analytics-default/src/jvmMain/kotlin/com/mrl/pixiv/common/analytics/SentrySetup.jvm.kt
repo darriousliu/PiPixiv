@@ -89,14 +89,14 @@ internal fun SentryOptions.configureDesktopCrashReports(
     cacheDir: String?,
 ) {
     configureCrashReports(dsn)
-    setAttachServerName(false)
+    isAttachServerName = false
     if (cacheDir != null) {
         cacheDirPath = cacheDir
         addIntegration(
             SendCachedEnvelopeFireAndForgetIntegration(SendFireAndForgetEnvelopeSender { cacheDirPath }),
         )
     }
-    setGlobalHubMode(true)
+    isGlobalHubMode = true
     val appRelease = "pipixiv@$appVersion"
     val build = appBuild.toString()
     release = appRelease
@@ -116,16 +116,20 @@ internal fun SentryOptions.configureDesktopCrashReports(
             if (event.release != appRelease || event.dist != build) return event
 
             with(event.contexts) {
+                // Sentry's nullable getters and non-null setters expose read-only Kotlin properties.
+                @Suppress("UsePropertyAccessSyntax")
                 setApp(App().apply {
                     appIdentifier = "com.mrl.pixiv"
                     appName = "PiPixiv"
                     this.appVersion = appVersion
                     this.appBuild = build
                 })
+                @Suppress("UsePropertyAccessSyntax")
                 setOperatingSystem(OperatingSystem().apply {
                     name = osName
                     version = osVersion
                 })
+                @Suppress("UsePropertyAccessSyntax")
                 setDevice(Device().apply {
                     // The Java SDK has no typed field for the schema's `device.arch`.
                     unknown = architecture?.let { mapOf("arch" to it) }

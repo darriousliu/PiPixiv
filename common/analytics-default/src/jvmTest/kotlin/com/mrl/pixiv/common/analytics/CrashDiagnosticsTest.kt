@@ -2,6 +2,8 @@ package com.mrl.pixiv.common.analytics
 
 import io.sentry.Breadcrumb
 import io.sentry.Hint
+import io.sentry.HttpBodyType
+import io.sentry.KeyValueCollectionBehavior
 import io.sentry.SendCachedEnvelopeFireAndForgetIntegration
 import io.sentry.SentryOptions
 import java.nio.file.Files
@@ -77,7 +79,15 @@ class CrashDiagnosticsTest {
             assertTrue(configuredPath == cacheDir || configuredPath.parent == cacheDir)
             assertTrue(options.integrations.any { it is SendCachedEnvelopeFireAndForgetIntegration })
             assertTrue(options.isEnableAutoSessionTracking)
-            assertFalse(options.isSendDefaultPii)
+            with(options.dataCollection) {
+                assertEquals(false, userInfo)
+                assertEquals(KeyValueCollectionBehavior.off(), cookies)
+                assertEquals(setOf(HttpBodyType.OUTGOING_REQUEST, HttpBodyType.INCOMING_RESPONSE), httpBodies)
+                assertEquals(false, databaseQueryData)
+                assertEquals(false, filePaths)
+                assertEquals(false, graphql.document)
+                assertEquals(false, graphql.variables)
+            }
             assertFalse(options.isAttachServerName)
             assertNull(options.beforeSend)
         } finally {
