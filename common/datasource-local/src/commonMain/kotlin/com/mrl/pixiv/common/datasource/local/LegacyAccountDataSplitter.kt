@@ -55,8 +55,10 @@ class LegacyAccountDataSplitter(
 
     suspend fun dropLegacyTables() {
         database.useWriterConnection { connection ->
-            connection.immediateTransaction {
-                for (table in legacyAccountTables) executeSQL("DROP TABLE IF EXISTS ${table.name}")
+            connection.executeSQL("PRAGMA main.secure_delete = ON")
+            // Commit each DROP separately so SQLite doesn't keep erased pages in a statement journal.
+            for (table in legacyAccountTables) {
+                connection.executeSQL("DROP TABLE IF EXISTS ${table.name}")
             }
         }
     }

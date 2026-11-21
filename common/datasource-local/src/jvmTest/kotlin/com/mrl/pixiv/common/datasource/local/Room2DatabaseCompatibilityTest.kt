@@ -1,6 +1,8 @@
 package com.mrl.pixiv.common.datasource.local
 
+import androidx.room3.executeSQL
 import androidx.room3.useReaderConnection
+import androidx.room3.useWriterConnection
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
@@ -276,6 +278,54 @@ class Room2DatabaseCompatibilityTest {
             } finally {
                 accounts.close()
                 provider.close()
+            }
+        }
+    }
+
+    @Test
+    fun `legacy table cleanup commits completed drops and resumes with secure delete`() = runTest {
+        withLegacyDatabase(version = 9) { file ->
+            val path = Path(file.absolutePath)
+            val accounts = AccountDatabaseProvider { Path(file.parentFile.resolve("accounts").absolutePath) }
+            try {
+                withRoomDatabase(file) { database ->
+                    val splitter = LegacyAccountDataSplitter(database, accounts, path)
+                    database.useWriterConnection { connection ->
+                        connection.executeSQL("PRAGMA foreign_keys = ON")
+                        connection.executeSQL(
+                            """
+                            CREATE TABLE cleanup_test_reference (
+                                novelId INTEGER NOT NULL,
+                                userId INTEGER NOT NULL,
+                                FOREIGN KEY(novelId, userId) REFERENCES browsing_history_novel(novelId, userId)
+                            )
+                            """.trimIndent()
+                        )
+                        connection.executeSQL("INSERT INTO cleanup_test_reference VALUES (10, 1)")
+                    }
+
+                    // The foreign key blocks the second DROP after the first has committed.
+                    assertFails { splitter.dropLegacyTables() }
+                    assertEquals("3", database.tableValue(legacyTablesCount))
+                    assertEquals(
+                        "0",
+                        database.tableValue("SELECT COUNT(*) FROM sqlite_master WHERE name = 'browsing_history_illust'"),
+                    )
+
+                    database.useWriterConnection { connection ->
+                        connection.executeSQL("DROP TABLE cleanup_test_reference")
+                    }
+                    splitter.dropLegacyTables()
+                    assertEquals("0", database.tableValue(legacyTablesCount))
+                    database.useWriterConnection { connection ->
+                        connection.usePrepared("PRAGMA main.secure_delete") { statement ->
+                            assertTrue(statement.step())
+                            assertEquals(1L, statement.getLong(0))
+                        }
+                    }
+                }
+            } finally {
+                accounts.close()
             }
         }
     }
