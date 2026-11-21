@@ -192,10 +192,12 @@ class StartupMigrationTest {
     }
 
     @Test
-    fun corruptLegacySessionDefersAccountPreferencesUntilAnExplicitTargetIsChosen() = withFixture { directory, manifest ->
+    fun corruptLegacySessionDefersAccountPreferencesUntilAnExplicitTargetIsChosen() = withStorage { root ->
+        val (fixture, manifest) = LegacyMigrationFixture.exportCorruptSession(root.resolve("fixtures"))
+        val directory = prepareMigrationRun(root, fixture, "run")
         MigrationTestRun(directory).useRun { run ->
-            assertTrue(run.legacy.kv.set("userInfo", "{".encodeToByteArray()))
             assertTrue(run.start())
+            assertEquals(manifest.mmkvCounts, lastMigrationTiming().mmkvCounts)
             assertNull(run.accounts.current.value)
             assertEquals("DARK", readDevicePreference(run.app, run.legacy).theme)
             assertTrue(run.preferences.sessions.recoverAfterLogin.value)

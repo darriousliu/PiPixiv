@@ -59,6 +59,9 @@ class StartupMigrationBenchmarkTest {
         assumeTrue(enabled || System.getenv("PIPIXIV_MIGRATION_FIXTURES") == "1")
         initializeMigrationTestStorage()
         MigrationTier.entries.forEach { LegacyMigrationFixture.export(fixtureRoot, it) }
+        if (System.getenv("PIPIXIV_MIGRATION_CORRUPT_SESSION") == "1") {
+            LegacyMigrationFixture.exportCorruptSession(fixtureRoot)
+        }
     }
 
     @Test

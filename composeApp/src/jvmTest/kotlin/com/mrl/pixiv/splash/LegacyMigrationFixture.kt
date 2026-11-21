@@ -65,11 +65,12 @@ internal enum class MigrationTier(
     val directory get() = name.lowercase()
     val orphanRows get() = if (this == Heavy) 500 else 0
 
-    fun userIds(): List<Long> {
+    fun userIds(syntheticOnly: Boolean): List<Long> {
+        val synthetic = List(accounts) { index -> 815001L + index }
+        if (syntheticOnly) return synthetic
         val extra = System.getenv("PIPIXIV_MIGRATION_UIDS").orEmpty().split(',').filter { it.isNotBlank() }
             .map { it.trim().toLong().also { uid -> require(uid > 0) } }
-        return (extra + List(accounts) { index -> 815001L + index }).distinct()
-            .take(maxOf(accounts, extra.size))
+        return (extra + synthetic).distinct().take(maxOf(accounts, extra.size))
     }
 }
 
@@ -102,23 +103,29 @@ internal object LegacyMigrationFixture {
         Tag(name = "創作テーマ $it", translatedName = "Original theme $it", addedByUploadedUser = it % 2 == 0)
     }
 
-    fun export(root: File, tier: MigrationTier): Pair<File, FixtureManifest> {
-        val directory = root.resolve(tier.directory)
+    fun export(root: File, tier: MigrationTier): Pair<File, FixtureManifest> =
+        export(root, tier, tier.directory, corruptSession = false)
+
+    fun exportCorruptSession(root: File): Pair<File, FixtureManifest> =
+        export(root, MigrationTier.Typical, "typical-corrupt-session", corruptSession = true)
+
+    private fun export(root: File, tier: MigrationTier, name: String, corruptSession: Boolean): Pair<File, FixtureManifest> {
+        val directory = root.resolve(name)
         val manifestFile = directory.resolve("manifest.json")
-        val userIds = tier.userIds()
+        val userIds = tier.userIds(syntheticOnly = corruptSession)
         if (manifestFile.isFile) {
             val existing = runCatching { manifestJson.decodeFromString<FixtureManifest>(manifestFile.readText()) }.getOrNull()
             if (existing != null && existing.generatorVersion == generatorVersion &&
-                existing.seed == fixtureSeed && existing.userIds == userIds &&
+                existing.tier == name && existing.seed == fixtureSeed && existing.userIds == userIds &&
                 existing.files.all { (name, info) -> directory.resolve(name).length() == info.bytes }
             ) return directory to existing
         }
-        val temporary = root.resolve("${tier.directory}.tmp")
+        val temporary = root.resolve("$name.tmp")
         temporary.deleteRecursively()
         check(temporary.mkdirs())
         try {
             val figures = generateDatabase(temporary.resolve("pixiv_db"), tier, userIds)
-            val counts = generatePreferences(temporary.resolve("mmkv"), tier, userIds)
+            val counts = generatePreferences(temporary.resolve("mmkv"), tier, userIds, corruptSession)
             val files = temporary.walkTopDown().filter { it.isFile }.associate {
                 it.relativeTo(temporary).invariantSeparatorsPath to FixtureFile(it.length(), it.sha256())
             }
@@ -139,8 +146,8 @@ internal object LegacyMigrationFixture {
                     "block_comment" to 0L,
                 )
             val manifest = FixtureManifest(
-                tier.directory, generatorVersion, fixtureSeed, userIds, totalRows, accountRows,
-                tier.translations - tier.duplicateTranslations, counts + ("skippedCorrupted" to 0L), figures.first, figures.second, files,
+                name, generatorVersion, fixtureSeed, userIds, totalRows, accountRows,
+                tier.translations - tier.duplicateTranslations, counts, figures.first, figures.second, files,
             )
             temporary.resolve("manifest.json").writeText(manifestJson.encodeToString(manifest))
             directory.deleteRecursively()
@@ -226,7 +233,12 @@ internal object LegacyMigrationFixture {
         return illustBytes / historyRows to novelBytes / historyRows
     }
 
-    private fun generatePreferences(path: File, tier: MigrationTier, ids: List<Long>): Map<String, Long> {
+    private fun generatePreferences(
+        path: File,
+        tier: MigrationTier,
+        ids: List<Long>,
+        corruptSession: Boolean,
+    ): Map<String, Long> {
         check(path.mkdirs())
         val app = mmkvOwner("pixiv.app", path.absolutePath).kv
         val legacy = mmkvOwner("pixiv.user", path.absolutePath).kv
@@ -236,7 +248,10 @@ internal object LegacyMigrationFixture {
             check(legacy.set("userRefreshToken", "fixture-refresh-token"))
             check(legacy.set("userAccessToken", "fixture-access-token"))
             check(legacy.set("accessTokenExpiresTime", timestamp))
-            check(legacy.set("userInfo", mmkvJson.encodeToString(UserDetailResp(user = exampleUser.copy(id = ids.first()))).encodeToByteArray()))
+            val userInfo = if (corruptSession) "{" else {
+                mmkvJson.encodeToString(UserDetailResp(user = exampleUser.copy(id = ids.first())))
+            }
+            check(legacy.set("userInfo", userInfo.encodeToByteArray()))
             check(legacy.set("userPreference", mmkvJson.encodeToString(UserPreference(
                 appLanguage = "ja", theme = "DARK", bypassSetting = UserPreference.BypassSetting.Proxy("localhost", 7890),
                 isR18Enabled = true, defaultPrivateBookmark = true,
@@ -259,13 +274,15 @@ internal object LegacyMigrationFixture {
             legacy.close()
             app.close()
         }
+        val migratedAccounts = if (corruptSession) 0L else 1L
         return mapOf(
-            "accounts" to 1L,
+            "accounts" to migratedAccounts,
             "searchHistory" to tier.searches.toLong(), "novelSearchHistory" to tier.searches.toLong(),
             "searchIdHistory" to tier.searches.toLong(), "novelSearchIdHistory" to tier.searches.toLong(),
             "bookmarkedTags" to tier.tags.toLong(), "novelSeriesProgress" to tier.series.toLong() * ids.size,
             "deviceTheme" to 1L, "deviceProxy" to 1L, "deviceAiTranslation" to 1L,
-            "accountR18" to 1L, "accountPrivateBookmark" to 1L,
+            "accountR18" to migratedAccounts, "accountPrivateBookmark" to migratedAccounts,
+            "skippedCorrupted" to if (corruptSession) 1L else 0L,
         )
     }
 
