@@ -20,6 +20,7 @@ import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.LegacyAccountPreferencesMigration
 import com.mrl.pixiv.common.repository.LegacyPreferenceOutcome
 import com.mrl.pixiv.common.repository.LegacyPreferenceResult
+import com.mrl.pixiv.common.repository.prefetchAccountPreferences
 import com.mrl.pixiv.common.repository.recovery.ItemStatus
 import com.mrl.pixiv.common.repository.recovery.MigrationItem
 import com.mrl.pixiv.common.repository.recovery.MigrationReason
@@ -117,7 +118,11 @@ class StartupMigration(
     fun onHomeEntered() {
         scope.launch {
             awaitReady()
-            lock.withLock { maintainAfterHome(storage) }
+            lock.withLock {
+                if (enteredHome) return@withLock
+                safeStep(storage, "prefetchAccountPreferences") { prefetchAccountPreferences() }
+                maintainAfterHome(storage)
+            }
         }
     }
 

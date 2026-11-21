@@ -34,9 +34,12 @@ class NovelSeriesProgressRepository : MMKVUser, AccountScoped {
         mmkvSerializable<Map<Long, NovelSeriesReadingProgress>>(emptyMap()),
         "novelSeriesProgress",
         emptyMap(),
+        loadOnAccess = true,
     )
 
     override fun reload() = novelSeriesProgress.reload(AccountStore.activeUserId)
+
+    internal fun prefetch(userId: Long) = novelSeriesProgress.prefetch(userId)
 
     fun observe(seriesId: Long): Flow<NovelSeriesReadingProgress?> =
         novelSeriesProgress.flow.map { it[seriesId] }.distinctUntilChanged()

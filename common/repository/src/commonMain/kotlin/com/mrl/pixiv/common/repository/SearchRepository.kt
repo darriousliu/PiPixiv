@@ -20,22 +20,26 @@ object SearchRepository : MMKVUser, AccountScoped {
     //------------------------------- 插图历史记录 ---------------------------------
     private val searchHistory = AccountMMKVProperty(
         mmkvSerializable(IllustSearch()), "searchHistory", IllustSearch(),
+        loadOnAccess = true,
     )
     val searchHistoryFlow = searchHistory.flow
 
     private val searchIdHistory = AccountMMKVProperty(
         mmkvStringSet(emptySet()), "searchIdHistory", emptySet(),
+        loadOnAccess = true,
     )
     val searchIdHistoryFlow = searchIdHistory.flow
 
     //------------------------------- 小说历史记录 ---------------------------------
     private val novelSearchHistory = AccountMMKVProperty(
         mmkvSerializable(NovelSearch()), "novelSearchHistory", NovelSearch(),
+        loadOnAccess = true,
     )
     val novelSearchHistoryFlow = novelSearchHistory.flow
 
     private val novelSearchIdHistory = AccountMMKVProperty(
         mmkvStringSet(emptySet()), "novelSearchIdHistory", emptySet(),
+        loadOnAccess = true,
     )
     val novelSearchIdHistoryFlow = novelSearchIdHistory.flow
 
@@ -177,6 +181,13 @@ object SearchRepository : MMKVUser, AccountScoped {
         novelSearchIdHistory.reload(userId)
         _savedSearchFilter.reload(userId)
         _rememberSearchFilter.reload(userId)
+    }
+
+    internal fun prefetch(userId: Long) {
+        searchHistory.prefetch(userId)
+        searchIdHistory.prefetch(userId)
+        novelSearchHistory.prefetch(userId)
+        novelSearchIdHistory.prefetch(userId)
     }
 
     fun historyForAccount(userId: Long): AccountSearchHistory = withAccountStorageLock {

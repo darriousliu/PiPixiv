@@ -10,10 +10,13 @@ import com.mrl.pixiv.common.mmkv.mmkvSerializable
 object BookmarkedTagRepository : MMKVUser, AccountScoped {
     private val bookmarkedTagsDelegate = AccountMMKVProperty(
         mmkvSerializable<List<Tag>>(emptyList()), "bookmarkedTagsDelegate", emptyList(),
+        loadOnAccess = true,
     )
     val bookmarkedTags = bookmarkedTagsDelegate.flow
 
     override fun reload() = bookmarkedTagsDelegate.reload(AccountStore.activeUserId)
+
+    internal fun prefetch(userId: Long) = bookmarkedTagsDelegate.prefetch(userId)
 
     fun addTag(tag: Tag) {
         bookmarkedTagsDelegate.update(AccountStore.activeUserId) { current ->

@@ -80,6 +80,7 @@ class AccountSessionManagerTest {
         assertNotEquals(oldEntryId, navigation.topEntryId)
         assertEquals(SECOND, databases.requireCurrent().userId)
         assertTrue(SearchRepository.searchHistoryFlow.value.searchHistoryList.isEmpty())
+        assertFalse(BookmarkedTagRepository.isBookmarked(tag))
         assertTrue(BookmarkedTagRepository.bookmarkedTags.value.isEmpty())
         assertTrue(history.getLocalIllusts(10, 0).isEmpty())
         assertFalse(illust.isBookmark)
@@ -88,6 +89,7 @@ class AccountSessionManagerTest {
         sessions.switchTo(FIRST)
         assertSame(firstDatabase, databases.requireCurrent())
         assertEquals("first search", SearchRepository.searchHistoryFlow.value.searchHistoryList.single().keyword)
+        assertTrue(BookmarkedTagRepository.isBookmarked(tag))
         assertEquals(listOf(tag), BookmarkedTagRepository.bookmarkedTags.value)
         assertEquals(listOf(illust), history.getLocalIllusts(10, 0))
 
