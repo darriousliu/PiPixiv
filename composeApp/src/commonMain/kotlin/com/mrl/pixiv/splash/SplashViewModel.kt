@@ -74,7 +74,8 @@ class SplashViewModel(
         }
     }
 
-    private fun routeFromSession() {
+    private suspend fun routeFromSession() {
+        AuthManager.applyStartupDebugOverrides()
         val session = AccountStore.current
         when {
             session == null || !session.hasUsableCredentials() -> routeToLogin()

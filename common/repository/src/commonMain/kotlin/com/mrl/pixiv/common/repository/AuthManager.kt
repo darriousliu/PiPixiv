@@ -28,6 +28,8 @@ object AuthManager {
 
     val userRefreshToken: String get() = AccountStore.current?.refreshToken.orEmpty()
 
+    suspend fun applyStartupDebugOverrides() = AccountDebug.expireAccessTokenOnStartup()
+
     suspend fun requireUserAccessToken(force: Boolean = false): String {
         val userId = AccountStore.activeUserId
         return requireUserAccessToken(userId, force)
@@ -46,6 +48,7 @@ object AuthManager {
                     ?: return@withLock ""
                 if (!force && !session.hasExpired()) return@withLock session.accessToken
                 try {
+                    AccountDebug.throwInvalidGrantIfRequested(userId)
                     refresh(session)
                 } catch (_: InvalidRefreshGrantException) {
                     AccountStore.storage.markNeedsRelogin(session)
