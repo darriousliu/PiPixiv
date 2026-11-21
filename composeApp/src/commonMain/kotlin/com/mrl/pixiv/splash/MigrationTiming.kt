@@ -38,6 +38,8 @@ internal data class MigrationTiming(
     val mmkvCounts: Map<String, Long>,
     val memoryStartBytes: Long?,
     val memoryPeakBytes: Long?,
+    val memoryWithoutGraphicsStartBytes: Long? = null,
+    val memoryWithoutGraphicsPeakBytes: Long? = null,
 )
 
 @Serializable
@@ -94,6 +96,8 @@ internal fun writeMigrationTiming(
         mmkvCounts = mmkvCounts,
         memoryStartBytes = memory?.start,
         memoryPeakBytes = memory?.peak,
+        memoryWithoutGraphicsStartBytes = memory?.startWithoutGraphics,
+        memoryWithoutGraphicsPeakBytes = memory?.peakWithoutGraphics,
     )
     logTiming(migrationTimingPrefix + timingJson.encodeToString(timing))
 }
@@ -125,17 +129,26 @@ internal fun migrationFiles(storage: MigrationStorage): MigrationFiles {
 }
 
 internal class MigrationMemory {
-    val start = migrationMemoryBytes()
+    private val initialSample = migrationMemorySample()
+    val start = initialSample?.bytes
+    val startWithoutGraphics = initialSample?.bytesWithoutGraphics
     var peak = start
+        private set
+    var peakWithoutGraphics = startWithoutGraphics
         private set
 
     fun sample() {
-        val bytes = migrationMemoryBytes() ?: return
-        peak = maxOf(peak ?: bytes, bytes)
+        val sample = migrationMemorySample() ?: return
+        peak = maxOf(peak ?: sample.bytes, sample.bytes)
+        sample.bytesWithoutGraphics?.let { bytes ->
+            peakWithoutGraphics = maxOf(peakWithoutGraphics ?: bytes, bytes)
+        }
     }
 }
 
-internal expect fun migrationMemoryBytes(): Long?
+internal data class MigrationMemorySample(val bytes: Long, val bytesWithoutGraphics: Long? = null)
+
+internal expect fun migrationMemorySample(): MigrationMemorySample?
 
 internal class MigrationMetrics(private val storage: MigrationStorage) {
     var before: MigrationFiles? = null

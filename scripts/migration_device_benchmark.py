@@ -878,6 +878,8 @@ def report_performance(platform, simulator, tier, scenario, count, totals, memor
         memory_limit = 128
     limits = f"{time_limit} ms / {memory_limit} MiB"
     checks = ((totals, time_limit), (memory, memory_limit * 1024**2))
+    if platform == "ios" and not memory:
+        return f"未验证（{limits}）"
     if any(values and max(values) > limit for values, limit in checks):
         return f"失败（{limits}）"
     if any(len(values) != count for values, _ in checks):
@@ -903,6 +905,20 @@ def report_group_summary(key, runs):
     memory_peaks = [
         timing["memoryPeakBytes"] for timing in migrations if timing.get("memoryPeakBytes") is not None
     ]
+    memory_summary = f"{report_mib(memory_peaks)} / {report_mib(extra_memory)}"
+    threshold_memory = extra_memory
+    if platform == "ios":
+        adjusted_peaks = []
+        adjusted_extra = []
+        for timing in migrations:
+            peak = timing.get("memoryWithoutGraphicsPeakBytes")
+            start = timing.get("memoryWithoutGraphicsStartBytes")
+            if peak is not None:
+                adjusted_peaks.append(peak)
+                if start is not None:
+                    adjusted_extra.append(peak - start)
+        memory_summary += f"（扣除图形 {report_mib(adjusted_peaks)} / {report_mib(adjusted_extra)}）"
+        threshold_memory = adjusted_extra
     disk_peaks = [timing["peakDiskBytes"] for timing in migrations if timing.get("peakDiskBytes") is not None]
     slow = [timing["slowUiShown"] for timing in migrations if "slowUiShown" in timing]
     mmkv = [run.get("mmkvMatches") for run in runs]
@@ -920,11 +936,11 @@ def report_group_summary(key, runs):
         platform, device, ", ".join(devices) or "—", ", ".join(hosts) or "—",
         ", ".join(versions) or "—", tier, scenario, len(runs),
         report_median_max(totals), report_median_max(completed),
-        f"{report_mib(memory_peaks)} / {report_mib(extra_memory)}", report_mib(disk_peaks),
+        memory_summary, report_mib(disk_peaks),
         f"{sum(slow)}/{len(slow)}" if slow else "—",
         f"{mmkv.count(True)} 通过 / {mmkv.count(False)} 失败 / {mmkv.count(None)} 未验证",
         outcomes, migration_verdict,
-        report_performance(platform, simulator, tier, scenario, len(runs), totals, extra_memory),
+        report_performance(platform, simulator, tier, scenario, len(runs), totals, threshold_memory),
     )
 
 
@@ -968,7 +984,8 @@ def run_report(_args):
         "# 跨平台迁移基准汇总",
         "",
         "以单轮最大值核对第 3.7 节的首次迁移耗时和额外内存阈值。"
-        "额外内存为本轮迁移较起始值的增量，JVM 使用测试进程另采样的堆增量。",
+        "额外内存为本轮迁移较起始值的增量，JVM 使用测试进程另采样的堆增量。"
+        "iOS 同时列出完整的 phys_footprint 和扣除图形内存后的值，按扣除图形内存后的增量判定。",
         "",
         "再次启动耗时仅记录。进首页耗时按新版比旧版慢 ≤ 100 ms 的标准由各轮报告判定。",
         "",

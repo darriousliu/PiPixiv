@@ -2,4 +2,5 @@ package com.mrl.pixiv.splash
 
 import android.os.Debug
 
-internal actual fun migrationMemoryBytes(): Long? = Debug.getPss() * 1024
+internal actual fun migrationMemorySample(): MigrationMemorySample? =
+    MigrationMemorySample(Debug.getPss() * 1024)

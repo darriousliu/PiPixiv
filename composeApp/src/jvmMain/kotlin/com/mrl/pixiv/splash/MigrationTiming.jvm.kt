@@ -1,4 +1,6 @@
 package com.mrl.pixiv.splash
 
 
-internal actual fun migrationMemoryBytes(): Long? = with(Runtime.getRuntime()) { totalMemory() - freeMemory() }
+internal actual fun migrationMemorySample(): MigrationMemorySample? = with(Runtime.getRuntime()) {
+    MigrationMemorySample(totalMemory() - freeMemory())
+}
