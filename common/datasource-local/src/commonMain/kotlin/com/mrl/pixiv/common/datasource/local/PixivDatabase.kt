@@ -313,7 +313,19 @@ abstract class PixivDatabase : RoomDatabase() {
                     )
                     """.trimIndent()
                 )
-                connection.execSQL("DROP TABLE novel_translation")
+                val secureDeleteMode = connection.prepare("PRAGMA main.secure_delete").use { statement ->
+                    check(statement.step())
+                    val mode = statement.getLong(0)
+                    // SQLite reports FAST as 2 but interprets a numeric assignment of 2 as ON.
+                    if (mode == 2L) "FAST" else mode.toString()
+                }
+                try {
+                    // The translations have already been copied. Skip scrubbing freed pages for this DROP.
+                    connection.execSQL("PRAGMA main.secure_delete = FAST")
+                    connection.execSQL("DROP TABLE novel_translation")
+                } finally {
+                    connection.execSQL("PRAGMA main.secure_delete = $secureDeleteMode")
+                }
                 connection.execSQL("ALTER TABLE novel_translation_new RENAME TO novel_translation")
             }
         }

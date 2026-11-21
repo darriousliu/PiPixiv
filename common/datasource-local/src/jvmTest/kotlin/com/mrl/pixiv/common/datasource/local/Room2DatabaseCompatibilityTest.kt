@@ -1,6 +1,8 @@
 package com.mrl.pixiv.common.datasource.local
 
 import androidx.room3.useReaderConnection
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
@@ -59,6 +61,8 @@ class Room2DatabaseCompatibilityTest {
                     legacyTranslation.copy(targetLanguage = "ja"),
                     database.novelTranslationDao().getByNovelIdAndLanguage(10L, "ja"),
                 )
+                assertEquals("2", database.tableValue("SELECT COUNT(*) FROM novel_translation"))
+                assertEquals("ok", database.tableValue("PRAGMA quick_check"))
                 assertEquals(legacyDownload, database.downloadDao().getDownload(20L, 0))
                 assertEquals("Blocked user", database.tableValue("SELECT name FROM block_user"))
                 assertEquals("1", database.tableValue("SELECT COUNT(*) FROM browsing_history_novel"))
@@ -77,6 +81,29 @@ class Room2DatabaseCompatibilityTest {
                 )
             }
             assertDatabaseVersion(file, 10L)
+        }
+    }
+
+    @Test
+    fun `v9 migration uses fast secure delete for the translation drop and restores the previous mode`() = runTest {
+        for ((initialMode, expectedValue) in listOf("ON" to 1L, "FAST" to 2L)) {
+            withLegacyDatabase(version = 9) { file ->
+                BundledSQLiteDriver().open(file.absolutePath).use { connection ->
+                    connection.execSQL("PRAGMA main.secure_delete = $initialMode")
+                    connection.execSQL("BEGIN IMMEDIATE")
+                    val observedConnection = object : SQLiteConnection by connection {
+                        override fun prepare(sql: String): SQLiteStatement {
+                            if (sql == "DROP TABLE novel_translation") {
+                                assertEquals(2L, connection.secureDeleteMode())
+                            }
+                            return connection.prepare(sql)
+                        }
+                    }
+                    PixivDatabase.MIGRATION_9_10.migrate(observedConnection)
+                    assertEquals(expectedValue, connection.secureDeleteMode())
+                    connection.execSQL("COMMIT")
+                }
+            }
         }
     }
 
@@ -258,6 +285,11 @@ class Room2DatabaseCompatibilityTest {
             assertTrue(statement.step())
             statement.getText(0)
         }
+    }
+
+    private fun SQLiteConnection.secureDeleteMode(): Long = prepare("PRAGMA main.secure_delete").use {
+        assertTrue(it.step())
+        it.getLong(0)
     }
 
     private suspend fun withLegacyDatabase(version: Int, block: suspend (File) -> Unit) {
