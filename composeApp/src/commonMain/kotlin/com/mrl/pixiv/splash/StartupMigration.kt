@@ -8,6 +8,7 @@ import com.mrl.pixiv.common.datasource.local.LegacyAccountTableGroup
 import com.mrl.pixiv.common.datasource.local.LegacyGlobalDatabaseMigration
 import com.mrl.pixiv.common.datasource.local.PixivDatabase
 import com.mrl.pixiv.common.datasource.local.accountStorageRoot
+import com.mrl.pixiv.common.datasource.local.checkpointOversizedWal
 import com.mrl.pixiv.common.datasource.local.globalDatabasePath
 import com.mrl.pixiv.common.datasource.local.legacyGlobalDatabasePath
 import com.mrl.pixiv.common.datasource.local.migration.DatabaseStartupGate
@@ -116,13 +117,32 @@ class StartupMigration(
     fun onHomeEntered() {
         scope.launch {
             awaitReady()
-            lock.withLock { accounts.withAccountFilesLocked { maintainAfterHome(storage) } }
+            lock.withLock { maintainAfterHome(storage) }
         }
     }
 
     internal suspend fun maintainAfterHome(storage: MigrationStorage): Long? {
         if (enteredHome) return null
         enteredHome = true
+        val cleanupMs = accounts.withAccountFilesLocked { cleanAndRetryAfterHome(storage) }
+
+        safeStep(storage, "checkpointGlobalWal") {
+            if (!database.requireOpen().checkpointOversizedWal(storage.databasePath())) {
+                Logger.w(tag = migrationTag) { "Global database WAL checkpoint deferred until the next launch" }
+            }
+        }
+        accounts.withAccountFilesLocked {
+            safeStep(storage, "checkpointAccountWal") {
+                val account = accounts.current.value ?: return@safeStep
+                if (!account.db.checkpointOversizedWal(accounts.databasePath(account.userId))) {
+                    Logger.w(tag = migrationTag) { "Account database WAL checkpoint deferred until the next launch" }
+                }
+            }
+        }
+        return cleanupMs
+    }
+
+    private suspend fun cleanAndRetryAfterHome(storage: MigrationStorage): Long? {
         val allResolved = items.value.values.all(ItemStatus::isResolved)
         var cleanupMs: Long? = null
         try {

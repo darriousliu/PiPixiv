@@ -7,6 +7,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.driver.bundled.SQLITE_OPEN_CREATE
 import androidx.sqlite.driver.bundled.SQLITE_OPEN_READWRITE
 import androidx.sqlite.driver.bundled.SQLITE_OPEN_URI
+import androidx.sqlite.execSQL
 import com.mrl.pixiv.common.datasource.local.dao.BlockContentDao
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelTranslationDao
@@ -63,7 +64,14 @@ private fun <T : RoomDatabase> RoomDatabase.Builder<T>.configure(): RoomDatabase
     return setDriver(object : SQLiteDriver by driver {
         // Enable URI parameters on ATTACH so that legacy and backup files are opened read-only.
         override fun open(fileName: String) =
-            driver.open(fileName, SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE or SQLITE_OPEN_URI)
+            driver.open(fileName, SQLITE_OPEN_READWRITE or SQLITE_OPEN_CREATE or SQLITE_OPEN_URI).also { connection ->
+                try {
+                    connection.execSQL("PRAGMA main.journal_size_limit = $databaseWalSizeLimitBytes")
+                } catch (error: Throwable) {
+                    connection.close()
+                    throw error
+                }
+            }
     }).setQueryCoroutineContext(Dispatchers.IO)
 }
 

@@ -1,6 +1,12 @@
 package com.mrl.pixiv.splash
 
+import androidx.room3.RoomDatabase
+import androidx.room3.executeSQL
+import androidx.room3.useWriterConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.execSQL
+import co.touchlab.kermit.Logger
+import com.mrl.pixiv.common.logs.AppLogStore
 import com.mrl.pixiv.common.repository.LegacyBlocks
 import com.mrl.pixiv.common.repository.readDevicePreference
 import com.mrl.pixiv.common.repository.recovery.ItemStatus
@@ -154,6 +160,71 @@ class StartupMigrationTest {
     }
 
     @Test
+    fun homeMaintenanceTruncatesOversizedGlobalAndActiveAccountWalFiles() = withStorage { directory ->
+        MigrationTestRun(directory).useRun { run ->
+            assertTrue(run.start())
+            run.accounts.publish(1L)
+            val globalWal = directory.resolve("pixiv_db-wal")
+            val accountPath = run.accounts.databasePath(1L)
+            val accountWal = File("$accountPath-wal")
+            val global = run.database.requireOpen()
+            val account = run.accounts.requireCurrent().db
+
+            global.createWalPayloadTable()
+            account.createWalPayloadTable()
+            global.appendLargeWalPayload()
+            account.appendLargeWalPayload()
+            assertTrue(globalWal.length() > walSizeLimitBytes)
+            assertTrue(accountWal.length() > walSizeLimitBytes)
+
+            run.migration.maintainAfterHome(run.storage)
+
+            assertTrue(globalWal.length() <= walSizeLimitBytes)
+            assertTrue(accountWal.length() <= walSizeLimitBytes)
+            assertEquals(1L, directory.databaseCount("SELECT COUNT(*) FROM test_wal_payload"))
+        }
+    }
+
+    @Test
+    fun busyWalCheckpointWaitsUntilTheNextLaunchToRetry() = withStorage { directory ->
+        MigrationTestRun(directory).useRun { run ->
+            assertTrue(run.start())
+            val globalWal = directory.resolve("pixiv_db-wal")
+            val global = run.database.requireOpen()
+            global.createWalPayloadTable()
+            BundledSQLiteDriver().open(run.databasePath.toString()).use { reader ->
+                reader.execSQL("BEGIN")
+                assertEquals(0L, reader.count("SELECT COUNT(*) FROM test_wal_payload"))
+                global.appendLargeWalPayload()
+                assertTrue(globalWal.length() > walSizeLimitBytes)
+
+                val originalWriters = Logger.config.logWriterList
+                val lastLogId = AppLogStore.state.value.current.lastOrNull()?.id ?: -1L
+                try {
+                    Logger.setLogWriters(AppLogStore.writer)
+                    run.migration.maintainAfterHome(run.storage)
+                } finally {
+                    Logger.setLogWriters(originalWriters)
+                }
+                assertTrue(AppLogStore.state.value.current.any {
+                    it.id > lastLogId && it.tag == migrationTag && it.message.contains("Global database WAL checkpoint deferred")
+                })
+                assertTrue(globalWal.length() > walSizeLimitBytes)
+                reader.execSQL("COMMIT")
+            }
+
+            run.migration.maintainAfterHome(run.storage)
+            assertTrue(globalWal.length() > walSizeLimitBytes)
+
+            val nextLaunch = StartupMigration(run.database, run.accounts)
+            assertTrue(nextLaunch.run(run.storage))
+            nextLaunch.maintainAfterHome(run.storage)
+            assertTrue(globalWal.length() <= walSizeLimitBytes)
+            assertEquals(1L, directory.databaseCount("SELECT COUNT(*) FROM test_wal_payload"))
+        }
+    }
+
+    @Test
     fun legacyPackageRoundTripOmitsTokensAndRemapsOnlySelectedAccount() = withFixture { directory, manifest ->
         MigrationTestRun(directory).useRun { run ->
             assertTrue(run.start())
@@ -302,6 +373,14 @@ class StartupMigrationTest {
     private fun File.databaseCount(sql: String) =
         BundledSQLiteDriver().open(resolve("pixiv_db").absolutePath).use { it.count(sql) }
 
+    private suspend fun RoomDatabase.createWalPayloadTable() = useWriterConnection { connection ->
+        connection.executeSQL("CREATE TABLE test_wal_payload (payload BLOB NOT NULL)")
+    }
+
+    private suspend fun RoomDatabase.appendLargeWalPayload() = useWriterConnection { connection ->
+        connection.executeSQL("INSERT INTO test_wal_payload VALUES (zeroblob(5242880))")
+    }
+
     private fun withFixture(block: suspend (File, FixtureManifest) -> Unit) = withStorage { root ->
         val (fixture, manifest) = LegacyMigrationFixture.export(StartupMigrationBenchmarkTest.fixtureRoot, MigrationTier.Typical)
         block(prepareMigrationRun(root, fixture, "run"), manifest)
@@ -317,3 +396,5 @@ class StartupMigrationTest {
         }
     }
 }
+
+private const val walSizeLimitBytes = 4L * 1024L * 1024L
