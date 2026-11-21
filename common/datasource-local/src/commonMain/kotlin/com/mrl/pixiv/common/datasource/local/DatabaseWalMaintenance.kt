@@ -11,7 +11,7 @@ import kotlinx.io.files.SystemFileSystem
 
 internal const val databaseWalSizeLimitBytes = 4L * 1024L * 1024L
 
-/** Returns false when the WAL checkpoint should be deferred to a later launch. */
+/** Returns false when the WAL could not be truncated on this attempt. */
 suspend fun RoomDatabase.checkpointOversizedWal(path: Path): Boolean {
     val wal = databaseSidecar(path, "-wal")
     if (!wal.exceedsWalSizeLimit()) return true

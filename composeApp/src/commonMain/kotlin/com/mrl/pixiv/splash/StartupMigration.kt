@@ -2,6 +2,7 @@ package com.mrl.pixiv.splash
 
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.datasource.local.AccountDatabaseProvider
+import com.mrl.pixiv.common.datasource.local.AccountHandle
 import com.mrl.pixiv.common.datasource.local.GlobalDatabaseProvider
 import com.mrl.pixiv.common.datasource.local.LegacyAccountDataSplitter
 import com.mrl.pixiv.common.datasource.local.LegacyAccountTableGroup
@@ -118,33 +119,68 @@ class StartupMigration(
     fun onHomeEntered() {
         scope.launch {
             awaitReady()
-            lock.withLock {
-                if (enteredHome) return@withLock
-                safeStep(storage, "prefetchAccountPreferences") { prefetchAccountPreferences() }
-                maintainAfterHome(storage)
-            }
+            maintainAfterHome(storage, prefetchPreferences = { prefetchAccountPreferences() })
         }
     }
 
-    internal suspend fun maintainAfterHome(storage: MigrationStorage): Long? {
-        if (enteredHome) return null
-        enteredHome = true
-        val cleanupMs = accounts.withAccountFilesLocked { cleanAndRetryAfterHome(storage) }
-
-        safeStep(storage, "checkpointGlobalWal") {
-            if (!database.requireOpen().checkpointOversizedWal(storage.databasePath())) {
-                Logger.w(tag = migrationTag) { "Global database WAL checkpoint deferred until the next launch" }
-            }
+    internal suspend fun maintainAfterHome(
+        storage: MigrationStorage,
+        prefetchPreferences: () -> Unit = {},
+        waitForWalRetry: suspend (Long) -> Unit = { delay(it) },
+    ): Long? {
+        val cleanupMs = lock.withLock {
+            if (enteredHome) return null
+            enteredHome = true
+            safeStep(storage, "prefetchAccountPreferences", prefetchPreferences)
+            accounts.withAccountFilesLocked { cleanAndRetryAfterHome(storage) }
         }
-        accounts.withAccountFilesLocked {
-            safeStep(storage, "checkpointAccountWal") {
-                val account = accounts.current.value ?: return@safeStep
-                if (!account.db.checkpointOversizedWal(accounts.databasePath(account.userId))) {
-                    Logger.w(tag = migrationTag) { "Account database WAL checkpoint deferred until the next launch" }
+
+        var globalComplete = false
+        var accountComplete = false
+        var lastCheckpointAccount: AccountHandle? = null
+        for ((attempt, waitMs) in walCheckpointWaitsMs.withIndex()) {
+            // Recovery and account changes can proceed between checkpoint attempts.
+            if (waitMs > 0) waitForWalRetry(waitMs)
+            val finalAttempt = attempt == walCheckpointWaitsMs.lastIndex
+            lock.withLock {
+                if (!globalComplete) {
+                    globalComplete = checkpointWal(storage, "Global", finalAttempt) {
+                        database.requireOpen().checkpointOversizedWal(storage.databasePath())
+                    }
+                }
+                accounts.withAccountFilesLocked {
+                    val account = accounts.current.value
+                    if (!accountComplete || account !== lastCheckpointAccount) {
+                        accountComplete = account == null || checkpointWal(storage, "Account", finalAttempt) {
+                            account.db.checkpointOversizedWal(accounts.databasePath(account.userId))
+                        }
+                        lastCheckpointAccount = account
+                    }
                 }
             }
+            if (globalComplete && accountComplete) break
         }
         return cleanupMs
+    }
+
+    private suspend inline fun checkpointWal(
+        storage: MigrationStorage,
+        databaseLabel: String,
+        finalAttempt: Boolean,
+        block: () -> Boolean,
+    ): Boolean {
+        val deferredMessage = "$databaseLabel database WAL checkpoint deferred until the next launch"
+        try {
+            if (block()) return true
+        } catch (error: Exception) {
+            if (error is CancellationException) throw error
+            if (finalAttempt) {
+                logMigrationError(storage, deferredMessage, error)
+            }
+            return false
+        }
+        if (finalAttempt) Logger.w(tag = migrationTag) { deferredMessage }
+        return false
     }
 
     private suspend fun cleanAndRetryAfterHome(storage: MigrationStorage): Long? {
@@ -547,6 +583,7 @@ class StartupMigration(
     }
 }
 
+private val walCheckpointWaitsMs = listOf(0L, 2_000L, 3_000L)
 private val preferenceItems = listOf(
     MigrationItem.Session, MigrationItem.Settings, MigrationItem.SearchAndTags, MigrationItem.SeriesProgress,
 )

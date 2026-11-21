@@ -3,10 +3,12 @@ package com.mrl.pixiv.splash
 import androidx.room3.RoomDatabase
 import androidx.room3.executeSQL
 import androidx.room3.useWriterConnection
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
+import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Logger
-import com.mrl.pixiv.common.logs.AppLogStore
+import co.touchlab.kermit.Severity
 import com.mrl.pixiv.common.repository.LegacyBlocks
 import com.mrl.pixiv.common.repository.readDevicePreference
 import com.mrl.pixiv.common.repository.recovery.ItemStatus
@@ -15,6 +17,7 @@ import com.mrl.pixiv.common.repository.recovery.MigrationReason
 import com.mrl.pixiv.common.util.JvmZipUtil
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.io.files.Path
 import java.io.File
 import kotlin.io.path.createTempDirectory
@@ -186,29 +189,40 @@ class StartupMigrationTest {
     }
 
     @Test
-    fun busyWalCheckpointWaitsUntilTheNextLaunchToRetry() = withStorage { directory ->
+    fun busyWalCheckpointRetriesInTheSameLaunchAfterReaderReleasesSnapshot() = withStorage { directory ->
         MigrationTestRun(directory).useRun { run ->
             assertTrue(run.start())
             val globalWal = directory.resolve("pixiv_db-wal")
-            val global = run.database.requireOpen()
-            global.createWalPayloadTable()
-            BundledSQLiteDriver().open(run.databasePath.toString()).use { reader ->
-                reader.execSQL("BEGIN")
-                assertEquals(0L, reader.count("SELECT COUNT(*) FROM test_wal_payload"))
-                global.appendLargeWalPayload()
+            val waits = mutableListOf<Long>()
+            run.database.requireOpen().withBusyWalReader(run.databasePath) { reader ->
                 assertTrue(globalWal.length() > walSizeLimitBytes)
-
-                val originalWriters = Logger.config.logWriterList
-                val lastLogId = AppLogStore.state.value.current.lastOrNull()?.id ?: -1L
-                try {
-                    Logger.setLogWriters(AppLogStore.writer)
-                    run.migration.maintainAfterHome(run.storage)
-                } finally {
-                    Logger.setLogWriters(originalWriters)
+                run.migration.maintainAfterHome(run.storage) { waitMs ->
+                    waits += waitMs
+                    assertTrue(globalWal.length() > walSizeLimitBytes)
+                    reader.execSQL("COMMIT")
                 }
-                assertTrue(AppLogStore.state.value.current.any {
-                    it.id > lastLogId && it.tag == migrationTag && it.message.contains("Global database WAL checkpoint deferred")
-                })
+            }
+            assertEquals(listOf(2_000L), waits)
+            assertTrue(globalWal.length() <= walSizeLimitBytes)
+            assertEquals(1L, directory.databaseCount("SELECT COUNT(*) FROM test_wal_payload"))
+        }
+    }
+
+    @Test
+    fun persistentBusyWalLogsOnceAndCanBeTruncatedOnNextLaunch() = withStorage { directory ->
+        MigrationTestRun(directory).useRun { run ->
+            assertTrue(run.start())
+            val globalWal = directory.resolve("pixiv_db-wal")
+            val waits = mutableListOf<Long>()
+            run.database.requireOpen().withBusyWalReader(run.databasePath) { reader ->
+                captureGlobalWalWarnings { warnings ->
+                    run.migration.maintainAfterHome(run.storage) { waitMs ->
+                        assertTrue(warnings.isEmpty())
+                        waits += waitMs
+                    }
+                    assertEquals(1, warnings.size)
+                }
+                assertEquals(listOf(2_000L, 3_000L), waits)
                 assertTrue(globalWal.length() > walSizeLimitBytes)
                 reader.execSQL("COMMIT")
             }
@@ -221,6 +235,37 @@ class StartupMigrationTest {
             nextLaunch.maintainAfterHome(run.storage)
             assertTrue(globalWal.length() <= walSizeLimitBytes)
             assertEquals(1L, directory.databaseCount("SELECT COUNT(*) FROM test_wal_payload"))
+        }
+    }
+
+    @Test
+    fun walRetryWaitAllowsRecoveryAndTargetsTheNewCurrentAccount() = withStorage { directory ->
+        MigrationTestRun(directory).useRun { run ->
+            run.debug(MigrationDebug(fail = setOf("LegacyBlocking")))
+            assertTrue(run.start())
+            assertFailed(run, MigrationItem.LegacyBlocking, 1)
+            run.accounts.publish(1L)
+            val previousPath = run.accounts.databasePath(1L)
+            val previousWal = File("$previousPath-wal")
+            val nextWal = File("${run.accounts.databasePath(2L)}-wal")
+            val nextAccount = run.accounts.open(2L).db
+            nextAccount.createWalPayloadTable()
+            nextAccount.appendLargeWalPayload()
+            assertTrue(nextWal.length() > walSizeLimitBytes)
+
+            run.accounts.requireCurrent().db.withBusyWalReader(previousPath) { reader ->
+                run.migration.maintainAfterHome(run.storage) {
+                    withTimeout(1_000L) {
+                        run.migration.abandonAll(run.storage)
+                        run.accounts.withAccountFilesLocked { run.accounts.publish(2L) }
+                    }
+                    reader.execSQL("COMMIT")
+                }
+            }
+
+            assertEquals(ItemStatus.Abandoned, run.status(MigrationItem.LegacyBlocking))
+            assertTrue(previousWal.length() > walSizeLimitBytes)
+            assertTrue(nextWal.length() <= walSizeLimitBytes)
         }
     }
 
@@ -379,6 +424,36 @@ class StartupMigrationTest {
 
     private suspend fun RoomDatabase.appendLargeWalPayload() = useWriterConnection { connection ->
         connection.executeSQL("INSERT INTO test_wal_payload VALUES (zeroblob(5242880))")
+    }
+
+    private suspend inline fun RoomDatabase.withBusyWalReader(path: Path, block: (SQLiteConnection) -> Unit) {
+        createWalPayloadTable()
+        BundledSQLiteDriver().open(path.toString()).use { reader ->
+            reader.execSQL("BEGIN")
+            assertEquals(0L, reader.count("SELECT COUNT(*) FROM test_wal_payload"))
+            appendLargeWalPayload()
+            block(reader)
+        }
+    }
+
+    private inline fun captureGlobalWalWarnings(block: (List<String>) -> Unit) {
+        val originalWriters = Logger.config.logWriterList
+        val warnings = mutableListOf<String>()
+        val writer = object : LogWriter() {
+            override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+                if (severity == Severity.Warn && tag == migrationTag &&
+                    message.contains("Global database WAL checkpoint deferred")
+                ) {
+                    warnings += message
+                }
+            }
+        }
+        try {
+            Logger.setLogWriters(writer)
+            block(warnings)
+        } finally {
+            Logger.setLogWriters(originalWriters)
+        }
     }
 
     private fun withFixture(block: suspend (File, FixtureManifest) -> Unit) = withStorage { root ->
