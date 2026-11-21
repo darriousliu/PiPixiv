@@ -5,7 +5,7 @@ import okio.ByteString.Companion.toByteString
 import kotlin.io.encoding.Base64
 import kotlin.random.Random
 
-private var codeVerifier = generateCodeVerifier()
+private lateinit var codeVerifier: String
 
 private fun generateCodeVerifier(): String {
     val randomKeySet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
@@ -37,8 +37,9 @@ fun checkUri(url: String): Pair<String, String>? {
         return null
     }
     if (url.protocol.name == "pixiv" && url.host == "account") {
-        val code = url.parameters["code"]
-        return if (code != null) code to codeVerifier else null
+        val code = url.parameters["code"] ?: return null
+        if (!::codeVerifier.isInitialized) return null
+        return code to codeVerifier
     }
     return null
 }
