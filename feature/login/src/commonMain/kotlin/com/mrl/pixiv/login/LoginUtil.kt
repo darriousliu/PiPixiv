@@ -5,20 +5,20 @@ import okio.ByteString.Companion.toByteString
 import kotlin.io.encoding.Base64
 import kotlin.random.Random
 
-private var codeVerifier = getCodeVer()
+private var codeVerifier = generateCodeVerifier()
 
-private fun getCodeVer(): String {
+private fun generateCodeVerifier(): String {
     val randomKeySet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
-    val result = (0..128).map {
+    return (0..128).map {
         randomKeySet[Random.nextInt(randomKeySet.length)]
     }.joinToString("")
-    codeVerifier = result
-    return codeVerifier
 }
 
 private fun getCodeChallenge(): String {
+    val verifier = generateCodeVerifier()
+    codeVerifier = verifier
     return Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).encode(
-        getCodeVer().encodeToByteArray().toByteString().sha256().toByteArray(),
+        verifier.encodeToByteArray().toByteString().sha256().toByteArray(),
     )
 }
 
