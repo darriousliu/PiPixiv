@@ -9,9 +9,10 @@ private var codeVerifier = generateCodeVerifier()
 
 private fun generateCodeVerifier(): String {
     val randomKeySet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
-    return (0..128).map {
-        randomKeySet[Random.nextInt(randomKeySet.length)]
-    }.joinToString("")
+    val verifierLength = 128
+    return buildString(verifierLength) {
+        repeat(verifierLength) { append(randomKeySet[Random.nextInt(randomKeySet.length)]) }
+    }
 }
 
 private fun getCodeChallenge(): String {
