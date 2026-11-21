@@ -38,7 +38,7 @@ sealed interface AppBackupContents {
 
 class AppBackupFiles(
     private val zipUtil: ZipUtil,
-    private val availableBytes: (String) -> Long = ::availableStorageBytes,
+    private val availableBytes: (String) -> Long = { availableStorageBytes(it) },
 ) {
     suspend fun exportV4(
         metadata: String,

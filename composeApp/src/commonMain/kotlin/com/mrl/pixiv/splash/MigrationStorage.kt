@@ -34,7 +34,7 @@ internal class MigrationStorage(
     val reloadPreferences: (Long?) -> Unit,
     val observeBlocks: suspend () -> Unit,
     val migrateBlocks: suspend () -> Boolean,
-    val availableBytes: (String) -> Long = ::availableStorageBytes,
+    val availableBytes: (String) -> Long = { availableStorageBytes(it) },
     val debug: Boolean,
 ) {
     fun readItems(): Map<MigrationItem, ItemStatus> {

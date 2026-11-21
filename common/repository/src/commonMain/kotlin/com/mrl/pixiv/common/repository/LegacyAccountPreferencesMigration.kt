@@ -74,7 +74,7 @@ data class LegacySearchAndTags(
 class LegacyAccountPreferencesMigration(
     private val app: MMKVOwner = AccountStore,
     private val legacy: MMKVOwner = mmkvOwner("pixiv.user"),
-    private val account: (Long) -> MMKVOwner = ::accountMMKVOwner,
+    private val account: (Long) -> MMKVOwner = { accountMMKVOwner(it) },
 ) {
     val sessions = if (app === AccountStore) AccountStore.storage else AccountSessionStorage(app)
 

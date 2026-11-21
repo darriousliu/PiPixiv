@@ -42,7 +42,7 @@ class BackupArchive private constructor(
             source: PlatformFile,
             stagingFile: PlatformFile,
             zipUtil: ZipUtil,
-            availableBytes: (String) -> Long = ::availableStorageBytes,
+            availableBytes: (String) -> Long = { availableStorageBytes(it) },
             timing: BackupTiming? = null,
         ): BackupArchive {
             val cachePath = checkNotNull(stagingFile.parent()).toKotlinxIoPath().toString()
@@ -89,7 +89,7 @@ class BackupArchive private constructor(
 fun checkBackupExportSpace(
     cacheDirectory: PlatformFile,
     databasePaths: List<String>,
-    availableBytes: (String) -> Long = ::availableStorageBytes,
+    availableBytes: (String) -> Long = { availableStorageBytes(it) },
 ) {
     val databaseSize = databasePaths.fold(0L) { total, path ->
         listOf(path, "$path-wal").fold(total) { size, file ->

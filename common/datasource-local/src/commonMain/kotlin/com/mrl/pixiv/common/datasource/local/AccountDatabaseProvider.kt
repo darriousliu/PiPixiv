@@ -16,7 +16,7 @@ import kotlinx.io.files.SystemFileSystem
 class AccountHandle(val userId: Long, val db: AccountDatabase)
 
 class AccountDatabaseProvider(
-    private val accountsRoot: () -> Path = ::accountStorageRoot,
+    private val accountsRoot: () -> Path = { accountStorageRoot() },
 ) {
     private val accountFilesMutex = Mutex()
     private val mutex = Mutex()

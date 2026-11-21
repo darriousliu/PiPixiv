@@ -10,7 +10,7 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlin.time.Clock
 
-class GlobalDatabaseProvider(private val path: () -> Path = ::globalDatabasePath) {
+class GlobalDatabaseProvider(private val path: () -> Path = { globalDatabasePath() }) {
     private val mutex = Mutex()
     private val database = MutableStateFlow<PixivDatabase?>(null)
 

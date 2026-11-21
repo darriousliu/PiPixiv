@@ -80,8 +80,8 @@ class StartupMigration(
         MigrationStorage(
             marker = AccountStore,
             legacy = legacy,
-            databasePath = ::globalDatabasePath,
-            accountRoot = ::accountStorageRoot,
+            databasePath = { globalDatabasePath() },
+            accountRoot = { accountStorageRoot() },
             filesRoot = { FileKit.filesDir.toKotlinxIoPath() },
             preferences = LegacyAccountPreferencesMigration(legacy = legacy),
             reloadPreferences = { reloadAccountPreferences() },
@@ -96,7 +96,7 @@ class StartupMigration(
     internal suspend fun run(
         storage: MigrationStorage,
         retry: Boolean = false,
-        logTiming: (String) -> Unit = ::logMigrationTiming,
+        logTiming: (String) -> Unit = { logMigrationTiming(it) },
     ): Boolean = withContext(Dispatchers.IO) {
         lock.withLock {
             when (state.value) {
