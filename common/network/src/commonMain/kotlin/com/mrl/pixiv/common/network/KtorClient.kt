@@ -1,8 +1,7 @@
 package com.mrl.pixiv.common.network
 
-import com.mrl.pixiv.common.data.Constants.AUTH_HOST
-import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.serialize.JSON
+import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.util.isDebug
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -16,7 +15,6 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
-import io.ktor.http.encodedPath
 import io.ktor.serialization.kotlinx.json.json
 import co.touchlab.kermit.Logger as KermitLogger
 
@@ -43,9 +41,6 @@ internal fun <T : HttpClientEngineConfig> httpClient(
 
         install(Logging) {
             level = if (isDebug) LogLevel.ALL else LogLevel.NONE
-            filter { request ->
-                request.url.host != AUTH_HOST || request.url.encodedPath.trimEnd('/') != "/auth/token"
-            }
             sanitizeHeader { it.equals(HttpHeaders.Authorization, ignoreCase = true) }
             logger =
                 object : Logger {
