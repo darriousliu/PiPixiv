@@ -89,7 +89,7 @@ class AccountDebugTest {
 
     private suspend fun withAccountDebugConfig(config: String, verify: suspend (File) -> Unit) {
         initializeMigrationTestStorage()
-        val file = File(FileKit.filesDir.absolutePath, "account-debug.json")
+        val file = File(FileKit.filesDir.absolutePath(), "account-debug.json")
         check(!file.exists())
         file.writeText(config)
         try {
