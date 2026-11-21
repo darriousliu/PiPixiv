@@ -688,7 +688,14 @@ class IOSTarget:
                     "copy", "to", "--source", str(empty),
                     "--destination", path, "--remove-existing-content", "true",
                 )
-                if self.info_files(path, recurse=True):
+                remaining = self.info_files(path, recurse=True)
+                if path == "Library":
+                    # iOS can recreate these two empty directories after replacing Library.
+                    for name in ("Caches", "Preferences"):
+                        resources = remaining.get(name, {}).get("resources", {})
+                        if resources.get("isDirectory") is True and resources.get("isSymbolicLink") is False:
+                            remaining.pop(name)
+                if remaining:
                     raise RuntimeError(f"The iOS test container directory did not empty: {path}")
         print(f"Verified empty iOS test container data directories for {self.bundle_id}.", flush=True)
 
