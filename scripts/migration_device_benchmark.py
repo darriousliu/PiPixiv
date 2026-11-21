@@ -863,7 +863,7 @@ def report_table(headers, rows):
         yield "| " + " | ".join(cells) + " |"
 
 
-def report_performance(platform, simulator, tier, scenario, count, totals, completed, memory):
+def report_performance(platform, simulator, tier, scenario, count, totals, memory):
     if simulator:
         return "模拟器，仅记录"
     if tier in IOS_TIERS:
@@ -872,14 +872,12 @@ def report_performance(platform, simulator, tier, scenario, count, totals, compl
         return "故障验证"
     if platform in {"desktop", "JVM"}:
         time_limit = {"typical": 300, "heavy": 2000, "extreme": 8000}[tier]
-        startup_limit = 5
         memory_limit = 64
     else:
         time_limit = {"typical": 1000, "heavy": 5000, "extreme": 15000}[tier]
-        startup_limit = 20
         memory_limit = 128
-    limits = f"{time_limit} / {startup_limit} ms / {memory_limit} MiB"
-    checks = ((totals, time_limit), (completed, startup_limit), (memory, memory_limit * 1024**2))
+    limits = f"{time_limit} ms / {memory_limit} MiB"
+    checks = ((totals, time_limit), (memory, memory_limit * 1024**2))
     if any(values and max(values) > limit for values, limit in checks):
         return f"失败（{limits}）"
     if any(len(values) != count for values, _ in checks):
@@ -926,7 +924,7 @@ def report_group_summary(key, runs):
         f"{sum(slow)}/{len(slow)}" if slow else "—",
         f"{mmkv.count(True)} 通过 / {mmkv.count(False)} 失败 / {mmkv.count(None)} 未验证",
         outcomes, migration_verdict,
-        report_performance(platform, simulator, tier, scenario, len(runs), totals, completed, extra_memory),
+        report_performance(platform, simulator, tier, scenario, len(runs), totals, extra_memory),
     )
 
 
@@ -969,8 +967,10 @@ def run_report(_args):
     lines = [
         "# 跨平台迁移基准汇总",
         "",
-        "耗时按各档的中位数和最大值汇总，以单轮最大值核对第 3.7 节阈值。"
+        "以单轮最大值核对第 3.7 节的首次迁移耗时和额外内存阈值。"
         "额外内存为本轮迁移较起始值的增量，JVM 使用测试进程另采样的堆增量。",
+        "",
+        "再次启动耗时仅记录。进首页耗时按新版比旧版慢 ≤ 100 ms 的标准由各轮报告判定。",
         "",
     ]
     if any(key[3] in IOS_TIERS for key, _ in groups):
