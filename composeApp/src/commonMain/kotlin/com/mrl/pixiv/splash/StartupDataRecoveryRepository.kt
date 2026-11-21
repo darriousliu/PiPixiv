@@ -43,7 +43,6 @@ class StartupDataRecoveryRepository(
 ) : DataRecoveryRepository {
     override val items get() = migration.items
     override val hasPending get() = migration.hasPending
-    override val recoverAfterLogin get() = migration.storage.preferences.sessions.recoverAfterLogin
 
     override suspend fun needsTargetAccount(item: MigrationItem): Boolean = withContext(Dispatchers.IO) {
         migration.awaitReady()

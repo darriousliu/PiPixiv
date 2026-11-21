@@ -57,7 +57,6 @@ class DataRecoveryViewModelTest {
             ),
         )
         override val hasPending = MutableStateFlow(true)
-        override val recoverAfterLogin = MutableStateFlow(false)
         val retried = mutableListOf<MigrationItem>()
         val retryGate = CompletableDeferred<Unit>()
 

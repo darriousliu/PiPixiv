@@ -45,7 +45,6 @@ val ItemStatus.isResolved: Boolean
 interface DataRecoveryRepository {
     val items: StateFlow<Map<MigrationItem, ItemStatus>>
     val hasPending: StateFlow<Boolean>
-    val recoverAfterLogin: StateFlow<Boolean>
 
     suspend fun needsTargetAccount(item: MigrationItem): Boolean
     suspend fun retry(item: MigrationItem, targetUserId: Long? = null): ItemStatus
