@@ -21,6 +21,7 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from statistics import median
+from urllib.parse import unquote, urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +29,9 @@ FIXTURES_DIR = ROOT / "build/migration-fixtures"
 RESULTS_DIR = ROOT / "build/migration-device"
 JVM_REPORT_DIR = ROOT / "build/reports/migration-benchmark"
 SUMMARY_PATH = ROOT / "build/reports/migration/summary.md"
-TIERS = ("typical", "heavy", "extreme", "typical-corrupt-session")
+BASE_TIERS = ("typical", "heavy", "extreme")
+IOS_TIERS = tuple(f"{tier}-ios" for tier in BASE_TIERS)
+TIERS = (*BASE_TIERS, "typical-corrupt-session", *IOS_TIERS)
 FAULTS = {
     "low-space": {"availableBytes": 0},
     "global-database": {"fail": ["GlobalDatabase"]},
@@ -67,12 +70,14 @@ def run_fixtures(args):
     environment = {**os.environ, "PIPIXIV_MIGRATION_FIXTURES": "1"}
     if args.corrupt_session:
         environment["PIPIXIV_MIGRATION_CORRUPT_SESSION"] = "1"
+    if args.ios:
+        environment["PIPIXIV_MIGRATION_IOS"] = "1"
     gradle_flags = ["--offline"] if args.offline else []
     subprocess.run(
         [
             str(ROOT / "gradlew"), ":composeApp:jvmTest", "--tests",
             "*StartupMigrationBenchmarkTest.exportFixtures*", "--rerun",
-            "-PcomposePreview=true", "--no-parallel", "--max-workers=1", *gradle_flags,
+            "-PcomposePreview=true", "--no-build-cache", "--no-parallel", "--max-workers=1", *gradle_flags,
         ],
         cwd=ROOT,
         env=environment,
@@ -247,6 +252,8 @@ def run_upgrade(target, args, fixture, manifest, output, evidence):
 def run_device(args):
     if args.platform == "ios" and not args.device:
         raise ValueError("run --platform ios requires an explicit --device")
+    if args.tier in IOS_TIERS and args.platform != "ios":
+        raise ValueError("The -ios fixture tiers are available only with --platform ios")
     if args.runs < 1:
         raise ValueError("--runs must be at least 1")
     if (args.scenario == "corrupt-session") != (args.tier == "typical-corrupt-session"):
@@ -286,6 +293,7 @@ def main():
     fixtures = commands.add_parser("fixtures", help="generate or reuse JVM fixture packages")
     fixtures.add_argument("--offline", action="store_true", help="use Gradle's local dependency cache")
     fixtures.add_argument("--corrupt-session", action="store_true", help="also export the corrupt-session fixture")
+    fixtures.add_argument("--ios", action="store_true", help="also export iOS fixtures without MMKV string sets")
     fixtures.set_defaults(handler=run_fixtures)
     run = commands.add_parser("run", help="reset the target and run in-place upgrades")
     run.add_argument("--platform", required=True, choices=("desktop", "android", "ios"))
@@ -295,7 +303,7 @@ def main():
     run.add_argument("--baseline", type=lambda path: Path(path).expanduser().resolve(), required=True)
     run.add_argument("--feature", type=lambda path: Path(path).expanduser().resolve(), required=True)
     run.add_argument("--scenario", choices=SCENARIOS, default="normal")
-    run.add_argument("--bundle-id", help="override the feature app's bundle identifier on iOS")
+    run.add_argument("--bundle-id", help="explicitly select the iOS test bundle (com.mrl.pixiv.PiPixiv)")
     run.add_argument("--evidence-dir", type=lambda path: Path(path).expanduser().resolve(), help="save a screenshot after each migration where supported")
     run.add_argument("--screenshot-delay", type=float, default=4, help="seconds to wait for the first page after migration")
     run.set_defaults(handler=run_device)
@@ -309,6 +317,7 @@ def main():
         return 1
     return 0
 ANDROID_PACKAGE = "com.mrl.pixiv"
+IOS_TEST_BUNDLE_ID = "com.mrl.pixiv.PiPixiv"
 DESKTOP_TEST_MARKER = ".pipixiv-migration-device-benchmark"
 LOG_NAMES = ("current.log", "previous.log")
 
@@ -605,11 +614,10 @@ class IOSTarget:
         self.identifier = identifier
         self.device = device_label(identifier)
         baseline_id = self.package_id(baseline)
-        self.bundle_id = bundle_id or self.package_id(feature)
-        if not self.bundle_id.startswith("com.mrl.pixiv.PiPixiv"):
-            raise ValueError("The iOS bundle identifier must start with com.mrl.pixiv.PiPixiv.")
-        if baseline_id != self.bundle_id or self.package_id(feature) != self.bundle_id:
-            raise ValueError("Both iOS .app packages must match the selected --bundle-id.")
+        feature_id = self.package_id(feature)
+        self.bundle_id = bundle_id or feature_id
+        if any(value != IOS_TEST_BUNDLE_ID for value in (self.bundle_id, baseline_id, feature_id)):
+            raise ValueError(f"iOS measurements are limited to the test bundle {IOS_TEST_BUNDLE_ID}.")
         self.pid = None
 
     @staticmethod
@@ -618,16 +626,71 @@ class IOSTarget:
             return plistlib.load(manifest)["CFBundleIdentifier"]
 
     def tool(self, group, action, *args, **kwargs):
-        return run_command("xcrun", "devicectl", "device", group, action, "--device", self.identifier, *args, **kwargs)
+        try:
+            return run_command("xcrun", "devicectl", "device", group, action, "--device", self.identifier, *args, **kwargs)
+        except subprocess.CalledProcessError as error:
+            message = (error.stderr + error.stdout).decode(errors="replace").strip()
+            raise RuntimeError(f"devicectl {group} {action} failed ({error.returncode}): {message}") from error
 
     def container_command(self, group, action, *args, **kwargs):
         return self.tool(group, action, "--domain-type", "appDataContainer", "--domain-identifier", self.bundle_id, *args, **kwargs)
 
-    def reset(self):
+    def installed_app(self):
         result = self.tool("info", "apps", "--include-all-apps", "--json-output", "-")
         entries = json.loads(result.stdout)["result"]["apps"]
-        if any(entry["bundleIdentifier"] == self.bundle_id for entry in entries):
-            self.tool("uninstall", "app", self.bundle_id, timeout=120)
+        apps = {entry["bundleIdentifier"]: entry for entry in entries}
+        other_apps = sorted(bundle for bundle in apps if bundle.startswith(IOS_TEST_BUNDLE_ID) and bundle != IOS_TEST_BUNDLE_ID)
+        if other_apps:
+            raise RuntimeError(f"Other PiPixiv apps are installed on the iOS device: {', '.join(other_apps)}")
+        return apps.get(self.bundle_id)
+
+    def info_files(self, directory=None, *, recurse=False):
+        location = () if directory is None else ("--subdirectory", directory)
+        result = self.container_command(
+            "info", "files", *location, "--recurse" if recurse else "--no-recurse", "--json-output", "-",
+        )
+        return {entry["relativePath"]: entry for entry in json.loads(result.stdout)["result"]["files"]}
+
+    def test_process_ids(self, app):
+        app_path = unquote(urlparse(app["url"]).path).rstrip("/")
+        if not app_path.endswith(".app"):
+            raise RuntimeError("Could not identify the executable directory of the iOS test app.")
+        return [
+            process["processIdentifier"] for process in self.running_processes()
+            if unquote(urlparse(process["executable"]).path).startswith(app_path + "/")
+        ]
+
+    def reset(self):
+        app = self.installed_app()
+        if app is None:
+            return
+        if app.get("containerAccessible") is not True:
+            raise RuntimeError("The installed iOS test app container is not accessible.")
+        for pid in self.test_process_ids(app):
+            self.tool("process", "terminate", "--pid", str(pid), check=False)
+        if self.test_process_ids(app):
+            raise RuntimeError("The iOS test app process is still running.")
+        self.pid = None
+
+        root_entries = self.info_files()
+        paths = [path for path in ("Documents", "Library", "tmp") if path in root_entries]
+        for path in paths:
+            resources = root_entries[path]["resources"]
+            if resources["isDirectory"] is not True or resources["isSymbolicLink"] is not False:
+                raise RuntimeError(f"Expected a regular iOS test container directory: {path}")
+
+        # Replacing the data directories preserves developer trust across overwrites.
+        with tempfile.TemporaryDirectory(prefix="pipixiv-ios-reset-") as temporary:
+            for path in paths:
+                empty = Path(temporary) / path
+                empty.mkdir()
+                self.container_command(
+                    "copy", "to", "--source", str(empty),
+                    "--destination", path, "--remove-existing-content", "true",
+                )
+                if self.info_files(path, recurse=True):
+                    raise RuntimeError(f"The iOS test container directory did not empty: {path}")
+        print(f"Verified empty iOS test container data directories for {self.bundle_id}.", flush=True)
 
     def install(self, package):
         self.tool("install", "app", str(package), timeout=120)
@@ -638,12 +701,14 @@ class IOSTarget:
         process = record.get("process", record)
         self.pid = process["processIdentifier"]
 
-    def is_running(self):
-        if self.pid is None:
-            return False
+    def running_processes(self):
         result = self.tool("info", "processes", "--json-output", "-")
-        processes = json.loads(result.stdout)["result"]["runningProcesses"]
-        return any(str(process["processIdentifier"]) == str(self.pid) for process in processes)
+        return json.loads(result.stdout)["result"]["runningProcesses"]
+
+    def is_running(self):
+        return self.pid is not None and any(
+            str(process["processIdentifier"]) == str(self.pid) for process in self.running_processes()
+        )
 
     def stop(self):
         if self.pid is not None:
@@ -658,14 +723,11 @@ class IOSTarget:
 
     def wait_for_baseline(self):
         def ready():
-            for path in (self.databases, self.mmkv, self.log_dir):
-                result = self.container_command("info", "files", "--subdirectory", path, "--no-recurse", check=False)
-                if result.returncode:
-                    message = (result.stderr + result.stdout).decode(errors="replace").strip()
-                    if self.missing_path(message):
-                        return False
-                    raise RuntimeError(f"Cannot read the iOS app container: {message}")
-            return True
+            entries = self.info_files(self.files)
+            return all(
+                entries.get(Path(path).name, {}).get("resources", {}).get("isDirectory") is True
+                for path in (self.databases, self.mmkv, self.log_dir)
+            )
 
         wait_until_ready(self, ready)
 
@@ -680,37 +742,49 @@ class IOSTarget:
                 evidence.write(b"\n")
         with tempfile.TemporaryDirectory(prefix="pipixiv-migration-") as scratch:
             for source, target in fixture_payload(fixture, debug_config, Path(scratch), self.databases, self.mmkv, self.files):
-                # devicectl keeps the source basename when given a destination directory.
-                self.container_command("copy", "to", "--source", str(source), "--destination", str(Path(target).parent), timeout=120)
-            verify_dir = Path(scratch) / "verify"
-            verify_dir.mkdir()
-            for name in ("pixiv_db-wal", "pixiv_db-shm"):
-                file = self.pull(f"{self.databases}/{name}", verify_dir)
-                if file.stat().st_size != 0:
-                    raise RuntimeError(f"iOS did not overwrite {name} with a zero-length sidecar.")
+                # devicectl treats the destination as the full path of the copied file.
+                self.container_command("copy", "to", "--source", str(source), "--destination", target)
+        manifest = json.loads((fixture / "manifest.json").read_text(encoding="utf-8"))
+        database_bytes = manifest["files"]["pixiv_db"]["bytes"]
+        entries = self.info_files(self.databases)
+        sidecars = {"pixiv_db-wal": 0, "pixiv_db-shm": 0}
+        for name, expected_size in {"pixiv_db": database_bytes, **sidecars}.items():
+            entry = entries.get(name, {})
+            resources = entry.get("resources", {})
+            actual_size = entry.get("metadata", {}).get("size")
+            if (
+                resources.get("isDirectory") is not False
+                or resources.get("isSymbolicLink") is not False
+                or type(actual_size) is not int
+                or actual_size != expected_size
+            ):
+                raise RuntimeError(f"Expected {name} to be a regular iOS container file of {expected_size} bytes.")
+        write_json(output / "zero-sidecars.json", sidecars)
 
     def restore_permissions(self):
         pass
 
     def pull(self, source, destination, *, missing_ok=False):
-        result = self.container_command("copy", "from", "--source", source, "--destination", str(destination), check=False, timeout=30)
+        file = destination / Path(source).name
+        result = self.container_command("copy", "from", "--source", source, "--destination", str(file), check=False)
         if result.returncode:
             message = (result.stderr + result.stdout).decode(errors="replace").strip()
             if missing_ok and self.missing_path(message):
                 return None
             raise RuntimeError(f"Cannot copy {source} from the iOS app container: {message}")
-        files = list(destination.rglob(Path(source).name))
-        if len(files) != 1 or not files[0].is_file():
-            raise RuntimeError(f"devicectl did not copy a single file for {source}.")
-        return files[0]
+        if not file.is_file():
+            raise RuntimeError(f"devicectl did not copy {source} to {file}.")
+        return file
 
     def logs(self):
         result = {}
-        for name in LOG_NAMES:
-            with tempfile.TemporaryDirectory(prefix="pipixiv-migration-") as temporary:
-                source = self.pull(f"{self.log_dir}/{name}", Path(temporary), missing_ok=True)
-                if source is not None:
-                    result[name] = source.read_bytes()
+        entries = self.info_files(self.log_dir)
+        with tempfile.TemporaryDirectory(prefix="pipixiv-migration-") as temporary:
+            for name in LOG_NAMES:
+                if name in entries:
+                    source = self.pull(f"{self.log_dir}/{name}", Path(temporary), missing_ok=True)
+                    if source is not None:
+                        result[name] = source.read_bytes()
         return result
 
     def database_sha256(self, name):
@@ -785,7 +859,9 @@ def report_table(headers, rows):
 def report_performance(platform, simulator, tier, scenario, count, totals, completed, memory):
     if simulator:
         return "模拟器，仅记录"
-    if tier not in {"typical", "heavy", "extreme"} or scenario == "storage-unavailable":
+    if tier in IOS_TIERS:
+        tier = tier.removesuffix("-ios")
+    if tier not in BASE_TIERS or scenario == "storage-unavailable":
         return "故障验证"
     if platform in {"desktop", "JVM"}:
         time_limit = {"typical": 300, "heavy": 2000, "extreme": 8000}[tier]
@@ -878,11 +954,9 @@ def run_report(_args):
         key = run["platform"], run["device"], run["simulator"], run["tier"], run.get("scenario", "normal")
         groups[key].append(run)
 
-    tier_order = ("typical", "heavy", "extreme", "typical-corrupt-session")
-
     def group_order(group):
         (platform, device, simulator, tier, scenario), _ = group
-        return platform, device, simulator, tier_order.index(tier), scenario != "normal", scenario
+        return platform, device, simulator, TIERS.index(tier), scenario != "normal", scenario
 
     groups = sorted(groups.items(), key=group_order)
     lines = [
@@ -892,6 +966,8 @@ def run_report(_args):
         "额外内存为本轮迁移较起始值的增量，JVM 使用测试进程另采样的堆增量。",
         "",
     ]
+    if any(key[3] in IOS_TIERS for key, _ in groups):
+        lines.extend(("`-ios` 档位使用 iOS 专用数据包，不含字符串集合。", ""))
     headers = (
         "平台", "设备标识", "机型", "系统版本", "应用版本", "档位", "场景", "轮次",
         "迁移中位 / 最大 ms", "再次启动中位 / 最大 ms", "峰值 / 额外内存 MiB",

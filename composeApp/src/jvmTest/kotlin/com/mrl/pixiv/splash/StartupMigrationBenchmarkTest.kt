@@ -9,6 +9,7 @@ import com.mrl.pixiv.common.datasource.local.AppDatabaseBackup
 import com.mrl.pixiv.common.datasource.local.DatabaseBackupStep
 import com.mrl.pixiv.common.datasource.local.DatabaseBackupTiming
 import com.mrl.pixiv.common.datasource.local.GlobalDatabaseProvider
+import com.mrl.pixiv.common.mmkv.mmkvOwner
 import com.mrl.pixiv.common.mmkv.mmkvSerializable
 import com.mrl.pixiv.common.mmkv.mmkvStringSet
 import com.mrl.pixiv.common.repository.NovelSeriesReadingProgress
@@ -61,6 +62,36 @@ class StartupMigrationBenchmarkTest {
         MigrationTier.entries.forEach { LegacyMigrationFixture.export(fixtureRoot, it) }
         if (System.getenv("PIPIXIV_MIGRATION_CORRUPT_SESSION") == "1") {
             LegacyMigrationFixture.exportCorruptSession(fixtureRoot)
+        }
+        if (System.getenv("PIPIXIV_MIGRATION_IOS") == "1") {
+            MigrationTier.entries.forEach { LegacyMigrationFixture.exportIos(fixtureRoot, it) }
+        }
+    }
+
+    @Test
+    fun iosFixtureOmitsSearchIdHistoriesInMmkvAndManifest() {
+        initializeMigrationTestStorage()
+        val root = createTempDirectory("pixiv-ios-migration-fixture-").toFile()
+        try {
+            val (directory) = LegacyMigrationFixture.exportIos(root, MigrationTier.Typical)
+            val manifest = reportJson.decodeFromString<FixtureManifest>(directory.resolve("manifest.json").readText())
+            assertEquals("typical-ios", directory.name)
+            assertEquals(directory.name, manifest.tier)
+            assertEquals(0L, manifest.mmkvCounts.getValue("skippedCorrupted"))
+
+            val legacy = mmkvOwner("pixiv.user", directory.resolve("mmkv").absolutePath)
+            try {
+                assertTrue(legacy.contains("searchHistory"))
+                assertTrue(legacy.contains("novelSearchHistory"))
+                for (key in listOf("searchIdHistory", "novelSearchIdHistory")) {
+                    assertEquals(0L, manifest.mmkvCounts.getValue(key), key)
+                    assertFalse(legacy.contains(key), key)
+                }
+            } finally {
+                legacy.kv.close()
+            }
+        } finally {
+            root.deleteRecursively()
         }
     }
 

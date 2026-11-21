@@ -109,7 +109,16 @@ internal object LegacyMigrationFixture {
     fun exportCorruptSession(root: File): Pair<File, FixtureManifest> =
         export(root, MigrationTier.Typical, "typical-corrupt-session", corruptSession = true)
 
-    private fun export(root: File, tier: MigrationTier, name: String, corruptSession: Boolean): Pair<File, FixtureManifest> {
+    fun exportIos(root: File, tier: MigrationTier): Pair<File, FixtureManifest> =
+        export(root, tier, "${tier.directory}-ios", corruptSession = false, omitSearchIdHistory = true)
+
+    private fun export(
+        root: File,
+        tier: MigrationTier,
+        name: String,
+        corruptSession: Boolean,
+        omitSearchIdHistory: Boolean = false,
+    ): Pair<File, FixtureManifest> {
         val directory = root.resolve(name)
         val manifestFile = directory.resolve("manifest.json")
         val userIds = tier.userIds(syntheticOnly = corruptSession)
@@ -125,7 +134,7 @@ internal object LegacyMigrationFixture {
         check(temporary.mkdirs())
         try {
             val figures = generateDatabase(temporary.resolve("pixiv_db"), tier, userIds)
-            val counts = generatePreferences(temporary.resolve("mmkv"), tier, userIds, corruptSession)
+            val counts = generatePreferences(temporary.resolve("mmkv"), tier, userIds, corruptSession, omitSearchIdHistory)
             val files = temporary.walkTopDown().filter { it.isFile }.associate {
                 it.relativeTo(temporary).invariantSeparatorsPath to FixtureFile(it.length(), it.sha256())
             }
@@ -238,13 +247,13 @@ internal object LegacyMigrationFixture {
         tier: MigrationTier,
         ids: List<Long>,
         corruptSession: Boolean,
+        omitSearchIdHistory: Boolean,
     ): Map<String, Long> {
         check(path.mkdirs())
         val app = mmkvOwner("pixiv.app", path.absolutePath).kv
         val legacy = mmkvOwner("pixiv.user", path.absolutePath).kv
         try {
             val searches = List(tier.searches) { SearchHistory("fixture keyword $it", timestamp + it) }
-            val idSearches = List(tier.searches) { (123_000_000 + it).toString() }.toSet()
             check(legacy.set("userRefreshToken", "fixture-refresh-token"))
             check(legacy.set("userAccessToken", "fixture-access-token"))
             check(legacy.set("accessTokenExpiresTime", timestamp))
@@ -261,8 +270,11 @@ internal object LegacyMigrationFixture {
             )).encodeToByteArray()))
             check(legacy.set("searchHistory", mmkvJson.encodeToString(IllustSearch(searches)).encodeToByteArray()))
             check(legacy.set("novelSearchHistory", mmkvJson.encodeToString(NovelSearch(searches)).encodeToByteArray()))
-            check(legacy.set("searchIdHistory", idSearches))
-            check(legacy.set("novelSearchIdHistory", idSearches))
+            if (!omitSearchIdHistory) {
+                val idSearches = List(tier.searches) { (123_000_000 + it).toString() }.toSet()
+                check(legacy.set("searchIdHistory", idSearches))
+                check(legacy.set("novelSearchIdHistory", idSearches))
+            }
             check(legacy.set("bookmarkedTagsDelegate", mmkvJson.encodeToString(List(tier.tags) { Tag(name = "Fixture tag $it") }).encodeToByteArray()))
             val series = buildMap {
                 for (uid in ids) repeat(tier.series) { i ->
@@ -275,10 +287,11 @@ internal object LegacyMigrationFixture {
             app.close()
         }
         val migratedAccounts = if (corruptSession) 0L else 1L
+        val searchIdCount = if (omitSearchIdHistory) 0L else tier.searches.toLong()
         return mapOf(
             "accounts" to migratedAccounts,
             "searchHistory" to tier.searches.toLong(), "novelSearchHistory" to tier.searches.toLong(),
-            "searchIdHistory" to tier.searches.toLong(), "novelSearchIdHistory" to tier.searches.toLong(),
+            "searchIdHistory" to searchIdCount, "novelSearchIdHistory" to searchIdCount,
             "bookmarkedTags" to tier.tags.toLong(), "novelSeriesProgress" to tier.series.toLong() * ids.size,
             "deviceTheme" to 1L, "deviceProxy" to 1L, "deviceAiTranslation" to 1L,
             "accountR18" to migratedAccounts, "accountPrivateBookmark" to migratedAccounts,
