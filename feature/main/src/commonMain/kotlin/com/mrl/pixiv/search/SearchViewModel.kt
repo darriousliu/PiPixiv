@@ -20,6 +20,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import org.koin.android.annotation.KoinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @Stable
 data class SearchState(
@@ -106,7 +107,7 @@ class SearchViewModel : BaseMviViewModel<SearchState, SearchAction>(
     private fun searchAutoComplete(action: SearchAction.SearchAutoComplete) {
         autoCompleteJob?.cancel()
         autoCompleteJob = launchIO {
-            delay(300)
+            delay(300.milliseconds)
             val resp = PixivRepository.searchAutoComplete(word = action.searchWords)
             updateState {
                 copy(autoCompleteSearchWords = resp.tags.toImmutableList())

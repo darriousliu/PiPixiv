@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">匿名の利用統計</string>
+    <string name="usage_analytics_description">よく使われる画面や機能を集計し、アプリの改善に役立てます。</string>
+    <string name="crash_diagnostics">クラッシュレポート</string>
+    <string name="crash_diagnostics_description">アプリがクラッシュしたりエラーが発生したりすると、エラー情報、アプリのバージョン、端末情報を自動で送信し、問題の特定と修正に役立てます。</string>
+    <string name="crash_diagnostics_switch_note">クラッシュレポートは上のスイッチの影響を受けません。</string>
+    <string name="privacy_not_collected_description">アプリは検索ワード、アカウント情報、閲覧した作品、ダウンロードしたファイルを能動的に収集しません。</string>
+</resources>

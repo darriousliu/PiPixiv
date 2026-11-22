@@ -12,19 +12,17 @@ interface NovelTranslationDao {
     suspend fun upsert(entity: NovelTranslationEntity)
 
     @Query(
-        "SELECT * FROM novel_translation WHERE userId = :userId AND novelId = :novelId AND targetLanguage = :targetLanguage LIMIT 1"
+        "SELECT * FROM novel_translation WHERE novelId = :novelId AND targetLanguage = :targetLanguage LIMIT 1"
     )
     suspend fun getByNovelIdAndLanguage(
-        userId: Long,
         novelId: Long,
         targetLanguage: String
     ): NovelTranslationEntity?
 
     @Query(
-        "DELETE FROM novel_translation WHERE userId = :userId AND novelId = :novelId AND targetLanguage = :targetLanguage"
+        "DELETE FROM novel_translation WHERE novelId = :novelId AND targetLanguage = :targetLanguage"
     )
     suspend fun deleteByNovelIdAndLanguage(
-        userId: Long,
         novelId: Long,
         targetLanguage: String
     )

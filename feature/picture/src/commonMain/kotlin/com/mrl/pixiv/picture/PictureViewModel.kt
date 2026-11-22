@@ -8,14 +8,20 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import co.touchlab.kermit.Logger
+import com.mrl.pixiv.common.analytics.recordCrashOperation
+import com.mrl.pixiv.common.coroutine.ProcessLifecycleScope
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Filter
 import com.mrl.pixiv.common.data.Illust
+import com.mrl.pixiv.common.data.ImageUrls
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.ugoira.UgoiraMetadata
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
+import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.network.networkSettings
+import com.mrl.pixiv.common.network.withNetworkPreference
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
 import com.mrl.pixiv.common.repository.DownloadManager
@@ -60,14 +66,29 @@ import io.ktor.utils.io.asSource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.io.buffered
 import kotlinx.io.readByteArray
 import org.koin.android.annotation.KoinViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
+
+internal val ImageUrls.preferredThumbnailUrl: String
+    get() = squareMedium.ifBlank { medium.ifBlank { large } }
+
+internal fun Illust.downloadThumbnailUrl(index: Int): String = if (pageCount > 1) {
+    metaPages?.getOrNull(index)?.imageUrls?.preferredThumbnailUrl.orEmpty()
+} else {
+    imageUrls.preferredThumbnailUrl
+}
 
 @Stable
 data class PictureState(
@@ -123,13 +144,14 @@ class PictureViewModel(
 ) : BaseMviViewModel<PictureState, PictureAction>(
     initialState = PictureState(illust = illust),
 ), KoinComponent {
-    private val imageOkHttpClient: HttpClient by inject(named<ImageClient>())
+    private val imageHttpClient: RoutedHttpClient<HttpClient> by inject(named<ImageClient>())
     private val downloadManager: DownloadManager by inject()
     val relatedIllusts = Pager(PagingConfig(pageSize = 20)) {
         RelatedIllustPaging(illust?.id ?: illustId!!)
     }.flow.cachedIn(viewModelScope)
 
     private val cachedDownloadSize = mutableMapOf<Int, Long>()
+    private val batchDownloadMutex = Mutex()
     private val ugoiraDir = FileKit.cacheDir / "ugoira"
     private var cachedUgoiraMetadata: UgoiraMetadata? = null
 
@@ -165,41 +187,17 @@ class PictureViewModel(
     }
 
     private fun downloadUgoira(illustId: Long) {
-        launchIO {
-            updateState { copy(ugoiraState = ugoiraState.copy(loading = true)) }
-            val resp = PixivRepository.getUgoiraMetadata(illustId)
-            cachedUgoiraMetadata = resp.ugoiraMetadata
-            if (!ugoiraDir.exists()) ugoiraDir.createDirectories()
-            val file = ugoiraDir / "$illustId.zip"
-            if (file.exists() && file.size() > 0) {
-                val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
-                    img.readBytes().decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
-                }
-                Logger.e(tag = TAG) { "downloadUgoira: $imageFiles" }
-                updateState {
-                    copy(
-                        ugoiraState = ugoiraState.copy(
-                            ugoiraImages = imageFiles.toImmutableList(),
-                            loading = false,
-                            isPlaying = true
-                        )
-                    )
-                }
-            } else {
-                val zipUrl = resp.ugoiraMetadata.zipUrls.medium
-                val response = imageOkHttpClient.request {
-                    url.takeFrom(zipUrl)
-                }
-                if (response.status.isSuccess()) {
-                    response.bodyAsChannel().asSource().buffered().use { source ->
-                        file.write(source.readByteArray())
-                    }
-                    // 解压
+        viewModelScope.launchImageOperation("Unable to load Ugoira") {
+            withNetworkPreference({ requireUserPreferenceValue.networkSettings() }) {
+                updateState { copy(ugoiraState = ugoiraState.copy(loading = true)) }
+                val resp = PixivRepository.getUgoiraMetadata(illustId)
+                cachedUgoiraMetadata = resp.ugoiraMetadata
+                if (!ugoiraDir.exists()) ugoiraDir.createDirectories()
+                val file = ugoiraDir / "$illustId.zip"
+                if (file.exists() && file.size() > 0) {
                     val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
-                        img.readBytes()
-                            .decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
+                        img.readBytes().decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
                     }
-                    Logger.e(tag = TAG) { "downloadUgoira: $imageFiles" }
                     updateState {
                         copy(
                             ugoiraState = ugoiraState.copy(
@@ -208,6 +206,35 @@ class PictureViewModel(
                                 isPlaying = true
                             )
                         )
+                    }
+                } else {
+                    val zipUrl = resp.ugoiraMetadata.zipUrls.medium
+                    val downloaded = imageHttpClient.withClient { client ->
+                        val response = client.request { url.takeFrom(zipUrl) }
+                        if (response.status.isSuccess()) {
+                            response.bodyAsChannel().asSource().buffered().use { source ->
+                                file.write(source.readByteArray())
+                            }
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    if (downloaded) {
+                        // 解压
+                        val imageFiles = unzipUgoira(file, illustId).mapIndexed { index, img ->
+                            img.readBytes()
+                                .decodeToImageBitmap() to resp.ugoiraMetadata.frames[index].delay
+                        }
+                        updateState {
+                            copy(
+                                ugoiraState = ugoiraState.copy(
+                                    ugoiraImages = imageFiles.toImmutableList(),
+                                    loading = false,
+                                    isPlaying = true
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -260,34 +287,81 @@ class PictureViewModel(
         index: Int,
         originalUrl: String,
     ) {
-        launchIO {
-            val illust = state.illust ?: return@launchIO
-            val title = illust.title
-            val userId = illust.user.id
-            val userName = illust.user.name
-            val thumbnailUrl = illust.imageUrls.squareMedium
-
+        viewModelScope.launchImageOperation("Unable to enqueue original page") {
+            val illust = state.illust ?: return@launchImageOperation
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
                 illust.user.id.toString()
             } else {
                 null
             }
-
-            val enqueued = downloadManager.enqueueDownload(
-                illustId = illustId,
-                index = index,
-                title = title,
-                userId = userId,
-                userName = userName,
-                thumbnailUrl = thumbnailUrl,
-                originalUrl = originalUrl,
-                subFolder = subFolder
-            )
+            val enqueued = enqueueOriginalPage(illust, illustId, index, originalUrl, subFolder)
 
             closeBottomSheet()
             if (enqueued) ToastUtil.safeShortToast(RStrings.download_add_to_queue)
         }
     }
+
+    fun downloadOriginalPages(illustId: Long, pageIndices: List<Int>) {
+        val illust = state.illust ?: return
+        if (illust.id != illustId || illust.type == Type.Ugoira) return
+
+        val pageCount = illust.pageCount.coerceAtLeast(1)
+        val pages = pageIndices.filter { it in 0 until pageCount }.distinct().sorted().mapNotNull { index ->
+            val originalUrl = if (illust.pageCount > 1) {
+                illust.metaPages?.getOrNull(index)?.imageUrls?.original
+            } else {
+                illust.metaSinglePage.originalImageURL
+            }
+            if (originalUrl.isNullOrBlank()) null else index to originalUrl
+        }
+        if (pages.isEmpty()) return
+
+        ProcessLifecycleScope.launchImageOperation("Unable to enqueue original pages") {
+            batchDownloadMutex.withLock {
+                val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
+                    illust.user.id.toString()
+                } else {
+                    null
+                }
+                var enqueued = false
+                for ((index, originalUrl) in pages) {
+                    try {
+                        // The download strategy reports denied storage permission itself.
+                        if (!enqueueOriginalPage(illust, illustId, index, originalUrl, subFolder)) {
+                            return@withLock
+                        }
+                        enqueued = true
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: Exception) {
+                        Logger.e(throwable = error, tag = TAG) { "Unable to enqueue original page" }
+                    }
+                }
+                ToastUtil.safeShortToast(
+                    if (enqueued) RStrings.download_add_to_queue else RStrings.download_failed,
+                )
+            }
+        }
+    }
+
+    private suspend fun enqueueOriginalPage(
+        illust: Illust,
+        illustId: Long,
+        index: Int,
+        originalUrl: String,
+        subFolder: String?,
+        listener: DownloadManager.DownloadManagerListener? = null,
+    ): Boolean = downloadManager.enqueueDownload(
+        illustId = illustId,
+        index = index,
+        title = illust.title,
+        userId = illust.user.id,
+        userName = illust.user.name,
+        thumbnailUrl = illust.downloadThumbnailUrl(index),
+        originalUrl = originalUrl,
+        subFolder = subFolder,
+        downloadManagerListener = listener,
+    )
 
     private fun unBookmark(illustId: Long) {
         BookmarkState.deleteBookmarkIllust(illustId)
@@ -359,14 +433,17 @@ class PictureViewModel(
 
     private suspend fun calculateImageSize(url: String): Long {
         return try {
-            val response = imageOkHttpClient.request {
-                method = HttpMethod.Head
-                url(url)
+            imageHttpClient.withClient { client ->
+                val response = client.request {
+                    method = HttpMethod.Head
+                    url(url)
+                }
+                response.contentLength() ?: 0
             }
-            val contentLength = response.contentLength() ?: 0
-            return contentLength
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (error: Exception) {
+            if (error !is CancellationException) {
+                Logger.e(throwable = error, tag = TAG) { "Unable to determine image size" }
+            }
             0
         }
     }
@@ -388,7 +465,7 @@ class PictureViewModel(
         downloadUrl: String,
         illust: Illust,
     ) {
-        launchIO {
+        viewModelScope.launchImageOperation("Unable to share image") {
             showLoading(true)
             closeBottomSheet()
             val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
@@ -396,13 +473,10 @@ class PictureViewModel(
             } else {
                 null
             }
-            downloadManager.enqueueDownload(
+            enqueueOriginalPage(
+                illust = illust,
                 illustId = illust.id,
                 index = index,
-                title = illust.title,
-                userId = illust.user.id,
-                userName = illust.user.name,
-                thumbnailUrl = illust.imageUrls.squareMedium,
                 originalUrl = downloadUrl,
                 subFolder = subFolder,
             ) { entity ->
@@ -426,22 +500,30 @@ class PictureViewModel(
 
     fun saveAsImage(imageUrl: String, file: PlatformFile) {
         // 用户已确认的保存任务应在滑出作品页后继续完成。
-        launchProcess(Dispatchers.IO) {
+        ProcessLifecycleScope.launchImageOperation("Unable to save image") {
+            recordCrashOperation("ImageSaveStarted")
             try {
                 showLoading(true)
-                val response = imageOkHttpClient.request {
-                    url(imageUrl)
+                imageHttpClient.withClient { client ->
+                    val response = client.request {
+                        url(imageUrl)
+                    }
+                    if (response.status.isSuccess()) {
+                        val bytes =
+                            response.bodyAsChannel().asSource().buffered().use { it.readByteArray() }
+                        file.write(bytes)
+                        recordCrashOperation("ImageSaveSucceeded")
+                        ToastUtil.safeShortToast(RStrings.download_success)
+                    } else {
+                        recordCrashOperation("ImageSaveFailed")
+                        ToastUtil.safeShortToast(RStrings.download_failed)
+                    }
                 }
-                if (response.status.isSuccess()) {
-                    val bytes =
-                        response.bodyAsChannel().asSource().buffered().use { it.readByteArray() }
-                    file.write(bytes)
-                    ToastUtil.safeShortToast(RStrings.download_success)
-                } else {
-                    ToastUtil.safeShortToast(RStrings.download_failed)
+            } catch (error: Exception) {
+                if (error !is CancellationException) {
+                    recordCrashOperation("ImageSaveFailed")
+                    Logger.e(throwable = error, tag = TAG) { "Unable to save image" }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
                 ToastUtil.safeShortToast(RStrings.download_failed)
             } finally {
                 showLoading(false)
@@ -465,42 +547,48 @@ class PictureViewModel(
     }
 
     fun downloadUgoiraAsGIF() {
-        launchIO {
+        viewModelScope.launchImageOperation("Unable to enqueue Ugoira") {
+            val illust = state.illust ?: return@launchImageOperation
             showLoading(true)
-            val illust = state.illust ?: return@launchIO
-            val illustId = illust.id
-            val title = illust.title
-            val userId = illust.user.id
-            val userName = illust.user.name
-            val thumbnailUrl = illust.imageUrls.squareMedium
-
-            val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
-                state.illust?.user?.id?.toString()
-            } else {
-                null
-            }
-
-            val metadata = cachedUgoiraMetadata
-                ?: PixivRepository.getUgoiraMetadata(illustId).ugoiraMetadata.also {
-                    cachedUgoiraMetadata = it
+            try {
+                val subFolder = if (requireUserPreferenceValue.downloadSubFolderByUser) {
+                    illust.user.id.toString()
+                } else {
+                    null
                 }
-            val zipUrl = metadata.zipUrls.medium
+                val metadata = cachedUgoiraMetadata
+                    ?: PixivRepository.getUgoiraMetadata(illust.id).ugoiraMetadata.also {
+                        cachedUgoiraMetadata = it
+                    }
+                val enqueued = downloadManager.enqueueDownload(
+                    illustId = illust.id,
+                    index = 0,
+                    title = illust.title,
+                    userId = illust.user.id,
+                    userName = illust.user.name,
+                    thumbnailUrl = illust.imageUrls.squareMedium,
+                    originalUrl = metadata.zipUrls.medium,
+                    subFolder = subFolder,
+                )
 
-            val enqueued = downloadManager.enqueueDownload(
-                illustId = illustId,
-                index = 0,
-                title = title,
-                userId = userId,
-                userName = userName,
-                thumbnailUrl = thumbnailUrl,
-                originalUrl = zipUrl,
-                subFolder = subFolder
-            )
-
-            closeBottomSheet()
-            showLoading(false)
-            if (enqueued) ToastUtil.safeShortToast(RStrings.download_add_to_queue)
+                closeBottomSheet()
+                if (enqueued) ToastUtil.safeShortToast(RStrings.download_add_to_queue)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Logger.e(throwable = error, tag = TAG) { "Unable to enqueue Ugoira" }
+                ToastUtil.safeShortToast(RStrings.download_failed)
+            } finally {
+                showLoading(false)
+            }
         }
+    }
+
+    private fun CoroutineScope.launchImageOperation(failureMessage: String, block: suspend CoroutineScope.() -> Unit) {
+        val exceptionHandler = CoroutineExceptionHandler { _, error ->
+            Logger.e(throwable = error, tag = TAG) { failureMessage }
+        }
+        launch(Dispatchers.IO + exceptionHandler, block = block)
     }
 
     fun toggleUgoiraPlayState() {

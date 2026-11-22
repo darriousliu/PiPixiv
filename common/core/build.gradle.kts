@@ -34,6 +34,7 @@ kotlin {
                 api(project(":common:analytics-foss"))
             }
             implementation(project(":common:data"))
+            implementation(project(":common:icons"))
             implementation(libs.compose.jetbrains.compose.resources)
             implementation(libs.androidx.annotation)
             implementation(libs.bundles.compose.navigation3)

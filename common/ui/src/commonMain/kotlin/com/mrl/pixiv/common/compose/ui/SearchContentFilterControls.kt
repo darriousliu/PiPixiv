@@ -30,6 +30,7 @@ import com.mrl.pixiv.strings.search_manga_only
 import com.mrl.pixiv.strings.search_series_only
 import com.mrl.pixiv.strings.search_show_r18
 import com.mrl.pixiv.strings.search_r18_only
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -40,56 +41,63 @@ fun SearchContentFilterControls(
     modifier: Modifier = Modifier,
     mode: AppViewMode? = null,
     horizontalContentPadding: Dp = 0.dp,
-) {
-    Column(modifier) {
-        if (mode != AppViewMode.NOVEL) {
+    artworkTypeSection: @Composable (title: String, content: @Composable () -> Unit) -> Unit =
+        { title, content ->
             Text(
-                stringResource(RStrings.search_content_type),
+                title,
                 modifier = Modifier.padding(horizontal = horizontalContentPadding),
                 style = MaterialTheme.typography.titleSmall,
             )
-            FlowRow(
-                modifier = Modifier.padding(horizontal = horizontalContentPadding),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                SearchArtworkType.entries.forEach { type ->
-                    FilterChip(
-                        selected = filter.artworkType == type,
-                        onClick = { onChange(filter.copy(artworkType = type)) },
-                        label = {
-                            Text(stringResource(when (type) {
-                                SearchArtworkType.ALL -> RStrings.search_type_all
-                                SearchArtworkType.GIF_ONLY -> RStrings.search_gif_only
-                                SearchArtworkType.EXCLUDE_GIF -> RStrings.search_exclude_gif
-                                SearchArtworkType.MANGA_ONLY -> RStrings.search_manga_only
-                            }))
-                        },
-                    )
+            content()
+        },
+    switchRow: @Composable (
+        label: StringResource, checked: Boolean, onCheckedChange: (Boolean) -> Unit,
+    ) -> Unit = { label, checked, onCheckedChange ->
+        SearchFilterSwitch(
+            label = stringResource(label),
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            horizontalContentPadding = horizontalContentPadding,
+        )
+    },
+) {
+    Column(modifier) {
+        if (mode != AppViewMode.NOVEL) {
+            artworkTypeSection(stringResource(RStrings.search_content_type)) {
+                FlowRow(
+                    modifier = Modifier.padding(horizontal = horizontalContentPadding),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    SearchArtworkType.entries.forEach { type ->
+                        FilterChip(
+                            selected = filter.artworkType == type,
+                            onClick = { onChange(filter.copy(artworkType = type)) },
+                            label = {
+                                Text(stringResource(when (type) {
+                                    SearchArtworkType.ALL -> RStrings.search_type_all
+                                    SearchArtworkType.GIF_ONLY -> RStrings.search_gif_only
+                                    SearchArtworkType.EXCLUDE_GIF -> RStrings.search_exclude_gif
+                                    SearchArtworkType.MANGA_ONLY -> RStrings.search_manga_only
+                                }))
+                            },
+                        )
+                    }
                 }
             }
         }
         if (mode != AppViewMode.ILLUST) {
-            SearchFilterSwitch(
-                label = stringResource(RStrings.search_series_only),
-                checked = filter.seriesOnly,
-                horizontalContentPadding = horizontalContentPadding,
-                onCheckedChange = { onChange(filter.copy(seriesOnly = it)) },
-            )
+            switchRow(RStrings.search_series_only, filter.seriesOnly) {
+                onChange(filter.copy(seriesOnly = it))
+            }
         }
         val showR18 = filter.showR18 ?: defaultShowR18
-        SearchFilterSwitch(
-            label = stringResource(RStrings.search_show_r18),
-            checked = showR18,
-            horizontalContentPadding = horizontalContentPadding,
-            onCheckedChange = { onChange(filter.withR18Enabled(it)) },
-        )
+        switchRow(RStrings.search_show_r18, showR18) {
+            onChange(filter.withR18Enabled(it))
+        }
         if (showR18) {
-            SearchFilterSwitch(
-                label = stringResource(RStrings.search_r18_only),
-                checked = filter.r18Only,
-                horizontalContentPadding = horizontalContentPadding,
-                onCheckedChange = { onChange(filter.copy(r18Only = it)) },
-            )
+            switchRow(RStrings.search_r18_only, filter.r18Only) {
+                onChange(filter.copy(r18Only = it))
+            }
         }
     }
 }

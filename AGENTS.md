@@ -3,6 +3,7 @@
 ## 代码风格与提交
 
 - Kotlin 使用 Kotlin 官方代码风格，优先按 Android Studio 的项目 Code Style 格式化本次修改的文件，避免顺带格式化无关文件。
+- 编写或修改代码时，新增或改写的代码注释和文档注释（如 KDoc）必须使用中文。
 - 保留工作区中已有的用户修改；提交前检查暂存差异和 `git diff --check`。
 - 提交信息使用中文，遵循 Conventional Commits，例如 `feat(ui): 统一漫画与发现页面样式`。
 
@@ -15,7 +16,7 @@
 3. 完成版本配置检查及受影响的验证，检查暂存差异并运行 `git diff --check`，再将发布分支以 `--no-ff` 合并到 `master`，提交信息使用 `chore(release): 发布 vX.Y.Z`。
 4. 在 `master` 的发布合并提交上创建注释标签 `vX.Y.Z`，标签必须指向该发布提交，不直接指向 `develop` 或发布分支的 tip。随后将该标签以 `--no-ff` 合并回 `develop`，提交信息使用 `chore(release): 将 vX.Y.Z 发布结果合并回开发分支`。
 5. 正常推送 `master`、`develop` 与版本标签，并核对远端合并关系及标签指向。正常发布不重写已推送的分支历史，已发布的版本标签不得移动或覆盖；已有同名标签或 Release 时先核对其状态和提交，避免重复发布。
-6. 按历史 GitHub Release 格式整理中英双语的新功能、问题修复、Issue 处理情况、下载表及完整变更链接，内容以自上一正式版本以来的实际变更为准。`.github/workflows/release.yml` 同时响应 `master` 和 `v*` 标签推送，须根据版本标签和发布提交 SHA 识别正式标签构建；只有标签构建会汇总 Release 附件。
+6. 按历史 GitHub Release 格式整理中英双语的新功能、问题修复、Issue 处理情况、下载表及完整变更链接，内容以自上一正式版本以来的实际变更为准。正文只在中文与英文之间保留一条 `---` 分隔线，两处下载小节及完整变更链接前用空行分组。`.github/workflows/release.yml` 同时响应 `master` 和 `v*` 标签推送，须根据版本标签和发布提交 SHA 识别正式标签构建；只有标签构建会汇总 Release 附件。
 7. 正式发布前等待标签流水线及最终 Release 汇总任务全部成功，核对 Android Default / FOSS APK、iOS IPA、Windows x86_64 MSI、macOS arm64 DMG、Linux x86_64 tar.gz 六个附件均已上传且版本正确。流水线会将 Release 写为草稿并使用 `Release vX.Y.Z` 占位正文，因此须在汇总结束后写回最终双语正文，再正式发布为最新稳定版，避免正文或发布状态被流水线覆盖。
 8. 发布后核对公开 Release 的正文、附件和最新稳定版状态，再清理本次临时发布分支，保留正式标签及 `master` / `develop` 的合并记录。构建或发布失败时保留草稿和发布分支，处理问题后继续，不将未完成的发布报告为已完成。
 

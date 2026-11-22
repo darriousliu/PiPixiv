@@ -12,6 +12,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Severity
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -29,6 +30,7 @@ import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.navigation.Navigation3MainGraph
 import com.mrl.pixiv.setting.network.AiLocalNetworkPermissionEffect
 import com.mrl.pixiv.setting.network.LocalNetworkPermissionEffect
+import com.mrl.pixiv.splash.MigrationSplash
 import com.mrl.pixiv.splash.SplashViewModel
 import com.mrl.pixiv.theme.PiPixivTheme
 import io.github.vinceglb.filekit.FileKit
@@ -81,10 +83,14 @@ fun App(
                 colorScheme = colorScheme
             ) {
                 val state = splashViewModel.asState()
-                state.startDestination?.let {
+                val destination = state.startDestination
+                if (destination == null) {
+                    val migrationState by splashViewModel.migrationState.collectAsStateWithLifecycle()
+                    MigrationSplash(migrationState, splashViewModel, modifier)
+                } else {
                     Navigation3MainGraph(
-                        startDestination = it,
-                        modifier = modifier
+                        startDestination = destination,
+                        modifier = modifier,
                     )
                 }
             }
@@ -103,24 +109,24 @@ private fun SetUpImageLoaderFactory(imageLoaderBuilder: ImageLoader.Builder.() -
             .decoderCoroutineContext(Dispatchers.IO.limitedParallelism(2))
             .logger(
                 object : CoilLogger {
-                    override var minLevel = CoilLogLevel.Info
+                    override var minLevel = CoilLogLevel.Warn
                     override fun log(
                         tag: String,
                         level: CoilLogLevel,
                         message: String?,
                         throwable: Throwable?,
                     ) {
+                        val exceptionName = throwable?.let { it::class.simpleName }
                         KermitLogger.processLog(
                             severity = when (level) {
                                 CoilLogLevel.Verbose -> Severity.Verbose
                                 CoilLogLevel.Debug -> Severity.Debug
                                 CoilLogLevel.Info -> Severity.Info
-                                CoilLogLevel.Warn -> Severity.Warn
-                                CoilLogLevel.Error -> Severity.Error
+                                CoilLogLevel.Warn, CoilLogLevel.Error -> Severity.Warn
                             },
                             tag = tag,
-                            throwable = throwable,
-                            message = message.orEmpty(),
+                            throwable = null,
+                            message = exceptionName?.let { "Image load failed: $it" } ?: "Image loader reported a problem",
                         )
                     }
                 },

@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">选择要下载的页面</string>
+    <string name="artwork_download_all_originals">下载全部原图</string>
+    <string name="artwork_download_selected">下载所选原图</string>
+    <string name="artwork_download_selection_count">已选 %1$d / %2$d</string>
+    <string name="artwork_download_page">第 %1$d 页</string>
+    <string name="select_all">全选</string>
+    <string name="artwork_download_clear_selection">取消全选</string>
+</resources>

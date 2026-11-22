@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">詳細設定</string>
     <string name="network_advanced_settings_desc">DNSリゾルバーをカスタマイズ</string>
     <string name="ech_doh_url">DoHアドレス</string>
-    <string name="restart_app_to_take_effect">アプリを再起動して有効にする</string>
     <string name="image_source">画像ソース</string>
     <string name="self_defined_source">カスタム画像ソース</string>
     <string name="default_open">デフォルトでリンクを開く</string>
@@ -165,6 +164,7 @@
     <string name="check_update">更新を確認</string>
     <string name="already_updated">すでに最新バージョン</string>
     <string name="project_url">プロジェクトURL</string>
+    <string name="telegram_channel">Telegramの更新情報チャンネル</string>
     <string name="feedback">フィードバック</string>
     <string name="feedback_content">問題のフィードバックと共同開発を歓迎します</string>
     <string name="share_app">アプリを共有</string>

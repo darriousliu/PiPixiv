@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">Lokale Daten werden aktualisiert …</string>
+    <string name="migration_failure">Lokale Daten konnten nicht aktualisiert werden</string>
+    <string name="migration_storage_failure">Nicht genug Speicherplatz. Gib Speicherplatz frei und versuche es erneut.</string>
+    <string name="migration_database_failure">Auf den lokalen Speicher kann nicht zugegriffen werden. Prüfe den Gerätespeicher und versuche es erneut.</string>
+    <string name="migration_export_logs">Protokolle exportieren</string>
+    <string name="account_management">Konten verwalten</string>
+    <string name="switch_account">Konto wechseln</string>
+    <string name="add_account">Konto hinzufügen</string>
+    <string name="account_needs_relogin">Erneute Anmeldung erforderlich</string>
+    <string name="account_current">Aktuelles Konto</string>
+    <string name="remove_account">Konto entfernen</string>
+    <string name="remove_account_confirmation">%1$s entfernen?</string>
+    <string name="account_removal_description">Um dieses Konto wieder zu verwenden, musst du dich erneut anmelden. Beibehaltene lokale Daten werden bei der erneuten Anmeldung wiederhergestellt.</string>
+    <string name="delete_account_local_data">Auch die lokalen Daten dieses Kontos löschen</string>
+    <string name="switch_to_another_account">Zu einem anderen Konto wechseln</string>
+    <string name="recovery_pending_notice">Ältere Daten warten auf die Wiederherstellung</string>
+    <string name="data_recovery_view">Ansehen</string>
+    <string name="recovery_title">Daten wiederherstellen</string>
+    <string name="recovery_item_session">Kontoanmeldung</string>
+    <string name="recovery_item_search_tags">Suchverlauf und Lesezeichen-Tags</string>
+    <string name="recovery_item_series_progress">Lesefortschritt in Romanserien</string>
+    <string name="recovery_item_shared_data">Downloadverlauf und Sperrlisten</string>
+    <string name="recovery_item_translations">Übersetzungs-Cache</string>
+    <string name="recovery_item_legacy_blocks">Sperrliste aus älterer Version</string>
+    <string name="recovery_status_pending">Wiederherstellung ausstehend</string>
+    <string name="recovery_status_skipped">Keine älteren Daten</string>
+    <string name="recovery_status_abandoned">Verworfen</string>
+    <string name="recovery_reason_storage">Nicht genügend Speicherplatz</string>
+    <string name="recovery_reason_corrupted">Die älteren Daten sind beschädigt</string>
+    <string name="recovery_reason_io">Lokaler Speicher konnte nicht gelesen oder beschrieben werden</string>
+    <string name="recovery_target_title">In das aktuelle Konto importieren?</string>
+    <string name="recovery_target_description">Das ursprüngliche Konto konnte nicht ermittelt werden. Bestätige, um diesen Eintrag im aktuellen Konto (ID %1$d) wiederherzustellen.</string>
+    <string name="recovery_export">Ältere Daten exportieren</string>
+    <string name="recovery_export_description">Der Export enthält den Browserverlauf und keine Anmeldedaten.</string>
+    <string name="recovery_import">Altdatenpaket importieren</string>
+    <string name="recovery_import_description">Wähle einen Eintrag für den Import in das aktuelle Konto (ID %1$d).</string>
+    <string name="recovery_abandon">Verwerfen und bereinigen</string>
+    <string name="recovery_abandon_description">Alle noch nicht wiederhergestellten Einträge werden verworfen. Nach dem nächsten erfolgreichen Start werden die älteren Daten entfernt. Bereits wiederhergestellte Daten bleiben erhalten.</string>
+    <string name="recovery_operation_failed">Der Vorgang ist fehlgeschlagen. Versuche es erneut.</string>
+    <string name="recovery_skip">Überspringen</string>
+    <string name="recovery_finish">Fertig</string>
+</resources>

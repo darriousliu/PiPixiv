@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">उन्नत सेटिंग</string>
     <string name="network_advanced_settings_desc">DNS रिज़ॉल्वर को अनुकूलित करें</string>
     <string name="ech_doh_url">DoH पता</string>
-    <string name="restart_app_to_take_effect">प्रभावी होने के लिए ऐप को पुनरारंभ करें</string>
     <string name="image_source">छवि स्रोत</string>
     <string name="self_defined_source">स्व-परिभाषित छवि स्रोत</string>
     <string name="default_open">डिफ़ॉल्ट ओपन लिंक</string>
@@ -165,6 +164,7 @@
     <string name="check_update">अपडेट जांचें</string>
     <string name="already_updated">पहले से ही नवीनतम संस्करण</string>
     <string name="project_url">प्रोजेक्ट URL</string>
+    <string name="telegram_channel">टेलीग्राम अपडेट चैनल</string>
     <string name="feedback">प्रतिक्रिया</string>
     <string name="feedback_content">समस्या प्रतिक्रिया और सह-विकास के लिए स्वागत है</string>
     <string name="share_app">ऐप साझा करें</string>

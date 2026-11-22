@@ -4,6 +4,7 @@ import com.ctrip.flight.mmkv.MMKVCLibLoader
 import com.ctrip.flight.mmkv.MMKVLogLevel
 import com.ctrip.flight.mmkv.initialize
 import com.mrl.pixiv.common.analytics.logException
+import com.mrl.pixiv.common.logs.AppLogStore
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.absolutePath
 import io.github.vinceglb.filekit.div
@@ -20,6 +21,9 @@ actual fun initializeMMKV(logLevel: MMKVLogLevel) {
             logLevel = logLevel,
         )
     } catch (e: Exception) {
+        runCatching {
+            AppLogStore.recordCrash(e, "MMKV", "Desktop storage initialization failed")
+        }
         logException(e)
         exitProcess(-1)
     }
@@ -45,7 +49,7 @@ private fun resolveMMKVNativeLibrary(): String {
         .toAbsolutePath()
         .normalize()
     check(Files.isRegularFile(libraryPath)) {
-        "MMKV native library does not exist: $libraryPath"
+        "MMKV native library is missing: $libraryName"
     }
     return libraryPath.toRealPath().toString()
 }

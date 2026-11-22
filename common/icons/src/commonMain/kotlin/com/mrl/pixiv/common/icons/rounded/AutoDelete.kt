@@ -1,0 +1,91 @@
+// Adapted from Google Material Symbols (Rounded, auto_delete, FILL=1).
+// Source: https://fonts.google.com/icons
+// SPDX-License-Identifier: Apache-2.0
+
+package com.mrl.pixiv.common.icons.rounded
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.mrl.pixiv.common.icons.Icons
+import com.mrl.pixiv.common.icons.materialSymbol
+
+val Icons.Rounded.AutoDelete: ImageVector
+    get() = autoDelete
+
+private val autoDelete by lazy {
+    materialSymbol("Rounded.AutoDelete") {
+        moveTo(7f, 21f)
+        quadTo(6.18f, 21f, 5.59f, 20.41f)
+        reflectiveQuadTo(5f, 19f)
+        verticalLineTo(6f)
+        quadTo(4.58f, 6f, 4.29f, 5.71f)
+        quadTo(4f, 5.43f, 4f, 5f)
+        reflectiveQuadTo(4.29f, 4.29f)
+        reflectiveQuadTo(5f, 4f)
+        horizontalLineTo(9f)
+        quadTo(9f, 3.57f, 9.29f, 3.29f)
+        quadTo(9.58f, 3f, 10f, 3f)
+        horizontalLineToRelative(4f)
+        quadToRelative(0.43f, 0f, 0.71f, 0.29f)
+        reflectiveQuadTo(15f, 4f)
+        horizontalLineToRelative(4f)
+        quadToRelative(0.43f, 0f, 0.71f, 0.29f)
+        reflectiveQuadTo(20f, 5f)
+        reflectiveQuadTo(19.71f, 5.71f)
+        reflectiveQuadTo(19f, 6f)
+        verticalLineTo(9.15f)
+        quadToRelative(0f, 0.43f, -0.34f, 0.7f)
+        reflectiveQuadToRelative(-0.79f, 0.2f)
+        quadToRelative(-0.2f, -0.03f, -0.43f, -0.04f)
+        quadTo(17.23f, 10f, 17f, 10f)
+        quadToRelative(-0.5f, 0f, -1f, 0.06f)
+        reflectiveQuadToRelative(-1f, 0.21f)
+        verticalLineTo(9f)
+        quadTo(15f, 8.57f, 14.71f, 8.29f)
+        reflectiveQuadTo(14f, 8f)
+        reflectiveQuadTo(13.29f, 8.29f)
+        reflectiveQuadTo(13f, 9f)
+        verticalLineToRelative(2.25f)
+        quadToRelative(-0.6f, 0.42f, -1.11f, 0.96f)
+        reflectiveQuadTo(11f, 13.4f)
+        verticalLineTo(9f)
+        quadTo(11f, 8.57f, 10.71f, 8.29f)
+        reflectiveQuadTo(10f, 8f)
+        quadTo(9.58f, 8f, 9.29f, 8.29f)
+        reflectiveQuadTo(9f, 9f)
+        verticalLineToRelative(7f)
+        quadToRelative(0f, 0.43f, 0.29f, 0.71f)
+        quadTo(9.58f, 17f, 10f, 17f)
+        quadToRelative(0f, 0.73f, 0.16f, 1.44f)
+        reflectiveQuadTo(10.6f, 19.8f)
+        quadToRelative(0.2f, 0.43f, -0.04f, 0.81f)
+        reflectiveQuadTo(9.9f, 21f)
+        horizontalLineTo(7f)
+        close()
+        moveToRelative(6.46f, -0.46f)
+        quadTo(12f, 19.08f, 12f, 17f)
+        reflectiveQuadToRelative(1.46f, -3.54f)
+        reflectiveQuadTo(17f, 12f)
+        reflectiveQuadToRelative(3.54f, 1.46f)
+        quadTo(22f, 14.93f, 22f, 17f)
+        reflectiveQuadToRelative(-1.46f, 3.54f)
+        reflectiveQuadTo(17f, 22f)
+        reflectiveQuadTo(13.46f, 20.54f)
+        close()
+        moveTo(17.5f, 16.8f)
+        verticalLineTo(14.5f)
+        quadToRelative(0f, -0.2f, -0.15f, -0.35f)
+        reflectiveQuadTo(17f, 14f)
+        reflectiveQuadToRelative(-0.35f, 0.15f)
+        reflectiveQuadTo(16.5f, 14.5f)
+        verticalLineToRelative(2.27f)
+        quadToRelative(0f, 0.2f, 0.07f, 0.39f)
+        reflectiveQuadTo(16.8f, 17.5f)
+        lineTo(18.3f, 19f)
+        quadToRelative(0.15f, 0.15f, 0.35f, 0.15f)
+        reflectiveQuadTo(19f, 19f)
+        reflectiveQuadToRelative(0.15f, -0.35f)
+        reflectiveQuadTo(19f, 18.3f)
+        lineTo(17.5f, 16.8f)
+        close()
+    }
+}

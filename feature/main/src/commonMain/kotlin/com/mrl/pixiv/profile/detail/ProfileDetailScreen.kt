@@ -259,6 +259,7 @@ fun ProfileDetailScreen(
                             ),
                             navToPictureScreen = navigationManager::navigateToPictureScreen,
                             illusts = state.userIllusts,
+                            sharedElementGroup = KEY_USER_ILLUSTS,
                             modifier = Modifier.fillMaxWidth(),
                             onAllClick = {
                                 navigationManager.navigateToUserIllustScreen(uid)
@@ -274,6 +275,7 @@ fun ProfileDetailScreen(
                             endText = stringResource(RStrings.view_all),
                             navToPictureScreen = navigationManager::navigateToPictureScreen,
                             illusts = state.userMangas,
+                            sharedElementGroup = KEY_USER_MANGAS,
                             modifier = Modifier.fillMaxWidth(),
                             onAllClick = {
                                 navigationManager.navigateToUserIllustScreen(uid, Type.Manga)
@@ -304,6 +306,7 @@ fun ProfileDetailScreen(
                             endText = stringResource(RStrings.view_all),
                             navToPictureScreen = navigationManager::navigateToPictureScreen,
                             illusts = state.userBookmarksIllusts,
+                            sharedElementGroup = KEY_USER_BOOKMARKS_ILLUSTS,
                             modifier = Modifier.fillMaxWidth(),
                             onAllClick = {
                                 navigationManager.navigateToCollectionScreen(uid)

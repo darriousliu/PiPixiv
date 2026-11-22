@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">Paramètres avancés</string>
     <string name="network_advanced_settings_desc">Personnaliser le service de résolution DNS</string>
     <string name="ech_doh_url">Adresse DoH</string>
-    <string name="restart_app_to_take_effect">Redémarrer l'application pour appliquer les modifications</string>
     <string name="image_source">Source d'image</string>
     <string name="self_defined_source">Source d'image personnalisée</string>
     <string name="default_open">Ouvrir le lien par défaut</string>
@@ -165,6 +164,7 @@
     <string name="check_update">Vérifier les mises à jour</string>
     <string name="already_updated">Déjà la dernière version</string>
     <string name="project_url">URL du projet</string>
+    <string name="telegram_channel">Chaîne Telegram des mises à jour</string>
     <string name="feedback">Retour d'information</string>
     <string name="feedback_content">Bienvenue pour signaler les problèmes et co-développer</string>
     <string name="share_app">Partager l'application</string>

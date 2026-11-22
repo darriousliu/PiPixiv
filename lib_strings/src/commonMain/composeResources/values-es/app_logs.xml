@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">Registros de la app</string>
+    <string name="app_logs_feedback_hint">Cópialos y adjúntalos al enviar comentarios</string>
+    <string name="app_logs_local_notice">Los registros se guardan solo en este dispositivo y nunca se suben automáticamente. Puedes revisarlos antes de copiarlos.</string>
+    <string name="app_logs_warnings">Advertencias y errores</string>
+    <string name="app_logs_errors">Solo errores</string>
+    <string name="app_logs_current">Ejecución actual</string>
+    <string name="app_logs_previous">Ejecución anterior</string>
+    <string name="app_logs_copy_all">Copiar todos los registros</string>
+    <string name="app_logs_clear">Borrar registros</string>
+    <string name="app_logs_clear_confirmation">¿Borrar los registros de la ejecución actual y la anterior?</string>
+    <string name="app_logs_empty">No hay registros que coincidan</string>
+    <string name="app_logs_expand">Expandir traza de pila</string>
+    <string name="app_logs_collapse">Contraer traza de pila</string>
+    <string name="app_logs_omitted">Entradas antiguas omitidas: %1$d</string>
+    <string name="app_logs_unknown_device">Desconocido</string>
+    <string name="app_logs_copied">Registros copiados</string>
+    <string name="app_logs_export_failed">No se pudieron copiar ni compartir los registros</string>
+</resources>

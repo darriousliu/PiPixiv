@@ -1,16 +1,13 @@
 package com.mrl.pixiv.common.mmkv
 
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.protobuf.ProtoBuf
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
+import kotlin.text.CharacterCodingException
 
-private val mmkvProtobuf = ProtoBuf {
-    encodeDefaults = false
-}
-
-private val mmkvJson = Json {
+val mmkvJson = Json {
     encodeDefaults = true
     ignoreUnknownKeys = true
     isLenient = true
@@ -19,38 +16,44 @@ private val mmkvJson = Json {
 class MMKVSerializableProperty<V>(
     private val serializer: KSerializer<V>,
     private val defaultValue: V
-) : ReadWriteProperty<MMKVOwner, V> {
-    override fun getValue(thisRef: MMKVOwner, property: KProperty<*>): V {
-        // 使用一个辅助 Key 来标记当前存储的数据类型是否为 JSON
-        // 这样可以避免在 ByteArray 类型上调用 getString 导致的 Native 崩溃
-        val flagKey = "${property.name}_is_json"
-        val isJson = thisRef.kv.getBoolean(flagKey, false)
+) : ReadWriteProperty<MMKVOwner, V>, MMKVField<V> {
+    override fun getValue(thisRef: MMKVOwner, property: KProperty<*>): V =
+        read(thisRef, property.name)
 
-        if (isJson) {
-            val jsonString = thisRef.kv.getString(property.name, "")
-            if (jsonString.isNotEmpty()) {
-                return mmkvJson.decodeFromString(serializer, jsonString)
-            }
-        } else {
-            // 如果标记为 false，说明可能是旧的 Protobuf 数据，或者是新数据但还未写入过
-            thisRef.kv.getByteArray(property.name)?.let {
-                val value = mmkvProtobuf.decodeFromByteArray(serializer, it)
-                // 迁移：读取到旧数据后，以 JSON 格式写回，并更新标记
-                setValue(thisRef, property, value)
-                return value
-            }
-        }
-        return defaultValue
+    override fun read(owner: MMKVOwner, key: String): V = readRecoverable(owner, key) { defaultValue }
+
+    fun readRecoverable(owner: MMKVOwner, key: String, onCorrupted: () -> V): V = try {
+        readStrict(owner, key)
+    } catch (_: CharacterCodingException) {
+        onCorrupted()
+    } catch (_: SerializationException) {
+        onCorrupted()
     }
 
-    override fun setValue(thisRef: MMKVOwner, property: KProperty<*>, value: V) {
-        val flagKey = "${property.name}_is_json"
-        if (value != null) {
-            thisRef.kv[property.name] = mmkvJson.encodeToString(serializer, value)
-            thisRef.kv[flagKey] = true
-        } else {
-            thisRef.kv.removeValueForKey(property.name)
-            thisRef.kv.removeValueForKey(flagKey)
+    fun readStrict(owner: MMKVOwner, key: String): V {
+        val bytes = owner.accessMMKV { getByteArray(key) }
+        if (bytes == null) {
+            if (owner.contains(key)) throw SerializationException("Could not read field $key")
+            return defaultValue
         }
+        return decode(bytes)
+    }
+
+    internal fun decode(bytes: ByteArray): V =
+        mmkvJson.decodeFromString(serializer, bytes.decodeToString(throwOnInvalidSequence = true))
+
+    override fun setValue(thisRef: MMKVOwner, property: KProperty<*>, value: V) {
+        persist(thisRef, property.name, value)
+    }
+
+    override fun write(owner: MMKVOwner, key: String, value: V) {
+        if (!persist(owner, key, value)) {
+            throw MMKVStorageException("Could not persist MMKV field $key")
+        }
+    }
+
+    private fun persist(owner: MMKVOwner, key: String, value: V): Boolean {
+        val bytes = value?.let { mmkvJson.encodeToString(serializer, it).encodeToByteArray() }
+        return owner.accessMMKV { set(key, bytes) }
     }
 }

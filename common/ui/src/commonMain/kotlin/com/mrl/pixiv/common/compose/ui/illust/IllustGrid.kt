@@ -24,6 +24,7 @@ private const val KEY_LOADING = "loading"
 fun LazyGridScope.illustGrid(
     illusts: LazyPagingItems<Illust>,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
+    sharedElementGroup: String,
     enableLoading: Boolean = false,
 ) {
     if (enableLoading && illusts.loadState.refresh is LoadState.Loading && illusts.itemCount == 0) {
@@ -54,9 +55,10 @@ fun LazyGridScope.illustGrid(
                     BookmarkState.deleteBookmarkIllust(illust.id)
                 }
             },
-            navToPictureScreen = { prefix, enableTransition ->
-                navToPictureScreen(illusts.itemSnapshotList.items, index, prefix, enableTransition)
+            navToPictureScreen = { cover ->
+                navToPictureScreen(illusts.itemSnapshotList.items, index, cover)
             },
+            sharedElementSlot = "$sharedElementGroup:$index",
             shouldShowTip = index == 0,
         )
     }
@@ -65,6 +67,7 @@ fun LazyGridScope.illustGrid(
 fun LazyStaggeredGridScope.illustGrid(
     illusts: LazyPagingItems<Illust>,
     navToPictureScreen: NavigateToHorizontalPictureScreen,
+    sharedElementGroup: String,
     enableLoading: Boolean = false,
 ) {
     if (enableLoading && illusts.loadState.refresh is LoadState.Loading && illusts.itemCount == 0) {
@@ -95,9 +98,10 @@ fun LazyStaggeredGridScope.illustGrid(
                     BookmarkState.deleteBookmarkIllust(illust.id)
                 }
             },
-            navToPictureScreen = { prefix, enableTransition ->
-                navToPictureScreen(illusts.itemSnapshotList.items, index, prefix, enableTransition)
+            navToPictureScreen = { cover ->
+                navToPictureScreen(illusts.itemSnapshotList.items, index, cover)
             },
+            sharedElementSlot = "$sharedElementGroup:$index",
             enableTransition = true
         )
     }

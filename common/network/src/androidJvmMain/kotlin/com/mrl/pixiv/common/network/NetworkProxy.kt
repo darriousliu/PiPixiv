@@ -9,11 +9,15 @@ import java.net.Proxy
 import java.net.ProxySelector
 import java.net.SocketAddress
 import java.net.URI
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 
 internal fun OkHttpClient.Builder.configureNetworkRouting(
     setting: BypassSetting,
     usePixivEch: Boolean,
+    dohClient: OkHttpClient? = null,
+    observeDns: ((List<NetworkDiagnosticResolver>) -> Unit)? = null,
 ): OkHttpClient.Builder = apply {
     // 代理由 OkHttp 选择，底层 TCP 不应再次套用 JVM 的系统 SOCKS 代理。
     socketFactory(DirectSocketFactory)
@@ -32,7 +36,7 @@ internal fun OkHttpClient.Builder.configureNetworkRouting(
         )
         is BypassSetting.ECH -> {
             if (usePixivEch) {
-                bypassECH(setting.url)
+                bypassECH(setting.url, dohClient ?: OkHttpClient(), observeDns)
             } else {
                 // AI 与更新检查沿用直连，避免把 Pixiv 的 DNS、ECH 和证书策略用于其他服务。
                 proxy(Proxy.NO_PROXY)
@@ -47,12 +51,28 @@ private object DirectProxySelector : ProxySelector() {
 }
 
 internal fun OkHttpConfig.configureProxyOrECH(
-    setting: BypassSetting = NetworkUtil.bypassSetting,
+    setting: BypassSetting,
     usePixivEch: Boolean = true,
+    observeDns: ((List<NetworkDiagnosticResolver>) -> Unit)? = null,
 ) {
-    config { configureNetworkRouting(setting, usePixivEch) }
+    val pool = ConnectionPool()
+    val dispatcher = Dispatcher()
+    val dohClient = if (setting is BypassSetting.ECH && usePixivEch) {
+        OkHttpClient.Builder().connectionPool(pool).dispatcher(dispatcher).build()
+    } else {
+        null
+    }
+    config {
+        connectionPool(pool)
+        dispatcher(dispatcher)
+        configureNetworkRouting(setting, usePixivEch, dohClient, observeDns)
+    }
 }
 
 actual fun HttpClientConfig<*>.configureNetworkProxy(setting: BypassSetting) {
     engine { (this as OkHttpConfig).configureProxyOrECH(setting, usePixivEch = false) }
+}
+
+actual fun HttpClientConfig<*>.configurePixivNetworkProxy(setting: BypassSetting) {
+    engine { (this as OkHttpConfig).configureProxyOrECH(setting) }
 }

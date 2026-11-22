@@ -178,6 +178,7 @@ fun ArtworkScreen(
                         illusts = userIllusts,
                         gridState = illustGridState,
                         navToPictureScreen = navigationManager::navigateToPictureScreen,
+                        sharedElementGroup = "user-illusts",
                     )
 
                     ArtworkPage.Novel -> UserNovelPage(
@@ -191,6 +192,7 @@ fun ArtworkScreen(
                         illusts = userMangas,
                         gridState = mangaGridState,
                         navToPictureScreen = navigationManager::navigateToPictureScreen,
+                        sharedElementGroup = "user-manga",
                     )
                 }
             }
@@ -203,6 +205,7 @@ private fun UserIllustPage(
     illusts: LazyPagingItems<Illust>,
     gridState: androidx.compose.foundation.lazy.grid.LazyGridState,
     navToPictureScreen: com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen,
+    sharedElementGroup: String,
 ) {
     val layoutParams = IllustGridDefaults.relatedLayoutParameters()
     val pullRefreshState = rememberPullToRefreshState()
@@ -231,6 +234,7 @@ private fun UserIllustPage(
             illustGrid(
                 illusts = illusts,
                 navToPictureScreen = navToPictureScreen,
+                sharedElementGroup = sharedElementGroup,
                 enableLoading = false,
             )
             if (

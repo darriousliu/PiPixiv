@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_api_proxy_title">Прокси для API приложения</string>
+    <string name="app_api_proxy_custom">Свой домен</string>
+    <string name="app_api_proxy_address">Домен прокси</string>
+    <string name="app_api_proxy_credentials">Прокси может читать токены доступа к API приложения. Используйте сервис, который вы контролируете.</string>
+    <string name="app_api_proxy_invalid">Укажите домен без схемы, порта и пути.</string>
+</resources>

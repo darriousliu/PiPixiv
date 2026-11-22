@@ -7,7 +7,15 @@ kotlin {
         namespace = "com.mrl.pixiv.common.analytics.default_"
     }
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
+        val androidJvmMain = create("androidJvmMain") {
+            dependsOn(commonMain.get())
+        }
+        androidMain.get().dependsOn(androidJvmMain)
+        jvmMain.get().dependsOn(androidJvmMain)
+
         commonMain.dependencies {
             // Sentry
             implementation(libs.sentry.multiplatform)
@@ -21,7 +29,10 @@ kotlin {
 
         }
         jvmMain.dependencies {
-
+            implementation(libs.filekit.core)
+        }
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }

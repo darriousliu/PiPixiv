@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">Mise à niveau des données locales…</string>
+    <string name="migration_failure">Impossible de mettre à niveau les données locales</string>
+    <string name="migration_storage_failure">Espace de stockage insuffisant. Libérez de l’espace, puis réessayez.</string>
+    <string name="migration_database_failure">Le stockage local est inaccessible. Vérifiez le stockage de votre appareil, puis réessayez.</string>
+    <string name="migration_export_logs">Exporter les journaux</string>
+    <string name="account_management">Gérer les comptes</string>
+    <string name="switch_account">Changer de compte</string>
+    <string name="add_account">Ajouter un compte</string>
+    <string name="account_needs_relogin">Reconnexion requise</string>
+    <string name="account_current">Compte actuel</string>
+    <string name="remove_account">Retirer le compte</string>
+    <string name="remove_account_confirmation">Retirer %1$s ?</string>
+    <string name="account_removal_description">Pour utiliser de nouveau ce compte, reconnectez-vous. Les données locales conservées seront restaurées à la reconnexion.</string>
+    <string name="delete_account_local_data">Supprimer aussi les données locales de ce compte</string>
+    <string name="switch_to_another_account">Passer à un autre compte</string>
+    <string name="recovery_pending_notice">Des données anciennes sont en attente de récupération</string>
+    <string name="data_recovery_view">Voir</string>
+    <string name="recovery_title">Récupération des données</string>
+    <string name="recovery_item_session">Connexion au compte</string>
+    <string name="recovery_item_search_tags">Historique de recherche et tags de favoris</string>
+    <string name="recovery_item_series_progress">Progression dans les séries de romans</string>
+    <string name="recovery_item_shared_data">Historique des téléchargements et listes de blocage</string>
+    <string name="recovery_item_translations">Cache des traductions</string>
+    <string name="recovery_item_legacy_blocks">Ancienne liste de blocage</string>
+    <string name="recovery_status_pending">Récupération en attente</string>
+    <string name="recovery_status_skipped">Aucune donnée ancienne</string>
+    <string name="recovery_status_abandoned">Abandonné</string>
+    <string name="recovery_reason_storage">Espace de stockage insuffisant</string>
+    <string name="recovery_reason_corrupted">Les données anciennes sont endommagées</string>
+    <string name="recovery_reason_io">Impossible de lire ou d’écrire dans le stockage local</string>
+    <string name="recovery_target_title">Importer dans le compte actuel ?</string>
+    <string name="recovery_target_description">Impossible d’identifier le compte d’origine. Confirmez pour récupérer cet élément avec le compte actuel (ID %1$d).</string>
+    <string name="recovery_export">Exporter les données anciennes</string>
+    <string name="recovery_export_description">L’export contient l’historique de navigation et exclut les identifiants de connexion.</string>
+    <string name="recovery_import">Importer depuis un paquet de données anciennes</string>
+    <string name="recovery_import_description">Choisissez un élément à importer dans le compte actuel (ID %1$d).</string>
+    <string name="recovery_abandon">Abandonner et nettoyer</string>
+    <string name="recovery_abandon_description">Abandonnez tous les éléments en attente. Les données anciennes seront nettoyées après le prochain démarrage réussi. Les données récupérées seront conservées.</string>
+    <string name="recovery_operation_failed">L’opération a échoué. Réessayez.</string>
+    <string name="recovery_skip">Passer</string>
+    <string name="recovery_finish">Terminer</string>
+</resources>

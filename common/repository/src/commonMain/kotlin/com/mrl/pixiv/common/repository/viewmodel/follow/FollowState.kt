@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 
 val User.isFollowing: Boolean
     get() = FollowState.state[id] ?: isFollowed
@@ -24,6 +25,8 @@ object FollowState {
     internal val state get() = requests.state
 
     fun isUpdating(userId: Long): Boolean = requests.isUpdating(userId)
+
+    internal fun clear() = requests.clear()
 
     fun followUser(userId: Long, restrict: Restrict = Restrict.PUBLIC): Job =
         requests.update(userId, isFollowing = true) {
@@ -49,11 +52,20 @@ internal class FollowRequestState(
 
     fun isUpdating(userId: Long): Boolean = jobs.containsKey(userId)
 
+    fun clear() {
+        val inFlight = jobs.values.toList()
+        jobs.clear()
+        state.clear()
+        inFlight.forEach { it.cancel() }
+    }
+
     fun update(userId: Long, isFollowing: Boolean, request: suspend () -> Unit): Job {
         jobs[userId]?.let { return it }
         val job = launchLazyRequest {
             request()
-            state[userId] = isFollowing
+            if (jobs[userId] === coroutineContext[Job]) {
+                state[userId] = isFollowing
+            }
         }
         jobs[userId] = job
         job.invokeOnCompletion {

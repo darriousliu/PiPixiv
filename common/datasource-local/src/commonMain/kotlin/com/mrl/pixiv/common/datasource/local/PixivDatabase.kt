@@ -8,10 +8,7 @@ import androidx.room3.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import com.mrl.pixiv.common.datasource.local.dao.BlockContentDao
-import com.mrl.pixiv.common.datasource.local.dao.BrowsingHistoryDao
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
-import com.mrl.pixiv.common.datasource.local.dao.NovelReadLaterDao
-import com.mrl.pixiv.common.datasource.local.dao.NovelReadingProgressDao
 import com.mrl.pixiv.common.datasource.local.dao.NovelTranslationDao
 import com.mrl.pixiv.common.datasource.local.entity.BlockCommentEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockIllustEntity
@@ -19,37 +16,26 @@ import com.mrl.pixiv.common.datasource.local.entity.BlockNovelEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockTagEntity
 import com.mrl.pixiv.common.datasource.local.entity.BlockUserEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
-import com.mrl.pixiv.common.datasource.local.entity.IllustHistoryEntity
-import com.mrl.pixiv.common.datasource.local.entity.NovelHistoryEntity
-import com.mrl.pixiv.common.datasource.local.entity.NovelReadLaterEntity
-import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelTranslationEntity
 
 @Database(
     entities = [
         DownloadEntity::class,
-        NovelReadingProgressEntity::class,
         NovelTranslationEntity::class,
-        NovelReadLaterEntity::class,
         BlockIllustEntity::class,
         BlockNovelEntity::class,
         BlockTagEntity::class,
         BlockCommentEntity::class,
         BlockUserEntity::class,
-        IllustHistoryEntity::class,
-        NovelHistoryEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 @ConstructedBy(PixivDatabaseConstructor::class)
 abstract class PixivDatabase : RoomDatabase() {
     abstract fun downloadDao(): DownloadDao
-    abstract fun novelReadingProgressDao(): NovelReadingProgressDao
     abstract fun novelTranslationDao(): NovelTranslationDao
-    abstract fun novelReadLaterDao(): NovelReadLaterDao
     abstract fun blockContentDao(): BlockContentDao
-    abstract fun browsingHistoryDao(): BrowsingHistoryDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -281,6 +267,66 @@ abstract class PixivDatabase : RoomDatabase() {
                 connection.execSQL(
                     "ALTER TABLE novel_translation ADD COLUMN metadataSourceMd5 TEXT NOT NULL DEFAULT ''"
                 )
+            }
+        }
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override suspend fun migrate(connection: SQLiteConnection) {
+                connection.execSQL(
+                    """
+                    CREATE TABLE novel_translation_new (
+                        novelId INTEGER NOT NULL,
+                        targetLanguage TEXT NOT NULL,
+                        provider TEXT NOT NULL,
+                        model TEXT NOT NULL,
+                        configFingerprint TEXT NOT NULL,
+                        sourceMd5 TEXT NOT NULL,
+                        translatedText TEXT NOT NULL,
+                        updatedAtMillis INTEGER NOT NULL,
+                        translatedTitle TEXT NOT NULL DEFAULT '',
+                        translatedCaption TEXT NOT NULL DEFAULT '',
+                        metadataSourceMd5 TEXT NOT NULL DEFAULT '',
+                        PRIMARY KEY(novelId, targetLanguage)
+                    )
+                    """.trimIndent()
+                )
+                // Sort row IDs and keys only, so SQLite doesn't sort the large translated texts.
+                connection.execSQL(
+                    """
+                    INSERT INTO novel_translation_new (
+                        novelId, targetLanguage, provider, model, configFingerprint, sourceMd5,
+                        translatedText, updatedAtMillis, translatedTitle, translatedCaption,
+                        metadataSourceMd5
+                    )
+                    SELECT novelId, targetLanguage, provider, model, configFingerprint, sourceMd5,
+                        translatedText, updatedAtMillis, translatedTitle, translatedCaption,
+                        metadataSourceMd5
+                    FROM novel_translation
+                    WHERE rowid IN (
+                        SELECT rowid FROM (
+                            SELECT rowid, ROW_NUMBER() OVER (
+                                PARTITION BY novelId, targetLanguage
+                                ORDER BY updatedAtMillis DESC, rowid DESC
+                            ) AS translationRank
+                            FROM novel_translation
+                        )
+                        WHERE translationRank = 1
+                    )
+                    """.trimIndent()
+                )
+                val secureDeleteMode = connection.prepare("PRAGMA main.secure_delete").use { statement ->
+                    check(statement.step())
+                    val mode = statement.getLong(0)
+                    // SQLite reports FAST as 2 but interprets a numeric assignment of 2 as ON.
+                    if (mode == 2L) "FAST" else mode.toString()
+                }
+                try {
+                    // The translations have already been copied. Skip scrubbing freed pages for this DROP.
+                    connection.execSQL("PRAGMA main.secure_delete = FAST")
+                    connection.execSQL("DROP TABLE novel_translation")
+                } finally {
+                    connection.execSQL("PRAGMA main.secure_delete = $secureDeleteMode")
+                }
+                connection.execSQL("ALTER TABLE novel_translation_new RENAME TO novel_translation")
             }
         }
     }

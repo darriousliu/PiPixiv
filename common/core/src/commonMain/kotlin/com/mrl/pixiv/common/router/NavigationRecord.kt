@@ -88,16 +88,20 @@ val Destination.paneSpec: DestinationPaneSpec
         is Destination.PictureDeeplink -> picturePaneSpec
 
         Destination.LoginOption,
+        Destination.AddAccount,
         is Destination.Login,
         Destination.OAuthLogin,
         Destination.WebCookieLogin,
         is Destination.ImagePreview -> exclusivePaneSpec
+
+        is Destination.DataRecovery -> if (afterLogin) exclusivePaneSpec else detailPaneSpec
 
         is Destination.ProfileDetail,
         is Destination.NovelDetail,
         is Destination.Comment,
         is Destination.Report,
         Destination.NetworkSetting,
+        Destination.NetworkDiagnostic,
         Destination.BrowsingSetting,
         Destination.SearchSetting,
         Destination.HistorySetting,
@@ -110,6 +114,8 @@ val Destination.paneSpec: DestinationPaneSpec
         Destination.BlockTag,
         Destination.CloudMute,
         Destination.BlockComments,
+        Destination.AccountManagement,
         Destination.AppData,
+        Destination.AppLog,
         Destination.About -> detailPaneSpec
     }

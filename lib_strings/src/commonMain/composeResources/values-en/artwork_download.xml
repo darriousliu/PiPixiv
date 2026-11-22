@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">Select pages to download</string>
+    <string name="artwork_download_all_originals">Download all originals</string>
+    <string name="artwork_download_selected">Download selected originals</string>
+    <string name="artwork_download_selection_count">%1$d of %2$d selected</string>
+    <string name="artwork_download_page">Page %1$d</string>
+    <string name="select_all">Select all</string>
+    <string name="artwork_download_clear_selection">Deselect all</string>
+</resources>

@@ -7,6 +7,8 @@ import android.content.Context
 actual suspend fun copyToClipboard(text: String) {
     // 复制到剪切板
     val clipboardManager = AppUtil.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+    // 可空的 getter 和非空的 setter 让 Kotlin 将 primaryClip 识别为只读属性。
+    @Suppress("UsePropertyAccessSyntax")
     clipboardManager?.setPrimaryClip(ClipData.newPlainText(text, text))
 }
 

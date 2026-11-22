@@ -20,6 +20,8 @@ actual object DeviceInfo {
         get() = UIDevice.currentDevice.model
 
     actual val APP_VERSION = "8.4.0"
+    actual fun appLogDetails() = AppLogDeviceDetails(PLATFORM, VERSION, DISPLAY_NAME)
+
     actual val DISPLAY_NAME by lazy {
         deviceModelMapping[deviceIdentifier] ?: MODEL
     }

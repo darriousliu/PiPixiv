@@ -23,8 +23,12 @@ sealed class Destination : NavKey {
     data object LoginOption : Destination()
 
     @Serializable
+    data object AddAccount : Destination()
+
+    @Serializable
     data class Login(
         val startUrl: String,
+        val addAccount: Boolean = false,
     ) : Destination()
 
     @Serializable
@@ -44,8 +48,8 @@ sealed class Destination : NavKey {
     @Serializable
     data class Picture(
         val index: Int,
-        val prefix: String,
-        val enableTransition: Boolean,
+        val cacheKey: String,
+        val cover: PictureCoverSource? = null,
     ) : Destination()
 
     @Serializable
@@ -57,7 +61,7 @@ sealed class Destination : NavKey {
     data class ImagePreview(
         val imageUrls: List<String>,
         val initialIndex: Int,
-        val sharedElementKey: String? = null,
+        val sharedImage: PictureImageKey? = null,
     ) : Destination()
 
     @Serializable
@@ -74,7 +78,13 @@ sealed class Destination : NavKey {
     data object Setting : Destination()
 
     @Serializable
+    data object AccountManagement : Destination()
+
+    @Serializable
     data object NetworkSetting : Destination()
+
+    @Serializable
+    data object NetworkDiagnostic : Destination()
 
     @Serializable
     data object BrowsingSetting : Destination()
@@ -168,10 +178,16 @@ sealed class Destination : NavKey {
     data object AppData : Destination()
 
     @Serializable
+    data class DataRecovery(val afterLogin: Boolean = false) : Destination()
+
+    @Serializable
     data object Download : Destination()
 
     @Serializable
     data object About : Destination()
+
+    @Serializable
+    data object AppLog : Destination()
 
     @Serializable
     data class Comment(
@@ -207,6 +223,32 @@ sealed class Destination : NavKey {
     @Serializable
     data class UserMangaSeries(val userId: Long) : Destination()
 }
+
+/** [slot] identifies an artwork occurrence within one navigation entry. */
+@Serializable
+data class PictureImageKey(
+    val entryId: String,
+    val slot: String,
+    val illustId: Long,
+    val page: Int = 0,
+)
+
+@Serializable
+data class PictureCoverSource(
+    val key: PictureImageKey,
+    val thumbnailUrl: String,
+)
+
+/**
+ * 打开页面时与上一页共享的图片。新增共享元素入口时需要同步登记，
+ * 返回该页面时才会保留共享元素过渡。
+ */
+val Destination.sharedImageFromOpener: PictureImageKey?
+    get() = when (this) {
+        is Destination.Picture -> cover?.key
+        is Destination.ImagePreview -> sharedImage
+        else -> null
+    }
 
 @Serializable
 sealed class MainPage(

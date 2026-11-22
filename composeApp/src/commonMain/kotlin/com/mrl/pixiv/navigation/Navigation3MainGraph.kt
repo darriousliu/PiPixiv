@@ -9,16 +9,25 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.separatingVerticalHingeBounds
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.entryProvider
@@ -36,24 +45,28 @@ import com.mrl.pixiv.collection.CollectionScreen
 import com.mrl.pixiv.collection.tags.BookmarkedTagsScreen
 import com.mrl.pixiv.comment.BlockCommentsScreen
 import com.mrl.pixiv.comment.CommentScreen
-import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.analytics.logScreenView
+import com.mrl.pixiv.common.analytics.recordCrashScreen
 import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
-import com.mrl.pixiv.common.compose.LocalSharedKeyPrefix
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.LocalToaster
+import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.PaneInputScope
 import com.mrl.pixiv.common.compose.layout.PaneInputState
 import com.mrl.pixiv.common.compose.layout.SplitPaneDividerWidth
 import com.mrl.pixiv.common.compose.layout.rememberSplitPaneState
 import com.mrl.pixiv.common.compose.listener.EscBackHandler
 import com.mrl.pixiv.common.repository.IllustCacheRepo
+import com.mrl.pixiv.common.repository.recovery.DataRecoveryRepository
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.LocalNavigationManager
+import com.mrl.pixiv.common.router.MainPage
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.router.paneSpec
 import com.mrl.pixiv.common.router.rememberNavigationState
 import com.mrl.pixiv.common.toast.ToastMessage
+import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.result.LocalResultEventBus
 import com.mrl.pixiv.common.util.result.ResultEventBus
@@ -87,8 +100,10 @@ import com.mrl.pixiv.setting.PrivacySettingScreen
 import com.mrl.pixiv.setting.SearchSettingScreen
 import com.mrl.pixiv.setting.SettingScreen
 import com.mrl.pixiv.setting.about.AboutScreen
+import com.mrl.pixiv.setting.account.AccountManagementScreen
 import com.mrl.pixiv.setting.ai.AiTranslationSettingScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
+import com.mrl.pixiv.setting.applog.AppLogScreen
 import com.mrl.pixiv.setting.block.BlockIllustScreen
 import com.mrl.pixiv.setting.block.BlockNovelScreen
 import com.mrl.pixiv.setting.block.BlockSettingsScreen
@@ -96,7 +111,12 @@ import com.mrl.pixiv.setting.block.BlockTagScreen
 import com.mrl.pixiv.setting.block.BlockUserScreen
 import com.mrl.pixiv.setting.block.CloudMuteScreen
 import com.mrl.pixiv.setting.download.DownloadScreen
+import com.mrl.pixiv.setting.network.NetworkDiagnosticScreen
 import com.mrl.pixiv.setting.network.NetworkSettingScreen
+import com.mrl.pixiv.setting.recovery.DataRecoveryScreen
+import com.mrl.pixiv.splash.StartupMigration
+import com.mrl.pixiv.strings.data_recovery_view
+import com.mrl.pixiv.strings.recovery_pending_notice
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
@@ -114,6 +134,7 @@ fun Navigation3MainGraph(
 ) {
     val toastState = rememberToasterState()
     val resultBus = remember { ResultEventBus() }
+    val recovery: DataRecoveryRepository = koinInject()
 
     rememberNavigationState(navigationManager)
     val inputState = remember { PaneInputState() }
@@ -135,10 +156,12 @@ fun Navigation3MainGraph(
         entry<Destination.LoginOption> {
             LoginOptionScreen()
         }
+        entry<Destination.AddAccount> {
+            LoginOptionScreen(addAccount = true)
+        }
         // 登陆
         entry<Destination.Login> {
-            val startUrl = it.startUrl
-            LoginScreen(startUrl = startUrl)
+            LoginScreen(startUrl = it.startUrl, addAccount = it.addAccount)
         }
         // OAuth token登陆
         entry<Destination.OAuthLogin> {
@@ -150,6 +173,10 @@ fun Navigation3MainGraph(
         }
 
         entry<Destination.Main> {
+            val migration: StartupMigration = koinInject()
+            if (navigationManager.currentDestination == Destination.Main) {
+                LaunchedEffect(migration) { migration.onHomeEntered() }
+            }
             MainScreen()
         }
 
@@ -188,7 +215,7 @@ fun Navigation3MainGraph(
             ImagePreviewScreen(
                 imageUrls = it.imageUrls,
                 initialIndex = it.initialIndex,
-                sharedElementKey = it.sharedElementKey,
+                sharedImage = it.sharedImage,
                 onBack = currentNavigationManager()::popBackStack,
             )
         }
@@ -212,9 +239,17 @@ fun Navigation3MainGraph(
             SettingScreen()
         }
 
+        entry<Destination.AccountManagement> {
+            AccountManagementScreen()
+        }
+
         // 网络设置页
         entry<Destination.NetworkSetting> {
             NetworkSettingScreen()
+        }
+
+        entry<Destination.NetworkDiagnostic> {
+            NetworkDiagnosticScreen()
         }
 
         entry<Destination.BrowsingSetting> {
@@ -299,16 +334,12 @@ fun Navigation3MainGraph(
                         ) + fadeOut(DefaultFloatAnimationSpec)
                     }
         ) {
-            val illusts = remember { IllustCacheRepo[it.prefix] }
-            CompositionLocalProvider(
-                LocalSharedKeyPrefix provides it.prefix
-            ) {
-                HorizontalSwipePictureScreen(
-                    illusts = illusts.toImmutableList(),
-                    index = it.index,
-                    enableTransition = it.enableTransition,
-                )
-            }
+            val illusts = remember(it.cacheKey) { IllustCacheRepo[it.cacheKey].toImmutableList() }
+            HorizontalSwipePictureScreen(
+                illusts = illusts,
+                index = it.index,
+                cover = it.cover,
+            )
         }
 
         entry<Destination.UserArtwork> {
@@ -348,11 +379,21 @@ fun Navigation3MainGraph(
         entry<Destination.AppData> {
             AppDataScreen()
         }
+        entry<Destination.DataRecovery> { destination ->
+            DataRecoveryScreen(
+                afterLogin = destination.afterLogin,
+                onBack = currentNavigationManager()::popBackStack,
+            )
+        }
         entry<Destination.Download> {
             DownloadScreen()
         }
         entry<Destination.About> {
             AboutScreen()
+        }
+
+        entry<Destination.AppLog> {
+            AppLogScreen()
         }
         entry<Destination.Comment> {
             CommentScreen(
@@ -405,10 +446,7 @@ fun Navigation3MainGraph(
 
     HandleDeeplink(navigationManager)
     LogScreen(navigationManager)
-    EscBackHandler {
-        if (navigationManager.backStack.isEmpty()) return@EscBackHandler
-        navigationManager.popBackStack()
-    }
+    EscBackHandler(navigationManager::popBackStack)
     SharedTransitionLayout {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,
@@ -465,6 +503,8 @@ fun Navigation3MainGraph(
                             pictureCacheDecorator,
                         ),
                         sceneStrategies = listOf(strategy),
+                        // 快速返回到共享图片的来源页时，仍需播完共享元素的收尾动画。
+                        settlesQuickBack = { scene, previous -> scene.returnsWithSharedImage(previous) },
                         entryProvider = { record ->
                             val destinationEntry = destinationEntryProvider(record.destination)
                             NavEntry(
@@ -485,10 +525,43 @@ fun Navigation3MainGraph(
                             }
                         }
                     )
+                    HomeRecoveryNotice(
+                        visible = topRecord.destination == Destination.Main &&
+                                navigationManager.currentMainPage == MainPage.Home,
+                        recovery = recovery,
+                        onView = { navigationManager.navigate(Destination.DataRecovery()) },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = LocalMainNavigationBottomInset.current),
+                    )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun HomeRecoveryNotice(
+    visible: Boolean,
+    recovery: DataRecoveryRepository,
+    onView: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val hasPending by recovery.hasPending.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    var shown by rememberSaveable { mutableStateOf(false) }
+    val message = stringResource(RStrings.recovery_pending_notice)
+    val viewLabel = stringResource(RStrings.data_recovery_view)
+    LaunchedEffect(visible, hasPending) {
+        if (!visible || !hasPending || shown) return@LaunchedEffect
+        shown = true
+        if (snackbar.showSnackbar(message, viewLabel, withDismissAction = true) ==
+            SnackbarResult.ActionPerformed
+        ) {
+            onView()
+        }
+    }
+    if (visible && hasPending) SnackbarHost(snackbar, modifier = modifier)
 }
 
 @Composable
@@ -524,96 +597,28 @@ internal expect fun HandleDeeplink(
     navigationManager: NavigationManager,
 )
 
-@OptIn(InternalSerializationApi::class)
 @Composable
 private fun LogScreen(
     navigationManager: NavigationManager,
 ) {
-    LaunchedEffect(navigationManager.currentDestination) {
-        // Get current destination
-        val currentDestination = navigationManager.currentDestination
+    val destination = navigationManager.currentDestination
+    val mainPage = if (destination == Destination.Main) navigationManager.currentMainPage else null
+    LaunchedEffect(navigationManager.topEntryId, mainPage) {
+        val screen = mainPage ?: destination
+        val name = screenName(screen)
+        recordCrashScreen(name)
+        when (screen) {
+            is MainPage.Home,
+            is MainPage.Ranking,
+            is MainPage.Latest,
+            is Destination.Following,
+            is Destination.SearchResults -> Unit
 
-        // Log screen view event
-        logEvent("screen_view", buildMap {
-            val screenName = currentDestination::class.serializer().descriptor.serialName
-                .split(".")
-                .lastOrNull()
-                .orEmpty()
-            put("screen_name", screenName)
-            put("screen_class", screenName)
-
-            // Add additional parameters for specific destinations
-            when (currentDestination) {
-                is Destination.Login -> {
-                    put("start_url", currentDestination.startUrl)
-                }
-
-                is Destination.Main -> {
-                    val screenName =
-                        navigationManager.currentMainPage::class.serializer().descriptor.serialName
-                            .split(".")
-                            .lastOrNull()
-                            .orEmpty()
-                    put("current_main_page", screenName)
-                }
-
-                is Destination.ProfileDetail -> {
-                    put("user_id", currentDestination.userId.toString())
-                }
-
-                is Destination.PictureDeeplink -> {
-                    put("illust_id", currentDestination.illustId.toString())
-                }
-
-                is Destination.SearchResults -> {
-                    put("search_words", currentDestination.searchWords)
-                    put("is_id_search", currentDestination.isIdSearch.toString())
-                    put("search_mode", currentDestination.searchMode.name)
-                }
-
-                is Destination.Picture -> {
-                    put("index", currentDestination.index.toString())
-                    put("prefix", currentDestination.prefix)
-                    put("enable_transition", currentDestination.enableTransition.toString())
-                }
-
-                is Destination.Collection -> {
-                    put("user_id", currentDestination.userId.toString())
-                    put("is_novel", currentDestination.isNovel.toString())
-                }
-
-                is Destination.Following -> {
-                    put("user_id", currentDestination.userId.toString())
-                }
-
-                is Destination.UserArtwork -> {
-                    put("user_id", currentDestination.userId.toString())
-                }
-
-                is Destination.UserNovels -> {
-                    put("user_id", currentDestination.userId.toString())
-                }
-
-                is Destination.Comment -> {
-                    put("id", currentDestination.id.toString())
-                    put("type", currentDestination.type.toString())
-                }
-
-                is Destination.Report -> {
-                    put("id", currentDestination.id.toString())
-                    put("type", currentDestination.type.toString())
-                }
-
-                is Destination.NovelDetail -> {
-                    put("novel_id", currentDestination.novelId.toString())
-                }
-
-                is Destination.NovelSeries -> {
-                    put("series_id", currentDestination.seriesId.toString())
-                }
-
-                else -> Unit
-            }
-        })
+            else -> logScreenView(name)
+        }
     }
 }
+
+@OptIn(InternalSerializationApi::class)
+private fun screenName(screen: Any): String =
+    screen::class.serializer().descriptor.serialName.substringAfterLast('.')

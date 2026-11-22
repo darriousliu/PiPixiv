@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">إحصاءات الاستخدام المجهولة الهوية</string>
+    <string name="usage_analytics_description">تحصي الشاشات والميزات المستخدمة لمساعدتنا على تحسين التطبيق.</string>
+    <string name="crash_diagnostics">تقارير الأعطال</string>
+    <string name="crash_diagnostics_description">عند تعطل التطبيق أو حدوث خطأ، يُرسل تلقائيًا تفاصيل الخطأ وإصدار التطبيق ومعلومات الجهاز لمساعدتنا على تحديد المشكلة وإصلاحها.</string>
+    <string name="crash_diagnostics_switch_note">لا يؤثر المفتاح أعلاه على تقارير الأعطال.</string>
+    <string name="privacy_not_collected_description">لا يجمع التطبيق بشكل نشط عبارات بحثك أو معلومات حسابك أو الأعمال التي تشاهدها أو الملفات التي تنزّلها.</string>
+</resources>

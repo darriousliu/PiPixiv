@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class CollectionSyncState { CHECKING, SYNCING, READY, FAILED, NOT_OWNER }
 
@@ -107,7 +108,7 @@ class CollectionSearchViewModel(private val uid: Long) : ViewModel() {
         val query = state.value.draft
         optionsJob = viewModelScope.launch {
             _state.update { it.copy(optionsLoading = true, optionsFailed = false) }
-            if (debounce) delay(300)
+            if (debounce) delay(300.milliseconds)
             try {
                 val (bookmarkResult, workResult, periodResult) = coroutineScope {
                     val bookmarks = async { CollectionSearchRepository.tags(query, true) }
@@ -155,11 +156,13 @@ internal fun applyCollectionSearchDraft(state: CollectionSearchState): Collectio
     )
 
 internal class CollectionSearchIllustPagingSource(private val query: CollectionSearchQuery) : PagingSource<String, Illust>() {
+    private val bookmarkGeneration = BookmarkState.accountGeneration
+
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Illust> = try {
         val response = CollectionSearchRepository.illusts(query, params.key)
         val visible = (if (requireUserPreferenceValue.isR18Enabled) response.illusts
             else response.illusts.filterNormalIllust()).filterBlockedTags().distinctBy { it.id }
-        visible.forEach { BookmarkState.updateIllustBookmarkDetail(it.id, true, query.restrict) }
+        visible.forEach { BookmarkState.updateIllustBookmarkDetail(it.id, true, query.restrict, bookmarkGeneration) }
         LoadResult.Page(visible, null, response.nextUrl?.takeIf { it.isNotBlank() && it != params.key })
     } catch (error: CancellationException) { throw error }
     catch (error: Exception) { LoadResult.Error(error) }
@@ -167,11 +170,13 @@ internal class CollectionSearchIllustPagingSource(private val query: CollectionS
 }
 
 internal class CollectionSearchNovelPagingSource(private val query: CollectionSearchQuery) : PagingSource<String, Novel>() {
+    private val bookmarkGeneration = BookmarkState.accountGeneration
+
     override suspend fun load(params: LoadParams<String>): LoadResult<String, Novel> = try {
         val response = CollectionSearchRepository.novels(query, params.key)
         val visible = (if (requireUserPreferenceValue.isR18Enabled) response.novels
             else response.novels.filterNormalNovel()).filterBlockedTags().distinctBy { it.id }
-        visible.forEach { BookmarkState.updateNovelBookmarkDetail(it.id, true, query.restrict) }
+        visible.forEach { BookmarkState.updateNovelBookmarkDetail(it.id, true, query.restrict, bookmarkGeneration) }
         LoadResult.Page(visible, null, response.nextUrl?.takeIf { it.isNotBlank() && it != params.key })
     } catch (error: CancellationException) { throw error }
     catch (error: Exception) { LoadResult.Error(error) }

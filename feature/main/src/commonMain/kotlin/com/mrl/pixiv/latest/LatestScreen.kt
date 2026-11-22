@@ -28,7 +28,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.analytics.trackTab
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
@@ -101,10 +101,7 @@ fun LatestScreen(
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             snapshotFlow { pages[pagerState.currentPage.coerceIn(pages.indices)] }
                 .collectLatest { visiblePage ->
-                    logEvent("screen_view", buildMap {
-                        put("screen_name", "Latest")
-                        put("page_name", visiblePage.name)
-                    })
+                    trackTab("Latest", visiblePage)
                 }
         }
     }

@@ -870,7 +870,9 @@ class NovelViewModel(
             previousWrite?.join()
             readingProgressRepository.saveProgress(novelId, progress)
             if (novel != null) seriesProgressRepository.record(novel, fraction)
-            Logger.d(tag = "NovelScreen") { "Saved progress for novel $progress" }
+            Logger.d(tag = "NovelScreen") {
+                "Saved reading progress: paragraphIndex=${progress.paragraphIndex}, charIndex=${progress.charIndex}"
+            }
         }
     }
 
@@ -881,7 +883,7 @@ class NovelViewModel(
         progressWriteJob = launchIO {
             previousWrite?.join()
             readingProgressRepository.clearProgress(novelId)
-            Logger.d(tag = "NovelScreen") { "Cleared progress for novelId=$novelId" }
+            Logger.d(tag = "NovelScreen") { "Cleared reading progress" }
         }
     }
 

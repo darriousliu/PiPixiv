@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.repository.viewmodel.follow
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -102,6 +103,29 @@ class FollowRequestStateTest {
 
         assertFalse(requests.isUpdating(42))
         assertEquals(false, requests.state[42])
+    }
+
+    @Test
+    fun clearingAccountStateDropsLateFollowResponses() = runTest {
+        val requests = FollowRequestState { request ->
+            backgroundScope.launch(start = CoroutineStart.LAZY) { request() }
+        }
+        requests.state[42] = false
+        val oldRequest = requests.update(42, isFollowing = true) {
+            try {
+                awaitCancellation()
+            } catch (_: CancellationException) {
+                // Model a request that still returns after cancellation.
+            }
+        }
+        runCurrent()
+
+        requests.clear()
+        runCurrent()
+
+        assertTrue(oldRequest.isCancelled)
+        assertTrue(requests.state.isEmpty())
+        assertFalse(requests.isUpdating(42))
     }
 
     @Test

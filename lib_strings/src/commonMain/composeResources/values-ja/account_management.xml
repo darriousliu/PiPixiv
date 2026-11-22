@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">ローカルデータをアップグレードしています…</string>
+    <string name="migration_failure">ローカルデータをアップグレードできませんでした</string>
+    <string name="migration_storage_failure">空き容量が不足しています。空き容量を増やしてから再試行してください。</string>
+    <string name="migration_database_failure">ローカルストレージにアクセスできません。端末のストレージを確認してから、もう一度お試しください。</string>
+    <string name="migration_export_logs">ログをエクスポート</string>
+    <string name="account_management">アカウント管理</string>
+    <string name="switch_account">アカウントを切り替える</string>
+    <string name="add_account">アカウントを追加</string>
+    <string name="account_needs_relogin">再ログインが必要</string>
+    <string name="account_current">現在のアカウント</string>
+    <string name="remove_account">アカウントを削除</string>
+    <string name="remove_account_confirmation">%1$s を削除しますか？</string>
+    <string name="account_removal_description">このアカウントを使うには再ログインが必要です。保持したローカルデータは、再ログイン時に復元されます。</string>
+    <string name="delete_account_local_data">このアカウントのローカルデータも削除する</string>
+    <string name="switch_to_another_account">別のアカウントに切り替える</string>
+    <string name="recovery_pending_notice">復元待ちの旧データがあります</string>
+    <string name="data_recovery_view">表示</string>
+    <string name="recovery_title">データの復元</string>
+    <string name="recovery_item_session">アカウントのログイン情報</string>
+    <string name="recovery_item_search_tags">検索履歴とブックマークタグ</string>
+    <string name="recovery_item_series_progress">小説シリーズの進捗</string>
+    <string name="recovery_item_shared_data">ダウンロード履歴とブロックリスト</string>
+    <string name="recovery_item_translations">翻訳キャッシュ</string>
+    <string name="recovery_item_legacy_blocks">旧バージョンのブロックリスト</string>
+    <string name="recovery_status_pending">復元待ち</string>
+    <string name="recovery_status_skipped">旧データなし</string>
+    <string name="recovery_status_abandoned">破棄済み</string>
+    <string name="recovery_reason_storage">ストレージの空き容量が不足しています</string>
+    <string name="recovery_reason_corrupted">旧データが破損しています</string>
+    <string name="recovery_reason_io">ローカルストレージを読み書きできません</string>
+    <string name="recovery_target_title">現在のアカウントにインポートしますか？</string>
+    <string name="recovery_target_description">旧データのアカウントを特定できませんでした。確定すると、現在のアカウント（ID：%1$d）でこの項目を復元します。</string>
+    <string name="recovery_export">旧データをエクスポート</string>
+    <string name="recovery_export_description">エクスポートには閲覧履歴が含まれ、ログイン認証情報は含まれません。</string>
+    <string name="recovery_import">旧データパッケージからインポート</string>
+    <string name="recovery_import_description">現在のアカウント（ID：%1$d）にインポートする項目を選択してください。</string>
+    <string name="recovery_abandon">破棄してクリーンアップ</string>
+    <string name="recovery_abandon_description">復元待ちの項目をすべて破棄します。次回の正常起動後に旧データを削除します。復元済みのデータは保持されます。</string>
+    <string name="recovery_operation_failed">操作に失敗しました。もう一度お試しください。</string>
+    <string name="recovery_skip">スキップ</string>
+    <string name="recovery_finish">完了</string>
+</resources>

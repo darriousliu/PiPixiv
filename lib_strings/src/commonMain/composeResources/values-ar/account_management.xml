@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">جارٍ ترقية البيانات المحلية…</string>
+    <string name="migration_failure">تعذرت ترقية البيانات المحلية</string>
+    <string name="migration_storage_failure">مساحة التخزين غير كافية. أفرغ بعض المساحة ثم أعد المحاولة.</string>
+    <string name="migration_database_failure">تعذّر الوصول إلى مساحة التخزين المحلية. تحقّق من مساحة تخزين الجهاز ثم أعد المحاولة.</string>
+    <string name="migration_export_logs">تصدير السجلات</string>
+    <string name="account_management">إدارة الحسابات</string>
+    <string name="switch_account">تبديل الحساب</string>
+    <string name="add_account">إضافة حساب</string>
+    <string name="account_needs_relogin">يلزم تسجيل الدخول مجددًا</string>
+    <string name="account_current">الحساب الحالي</string>
+    <string name="remove_account">إزالة الحساب</string>
+    <string name="remove_account_confirmation">هل تريد إزالة %1$s؟</string>
+    <string name="account_removal_description">لاستخدام هذا الحساب مجددًا، يلزم تسجيل الدخول إليه مرة أخرى. ستُستعاد البيانات المحلية التي احتفظت بها عند تسجيل الدخول.</string>
+    <string name="delete_account_local_data">حذف البيانات المحلية لهذا الحساب أيضًا</string>
+    <string name="switch_to_another_account">التبديل إلى حساب آخر</string>
+    <string name="recovery_pending_notice">هناك بيانات قديمة بانتظار الاستعادة</string>
+    <string name="data_recovery_view">عرض</string>
+    <string name="recovery_title">استعادة البيانات</string>
+    <string name="recovery_item_session">بيانات تسجيل الدخول إلى الحساب</string>
+    <string name="recovery_item_search_tags">سجل البحث ووسوم العلامات المرجعية</string>
+    <string name="recovery_item_series_progress">تقدّم قراءة سلاسل الروايات</string>
+    <string name="recovery_item_shared_data">سجل التنزيلات وقوائم الحظر</string>
+    <string name="recovery_item_translations">ذاكرة التخزين المؤقت للترجمات</string>
+    <string name="recovery_item_legacy_blocks">قائمة الحظر القديمة</string>
+    <string name="recovery_status_pending">بانتظار الاستعادة</string>
+    <string name="recovery_status_skipped">لا توجد بيانات قديمة</string>
+    <string name="recovery_status_abandoned">تم التخلي عنه</string>
+    <string name="recovery_reason_storage">مساحة التخزين غير كافية</string>
+    <string name="recovery_reason_corrupted">البيانات القديمة تالفة</string>
+    <string name="recovery_reason_io">تعذّرت القراءة من التخزين المحلي أو الكتابة إليه</string>
+    <string name="recovery_target_title">هل تريد الاستيراد إلى الحساب الحالي؟</string>
+    <string name="recovery_target_description">تعذّر تحديد الحساب الأصلي. أكّد لاستعادة هذا العنصر في الحساب الحالي (المعرّف %1$d).</string>
+    <string name="recovery_export">تصدير البيانات القديمة</string>
+    <string name="recovery_export_description">يتضمّن الملف المُصدَّر سجل التصفّح ويستثني بيانات اعتماد تسجيل الدخول.</string>
+    <string name="recovery_import">استيراد من حزمة بيانات قديمة</string>
+    <string name="recovery_import_description">اختر عنصرًا لاستيراده إلى الحساب الحالي (المعرّف %1$d).</string>
+    <string name="recovery_abandon">التخلي عن البيانات وتنظيفها</string>
+    <string name="recovery_abandon_description">سيتم التخلي عن جميع العناصر التي تنتظر الاستعادة. ستُنظَّف البيانات القديمة بعد التشغيل الناجح التالي، وسيتم الاحتفاظ بالبيانات المستعادة.</string>
+    <string name="recovery_operation_failed">تعذّرت العملية. حاول مرة أخرى.</string>
+    <string name="recovery_skip">تخطّي</string>
+    <string name="recovery_finish">تم</string>
+</resources>

@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">إعدادات متقدمة</string>
     <string name="network_advanced_settings_desc">تخصيص خدمة تحليل أسماء DNS</string>
     <string name="ech_doh_url">عنوان DoH</string>
-    <string name="restart_app_to_take_effect">أعد تشغيل التطبيق لتطبيق التغييرات</string>
     <string name="image_source">مصدر الصورة</string>
     <string name="self_defined_source">مصدر صورة مخصص</string>
     <string name="default_open">فتح الرابط الافتراضي</string>
@@ -165,6 +164,7 @@
     <string name="check_update">التحقق من التحديثات</string>
     <string name="already_updated">بالفعل أحدث إصدار</string>
     <string name="project_url">عنوان المشروع</string>
+    <string name="telegram_channel">قناة التحديثات على تيليجرام</string>
     <string name="feedback">ملاحظات</string>
     <string name="feedback_content">نرحب بملاحظاتك ومساهمتك في التطوير</string>
     <string name="share_app">مشاركة التطبيق</string>

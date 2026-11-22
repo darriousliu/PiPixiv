@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +32,8 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.login.canFinishLogin
+import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.sign_in
 import com.mrl.pixiv.strings.token
 import org.jetbrains.compose.resources.stringResource
@@ -47,11 +48,6 @@ fun OAuthLoginScreen(
     var token by remember { mutableStateOf("") }
     val state = viewModel.asState()
     val focusManager = LocalFocusManager.current
-    LaunchedEffect(state.isLogin) {
-        if (state.isLogin) {
-            navigationManager.loginToMainScreen()
-        }
-    }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -64,7 +60,7 @@ fun OAuthLoginScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(RStrings.back),
                         )
                     }
                 }
@@ -94,7 +90,7 @@ fun OAuthLoginScreen(
                     onClick = click@{
                         if (state.loading || token.isEmpty()) return@click
                         focusManager.clearFocus()
-                        viewModel.dispatch(OAuthLoginAction.Login(token))
+                        viewModel.dispatch(OAuthLoginAction.Login(token, navigationManager::canFinishLogin))
                     },
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.fillMaxWidth()

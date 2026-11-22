@@ -49,14 +49,21 @@ private data class DnsJsonAnswer(
 
 fun OkHttpClient.Builder.bypassECH(
     queryUrl: String,
+    dohClient: OkHttpClient = OkHttpClient(),
+): OkHttpClient.Builder = bypassECH(queryUrl, dohClient, null)
+
+internal fun OkHttpClient.Builder.bypassECH(
+    queryUrl: String,
+    dohClient: OkHttpClient,
+    observeDns: ((List<NetworkDiagnosticResolver>) -> Unit)?,
 ): OkHttpClient.Builder {
-    val dohResolver = DnsJsonResolver(queryUrl)
+    val dohResolver = DnsJsonResolver(queryUrl, baseClient = dohClient)
     val originResolver = RacingOriginDnsResolver(
         timeoutSeconds = DOH_TIMEOUT_SECONDS,
         dohLookup = dohResolver::lookup,
         systemLookup = Dns.SYSTEM::lookup,
     )
-    val echBootstrapResolver = DnsJsonResolver(ECH.DEFAULT_DOH_URL)
+    val echBootstrapResolver = DnsJsonResolver(ECH.DEFAULT_DOH_URL, baseClient = dohClient)
     val echConfig = PixivEchConfigCache(
         lookup = {
             try {
@@ -74,6 +81,7 @@ fun OkHttpClient.Builder.bypassECH(
     return dns(
         PixivEchDns(
             originLookup = originResolver::lookup,
+            observeDns = observeDns,
         )
     ).proxy(
         Proxy.NO_PROXY
@@ -99,6 +107,7 @@ internal class PixivEchDns(
     private val fallback: Map<String, String> = hostMap,
     private val systemDns: Dns = Dns.SYSTEM,
     private val fallbackLookup: (String) -> List<InetAddress> = ::parseFallbackAddresses,
+    private val observeDns: ((List<NetworkDiagnosticResolver>) -> Unit)? = null,
 ) : Dns {
     override fun lookup(hostname: String): List<InetAddress> {
         val normalizedHostname = hostname.lowercase()
@@ -107,7 +116,9 @@ internal class PixivEchDns(
             ?.value
         val isManagedHost = normalizedHostname in PIXIV_BYPASS_HOSTS || fallbackHost != null
         if (!isManagedHost) {
-            return systemDns.lookup(hostname).logResult(hostname, "system DNS")
+            return systemDns.lookup(hostname).logResult(hostname, "system DNS").also {
+                observeDns?.invoke(listOf(NetworkDiagnosticResolver.SYSTEM))
+            }
         }
 
         val originHostname = PIXIV_DNS_ALIASES[normalizedHostname] ?: hostname
@@ -121,6 +132,10 @@ internal class PixivEchDns(
         }.orEmpty()
         val bypassAddresses = (originResult?.addresses.orEmpty() + fallbackAddresses).distinct()
         if (bypassAddresses.isNotEmpty()) {
+            observeDns?.invoke(buildList {
+                originResult?.resolver?.let(::add)
+                if (fallbackAddresses.isNotEmpty()) add(NetworkDiagnosticResolver.FALLBACK)
+            })
             val source = when {
                 originResult != null && fallbackAddresses.isNotEmpty() ->
                     "${originResult.source} + fallback"
@@ -162,13 +177,14 @@ internal class PixivEchDns(
         hostname: String,
         source: String,
     ): List<InetAddress> = distinct().also {
-        Logger.d { "DNS lookup $hostname via $source result: $it" }
+        Logger.d { "DNS lookup $hostname via $source returned ${it.size} addresses" }
     }
 }
 
 internal data class DnsLookupResult(
     val source: String,
     val addresses: List<InetAddress>,
+    val resolver: NetworkDiagnosticResolver? = null,
 )
 
 internal class RacingOriginDnsResolver(
@@ -181,10 +197,10 @@ internal class RacingOriginDnsResolver(
 
     fun lookup(hostname: String): DnsLookupResult? {
         val tasks = listOf(
-            addressLookupTask("DoH($hostname)") {
+            addressLookupTask("DoH($hostname)", NetworkDiagnosticResolver.DOH) {
                 dohLookup(hostname)
             },
-            addressLookupTask("system origin DNS($hostname)") {
+            addressLookupTask("system origin DNS($hostname)", NetworkDiagnosticResolver.SYSTEM) {
                 systemLookup(hostname)
             },
         )
@@ -210,6 +226,7 @@ internal class RacingOriginDnsResolver(
 
     private fun addressLookupTask(
         source: String,
+        resolver: NetworkDiagnosticResolver,
         lookup: () -> List<InetAddress>,
     ) = Callable {
         try {
@@ -217,7 +234,7 @@ internal class RacingOriginDnsResolver(
             if (addresses.isEmpty()) {
                 throw UnknownHostException("$source returned no addresses")
             }
-            DnsLookupResult(source, addresses)
+            DnsLookupResult(source, addresses, resolver)
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()
             throw e

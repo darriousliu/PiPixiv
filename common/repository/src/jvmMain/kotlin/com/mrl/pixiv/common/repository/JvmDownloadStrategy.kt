@@ -1,11 +1,16 @@
 package com.mrl.pixiv.common.repository
 
+import co.touchlab.kermit.Logger
 import coil3.annotation.InternalCoilApi
 import coil3.util.MimeTypeMap
+import com.mrl.pixiv.common.analytics.recordCrashOperation
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
 import com.mrl.pixiv.common.network.ImageClient
+import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.network.networkSettings
+import com.mrl.pixiv.common.network.withNetworkPreference
 import com.mrl.pixiv.common.repository.util.generateFileName
 import com.mrl.pixiv.common.util.PictureType
 import com.shakster.gifkt.GifEncoder
@@ -42,7 +47,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(InternalCoilApi::class)
 class JvmDownloadStrategy(
     private val downloadDao: DownloadDao,
-    @ImageClient private val httpClient: HttpClient
+    @ImageClient private val httpClient: RoutedHttpClient<HttpClient>
 ) : DownloadStrategy {
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -56,10 +61,13 @@ class JvmDownloadStrategy(
 
         val job = scope.launch {
             try {
-                processDownload(illustId, index, url, subFolder)
+                withNetworkPreference({ requireUserPreferenceValue.networkSettings() }) {
+                    processDownload(illustId, index, url, subFolder)
+                }
             } catch (e: Exception) {
                 if (e !is CancellationException) {
-                    e.printStackTrace()
+                    recordCrashOperation("DownloadFailed")
+                    Logger.e(throwable = e, tag = "Download") { "Download failed" }
                     updateStatus(illustId, index, DownloadStatus.FAILED)
                 }
             } finally {
@@ -76,6 +84,7 @@ class JvmDownloadStrategy(
         subFolder: String?
     ) {
         var entity = downloadDao.getDownload(illustId, index) ?: return
+        recordCrashOperation("DownloadStarted")
         entity = entity.copy(status = DownloadStatus.RUNNING.value, progress = 0f)
         downloadDao.update(entity)
 
@@ -84,6 +93,7 @@ class JvmDownloadStrategy(
         } else {
             handleImage(entity, url, subFolder)
         }
+        recordCrashOperation("DownloadSucceeded")
     }
 
     private suspend fun handleImage(entity: DownloadEntity, url: String, subFolder: String?) {
@@ -169,9 +179,9 @@ class JvmDownloadStrategy(
     private suspend fun downloadBytes(
         url: String,
         entity: DownloadEntity
-    ): Pair<ByteArray, String> {
+    ): Pair<ByteArray, String> = httpClient.withClient { client ->
         var currentEntity = entity
-        val response = httpClient.get(url) {
+        val response = client.get(url) {
             onDownload { bytesSentTotal, contentLength ->
                 if (contentLength != null && contentLength > 0) {
                     val progress = bytesSentTotal.toFloat() / contentLength.toFloat()
@@ -184,7 +194,7 @@ class JvmDownloadStrategy(
         }
 
         if (!response.status.isSuccess()) {
-            throw Exception("Request failed: ${response.status}")
+            throw Exception("Request failed: ${response.status.value}")
         }
 
         val bytes = response.readRawBytes()
@@ -192,7 +202,7 @@ class JvmDownloadStrategy(
         if (mimeType == null) {
             mimeType = MimeTypeMap.getMimeTypeFromUrl(url) ?: "application/octet-stream"
         }
-        return bytes to mimeType
+        bytes to mimeType
     }
 
     private suspend fun updateStatus(illustId: Long, index: Int, status: DownloadStatus) {

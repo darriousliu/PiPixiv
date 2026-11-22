@@ -76,6 +76,7 @@ fun IllustBottomBookmarkSheet(
     var selectedRestrict by remember { mutableStateOf(Restrict.PUBLIC) }
     val illustBookmarkDetailTags = remember { mutableStateListOf<BookmarkDetailTag>() }
     LaunchedEffect(Unit) {
+        val generation = BookmarkState.accountGeneration
         launchProcess {
             val resp = withIOContext { PixivRepository.getIllustBookmarkDetail(illust.id) }
             val restrict = Restrict.fromValue(resp.bookmarkDetail.restrict)
@@ -84,6 +85,7 @@ fun IllustBottomBookmarkSheet(
                 illustId = illust.id,
                 isBookmarked = resp.bookmarkDetail.isBookmarked,
                 restrict = restrict,
+                generation = generation,
             )
             illustBookmarkDetailTags.clear()
             illustBookmarkDetailTags.addAll(resp.bookmarkDetail.tags)
@@ -110,6 +112,7 @@ fun NovelBottomBookmarkSheet(
     var selectedRestrict by remember { mutableStateOf(Restrict.PUBLIC) }
     val novelBookmarkDetailTags = remember { mutableStateListOf<BookmarkDetailTag>() }
     LaunchedEffect(Unit) {
+        val generation = BookmarkState.accountGeneration
         launchProcess {
             val resp = withIOContext { PixivRepository.getNovelBookmarkDetail(novel.id) }
             val restrict = Restrict.fromValue(resp.bookmarkDetail.restrict)
@@ -118,6 +121,7 @@ fun NovelBottomBookmarkSheet(
                 novelId = novel.id,
                 isBookmarked = resp.bookmarkDetail.isBookmarked,
                 restrict = restrict,
+                generation = generation,
             )
             novelBookmarkDetailTags.clear()
             novelBookmarkDetailTags.addAll(resp.bookmarkDetail.tags)

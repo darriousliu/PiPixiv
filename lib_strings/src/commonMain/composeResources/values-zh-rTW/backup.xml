@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_export_insufficient_space">儲存空間不足，無法匯出</string>
+    <string name="backup_import_insufficient_space">儲存空間不足，無法匯入</string>
+    <string name="backup_import_file_too_large">備份檔案過大，無法匯入</string>
+    <string name="backup_import_translation_incomplete">已匯入資料，但翻譯快取未完全匯入</string>
+</resources>

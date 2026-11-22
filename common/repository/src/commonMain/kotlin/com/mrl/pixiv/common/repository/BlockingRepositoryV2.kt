@@ -23,7 +23,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -36,7 +39,7 @@ object BlockingRepositoryV2 : KoinComponent {
     }
     private val contentDao by inject<BlockContentDao>()
     private var initialized = false
-    private var legacyMigrationTriggered = false
+    private val migrationLock = Mutex()
 
     private val blockIllustIds = MutableStateFlow<Set<Long>>(emptySet())
     private val blockNovelIds = MutableStateFlow<Set<Long>>(emptySet())
@@ -63,14 +66,6 @@ object BlockingRepositoryV2 : KoinComponent {
 
     val blockTagItemsFlow = contentDao.observeTags().map { entities ->
         entities.map { BlockTagEntity(tag = it.tag, isRegex = it.isRegex) }
-    }
-
-    fun initAfterKoin() {
-        if (initialized) return
-        val dao = runCatching { contentDao }.getOrNull() ?: return
-        initialized = true
-        observeDatabase(dao)
-        migrateLegacyDataIfNeeded(dao)
     }
 
     fun blockIllust(illustId: Long, title: String) {
@@ -152,9 +147,32 @@ object BlockingRepositoryV2 : KoinComponent {
         write { deleteComment(commentId) }
     }
 
-    @Suppress("DEPRECATION")
-    fun migrate() {
-        initAfterKoin()
+    suspend fun startObservingDatabase() = migrationLock.withLock {
+        if (initialized) return@withLock
+        observeDatabase(contentDao)
+        initialized = true
+    }
+
+    fun readLegacyBlocks(legacyUser: MMKVOwner): LegacyBlocks = LegacyBlocks(
+        illusts = LegacyBlockingStore.blockIllusts.orEmpty() +
+            legacyUser.mmkvStringSet().read(legacyUser, "blockIllusts").orEmpty(),
+        novels = LegacyBlockingStore.blockNovels.orEmpty(),
+        users = LegacyBlockingStore.blockUsers.orEmpty() +
+            legacyUser.mmkvStringSet().read(legacyUser, "blockUsers").orEmpty(),
+        tags = LegacyBlockingStore.blockTags.orEmpty(),
+        comments = LegacyBlockingStore.blockComments,
+    )
+
+    suspend fun importLegacyBlocks(blocks: LegacyBlocks): Boolean {
+        if (blocks.counts().values.all { it == 0L }) return false
+        contentDao.insertMissing(
+            illusts = blocks.illusts.mapNotNull { it.toLongOrNull() }.map { BlockIllustEntity(illustId = it) },
+            novels = blocks.novels.mapNotNull { it.toLongOrNull() }.map { BlockNovelEntity(novelId = it) },
+            users = blocks.users.mapNotNull { it.toLongOrNull() }.map { BlockUserEntity(userId = it) },
+            tags = blocks.tags.map { it.trim() }.filter(String::isNotEmpty).map { BlockTagEntity(tag = it, isRegex = false) },
+            comments = blocks.comments.map { BlockCommentEntity(commentId = it.id, commentJson = json.encodeToString(it)) },
+        )
+        return true
     }
 
     suspend fun restore(
@@ -341,88 +359,31 @@ object BlockingRepositoryV2 : KoinComponent {
         blockTagRegexValues.value = regexList
     }
 
-    @Suppress("DEPRECATION")
-    private fun migrateLegacyDataIfNeeded(dao: BlockContentDao) {
-        if (legacyMigrationTriggered) return
-        legacyMigrationTriggered = true
-        scope.launchCatch {
-            val legacyIllusts = LegacyBlockingStore.blockIllusts.orEmpty() +
-                    BlockingRepository.blockIllustsFlow.value.orEmpty()
-            val legacyUsers = LegacyBlockingStore.blockUsers.orEmpty() +
-                    BlockingRepository.blockUsersFlow.value.orEmpty()
-            val legacyNovels = LegacyBlockingStore.blockNovels.orEmpty()
-            val legacyTags = LegacyBlockingStore.blockTags.orEmpty()
-            val legacyComments = LegacyBlockingStore.blockComments.distinctBy { it.id }
+}
 
-            val hasLegacyData = legacyIllusts.isNotEmpty() ||
-                    legacyUsers.isNotEmpty() ||
-                    legacyNovels.isNotEmpty() ||
-                    legacyTags.isNotEmpty() ||
-                    legacyComments.isNotEmpty()
-
-            if (!hasLegacyData) return@launchCatch
-
-            runCatching {
-                val illustEntities = legacyIllusts.mapNotNull { it.toLongOrNull() }
-                    .distinct()
-                    .map { BlockIllustEntity(illustId = it) }
-                if (illustEntities.isNotEmpty()) {
-                    dao.upsertIllusts(illustEntities)
-                }
-
-                val novelEntities = legacyNovels.mapNotNull { it.toLongOrNull() }
-                    .distinct()
-                    .map { BlockNovelEntity(novelId = it) }
-                if (novelEntities.isNotEmpty()) {
-                    dao.upsertNovels(novelEntities)
-                }
-
-                val userEntities = legacyUsers.mapNotNull { it.toLongOrNull() }
-                    .distinct()
-                    .map { BlockUserEntity(userId = it) }
-                if (userEntities.isNotEmpty()) {
-                    dao.upsertUsers(userEntities)
-                }
-
-                val tagEntities = legacyTags
-                    .distinct()
-                    .map { BlockTagEntity(tag = it, isRegex = false) }
-                if (tagEntities.isNotEmpty()) {
-                    dao.upsertTags(tagEntities)
-                }
-
-                val commentEntities = legacyComments
-                    .map {
-                        BlockCommentEntity(
-                            commentId = it.id,
-                            commentJson = json.encodeToString(it),
-                        )
-                    }
-                if (commentEntities.isNotEmpty()) {
-                    dao.upsertComments(commentEntities)
-                }
-
-                LegacyBlockingStore.clear()
-                BlockingRepository.restore(emptySet(), emptySet())
-            }
-        }
-    }
+@Serializable
+data class LegacyBlocks(
+    val illusts: Set<String> = emptySet(),
+    val novels: Set<String> = emptySet(),
+    val users: Set<String> = emptySet(),
+    val tags: Set<String> = emptySet(),
+    val comments: List<Comment> = emptyList(),
+) {
+    fun counts(): Map<String, Long> = mapOf(
+        "legacyBlockIllusts" to illusts.size.toLong(),
+        "legacyBlockNovels" to novels.size.toLong(),
+        "legacyBlockUsers" to users.size.toLong(),
+        "legacyBlockTags" to tags.size.toLong(),
+        "legacyBlockComments" to comments.size.toLong(),
+    )
 }
 
 private object LegacyBlockingStore : MMKVOwner {
     override val id: String = "block_content"
 
-    var blockIllusts by mmkvStringSet(emptySet())
-    var blockNovels by mmkvStringSet(emptySet())
-    var blockUsers by mmkvStringSet(emptySet())
-    var blockTags by mmkvStringSet(emptySet())
-    var blockComments by mmkvSerializable<List<Comment>>(emptyList())
-
-    fun clear() {
-        blockIllusts = emptySet()
-        blockNovels = emptySet()
-        blockUsers = emptySet()
-        blockTags = emptySet()
-        blockComments = emptyList()
-    }
+    val blockIllusts by mmkvStringSet(emptySet())
+    val blockNovels by mmkvStringSet(emptySet())
+    val blockUsers by mmkvStringSet(emptySet())
+    val blockTags by mmkvStringSet(emptySet())
+    val blockComments by mmkvSerializable<List<Comment>>(emptyList())
 }

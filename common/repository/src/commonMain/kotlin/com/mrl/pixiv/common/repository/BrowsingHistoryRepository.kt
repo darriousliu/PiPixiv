@@ -3,7 +3,8 @@ package com.mrl.pixiv.common.repository
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.setting.HistorySettings
-import com.mrl.pixiv.common.datasource.local.dao.BrowsingHistoryDao
+import com.mrl.pixiv.common.datasource.local.AccountDatabaseProvider
+import com.mrl.pixiv.common.datasource.local.AccountHandle
 import com.mrl.pixiv.common.datasource.local.entity.IllustHistoryEntity
 import com.mrl.pixiv.common.datasource.local.entity.NovelHistoryEntity
 import com.mrl.pixiv.common.util.currentTimeMillis
@@ -11,13 +12,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 
 @Single
 @OptIn(ExperimentalCoroutinesApi::class)
 class BrowsingHistoryRepository(
-    private val dao: BrowsingHistoryDao,
+    private val databases: AccountDatabaseProvider,
 ) {
     private val json = Json {
         ignoreUnknownKeys = true
@@ -34,8 +36,10 @@ class BrowsingHistoryRepository(
         if (!settings.enabled || illusts.isEmpty()) return
 
         val uniqueIllusts = illusts.distinctBy { it.id }
-        val userInfo = requireUserInfoValue
-        val userId = userInfo.user.id
+        val account = databases.requireCurrent()
+        val isPremium = requireUserInfoValue.let { it.user.id == account.userId && it.profile.isPremium }
+        val dao = account.db.browsingHistoryDao()
+        val userId = account.userId
         val now = currentTimeMillis()
         dao.upsertIllusts(
             uniqueIllusts.mapIndexed { index, illust ->
@@ -47,9 +51,9 @@ class BrowsingHistoryRepository(
                 )
             }
         )
-        pruneIfNeeded(userId, settings)
+        pruneIfNeeded(account, settings)
 
-        if (settings.cloudEnabled && userInfo.profile.isPremium) {
+        if (settings.cloudEnabled && isPremium && databases.current.value === account) {
             runCatching {
                 PixivRepository.addIllustBrowsingHistory(uniqueIllusts.map { it.id })
             }
@@ -60,8 +64,10 @@ class BrowsingHistoryRepository(
         val settings = requireUserPreferenceValue.historySettings.normalized()
         if (!settings.enabled) return
 
-        val userInfo = requireUserInfoValue
-        val userId = userInfo.user.id
+        val account = databases.requireCurrent()
+        val isPremium = requireUserInfoValue.let { it.user.id == account.userId && it.profile.isPremium }
+        val dao = account.db.browsingHistoryDao()
+        val userId = account.userId
         dao.upsertNovel(
             NovelHistoryEntity(
                 novelId = novel.id,
@@ -70,9 +76,9 @@ class BrowsingHistoryRepository(
                 novelJson = json.encodeToString(novel),
             )
         )
-        pruneIfNeeded(userId, settings)
+        pruneIfNeeded(account, settings)
 
-        if (settings.cloudEnabled && userInfo.profile.isPremium) {
+        if (settings.cloudEnabled && isPremium && databases.current.value === account) {
             runCatching {
                 PixivRepository.addNovelBrowsingHistory(novel.id)
             }
@@ -80,32 +86,40 @@ class BrowsingHistoryRepository(
     }
 
     suspend fun getLocalIllusts(limit: Int, offset: Int): List<Illust> {
-        val userId = requireUserInfoValue.user.id
-        return dao.getIllusts(userId = userId, limit = limit, offset = offset)
+        val account = databases.current.value ?: return emptyList()
+        return account.db.browsingHistoryDao()
+            .getIllusts(userId = account.userId, limit = limit, offset = offset)
             .mapNotNull { runCatching { json.decodeFromString<Illust>(it.illustJson) }.getOrNull() }
     }
 
     suspend fun getLocalNovels(limit: Int, offset: Int): List<Novel> {
-        val userId = requireUserInfoValue.user.id
-        return dao.getNovels(userId = userId, limit = limit, offset = offset)
+        val account = databases.current.value ?: return emptyList()
+        return account.db.browsingHistoryDao()
+            .getNovels(userId = account.userId, limit = limit, offset = offset)
             .mapNotNull { runCatching { json.decodeFromString<Novel>(it.novelJson) }.getOrNull() }
     }
 
     fun observeLocalIllustCount(): Flow<Int> =
-        requireUserInfoFlow.flatMapLatest { dao.observeIllustCount(it.user.id) }.distinctUntilChanged()
+        databases.current.flatMapLatest { account ->
+            account?.let { it.db.browsingHistoryDao().observeIllustCount(it.userId) } ?: flowOf(0)
+        }.distinctUntilChanged()
 
     fun observeLocalNovelCount(): Flow<Int> =
-        requireUserInfoFlow.flatMapLatest { dao.observeNovelCount(it.user.id) }.distinctUntilChanged()
+        databases.current.flatMapLatest { account ->
+            account?.let { it.db.browsingHistoryDao().observeNovelCount(it.userId) } ?: flowOf(0)
+        }.distinctUntilChanged()
 
     suspend fun clearAllLocalHistory() {
-        val userId = requireUserInfoValue.user.id
-        dao.clearIllusts(userId)
-        dao.clearNovels(userId)
+        val account = databases.requireCurrent()
+        val dao = account.db.browsingHistoryDao()
+        dao.clearIllusts(account.userId)
+        dao.clearNovels(account.userId)
     }
 
-    private suspend fun pruneIfNeeded(userId: Long, settings: HistorySettings) {
+    private suspend fun pruneIfNeeded(account: AccountHandle, settings: HistorySettings) {
         if (!settings.autoClean || settings.unlimited) return
-        dao.pruneIllusts(userId = userId, maxEntries = settings.maxEntries)
-        dao.pruneNovels(userId = userId, maxEntries = settings.maxEntries)
+        val dao = account.db.browsingHistoryDao()
+        dao.pruneIllusts(userId = account.userId, maxEntries = settings.maxEntries)
+        dao.pruneNovels(userId = account.userId, maxEntries = settings.maxEntries)
     }
 }

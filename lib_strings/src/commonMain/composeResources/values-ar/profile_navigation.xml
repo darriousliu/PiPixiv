@@ -8,6 +8,12 @@
     <string name="settings_section_account">الحساب</string>
     <string name="profile_view_homepage">عرض الملف الشخصي</string>
     <string name="settings_section_general">عام</string>
+    <string name="settings_section_work_grid">شبكة الأعمال</string>
+    <string name="settings_section_image_preview">معاينة الصور</string>
+    <string name="settings_section_novel_tags">وسوم الروايات</string>
+    <string name="settings_section_search_defaults">إعدادات البحث الافتراضية</string>
+    <string name="settings_section_result_display">عرض النتائج</string>
+    <string name="settings_section_content_filters">عوامل تصفية المحتوى</string>
     <string name="unblock_item">إلغاء الحظر</string>
     <string name="liquid_glass_navigation">التنقّل بتأثير الزجاج السائل</string>
     <string name="liquid_glass_navigation_desc">أوقف هذا الخيار لاستخدام شريط التنقّل السفلي القياسي.</string>

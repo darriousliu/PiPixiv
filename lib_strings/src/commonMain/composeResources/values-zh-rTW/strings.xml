@@ -87,7 +87,6 @@
     <string name="network_advanced_settings">進階設定</string>
     <string name="network_advanced_settings_desc">自訂 DNS 解析服務</string>
     <string name="ech_doh_url">DoH 位址</string>
-    <string name="restart_app_to_take_effect">重啟 App 後生效</string>
     <string name="image_source">圖源</string>
     <string name="self_defined_source">自定義圖源</string>
     <string name="default_open">預設開啟連結</string>
@@ -165,6 +164,7 @@
     <string name="check_update">檢查更新</string>
     <string name="already_updated">已經是最新版本</string>
     <string name="project_url">專案地址</string>
+    <string name="telegram_channel">Telegram 更新頻道</string>
     <string name="feedback">回饋</string>
     <string name="feedback_content">歡迎回饋問題與共同開發</string>
     <string name="share_app">分享應用程式</string>

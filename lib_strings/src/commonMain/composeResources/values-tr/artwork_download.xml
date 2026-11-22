@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">İndirilecek sayfaları seçin</string>
+    <string name="artwork_download_all_originals">Tüm orijinal görselleri indir</string>
+    <string name="artwork_download_selected">Seçili orijinal görselleri indir</string>
+    <string name="artwork_download_selection_count">%2$d sayfadan %1$d tanesi seçildi</string>
+    <string name="artwork_download_page">Sayfa %1$d</string>
+    <string name="select_all">Tümünü seç</string>
+    <string name="artwork_download_clear_selection">Tüm seçimleri kaldır</string>
+</resources>

@@ -14,6 +14,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import co.touchlab.kermit.Logger as KermitLogger
 
@@ -40,10 +41,11 @@ internal fun <T : HttpClientEngineConfig> httpClient(
 
         install(Logging) {
             level = if (isDebug) LogLevel.ALL else LogLevel.NONE
+            sanitizeHeader { it.equals(HttpHeaders.Authorization, ignoreCase = true) }
             logger =
                 object : Logger {
                     override fun log(message: String) {
-                        KermitLogger.i(tag = "HttpClient") {
+                        KermitLogger.d(tag = "HttpClient") {
                             """
               |---
               |$message
@@ -76,9 +78,12 @@ internal fun <T : HttpClientEngineConfig> imageHttpClient(
     }
 }
 
-internal expect val baseHttpClient: HttpClient
+internal expect fun baseHttpClient(
+    setting: UserPreference.BypassSetting,
+    allowRedirects: Boolean = true,
+): HttpClient
 
-internal expect val baseImageHttpClient: HttpClient
+internal expect fun baseImageHttpClient(setting: UserPreference.BypassSetting): HttpClient
 
 expect val httpEngineFactory: HttpClientEngineFactory<*>
 
@@ -86,3 +91,8 @@ expect val httpEngineFactory: HttpClientEngineFactory<*>
 expect fun HttpClientConfig<*>.configureNetworkProxy(
     setting: UserPreference.BypassSetting = NetworkUtil.bypassSetting,
 )
+
+expect fun HttpClientConfig<*>.configurePixivNetworkProxy(setting: UserPreference.BypassSetting)
+
+internal fun routedPixivClient(create: (UserPreference.BypassSetting) -> HttpClient) =
+    RoutedHttpClient(NetworkUtil::bypassSetting, create, HttpClient::close, NetworkUtil::networkSettings)

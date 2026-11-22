@@ -35,6 +35,7 @@ import com.mrl.pixiv.common.compose.layout.SplitPaneDividerWidth
 import com.mrl.pixiv.common.compose.layout.SplitPaneState
 import com.mrl.pixiv.common.router.NavigationRecord
 import com.mrl.pixiv.common.router.paneSpec
+import com.mrl.pixiv.common.router.sharedImageFromOpener
 import com.mrl.pixiv.common.util.isAndroid
 import com.mrl.pixiv.common.util.platform
 
@@ -49,7 +50,7 @@ internal val NavEntry<NavigationRecord>.record: NavigationRecord
  */
 @Stable
 internal class AdaptivePaneTransitionState(
-    private val enablePredictiveBackCard: Boolean = platform.isAndroid(),
+    val enablePredictiveBackCard: Boolean = platform.isAndroid(),
 ) {
     private var segment by mutableStateOf<PaneTransitionSegment?>(null)
     private var backCard by mutableStateOf<PredictiveBackCardTransition?>(null)
@@ -204,13 +205,33 @@ internal data class AdaptiveScene(
 
 internal enum class TransitionKind { Forward, Back, Predictive }
 
+/**
+ * 当前页面带着共享图片从上一页打开，且正返回到上一页时成立；上一页可以是分栏场景。
+ * 只按打开方式判断：页面内切换后若已没有对应元素，过渡会自然退化为默认的淡入淡出。
+ * 共享图片的 entryId 不一定指向上一页（作品首图沿用瀑布流的封面标识），因此不以它判断。
+ */
+internal fun Scene<*>.returnsWithSharedImage(target: Scene<*>?): Boolean {
+    if (this !is AdaptiveScene || target !is AdaptiveScene || source != null) return false
+    return top.record.destination.sharedImageFromOpener != null &&
+        target.top.contentKey == previousEntries.lastOrNull()?.contentKey
+}
+
 private fun AnimatedContentTransitionScope<Scene<*>>.adaptiveTransform(
-    kind: TransitionKind,
+    transitionKind: TransitionKind,
     paneTransitionState: AdaptivePaneTransitionState,
     swipeEdge: Int = 0,
 ): ContentTransform {
     val initial = initialState as? AdaptiveScene
     val target = targetState as? AdaptiveScene
+    // 返回到共享图片的来源页时，手势按普通返回的转场推进，不使用会停用共享元素的卡片。
+    val kind = if (
+        transitionKind == TransitionKind.Predictive && paneTransitionState.enablePredictiveBackCard &&
+        initialState.returnsWithSharedImage(targetState)
+    ) {
+        TransitionKind.Back
+    } else {
+        transitionKind
+    }
     paneTransitionState.update(initial, target, kind, swipeEdge)
     if (initial != null && target != null) {
         val samePage = initial.top.contentKey == target.top.contentKey

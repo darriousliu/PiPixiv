@@ -1,4 +1,5 @@
 import com.mrl.pixiv.buildsrc.configureDesktopSentryMapping
+import com.mrl.pixiv.buildsrc.configureNucleusTaoComposeCompatibility
 import dev.nucleusframework.desktop.application.dsl.TargetFormat
 import dev.nucleusframework.desktop.application.tasks.AbstractElectronBuilderPackageTask
 import dev.nucleusframework.desktop.application.tasks.AbstractGenerateAotCacheTask
@@ -12,6 +13,7 @@ plugins {
 }
 
 val desktopOsName = System.getProperty("os.name").toString()
+configureNucleusTaoComposeCompatibility()
 // AOT trades additional cache bytes for startup work; keep size-focused builds unchanged.
 val desktopAotEnabled = providers.gradleProperty("desktopAot")
     .map(String::toBooleanStrict)
@@ -73,7 +75,6 @@ dependencies {
     implementation(project(":common:repository"))
     implementation(project(":common:ui"))
     implementation(project(":lib_strings"))
-    implementation(compose.desktop.currentOs)
     implementation(libs.bundles.compose.baselibs)
     implementation(libs.compose.jetbrains.compose.resources)
     implementation(libs.nucleus.application)

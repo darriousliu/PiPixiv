@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_api_proxy_title">App API proxy sunucusu</string>
+    <string name="app_api_proxy_custom">Özel alan adı</string>
+    <string name="app_api_proxy_address">Proxy alan adı</string>
+    <string name="app_api_proxy_credentials">Proxy, App API erişim belirteçlerini okuyabilir. Kendi denetiminizdeki bir hizmeti kullanın.</string>
+    <string name="app_api_proxy_invalid">Şema, bağlantı noktası veya yol içermeyen bir alan adı girin.</string>
+</resources>

@@ -30,11 +30,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.common.analytics.logScreenView
+import com.mrl.pixiv.common.analytics.trackTab
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
@@ -61,6 +67,7 @@ import com.mrl.pixiv.strings.app_name
 import com.mrl.pixiv.strings.community_recommended_users
 import com.mrl.pixiv.strings.illustrations
 import com.mrl.pixiv.strings.manga
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -177,6 +184,7 @@ private fun IllustMode(
     imageFeedMode: HomeImageFeedMode = viewModel.imageFeedMode,
 ) {
     val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val pagerState = rememberPagerState(initialPage = imageFeedMode.ordinal) {
         HomeImageFeedMode.entries.size
     }
@@ -195,6 +203,14 @@ private fun IllustMode(
 
     LaunchedEffect(currentImageFeedMode) {
         viewModel.switchImageFeedMode(currentImageFeedMode)
+    }
+
+    LaunchedEffect(lifecycleOwner, pagerState) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            snapshotFlow { HomeImageFeedMode.entries[pagerState.currentPage] }.collectLatest { mode ->
+                trackTab("Home", mode)
+            }
+        }
     }
 
     Column(
@@ -269,6 +285,7 @@ private fun HomeImageFeedPage(
                 recommendImageList = recommendImageList,
                 navToPictureScreen = navigateToPictureScreen,
                 lazyStaggeredGridState = lazyStaggeredGridState,
+                sharedElementGroup = "home:${mode.name}",
             )
             PagingContentState(
                 loadStates = recommendImageList.loadState,
@@ -295,6 +312,7 @@ private fun NovelMode(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val recommendNovelList = viewModel.recommendNovelList.collectAsLazyPagingItems()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val lazyListState = viewModel.lazyListState
     val pullRefreshState = rememberPullToRefreshState()
     val onRefresh = recommendNovelList::refresh
@@ -306,6 +324,12 @@ private fun NovelMode(
     }
 
     KeyEventListener(controller)
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            logScreenView("Home")
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.sideEffect.collect { sideEffect ->

@@ -2,43 +2,32 @@ package com.mrl.pixiv.common.analytics
 
 import android.app.Application
 import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics.ConsentStatus
+import com.google.firebase.analytics.FirebaseAnalytics.ConsentType
 import com.google.firebase.analytics.analytics
 import com.google.firebase.analytics.logEvent
 import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.initialize
-import io.sentry.kotlin.multiplatform.Sentry
 
 private val firebaseAnalytics
     get() = Firebase.analytics
-
-private val firebaseCrashlytics
-    get() = Firebase.crashlytics
 
 fun Application.initializeFirebase(isDebug: Boolean) {
     Firebase.initialize(this)
     Firebase.crashlytics.isCrashlyticsCollectionEnabled = !isDebug
 }
 
-actual fun logEvent(
-    event: String,
-    params: Map<String, Any>?
-) {
-    firebaseAnalytics.logEvent(event) {
-        params?.forEach { (k, v) ->
-            when (v) {
-                is String -> param(k, v)
-                is Int -> param(k, v.toLong())
-                is Long -> param(k, v)
-                is Float -> param(k, v.toDouble())
-                is Double -> param(k, v)
-                is Boolean -> param(k, v.toString())
-                else -> param(k, v.toString())
-            }
-        }
-    }
+internal actual fun setPlatformUsageAnalyticsEnabled(enabled: Boolean) {
+    val analytics = firebaseAnalytics
+    val analyticsStorage = if (enabled) ConsentStatus.GRANTED else ConsentStatus.DENIED
+    analytics.setConsent(mapOf(ConsentType.ANALYTICS_STORAGE to analyticsStorage))
+    analytics.setAnalyticsCollectionEnabled(enabled)
+    if (!enabled) analytics.resetAnalyticsData()
 }
 
-actual fun logException(e: Throwable) {
-    firebaseCrashlytics.recordException(e)
-    Sentry.captureException(e)
+internal actual fun logPlatformScreenView(screen: String, page: String?) {
+    firebaseAnalytics.logEvent("screen_view") {
+        param("screen_name", screen)
+        if (page != null) param("page_name", page)
+    }
 }

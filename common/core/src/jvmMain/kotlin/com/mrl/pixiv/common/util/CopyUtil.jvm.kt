@@ -5,6 +5,7 @@ package com.mrl.pixiv.common.util
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.asAwtTransferable
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,7 +58,7 @@ suspend fun copyImageToClipboard(imageUri: String) {
         }
         file.readBytes()
     } catch (e: Exception) {
-        e.printStackTrace()
+        Logger.e(throwable = e, tag = "CopyUtil") { "Unable to read clipboard image source" }
         null
     } ?: return
 

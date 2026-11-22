@@ -3,34 +3,42 @@ package com.mrl.pixiv.common.repository
 import com.mrl.pixiv.common.data.Constants.API_HOST
 import com.mrl.pixiv.common.data.collection.CollectionSearchQuery
 import com.mrl.pixiv.common.data.collection.CollectionWorkType
-import com.mrl.pixiv.common.datasource.remote.createCollectionSearchApi
+import com.mrl.pixiv.common.datasource.remote.CollectionSearchApi
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
 
 object CollectionSearchRepository {
-    private val api by lazy { PixivRepository.apiKtorfit.createCollectionSearchApi() }
+    private suspend fun <T> withApi(block: suspend (CollectionSearchApi) -> T): T =
+        PixivRepository.withApiServices { block(it.collection) }
 
-    suspend fun syncStatus() = api.syncStatus()
+    suspend fun syncStatus() = withApi { it.syncStatus() }
 
     suspend fun illusts(query: CollectionSearchQuery, nextUrl: String? = null) =
-        api.illusts(collectionPageParameters(query, nextUrl))
+        withApi { it.illusts(collectionPageParameters(query, nextUrl)) }
 
     suspend fun novels(query: CollectionSearchQuery, nextUrl: String? = null) =
-        api.novels(collectionPageParameters(query, nextUrl))
+        withApi { it.novels(collectionPageParameters(query, nextUrl)) }
 
     suspend fun tags(query: CollectionSearchQuery, bookmarkTags: Boolean, nextUrl: String? = null) =
-        (if (nextUrl == null) query.tagParameters(if (bookmarkTags) query.bookmarkTag else query.workTag)
-        else collectionNextParameters(nextUrl, collectionTagPath(query.type, bookmarkTags)) +
-            query.tagParameters(if (bookmarkTags) query.bookmarkTag else query.workTag)).let {
+        withApi { api ->
+            val filter = query.tagParameters(if (bookmarkTags) query.bookmarkTag else query.workTag)
+            val parameters = if (nextUrl == null) filter else {
+                collectionNextParameters(nextUrl, collectionTagPath(query.type, bookmarkTags)) + filter
+            }
             when (query.type) {
-                CollectionWorkType.ILLUST -> if (bookmarkTags) api.illustBookmarkTags(it) else api.illustWorkTags(it)
-                CollectionWorkType.NOVEL -> if (bookmarkTags) api.novelBookmarkTags(it) else api.novelWorkTags(it)
+                CollectionWorkType.ILLUST ->
+                    if (bookmarkTags) api.illustBookmarkTags(parameters) else api.illustWorkTags(parameters)
+
+                CollectionWorkType.NOVEL ->
+                    if (bookmarkTags) api.novelBookmarkTags(parameters) else api.novelWorkTags(parameters)
             }
         }
 
-    suspend fun periods(query: CollectionSearchQuery) = when (query.type) {
-        CollectionWorkType.ILLUST -> api.illustPeriods(query.periodParameters())
-        CollectionWorkType.NOVEL -> api.novelPeriods(query.periodParameters())
+    suspend fun periods(query: CollectionSearchQuery) = withApi { api ->
+        when (query.type) {
+            CollectionWorkType.ILLUST -> api.illustPeriods(query.periodParameters())
+            CollectionWorkType.NOVEL -> api.novelPeriods(query.periodParameters())
+        }
     }
 }
 

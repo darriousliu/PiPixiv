@@ -1,8 +1,8 @@
 package com.mrl.pixiv.common.network
 
 import androidx.compose.ui.text.intl.Locale
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Constants.HashSalt
-import com.mrl.pixiv.common.data.Constants.IMAGE_HOST
 import com.mrl.pixiv.common.data.setting.UserPreference
 import com.mrl.pixiv.common.util.DeviceInfo
 import io.ktor.client.request.HttpRequestBuilder
@@ -29,8 +29,7 @@ interface NetworkFeature {
 
 internal object NetworkUtil : KoinComponent {
     private val networkFeature by inject<NetworkFeature>()
-    val imageHost: String
-        get() = networkFeature.provideUserPreference().imageHost.ifEmpty { IMAGE_HOST }
+    fun networkSettings(): NetworkSettings = networkFeature.provideUserPreference().networkSettings()
 
     val bypassSetting: UserPreference.BypassSetting
         get() = networkFeature.provideUserPreference().bypassSetting
@@ -54,12 +53,25 @@ internal object NetworkUtil : KoinComponent {
             val md5 = text.toByteArray().toByteString().md5()
             return md5.hex()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(throwable = e, tag = "NetworkUtil") { "Unable to compute the request signature" }
         }
         return ""
     }
 
-    suspend fun addAuthHeader(request: HttpRequestBuilder) {
+    suspend fun addAuthHeader(request: HttpRequestBuilder) =
+        addAuthHeader(request) { requireUserAccessToken() }
+
+    suspend fun addAuthHeader(
+        request: HttpRequestBuilder,
+        readAccessToken: suspend () -> String,
+    ) {
+        addAppHeaders(request)
+        if (!request.url.encodedPath.contains("/auth/token")) {
+            request.headers["Authorization"] = "Bearer ${readAccessToken()}"
+        }
+    }
+
+    fun addAppHeaders(request: HttpRequestBuilder) {
         val locale = Locale.current
         val instantNow = Clock.System.now()
         val timeZone = TimeZone.currentSystemDefault()
@@ -84,9 +96,6 @@ internal object NetworkUtil : KoinComponent {
                 "User-Agent",
                 "Pixiv${DeviceInfo.PLATFORM.replaceFirstChar { it.uppercase() }}App/${DeviceInfo.APP_VERSION} (${DeviceInfo.PLATFORM} ${DeviceInfo.VERSION}; ${DeviceInfo.MODEL})"
             )
-            if (!request.url.encodedPath.contains("/auth/token")) {
-                set("Authorization", "Bearer ${requireUserAccessToken()}")
-            }
             // zh_CN
             set("Accept-Language", locale.toLanguageTag().replace("-", "_"))
             // zh-hans
@@ -96,9 +105,7 @@ internal object NetworkUtil : KoinComponent {
             set("App-Version", DeviceInfo.APP_VERSION)
             set("X-Client-Time", isoDate)
             set("X-Client-Hash", encode("$isoDate$HashSalt"))
-//            set("Host", request.host)
         }
-
     }
 
     suspend fun requireUserAccessToken() = networkFeature.provideUserAccessToken()

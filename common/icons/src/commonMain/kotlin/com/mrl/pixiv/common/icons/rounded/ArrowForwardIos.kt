@@ -1,0 +1,35 @@
+// Adapted from Google Material Symbols (Rounded, arrow_forward_ios, FILL=1).
+// Source: https://fonts.google.com/icons
+// SPDX-License-Identifier: Apache-2.0
+
+package com.mrl.pixiv.common.icons.rounded
+
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.mrl.pixiv.common.icons.Icons
+import com.mrl.pixiv.common.icons.materialSymbol
+
+val Icons.Rounded.ArrowForwardIos: ImageVector
+    get() = arrowForwardIos
+
+private val arrowForwardIos by lazy {
+    materialSymbol("Rounded.ArrowForwardIos", autoMirror = true) {
+        moveTo(14.48f, 12f)
+        lineTo(7.13f, 4.65f)
+        quadTo(6.75f, 4.27f, 6.76f, 3.76f)
+        reflectiveQuadTo(7.15f, 2.88f)
+        reflectiveQuadTo(8.04f, 2.5f)
+        reflectiveQuadTo(8.93f, 2.88f)
+        lineToRelative(7.68f, 7.7f)
+        quadToRelative(0.3f, 0.3f, 0.45f, 0.68f)
+        reflectiveQuadTo(17.2f, 12f)
+        reflectiveQuadToRelative(-0.15f, 0.75f)
+        reflectiveQuadTo(16.6f, 13.43f)
+        lineToRelative(-7.7f, 7.7f)
+        quadTo(8.53f, 21.5f, 8.03f, 21.49f)
+        reflectiveQuadTo(7.15f, 21.1f)
+        reflectiveQuadTo(6.78f, 20.21f)
+        reflectiveQuadTo(7.15f, 19.33f)
+        lineTo(14.48f, 12f)
+        close()
+    }
+}

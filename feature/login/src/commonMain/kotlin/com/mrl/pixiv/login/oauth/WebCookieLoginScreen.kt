@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +33,8 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
+import com.mrl.pixiv.login.canFinishLogin
+import com.mrl.pixiv.strings.back
 import com.mrl.pixiv.strings.cookies
 import com.mrl.pixiv.strings.recommend_cookie_export_plugin
 import com.mrl.pixiv.strings.sign_in
@@ -49,11 +50,6 @@ fun WebCookieLoginScreen(
     var phpSessionId by remember { mutableStateOf("") }
     val state = viewModel.asState()
     val focusManager = LocalFocusManager.current
-    LaunchedEffect(state.isLogin) {
-        if (state.isLogin) {
-            navigationManager.loginToMainScreen()
-        }
-    }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -66,7 +62,7 @@ fun WebCookieLoginScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(RStrings.back),
                         )
                     }
                 }
@@ -97,7 +93,9 @@ fun WebCookieLoginScreen(
                     onClick = click@{
                         if (state.loading || phpSessionId.isEmpty()) return@click
                         focusManager.clearFocus()
-                        viewModel.loginWithCookies(phpSessionId)
+                        viewModel.dispatch(
+                            OAuthLoginAction.LoginWithCookies(phpSessionId, navigationManager::canFinishLogin)
+                        )
                     },
                     shapes = ButtonDefaults.shapes(),
                     modifier = Modifier.fillMaxWidth()

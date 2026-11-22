@@ -14,9 +14,11 @@ kotlin {
             implementation(project(":common:ai"))
             implementation(project(":common:data"))
             implementation(project(":common:datasource-local"))
+            implementation(project(":common:network"))
             implementation(project(":common:repository"))
             implementation(project(":common:ui"))
             implementation(project(":common:core"))
+            implementation(project(":common:icons"))
 
             implementation(project.dependencies.platform(libs.coil3.bom))
             implementation(libs.bundles.coil3)
@@ -33,8 +35,8 @@ kotlin {
             implementation(kotlin("test"))
         }
         jvmTest.dependencies {
-            implementation("org.jetbrains.compose.ui:ui-test:${libs.versions.composeMultiplatform.get()}")
-            implementation(compose.desktop.currentOs)
+            implementation(libs.compose.jetbrains.ui.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }

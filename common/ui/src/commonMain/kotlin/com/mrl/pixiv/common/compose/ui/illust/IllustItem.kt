@@ -1,9 +1,5 @@
 package com.mrl.pixiv.common.compose.ui.illust
 
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,16 +45,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.mrl.pixiv.common.animation.DefaultAnimationDuration
-import com.mrl.pixiv.common.animation.DefaultFloatAnimationSpec
-import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
-import com.mrl.pixiv.common.compose.rememberNavigationSharedContentState
+import com.mrl.pixiv.common.compose.navigationSharedImage
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.data.AiType
@@ -71,6 +63,9 @@ import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isPrivateBookmark
+import com.mrl.pixiv.common.router.LocalNavigationManager
+import com.mrl.pixiv.common.router.PictureCoverSource
+import com.mrl.pixiv.common.router.PictureImageKey
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.allowRgb565
 import com.mrl.pixiv.common.util.conditionally
@@ -83,14 +78,14 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.Uuid
 
 @Composable
 fun SquareIllustItem(
     illust: Illust,
     isBookmarked: Boolean,
     onBookmarkClick: (Restrict, List<String>?, Boolean) -> Unit,
-    navToPictureScreen: (String, Boolean) -> Unit,
+    navToPictureScreen: (PictureCoverSource?) -> Unit,
+    sharedElementSlot: String,
     modifier: Modifier = Modifier,
     elevation: Dp = 5.dp,
     shouldShowTip: Boolean = false,
@@ -98,98 +93,80 @@ fun SquareIllustItem(
     enableTransition: Boolean = !currentWindowAdaptiveInfoV2().isWidthAtLeastExpanded,
 ) {
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
-    val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     val isIllustBlocked = BlockingRepositoryV2.collectIllustBlockAsState(illust.id)
     val isUserBlocked = BlockingRepositoryV2.collectUserBlockAsState(illust.user.id)
-    val enableTransition = enableTransition && !isIllustBlocked && !isUserBlocked
-    val onClick = {
-        navToPictureScreen(prefix, enableTransition)
-    }
-    val animatedContentScope = LocalNavAnimatedContentScope.current
+    val isBlocked = isIllustBlocked || isUserBlocked
+    val imageKey = illust.imageUrls.squareMedium
+    val cover = pictureCoverSource(illust, sharedElementSlot, imageKey, enableTransition && !isBlocked)
 
-    with(LocalSharedTransitionScope.current) {
-        Box(
-            modifier = modifier
-                .aspectRatio(1f)
-                .sharedBounds(
-                    rememberNavigationSharedContentState(key = "${prefix}-card-${illust.id}"),
-                    animatedContentScope,
-                    enter = fadeIn(DefaultFloatAnimationSpec),
-                    exit = fadeOut(DefaultFloatAnimationSpec),
-                    boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
-//                    renderInOverlayDuringTransition = false
-                )
-                .shadow(elevation, shape)
-                .background(MaterialTheme.colorScheme.background)
-                .throttleClick { onClick() }
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .shadow(elevation, shape)
+            .background(MaterialTheme.colorScheme.background)
+            .throttleClick { navToPictureScreen(cover) }
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .navigationSharedImage(cover?.key)
+                .matchParentSize()
+                .conditionally(isBlocked) {
+                    blur(50.dp, BlurredEdgeTreatment(shape))
+                },
+            model = ImageRequest.Builder(LocalPlatformContext.current)
+                .data(imageKey)
+                .crossfade(1.seconds.inWholeMilliseconds.toInt())
+                .allowRgb565(true)
+                .placeholderMemoryCacheKey(imageKey)
+                .memoryCacheKey(imageKey)
+                .build(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+        )
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(5.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val imageKey = illust.imageUrls.squareMedium
-            AsyncImage(
-                modifier = Modifier
-                    .matchParentSize()
-                    .sharedElement(
-                        rememberNavigationSharedContentState(key = "${prefix}-$imageKey"),
-                        animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                        placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
-                    )
-                    .conditionally(isIllustBlocked || isUserBlocked) {
-                        blur(50.dp, BlurredEdgeTreatment(shape))
-                    },
-                model = ImageRequest.Builder(LocalPlatformContext.current)
-                    .data(illust.imageUrls.squareMedium)
-                    .crossfade(1.seconds.inWholeMilliseconds.toInt())
-                    .allowRgb565(true)
-                    .placeholderMemoryCacheKey(imageKey)
-                    .memoryCacheKey(imageKey)
-                    .build(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-            )
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(5.dp),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (illust.illustAIType == AiType.AiGeneratedWorks) {
-                    AIBadge()
-                }
-                if (illust.type == Type.Ugoira) {
-                    GifBadge()
-                }
-                if (illust.type == Type.Manga) {
-                    TextBadge(text = stringResource(RStrings.manga))
-                }
-                if (illust.series != null) {
-                    TextBadge(text = stringResource(RStrings.series))
-                }
-                if (illust.pageCount > 1) {
-                    PageBadge(
-                        pageCount = illust.pageCount,
-                    )
-                }
+            if (illust.illustAIType == AiType.AiGeneratedWorks) {
+                AIBadge()
             }
-            if (!isUserBlocked && !isIllustBlocked) {
-                BookmarkTooltipBox(
-                    shouldShowTip = shouldShowTip,
-                    modifier = Modifier.align(Alignment.BottomEnd),
+            if (illust.type == Type.Ugoira) {
+                GifBadge()
+            }
+            if (illust.type == Type.Manga) {
+                TextBadge(text = stringResource(RStrings.manga))
+            }
+            if (illust.series != null) {
+                TextBadge(text = stringResource(RStrings.series))
+            }
+            if (illust.pageCount > 1) {
+                PageBadge(
+                    pageCount = illust.pageCount,
+                )
+            }
+        }
+        if (!isUserBlocked && !isIllustBlocked) {
+            BookmarkTooltipBox(
+                shouldShowTip = shouldShowTip,
+                modifier = Modifier.align(Alignment.BottomEnd),
+            ) {
+                IconButton(
+                    onClick = throttleClick {
+                        val restrict =
+                            if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+                        onBookmarkClick(restrict, null, false)
+                    },
+                    onLongClick = { showBottomSheet = true },
                 ) {
-                    IconButton(
-                        onClick = throttleClick {
-                            val restrict =
-                                if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
-                            onBookmarkClick(restrict, null, false)
-                        },
-                        onLongClick = { showBottomSheet = true },
-                    ) {
-                        BookmarkIcon(
-                            isBookmarked = isBookmarked,
-                            isPrivate = illust.isPrivateBookmark,
-                            iconSize = 24.dp,
-                            contentDescription = "",
-                        )
-                    }
+                    BookmarkIcon(
+                        isBookmarked = isBookmarked,
+                        isPrivate = illust.isPrivateBookmark,
+                        iconSize = 24.dp,
+                        contentDescription = "",
+                    )
                 }
             }
         }
@@ -210,142 +187,109 @@ fun SquareIllustItem(
 
 @Composable
 fun RectangleIllustItem(
-    navToPictureScreen: (String, Boolean) -> Unit,
+    navToPictureScreen: (PictureCoverSource?) -> Unit,
     illust: Illust,
     isBookmarked: Boolean,
     onBookmarkClick: (Restrict, List<String>?, Boolean) -> Unit,
+    sharedElementSlot: String,
     modifier: Modifier = Modifier,
     enableTransition: Boolean = !currentWindowAdaptiveInfoV2().isWidthAtLeastExpanded,
     shouldShowTip: Boolean = false,
 ) {
-    val scale = calculateIllustAspectRatio(illust.width, illust.height)
-    val sharedTransitionScope = LocalSharedTransitionScope.current
-    val animatedContentScope = LocalNavAnimatedContentScope.current
-    val prefix = rememberSaveable(enableTransition) { Uuid.random().toHexString() }
     val isIllustBlocked = BlockingRepositoryV2.collectIllustBlockAsState(illust.id)
     val isUserBlocked = BlockingRepositoryV2.collectUserBlockAsState(illust.user.id)
-    val enableTransition = enableTransition && !isIllustBlocked && !isUserBlocked
+    val isBlocked = isIllustBlocked || isUserBlocked
+    val imageKey = illust.imageUrls.medium
+    val cover = pictureCoverSource(illust, sharedElementSlot, imageKey, enableTransition && !isBlocked)
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val onBookmarkLongClick = {
         showBottomSheet = true
     }
-    val context = LocalPlatformContext.current
 
-    with(sharedTransitionScope) {
-        val shape = 10f.round
-        Box(
-            modifier = modifier
-                .sharedBounds(
-                    rememberNavigationSharedContentState(key = "${prefix}-card-${illust.id}"),
-                    animatedContentScope,
-                    enter = fadeIn(DefaultFloatAnimationSpec),
-                    exit = fadeOut(DefaultFloatAnimationSpec),
-                    boundsTransform = { _, _ -> tween(DefaultAnimationDuration) },
-//                    renderInOverlayDuringTransition = false
-                )
-                .padding(horizontal = 5.dp)
-                .padding(bottom = 5.dp)
-                .throttleClick {
-                    navToPictureScreen(prefix, enableTransition)
-                }
-                .shadow(4.dp, shape, clip = false)
-                .background(color = MaterialTheme.colorScheme.surface, shape = shape)
-                .clip(shape),
-        ) {
-            Column {
-                val imageKey = illust.imageUrls.medium
-                val imageShape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
-                AsyncImage(
-                    model = remember {
-                        ImageRequest.Builder(context)
-                            .data(illust.imageUrls.medium)
-                            .allowRgb565(true)
-                            .crossfade(1.seconds.inWholeMilliseconds.toInt())
-                            .placeholderMemoryCacheKey(imageKey)
-                            .memoryCacheKey(imageKey)
-                            .build()
-                    },
-                    contentDescription = null,
-                    modifier = Modifier
-                        .aspectRatio(scale)
-                        .conditionally(isIllustBlocked || isUserBlocked) {
-                            blur(50.dp, BlurredEdgeTreatment(imageShape))
-                        }
-                        .clip(imageShape)
-                        .sharedElement(
-                            sharedTransitionScope.rememberNavigationSharedContentState(key = "${prefix}-$imageKey"),
-                            animatedVisibilityScope = animatedContentScope,
-                            placeholderSize = SharedTransitionScope.PlaceholderSize.AnimatedSize,
-                        ),
-                    alignment = Alignment.TopCenter,
-                )
-                Row(
-                    modifier = Modifier
-                        .padding(start = 5.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+    val shape = 10f.round
+    Box(
+        modifier = modifier
+            .padding(horizontal = 5.dp)
+            .padding(bottom = 5.dp)
+            .throttleClick {
+                navToPictureScreen(cover)
+            }
+            .shadow(4.dp, shape, clip = false)
+            .background(color = MaterialTheme.colorScheme.surface, shape = shape)
+            .clip(shape),
+    ) {
+        Column {
+            RectangleIllustCover(
+                illust = illust,
+                sharedImage = cover?.key,
+                isBlocked = isBlocked,
+            )
+            Row(
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Column(
-                        modifier = Modifier.weight(1f)
+                    Text(
+                        text = illust.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = illust.user.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                BookmarkTooltipBox(
+                    shouldShowTip = shouldShowTip,
+                ) {
+                    IconButton(
+                        onClick = throttleClick {
+                            val restrict =
+                                if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
+                            onBookmarkClick(restrict, null, false)
+                        },
+                        onLongClick = onBookmarkLongClick,
                     ) {
-                        Text(
-                            text = illust.title,
-                            style = MaterialTheme.typography.bodyLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                        BookmarkIcon(
+                            isBookmarked = isBookmarked,
+                            isPrivate = illust.isPrivateBookmark,
+                            iconSize = 24.dp,
+                            contentDescription = "",
                         )
-                        Text(
-                            text = illust.user.name,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                    BookmarkTooltipBox(
-                        shouldShowTip = shouldShowTip,
-                    ) {
-                        IconButton(
-                            onClick = throttleClick {
-                                val restrict =
-                                    if (requireUserPreferenceValue.defaultPrivateBookmark) Restrict.PRIVATE else Restrict.PUBLIC
-                                onBookmarkClick(restrict, null, false)
-                            },
-                            onLongClick = onBookmarkLongClick,
-                        ) {
-                            BookmarkIcon(
-                                isBookmarked = isBookmarked,
-                                isPrivate = illust.isPrivateBookmark,
-                                iconSize = 24.dp,
-                                contentDescription = "",
-                            )
-                        }
                     }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(5.dp),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (illust.illustAIType == AiType.AiGeneratedWorks) {
-                    AIBadge()
-                }
-                if (illust.type == Type.Ugoira) {
-                    GifBadge()
-                }
-                if (illust.type == Type.Manga) {
-                    TextBadge(text = stringResource(RStrings.manga))
-                }
-                if (illust.series != null) {
-                    TextBadge(text = stringResource(RStrings.series))
-                }
-                if (illust.pageCount > 1) {
-                    PageBadge(
-                        pageCount = illust.pageCount,
-                    )
-                }
+        }
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(5.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (illust.illustAIType == AiType.AiGeneratedWorks) {
+                AIBadge()
+            }
+            if (illust.type == Type.Ugoira) {
+                GifBadge()
+            }
+            if (illust.type == Type.Manga) {
+                TextBadge(text = stringResource(RStrings.manga))
+            }
+            if (illust.series != null) {
+                TextBadge(text = stringResource(RStrings.series))
+            }
+            if (illust.pageCount > 1) {
+                PageBadge(
+                    pageCount = illust.pageCount,
+                )
             }
         }
     }
@@ -360,6 +304,50 @@ fun RectangleIllustItem(
             bottomSheetState = bottomSheetState,
             onBookmarkClick = onBookmarkClick,
         )
+    }
+}
+
+@Composable
+internal fun RectangleIllustCover(
+    illust: Illust,
+    sharedImage: PictureImageKey?,
+    isBlocked: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalPlatformContext.current
+    val imageUrl = illust.imageUrls.medium
+    val shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
+    AsyncImage(
+        model = remember(context, imageUrl) {
+            ImageRequest.Builder(context)
+                .data(imageUrl)
+                .allowRgb565(true)
+                .crossfade(1.seconds.inWholeMilliseconds.toInt())
+                .placeholderMemoryCacheKey(imageUrl)
+                .memoryCacheKey(imageUrl)
+                .build()
+        },
+        contentDescription = null,
+        modifier = modifier
+            .navigationSharedImage(sharedImage)
+            .aspectRatio(calculateIllustAspectRatio(illust.width, illust.height))
+            .conditionally(isBlocked) { blur(50.dp, BlurredEdgeTreatment(shape)) }
+            .clip(shape),
+        alignment = Alignment.TopCenter,
+    )
+}
+
+@Composable
+private fun pictureCoverSource(
+    illust: Illust,
+    slot: String,
+    thumbnailUrl: String,
+    enabled: Boolean,
+): PictureCoverSource? {
+    if (!enabled || illust.type == Type.Ugoira || thumbnailUrl.isBlank()) return null
+    val entryId = LocalNavigationManager.current?.entryId ?: return null
+    return remember(entryId, slot, illust.id, thumbnailUrl) {
+        PictureCoverSource(PictureImageKey(entryId, slot, illust.id), thumbnailUrl)
     }
 }
 

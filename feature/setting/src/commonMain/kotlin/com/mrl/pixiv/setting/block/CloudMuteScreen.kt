@@ -20,13 +20,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Tag
+import androidx.compose.material.icons.rounded.unfilled.Cloud
+import androidx.compose.material.icons.rounded.unfilled.Delete
+import androidx.compose.material.icons.rounded.unfilled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -287,7 +287,7 @@ internal fun CloudMuteContent(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    Icons.Outlined.Cloud,
+                                    Icons.Rounded.Cloud,
                                     null,
                                     tint = MaterialTheme.colorScheme.primary
                                 )
@@ -330,7 +330,7 @@ internal fun CloudMuteContent(
                         enabled = !state.busy,
                         modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
                     ) {
-                        Icon(Icons.Outlined.Download, null, Modifier.size(18.dp))
+                        Icon(Icons.Rounded.Download, null, Modifier.size(18.dp))
                         Spacer(Modifier.size(8.dp))
                         Text(stringResource(RStrings.cloud_mute_import))
                     }
@@ -357,7 +357,7 @@ internal fun CloudMuteContent(
                                         color = MaterialTheme.colorScheme.surfaceContainerHigh
                                     ) {
                                         Icon(
-                                            Icons.Outlined.Person,
+                                            Icons.Rounded.Person,
                                             null,
                                             Modifier.padding(8.dp).size(24.dp),
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -384,7 +384,7 @@ internal fun CloudMuteContent(
                                     enabled = !state.busy
                                 ) {
                                     Icon(
-                                        Icons.Outlined.Delete,
+                                        Icons.Rounded.Delete,
                                         stringResource(RStrings.cloud_mute_remove)
                                     )
                                 }
@@ -405,7 +405,7 @@ internal fun CloudMuteContent(
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             leadingContent = {
                                 Icon(
-                                    Icons.Outlined.Tag,
+                                    Icons.Rounded.Tag,
                                     null,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -423,7 +423,7 @@ internal fun CloudMuteContent(
                                     enabled = !state.busy
                                 ) {
                                     Icon(
-                                        Icons.Outlined.Delete,
+                                        Icons.Rounded.Delete,
                                         stringResource(RStrings.cloud_mute_remove)
                                     )
                                 }

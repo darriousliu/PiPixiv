@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.rounded.EditCalendar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Icon
@@ -47,7 +47,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.analytics.trackTab
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
@@ -183,12 +183,9 @@ fun RankingScreen(
 
     LaunchedEffect(lifecycleOwner, pagerState, availableModes) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            snapshotFlow { pagerState.currentPage }.collectLatest { page ->
-                availableModes.getOrNull(page)?.let { mode ->
-                    logEvent("screen_view", buildMap {
-                        put("screen_name", "Ranking")
-                        put("mode", mode.value)
-                    })
+            snapshotFlow { availableModes.getOrNull(pagerState.currentPage) }.collectLatest { mode ->
+                if (mode != null) {
+                    trackTab("Ranking", mode)
                 }
             }
         }
@@ -249,7 +246,7 @@ fun RankingScreen(
                         onClick = { showDatePicker = true }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.EditCalendar,
+                            imageVector = Icons.Rounded.EditCalendar,
                             contentDescription = null
                         )
                     }
@@ -367,7 +364,8 @@ private fun IllustMode(
         ) {
             illustGrid(
                 illusts = rankingList,
-                navToPictureScreen = navigateToPictureScreen
+                navToPictureScreen = navigateToPictureScreen,
+                sharedElementGroup = "ranking:${mode.value}",
             )
 
             if (

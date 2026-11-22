@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">익명 사용 통계</string>
+    <string name="usage_analytics_description">자주 사용하는 화면과 기능을 집계해 앱 개선에 활용합니다.</string>
+    <string name="crash_diagnostics">비정상 종료 보고서</string>
+    <string name="crash_diagnostics_description">앱이 비정상 종료되거나 오류가 발생하면 오류 정보, 앱 버전, 기기 정보를 자동으로 전송해 문제를 찾고 해결하는 데 활용합니다.</string>
+    <string name="crash_diagnostics_switch_note">비정상 종료 보고서는 위 스위치의 영향을 받지 않습니다.</string>
+    <string name="privacy_not_collected_description">앱은 사용자의 검색어, 계정 정보, 열람한 작품, 다운로드한 파일을 능동적으로 수집하지 않습니다.</string>
+</resources>

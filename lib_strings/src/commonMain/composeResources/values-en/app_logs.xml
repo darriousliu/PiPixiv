@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">App logs</string>
+    <string name="app_logs_feedback_hint">Copy and attach when sending feedback</string>
+    <string name="app_logs_local_notice">Logs are stored only on this device and are never uploaded automatically. You can review them before copying.</string>
+    <string name="app_logs_warnings">Warnings and above</string>
+    <string name="app_logs_errors">Errors only</string>
+    <string name="app_logs_current">This run</string>
+    <string name="app_logs_previous">Last run</string>
+    <string name="app_logs_copy_all">Copy all logs</string>
+    <string name="app_logs_clear">Clear logs</string>
+    <string name="app_logs_clear_confirmation">Clear logs from this run and the last run?</string>
+    <string name="app_logs_empty">No matching logs</string>
+    <string name="app_logs_expand">Expand stack trace</string>
+    <string name="app_logs_collapse">Collapse stack trace</string>
+    <string name="app_logs_omitted">Older entries omitted: %1$d</string>
+    <string name="app_logs_unknown_device">Unknown</string>
+    <string name="app_logs_copied">Logs copied</string>
+    <string name="app_logs_export_failed">Could not copy or share logs</string>
+</resources>

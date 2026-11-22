@@ -2,6 +2,7 @@ package com.mrl.pixiv.common.compose.ui.novel
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -10,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.Person
@@ -160,6 +159,7 @@ internal fun NovelItemContent(
     val isBookmarked = novel.isBookmark
     val isAI = novel.novelAiType == AiType.AiGeneratedWorks
     val seriesId = validNovelSeriesId(novel.series.id)
+    val coverWidthFraction = 0.24f
 
     Card(
         modifier = modifier
@@ -176,227 +176,228 @@ internal fun NovelItemContent(
                 .clickable { onNovelClick(novel.id) }
                 .height(IntrinsicSize.Min)
         ) {
-            // 左侧封面
-            AsyncImage(
-                model = remember {
-                    ImageRequest.Builder(context)
-                        .data(novel.imageUrls.medium)
-                        .allowRgb565(true)
-                        .crossfade(1.seconds.inWholeMilliseconds.toInt())
-                        .build()
-                },
-                contentDescription = novel.title,
+            // 封面跟随右侧内容的高度，图片加载后也不改变卡片尺寸。
+            Box(
                 modifier = Modifier
-                    .width(
-                        when {
-                            compactMarkerLayout -> 64.dp
-                            markerPageLabel != null -> 120.dp
-                            else -> 80.dp
-                        }
-                    )
+                    .weight(coverWidthFraction)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-            8.HSpacer
-
-            // 中间内容
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 8.dp)
+                    .padding(8.dp),
             ) {
-                // 系列
-                if (seriesId != null && !novel.series.title.isNullOrEmpty()) {
-                    Text(
-                        text = novel.series.title ?: "",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.clickable {
-                            onSeriesClick(seriesId)
-                        },
-                    )
-                }
-
-                // 标题
-                Text(
-                    text = novel.title,
-                    style = if (compactTitle) {
-                        MaterialTheme.typography.titleSmall
-                    } else {
-                        MaterialTheme.typography.titleMedium
+                AsyncImage(
+                    model = remember {
+                        ImageRequest.Builder(context)
+                            .data(novel.imageUrls.medium)
+                            .allowRgb565(true)
+                            .crossfade(1.seconds.inWholeMilliseconds.toInt())
+                            .build()
                     },
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 4.dp)
+                    contentDescription = novel.title,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(MaterialTheme.shapes.small),
+                    contentScale = ContentScale.Crop,
                 )
+            }
 
-                // Narrow marker cards keep the author readable beside the action column.
-                if (compactMarkerLayout) {
+            Column(Modifier.weight(1f - coverWidthFraction)) {
+                Row(Modifier.fillMaxWidth()) {
+                    // 中间内容
                     Column(
-                        modifier = Modifier.padding(top = 4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Rounded.Person,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            4.HSpacer
+                        // 系列
+                        if (seriesId != null && !novel.series.title.isNullOrEmpty()) {
                             Text(
-                                text = novel.user.name,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                text = novel.series.title ?: "",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.clickable {
+                                    onSeriesClick(seriesId)
+                                },
                             )
                         }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Rounded.TextFields,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            4.HSpacer
-                            Text(
-                                text = "${novel.textLength}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            if (isAI) {
-                                8.HSpacer
-                                AIBadge()
-                            }
-                        }
-                    }
-                } else {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Person,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        4.HSpacer
-                        Text(
-                            text = novel.user.name,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                        8.HSpacer
-                        Icon(
-                            imageVector = Icons.Rounded.TextFields,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        4.HSpacer
-                        Text(
-                            text = "${novel.textLength}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (isAI) {
-                            8.HSpacer
-                            AIBadge()
-                        }
-                    }
-                }
 
-                Text(
-                    text = remember(novel.createDate) {
-                        convertUtcStringToLocalDateTime(novel.createDate)
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-
-                // 标签
-                if (novel.tags.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.padding(top = 4.dp)
-                    ) {
-                        val tagsText = novel.tags.take(3).joinToString(" ") { tag ->
-                            val name = tag.name
-                            val translatedName = tag.translatedName.takeIf { it.isNotEmpty() }
-                            if (translatedName != null) {
-                                "#$name $translatedName"
+                        // 标题
+                        Text(
+                            text = novel.title,
+                            style = if (compactTitle) {
+                                MaterialTheme.typography.titleSmall
                             } else {
-                                "#$name"
+                                MaterialTheme.typography.titleMedium
+                            },
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+
+                        // Narrow marker cards keep the author readable beside the action column.
+                        if (compactMarkerLayout) {
+                            Column(
+                                modifier = Modifier.padding(top = 4.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Person,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    4.HSpacer
+                                    Text(
+                                        text = novel.user.name,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.TextFields,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    4.HSpacer
+                                    Text(
+                                        text = "${novel.textLength}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    if (isAI) {
+                                        8.HSpacer
+                                        AIBadge()
+                                    }
+                                }
+                            }
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Person,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                4.HSpacer
+                                Text(
+                                    text = novel.user.name,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+                                8.HSpacer
+                                Icon(
+                                    imageVector = Icons.Rounded.TextFields,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                4.HSpacer
+                                Text(
+                                    text = "${novel.textLength}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                if (isAI) {
+                                    8.HSpacer
+                                    AIBadge()
+                                }
                             }
                         }
+
                         Text(
-                            text = tagsText,
+                            text = remember(novel.createDate) {
+                                convertUtcStringToLocalDateTime(novel.createDate)
+                            },
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
+                            modifier = Modifier.padding(top = 4.dp),
                         )
+
+                        // 标签
+                        if (novel.tags.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                val tagsText = novel.tags.take(3).joinToString(" ") { tag ->
+                                    val name = tag.name
+                                    val translatedName = tag.translatedName.takeIf { it.isNotEmpty() }
+                                    if (translatedName != null) {
+                                        "#$name $translatedName"
+                                    } else {
+                                        "#$name"
+                                    }
+                                }
+                                Text(
+                                    text = tagsText,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+
+                    4.HSpacer
+
+                    // 右侧收藏按钮和收藏数
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(vertical = 8.dp, horizontal = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        readLaterAction()
+                        IconButton(
+                            onClick = onBookmarkClick,
+                            onLongClick = onBookmarkLongClick,
+                        ) {
+                            BookmarkIcon(
+                                isBookmarked = isBookmarked,
+                                isPrivate = novel.isPrivateBookmark,
+                                iconSize = 24.dp,
+                            )
+                        }
+                        Text(
+                            text = "${novel.totalBookmarks}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (markerPageLabel != null && onMarkerClick != null) {
+                            IconButton(onClick = onMarkerClick) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Bookmark,
+                                    contentDescription = markerPageLabel,
+                                )
+                            }
+                            Text(
+                                text = markerPageLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
-            }
-
-            4.HSpacer
-
-            // 右侧收藏按钮和收藏数
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                readLaterAction()
-                IconButton(
-                    onClick = onBookmarkClick,
-                    onLongClick = onBookmarkLongClick,
-                ) {
-                    BookmarkIcon(
-                        isBookmarked = isBookmarked,
-                        isPrivate = novel.isPrivateBookmark,
-                        iconSize = 24.dp,
-                    )
-                }
-                Text(
-                    text = "${novel.totalBookmarks}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (markerPageLabel != null && onMarkerClick != null) {
-                    IconButton(onClick = onMarkerClick) {
-                        Icon(
-                            imageVector = Icons.Rounded.Bookmark,
-                            contentDescription = markerPageLabel,
-                        )
+                if (onMetadataClick != null) {
+                    TextButton(
+                        onClick = onMetadataClick,
+                        modifier = Modifier.align(Alignment.End).padding(end = 8.dp),
+                    ) {
+                        Text(stringResource(RStrings.view_more))
                     }
-                    Text(
-                        text = markerPageLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 }
-            }
-        }
-        if (onMetadataClick != null) {
-            TextButton(
-                onClick = onMetadataClick,
-                modifier = Modifier.align(Alignment.End).padding(end = 8.dp),
-            ) {
-                Text(stringResource(RStrings.view_more))
             }
         }
     }

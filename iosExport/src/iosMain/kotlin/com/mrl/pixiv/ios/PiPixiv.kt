@@ -1,5 +1,6 @@
 package com.mrl.pixiv.ios
 
+import com.mrl.pixiv.IosBackgroundDownloads
 import com.mrl.pixiv.MainViewController
 import com.mrl.pixiv.common.util.PhotoUtil
 import com.mrl.pixiv.common.util.ZipUtil
@@ -22,4 +23,8 @@ object PiPixiv {
     fun makeMainViewController(
         onStatusBarVisibilityChange: (Boolean) -> Unit,
     ): UIViewController = MainViewController(onStatusBarVisibilityChange)
+
+    fun handleBackgroundDownloadEvents(identifier: String, onFinished: () -> Unit) {
+        IosBackgroundDownloads.handleEvents(identifier, onFinished)
+    }
 }

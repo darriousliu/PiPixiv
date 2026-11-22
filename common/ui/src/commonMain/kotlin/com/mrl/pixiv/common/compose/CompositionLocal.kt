@@ -11,10 +11,6 @@ val LocalSharedTransitionScope = compositionLocalOf<SharedTransitionScope> {
     noLocalProvidedFor("LocalSharedTransitionScope")
 }
 
-val LocalSharedKeyPrefix = compositionLocalOf {
-    ""
-}
-
 val LocalToaster = staticCompositionLocalOf<ToasterState> {
     noLocalProvidedFor("LocalToaster")
 }

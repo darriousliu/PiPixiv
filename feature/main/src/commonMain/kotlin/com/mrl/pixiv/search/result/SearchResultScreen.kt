@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.mrl.pixiv.common.analytics.logEvent
+import com.mrl.pixiv.common.analytics.trackTab
 import com.mrl.pixiv.common.compose.IllustGridDefaults
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
@@ -236,10 +236,8 @@ fun SearchResultsScreen(
     KeyEventListener(controller)
 
     LaunchedEffect(pagerState.currentPage) {
-        logEvent("screen_view", buildMap {
-            put("screen_name", "SearchResults")
-            put("page_name", SearchResultsPage.entries[pagerState.currentPage].name)
-        })
+        val page = SearchResultsPage.entries[pagerState.currentPage]
+        trackTab("SearchResults", page)
     }
 
     Scaffold(
@@ -435,12 +433,14 @@ fun SearchResultsScreen(
                                                     state = manualIllustResults,
                                                     navToPictureScreen =
                                                         navigationManager::navigateToPictureScreen,
+                                                    sharedElementGroup = "search-square-manual",
                                                 )
                                             } else if (searchResults != null) {
                                                 illustGrid(
                                                     illusts = searchResults,
                                                     navToPictureScreen =
                                                         navigationManager::navigateToPictureScreen,
+                                                    sharedElementGroup = "search-square",
                                                 )
                                             }
 
@@ -491,6 +491,7 @@ fun SearchResultsScreen(
                                                     state = manualIllustResults,
                                                     navToPictureScreen =
                                                         navigationManager::navigateToPictureScreen,
+                                                    sharedElementGroup = "search-waterfall-manual",
                                                 )
                                             } else if (searchResults != null) {
                                                 items(
@@ -518,15 +519,14 @@ fun SearchResultsScreen(
                                                                 )
                                                             }
                                                         },
-                                                        navToPictureScreen =
-                                                            { prefix, enableTransition ->
-                                                                navigationManager.navigateToPictureScreen(
-                                                                    searchResults.itemSnapshotList.items,
-                                                                    index,
-                                                                    prefix,
-                                                                    enableTransition,
-                                                                )
-                                                            },
+                                                        navToPictureScreen = { cover ->
+                                                            navigationManager.navigateToPictureScreen(
+                                                                searchResults.itemSnapshotList.items,
+                                                                index,
+                                                                cover,
+                                                            )
+                                                        },
+                                                        sharedElementSlot = "search-waterfall:$index",
                                                         shouldShowTip = index == 0,
                                                     )
                                                 }
@@ -872,7 +872,8 @@ fun SearchResultsScreen(
                                             navigationManager.navigateToProfileDetailScreen(
                                                 userPreview.user.id
                                             )
-                                        }
+                                        },
+                                        sharedElementGroup = "search-user:$index:${userPreview.user.id}",
                                     )
                                 }
                             }

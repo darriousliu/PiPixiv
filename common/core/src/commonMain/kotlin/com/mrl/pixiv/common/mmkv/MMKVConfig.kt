@@ -2,28 +2,102 @@ package com.mrl.pixiv.common.mmkv
 
 import com.ctrip.flight.mmkv.MMKV_KMP
 import com.ctrip.flight.mmkv.mmkvWithID
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.filesDir
+import io.github.vinceglb.filekit.toKotlinxIoPath
+import kotlinx.coroutines.CancellationException
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlinx.serialization.serializer
 
 interface MMKVOwner {
     val id: String
-    val kv: MMKV_KMP get() = mmkvWithID(id)
+    val kv: MMKV_KMP
+        get() = withAccountStorageLock {
+            defaultInstances.getOrPut(id) { mmkvOperation { mmkvWithID(id) } }
+        }
+
+    fun contains(key: String): Boolean = accessMMKV { containsKey(key) }
+    fun sync() = accessMMKV { sync() }
+}
+
+class MMKVStorageException(message: String, cause: Throwable? = null) : IllegalStateException(message, cause)
+
+private inline fun <T> mmkvOperation(block: () -> T): T = try {
+    block()
+} catch (error: Exception) {
+    if (error is CancellationException || error is MMKVStorageException) throw error
+    throw MMKVStorageException("MMKV storage operation failed", error)
+}
+
+internal fun <T> MMKVOwner.accessMMKV(block: MMKV_KMP.() -> T): T {
+    fun access(): T {
+        val store = kv
+        return mmkvOperation { store.block() }
+    }
+    return if (this is MMKVUser) withAccountStorageLock(::access) else access()
 }
 
 /**
- * 存储用户无关对数据
+ * 存储设备级数据。
  */
 interface MMKVApp : MMKVOwner {
     override val id get() = "pixiv.app"
-    override val kv get() = mmkvWithID(id)
 }
 
-/**
- * 当前用户级别的key-value存储实现该接口
- * 退出登录后会被清除
- */
 interface MMKVUser : MMKVOwner {
     override val id get() = "pixiv.user"
-    override val kv get() = mmkvWithID(id)
+    val userId: Long get() = AccountStore.activeUserId
+    override val kv: MMKV_KMP get() = accountMMKVOwner(userId).kv
+}
+
+class AccountMMKVOwner(
+    override val userId: Long,
+    private val filesDirectory: String,
+) : MMKVUser {
+    private var closed = false
+    private val instance = lazy {
+        require(userId > 0)
+        val directory = Path(filesDirectory, "accounts", userId.toString(), "mmkv")
+        SystemFileSystem.createDirectories(directory)
+        mmkvOperation { mmkvWithID(id, rootPath = directory.toString()) }
+    }
+
+    override val kv: MMKV_KMP
+        get() = withAccountStorageLock {
+            check(!closed) { "The account MMKV owner has been closed." }
+            instance.value
+        }
+
+    internal fun close() {
+        closed = true
+        if (instance.isInitialized()) mmkvOperation { instance.value.close() }
+    }
+}
+
+private val defaultInstances = mutableMapOf<String, MMKV_KMP>()
+private val accountInstances = mutableMapOf<Long, AccountMMKVOwner>()
+
+fun accountMMKVOwner(userId: Long): MMKVOwner = withAccountStorageLock {
+    require(userId > 0)
+    accountInstances.getOrPut(userId) {
+        AccountMMKVOwner(userId, FileKit.filesDir.toKotlinxIoPath().toString())
+    }
+}
+
+fun openAccountMMKV(userId: Long) {
+    accountMMKVOwner(userId).kv
+}
+
+fun closeAccountMMKV(userId: Long) {
+    withAccountStorageLock { accountInstances.remove(userId)?.close() }
+}
+
+fun mmkvOwner(id: String, rootPath: String? = null): MMKVOwner = object : MMKVOwner {
+    override val id = id
+    override val kv by lazy {
+        if (rootPath == null) super<MMKVOwner>.kv else mmkvOperation { mmkvWithID(id, rootPath = rootPath) }
+    }
 }
 
 internal operator fun MMKV_KMP.set(key: String, value: ByteArray?) = if (value == null) {
@@ -64,5 +138,5 @@ fun <V> MMKVProperty<V>.asMutableStateFlow() = MMKVStateFlowProperty(this)
 
 fun <V> MMKVSerializableProperty<V>.asMutableStateFlow() = MMKVStateFlowSerializableProperty(this)
 
-fun MMKVOwner.clearAll() = kv.clearAll()
+fun MMKVOwner.clearAll() = accessMMKV { clearAll() }
 

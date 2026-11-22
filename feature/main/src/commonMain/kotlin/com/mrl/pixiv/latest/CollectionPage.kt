@@ -171,12 +171,11 @@ private fun CollectionIllustPage(
                     RectangleIllustItem(
                         illust = illust,
                         isBookmarked = isBookmarked,
-                        navToPictureScreen = { prefix, enableTransition ->
+                        navToPictureScreen = { cover ->
                             navigationManager.navigateToPictureScreen(
                                 userBookmarksIllusts.itemSnapshotList.items,
                                 index,
-                                prefix,
-                                enableTransition
+                                cover,
                             )
                         },
                         onBookmarkClick = { restrict, tags, isEdit ->
@@ -185,7 +184,8 @@ private fun CollectionIllustPage(
                             } else {
                                 BookmarkState.deleteBookmarkIllust(illust.id)
                             }
-                        }
+                        },
+                        sharedElementSlot = "latest-bookmarks:$index",
                     )
                 }
 

@@ -1,6 +1,6 @@
 package com.mrl.pixiv.common.repository
 
-import com.mrl.pixiv.common.datasource.local.dao.NovelReadingProgressDao
+import com.mrl.pixiv.common.datasource.local.AccountDatabaseProvider
 import com.mrl.pixiv.common.datasource.local.entity.NovelReadingProgressEntity
 import com.mrl.pixiv.common.util.currentTimeMillis
 import org.koin.core.annotation.Single
@@ -13,22 +13,23 @@ data class NovelReadingProgress(
 
 @Single
 class NovelReadingProgressRepository(
-    private val dao: NovelReadingProgressDao
+    private val databases: AccountDatabaseProvider,
 ) {
     suspend fun getProgress(novelId: Long): NovelReadingProgress? {
-        val userId = requireUserInfoValue.user.id
-        return dao.getByNovelId(userId = userId, novelId = novelId)?.toDomain()
+        val account = databases.current.value ?: return null
+        return account.db.novelReadingProgressDao()
+            .getByNovelId(userId = account.userId, novelId = novelId)?.toDomain()
     }
 
     suspend fun saveProgress(
         novelId: Long,
         progress: NovelReadingProgress
     ) {
-        val userId = requireUserInfoValue.user.id
-        dao.upsert(
+        val account = databases.requireCurrent()
+        account.db.novelReadingProgressDao().upsert(
             NovelReadingProgressEntity(
                 novelId = novelId,
-                userId = userId,
+                userId = account.userId,
                 paragraphIndex = progress.paragraphIndex,
                 charIndex = progress.charIndex,
                 paragraphHash = progress.paragraphHash,
@@ -38,8 +39,8 @@ class NovelReadingProgressRepository(
     }
 
     suspend fun clearProgress(novelId: Long) {
-        val userId = requireUserInfoValue.user.id
-        dao.deleteByNovelId(userId = userId, novelId = novelId)
+        val account = databases.requireCurrent()
+        account.db.novelReadingProgressDao().deleteByNovelId(userId = account.userId, novelId = novelId)
     }
 }
 

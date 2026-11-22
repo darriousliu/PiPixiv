@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">Anonyme App-Statistik</string>
+    <string name="usage_analytics_description">Zählt, welche Bildschirme und Funktionen genutzt werden, damit wir die App verbessern können.</string>
+    <string name="crash_diagnostics">Absturzberichte</string>
+    <string name="crash_diagnostics_description">Stürzt die App ab oder tritt ein Fehler auf, werden Fehlerdetails, App-Version und Geräteinformationen automatisch gesendet, damit wir das Problem finden und beheben können.</string>
+    <string name="crash_diagnostics_switch_note">Der Schalter oben wirkt sich nicht auf Absturzberichte aus.</string>
+    <string name="privacy_not_collected_description">Die App erfasst Ihre Suchbegriffe, Kontodaten, angesehenen Werke und heruntergeladenen Dateien nicht aktiv.</string>
+</resources>

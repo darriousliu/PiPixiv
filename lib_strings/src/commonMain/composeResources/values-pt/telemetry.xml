@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">Estatísticas anônimas de uso</string>
+    <string name="usage_analytics_description">Conta quais telas e recursos são usados para nos ajudar a melhorar o app.</string>
+    <string name="crash_diagnostics">Relatórios de falhas</string>
+    <string name="crash_diagnostics_description">Quando o app falha ou encontra um erro, ele envia automaticamente os detalhes do erro, a versão do app e informações do dispositivo para que possamos encontrar e corrigir o problema.</string>
+    <string name="crash_diagnostics_switch_note">O botão acima não afeta os relatórios de falhas.</string>
+    <string name="privacy_not_collected_description">O app não coleta ativamente seus termos de pesquisa, dados da conta, obras que você vê nem arquivos que você baixa.</string>
+</resources>

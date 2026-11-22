@@ -1,0 +1,9 @@
+<resources>
+    <string name="artwork_download_pages">डाउनलोड करने के लिए पेज चुनें</string>
+    <string name="artwork_download_all_originals">सभी मूल चित्र डाउनलोड करें</string>
+    <string name="artwork_download_selected">चुने गए मूल चित्र डाउनलोड करें</string>
+    <string name="artwork_download_selection_count">%2$d में से %1$d चुने गए</string>
+    <string name="artwork_download_page">पेज %1$d</string>
+    <string name="select_all">सभी चुनें</string>
+    <string name="artwork_download_clear_selection">सभी का चयन हटाएँ</string>
+</resources>

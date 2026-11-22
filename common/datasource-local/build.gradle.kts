@@ -12,7 +12,7 @@ kotlin {
             // Serialization
             implementation(libs.bundles.kotlinx.serialization)
             // Room
-            implementation(libs.androidx.room3.runtime)
+            api(libs.androidx.room3.runtime)
             implementation(libs.androidx.sqlite.bundled)
             // Koin
             implementation(libs.bundles.koin)

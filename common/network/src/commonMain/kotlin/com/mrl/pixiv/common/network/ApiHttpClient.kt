@@ -1,50 +1,42 @@
 package com.mrl.pixiv.common.network
 
-import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.HttpRequestRetry
-import io.ktor.client.plugins.HttpResponseValidator
+import com.mrl.pixiv.common.data.Constants.API_HOST
+import com.mrl.pixiv.common.data.setting.UserPreference.BypassSetting
+import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpSend
-import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.plugin
-import io.ktor.client.request.accept
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.URLProtocol
 import org.koin.core.annotation.Single
 
-@Single(createdAtStart = true)
+@Single
 @ApiClient
-fun apiHttpClient() = baseHttpClient.apply {
-    plugin(HttpSend).apply {
-        intercept { request ->
-            NetworkUtil.addAuthHeader(request)
-            execute(request)
+fun apiHttpClient() = routedPixivClient(::createApiClient)
+
+private fun createApiClient(setting: BypassSetting): HttpClient =
+    baseHttpClient(setting, allowRedirects = false).applyAppApiRequests(
+        readProxyHost = { (currentNetworkPreference() ?: NetworkUtil.networkSettings()).appApiProxyHost },
+        readAccessToken = { NetworkUtil.requireUserAccessToken() },
+    )
+
+internal fun HttpClient.applyAppApiRequests(
+    readProxyHost: suspend () -> String,
+    readAccessToken: suspend () -> String,
+): HttpClient = apply {
+    plugin(HttpSend).intercept { request ->
+        require(
+            request.url.protocol == URLProtocol.HTTPS &&
+                request.url.host.equals(API_HOST, ignoreCase = true) &&
+                request.url.user == null && request.url.password == null,
+        ) { "Unexpected Pixiv App API request destination" }
+        request.url.applyAppApiProxyHost(readProxyHost())
+        NetworkUtil.addAuthHeader(request, readAccessToken)
+        var call = execute(request)
+        if (call.response.status in HttpStatusCode.BadRequest..HttpStatusCode.RequestHeaderFieldTooLarge) {
+            // Keep the original account's credentials when retrying an in-flight request.
+            NetworkUtil.addAppHeaders(request)
+            call = execute(request)
         }
-        intercept { request ->
-            var call = execute(request)
-            if (call.response.status in HttpStatusCode.BadRequest..HttpStatusCode.RequestHeaderFieldTooLarge) {
-                NetworkUtil.requireUserAccessToken()
-                NetworkUtil.addAuthHeader(request)
-                call = execute(request)
-            }
-            call
-        }
-    }
-    config {
-        defaultRequest {
-            accept(ContentType.Application.Json)
-        }
-        HttpResponseValidator {
-            handleResponseExceptionWithRequest { cause, _ ->
-                val tokenExpiredException = cause as? ClientRequestException
-                    ?: return@handleResponseExceptionWithRequest
-                if (tokenExpiredException.response.status in HttpStatusCode.BadRequest..HttpStatusCode.RequestHeaderFieldTooLarge) {
-                    NetworkUtil.requireUserAccessToken()
-                }
-            }
-        }
-        install(HttpRequestRetry) {
-            retryOnServerErrors(maxRetries = 3)
-            exponentialDelay()
-        }
+        call
     }
 }

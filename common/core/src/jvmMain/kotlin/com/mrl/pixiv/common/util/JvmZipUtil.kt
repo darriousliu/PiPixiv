@@ -1,9 +1,11 @@
 package com.mrl.pixiv.common.util
 
+import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -11,7 +13,6 @@ import kotlin.io.buffered
 import kotlin.io.copyTo
 import kotlin.io.inputStream
 import kotlin.io.outputStream
-import kotlin.io.readBytes
 import kotlin.use
 
 @Single
@@ -54,25 +55,35 @@ class JvmZipUtil : ZipUtil {
             }
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(throwable = e, tag = "ZipUtil") { "Unable to extract ZIP archive" }
             false
         }
     }
 
     override fun compress(
         sourcePath: String,
-        destinationPath: String
+        destinationPath: String,
+    ): Boolean = compressArchive(sourcePath, destinationPath, Deflater.BEST_SPEED)
+
+    fun compressWithLevel(sourcePath: String, destinationPath: String, compressionLevel: Int): Boolean =
+        compressArchive(sourcePath, destinationPath, compressionLevel)
+
+    private fun compressArchive(
+        sourcePath: String,
+        destinationPath: String,
+        compressionLevel: Int,
     ): Boolean {
         return try {
             val sourceFile = File(sourcePath)
             val destOutputStream = getOutputStream(destinationPath)
 
             ZipOutputStream(destOutputStream.buffered()).use { zos ->
+                zos.setLevel(compressionLevel)
                 compressRecursive(sourceFile, sourceFile.name, zos)
             }
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(throwable = e, tag = "ZipUtil") { "Unable to create ZIP archive" }
             false
         }
     }
@@ -99,52 +110,21 @@ class JvmZipUtil : ZipUtil {
         }
     }
 
-    override fun getZipEntryList(zipFilePath: String): List<Pair<String, Boolean>> {
-        val entryList = mutableListOf<Pair<String, Boolean>>()
-        try {
-            val inputStream = getInputStream(zipFilePath)
+    override fun getZipEntryList(zipFilePath: String): List<Pair<String, Boolean>> =
+        getZipEntryMetadata(zipFilePath).orEmpty().map { it.name to it.isDirectory }
 
-            inputStream.use { fis ->
-                ZipInputStream(fis.buffered()).use { zis ->
-                    var entry = zis.nextEntry
-                    while (entry != null) {
-                        entryList.add(entry.name to entry.isDirectory)
-                        zis.closeEntry()
-                        entry = zis.nextEntry
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return entryList
-    }
+    override fun getZipEntryMetadata(zipFilePath: String): List<ZipEntryMetadata>? =
+        localZipEntryMetadata(zipFilePath)
 
-    override fun getZipEntryContent(
+    override fun getZipEntryContent(zipFilePath: String, entryName: String, maxBytes: Int): ByteArray? =
+        localZipEntryContent(zipFilePath, entryName, maxBytes)
+
+    override fun extractZipEntry(
         zipFilePath: String,
-        entryName: String
-    ): ByteArray? {
-        return try {
-            val inputStream = getInputStream(zipFilePath)
-
-            return inputStream.use { fis ->
-                ZipInputStream(fis.buffered()).use { zis ->
-                    var entry = zis.nextEntry
-                    while (entry != null) {
-                        if (entry.name == entryName) {
-                            return@use zis.readBytes()
-                        }
-                        zis.closeEntry()
-                        entry = zis.nextEntry
-                    }
-                    null
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
+        entryName: String,
+        outputPath: String,
+        maxBytes: Long,
+    ): Boolean = extractLocalZipEntry(zipFilePath, entryName, outputPath, maxBytes)
 
     private fun getInputStream(path: String): InputStream {
         return File(path).inputStream()

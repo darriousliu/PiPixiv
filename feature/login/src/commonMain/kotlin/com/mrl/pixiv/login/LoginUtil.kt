@@ -5,20 +5,21 @@ import okio.ByteString.Companion.toByteString
 import kotlin.io.encoding.Base64
 import kotlin.random.Random
 
-private var codeVerifier = getCodeVer()
+private lateinit var codeVerifier: String
 
-private fun getCodeVer(): String {
+private fun generateCodeVerifier(): String {
     val randomKeySet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
-    val result = (0..128).map {
-        randomKeySet[Random.nextInt(randomKeySet.length)]
-    }.joinToString("")
-    codeVerifier = result
-    return codeVerifier
+    val verifierLength = 128
+    return buildString(verifierLength) {
+        repeat(verifierLength) { append(randomKeySet[Random.nextInt(randomKeySet.length)]) }
+    }
 }
 
 private fun getCodeChallenge(): String {
+    val verifier = generateCodeVerifier()
+    codeVerifier = verifier
     return Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).encode(
-        getCodeVer().encodeToByteArray().toByteString().sha256().toByteArray(),
+        verifier.encodeToByteArray().toByteString().sha256().toByteArray(),
     )
 }
 
@@ -30,10 +31,15 @@ fun generateWebViewUrl(create: Boolean) =
     }
 
 fun checkUri(url: String): Pair<String, String>? {
-    val url = Url(url)
+    val url = try {
+        Url(url)
+    } catch (_: Exception) {
+        return null
+    }
     if (url.protocol.name == "pixiv" && url.host == "account") {
-        val code = url.parameters["code"]
-        return if (code != null) code to codeVerifier else null
+        val code = url.parameters["code"] ?: return null
+        if (!::codeVerifier.isInitialized) return null
+        return code to codeVerifier
     }
     return null
 }

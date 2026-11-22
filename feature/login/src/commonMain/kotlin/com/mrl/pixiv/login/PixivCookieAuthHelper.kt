@@ -1,5 +1,7 @@
 package com.mrl.pixiv.login
 
+import com.mrl.pixiv.common.data.auth.AuthTokenResp
+import com.mrl.pixiv.common.network.httpEngineFactory
 import com.mrl.pixiv.common.repository.AuthManager
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -65,7 +67,7 @@ class PixivCookieAuthHelper(
 
     private val cookieStorage = AcceptAllCookiesStorage()
 
-    private val client: HttpClient = HttpClient {
+    private val client: HttpClient = HttpClient(httpEngineFactory) {
         install(ContentNegotiation) { json(json) }
         install(HttpCookies) { storage = cookieStorage }
         install(HttpTimeout) {
@@ -92,7 +94,7 @@ class PixivCookieAuthHelper(
      * @throws IllegalStateException 若 PHPSESSID 缺失或账号未登录
      * @throws IllegalStateException 若任一重定向跳转失败
      */
-    suspend fun login(cookies: List<Cookie>) {
+    suspend fun login(cookies: List<Cookie>): AuthTokenResp {
         // 1. 生成 PKCE 参数
         val (verifier, codeChallenge) = generatePkce()
 
@@ -111,7 +113,7 @@ class PixivCookieAuthHelper(
         val code = fetchAuthorizationCode(redirectUrl)
 
         // 5. 用 code + verifier 换取最终 Token
-        AuthManager.login(code, verifier)
+        return AuthManager.login(code, verifier)
     }
 
     override fun close() = client.close()
@@ -175,7 +177,7 @@ class PixivCookieAuthHelper(
         }
         // Step 5: 拿到 post-redirect的 URL
         val postRedirectLink = requireNotNull(accountSelected.location()) {
-            "未能从 account-selected 获取跳转地址（期望跳转至 $POST_REDIRECT_URL）"
+            "未能获取账号确认后的跳转地址"
         }
         // Step 6: 进入 redirect() 逻辑 —— 处理 POST_REDIRECT_URL 链路
         return resolvePostRedirect(postRedirectLink)
@@ -205,11 +207,11 @@ class PixivCookieAuthHelper(
         }
         // https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback?state=xxx&code=xxx
         val usersAuthPixivCallbackUrl = requireNotNull(codeResp.location()) {
-            "未能获取 pixiv:// 跳转地址，OAuth 授权失败"
+            "未能获取 OAuth 授权回调地址"
         }
 
         return usersAuthPixivCallbackUrl.parameters["code"]
-            ?: throw NoSuchElementException("pixiv:// URL 中未找到 code 参数，完整 URL: $usersAuthPixivCallbackUrl")
+            ?: throw NoSuchElementException("OAuth 授权回调缺少 code 参数")
     }
 
     // ── 工具函数 ───────────────────────────────────────────────────────────────

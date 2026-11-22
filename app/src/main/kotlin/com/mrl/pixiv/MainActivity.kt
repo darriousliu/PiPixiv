@@ -16,18 +16,22 @@ import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import co.touchlab.kermit.Logger
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
-import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.allowRgb565
 import com.mrl.pixiv.common.activity.BaseActivity
 import com.mrl.pixiv.common.compose.LocalKeyEventFlow
 import com.mrl.pixiv.common.network.ImageClient
-import com.mrl.pixiv.common.viewmodel.state
+import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.network.imageNetworkFetcher
+import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
+import com.mrl.pixiv.common.util.setAppCompatDelegateThemeMode
 import com.mrl.pixiv.splash.SplashViewModel
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
@@ -42,7 +46,7 @@ import androidx.compose.ui.input.key.KeyEvent as ComposeKeyEvent
 
 class MainActivity : BaseActivity() {
     private val splashViewModel: SplashViewModel by viewModel()
-    private val imageHttpClient: HttpClient by inject(named<ImageClient>())
+    private val imageHttpClient: RoutedHttpClient<HttpClient> by inject(named<ImageClient>())
     private val flow = MutableSharedFlow<ComposeKeyEvent>()
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -50,6 +54,8 @@ class MainActivity : BaseActivity() {
     override fun BuildContent() {
         CompositionLocalProvider(LocalKeyEventFlow provides flow) {
             val darkTheme = isSystemInDarkTheme()
+            val appTheme by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { theme }
+            LaunchedEffect(appTheme) { setAppCompatDelegateThemeMode(SettingRepository.settingTheme) }
             LaunchedEffect(darkTheme) {
                 // Draw edge-to-edge and set system bars color to transparent
                 val lightStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.BLACK)
@@ -84,7 +90,7 @@ class MainActivity : BaseActivity() {
                             } else {
                                 add(GifDecoder.Factory())
                             }
-                            add(KtorNetworkFetcherFactory(imageHttpClient))
+                            add(imageNetworkFetcher(imageHttpClient))
                         }
                 },
                 splashViewModel = splashViewModel
@@ -95,7 +101,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                splashViewModel.state.isLoading
+                splashViewModel.keepNativeSplash
             }
         }
         super.onCreate(savedInstanceState)
@@ -133,8 +139,7 @@ class MainActivity : BaseActivity() {
             }
             .forEach { info ->
                 Logger.w(tag = "Android17Compat") {
-                    "Recent process exit may be affected by Android memory limits: " +
-                            "reason=${info.reason}, description=${info.description}"
+                    "Recent process exit may be affected by Android memory limits: reason=${info.reason}"
                 }
             }
     }

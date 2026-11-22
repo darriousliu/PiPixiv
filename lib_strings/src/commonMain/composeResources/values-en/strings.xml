@@ -88,7 +88,6 @@
     <string name="network_advanced_settings">Advanced settings</string>
     <string name="network_advanced_settings_desc">Customize the DNS resolver</string>
     <string name="ech_doh_url">DoH URL</string>
-    <string name="restart_app_to_take_effect">Restart app to take effect</string>
     <string name="image_source">Image Source</string>
     <string name="self_defined_source">Self-defined Image Source</string>
     <string name="default_open">Default Open Link</string>
@@ -166,6 +165,7 @@
     <string name="check_update">Check Update</string>
     <string name="already_updated">Already the latest version</string>
     <string name="project_url">Project URL</string>
+    <string name="telegram_channel">Telegram updates channel</string>
     <string name="feedback">Feedback</string>
     <string name="feedback_content">Welcome to feedback issues and co-develop</string>
     <string name="share_app">Share App</string>

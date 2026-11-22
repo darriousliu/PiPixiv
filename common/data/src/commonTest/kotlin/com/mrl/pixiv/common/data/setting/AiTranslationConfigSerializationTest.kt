@@ -1,20 +1,14 @@
 package com.mrl.pixiv.common.data.setting
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.protobuf.ProtoBuf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalSerializationApi::class)
 class AiTranslationConfigSerializationTest {
     private val json = Json {
         encodeDefaults = false
         ignoreUnknownKeys = true
-    }
-    private val protoBuf = ProtoBuf {
-        encodeDefaults = false
     }
 
     @Test
@@ -43,37 +37,7 @@ class AiTranslationConfigSerializationTest {
     }
 
     @Test
-    fun `old protobuf config uses new field defaults`() {
-        val legacyBytes = protoBuf.encodeToByteArray(
-            LegacyAiTranslationConfig.serializer(),
-            LegacyAiTranslationConfig(
-                provider = AiProvider.GEMINI,
-                endpoint = "https://api.example.com",
-                apiKey = "secret",
-                model = "model",
-                responseApi = false,
-                extraBody = "{}",
-            )
-        )
-
-        val decoded = protoBuf.decodeFromByteArray(
-            AiTranslationConfig.serializer(),
-            legacyBytes,
-        )
-
-        assertEquals(AiProvider.GEMINI, decoded.provider)
-        assertEquals(
-            AiTranslationConfig.GENERATION_TIMEOUT_DEFAULT_SECONDS,
-            decoded.generationTimeoutSeconds,
-        )
-        assertEquals(
-            AiTranslationConfig.MAX_CONCURRENT_REQUESTS_DEFAULT,
-            decoded.maxConcurrentRequests,
-        )
-    }
-
-    @Test
-    fun `custom request settings round trip through json and protobuf`() {
+    fun `custom request settings round trip through json`() {
         val config = AiTranslationConfig(
             generationTimeoutSeconds = 900,
             maxConcurrentRequests = 200,
@@ -85,19 +49,11 @@ class AiTranslationConfigSerializationTest {
                 json.encodeToString(AiTranslationConfig.serializer(), config)
             ),
         )
-        assertEquals(
-            config,
-            protoBuf.decodeFromByteArray(
-                AiTranslationConfig.serializer(),
-                protoBuf.encodeToByteArray(AiTranslationConfig.serializer(), config),
-            ),
-        )
     }
 
     @Test
     fun `catalog updates preserve explicitly saved legacy and custom model ids`() {
         val legacyJson = Json { encodeDefaults = true }
-        val legacyProtoBuf = ProtoBuf { encodeDefaults = true }
         val savedModels = listOf(
             AiProvider.OPENAI to "gpt-5.4-mini",
             AiProvider.CLAUDE to "claude-opus-4-8",
@@ -125,16 +81,6 @@ class AiTranslationConfigSerializationTest {
                 expected,
                 json.decodeFromString<AiTranslationConfig>(
                     legacyJson.encodeToString(LegacyAiTranslationConfig.serializer(), legacyConfig)
-                ),
-            )
-            assertEquals(
-                expected,
-                protoBuf.decodeFromByteArray(
-                    AiTranslationConfig.serializer(),
-                    legacyProtoBuf.encodeToByteArray(
-                        LegacyAiTranslationConfig.serializer(),
-                        legacyConfig,
-                    ),
                 ),
             )
         }

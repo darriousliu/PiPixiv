@@ -32,87 +32,88 @@ class GeminiTextClient(
 ) : AiTextProviderClient {
     override val provider: AiProvider = AiProvider.GEMINI
 
-    override suspend fun generateText(request: AiTextRequest): AiTextResponse {
-        val systemPrompt = request.messages
-            .filter { it.role == AiMessageRole.SYSTEM }
-            .joinToString(separator = "\n\n") { it.content }
-            .trim()
+    override suspend fun generateText(request: AiTextRequest): AiTextResponse =
+        httpClientHolder.withClient { client ->
+            val systemPrompt = request.messages
+                .filter { it.role == AiMessageRole.SYSTEM }
+                .joinToString(separator = "\n\n") { it.content }
+                .trim()
 
-        val messages = request.messages.filter { it.role != AiMessageRole.SYSTEM }
-        require(messages.isNotEmpty()) {
-            "Gemini request requires at least one non-system message."
-        }
+            val messages = request.messages.filter { it.role != AiMessageRole.SYSTEM }
+            require(messages.isNotEmpty()) {
+                "Gemini request requires at least one non-system message."
+            }
 
-        val resolvedModel = request.model
-        val response = httpClientHolder.client.post {
-            url(geminiUrl(request.endpoint, resolvedModel))
-            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header("x-goog-api-key", request.apiKey)
-            configureAiGenerationTimeout(request.generationTimeoutMillis)
-            setBody(
-                buildJsonObject {
-                    if (systemPrompt.isNotBlank()) {
-                        put(
-                            "system_instruction",
-                            buildJsonObject {
-                                put(
-                                    "parts",
-                                    buildJsonArray {
-                                        add(buildJsonObject { put("text", systemPrompt) })
-                                    }
-                                )
-                            }
-                        )
-                    }
-                    putJsonArray("contents") {
-                        messages.forEach { message ->
-                            add(
+            val resolvedModel = request.model
+            val response = client.post {
+                url(geminiUrl(request.endpoint, resolvedModel))
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header("x-goog-api-key", request.apiKey)
+                configureAiGenerationTimeout(request.generationTimeoutMillis)
+                setBody(
+                    buildJsonObject {
+                        if (systemPrompt.isNotBlank()) {
+                            put(
+                                "system_instruction",
                                 buildJsonObject {
-                                    put("role", message.role.toGeminiRole())
                                     put(
                                         "parts",
                                         buildJsonArray {
-                                            add(buildJsonObject { put("text", message.content) })
+                                            add(buildJsonObject { put("text", systemPrompt) })
                                         }
                                     )
                                 }
                             )
                         }
-                    }
-                    request.maxOutputTokens?.let { maxOutputTokens ->
-                        put(
-                            "generationConfig",
-                            buildJsonObject {
-                                put("maxOutputTokens", maxOutputTokens)
+                        putJsonArray("contents") {
+                            messages.forEach { message ->
+                                add(
+                                    buildJsonObject {
+                                        put("role", message.role.toGeminiRole())
+                                        put(
+                                            "parts",
+                                            buildJsonArray {
+                                                add(buildJsonObject { put("text", message.content) })
+                                            }
+                                        )
+                                    }
+                                )
                             }
-                        )
+                        }
+                        request.maxOutputTokens?.let { maxOutputTokens ->
+                            put(
+                                "generationConfig",
+                                buildJsonObject {
+                                    put("maxOutputTokens", maxOutputTokens)
+                                }
+                            )
+                        }
                     }
-                }
-                    .withExtraBody(
-                        extraBody = request.extraBody,
-                        reservedKeys = setOf("contents", "system_instruction"),
-                        providerName = provider.name,
-                    )
-                    .toString()
-            )
-        }
-
-        val payload = response.toJsonObject(providerName = provider.name)
-        val text = payload["candidates"]?.jsonArrayOrNull()
-            ?.firstOrNull()?.jsonObjectOrNull()?.get("content")
-            ?.jsonObjectOrNull()?.get("parts")
-            ?.jsonArrayOrNull()?.mapNotNull { part ->
-                part.jsonObjectOrNull()?.get("text")?.stringOrNull()
+                        .withExtraBody(
+                            extraBody = request.extraBody,
+                            reservedKeys = setOf("contents", "system_instruction"),
+                            providerName = provider.name,
+                        )
+                        .toString()
+                )
             }
-            ?.joinToString(separator = "")
-            ?.trim()
-            .orEmpty()
 
-        require(text.isNotBlank()) {
-            "AI returned empty text response."
+            val payload = response.toJsonObject(providerName = provider.name)
+            val text = payload["candidates"]?.jsonArrayOrNull()
+                ?.firstOrNull()?.jsonObjectOrNull()?.get("content")
+                ?.jsonObjectOrNull()?.get("parts")
+                ?.jsonArrayOrNull()?.mapNotNull { part ->
+                    part.jsonObjectOrNull()?.get("text")?.stringOrNull()
+                }
+                ?.joinToString(separator = "")
+                ?.trim()
+                .orEmpty()
+
+            require(text.isNotBlank()) {
+                "AI returned empty text response."
+            }
+            AiTextResponse(text = text)
         }
-        return AiTextResponse(text = text)
-    }
 
     private fun geminiUrl(endpoint: String, model: String): String {
         val base = normalizeBaseUrl(endpoint)

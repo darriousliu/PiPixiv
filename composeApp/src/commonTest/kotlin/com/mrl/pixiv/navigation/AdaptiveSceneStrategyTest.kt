@@ -11,6 +11,8 @@ import com.mrl.pixiv.common.compose.layout.SplitPaneState
 import com.mrl.pixiv.common.router.CommentType
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationRecord
+import com.mrl.pixiv.common.router.PictureCoverSource
+import com.mrl.pixiv.common.router.PictureImageKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -29,7 +31,7 @@ class AdaptiveSceneStrategyTest {
     @Test
     fun fullWidthPicturesNeverBecomeDetailsEvenWithAnInvalidOwner() {
         val source = entry("list", Destination.Following(1))
-        for (destination in listOf(Destination.Picture(0, "images", false), Destination.PictureDeeplink(5))) {
+        for (destination in listOf(Destination.Picture(0, "images"), Destination.PictureDeeplink(5))) {
             val picture = entry("picture", destination, "list")
             val scene = scene(listOf(source, picture), width = 2000.dp)
 
@@ -186,6 +188,38 @@ class AdaptiveSceneStrategyTest {
         enabled.update(split, previous, TransitionKind.Predictive, NavigationEvent.EDGE_RIGHT)
         assertNull(enabled.backCardFor(split))
         assertNull(enabled.backCardFor(previous))
+    }
+
+    @Test
+    fun sharedImageTransitionIsKeptOnlyWhenReturningToItsOpener() {
+        val grid = entry("grid", Destination.Main)
+        val cover = PictureCoverSource(PictureImageKey("grid", "home", 1L), "thumbnail")
+        val picture = entry("picture", Destination.Picture(0, "images", cover))
+        // 作品首图打开预览时沿用封面标识，entryId 指向瀑布流而不是作品页。
+        val preview = entry("preview", Destination.ImagePreview(listOf("image"), 0, cover.key))
+        val gridScene = scene(listOf(grid), width = 400.dp)
+        val pictureScene = scene(listOf(grid, picture), width = 400.dp)
+        val previewScene = scene(listOf(grid, picture, preview), width = 400.dp)
+
+        assertTrue(pictureScene.returnsWithSharedImage(gridScene))
+        assertTrue(previewScene.returnsWithSharedImage(pictureScene))
+        assertFalse(previewScene.returnsWithSharedImage(gridScene), "Only the opener can receive the image")
+        assertFalse(pictureScene.returnsWithSharedImage(null))
+
+        val plainPicture = entry("plain-picture", Destination.Picture(0, "images"))
+        val plainPreview = entry("plain-preview", Destination.ImagePreview(listOf("image"), 0))
+        assertFalse(scene(listOf(grid, plainPicture), width = 400.dp).returnsWithSharedImage(gridScene))
+        assertFalse(scene(listOf(grid, picture, plainPreview), width = 400.dp).returnsWithSharedImage(pictureScene))
+
+        // 中等宽度下来源页可能是分栏，缩略图位于其中一栏，返回时仍由该场景接住共享图片。
+        val list = entry("list", Destination.Following(1))
+        val profile = entry("profile", Destination.ProfileDetail(2), "list")
+        val profileCover = PictureCoverSource(PictureImageKey("profile", "works", 1L), "thumbnail")
+        val fromDetail = entry("from-detail", Destination.Picture(0, "images", profileCover))
+        val splitScene = scene(listOf(list, profile))
+        assertNotNull(splitScene.source)
+        assertTrue(scene(listOf(list, profile, fromDetail)).returnsWithSharedImage(splitScene))
+        assertFalse(splitScene.returnsWithSharedImage(scene(listOf(list))), "A split detail has no shared image")
     }
 
     @Test

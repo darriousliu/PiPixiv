@@ -6,11 +6,17 @@ import androidx.work.WorkerParameters
 import co.touchlab.kermit.Logger
 import coil3.annotation.InternalCoilApi
 import coil3.util.MimeTypeMap
+import com.mrl.pixiv.common.analytics.recordCrashOperation
 import com.mrl.pixiv.common.datasource.local.dao.DownloadDao
 import com.mrl.pixiv.common.datasource.local.entity.DownloadEntity
 import com.mrl.pixiv.common.datasource.local.entity.DownloadStatus
+import com.mrl.pixiv.common.datasource.local.migration.DatabaseStartupGate
 import com.mrl.pixiv.common.network.ImageClient
+import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.network.networkSettings
+import com.mrl.pixiv.common.network.withNetworkPreference
 import com.mrl.pixiv.common.repository.PixivRepository
+import com.mrl.pixiv.common.repository.requireUserPreferenceValue
 import com.mrl.pixiv.common.repository.util.generateFileName
 import com.mrl.pixiv.common.util.PictureType
 import com.mrl.pixiv.common.util.saveToAlbum
@@ -24,6 +30,7 @@ import io.ktor.http.contentLength
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.copyTo
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -46,7 +53,7 @@ class DownloadWorker(
 ) : CoroutineWorker(context, params), KoinComponent {
 
     private val downloadDao: DownloadDao by inject()
-    private val imageHttpClient: HttpClient by inject(named<ImageClient>())
+    private val imageHttpClient: RoutedHttpClient<HttpClient> by inject(named<ImageClient>())
 
     override suspend fun doWork(): Result {
         val illustId = inputData.getLong("illustId", -1L)
@@ -55,19 +62,26 @@ class DownloadWorker(
         val subFolder = inputData.getString("subFolder")
 
         if (illustId == -1L || index == -1) return Result.failure()
+        if (!DatabaseStartupGate.prepareInBackground()) return Result.retry()
 
         var entity = downloadDao.getDownload(illustId, index) ?: return Result.failure()
         entity = entity.copy(status = DownloadStatus.RUNNING.value, progress = 0f)
         downloadDao.update(entity)
 
+        recordCrashOperation("DownloadStarted")
         return try {
-            if (url.endsWith(".zip")) {
-                handleUgoira(entity, url, illustId, subFolder)
-            } else {
-                handleImage(entity, url, illustId, subFolder)
-            }
+            withNetworkPreference({ requireUserPreferenceValue.networkSettings() }) {
+                if (url.endsWith(".zip")) {
+                    handleUgoira(entity, url, illustId, subFolder)
+                } else {
+                    handleImage(entity, url, illustId, subFolder)
+                }
+            }.also { recordCrashOperation("DownloadSucceeded") }
         } catch (e: Exception) {
-            e.printStackTrace()
+            if (e !is CancellationException) {
+                recordCrashOperation("DownloadFailed")
+                Logger.e(throwable = e, tag = "Download") { "Download failed" }
+            }
             entity = entity.copy(status = DownloadStatus.FAILED.value)
             downloadDao.update(entity)
             if (runAttemptCount < 1) {
@@ -191,38 +205,40 @@ class DownloadWorker(
     ): String {
         var currentEntity = entity
         val result = withTimeoutOrNull(60.seconds) {
-            imageHttpClient.prepareGet(url) {
-                onDownload { bytesSentTotal, contentLength ->
-                    if (contentLength != null && contentLength > 0) {
-                        val progress = bytesSentTotal.toFloat() / contentLength.toFloat()
-                        Logger.d(tag = "DownloadWorker") { "Downloading $bytesSentTotal/$contentLength: $progress" }
-                        if (progress != currentEntity.progress) {
-                            currentEntity = currentEntity.copy(progress = progress)
-                            downloadDao.update(currentEntity)
+            imageHttpClient.withClient { client ->
+                client.prepareGet(url) {
+                    onDownload { bytesSentTotal, contentLength ->
+                        if (contentLength != null && contentLength > 0) {
+                            val progress = bytesSentTotal.toFloat() / contentLength.toFloat()
+                            Logger.d(tag = "DownloadWorker") { "Downloading $bytesSentTotal/$contentLength: $progress" }
+                            if (progress != currentEntity.progress) {
+                                currentEntity = currentEntity.copy(progress = progress)
+                                downloadDao.update(currentEntity)
+                            }
                         }
                     }
-                }
-            }.execute { response ->
-                if (!response.status.isSuccess()) {
-                    throw Exception("Request failed: ${response.status}")
-                }
+                }.execute { response ->
+                    if (!response.status.isSuccess()) {
+                        throw Exception("Request failed: ${response.status.value}")
+                    }
 
-                var mimeType = response.contentType()?.withoutParameters()?.toString()
+                    var mimeType = response.contentType()?.withoutParameters()?.toString()
 
-                if (mimeType == null) {
-                    mimeType = MimeTypeMap.getMimeTypeFromUrl(url) ?: "application/octet-stream"
+                    if (mimeType == null) {
+                        mimeType = MimeTypeMap.getMimeTypeFromUrl(url) ?: "application/octet-stream"
+                    }
+
+                    FileOutputStream(outputFile).channel.use { channel: FileChannel ->
+                        response.bodyAsChannel().copyTo(channel)
+                    }
+
+                    if (response.contentLength() == null || currentEntity.progress < 1f) {
+                        currentEntity = currentEntity.copy(progress = 1f)
+                        downloadDao.update(currentEntity)
+                    }
+
+                    mimeType
                 }
-
-                FileOutputStream(outputFile).channel.use { channel: FileChannel ->
-                    response.bodyAsChannel().copyTo(channel)
-                }
-
-                if (response.contentLength() == null || currentEntity.progress < 1f) {
-                    currentEntity = currentEntity.copy(progress = 1f)
-                    downloadDao.update(currentEntity)
-                }
-
-                mimeType
             }
         }
         return result ?: throw Exception("Timeout")

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">應用程式記錄</string>
+    <string name="app_logs_feedback_hint">回報問題時可複製並附上</string>
+    <string name="app_logs_local_notice">記錄僅儲存在此裝置上，絕不會自動上傳。複製前可以查看。</string>
+    <string name="app_logs_warnings">警告及以上</string>
+    <string name="app_logs_errors">僅錯誤</string>
+    <string name="app_logs_current">本次執行</string>
+    <string name="app_logs_previous">上次執行</string>
+    <string name="app_logs_copy_all">複製所有記錄</string>
+    <string name="app_logs_clear">清除記錄</string>
+    <string name="app_logs_clear_confirmation">要清除本次和上次執行的記錄嗎？</string>
+    <string name="app_logs_empty">沒有相符的記錄</string>
+    <string name="app_logs_expand">展開堆疊</string>
+    <string name="app_logs_collapse">收合堆疊</string>
+    <string name="app_logs_omitted">已省略 %1$d 筆較早的記錄。</string>
+    <string name="app_logs_unknown_device">未知</string>
+    <string name="app_logs_copied">已複製記錄</string>
+    <string name="app_logs_export_failed">無法複製或分享記錄</string>
+</resources>

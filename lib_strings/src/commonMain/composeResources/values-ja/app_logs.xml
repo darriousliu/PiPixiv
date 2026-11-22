@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">アプリのログ</string>
+    <string name="app_logs_feedback_hint">フィードバックを送る際にコピーして添付</string>
+    <string name="app_logs_local_notice">ログはこのデバイスにのみ保存され、自動でアップロードされません。コピーする前に確認できます。</string>
+    <string name="app_logs_warnings">警告以上</string>
+    <string name="app_logs_errors">エラーのみ</string>
+    <string name="app_logs_current">今回の実行</string>
+    <string name="app_logs_previous">前回の実行</string>
+    <string name="app_logs_copy_all">すべてのログをコピー</string>
+    <string name="app_logs_clear">ログを消去</string>
+    <string name="app_logs_clear_confirmation">今回と前回の実行ログを消去しますか？</string>
+    <string name="app_logs_empty">該当するログがありません</string>
+    <string name="app_logs_expand">スタックトレースを展開</string>
+    <string name="app_logs_collapse">スタックトレースを折りたたむ</string>
+    <string name="app_logs_omitted">古いログを %1$d 件省略しました。</string>
+    <string name="app_logs_unknown_device">不明</string>
+    <string name="app_logs_copied">ログをコピーしました</string>
+    <string name="app_logs_export_failed">ログをコピーまたは共有できませんでした</string>
+</resources>

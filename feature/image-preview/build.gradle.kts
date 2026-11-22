@@ -11,6 +11,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":lib_strings"))
             implementation(project(":common:core"))
+            implementation(project(":common:icons"))
             implementation(project(":common:ui"))
 
             // Coil3

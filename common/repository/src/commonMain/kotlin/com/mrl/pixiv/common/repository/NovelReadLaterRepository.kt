@@ -9,6 +9,8 @@ import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.setting.AiProvider
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
 import com.mrl.pixiv.common.data.setting.BrowsingSettings
+import com.mrl.pixiv.common.datasource.local.AccountDatabaseProvider
+import com.mrl.pixiv.common.datasource.local.AccountHandle
 import com.mrl.pixiv.common.datasource.local.dao.NovelReadLaterDao
 import com.mrl.pixiv.common.datasource.local.entity.NovelReadLaterEntity
 import com.mrl.pixiv.common.repository.util.hasDisallowedLongNovelTag
@@ -24,8 +26,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -34,12 +39,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 import kotlinx.io.IOException
 import kotlinx.serialization.decodeFromString
@@ -82,6 +88,11 @@ data class NovelReadLaterKey(
 private data class ActiveTask(
     val key: NovelReadLaterKey,
     val attemptToken: String,
+    val job: Job,
+)
+
+private data class AccountQueue(
+    val userId: Long,
     val job: Job,
 )
 
@@ -167,7 +178,7 @@ object NovelReadLaterQueuePolicy {
 
 @Single(createdAtStart = true)
 class NovelReadLaterRepository(
-    private val dao: NovelReadLaterDao,
+    private val databases: AccountDatabaseProvider,
     private val translationRepository: NovelTranslationRepository,
     private val translationService: NovelAiTranslationService,
     private val source: NovelReadLaterSource,
@@ -175,36 +186,54 @@ class NovelReadLaterRepository(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val taskOwnershipMutex = Mutex()
     private var activeTask: ActiveTask? = null
+    private var activeQueue: AccountQueue? = null
+
+    suspend fun withQueueClaimsPaused(block: suspend () -> Unit) {
+        taskOwnershipMutex.withLock { block() }
+    }
+
+    suspend fun cancelAccountWork(userId: Long) {
+        val job = taskOwnershipMutex.withLock {
+            check(databases.current.value?.userId != userId) { "The account queue is still active." }
+            activeQueue?.takeIf { it.userId == userId }?.job
+        }
+        // The outer queue also restores the interrupted attempt before it finishes.
+        job?.cancelAndJoin()
+    }
 
     init {
         scope.launch {
-            dao.restoreInterrupted(currentTimeMillis())
-            requireUserInfoFlow
-                .map { it.user.id }
-                .distinctUntilChanged()
-                .collectLatest { userId ->
-                    if (userId > 0L) {
-                        combine(
-                            dao.observePendingCount(userId),
-                            AiLocalNetworkAccessGate.state,
-                        ) { pendingCount, accessState ->
-                            pendingCount to accessState
-                        }.collect { (pendingCount, _) ->
-                            if (pendingCount > 0) {
-                                drainQueue(userId)
-                            }
+            databases.current.collectLatest { account ->
+                if (account == null) return@collectLatest
+                val queue = AccountQueue(account.userId, currentCoroutineContext().job)
+                taskOwnershipMutex.withLock {
+                    if (databases.current.value !== account) return@collectLatest
+                    activeQueue = queue
+                }
+                try {
+                    val dao = account.db.novelReadLaterDao()
+                    dao.restoreInterrupted(currentTimeMillis())
+                    combine(
+                        dao.observePendingCount(account.userId),
+                        AiLocalNetworkAccessGate.state,
+                    ) { pendingCount, _ -> pendingCount }
+                        .collect { pendingCount ->
+                            if (pendingCount > 0) drainQueue(account)
                         }
+                } finally {
+                    withContext(NonCancellable) {
+                        taskOwnershipMutex.withLock { activeQueue = null }
                     }
                 }
+            }
         }
     }
 
     fun observeItems(): Flow<List<NovelReadLaterItem>> {
-        return requireUserInfoFlow.flatMapLatest { userInfo ->
-            val userId = userInfo.user.id
-            if (userId > 0L) {
+        return databases.current.flatMapLatest { account ->
+            if (account != null) {
                 filterNovelReadLaterEntries(
-                    entries = dao.observeByUserId(userId),
+                    entries = account.db.novelReadLaterDao().observeByUserId(account.userId),
                     browsingSettings = requireUserPreferenceFlow
                         .map { it.browsingSettings }
                         .distinctUntilChanged(),
@@ -219,11 +248,10 @@ class NovelReadLaterRepository(
         novelId: Long,
         targetLanguage: String,
     ): Flow<NovelReadLaterItem?> {
-        return requireUserInfoFlow.flatMapLatest { userInfo ->
-            val userId = userInfo.user.id
-            if (userId > 0L) {
-                dao.observeByKey(
-                    userId = userId,
+        return databases.current.flatMapLatest { account ->
+            if (account != null) {
+                account.db.novelReadLaterDao().observeByKey(
+                    userId = account.userId,
                     novelId = novelId,
                     targetLanguage = targetLanguage,
                 ).map { it?.toDomain() }
@@ -238,8 +266,7 @@ class NovelReadLaterRepository(
         targetLanguage: String,
         config: AiTranslationConfig = requireUserPreferenceValue.aiTranslationConfig,
     ) {
-        val userId = requireUserInfoValue.user.id
-        require(userId > 0L) { "A signed-in user is required." }
+        val account = databases.requireCurrent()
         val normalizedConfig = config.normalizedForQueue()
         require(normalizedConfig.isReadyForQueue()) {
             "AI translation configuration is incomplete."
@@ -247,7 +274,7 @@ class NovelReadLaterRepository(
         val now = currentTimeMillis()
         val entity = NovelReadLaterEntity(
             novelId = novel.id,
-            userId = userId,
+            userId = account.userId,
             targetLanguage = targetLanguage,
             novelTitle = novel.title,
             novelCaption = novel.caption,
@@ -269,7 +296,7 @@ class NovelReadLaterRepository(
             updatedAtMillis = now,
         )
         taskOwnershipMutex.withLock {
-            dao.insert(entity)
+            account.db.novelReadLaterDao().insert(entity)
         }
     }
 
@@ -277,8 +304,9 @@ class NovelReadLaterRepository(
         novelId: Long,
         targetLanguage: String,
     ) {
+        val account = databases.requireCurrent()
         val key = NovelReadLaterKey(
-            userId = requireUserInfoValue.user.id,
+            userId = account.userId,
             novelId = novelId,
             targetLanguage = targetLanguage,
         )
@@ -287,7 +315,7 @@ class NovelReadLaterRepository(
                 ?.takeIf { it.key == key }
                 ?.job
             ownedJob?.cancel()
-            dao.deleteByKey(
+            account.db.novelReadLaterDao().deleteByKey(
                 userId = key.userId,
                 novelId = key.novelId,
                 targetLanguage = key.targetLanguage,
@@ -306,9 +334,10 @@ class NovelReadLaterRepository(
         require(normalizedConfig.isReadyForQueue()) {
             "AI translation configuration is incomplete."
         }
+        val account = databases.requireCurrent()
         taskOwnershipMutex.withLock {
-            dao.retry(
-                userId = requireUserInfoValue.user.id,
+            account.db.novelReadLaterDao().retry(
+                userId = account.userId,
                 novelId = novelId,
                 targetLanguage = targetLanguage,
                 provider = normalizedConfig.provider.name,
@@ -328,7 +357,9 @@ class NovelReadLaterRepository(
         sourceText: String,
         config: AiTranslationConfig = requireUserPreferenceValue.aiTranslationConfig,
     ): NovelTranslationCache? {
-        val userId = requireUserInfoValue.user.id
+        val account = databases.current.value ?: return null
+        val dao = account.db.novelReadLaterDao()
+        val userId = account.userId
         val normalizedConfig = config.normalizedForQueue()
         val item = dao.getByKey(
             userId = userId,
@@ -343,8 +374,7 @@ class NovelReadLaterRepository(
             extraBody = normalizedConfig.extraBody,
         )
         val currentConfigFingerprint = buildNovelAiConfigFingerprint(normalizedConfig)
-        val cached = translationRepository.getTranslationForUser(
-            userId = userId,
+        val cached = translationRepository.getTranslation(
             novelId = novelId,
             targetLanguage = targetLanguage,
         )
@@ -374,9 +404,10 @@ class NovelReadLaterRepository(
         return cached
     }
 
-    private suspend fun drainQueue(userId: Long) {
-        while (true) {
-            val pending = dao.getPending(userId)
+    private suspend fun drainQueue(account: AccountHandle) {
+        val dao = account.db.novelReadLaterDao()
+        while (databases.current.value === account) {
+            val pending = dao.getPending(account.userId)
             if (pending.isEmpty()) return
             val accessState = AiLocalNetworkAccessGate.state.value
             val endpoints = pending.map { it.endpoint }
@@ -414,12 +445,13 @@ class NovelReadLaterRepository(
                         ownedJob = launch(start = CoroutineStart.LAZY) {
                             if (claimedItem.retryCount > 0) {
                                 delay(
-                                    NovelReadLaterQueuePolicy.retryDelayMillis(
-                                        claimedItem.retryCount
-                                    )
+                                    NovelReadLaterQueuePolicy.retryDelayMillis(claimedItem.retryCount).milliseconds,
                                 )
                             }
-                            processItem(claimedItem)
+                            if (databases.current.value !== account) {
+                                throw CancellationException("The queue account is no longer active.")
+                            }
+                            processItem(dao, claimedItem)
                         }
                         activeTask = ActiveTask(
                             key = key,
@@ -454,7 +486,7 @@ class NovelReadLaterRepository(
         }
     }
 
-    private suspend fun processItem(item: NovelReadLaterEntity) {
+    private suspend fun processItem(dao: NovelReadLaterDao, item: NovelReadLaterEntity) {
         try {
             val currentConfig = requireUserPreferenceValue.aiTranslationConfig
             val config = item.toExecutionConfig(currentConfig)
@@ -462,7 +494,7 @@ class NovelReadLaterRepository(
                 "AI translation configuration changed. Retry the task to use the new configuration."
             }
 
-            val sourceContent = source.load(item.novelId)
+            val sourceContent = withContext(RequestAccount(item.userId)) { source.load(item.novelId) }
             val sourceText = sourceContent.text.trim()
             val sourceMd5 = buildNovelTranslationSourceHash(
                 sourceText = sourceText,
@@ -473,8 +505,7 @@ class NovelReadLaterRepository(
                 caption = sourceContent.novel.caption,
                 extraBody = config.extraBody,
             )
-            val cached = translationRepository.getTranslationForUser(
-                userId = item.userId,
+            val cached = translationRepository.getTranslation(
                 novelId = item.novelId,
                 targetLanguage = item.targetLanguage,
             )
@@ -501,8 +532,7 @@ class NovelReadLaterRepository(
                             targetLanguageTag = item.targetLanguage,
                             config = config,
                         ).also { translatedText ->
-                            translationRepository.saveTranslationForUser(
-                                userId = item.userId,
+                            translationRepository.saveTranslation(
                                 novelId = item.novelId,
                                 targetLanguage = item.targetLanguage,
                                 provider = config.provider,
@@ -528,8 +558,7 @@ class NovelReadLaterRepository(
                             targetLanguageTag = item.targetLanguage,
                             config = config,
                         ).also { translatedMetadata ->
-                            translationRepository.saveMetadataTranslationForUser(
-                                userId = item.userId,
+                            translationRepository.saveMetadataTranslation(
                                 novelId = item.novelId,
                                 targetLanguage = item.targetLanguage,
                                 provider = config.provider,

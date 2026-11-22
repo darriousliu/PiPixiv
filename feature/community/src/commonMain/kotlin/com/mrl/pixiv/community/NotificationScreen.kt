@@ -16,8 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.unfilled.Notifications
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -236,7 +236,7 @@ private fun NotificationRow(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh
                 ) {
                     Icon(
-                        Icons.Outlined.Notifications,
+                        Icons.Rounded.Notifications,
                         null,
                         Modifier.padding(12.dp).size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant

@@ -42,6 +42,7 @@ class EchSettingsRestorationTest {
                             MaterialExpressiveTheme {
                                 BypassSettingEditor(
                                     bypassSetting = setting,
+                                    supportsEch = true,
                                     onUpdate = {
                                         setting = it
                                         updates += it

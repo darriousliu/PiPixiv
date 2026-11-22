@@ -2,8 +2,9 @@ package com.mrl.pixiv.common.repository
 
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.data.Constants
-import com.mrl.pixiv.common.network.httpEngineFactory
+import com.mrl.pixiv.common.network.RoutedHttpClient
 import com.mrl.pixiv.common.network.configureNetworkProxy
+import com.mrl.pixiv.common.network.httpEngineFactory
 import com.mrl.pixiv.common.serialize.JSON
 import com.mrl.pixiv.common.util.AppUtil
 import com.mrl.pixiv.common.util.Platform
@@ -11,20 +12,40 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.strings.already_updated
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.cacheDir
+import io.github.vinceglb.filekit.delete
+import io.github.vinceglb.filekit.sink
+import io.github.vinceglb.filekit.write
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
+import io.ktor.client.request.prepareGet
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.URLProtocol
+import io.ktor.http.Url
+import io.ktor.http.contentLength
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.utils.io.readTo
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.io.RawSink
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
 
 @Serializable
 data class GitHubRelease(
@@ -47,12 +68,20 @@ data class GithubAsset(
 
 object VersionManager {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val client = HttpClient(httpEngineFactory) {
-        configureNetworkProxy()
-        install(ContentNegotiation) {
-            json(JSON)
-        }
-    }
+    private val clients = RoutedHttpClient(
+        readSetting = { requireUserPreferenceValue.bypassSetting },
+        create = { setting ->
+            HttpClient(httpEngineFactory) {
+                configureNetworkProxy(setting)
+                install(HttpTimeout) {
+                    connectTimeoutMillis = 30_000
+                    socketTimeoutMillis = 30_000
+                }
+                install(ContentNegotiation) { json(JSON) }
+            }
+        },
+        close = HttpClient::close,
+    )
 
     private val _hasNewVersion = MutableStateFlow(false)
     val hasNewVersion: StateFlow<Boolean> = _hasNewVersion
@@ -63,7 +92,11 @@ object VersionManager {
     fun checkUpdate(showToast: Boolean = false) {
         scope.launch {
             try {
-                val release = client.get(Constants.GITHUB_UPDATE_API).body<GitHubRelease>()
+                val release = clients.withClient { client ->
+                    client.get(Constants.GITHUB_UPDATE_API) {
+                        timeout { requestTimeoutMillis = 30_000 }
+                    }.body<GitHubRelease>()
+                }
                 val latestVersion = release.tagName.removePrefix("v")
                 val currentVersion = AppUtil.versionName
 
@@ -77,8 +110,35 @@ object VersionManager {
                         ToastUtil.safeShortToast(RStrings.already_updated)
                     }
                 }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 Logger.e(throwable = e, tag = "VersionManager") { "Failed to check update" }
+            }
+        }
+    }
+
+    suspend fun saveUpdateAsset(
+        asset: GithubAsset,
+        selectDestination: suspend (suggestedName: String) -> PlatformFile?,
+    ): Boolean {
+        val name = asset.name
+        require(name.isNotBlank() && name != "." && name != ".." && '/' !in name && '\\' !in name)
+        val temporaryFile = PlatformFile(FileKit.cacheDir, "update-${Uuid.random()}.part")
+        try {
+            withContext(Dispatchers.IO) {
+                clients.withClient { client ->
+                    streamUpdateAsset(client, asset.downloadUrl) { temporaryFile.sink() }
+                }
+            }
+            val destination = selectDestination(name) ?: return false
+            destination write temporaryFile
+            return true
+        } finally {
+            withContext(NonCancellable) {
+                runCatching { temporaryFile.delete(mustExist = false) }.onFailure {
+                    Logger.w(tag = "VersionManager") { "Failed to remove temporary update file" }
+                }
             }
         }
     }
@@ -111,5 +171,22 @@ object VersionManager {
             }
         }
         return 0
+    }
+}
+
+internal suspend fun streamUpdateAsset(
+    client: HttpClient,
+    downloadUrl: String,
+    openSink: () -> RawSink,
+) {
+    val url = Url(downloadUrl)
+    require(url.protocol == URLProtocol.HTTPS && url.host.isNotBlank() && url.user == null && url.password == null)
+    client.prepareGet(url).execute { response ->
+        check(response.status == HttpStatusCode.OK) { "Update download returned HTTP ${response.status.value}" }
+        val expectedLength = response.contentLength()
+        val receivedLength = openSink().use { sink -> response.bodyAsChannel().readTo(sink) }
+        check(receivedLength > 0 && (expectedLength == null || receivedLength == expectedLength)) {
+            "Incomplete update download"
+        }
     }
 }

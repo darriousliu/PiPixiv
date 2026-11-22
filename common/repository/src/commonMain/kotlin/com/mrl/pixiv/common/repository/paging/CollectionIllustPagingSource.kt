@@ -16,6 +16,8 @@ class CollectionIllustPagingSource(
     private val userId: Long,
     private val query: UserBookmarksQuery
 ) : PagingSource<UserBookmarksQuery, Illust>() {
+    private val bookmarkGeneration = BookmarkState.accountGeneration
+
     override suspend fun load(params: LoadParams<UserBookmarksQuery>): LoadResult<UserBookmarksQuery, Illust> {
         return try {
             val resp = if (params.key == null) {
@@ -38,6 +40,7 @@ class CollectionIllustPagingSource(
                         illustId = it.id,
                         isBookmarked = true,
                         restrict = currentRestrict,
+                        generation = bookmarkGeneration,
                     )
                 }
             }

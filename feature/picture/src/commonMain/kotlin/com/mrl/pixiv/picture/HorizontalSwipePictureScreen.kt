@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreOwner
 import com.mrl.pixiv.common.coroutine.launchProcess
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.repository.BrowsingHistoryRepository
+import com.mrl.pixiv.common.router.PictureCoverSource
 import com.mrl.pixiv.common.router.currentNavigationManager
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +28,7 @@ import org.koin.compose.koinInject
 fun HorizontalSwipePictureScreen(
     illusts: ImmutableList<Illust>,
     index: Int,
-    enableTransition: Boolean,
+    cover: PictureCoverSource?,
     modifier: Modifier = Modifier
 ) {
     val browsedIllusts = remember { mutableMapOf<Long, Illust>() }
@@ -43,6 +44,7 @@ fun HorizontalSwipePictureScreen(
         return
     }
     val safeIndex = index.coerceIn(0, illusts.lastIndex)
+    val previewEntryId = navigationManager.entryId.takeIf { cover != null }
     val pagerState = rememberPagerState(safeIndex) { illusts.size }
     LaunchedEffect(pagerState.currentPage, illusts) {
         val current = illusts.getOrNull(pagerState.currentPage) ?: return@LaunchedEffect
@@ -67,11 +69,14 @@ fun HorizontalSwipePictureScreen(
         illusts = illusts,
         modifier = modifier,
         state = pagerState,
-    ) { illust ->
+    ) { page, illust ->
         PictureScreen(
             illust = illust,
             onBack = onBack,
-            enableTransition = enableTransition,
+            cover = cover?.takeIf { page == safeIndex },
+            pictureIndex = page,
+            previewEntryId = previewEntryId,
+            isActivePage = { pagerState.currentPage == page },
         )
     }
 }
@@ -81,7 +86,7 @@ internal fun PicturePager(
     illusts: ImmutableList<Illust>,
     state: PagerState,
     modifier: Modifier = Modifier,
-    content: @Composable (Illust) -> Unit,
+    content: @Composable (Int, Illust) -> Unit,
 ) {
     HorizontalPager(
         state = state,
@@ -92,7 +97,7 @@ internal fun PicturePager(
         // 每个作品拥有独立的 Store，页面移出组合时清理分页缓存和动图状态。
         val owner = rememberViewModelStoreOwner()
         CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
-            content(illust)
+            content(page, illust)
         }
     }
 }

@@ -7,6 +7,13 @@ actual object DeviceInfo {
     actual val VERSION = "15"
     actual val MODEL = "Pixel 9 Pro XL"
     actual val APP_VERSION = "6.158.0"
+
+    actual fun appLogDetails() = AppLogDeviceDetails(
+        platform = System.getProperty("os.name").orEmpty(),
+        osVersion = System.getProperty("os.version").orEmpty(),
+        model = null,
+    )
+
     actual val DISPLAY_NAME by lazy {
         val os = System.getProperty("os.name")
         return@lazy when {

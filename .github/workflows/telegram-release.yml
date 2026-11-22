@@ -1,0 +1,146 @@
+name: Telegram Release Announcement
+
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+jobs:
+  announce:
+    if: ${{ !github.event.release.draft && !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post release announcement to Telegram
+        shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Skipping tag outside PiPixiv's stable version format."
+            exit 0
+          fi
+
+          if [[ -z "$TELEGRAM_BOT_TOKEN" ]]; then
+            echo "::error::Configure the TELEGRAM_BOT_TOKEN repository secret."
+            exit 1
+          fi
+
+          payload_file=$(mktemp)
+          trap 'rm -f "$payload_file"' EXIT
+          python3 - <<'PY' > "$payload_file"
+          import json
+          import os
+          import re
+
+          english_heading = re.compile(
+              r"^ {0,3}#{1,6}[ \t]+\W*(?:English\s*$|(?:New Features|No New Features|What['’]s New|Bug Fixes)\b)",
+              re.IGNORECASE,
+          )
+          changelog_label = re.compile(
+              r"^(\s*(?:\*\*)?)(?:完整变更(?:\s*/\s*Full Changelog)?|Full Changelog)(?!\w)",
+              re.IGNORECASE,
+          )
+          divider = re.compile(r"\s*(?:[-_*]\s*){3,}")
+
+          def chinese_release_lines(notes):
+              lines = notes.splitlines()
+              boundary = next(
+                  (index for index, line in enumerate(lines) if english_heading.match(line)),
+                  len(lines),
+              )
+              chinese = lines[:boundary]
+
+              if boundary < len(lines):
+                  while chinese and (not chinese[-1].strip() or divider.fullmatch(chinese[-1])):
+                      chinese.pop()
+              if not any(line.strip() for line in chinese):
+                  raise SystemExit("GitHub Release has no Chinese announcement body.")
+
+              def has_changelog_link(line):
+                  return changelog_label.match(line) and "/compare/" in line
+
+              if not any(has_changelog_link(line) for line in chinese):
+                  shared = next(
+                      (line for line in reversed(lines[boundary:]) if has_changelog_link(line)),
+                      None,
+                  )
+                  if shared:
+                      chinese.extend(("", shared))
+
+              return [changelog_label.sub(r"\g<1>完整变更", line, count=1) for line in chinese]
+
+          special = set(r"\_*[]()~`>#+-=|{}.!")
+          inline = re.compile(
+              r"\[(?P<label>[^\]\n]+)\]\((?P<url>https?://(?:[^()\s]|\([^()\s]*\))+)\)"
+              r"|\*\*(?P<bold>[^*`\n]+)\*\*"
+              r"|`(?P<code>[^`\n]+)`"
+              r"|(?<!\*)\*(?P<italic>[^*`\n]+)\*(?!\*)"
+              r"|(?<!\w)_(?P<italic_alt>[^_`\n]+)_(?!\w)"
+          )
+
+          def escape_text(value):
+              return "".join("\\" + char if char in special else char for char in value)
+
+          def link(label, url):
+              destination = url.replace("\\", "\\\\").replace(")", "\\)")
+              return f"[{escape_text(label)}]({destination})"
+
+          def format_inline(value):
+              parts = []
+              position = 0
+              for match in inline.finditer(value):
+                  parts.append(escape_text(value[position:match.start()]))
+                  if match["url"]:
+                      parts.append(link(match["label"], match["url"]))
+                  elif match["bold"]:
+                      parts.append(f"*{format_inline(match['bold'])}*")
+                  elif match["code"]:
+                      code = match["code"].replace("\\", "\\\\")
+                      parts.append(f"`{code}`")
+                  else:
+                      italic = match["italic"] or match["italic_alt"]
+                      parts.append(f"_{format_inline(italic)}_")
+                  position = match.end()
+              parts.append(escape_text(value[position:]))
+              return "".join(parts)
+
+          def format_line(line):
+              if heading := re.fullmatch(r"#{1,6} +(.+)", line):
+                  return f"*{format_inline(heading[1])}*"
+              if divider.fullmatch(line):
+                  return "────────"
+              if line.startswith("|"):
+                  cells = line.strip().strip("|").split("|")
+                  if all(re.fullmatch(r":?-{3,}:?", cell.strip()) for cell in cells):
+                      return ""
+                  return r" \| ".join(format_inline(cell.strip()) for cell in cells)
+              if bullet := re.fullmatch(r"(\s*)[-*+] +(.*)", line):
+                  return f"{bullet[1]}• {format_inline(bullet[2])}"
+              if quote := re.fullmatch(r"> ?(.*)", line):
+                  return ">" + format_inline(quote[1])
+              return format_inline(line)
+
+          with open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8") as event:
+              notes = json.load(event)["release"].get("body") or ""
+
+          body = "\n".join(format_line(line) for line in chinese_release_lines(notes)).strip()
+
+          print(json.dumps({
+              "chat_id": "@PiPixivChannel",
+              "text": body,
+              "parse_mode": "MarkdownV2",
+              "link_preview_options": {
+                  "is_disabled": False,
+                  "url": os.environ["RELEASE_URL"],
+                  "show_above_text": False,
+              },
+          }))
+          PY
+
+          curl --fail-with-body --silent --show-error --max-time 30 \
+            --json "@$payload_file" \
+            "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+            | jq --exit-status 'if .ok then .result.message_id else error(.description // "Telegram rejected the announcement.") end'

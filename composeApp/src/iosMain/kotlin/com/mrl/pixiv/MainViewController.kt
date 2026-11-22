@@ -2,15 +2,17 @@ package com.mrl.pixiv
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.window.ComposeUIViewController
 import coil3.PlatformContext
-import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.mrl.pixiv.common.analytics.FLAVOR
 import com.mrl.pixiv.common.compose.LocalKeyEventFlow
 import com.mrl.pixiv.common.data.setting.SettingTheme
 import com.mrl.pixiv.common.network.ImageClient
+import com.mrl.pixiv.common.network.RoutedHttpClient
+import com.mrl.pixiv.common.network.imageNetworkFetcher
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.util.AppUtil
@@ -24,11 +26,14 @@ fun MainViewController(onStatusBarVisibilityChange: (Boolean) -> Unit) = run {
     val keyStateFlow = MutableSharedFlow<KeyEvent>()
     AppUtil.init(PlatformContext.INSTANCE, FLAVOR)
     ComposeUIViewController {
+        LaunchedEffect(Unit) {
+            IosBackgroundDownloads.reconnectPending()
+        }
         CompositionLocalProvider(
             LocalKeyEventFlow provides keyStateFlow,
             LocalStatusBarVisibilityController provides onStatusBarVisibilityChange,
         ) {
-            val imageHttpClient = koinInject<HttpClient>(named<ImageClient>())
+            val imageHttpClient = koinInject<RoutedHttpClient<HttpClient>>(named<ImageClient>())
             val theme by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { theme }
             App(
                 darkTheme = when (theme) {
@@ -39,7 +44,7 @@ fun MainViewController(onStatusBarVisibilityChange: (Boolean) -> Unit) = run {
                 },
                 imageLoaderBuilder = {
                     this.components {
-                        add(KtorNetworkFetcherFactory(imageHttpClient))
+                        add(imageNetworkFetcher(imageHttpClient))
                     }
                 }
             )

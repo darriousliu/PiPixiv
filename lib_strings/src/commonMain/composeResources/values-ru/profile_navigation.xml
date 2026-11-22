@@ -8,6 +8,12 @@
     <string name="settings_section_account">Аккаунт</string>
     <string name="profile_view_homepage">Посмотреть профиль</string>
     <string name="settings_section_general">Общие</string>
+    <string name="settings_section_work_grid">Сетка работ</string>
+    <string name="settings_section_image_preview">Предпросмотр изображений</string>
+    <string name="settings_section_novel_tags">Теги новелл</string>
+    <string name="settings_section_search_defaults">Поиск по умолчанию</string>
+    <string name="settings_section_result_display">Отображение результатов</string>
+    <string name="settings_section_content_filters">Фильтры контента</string>
     <string name="unblock_item">Разблокировать</string>
     <string name="liquid_glass_navigation">Навигация с эффектом жидкого стекла</string>
     <string name="liquid_glass_navigation_desc">Отключите этот параметр, чтобы использовать стандартную нижнюю панель навигации.</string>

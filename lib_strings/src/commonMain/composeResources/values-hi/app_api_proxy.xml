@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_api_proxy_title">App API प्रॉक्सी</string>
+    <string name="app_api_proxy_custom">कस्टम डोमेन</string>
+    <string name="app_api_proxy_address">प्रॉक्सी डोमेन</string>
+    <string name="app_api_proxy_credentials">प्रॉक्सी App API के ऐक्सेस टोकन पढ़ सकता है। ऐसी सेवा इस्तेमाल करें जो आपके नियंत्रण में हो।</string>
+    <string name="app_api_proxy_invalid">स्कीम, पोर्ट या पाथ के बिना डोमेन डालें।</string>
+</resources>

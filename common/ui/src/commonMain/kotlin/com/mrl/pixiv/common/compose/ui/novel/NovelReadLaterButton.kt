@@ -1,7 +1,6 @@
 package com.mrl.pixiv.common.compose.ui.novel
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.WatchLater
 import androidx.compose.material.icons.rounded.WatchLater
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,6 +34,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import androidx.compose.material.icons.rounded.unfilled.WatchLater as WatchLaterUnfilled
 
 @Composable
 fun NovelReadLaterButton(
@@ -57,7 +57,7 @@ fun NovelReadLaterButtonContent(
 ) {
     IconButton(modifier = modifier, onClick = onClick) {
         Icon(
-            imageVector = if (isAdded) Icons.Rounded.WatchLater else Icons.Outlined.WatchLater,
+            imageVector = if (isAdded) Icons.Rounded.WatchLater else Icons.Rounded.WatchLaterUnfilled,
             contentDescription = stringResource(
                 if (isAdded) RStrings.remove_from_read_later else RStrings.add_to_read_later
             ),
@@ -87,7 +87,7 @@ fun NovelReadLaterListItem(
             modifier = modifier,
             leadingContent = {
                 Icon(
-                    imageVector = if (isAdded) Icons.Rounded.WatchLater else Icons.Outlined.WatchLater,
+                    imageVector = if (isAdded) Icons.Rounded.WatchLater else Icons.Rounded.WatchLaterUnfilled,
                     contentDescription = null,
                 )
             },

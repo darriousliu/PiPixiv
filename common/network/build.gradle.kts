@@ -24,6 +24,8 @@ kotlin {
             implementation(libs.bundles.kotlinx.serialization)
             // Ktor
             implementation(libs.bundles.kotlinx.ktor)
+            implementation(project.dependencies.platform(libs.coil3.bom))
+            implementation(libs.coil3.network.ktor3)
 
             // DateTime
             implementation(libs.kotlinx.datetime)

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">Обновление локальных данных…</string>
+    <string name="migration_failure">Не удалось обновить локальные данные</string>
+    <string name="migration_storage_failure">Недостаточно места. Освободите место и повторите попытку.</string>
+    <string name="migration_database_failure">Не удалось получить доступ к локальному хранилищу. Проверьте хранилище устройства и повторите попытку.</string>
+    <string name="migration_export_logs">Экспортировать журналы</string>
+    <string name="account_management">Управление аккаунтами</string>
+    <string name="switch_account">Сменить аккаунт</string>
+    <string name="add_account">Добавить аккаунт</string>
+    <string name="account_needs_relogin">Требуется повторный вход</string>
+    <string name="account_current">Текущий аккаунт</string>
+    <string name="remove_account">Убрать аккаунт</string>
+    <string name="remove_account_confirmation">Убрать аккаунт %1$s?</string>
+    <string name="account_removal_description">Чтобы снова пользоваться этим аккаунтом, войдите в него заново. Сохранённые локальные данные восстановятся при повторном входе.</string>
+    <string name="delete_account_local_data">Также удалить локальные данные этого аккаунта</string>
+    <string name="switch_to_another_account">Перейти в другой аккаунт</string>
+    <string name="recovery_pending_notice">Есть старые данные, ожидающие восстановления</string>
+    <string name="data_recovery_view">Посмотреть</string>
+    <string name="recovery_title">Восстановление данных</string>
+    <string name="recovery_item_session">Данные для входа в аккаунт</string>
+    <string name="recovery_item_search_tags">История поиска и теги закладок</string>
+    <string name="recovery_item_series_progress">Прогресс чтения серий романов</string>
+    <string name="recovery_item_shared_data">История загрузок и списки блокировки</string>
+    <string name="recovery_item_translations">Кэш переводов</string>
+    <string name="recovery_item_legacy_blocks">Старый список блокировки</string>
+    <string name="recovery_status_pending">Ожидает восстановления</string>
+    <string name="recovery_status_skipped">Старых данных нет</string>
+    <string name="recovery_status_abandoned">Отброшено</string>
+    <string name="recovery_reason_storage">Недостаточно места в хранилище</string>
+    <string name="recovery_reason_corrupted">Старые данные повреждены</string>
+    <string name="recovery_reason_io">Не удалось прочитать или записать данные в локальное хранилище</string>
+    <string name="recovery_target_title">Импортировать в текущий аккаунт?</string>
+    <string name="recovery_target_description">Не удалось определить исходный аккаунт. Подтвердите восстановление этого элемента в текущем аккаунте (ID %1$d).</string>
+    <string name="recovery_export">Экспортировать старые данные</string>
+    <string name="recovery_export_description">В архив войдёт история просмотров. Данные для входа в него не входят.</string>
+    <string name="recovery_import">Импортировать из архива со старыми данными</string>
+    <string name="recovery_import_description">Выберите элемент для импорта в текущий аккаунт (ID %1$d).</string>
+    <string name="recovery_abandon">Отбросить и очистить</string>
+    <string name="recovery_abandon_description">Все элементы, ожидающие восстановления, будут отброшены. После следующего успешного запуска старые данные будут удалены. Восстановленные данные сохранятся.</string>
+    <string name="recovery_operation_failed">Не удалось выполнить операцию. Повторите попытку.</string>
+    <string name="recovery_skip">Пропустить</string>
+    <string name="recovery_finish">Готово</string>
+</resources>

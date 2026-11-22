@@ -55,7 +55,6 @@ import com.mrl.pixiv.strings.reading_manga_series
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import kotlin.uuid.Uuid
 
 @Composable
 fun MangaSeriesScreen(
@@ -125,8 +124,6 @@ fun MangaSeriesScreen(
                             navigationManager.navigateToPictureScreen(
                                 works.itemSnapshotList.items,
                                 index,
-                                "manga_${Uuid.random().toHexString()}",
-                                false,
                             )
                         }
                     }

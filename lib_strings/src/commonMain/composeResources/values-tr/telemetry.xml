@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">Anonim kullanım istatistikleri</string>
+    <string name="usage_analytics_description">Uygulamayı geliştirmemize yardımcı olmak için hangi ekranların ve özelliklerin kullanıldığını sayar.</string>
+    <string name="crash_diagnostics">Çökme raporları</string>
+    <string name="crash_diagnostics_description">Uygulama çöktüğünde veya bir hata oluştuğunda, sorunu bulup düzeltebilmemiz için hata ayrıntılarını, uygulama sürümünü ve cihaz bilgilerini otomatik olarak gönderir.</string>
+    <string name="crash_diagnostics_switch_note">Yukarıdaki anahtar çökme raporlarını etkilemez.</string>
+    <string name="privacy_not_collected_description">Uygulama arama terimlerinizi, hesap bilgilerinizi, görüntülediğiniz eserleri veya indirdiğiniz dosyaları aktif olarak toplamaz.</string>
+</resources>

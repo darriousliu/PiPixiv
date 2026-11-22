@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="migration_progress">Upgrading local data…</string>
+    <string name="migration_failure">Couldn’t upgrade local data</string>
+    <string name="migration_storage_failure">Not enough storage. Free up space and try again.</string>
+    <string name="migration_database_failure">Local storage is unavailable. Check your device storage and try again.</string>
+    <string name="migration_export_logs">Export logs</string>
+    <string name="account_management">Manage accounts</string>
+    <string name="switch_account">Switch accounts</string>
+    <string name="add_account">Add account</string>
+    <string name="account_needs_relogin">Sign-in required</string>
+    <string name="account_current">Current account</string>
+    <string name="remove_account">Remove account</string>
+    <string name="remove_account_confirmation">Remove %1$s?</string>
+    <string name="account_removal_description">You’ll need to sign in again to use this account. Any local data you keep will be restored when you sign back in.</string>
+    <string name="delete_account_local_data">Also delete this account’s local data</string>
+    <string name="switch_to_another_account">Switch to another account</string>
+    <string name="recovery_pending_notice">Some older data is waiting to be recovered</string>
+    <string name="data_recovery_view">View</string>
+    <string name="recovery_title">Data recovery</string>
+    <string name="recovery_item_session">Account sign-in</string>
+    <string name="recovery_item_search_tags">Search history and bookmarked tags</string>
+    <string name="recovery_item_series_progress">Novel series progress</string>
+    <string name="recovery_item_shared_data">Downloads and block lists</string>
+    <string name="recovery_item_translations">Translation cache</string>
+    <string name="recovery_item_legacy_blocks">Legacy block list</string>
+    <string name="recovery_status_pending">Pending recovery</string>
+    <string name="recovery_status_skipped">No older data</string>
+    <string name="recovery_status_abandoned">Discarded</string>
+    <string name="recovery_reason_storage">Insufficient storage</string>
+    <string name="recovery_reason_corrupted">The older data is corrupted</string>
+    <string name="recovery_reason_io">Could not read or write local storage</string>
+    <string name="recovery_target_title">Import into the current account?</string>
+    <string name="recovery_target_description">The original account could not be identified. Confirm to recover this item using the current account (ID %1$d).</string>
+    <string name="recovery_export">Export older data</string>
+    <string name="recovery_export_description">The export includes browsing history and excludes sign-in credentials.</string>
+    <string name="recovery_import">Import from a legacy package</string>
+    <string name="recovery_import_description">Choose an item to import into the current account (ID %1$d).</string>
+    <string name="recovery_abandon">Discard and clean up</string>
+    <string name="recovery_abandon_description">Discard all unresolved items. Older data will be cleaned up after the next successful launch. Recovered data will be kept.</string>
+    <string name="recovery_operation_failed">The operation failed. Try again.</string>
+    <string name="recovery_skip">Skip</string>
+    <string name="recovery_finish">Done</string>
+</resources>

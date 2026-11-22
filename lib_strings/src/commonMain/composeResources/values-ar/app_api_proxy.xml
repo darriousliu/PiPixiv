@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_api_proxy_title">وكيل واجهة App API</string>
+    <string name="app_api_proxy_custom">نطاق مخصّص</string>
+    <string name="app_api_proxy_address">نطاق الوكيل</string>
+    <string name="app_api_proxy_credentials">يمكن للوكيل قراءة رموز الوصول إلى واجهة App API. استخدم خدمة تتحكم فيها أنت.</string>
+    <string name="app_api_proxy_invalid">أدخل نطاقًا من دون مخطط أو منفذ أو مسار.</string>
+</resources>

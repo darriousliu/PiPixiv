@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.coroutine
 
+import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.util.ToastUtil
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -9,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -17,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 private val ioScope by lazy { CoroutineScope(Dispatchers.IO) }
-internal val mainScope by lazy { CoroutineScope(Dispatchers.Main) }
+internal val mainScope by lazy { CoroutineScope(SupervisorJob() + Dispatchers.Main) }
 
 /**
  * ProcessLifecycleScope
@@ -77,11 +79,13 @@ fun CoroutineScope.launchCatch(
     start: CoroutineStart = CoroutineStart.DEFAULT,
     loading: MutableStateFlow<Boolean>? = null,
     errorToast: Boolean = false,
-    error: (Throwable) -> Unit = { it.printStackTrace() },
+    error: (Throwable) -> Unit = {},
     block: suspend CoroutineScope.() -> Unit,
 ): Job {
     val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        throwable.printStackTrace()
+        if (throwable !is CancelException && throwable !is CancellationException) {
+            Logger.e(throwable = throwable, tag = "Coroutine") { "Background coroutine failed" }
+        }
         error.invoke(throwable)
         loading?.update { false }
 

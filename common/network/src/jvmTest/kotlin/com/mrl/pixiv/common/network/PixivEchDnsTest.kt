@@ -241,7 +241,7 @@ class PixivEchDnsTest {
         )
 
         assertEquals(
-            DnsLookupResult("DoH($PIXIV_API_DNS_ALIAS)", listOf(dohAddress)),
+            DnsLookupResult("DoH($PIXIV_API_DNS_ALIAS)", listOf(dohAddress), NetworkDiagnosticResolver.DOH),
             resolver.lookup(PIXIV_API_DNS_ALIAS),
         )
         assertEquals(PIXIV_API_DNS_ALIAS, dohHostname)
@@ -260,6 +260,7 @@ class PixivEchDnsTest {
             DnsLookupResult(
                 "system origin DNS($PIXIV_API_DNS_ALIAS)",
                 listOf(systemAddress),
+                NetworkDiagnosticResolver.SYSTEM,
             ),
             resolver.lookup(PIXIV_API_DNS_ALIAS),
         )

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_logs">Журналы приложения</string>
+    <string name="app_logs_feedback_hint">Скопируйте и приложите к отзыву</string>
+    <string name="app_logs_local_notice">Журналы хранятся только на этом устройстве и никогда не отправляются автоматически. Их можно проверить перед копированием.</string>
+    <string name="app_logs_warnings">От предупреждений</string>
+    <string name="app_logs_errors">Только ошибки</string>
+    <string name="app_logs_current">Текущий запуск</string>
+    <string name="app_logs_previous">Прошлый запуск</string>
+    <string name="app_logs_copy_all">Копировать все журналы</string>
+    <string name="app_logs_clear">Очистить журналы</string>
+    <string name="app_logs_clear_confirmation">Удалить журналы текущего и прошлого запусков?</string>
+    <string name="app_logs_empty">Нет подходящих записей</string>
+    <string name="app_logs_expand">Развернуть трассировку</string>
+    <string name="app_logs_collapse">Свернуть трассировку</string>
+    <string name="app_logs_omitted">Пропущено старых записей: %1$d</string>
+    <string name="app_logs_unknown_device">Неизвестно</string>
+    <string name="app_logs_copied">Журналы скопированы</string>
+    <string name="app_logs_export_failed">Не удалось скопировать журналы или поделиться ими</string>
+</resources>

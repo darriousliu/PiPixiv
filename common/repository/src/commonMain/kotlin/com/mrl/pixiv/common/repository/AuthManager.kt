@@ -5,57 +5,77 @@ import com.mrl.pixiv.common.data.Constants
 import com.mrl.pixiv.common.data.auth.AuthTokenFieldReq
 import com.mrl.pixiv.common.data.auth.AuthTokenResp
 import com.mrl.pixiv.common.data.auth.GrantType
-import com.mrl.pixiv.common.mmkv.MMKVUser
-import com.mrl.pixiv.common.mmkv.mmkvLong
-import com.mrl.pixiv.common.mmkv.mmkvString
+import com.mrl.pixiv.common.mmkv.AccountSession
+import com.mrl.pixiv.common.mmkv.AccountStore
+import com.mrl.pixiv.common.mmkv.withAccountStorageLock
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.util.currentTimeMillis
 import com.mrl.pixiv.strings.network_error
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
-object AuthManager : MMKVUser {
-    private val tokenRefreshMutex = Mutex()
-    var userRefreshToken by mmkvString()
-        private set
-    private var userAccessToken by mmkvString()
-    private var accessTokenExpiresTime: Long by mmkvLong()
-    val hasTokens: Boolean
-        get() = userRefreshToken.isNotEmpty() && userAccessToken.isNotEmpty()
+object AuthManager {
+    private val refreshLocks = MutableStateFlow<Map<Long, Mutex>>(emptyMap())
+    private val refreshErrorToastLock = Mutex()
+    private var lastRefreshErrorToast: TimeMark? = null
 
-    val isNeedRefreshToken: Boolean
-        get() = accessTokenExpiresTime != 0L && accessTokenExpiresTime <= currentTimeMillis()
+    val userRefreshToken: String get() = AccountStore.current?.refreshToken.orEmpty()
 
-    val isLogin: Boolean
-        get() = hasTokens && accessTokenExpiresTime > currentTimeMillis()
+    suspend fun applyStartupDebugOverrides() = AccountDebug.expireAccessTokenOnStartup()
 
+    suspend fun requireUserAccessToken(force: Boolean = false): String {
+        val userId = AccountStore.activeUserId
+        return requireUserAccessToken(userId, force)
+    }
 
-    suspend fun requireUserAccessToken(force: Boolean = false): String =
-        withIOContext {
-            tokenRefreshMutex.withLock {
-                return@withLock runCatching {
-                    if (userAccessToken.isEmpty()) {
-                        throw IllegalStateException("User access token is empty")
-                    }
-                    if (isNeedRefreshToken || force) {
-                        val resp = PixivRepository.refreshToken(
-                            AuthTokenFieldReq(
-                                grantType = GrantType.REFRESH_TOKEN.value,
-                                refreshToken = userRefreshToken
-                            )
-                        )
-                        updateUserInfo(resp)
-                    }
-                    userAccessToken
-                }.onFailure {
-                    ToastUtil.safeShortToast(RStrings.network_error)
-                }.getOrNull().orEmpty()
+    /** Resolves the credentials for the account that initiated the request. */
+    suspend fun requireUserAccessToken(userId: Long, force: Boolean = false): String {
+        if (userId <= 0) return ""
+        return withIOContext {
+            val lock = refreshLocks.updateAndGet { locks ->
+                if (userId in locks) locks else locks + (userId to Mutex())
+            }.getValue(userId)
+            lock.withLock {
+                val session = AccountStore.find(userId)
+                    ?.takeIf(AccountSession::hasUsableCredentials)
+                    ?: return@withLock ""
+                if (!force && !session.hasExpired()) return@withLock session.accessToken
+                try {
+                    AccountDebug.throwInvalidGrantIfRequested(userId)
+                    refresh(session)
+                } catch (_: InvalidRefreshGrantException) {
+                    AccountStore.storage.markNeedsRelogin(session)
+                        ?.takeIf { it.hasUsableCredentials() && !it.hasExpired() }
+                        ?.accessToken.orEmpty()
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (_: Exception) {
+                    showRefreshErrorToast()
+                    ""
+                }
             }
         }
+    }
 
-    suspend fun login(code: String, codeVerifier: String) {
-        val resp = PixivRepository.login(
+    private suspend fun showRefreshErrorToast() {
+        val shouldShow = refreshErrorToastLock.withLock {
+            val lastToast = lastRefreshErrorToast
+            if (lastToast != null && lastToast.elapsedNow() < 10.seconds) return@withLock false
+            lastRefreshErrorToast = TimeSource.Monotonic.markNow()
+            true
+        }
+        if (shouldShow) ToastUtil.safeShortToast(RStrings.network_error)
+    }
+
+    suspend fun login(code: String, codeVerifier: String): AuthTokenResp =
+        PixivRepository.login(
             AuthTokenFieldReq(
                 grantType = GrantType.AUTHORIZATION_CODE.value,
                 code = code,
@@ -63,35 +83,46 @@ object AuthManager : MMKVUser {
                 redirectUri = Constants.PIXIV_LOGIN_REDIRECT_URL,
             )
         )
-        updateUserInfo(resp)
-    }
 
-    suspend fun login(refreshToken: String) {
-        val resp = PixivRepository.refreshToken(
+    suspend fun login(refreshToken: String): AuthTokenResp = requestRefresh(refreshToken)
+
+    private suspend fun requestRefresh(refreshToken: String) =
+        PixivRepository.refreshToken(
             AuthTokenFieldReq(
                 grantType = GrantType.REFRESH_TOKEN.value,
-                refreshToken = refreshToken
+                refreshToken = refreshToken,
             )
         )
-        updateUserInfo(resp)
-    }
 
-    private fun updateUserInfo(resp: AuthTokenResp) {
-        userAccessToken = resp.accessToken
-        userRefreshToken = resp.refreshToken
-        accessTokenExpiresTime = currentTimeMillis() + resp.expiresIn * 1000
-        resp.user?.let { user ->
-            UserManager.updateUserInfo(
-                user.id.toLong(),
-                user.name,
-                user.account
-            )
+    private suspend fun refresh(session: AccountSession): String {
+        val updated = requestRefresh(session.refreshToken).toAccountSession()
+        return withAccountStorageLock {
+            val saved = AccountStore.storage.saveRefreshedTokens(session, updated)
+            if (saved != null && saved.hasUsableCredentials() && !saved.hasExpired()) {
+                UserManager.updateUserInfo(saved)
+                saved.accessToken
+            } else {
+                ""
+            }
         }
     }
+}
 
-    fun logout() {
-        userAccessToken = ""
-        userRefreshToken = ""
-        accessTokenExpiresTime = 0L
+internal fun AuthTokenResp.toAccountSession(): AccountSession {
+    val payload = response ?: this
+    val user = requireNotNull(payload.user) { "The login response is missing the account" }
+    val userId = user.id.toLongOrNull()
+    require(userId != null && userId > 0 && payload.refreshToken.isNotEmpty() && payload.accessToken.isNotEmpty()) {
+        "The login response contains incomplete credentials"
     }
+    return AccountSession(
+        userId = userId,
+        name = user.name,
+        account = user.account,
+        avatarUrl = user.profileImageUrls.px170X170.ifEmpty { user.profileImageUrls.px50X50 },
+        isPremium = user.isPremium,
+        refreshToken = payload.refreshToken,
+        accessToken = payload.accessToken,
+        accessTokenExpiresAt = currentTimeMillis() + payload.expiresIn * 1_000,
+    )
 }

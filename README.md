@@ -20,7 +20,7 @@ Pixiv 应用
 
 ## 📥 下载
 
-当前源码版本：**2.6.1**。已发布版本请查看下方 GitHub Release。
+当前源码版本：**2.7.0**。已发布版本请查看下方 GitHub Release。
 
 [![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=稳定版)](https://github.com/darriousliu/PiPixiv/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=下载量&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
@@ -47,10 +47,11 @@ Pixiv 应用
 
 <div align="left">
 
-### 🔐 认证与登录
+### 🔐 账号与登录
 
 * 🔐 使用 Pixiv 账号登录（OAuth 认证）。
 * 🍪 通过网页端 Cookie（PHPSESSID）登录，无需手动填写 Token。
+* 👥 在「设置 → 切换账户」添加、即时切换或移除 Pixiv 账号。浏览历史、搜索历史、稍后阅读和小说阅读进度按账号保存，移除账号时默认保留其本地数据。
 * 🔒 登出前二次确认。
 
 ### 🏠 内容浏览
@@ -64,7 +65,7 @@ Pixiv 应用
 
 * 🖼️ 查看插图详情（多图、UGOIRA 动图、推荐插图）。
 * 🔎 图片预览支持选择画质、缩放，以及按原图比例查看相关作品。
-* ⬇️ 下载原始插图或 GIF，自定义文件命名，管理下载队列。
+* ⬇️ 下载原图或动图 GIF，支持自定义文件名和管理下载队列。多图作品可从详情批量下载所选或全部原图。
 
 ### 📖 小说
 
@@ -101,12 +102,14 @@ Pixiv 应用
 
 * ⚙️ 应用设置（语言、图片来源、网格列数、私密收藏等）。
 * 🧭 可在悬浮液态玻璃与标准底部导航栏之间切换。
-* 🌐 默认使用系统代理，可切换为直连或手动 HTTP / SOCKS 代理，修改网络模式后重启应用生效；Android 和桌面端另提供 ECH 模式。
-* 🔒 隐私设置支持控制 R-18 内容显示、进入搜索页时读取剪贴板。
+* 🌐 默认使用系统代理，可切换为直连或手动 HTTP / SOCKS 代理。保存后，新网络请求立即使用新设置。Android 和桌面端另提供 ECH 模式，网页登录支持的连接方式随平台而异。
+* 🛠️ 在「网络设置」中可配置自定义 App API 代理域名，并通过「网络自检」检查 DNS、Pixiv API、官网、登录和图片下载。
+* 🔒 隐私设置支持控制 R-18 内容显示、进入搜索页时读取剪贴板。Android Default、iOS 和桌面版还可关闭匿名使用统计。
 * 🚫 屏蔽作品、用户和标签，可按长度与分段数量过滤小说长标签。
 * 🔗 深度链接支持。
-* 📦 应用数据管理（缓存清理、数据导出/导入）。
-* 🆕 更新弹窗以 Markdown 展示发布说明，支持点击正文链接。
+* 📦 在「应用数据」中清理缓存、导入和导出备份。升级后如有待恢复项，可在「数据恢复」中逐项重试，也可导入和导出旧数据包。
+* 📋 在「设置 → 关于 → 应用日志」查看本次和上次运行的本地日志，可按级别筛选、复制或分享。
+* 🆕 更新弹窗以 Markdown 展示发布说明，支持点击正文链接。可在「设置 → 关于」打开 Telegram 更新频道。
 
 ### 🖥️ 桌面平台
 

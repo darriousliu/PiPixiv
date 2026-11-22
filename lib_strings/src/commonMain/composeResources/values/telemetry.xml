@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_analytics">匿名使用统计</string>
+    <string name="usage_analytics_description">统计常用的页面和功能，帮助我们改进应用。</string>
+    <string name="crash_diagnostics">崩溃报告</string>
+    <string name="crash_diagnostics_description">应用崩溃或出错时，会自动发送错误信息、应用版本和设备信息，帮助我们定位和修复问题。</string>
+    <string name="crash_diagnostics_switch_note">崩溃报告不受上方开关影响。</string>
+    <string name="privacy_not_collected_description">应用不会主动收集你的搜索词、账号信息、浏览的作品或下载的文件。</string>
+</resources>

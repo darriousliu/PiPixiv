@@ -147,12 +147,11 @@ private fun TrendingIllustPage(
                     RectangleIllustItem(
                         illust = illust,
                         isBookmarked = isBookmarked,
-                        navToPictureScreen = { prefix, enableTransition ->
+                        navToPictureScreen = { cover ->
                             navigationManager.navigateToPictureScreen(
                                 illustsFollowing.itemSnapshotList.items,
                                 index,
-                                prefix,
-                                enableTransition
+                                cover,
                             )
                         },
                         onBookmarkClick = { restrict, tags, isEdit ->
@@ -161,7 +160,8 @@ private fun TrendingIllustPage(
                             } else {
                                 BookmarkState.deleteBookmarkIllust(illust.id)
                             }
-                        }
+                        },
+                        sharedElementSlot = "latest-trending:$index",
                     )
                 }
 

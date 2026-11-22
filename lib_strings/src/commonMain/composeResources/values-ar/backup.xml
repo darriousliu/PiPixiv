@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="backup_export_insufficient_space">مساحة التخزين غير كافية لتصدير النسخة الاحتياطية</string>
+    <string name="backup_import_insufficient_space">مساحة التخزين غير كافية لاستيراد النسخة الاحتياطية</string>
+    <string name="backup_import_file_too_large">ملف النسخة الاحتياطية أكبر من الحد المسموح للاستيراد</string>
+    <string name="backup_import_translation_incomplete">تم استيراد البيانات، لكن تعذّر استيراد جزء من ذاكرة التخزين المؤقت للترجمات.</string>
+</resources>
