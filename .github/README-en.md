@@ -20,7 +20,7 @@ by [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/)
 
 ## 📥 Download
 
-Current source version: **2.6.1**. See GitHub Release below for published versions.
+Current source version: **2.7.0**. See GitHub Release below for published versions.
 
 [![GitHub Release](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=Stable)](https://github.com/darriousliu/PiPixiv/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/darriousliu/PiPixiv/releases)
@@ -47,10 +47,11 @@ Current source version: **2.6.1**. See GitHub Release below for published versio
 
 <div align="left">
 
-### 🔐 Authentication
+### 🔐 Accounts & Sign-in
 
 * 🔐 Log in with Pixiv account (OAuth authentication).
 * 🍪 Log in via web Cookie (PHPSESSID) without manually entering a token.
+* 👥 Add, remove, or instantly switch between Pixiv accounts in **Settings → Switch accounts**. Browsing history, search history, Read Later, and novel reading progress are stored per account. Removing an account keeps its local data by default.
 * 🔒 Confirm before signing out.
 
 ### 🏠 Content Browsing
@@ -64,7 +65,7 @@ Current source version: **2.6.1**. See GitHub Release below for published versio
 
 * 🖼️ View illustration details (multi-page, UGOIRA animation, related artworks).
 * 🔎 Choose preview image quality, zoom into images, and view related artworks at their original aspect ratios.
-* ⬇️ Download original illustrations or GIFs, customize file naming, manage download queue.
+* ⬇️ Download originals or animated GIFs, customize filenames, and manage the download queue. For multi-image works, download selected originals or all originals from the work details.
 
 ### 📖 Novel
 
@@ -102,11 +103,13 @@ Current source version: **2.6.1**. See GitHub Release below for published versio
 * ⚙️ App settings (language, image source, grid columns, private bookmarks, etc.).
 * 🧭 Switch between the floating liquid-glass bar and the standard bottom navigation bar.
 * 🌐 Use the system proxy by default, or choose a direct connection or manual HTTP / SOCKS proxy. New network requests use the saved settings immediately. Android and desktop platforms also offer ECH mode. The connection modes available for web sign-in vary by platform.
-* 🔒 Privacy settings control R-18 content visibility and clipboard reading when opening search.
+* 🛠️ Set a custom App API proxy domain in **Network Setting** and run a **Network check** for DNS, the Pixiv API, the Pixiv website, sign-in, and image downloads.
+* 🔒 Privacy settings control R-18 content visibility and clipboard reading when opening search. Android Default, iOS, and desktop users can also turn off anonymous usage statistics.
 * 🚫 Block artworks, users, and tags, and filter long novel tags by length and segment count.
 * 🔗 Deep link support.
-* 📦 App data management (cache clearing, data export/import).
-* 🆕 Update dialogs display release notes as Markdown with clickable links.
+* 📦 Clear the cache, import backups, or export backups in **App data**. If any items are pending after an upgrade, open **Data recovery** to retry them individually. You can also import and export legacy data packages.
+* 📋 View local logs from the current and previous runs in **Settings → About → App logs**, filter by severity, and copy or share them.
+* 🆕 Update dialogs display release notes as Markdown with clickable links. Open the Telegram updates channel from **Settings → About**.
 
 ### 🖥️ Desktop Platform
 
