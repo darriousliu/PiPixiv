@@ -89,6 +89,7 @@ class BackupArchive private constructor(
 fun checkBackupExportSpace(
     cacheDirectory: PlatformFile,
     databasePaths: List<String>,
+    zipUtil: ZipUtil,
     availableBytes: (String) -> Long = { availableStorageBytes(it) },
 ) {
     val databaseSize = databasePaths.fold(0L) { total, path ->
@@ -96,8 +97,9 @@ fun checkBackupExportSpace(
             checkedAdd(size, SystemFileSystem.metadataOrNull(Path(file))?.size ?: 0)
         }
     }
-    val halfSize = databaseSize / 2 + databaseSize % 2
-    val required = checkedAdd(checkedAdd(checkedAdd(databaseSize, databaseSize), halfSize), backupDiskMargin)
+    // The snapshots and staged ZIP remain in cache while the ZIP is copied to the destination.
+    val destinationSize = if (zipUtil.storesUncompressed) databaseSize else databaseSize / 2 + databaseSize % 2
+    val required = checkedAdd(checkedAdd(checkedAdd(databaseSize, databaseSize), destinationSize), backupDiskMargin)
     requireBackupSpace(availableBytes(cacheDirectory.toKotlinxIoPath().toString()), required)
 }
 

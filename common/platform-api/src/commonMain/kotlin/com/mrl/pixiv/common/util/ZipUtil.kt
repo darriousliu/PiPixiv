@@ -1,6 +1,8 @@
 package com.mrl.pixiv.common.util
 
 interface ZipUtil {
+    val storesUncompressed: Boolean get() = false
+
     fun unzip(sourcePath: String, destinationPath: String): Boolean
 
     fun compress(sourcePath: String, destinationPath: String): Boolean

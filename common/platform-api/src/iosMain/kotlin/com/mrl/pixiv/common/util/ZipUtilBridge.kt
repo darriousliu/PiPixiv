@@ -4,6 +4,9 @@ package com.mrl.pixiv.common.util
  * Constructible Kotlin superclass for the Swift implementation of [ZipUtil].
  */
 open class ZipUtilBridge : ZipUtil {
+    // The Swift implementation uses ZIPFoundation's default uncompressed entries.
+    final override val storesUncompressed: Boolean get() = true
+
     override fun unzip(sourcePath: String, destinationPath: String): Boolean =
         error("ZipUtilBridge must be implemented in Swift")
 

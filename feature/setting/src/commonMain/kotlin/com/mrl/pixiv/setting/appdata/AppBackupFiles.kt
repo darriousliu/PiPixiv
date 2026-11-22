@@ -51,7 +51,12 @@ class AppBackupFiles(
         timing: BackupTiming? = null,
         databaseTiming: DatabaseBackupTiming? = null,
     ) {
-        checkBackupExportSpace(workDir, listOf(globalDatabasePath, accountDatabasePath), availableBytes)
+        checkBackupExportSpace(
+            workDir,
+            listOf(globalDatabasePath, accountDatabasePath),
+            zipUtil,
+            availableBytes,
+        )
         val source = (workDir / backupDirectory).also { it.createDirectories() }
         (source / jsonDataFile).writeString(metadata)
         AppDatabaseBackup.export(
