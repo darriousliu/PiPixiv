@@ -27,8 +27,9 @@ actual fun LocalNetworkPermissionEffect(bypassSetting: UserPreference.BypassSett
         key = bypassSetting,
         needsLocalNetworkAccess = when (bypassSetting) {
             UserPreference.BypassSetting.System -> {
-                systemProxy?.host?.isLocalNetworkHost() == true ||
-                    systemProxy?.pacFileUrl?.host?.isLocalNetworkHost() == true
+                // 代理软件常把系统代理设为 127.0.0.1，PAC 模式的主机名固定为 localhost，二者均为回环流量，不触发授权。
+                systemProxy?.host?.requiresLocalNetworkPermission() == true ||
+                    systemProxy?.pacFileUrl?.host?.requiresLocalNetworkPermission() == true
             }
             else -> bypassSetting.needsLocalNetworkAccess()
         },
@@ -91,28 +92,7 @@ private fun LocalNetworkPermissionRequestEffect(
 private fun UserPreference.BypassSetting.needsLocalNetworkAccess(): Boolean {
     return when (this) {
         UserPreference.BypassSetting.System, UserPreference.BypassSetting.Direct -> false
-        is UserPreference.BypassSetting.Proxy -> host.isLocalNetworkHost()
-        is UserPreference.BypassSetting.ECH -> parseUrl(url)?.host?.isLocalNetworkHost() == true
+        is UserPreference.BypassSetting.Proxy -> host.requiresLocalNetworkPermission()
+        is UserPreference.BypassSetting.ECH -> parseUrl(url)?.host?.requiresLocalNetworkPermission() == true
     }
-}
-
-private fun String.isLocalNetworkHost(): Boolean {
-    val normalized = trim().trim('[', ']').lowercase()
-    if (
-        normalized == "localhost" ||
-        normalized == "::1" ||
-        normalized.endsWith(".local")
-    ) {
-        return true
-    }
-
-    val parts = normalized.split('.')
-    if (parts.size != 4) return false
-    val octets = parts.map { it.toIntOrNull() ?: return false }
-
-    return octets[0] == 10 ||
-            octets[0] == 127 ||
-            octets[0] == 169 && octets[1] == 254 ||
-            octets[0] == 172 && octets[1] in 16..31 ||
-            octets[0] == 192 && octets[1] == 168
 }
