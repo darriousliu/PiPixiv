@@ -16,6 +16,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneInfo
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.rememberSceneState
@@ -29,7 +30,12 @@ import com.mrl.pixiv.common.util.platform
 // 此阈值仅用于决定完成方式，不得为判断手势类型而延迟绘制进度。
 private const val QuickBackDurationMillis = 120L
 
-/** 将快速返回的完成方式与 Nav3 可随手势调整进度的预览动画分开处理。 */
+/**
+ * 将快速返回的完成方式与 Nav3 可随手势调整进度的预览动画分开处理。
+ *
+ * @param settlesQuickBack 从当前场景返回到上一场景时，若需要播完收尾动画（例如共享元素），
+ * 即使属于快速返回也不跳过收尾。
+ */
 @Composable
 internal fun <T : Any> PredictiveBackNavDisplay(
     backStack: List<T>,
@@ -39,6 +45,7 @@ internal fun <T : Any> PredictiveBackNavDisplay(
     sceneStrategies: List<SceneStrategy<T>>,
     sharedTransitionScope: SharedTransitionScope,
     enableQuickBack: Boolean = platform.isAndroid(),
+    settlesQuickBack: (current: Scene<T>, previous: Scene<T>?) -> Boolean = { _, _ -> false },
     entryProvider: (T) -> NavEntry<T>,
 ) {
     require(backStack.isNotEmpty()) { "Navigation back stack cannot be empty" }
@@ -87,7 +94,9 @@ internal fun <T : Any> PredictiveBackNavDisplay(
         },
         onBackCompleted = {
             val popCount = (entries.size - scene.previousEntries.size).coerceAtLeast(0)
-            if (enableQuickBack && !isLongGesture && popCount > 0) {
+            if (enableQuickBack && !isLongGesture && popCount > 0 &&
+                !settlesQuickBack(scene, sceneState.previousScenes.lastOrNull())
+            ) {
                 // 仅重建动画容器，直接显示确认返回后的场景。
                 // 只修改返回动画参数仍会等待子动画及共享条目动画结束。
                 displaySequence++

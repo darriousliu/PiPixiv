@@ -239,6 +239,17 @@ data class PictureCoverSource(
     val thumbnailUrl: String,
 )
 
+/**
+ * 打开页面时与上一页共享的图片。新增共享元素入口时需要同步登记，
+ * 返回该页面时才会保留共享元素过渡。
+ */
+val Destination.sharedImageFromOpener: PictureImageKey?
+    get() = when (this) {
+        is Destination.Picture -> cover?.key
+        is Destination.ImagePreview -> sharedImage
+        else -> null
+    }
+
 @Serializable
 sealed class MainPage(
     @Transient

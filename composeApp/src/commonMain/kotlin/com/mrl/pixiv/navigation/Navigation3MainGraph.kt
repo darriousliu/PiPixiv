@@ -503,6 +503,8 @@ fun Navigation3MainGraph(
                             pictureCacheDecorator,
                         ),
                         sceneStrategies = listOf(strategy),
+                        // 快速返回到共享图片的来源页时，仍需播完共享元素的收尾动画。
+                        settlesQuickBack = { scene, previous -> scene.returnsWithSharedImage(previous) },
                         entryProvider = { record ->
                             val destinationEntry = destinationEntryProvider(record.destination)
                             NavEntry(

@@ -1,10 +1,12 @@
 package com.mrl.pixiv.navigation
 
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -15,6 +17,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toAwtImage
@@ -35,8 +38,11 @@ import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import com.mrl.pixiv.common.compose.LocalSharedTransitionScope
 import com.mrl.pixiv.common.compose.layout.PaneInputState
 import com.mrl.pixiv.common.compose.layout.SplitPaneState
+import com.mrl.pixiv.common.compose.navigationSharedImage
 import com.mrl.pixiv.common.router.Destination
 import com.mrl.pixiv.common.router.NavigationRecord
+import com.mrl.pixiv.common.router.PictureCoverSource
+import com.mrl.pixiv.common.router.PictureImageKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.swing.Swing
@@ -44,6 +50,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
@@ -63,6 +70,75 @@ class PredictiveBackDetailTest {
     @Test
     fun quicklyClosingTheLastDetailSkipsSettlingAndKeepsSourceState() =
         checkQuickDetailBack(hasPreviousDetail = false, edge = NavigationEvent.EDGE_RIGHT)
+
+    @Test
+    fun quicklyReturningToTheArtworkGridCompletesTheSharedTransition() =
+        checkSharedImageQuickBack(SharedImageRoute.GridToPicture)
+
+    @Test
+    fun quicklyClosingTheImagePreviewCompletesTheSharedTransition() =
+        checkSharedImageQuickBack(SharedImageRoute.PictureToPreview)
+
+    private fun checkSharedImageQuickBack(route: SharedImageRoute) {
+        Dispatchers.setMain(Dispatchers.Swing)
+        try {
+            runDesktopComposeUiTest(width = 420, height = 800, testTimeout = 30.seconds) {
+                mainClock.autoAdvance = false
+                val fixture = DetailBackFixture(hasPreviousDetail = false, sharedImageRoute = route)
+                val originalStack = fixture.backStack.toList()
+                val detailTag = originalStack.last().entryId
+                try {
+                    setContent { fixture.Content() }
+                    settle()
+
+                    // 左上角按钮直接修改返回栈，当前页的图片应与上一页的对应图片匹配。
+                    runOnIdle { fixture.backStack.removeLast() }
+                    mainClock.advanceTimeBy(48)
+                    waitForIdle()
+                    runOnIdle {
+                        assertTrue(fixture.sharedScope.isTransitionActive, "Toolbar pop must animate the shared image")
+                    }
+                    settle()
+                    runOnIdle { fixture.backStack.add(originalStack.last()) }
+                    settle()
+
+                    startBack(fixture, NavigationEvent.EDGE_RIGHT)
+                    runOnIdle {
+                        fixture.input.backProgressed(
+                            NavigationEvent(swipeEdge = NavigationEvent.EDGE_RIGHT, progress = 0.2f),
+                        )
+                    }
+                    mainClock.advanceTimeBy(48)
+                    waitForIdle()
+                    runOnIdle {
+                        assertEquals(originalStack, fixture.backStack.toList())
+                        assertTrue(fixture.sharedScope.isTransitionActive, "Swipe must seek the shared image transition")
+                        fixture.input.backCompleted()
+                    }
+
+                    // 在 120 ms 内松手时，也必须保留场景以绘制共享元素的收尾帧。
+                    repeat(3) {
+                        mainClock.advanceTimeByFrame()
+                        waitForIdle()
+                        onNodeWithTag(detailTag).assertExists()
+                        runOnIdle { assertTrue(fixture.sharedScope.isTransitionActive) }
+                    }
+                    settle()
+                    onNodeWithTag(detailTag).assertDoesNotExist()
+                    assertEquals(DetailSourceArgb, captureToImage().toAwtImage().getRGB(2, 2))
+                    runOnIdle {
+                        assertEquals(originalStack.dropLast(1), fixture.backStack.toList())
+                        assertEquals(1, fixture.backCalls)
+                        assertFalse(fixture.sharedScope.isTransitionActive)
+                    }
+                } finally {
+                    runOnIdle { fixture.navigationEventDispatcher.dispose() }
+                }
+            }
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
 
     @Test
     fun closingTheLastDetailStartsExpandingImmediatelyAndCancellationRestoresIt() {
@@ -287,11 +363,39 @@ private const val DetailSourceArgb = 0xff286bc5.toInt()
 private const val NetworkDetailArgb = 0xff40aa71.toInt()
 private const val BrowsingDetailArgb = 0xffcc3452.toInt()
 
-private class DetailBackFixture(hasPreviousDetail: Boolean) : NavigationEventDispatcherOwner {
+/** 当前页面共享图片的打开方式；[None] 为普通的来源页与详情页。 */
+private enum class SharedImageRoute { None, GridToPicture, PictureToPreview }
+
+private class DetailBackFixture(
+    hasPreviousDetail: Boolean,
+    sharedImageRoute: SharedImageRoute = SharedImageRoute.None,
+) : NavigationEventDispatcherOwner {
     override val navigationEventDispatcher = NavigationEventDispatcher()
     val input = DirectNavigationEventInput().also(navigationEventDispatcher::addInput)
-    private val source = NavigationRecord("detail-test-source", Destination.Setting)
-    private val network = NavigationRecord("detail-test-network", Destination.NetworkSetting, source.entryId)
+    private val sharedImage = when (sharedImageRoute) {
+        SharedImageRoute.None -> null
+        SharedImageRoute.GridToPicture -> PictureImageKey("detail-test-source", "home", 1L)
+        // 作品首图沿用瀑布流的封面标识，entryId 指向更早的瀑布流而不是作品页。
+        SharedImageRoute.PictureToPreview -> PictureImageKey("detail-test-grid", "home", 1L)
+    }
+    private val cover = sharedImage?.let { PictureCoverSource(it, "thumbnail") }
+    private val source = NavigationRecord(
+        "detail-test-source",
+        when (sharedImageRoute) {
+            SharedImageRoute.None -> Destination.Setting
+            SharedImageRoute.GridToPicture -> Destination.Main
+            SharedImageRoute.PictureToPreview -> Destination.Picture(0, "test", cover)
+        },
+    )
+    private val network = NavigationRecord(
+        "detail-test-network",
+        when (sharedImageRoute) {
+            SharedImageRoute.None -> Destination.NetworkSetting
+            SharedImageRoute.GridToPicture -> Destination.Picture(0, "test", cover)
+            SharedImageRoute.PictureToPreview -> Destination.ImagePreview(listOf("image"), 0, sharedImage)
+        },
+        ownerEntryId = source.entryId.takeIf { sharedImageRoute == SharedImageRoute.None },
+    )
     private val browsing = NavigationRecord("detail-test-browsing", Destination.BrowsingSetting, source.entryId)
     val backStack = mutableStateListOf(source, network).apply {
         if (hasPreviousDetail) add(browsing)
@@ -303,11 +407,14 @@ private class DetailBackFixture(hasPreviousDetail: Boolean) : NavigationEventDis
         private set
     var sourceDisposals = 0
         private set
+    lateinit var sharedScope: SharedTransitionScope
+        private set
 
     @Composable
     fun Content() {
         MaterialTheme {
             SharedTransitionLayout(Modifier.fillMaxSize()) {
+                sharedScope = this
                 CompositionLocalProvider(
                     LocalSharedTransitionScope provides this,
                     LocalNavigationEventDispatcherOwner provides this@DetailBackFixture,
@@ -322,6 +429,7 @@ private class DetailBackFixture(hasPreviousDetail: Boolean) : NavigationEventDis
                         PredictiveBackNavDisplay(
                             backStack = backStack,
                             enableQuickBack = true,
+                            settlesQuickBack = { scene, previous -> scene.returnsWithSharedImage(previous) },
                             modifier = Modifier.fillMaxSize(),
                             sharedTransitionScope = this@SharedTransitionLayout,
                             sceneStrategies = listOf(strategy),
@@ -351,7 +459,19 @@ private class DetailBackFixture(hasPreviousDetail: Boolean) : NavigationEventDis
                                         network -> NetworkDetailArgb
                                         else -> BrowsingDetailArgb
                                     }
-                                    Box(Modifier.fillMaxSize().background(Color(color)).testTag(record.entryId))
+                                    Box(
+                                        Modifier.fillMaxSize().background(Color(color)).testTag(record.entryId),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        if (sharedImage != null) {
+                                            Box(
+                                                Modifier
+                                                    .navigationSharedImage(sharedImage)
+                                                    .size(if (record == source) 48.dp else 160.dp)
+                                                    .background(Color.White),
+                                            )
+                                        }
+                                    }
                                 }
                             },
                         )
