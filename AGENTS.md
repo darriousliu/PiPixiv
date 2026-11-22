@@ -3,6 +3,7 @@
 ## 代码风格与提交
 
 - Kotlin 使用 Kotlin 官方代码风格，优先按 Android Studio 的项目 Code Style 格式化本次修改的文件，避免顺带格式化无关文件。
+- 编写或修改代码时，新增或改写的代码注释和文档注释（如 KDoc）必须使用中文。
 - 保留工作区中已有的用户修改；提交前检查暂存差异和 `git diff --check`。
 - 提交信息使用中文，遵循 Conventional Commits，例如 `feat(ui): 统一漫画与发现页面样式`。
 
