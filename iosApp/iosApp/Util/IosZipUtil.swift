@@ -106,7 +106,7 @@ class IosZipUtil: util.ZipUtilBridge {
             return true
         } catch {
             try? fileManager.removeItem(at: outputURL)
-            print("Unable to extract ZIP entry")
+            print("Unable to extract ZIP entry: \(type(of: error)), code \((error as NSError).code)")
             return false
         }
     }
