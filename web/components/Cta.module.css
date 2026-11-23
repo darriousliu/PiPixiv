@@ -1,0 +1,46 @@
+.section {
+  padding-top: 0;
+}
+.card {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 64px);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  color: #fff;
+  overflow: hidden;
+  background: linear-gradient(125deg, #0096e6 0%, #6a4cff 55%, #ec3f84 100%);
+  box-shadow: 0 40px 100px -40px rgba(106, 76, 255, 0.8);
+}
+.aurora {
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.28), transparent 35%),
+    radial-gradient(circle at 75% 65%, rgba(0, 220, 255, 0.35), transparent 40%);
+  animation: spin 40s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.icon {
+  border-radius: 20px;
+  box-shadow: 0 20px 40px -14px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(255, 255, 255, 0.16);
+}
+.card p {
+  max-width: 32em;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 18px;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}

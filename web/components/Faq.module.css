@@ -1,0 +1,91 @@
+.list {
+  display: grid;
+  gap: 10px;
+}
+
+.item {
+  border-radius: 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.item[open] {
+  border-color: var(--line-2);
+  box-shadow: var(--shadow-md);
+}
+.item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: 20px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.item summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 支持 ::details-content 的浏览器中平滑展开 / 收起 */
+.item::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition: block-size 0.4s var(--ease-out), content-visibility 0.4s allow-discrete;
+}
+.item[open]::details-content {
+  block-size: auto;
+}
+
+.toggle {
+  position: relative;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--soft-bg);
+  transition: background-color 0.3s, transform 0.4s var(--ease-out);
+}
+.toggle::before,
+.toggle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--ink-2);
+  transform: translate(-50%, -50%);
+  transition: transform 0.4s var(--ease-out), background-color 0.3s;
+}
+.toggle::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+.item[open] .toggle {
+  background: var(--brand-tint);
+  transform: rotate(180deg);
+}
+.item[open] .toggle::before,
+.item[open] .toggle::after {
+  background: var(--brand-ink);
+}
+.item[open] .toggle::after {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+.body {
+  padding: 0 24px 22px;
+  color: var(--ink-2);
+  font-size: 15.5px;
+  line-height: 1.8;
+}
+.body a {
+  color: var(--brand-ink);
+  font-weight: 600;
+}
+.body a:hover {
+  text-decoration: underline;
+}

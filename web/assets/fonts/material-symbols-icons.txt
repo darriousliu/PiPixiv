@@ -1,0 +1,1 @@
+arrow_forward,auto_awesome,blur_on,check,check_circle,close,dark_mode,download,gif_box,history,image,leaderboard,light_mode,menu,menu_book,network_check,photo_library,search,settings_backup_restore,shield,star,switch_account,translate

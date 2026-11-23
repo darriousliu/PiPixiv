@@ -1,0 +1,416 @@
+{
+  "meta": {
+    "title": "PiPixiv — 开源跨平台的第三方 Pixiv 客户端",
+    "description": "PiPixiv 是一个完全由 Compose Multiplatform 编写的开源第三方 Pixiv 客户端，支持 Android、iOS、Windows、macOS 与 Linux。插画、动图、漫画、小说与 AI 小说翻译，一个应用全部搞定。",
+    "ogTitle": "PiPixiv — 在任何屏幕上畅游 Pixiv",
+    "keywords": [
+      "PiPixiv",
+      "Pixiv",
+      "Pixiv 客户端",
+      "Pixiv 第三方客户端",
+      "Compose Multiplatform",
+      "插画",
+      "漫画",
+      "小说",
+      "开源"
+    ]
+  },
+  "common": {
+    "skipToContent": "跳到正文"
+  },
+  "nav": {
+    "label": "主导航",
+    "home": "PiPixiv 首页",
+    "links": {
+      "features": "功能",
+      "showcase": "界面",
+      "download": "下载",
+      "opensource": "开源",
+      "faq": "常见问题"
+    },
+    "download": "下载",
+    "star": "Star",
+    "starLabel": "在 GitHub 上 Star PiPixiv",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单",
+    "toLight": "切换到浅色",
+    "toDark": "切换到深色",
+    "language": "切换语言"
+  },
+  "platforms": {
+    "android": "Android",
+    "ios": "iOS",
+    "windows": "Windows",
+    "macos": "macOS",
+    "linux": "Linux"
+  },
+  "platformHints": {
+    "android": "适用于 Android",
+    "ios": "适用于 iPhone 与 iPad",
+    "windows": "适用于 Windows",
+    "macos": "适用于 macOS · Apple Silicon",
+    "linux": "适用于 Linux"
+  },
+  "hero": {
+    "releasePill": "新版本 {version} 已发布",
+    "releasePillFallback": "查看最新版本",
+    "title": [
+      "在任何屏幕上",
+      "畅游 {pixiv}"
+    ],
+    "lead": "PiPixiv 是一个开源的第三方 Pixiv 客户端，完全由 Compose Multiplatform 编写。插画、动图、漫画与小说，在手机、平板和电脑上都有同样顺手的体验。",
+    "download": "免费下载",
+    "source": "查看源代码",
+    "platformsLabel": "支持的平台",
+    "chips": {
+      "ugoira": "UGOIRA 动图",
+      "translate": "AI 小说翻译",
+      "accounts": "多账号即时切换"
+    },
+    "downloadHint": "Android · iOS · 桌面"
+  },
+  "ticker": {
+    "label": "功能一览",
+    "rows": [
+      [
+        "插画",
+        "漫画",
+        "小说",
+        "UGOIRA 动图",
+        "排行榜",
+        "最新动态",
+        "浏览历史",
+        "稍后阅读",
+        "AI 翻译",
+        "批量下载",
+        "收藏标签",
+        "评论"
+      ],
+      [
+        "多账号",
+        "Cookie 登录",
+        "网络自检",
+        "ECH",
+        "HTTP / SOCKS 代理",
+        "深色模式",
+        "液态玻璃导航",
+        "屏蔽设置",
+        "深度链接",
+        "备份与恢复",
+        "键盘快捷键",
+        "分页浏览"
+      ]
+    ]
+  },
+  "features": {
+    "eyebrow": "Features",
+    "title": [
+      "看图、追更、读小说",
+      "一个应用就够了"
+    ],
+    "lead": "从首页推荐到排行榜，从 UGOIRA 动图到长篇小说，PiPixiv 把逛 Pixiv 的每一步都做得轻快顺手。",
+    "ranking": {
+      "title": "推荐、排行、新作",
+      "body": "首页瀑布流个性推荐，最新动态按发现、收藏、关注分类。排行榜覆盖日榜、周榜、月榜、男女性向、原创、新人与 AI 生成，还能回看往期。",
+      "chips": [
+        "日榜",
+        "男性热门",
+        "女性热门",
+        "原创",
+        "新人",
+        "周榜",
+        "月榜",
+        "AI 生成",
+        "往期"
+      ]
+    },
+    "illust": {
+      "title": "插画与动图",
+      "body": "多图作品和 UGOIRA 动图一应俱全。预览时可选画质、自由缩放；一键下载原图或导出 GIF，多图作品支持批量下载，文件名也能自定义。",
+      "stats": [
+        {
+          "value": "原图",
+          "label": "高清下载"
+        },
+        {
+          "value": "GIF",
+          "label": "动图导出"
+        },
+        {
+          "value": "批量",
+          "label": "下载队列"
+        }
+      ]
+    },
+    "ai": {
+      "title": "AI 小说翻译",
+      "body": "接入 OpenAI、Claude、Gemini 及兼容接口，也能连接局域网服务。译文流式显示并本地缓存，原文与译文随时切换；稍后阅读还可以排队批量翻译。",
+      "translated": "译文",
+      "original": "原文",
+      "badge": "流式输出",
+      "samples": [
+        {
+          "source": "放課後の図書室には、雨の匂いが満ちていた。",
+          "output": "放学后的图书室里，弥漫着雨的气味。"
+        },
+        {
+          "source": "彼女は振り返らずに、小さく手を振った。",
+          "output": "她没有回头，只是轻轻挥了挥手。"
+        },
+        {
+          "source": "星の数だけ、物語がある。",
+          "output": "有多少颗星星，就有多少个故事。"
+        }
+      ]
+    },
+    "reader": {
+      "title": "沉浸式小说阅读",
+      "body": "调节字号与行距、拖动滚动条快速定位，调整排版时保持阅读位置。进度自动保存，系列目录一键继续阅读，支持书签与 TXT 导出。",
+      "fontSize": "字号",
+      "lineHeight": "行距",
+      "progress": "第 3 章 · 已读"
+    },
+    "accounts": {
+      "title": "多账号即时切换",
+      "body": "在「设置 → 切换账户」添加、切换或移除账号。浏览历史、搜索历史、稍后阅读与阅读进度按账号分别保存。"
+    },
+    "network": {
+      "title": "网络自检",
+      "body": "系统代理、直连、手动 HTTP / SOCKS 代理，Android 与桌面端还支持 ECH。一键检查网络连通情况，快速定位问题。",
+      "checks": [
+        "DNS 解析",
+        "Pixiv API",
+        "登录服务",
+        "图片下载"
+      ]
+    },
+    "privacy": {
+      "title": "隐私与屏蔽",
+      "body": "控制 R-18 内容显示和剪贴板读取，按作品、用户、标签屏蔽不想看的内容，还能过滤过长的小说标签。匿名使用统计可随时关闭。",
+      "toggles": [
+        "显示 R-18 内容",
+        "匿名使用统计"
+      ]
+    },
+    "search": {
+      "title": "搜索与发现",
+      "body": "搜索插画、小说与用户，按人气或最新排序，并按需筛选 AI 作品。结果可连续滚动或分页跳转；长按标签即可收藏或复制。",
+      "query": "風景",
+      "sort": "人气",
+      "tags": [
+        "#オリジナル",
+        "#風景",
+        "#空",
+        "#夕焼け"
+      ]
+    },
+    "data": {
+      "title": "数据由你掌控",
+      "body": "浏览历史保存在本地，支持搜索、清空与自动清理。应用数据可以导入导出备份，升级后的待恢复项能逐项重试，本地日志随时查看。",
+      "pills": [
+        "浏览历史",
+        "导出备份",
+        "数据恢复"
+      ]
+    }
+  },
+  "showcase": {
+    "eyebrow": "Interface",
+    "title": "握在手里，同样精致",
+    "lead": "Android 与 iOS 共用同一套界面，遵循 Material 3 设计语言。",
+    "tabsLabel": "应用界面",
+    "tabs": {
+      "ranking": {
+        "title": "排行榜",
+        "body": "日榜、周榜、月榜、原创、新人与 AI 生成一滑即换，日历按钮还能回看往期。"
+      },
+      "detail": {
+        "title": "作品详情",
+        "body": "完整画幅大图，标签附带译名；下载、收藏和分享收在悬浮胶囊里。"
+      },
+      "novel": {
+        "title": "小说阅读",
+        "body": "封面、系列、标签与简介一目了然，翻译、目录和收藏都在顶栏。"
+      },
+      "settings": {
+        "title": "液态玻璃导航",
+        "body": "悬浮的液态玻璃导航栏，也可以在设置里换回标准底部导航。"
+      },
+      "network": {
+        "title": "网络设置",
+        "body": "系统代理、直连和手动代理一键切换，配合网络自检快速排查。深色模式同样精致。"
+      }
+    },
+    "highlights": [
+      "Material 3 设计",
+      "深浅色主题",
+      "多语言界面",
+      "Android 与 iOS 同一套界面"
+    ]
+  },
+  "bigScreen": {
+    "eyebrow": "Big screen",
+    "title": "大屏，不只是放大的手机",
+    "lead": "宽度达到 600dp 时切换为侧边导航，840dp 起插画流与作品详情并排显示，保留完整画幅。桌面版还能用键盘操作。",
+    "tabsLabel": "桌面端界面",
+    "tabs": {
+      "search": {
+        "title": "宽屏瀑布流",
+        "body": "搜索结果、排行与推荐铺满宽屏，网格列数还可以在设置里调整。"
+      },
+      "detail": {
+        "title": "作品详情双栏",
+        "body": "左侧完整画幅，右侧是作者、标签译名与相关作品；下载、收藏和分享收在悬浮胶囊里。"
+      },
+      "novel": {
+        "title": "列表与阅读并排",
+        "body": "小说排行与正文左右并排，翻译、目录和收藏都在顶栏。"
+      },
+      "ai": {
+        "title": "设置双栏展开",
+        "body": "AI 翻译的接口地址、模型、超时与并发数，在设置列表旁直接配置。"
+      }
+    },
+    "keysLabel": "桌面端快捷键",
+    "keys": {
+      "refresh": "回到顶部 / 刷新",
+      "scroll": "滚动列表",
+      "back": "返回上一页",
+      "theme": "跟随系统深浅色"
+    }
+  },
+  "screens": {
+    "phones": {
+      "search": {
+        "caption": "搜索",
+        "alt": "PiPixiv 中搜索「風景」的结果"
+      },
+      "detail": {
+        "caption": "作品详情",
+        "alt": "PiPixiv 作品详情页，大图与标签"
+      },
+      "ranking": {
+        "caption": "排行榜",
+        "alt": "PiPixiv 原创排行榜"
+      },
+      "tags": {
+        "caption": "热门标签",
+        "alt": "PiPixiv 搜索页与热门标签"
+      },
+      "settings": {
+        "caption": "设置",
+        "alt": "PiPixiv 设置页，可开关液态玻璃导航"
+      },
+      "network": {
+        "caption": "网络设置",
+        "alt": "PiPixiv 网络设置页，深色模式"
+      },
+      "novel": {
+        "caption": "小说阅读",
+        "alt": "PiPixiv 小说详情与阅读页"
+      }
+    },
+    "desktop": {
+      "search": "PiPixiv 桌面版中搜索「風景」的结果",
+      "detail": "PiPixiv 桌面版作品详情页，左侧大图，右侧作者信息与相关作品",
+      "novel": "PiPixiv 桌面版小说排行与阅读页并排显示",
+      "ai": "PiPixiv 桌面版 AI 翻译设置页"
+    }
+  },
+  "download": {
+    "eyebrow": "Download",
+    "title": "选择你的平台",
+    "lead": "所有安装包都由 GitHub Actions 自动构建，发布在 GitHub Releases。",
+    "latest": "最新版本",
+    "released": "{date} 发布",
+    "changelog": "更新日志",
+    "recommended": "适合你的设备",
+    "requirements": {
+      "android": "Android 8.0 及以上",
+      "ios": "iOS 18 及以上",
+      "windows": "x86_64",
+      "macos": "Apple Silicon",
+      "linux": "x86_64"
+    },
+    "actions": {
+      "androidDefault": "下载 APK",
+      "ios": "下载 IPA",
+      "iosHelp": "如何安装 IPA？",
+      "windows": "下载 MSI",
+      "macos": "下载 DMG",
+      "linux": "下载 tar.gz"
+    }
+  },
+  "opensource": {
+    "eyebrow": "Open source",
+    "title": [
+      "开源，",
+      "也认真对待工程"
+    ],
+    "body": "PiPixiv 以 Apache-2.0 协议开源。一套 Kotlin 代码，借助 Compose Multiplatform 运行在五个平台上。欢迎提交 Issue、功能建议和 PR。",
+    "github": "GitHub 仓库",
+    "telegram": "Telegram 频道",
+    "stats": {
+      "stars": "GitHub Stars",
+      "downloads": "累计下载",
+      "platforms": "支持平台",
+      "license": "开源协议"
+    },
+    "techLabel": "技术栈"
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "常见问题",
+    "items": [
+      {
+        "id": "official",
+        "q": "PiPixiv 是 Pixiv 官方应用吗？",
+        "a": "不是。PiPixiv 是社区开发的第三方开源客户端，与 pixiv Inc. 没有任何关联。你需要使用自己的 Pixiv 账号登录，所有作品的版权归原作者所有。"
+      },
+      {
+        "id": "price",
+        "q": "需要付费吗？",
+        "a": "不需要。PiPixiv 免费、开源，源代码以 Apache-2.0 协议托管在 GitHub 上。"
+      },
+      {
+        "id": "login",
+        "q": "支持哪些登录方式？",
+        "a": "支持使用 Pixiv 账号登录（OAuth 认证），也可以通过网页端 Cookie（PHPSESSID）登录，无需手动填写 Token。多个账号可以在「设置 → 切换账户」中添加和切换。"
+      },
+      {
+        "id": "ios",
+        "q": "iOS 版怎么安装？",
+        "a": "Release 中提供的是 IPA 安装包，需要借助 AltStore、SideStore 等自签工具安装到设备上，系统要求 iOS 18 或更高版本。"
+      },
+      {
+        "id": "network",
+        "q": "连不上 Pixiv 怎么办？",
+        "a": "在「设置 → 网络设置」中可以切换系统代理、直连或手动 HTTP / SOCKS 代理，Android 和桌面端还可以使用 ECH，也可以配置自定义的 App API 代理域名。「网络自检」会逐项检查 DNS、Pixiv API、官网、登录和图片下载，帮你定位问题。"
+      },
+      {
+        "id": "feedback",
+        "q": "遇到问题如何反馈？",
+        "a": "欢迎在 [GitHub Issues](https://github.com/darriousliu/PiPixiv/issues) 反馈，新版本和公告会同步到 Telegram 频道 [@PiPixivChannel](https://t.me/PiPixivChannel)。在「设置 → 关于 → 应用日志」中可以复制本次和上次运行的日志，附在反馈里会很有帮助。"
+      }
+    ]
+  },
+  "cta": {
+    "title": "现在就开始畅游 Pixiv",
+    "body": "免费、开源，Android、iOS、Windows、macOS 与 Linux 都能用。",
+    "download": "下载 PiPixiv",
+    "star": "在 GitHub 上 Star"
+  },
+  "footer": {
+    "disclaimer": "第三方开源 Pixiv 客户端，与 pixiv Inc. 无关。页面截图中的作品版权归各自作者所有。",
+    "pages": "页面",
+    "project": "项目",
+    "community": "社区",
+    "repo": "GitHub 仓库",
+    "releases": "Releases",
+    "issues": "问题反馈",
+    "telegram": "Telegram 频道",
+    "readme": "中文 README",
+    "license": "Apache-2.0 License",
+    "builtWith": "使用 Kotlin 与 Compose Multiplatform 构建"
+  }
+}

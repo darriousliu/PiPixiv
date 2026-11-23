@@ -1,0 +1,417 @@
+{
+  "meta": {
+    "title": "PiPixiv — Open-source, cross-platform Pixiv client",
+    "description": "PiPixiv is an open-source third-party Pixiv client written entirely in Compose Multiplatform, available for Android, iOS, Windows, macOS and Linux. Illustrations, ugoira, manga, novels and AI novel translation in one app.",
+    "ogTitle": "PiPixiv — Explore Pixiv on every screen",
+    "keywords": [
+      "PiPixiv",
+      "Pixiv",
+      "Pixiv client",
+      "Pixiv app",
+      "third-party Pixiv client",
+      "Compose Multiplatform",
+      "illustrations",
+      "manga",
+      "novels",
+      "open source"
+    ]
+  },
+  "common": {
+    "skipToContent": "Skip to content"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "home": "PiPixiv home",
+    "links": {
+      "features": "Features",
+      "showcase": "Interface",
+      "download": "Download",
+      "opensource": "Open source",
+      "faq": "FAQ"
+    },
+    "download": "Download",
+    "star": "Star",
+    "starLabel": "Star PiPixiv on GitHub",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "toLight": "Switch to light theme",
+    "toDark": "Switch to dark theme",
+    "language": "Change language"
+  },
+  "platforms": {
+    "android": "Android",
+    "ios": "iOS",
+    "windows": "Windows",
+    "macos": "macOS",
+    "linux": "Linux"
+  },
+  "platformHints": {
+    "android": "For Android",
+    "ios": "For iPhone and iPad",
+    "windows": "For Windows",
+    "macos": "For macOS · Apple Silicon",
+    "linux": "For Linux"
+  },
+  "hero": {
+    "releasePill": "{version} is out",
+    "releasePillFallback": "See the latest release",
+    "title": [
+      "Explore {pixiv}",
+      "on every screen"
+    ],
+    "lead": "PiPixiv is an open-source third-party Pixiv client written entirely in Compose Multiplatform. Illustrations, ugoira, manga and novels feel just as good on your phone, tablet and desktop.",
+    "download": "Free download",
+    "source": "View source",
+    "platformsLabel": "Supported platforms",
+    "chips": {
+      "ugoira": "Ugoira animations",
+      "translate": "AI novel translation",
+      "accounts": "Instant account switching"
+    },
+    "downloadHint": "Android · iOS · Desktop"
+  },
+  "ticker": {
+    "label": "Feature overview",
+    "rows": [
+      [
+        "Illustrations",
+        "Manga",
+        "Novels",
+        "Ugoira",
+        "Rankings",
+        "Latest works",
+        "History",
+        "Read later",
+        "AI translation",
+        "Batch download",
+        "Bookmark tags",
+        "Comments"
+      ],
+      [
+        "Multiple accounts",
+        "Cookie login",
+        "Network check",
+        "ECH",
+        "HTTP / SOCKS proxy",
+        "Dark mode",
+        "Liquid glass navigation",
+        "Blocking",
+        "Deep links",
+        "Backup & restore",
+        "Keyboard shortcuts",
+        "Pagination"
+      ]
+    ]
+  },
+  "features": {
+    "eyebrow": "Features",
+    "title": [
+      "Artworks, series and novels",
+      "all in one app"
+    ],
+    "lead": "From your home feed to the rankings, from ugoira to long-form novels, PiPixiv makes every part of browsing Pixiv quick and comfortable.",
+    "ranking": {
+      "title": "Recommended, ranked, new",
+      "body": "A personalised masonry feed on the home screen and latest works sorted by discovery, bookmarks and follows. Rankings cover daily, weekly, monthly, popular with men and women, original, rookie and AI-generated, including past dates.",
+      "chips": [
+        "Daily",
+        "Popular with men",
+        "Popular with women",
+        "Original",
+        "Rookie",
+        "Weekly",
+        "Monthly",
+        "AI generated",
+        "Past"
+      ]
+    },
+    "illust": {
+      "title": "Illustrations & ugoira",
+      "body": "Multi-page works and ugoira animations just work. Pick the preview quality, zoom freely, download originals or export GIFs, and batch-download multi-page works with your own file names.",
+      "stats": [
+        {
+          "value": "Original",
+          "label": "Full-size download"
+        },
+        {
+          "value": "GIF",
+          "label": "Ugoira export"
+        },
+        {
+          "value": "Batch",
+          "label": "Download queue"
+        }
+      ]
+    },
+    "ai": {
+      "title": "AI novel translation",
+      "body": "Works with OpenAI, Claude, Gemini and compatible APIs, including services on your local network. Translations stream in, are cached locally and can be toggled with the original. Read-later items can be queued for translation.",
+      "translated": "Translation",
+      "original": "Original",
+      "badge": "Streaming",
+      "samples": [
+        {
+          "source": "放課後の図書室には、雨の匂いが満ちていた。",
+          "output": "After school, the library was filled with the smell of rain."
+        },
+        {
+          "source": "彼女は振り返らずに、小さく手を振った。",
+          "output": "Without looking back, she gave a small wave."
+        },
+        {
+          "source": "星の数だけ、物語がある。",
+          "output": "There are as many stories as there are stars."
+        }
+      ]
+    },
+    "reader": {
+      "title": "Immersive novel reader",
+      "body": "Adjust font size and line spacing, drag the scrollbar to jump around, and keep your place while changing the layout. Progress is saved automatically, series pick up where you left off, and bookmarks and TXT export are built in.",
+      "fontSize": "Size",
+      "lineHeight": "Spacing",
+      "progress": "Chapter 3 · read"
+    },
+    "accounts": {
+      "title": "Switch accounts instantly",
+      "body": "Add, switch or remove accounts under Settings → Switch account. Browsing history, search history, read-later and reading progress are kept per account."
+    },
+    "network": {
+      "title": "Network check",
+      "body": "System proxy, direct connection or manual HTTP / SOCKS proxy, plus ECH on Android and desktop. A built-in check pinpoints what is blocking your connection.",
+      "checks": [
+        "DNS",
+        "Pixiv API",
+        "Login",
+        "Image download"
+      ]
+    },
+    "privacy": {
+      "title": "Privacy & blocking",
+      "body": "Control R-18 content and clipboard access, block works, users and tags, and filter overly long novel tags. Anonymous usage statistics can be turned off at any time.",
+      "toggles": [
+        "Show R-18 content",
+        "Anonymous usage statistics"
+      ]
+    },
+    "search": {
+      "title": "Search & discover",
+      "body": "Search illustrations, novels and users, sort by popularity or date, and filter AI works. Scroll continuously or jump between pages; long-press a tag to bookmark or copy it.",
+      "query": "風景",
+      "sort": "Popular",
+      "tags": [
+        "#オリジナル",
+        "#風景",
+        "#空",
+        "#夕焼け"
+      ]
+    },
+    "data": {
+      "title": "Your data, your control",
+      "body": "Browsing history stays on your device and can be searched, cleared or pruned automatically. Back up and restore app data, retry pending items after an upgrade, and read local logs anytime.",
+      "pills": [
+        "History",
+        "Export backup",
+        "Data recovery"
+      ]
+    }
+  },
+  "showcase": {
+    "eyebrow": "Interface",
+    "title": "Just as polished in your hand",
+    "lead": "Android and iOS share the same interface, built on Material 3.",
+    "tabsLabel": "App interface",
+    "tabs": {
+      "ranking": {
+        "title": "Rankings",
+        "body": "Daily, weekly, monthly, original, rookie and AI-generated, one swipe apart, plus a calendar for past dates."
+      },
+      "detail": {
+        "title": "Artwork details",
+        "body": "The full image up front, tags with translations, and download, bookmark and share in a floating pill."
+      },
+      "novel": {
+        "title": "Novel reader",
+        "body": "Cover, series, tags and caption at a glance, with translation, contents and bookmarks in the top bar."
+      },
+      "settings": {
+        "title": "Liquid glass navigation",
+        "body": "A floating liquid glass navigation bar, or switch back to the standard bottom bar in Settings."
+      },
+      "network": {
+        "title": "Network settings",
+        "body": "Switch between system proxy, direct and manual proxy, and run the network check when something is off. Dark mode included."
+      }
+    },
+    "highlights": [
+      "Material 3 design",
+      "Light & dark themes",
+      "Multilingual",
+      "One interface on Android & iOS"
+    ]
+  },
+  "bigScreen": {
+    "eyebrow": "Big screen",
+    "title": "Big screens get more than a bigger phone",
+    "lead": "From 600dp the app switches to a navigation rail, and from 840dp the feed and artwork details sit side by side with the full image. The desktop app also works from the keyboard.",
+    "tabsLabel": "Desktop interface",
+    "tabs": {
+      "search": {
+        "title": "Wide masonry grid",
+        "body": "Search results, rankings and recommendations fill the screen, and the grid column count is adjustable in Settings."
+      },
+      "detail": {
+        "title": "Two-pane artwork view",
+        "body": "The full artwork on the left; artist, translated tags and related works on the right. Download, bookmark and share live in a floating pill."
+      },
+      "novel": {
+        "title": "List and reader side by side",
+        "body": "Novel rankings and the reader sit side by side, with translation, contents and bookmarks in the top bar."
+      },
+      "ai": {
+        "title": "Two-pane settings",
+        "body": "Set the AI translation endpoint, model, timeout and concurrency right next to the settings list."
+      }
+    },
+    "keysLabel": "Desktop shortcuts",
+    "keys": {
+      "refresh": "Back to top / refresh",
+      "scroll": "Scroll lists",
+      "back": "Go back",
+      "theme": "Follows system theme"
+    }
+  },
+  "screens": {
+    "phones": {
+      "search": {
+        "caption": "Search",
+        "alt": "Search results for 風景 (landscape) in PiPixiv"
+      },
+      "detail": {
+        "caption": "Artwork details",
+        "alt": "An artwork page in PiPixiv with the full image and tags"
+      },
+      "ranking": {
+        "caption": "Rankings",
+        "alt": "The original rankings in PiPixiv"
+      },
+      "tags": {
+        "caption": "Popular tags",
+        "alt": "The search page with popular tags in PiPixiv"
+      },
+      "settings": {
+        "caption": "Settings",
+        "alt": "PiPixiv settings with the liquid glass navigation switch"
+      },
+      "network": {
+        "caption": "Network settings",
+        "alt": "Network settings in PiPixiv, dark theme"
+      },
+      "novel": {
+        "caption": "Novel reader",
+        "alt": "A novel page in PiPixiv"
+      }
+    },
+    "desktop": {
+      "search": "Search results for 風景 (landscape) in PiPixiv for desktop",
+      "detail": "PiPixiv for desktop showing an artwork with artist details and related works",
+      "novel": "PiPixiv for desktop showing novel rankings next to the reader",
+      "ai": "AI translation settings in PiPixiv for desktop"
+    }
+  },
+  "download": {
+    "eyebrow": "Download",
+    "title": "Choose your platform",
+    "lead": "Every build is produced by GitHub Actions and published on GitHub Releases.",
+    "latest": "Latest",
+    "released": "released {date}",
+    "changelog": "Changelog",
+    "recommended": "For your device",
+    "requirements": {
+      "android": "Android 8.0 or later",
+      "ios": "iOS 18 or later",
+      "windows": "x86_64",
+      "macos": "Apple Silicon",
+      "linux": "x86_64"
+    },
+    "actions": {
+      "androidDefault": "Download APK",
+      "ios": "Download IPA",
+      "iosHelp": "How to install the IPA?",
+      "windows": "Download MSI",
+      "macos": "Download DMG",
+      "linux": "Download tar.gz"
+    }
+  },
+  "opensource": {
+    "eyebrow": "Open source",
+    "title": [
+      "Open source,",
+      "engineered with care"
+    ],
+    "body": "PiPixiv is open source under the Apache-2.0 license. A single Kotlin codebase runs on five platforms through Compose Multiplatform. Issues, feature ideas and pull requests are welcome.",
+    "github": "GitHub repository",
+    "telegram": "Telegram channel",
+    "stats": {
+      "stars": "GitHub stars",
+      "downloads": "Downloads",
+      "platforms": "Platforms",
+      "license": "License"
+    },
+    "techLabel": "Tech stack"
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "Frequently asked questions",
+    "items": [
+      {
+        "id": "official",
+        "q": "Is PiPixiv an official Pixiv app?",
+        "a": "No. PiPixiv is a community-built, open-source third-party client with no affiliation to pixiv Inc. You sign in with your own Pixiv account, and every artwork belongs to its creator."
+      },
+      {
+        "id": "price",
+        "q": "Does it cost anything?",
+        "a": "No. PiPixiv is free and open source, with its source code on GitHub under the Apache-2.0 license."
+      },
+      {
+        "id": "login",
+        "q": "How do I sign in?",
+        "a": "Sign in with your Pixiv account (OAuth), or with your web session cookie (PHPSESSID) without copying tokens by hand. Add and switch between accounts under Settings → Switch account."
+      },
+      {
+        "id": "ios",
+        "q": "How do I install the iOS app?",
+        "a": "Releases include an IPA file, which you install with a sideloading tool such as AltStore or SideStore. iOS 18 or later is required."
+      },
+      {
+        "id": "network",
+        "q": "I can't connect to Pixiv. What can I do?",
+        "a": "Under Settings → Network you can switch between system proxy, direct connection and a manual HTTP / SOCKS proxy, use ECH on Android and desktop, or set a custom App API proxy domain. The network check tests DNS, the Pixiv API, the website, login and image downloads one by one to find the problem."
+      },
+      {
+        "id": "feedback",
+        "q": "Where can I report problems?",
+        "a": "Open an issue on [GitHub Issues](https://github.com/darriousliu/PiPixiv/issues). New releases and announcements are posted to the Telegram channel [@PiPixivChannel](https://t.me/PiPixivChannel). Copying the logs from Settings → About → App logs into your report helps a lot."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Start exploring Pixiv today",
+    "body": "Free and open source, on Android, iOS, Windows, macOS and Linux.",
+    "download": "Download PiPixiv",
+    "star": "Star on GitHub"
+  },
+  "footer": {
+    "disclaimer": "An open-source third-party Pixiv client, not affiliated with pixiv Inc. Artworks shown in screenshots belong to their respective creators.",
+    "pages": "Pages",
+    "project": "Project",
+    "community": "Community",
+    "repo": "GitHub repository",
+    "releases": "Releases",
+    "issues": "Report an issue",
+    "telegram": "Telegram channel",
+    "readme": "English README",
+    "license": "Apache-2.0 License",
+    "builtWith": "Built with Kotlin & Compose Multiplatform"
+  }
+}

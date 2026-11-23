@@ -1,0 +1,269 @@
+.stage {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  grid-template-areas: "tabs window" "footer footer";
+  gap: 28px 40px;
+  align-items: center;
+  padding: clamp(16px, 3vw, 36px);
+  border-radius: var(--radius-xl);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+}
+
+.side {
+  grid-area: tabs;
+  display: grid;
+  gap: 28px;
+}
+.tabs {
+  display: grid;
+  gap: 6px;
+}
+.tab {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+.tab:hover {
+  background: var(--soft-bg);
+}
+.tab[aria-selected="true"] {
+  background: var(--card);
+  box-shadow: var(--shadow-md);
+}
+.tabIcon {
+  display: grid !important;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--soft-bg);
+  color: var(--ink-3);
+  font-size: 20px !important;
+  transition: background 0.3s, color 0.3s;
+}
+.tab[aria-selected="true"] .tabIcon {
+  background: var(--grad);
+  color: #fff;
+}
+.tabText {
+  display: grid;
+  gap: 4px;
+}
+.tabText b {
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--ink-2);
+  transition: color 0.3s;
+}
+.tabText small {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  color: var(--ink-3);
+  font-size: 14px;
+  line-height: 1.6;
+  transition: opacity 0.35s ease, max-height 0.45s var(--ease-out);
+}
+.tab[aria-selected="true"] .tabText b {
+  color: var(--ink);
+}
+.tab[aria-selected="true"] .tabText small {
+  max-height: 6em;
+  opacity: 1;
+}
+
+/* 自动切换的进度条，仅用于显示：切换时机由 Showcase.tsx 计时，--dur 也由它设置。 */
+.progress {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--grad);
+  transform-origin: left;
+  transform: scaleX(0);
+  opacity: 0;
+}
+.stage[data-auto] .tab[aria-selected="true"] .progress {
+  opacity: 1;
+  animation: progress var(--dur) linear forwards paused;
+}
+.stage[data-auto][data-playing] .tab[aria-selected="true"] .progress {
+  animation-play-state: running;
+}
+@keyframes progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.window {
+  position: relative;
+  grid-area: window;
+  display: grid;
+  aspect-ratio: 1600 / 1003;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111;
+  box-shadow: var(--shadow-lg);
+}
+.shot {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: scale(1.015);
+  transition: opacity 0.6s ease, transform 0.9s var(--ease-out);
+}
+.shot[data-active] {
+  opacity: 1;
+  transform: none;
+}
+.shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.footer {
+  grid-area: footer;
+}
+
+/* iPhone 边框样式 */
+.stage[data-variant="phone"] {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  column-gap: clamp(32px, 6vw, 96px);
+  padding-inline: clamp(16px, 5vw, 64px);
+  background: var(--bg-2) radial-gradient(60% 80% at 85% 40%, rgba(124, 92, 255, 0.14), transparent 70%);
+}
+.stage[data-variant="phone"] .window {
+  aspect-ratio: 1000 / 2172;
+  width: 100%;
+  max-width: 360px;
+  justify-self: center;
+  padding: 3%;
+  border-radius: 15% / 7%;
+  background: linear-gradient(145deg, #3a3f4a, #0d1016 55%, #2a2f3a);
+  box-shadow: var(--shadow-lg), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14);
+}
+.stage[data-variant="phone"] .shot {
+  overflow: hidden;
+  border-radius: 13% / 6.1%;
+}
+/* 灵动岛（模拟器截图本身不包含） */
+.stage[data-variant="phone"] .window::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 2.5%;
+  left: 50%;
+  width: 27%;
+  height: 3.7%;
+  border-radius: 999px;
+  background: #000;
+  transform: translateX(-50%);
+}
+.intro .lead {
+  margin-top: 16px;
+  color: var(--ink-2);
+  font-size: clamp(16px, 1.4vw, 18px);
+}
+.intro .pills {
+  justify-content: flex-start;
+  margin-top: 20px;
+}
+
+/* 共用的底部说明行 */
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 24px;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+.keys li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.keys :global(.ms) {
+  color: var(--ink-3);
+  font-size: 18px;
+}
+
+@media (max-width: 980px) {
+  .intro {
+    text-align: center;
+  }
+  .intro .pills {
+    justify-content: center;
+  }
+  .stage,
+  .stage[data-variant="phone"] {
+    grid-template-columns: 1fr;
+    grid-template-areas: "window" "tabs" "footer";
+  }
+  .stage[data-variant="phone"] .window {
+    max-width: 300px;
+  }
+  /* 小屏幕下的手机样式：依次为标题、手机、标签。 */
+  .stage[data-variant="phone"] {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .stage[data-variant="phone"] .side {
+    display: contents;
+  }
+  .stage[data-variant="phone"] .intro {
+    order: 0;
+  }
+  .stage[data-variant="phone"] .window {
+    order: 1;
+    align-self: center;
+  }
+  .stage[data-variant="phone"] .tabs {
+    order: 2;
+  }
+  .stage[data-variant="phone"] .footer {
+    order: 3;
+  }
+  .tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .tabs {
+    grid-template-columns: 1fr;
+  }
+  .tab {
+    padding: 14px;
+  }
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.pills li {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 500;
+}

@@ -1,0 +1,72 @@
+.footer {
+  padding: 56px 0 40px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.brand img {
+  border-radius: 9px;
+}
+.brandCol p {
+  max-width: 26em;
+  margin-top: 14px;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+.col {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+.col h4 {
+  margin-bottom: 4px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+}
+.col a {
+  width: fit-content;
+  color: var(--ink-2);
+  font-size: 14px;
+  transition: color 0.2s;
+}
+.col a:hover {
+  color: var(--brand-ink);
+}
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+@media (max-width: 980px) {
+  .inner {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .brandCol {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

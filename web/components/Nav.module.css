@@ -1,0 +1,240 @@
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  padding: 12px var(--gutter) 0;
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 1160px;
+  height: var(--nav-h);
+  margin: 0 auto;
+  padding: 0 10px 0 16px;
+  border-radius: 22px;
+  border: 1px solid transparent;
+  pointer-events: auto;
+  transition: background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease,
+    max-width 0.5s var(--ease-out);
+}
+.nav[data-scrolled] .inner,
+.nav[data-open] .inner {
+  max-width: 1080px;
+  background: var(--glass);
+  border-color: var(--line);
+  box-shadow: var(--shadow-md);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  backdrop-filter: saturate(180%) blur(18px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.brand img {
+  border-radius: 9px;
+  box-shadow: 0 4px 12px -4px rgba(0, 180, 255, 0.6);
+}
+
+.links {
+  display: flex;
+  gap: 4px;
+  margin: 0 auto;
+}
+.links a {
+  display: block;
+  padding: 8px 14px;
+  border-radius: 12px;
+  color: var(--ink-2);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.2s, background-color 0.2s;
+}
+.links a:hover {
+  color: var(--ink);
+  background: var(--soft-bg);
+}
+.links a[data-active] {
+  color: var(--ink);
+}
+.links a[data-active]::after {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 2px;
+  margin: 2px auto -4px;
+  border-radius: 2px;
+  background: var(--grad);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.iconBtn:hover,
+.iconBtn[aria-expanded="true"] {
+  background: var(--soft-bg);
+  color: var(--ink);
+}
+.iconBtn :global(.ms) {
+  font-size: 22px;
+}
+
+.lang {
+  position: relative;
+}
+.langShort {
+  font-size: 13px;
+  font-weight: 700;
+}
+.langMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 168px;
+  padding: 6px;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  animation: pop 0.2s var(--ease-out);
+}
+.langMenu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.langMenu a:hover {
+  background: var(--soft-bg);
+  color: var(--ink);
+}
+.langMenu a[aria-checked="true"] {
+  color: var(--brand-ink);
+}
+.langMenu :global(.ms) {
+  font-size: 18px;
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+
+.ghBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 6px 0 12px;
+  border-radius: 12px;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s, color 0.2s;
+}
+.ghBtn:hover {
+  background: var(--soft-bg);
+  color: var(--ink);
+}
+.ghIcon {
+  width: 18px;
+  height: 18px;
+}
+.ghCount {
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: var(--soft-bg);
+  color: var(--ink);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.menuBtn {
+  display: none;
+}
+
+@media (max-width: 1040px) {
+  .links {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 8px;
+    border-radius: 20px;
+    /* 使用不透明背景：这里的 backdrop-filter 只能取到导航栏本身（它的 backdrop root）。 */
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: top center;
+    transition: opacity 0.25s ease, transform 0.3s var(--ease-out), visibility 0s 0.3s;
+  }
+  .nav[data-open] .links {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.25s ease, transform 0.3s var(--ease-out), visibility 0s;
+  }
+  .links a {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+  .links a[data-active]::after {
+    display: none;
+  }
+  .actions {
+    margin-left: auto;
+  }
+  .menuBtn {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 720px) {
+  .ghLabel,
+  .cta,
+  .langShort {
+    display: none;
+  }
+  .ghBtn {
+    padding: 0 6px 0 10px;
+  }
+}
