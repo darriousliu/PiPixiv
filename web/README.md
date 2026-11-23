@@ -55,17 +55,12 @@ assets/fonts/        自托管字体
 
 ## 截图
 
-截图来自 iPhone 18 Pro Max 模拟器（1320×2868，缩放到 1000px 宽）：
+截图按界面语言放在 `assets/screenshots/<code>/` 下，并在 `lib/screenshots.ts` 中引用：
 
-- 状态栏统一为 9:41、满电：`xcrun simctl status_bar <udid> override --time 9:41 --batteryState discharging --batteryLevel 100 --wifiBars 3 --cellularMode notSupported`；
-- 英文界面通过启动参数切换，不改应用设置：`xcrun simctl launch <udid> com.mrl.pixiv.PiPixiv -AppleLanguages "(en)" -AppleLocale en_US`；
-- 页面跳转用 Maestro 驱动，截图用 `xcrun simctl io <udid> screenshot`。
+- 手机截图宽 1000px，不含灵动岛（页面上的灵动岛由 CSS 绘制）；
+- 桌面截图宽 1600px，只截应用窗口，不含阴影。
 
-页面上的灵动岛是 CSS 画的，截图本身不包含。
-
-桌面端截图来自 macOS 桌面版（`./gradlew :desktopApp:run`），窗口 1400×878pt，用 `screencapture -o -l <窗口 ID>` 只截应用窗口（不含阴影），缩放到 1600px 宽。英文版把 JVM 参数改为 `-Duser.language=en -Duser.country=US` 后重新启动。
-
-「大屏」区块（`components/BigScreen.tsx`）只在 `lib/screenshots.ts` 提供了 `desktop` 截图时才会显示。
+「大屏」区块（`components/BigScreen.tsx`）只在提供了 `desktop` 截图时才会显示。
 
 ## 图标字体
 
@@ -81,27 +76,4 @@ curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 
 ## 部署
 
-站点部署在 Vercel，域名 `pipixiv.com` 在 Cloudflare 注册，DNS 也由 Cloudflare 托管。站点需要 Node.js 运行时（用到了 `proxy.ts`、`'use cache'` 和图片优化），不能导出为纯静态文件；除 Vercel 外，也可以部署到任意能运行 `next start` 的服务器。
-
-### Vercel 项目设置
-
-| 设置 | 值 |
-| --- | --- |
-| Root Directory | `web` |
-| Production Branch | `develop` |
-| Ignored Build Step | `git diff --quiet HEAD^ HEAD -- .`（只在 `web/` 有改动时重新构建） |
-| 环境变量 `NEXT_PUBLIC_SITE_URL` | `https://pipixiv.com` |
-| 环境变量 `GITHUB_TOKEN` | 只读公开仓库的 fine-grained token。Vercel 的出口 IP 由多个项目共用，不配置时容易触发 GitHub API 限额，版本号、下载链接和 Star 数会退回默认显示 |
-
-在 Settings → Domains 中添加 `pipixiv.com` 和 `www.pipixiv.com`，并将后者设为跳转到前者。
-
-### Cloudflare DNS
-
-| 类型 | 名称 | 内容 | 代理状态 |
-| --- | --- | --- | --- |
-| A | `@` | Vercel 域名页面显示的 IP | 仅 DNS |
-| CNAME | `www` | Vercel 域名页面显示的地址 | 仅 DNS |
-
-- 两条记录保持「仅 DNS」（灰色云朵），开启代理会导致 Vercel 无法验证域名或签发证书；
-- 添加前删除 `@` 已有的 A / AAAA 记录；
-- 如有 CAA 记录，需要允许 `letsencrypt.org`。
+站点需要 Node.js 运行时（用到了 `proxy.ts`、`'use cache'` 和图片优化），不能导出为纯静态文件。

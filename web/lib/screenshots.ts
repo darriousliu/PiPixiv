@@ -1,8 +1,7 @@
 import type { StaticImageData } from "next/image";
 import type { Locale } from "@/i18n/config";
 
-// 手机：iPhone 18 Pro Max 模拟器（1320×2868，缩放到 1000px 宽）。
-// 桌面：macOS 桌面版窗口，1400×878pt（缩放到 1600px 宽）。每种界面语言一套。
+// 手机截图宽 1000px，桌面截图宽 1600px。每种界面语言一套。
 import zhSearch from "@/assets/screenshots/zh/search.jpg";
 import zhDetail from "@/assets/screenshots/zh/detail.jpg";
 import zhRanking from "@/assets/screenshots/zh/ranking.jpg";
