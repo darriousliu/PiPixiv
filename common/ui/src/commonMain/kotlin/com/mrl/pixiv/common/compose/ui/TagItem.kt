@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,7 +59,8 @@ fun TagItem(
                 },
                 onClick = onClick
             )
-            .padding(horizontal = 10.dp, vertical = 2.5.dp),
+            .padding(horizontal = 10.dp, vertical = 2.5.dp)
+            .paddingFromBaseline(top = 17.sp, bottom = 4.sp),
         horizontalArrangement = 5f.spaceBy,
     ) {
         Text(
