@@ -5,8 +5,8 @@ const github = `https://github.com/${repo}`;
 
 export const siteConfig = {
   name: "PiPixiv",
-  /** 站点的公开地址。确定域名后设置 NEXT_PUBLIC_SITE_URL。 */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  /** 站点的正式地址，用于 canonical、hreflang、Open Graph 和 sitemap。可用 NEXT_PUBLIC_SITE_URL 覆盖。 */
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://pipixiv.com",
   repo,
   links: {
     github,

@@ -25,7 +25,7 @@ npm run typecheck
 
 | 变量 | 作用 |
 | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | 站点正式域名，用于 canonical、hreflang、Open Graph、sitemap。未设置时为 `http://localhost:3000` |
+| `NEXT_PUBLIC_SITE_URL` | 站点正式地址，用于 canonical、hreflang、Open Graph、sitemap。未设置时为 `https://pipixiv.com` |
 | `GITHUB_TOKEN` | 提高 GitHub API 的请求额度（未认证时每小时 60 次） |
 
 ## 目录
@@ -81,4 +81,27 @@ curl -s -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 
 ## 部署
 
-需要 Node.js 运行时（用到了 `proxy.ts` 和服务端缓存刷新），可以部署到 Vercel、Firebase App Hosting、Cloudflare（OpenNext）或任意能运行 `next start` 的服务器。
+站点部署在 Vercel，域名 `pipixiv.com` 在 Cloudflare 注册，DNS 也由 Cloudflare 托管。站点需要 Node.js 运行时（用到了 `proxy.ts`、`'use cache'` 和图片优化），不能导出为纯静态文件；除 Vercel 外，也可以部署到任意能运行 `next start` 的服务器。
+
+### Vercel 项目设置
+
+| 设置 | 值 |
+| --- | --- |
+| Root Directory | `web` |
+| Production Branch | `develop` |
+| Ignored Build Step | `git diff --quiet HEAD^ HEAD -- .`（只在 `web/` 有改动时重新构建） |
+| 环境变量 `NEXT_PUBLIC_SITE_URL` | `https://pipixiv.com` |
+| 环境变量 `GITHUB_TOKEN` | 只读公开仓库的 fine-grained token。Vercel 的出口 IP 由多个项目共用，不配置时容易触发 GitHub API 限额，版本号、下载链接和 Star 数会退回默认显示 |
+
+在 Settings → Domains 中添加 `pipixiv.com` 和 `www.pipixiv.com`，并将后者设为跳转到前者。
+
+### Cloudflare DNS
+
+| 类型 | 名称 | 内容 | 代理状态 |
+| --- | --- | --- | --- |
+| A | `@` | Vercel 域名页面显示的 IP | 仅 DNS |
+| CNAME | `www` | Vercel 域名页面显示的地址 | 仅 DNS |
+
+- 两条记录保持「仅 DNS」（灰色云朵），开启代理会导致 Vercel 无法验证域名或签发证书；
+- 添加前删除 `@` 已有的 A / AAAA 记录；
+- 如有 CAA 记录，需要允许 `letsencrypt.org`。
