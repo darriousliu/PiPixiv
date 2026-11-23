@@ -13,6 +13,8 @@
 一个完全由 [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) 编写的跨平台第三方
 Pixiv 应用
 
+**[访问 PiPixiv 官网](https://pipixiv.com/zh)**
+
 [![Kotlin 2.4.21](https://img.shields.io/badge/Kotlin-2.4.21-blue?logo=kotlin)](https://kotlinlang.org)
 [![Compose Multiplatform 1.12.2](https://img.shields.io/badge/Compose_Multiplatform-1.12.2-blue)](https://www.jetbrains.com/compose-multiplatform/)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/darriousliu/PiPixiv/release.yml)](https://github.com/darriousliu/PiPixiv/actions/workflows/release.yml)
