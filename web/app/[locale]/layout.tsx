@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import { fallbackLocale, localeMeta, locales } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/dictionaries";
 import { icons, sans } from "@/lib/fonts";
@@ -74,6 +75,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
           {bootScript}
         </Script>
         {children}
+        <Analytics />
       </body>
     </html>
   );
