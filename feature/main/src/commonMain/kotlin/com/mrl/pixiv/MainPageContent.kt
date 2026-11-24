@@ -1,31 +1,39 @@
 package com.mrl.pixiv
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.rememberLifecycleOwner
 import com.mrl.pixiv.common.compose.layout.LocalPaneKeyEventsEnabled
 import com.mrl.pixiv.common.router.MainPage
 
-/** Shares page state across the compact pager and the existing wide-screen navigation host. */
+/**
+ * 统一承载主页面内容，在紧凑横向滑页和大屏淡入淡出之间复用同一个组合宿主与保存状态。
+ *
+ * 这里不再使用 HorizontalPager + movableContentOf：HorizontalPager 底层通过 SubcomposeLayout
+ * 复用失活槽位，跨页切换时可能在同一测量阶段将已失活槽位中的 movableContent 重新挂载到新页，
+ * 触发 ApplyOnDeactivatedNodeAssertion 崩溃。
+ */
 @Composable
 internal fun MainPageContent(
     selectedPage: MainPage,
@@ -35,61 +43,55 @@ internal fun MainPageContent(
 ) {
     val pageStateHolder = rememberSaveableStateHolder()
     val currentContent by rememberUpdatedState(content)
-    // A page keeps the same composition identity when resizing between pager and rail hosts.
-    val pages = remember(pageStateHolder) {
-        mainNavigationItems.mapIndexed { index, (page, _) ->
-            movableContentOf {
-                pageStateHolder.SaveableStateProvider(index) { currentContent(page) }
-            }
+    var deferredPage by remember { mutableStateOf(selectedPage) }
+
+    LaunchedEffect(selectedPage, usePager) {
+        if (!usePager || deferredPage == selectedPage) {
+            deferredPage = selectedPage
+            return@LaunchedEffect
         }
+        // 让底部导航栏先呈现首帧过渡，再组合冷启动目标页。
+        withFrameNanos { }
+        deferredPage = selectedPage
     }
-    val pageContent: @Composable (MainPage) -> Unit = { page ->
-        pages[mainNavigationItems.indexOfFirst { it.first == page }]()
-    }
-    if (usePager) {
-        MainPagePager(selectedPage, modifier, pageContent)
-    } else {
-        AnimatedContent(
-            targetState = selectedPage,
-            modifier = modifier,
-            transitionSpec = {
+
+    val displayedPage = if (usePager) deferredPage else selectedPage
+
+    AnimatedContent(
+        targetState = displayedPage,
+        modifier = modifier.fillMaxSize().clipToBounds(),
+        transitionSpec = {
+            val transform = if (usePager) {
+                val initialIndex = mainNavigationItems.indexOfFirst { it.first == initialState }
+                val targetIndex = mainNavigationItems.indexOfFirst { it.first == targetState }
+                val direction = if (targetIndex >= initialIndex) {
+                    AnimatedContentTransitionScope.SlideDirection.Start
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.End
+                }
+                slideIntoContainer(
+                    towards = direction,
+                    animationSpec = tween(300),
+                ).togetherWith(
+                    slideOutOfContainer(
+                        towards = direction,
+                        animationSpec = tween(300),
+                    )
+                )
+            } else {
                 fadeIn(animationSpec = tween(220, delayMillis = 90))
                     .togetherWith(fadeOut(animationSpec = tween(90)))
-            },
-            content = { pageContent(it) },
-        )
-    }
-}
-
-@Composable
-private fun MainPagePager(
-    selectedPage: MainPage,
-    modifier: Modifier = Modifier,
-    content: @Composable (MainPage) -> Unit,
-) {
-    val selectedIndex = mainNavigationItems.indexOfFirst { it.first == selectedPage }
-    val pagerState = rememberPagerState(initialPage = selectedIndex) { mainNavigationItems.size }
-
-    LaunchedEffect(selectedIndex, pagerState) {
-        // Let the dock present its first animation frame before composing a cold destination.
-        withFrameNanos { }
-        pagerState.animateScrollToPage(selectedIndex, animationSpec = tween(300))
-    }
-
-    HorizontalPager(
-        state = pagerState,
-        modifier = modifier.fillMaxSize(),
-        key = { it },
-        // A long tab jump pre-jumps near its destination. Measuring an offscreen neighbour there
-        // can apply its Scaffold subcomposition to a deactivated node under shared lookahead.
-        beyondViewportPageCount = 0,
-        // Home, Ranking and Latest already own horizontal gestures for their child tabs.
-        userScrollEnabled = false,
-    ) { index ->
-        val active by remember(pagerState, selectedIndex, index) {
+            }
+            transform.using(null)
+        },
+        label = "main_page_content",
+    ) { page ->
+        val index = mainNavigationItems.indexOfFirst { it.first == page }
+        val active by remember(transition, selectedPage, page) {
             derivedStateOf {
-                index == selectedIndex && index == pagerState.settledPage &&
-                        !pagerState.isScrollInProgress
+                page == selectedPage &&
+                    transition.currentState == EnterExitState.Visible &&
+                    transition.targetState == EnterExitState.Visible
             }
         }
         val lifecycleOwner = rememberLifecycleOwner(
@@ -99,7 +101,9 @@ private fun MainPagePager(
             LocalLifecycleOwner provides lifecycleOwner,
             LocalPaneKeyEventsEnabled provides (LocalPaneKeyEventsEnabled.current && active),
         ) {
-            content(mainNavigationItems[index].first)
+            pageStateHolder.SaveableStateProvider(index) {
+                currentContent(page)
+            }
         }
     }
 }
