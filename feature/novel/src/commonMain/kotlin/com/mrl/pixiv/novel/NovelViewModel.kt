@@ -1,7 +1,6 @@
 package com.mrl.pixiv.novel
 
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import com.mrl.pixiv.common.ai.isReadyForAiRequest
@@ -133,9 +132,14 @@ sealed class NovelIntent : ViewIntent {
     data object ShareNovel : NovelIntent()
     data object ExportToTxt : NovelIntent()
     data class NavigateToChapter(val novelId: Long) : NovelIntent()
-    data class TranslateNovel(val forceRefresh: Boolean = false) : NovelIntent()
+    /** @param fallbackLanguageTag 未设置应用语言时使用的界面语言标签，由 UI 从 LocalLocale 读取 */
+    data class TranslateNovel(
+        val fallbackLanguageTag: String,
+        val forceRefresh: Boolean = false,
+    ) : NovelIntent()
     data object CancelTranslation : NovelIntent()
-    data object DeleteNovelTranslation : NovelIntent()
+    /** @param fallbackLanguageTag 未设置应用语言时使用的界面语言标签，由 UI 从 LocalLocale 读取 */
+    data class DeleteNovelTranslation(val fallbackLanguageTag: String) : NovelIntent()
     data object ToggleDisplayOriginalText : NovelIntent()
     data class ApplyReadLaterTranslation(val targetLanguage: String) : NovelIntent()
 }
@@ -193,9 +197,12 @@ class NovelViewModel(
                 loadNovelDetail(intent.novelId)
             }
 
-            is NovelIntent.TranslateNovel -> translateNovel(intent.forceRefresh)
+            is NovelIntent.TranslateNovel -> translateNovel(
+                fallbackLanguageTag = intent.fallbackLanguageTag,
+                forceRefresh = intent.forceRefresh,
+            )
             is NovelIntent.CancelTranslation -> cancelTranslation()
-            is NovelIntent.DeleteNovelTranslation -> deleteNovelTranslation()
+            is NovelIntent.DeleteNovelTranslation -> deleteNovelTranslation(intent.fallbackLanguageTag)
             is NovelIntent.ToggleDisplayOriginalText -> toggleDisplayOriginalText()
             is NovelIntent.ApplyReadLaterTranslation ->
                 applyReadLaterTranslation(intent.targetLanguage)
@@ -444,7 +451,7 @@ class NovelViewModel(
         }
     }
 
-    private fun translateNovel(forceRefresh: Boolean = false) {
+    private fun translateNovel(fallbackLanguageTag: String, forceRefresh: Boolean = false) {
         if (translationJob != null || uiState.value.isTranslating) return
 
         val novel = uiState.value.novel ?: return
@@ -467,7 +474,7 @@ class NovelViewModel(
             extraBody = config.extraBody,
         )
         val configFingerprint = buildNovelAiConfigFingerprint(config)
-        val targetLanguageTag = resolveTargetLanguageTag()
+        val targetLanguageTag = resolveTargetLanguageTag(fallbackLanguageTag)
         val runToken = Any()
         val progressBeforeTranslation =
             progressSession.get(novel.id) ?: uiState.value.restoreProgress
@@ -728,14 +735,14 @@ class NovelViewModel(
         }
     }
 
-    private fun deleteNovelTranslation() {
+    private fun deleteNovelTranslation(fallbackLanguageTag: String) {
         if (uiState.value.isTranslating) return
 
         val novel = uiState.value.novel ?: return
         val sourceText = sourceNovelText.trim().ifBlank { uiState.value.novelText.trim() }
         if (sourceText.isBlank()) return
 
-        val targetLanguageTag = resolveTargetLanguageTag()
+        val targetLanguageTag = resolveTargetLanguageTag(fallbackLanguageTag)
 
         launchIO(
             onError = { throwable ->
@@ -957,10 +964,10 @@ class NovelViewModel(
         )
     }
 
-    private fun resolveTargetLanguageTag(): String {
+    private fun resolveTargetLanguageTag(fallbackLanguageTag: String): String {
         return requireUserPreferenceValue.appLanguage
             ?.takeIf { it.isNotBlank() }
-            ?: Locale.current.toLanguageTag().ifBlank { "en" }
+            ?: fallbackLanguageTag.ifBlank { "en" }
     }
 }
 

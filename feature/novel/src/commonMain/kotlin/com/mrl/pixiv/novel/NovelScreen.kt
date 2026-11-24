@@ -52,6 +52,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -77,6 +78,7 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
@@ -481,6 +483,7 @@ fun NovelScreen(
         }
     }
 
+    val fallbackLanguageTag = LocalLocale.current.toLanguageTag()
     val requestTranslation: () -> Unit = request@{
         val novel = state.novel ?: return@request
         viewModel.translationListAnchor = NovelTranslationListAnchor(
@@ -490,7 +493,10 @@ fun NovelScreen(
         )
         saveReadingProgress()
         viewModel.dispatch(
-            NovelIntent.TranslateNovel(forceRefresh = state.isTranslated)
+            NovelIntent.TranslateNovel(
+                fallbackLanguageTag = fallbackLanguageTag,
+                forceRefresh = state.isTranslated,
+            )
         )
     }
 
@@ -855,7 +861,7 @@ fun NovelScreen(
                     viewModel.dispatch(NovelIntent.ToggleDisplayOriginalText)
                 },
                 onDeleteTranslation = {
-                    viewModel.dispatch(NovelIntent.DeleteNovelTranslation)
+                    viewModel.dispatch(NovelIntent.DeleteNovelTranslation(fallbackLanguageTag))
                 },
                 onRegenerateTranslation = {
                     viewModel.dispatch(NovelIntent.ToggleBottomSheet)
@@ -877,6 +883,24 @@ fun NovelScreen(
             )
         }
     }
+}
+
+/**
+ * 以外部状态为唯一数据源的分档滑块：每次重组将 [value] 同步到 [SliderState]，
+ * 拖动时仅通过 [onValueChange] 上报，由调用方更新状态后再回写。
+ */
+@Composable
+private fun SteppedSlider(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int,
+) {
+    val sliderState = remember(steps, valueRange) {
+        SliderState(value = value, steps = steps, trackRange = valueRange)
+    }
+    sliderState.value = value
+    Slider(state = sliderState, onValueChange = onValueChange)
 }
 
 @Composable
@@ -906,44 +930,44 @@ private fun NovelBottomSheetContent(
 
         // 字号调整
         ListItem(
-            headlineContent = {
-                Text(
-                    text = stringResource(RStrings.font_size_value, state.fontSize),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            },
             supportingContent = {
-                Slider(
+                SteppedSlider(
                     value = state.fontSize.toFloat(),
                     onValueChange = { onFontSizeChange(it.roundToInt()) },
                     valueRange = 10f..32f,
                     steps = 21
                 )
             },
+            shapes = ListItemDefaults.shapes(shape = RectangleShape),
             colors = colors
-        )
+        ) {
+            Text(
+                text = stringResource(RStrings.font_size_value, state.fontSize),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
 
         // 行间距调整
         ListItem(
-            headlineContent = {
-                Text(
-                    text = stringResource(
-                        RStrings.line_spacing_value,
-                        (if (state.lineSpacingSp >= 0) "+" else "") + state.lineSpacingSp.toString()
-                    ),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            },
             supportingContent = {
-                Slider(
+                SteppedSlider(
                     value = state.lineSpacingSp.toFloat(),
                     onValueChange = { onLineSpacingChange(it.roundToInt()) },
                     valueRange = -10f..10f,
                     steps = 19
                 )
             },
+            shapes = ListItemDefaults.shapes(shape = RectangleShape),
             colors = colors
-        )
+        ) {
+            Text(
+                text = stringResource(
+                    RStrings.line_spacing_value,
+                    (if (state.lineSpacingSp >= 0) "+" else "") + state.lineSpacingSp.toString()
+                ),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
 
         ListItem(
             onClick = rememberThrottleClick(onClick = onToggleMarker),

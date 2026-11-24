@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.InputTransformation
-import androidx.compose.foundation.text.input.maxLength
+import androidx.compose.foundation.text.input.maxLengthReject
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
@@ -145,7 +145,7 @@ fun ReportScreen(
                             textAlign = TextAlign.End
                         )
                     },
-                    inputTransformation = InputTransformation.maxLength(MAX_REPORT_CONTENT_LENGTH),
+                    inputTransformation = InputTransformation.maxLengthReject(MAX_REPORT_CONTENT_LENGTH),
                 )
 
                 Button(

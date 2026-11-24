@@ -27,7 +27,7 @@ import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
-import androidx.compose.foundation.text.input.maxLength
+import androidx.compose.foundation.text.input.maxLengthReject
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Send
@@ -172,7 +172,7 @@ fun CommentInput(
             }
         }
     }
-    val maxLengthTransformation = InputTransformation.maxLength(MAX_COMMENT_LENGTH)
+    val maxLengthTransformation = InputTransformation.maxLengthReject(MAX_COMMENT_LENGTH)
 
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     val scrollState = rememberScrollState()

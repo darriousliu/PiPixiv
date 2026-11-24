@@ -13,8 +13,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.delete
+import androidx.compose.foundation.text.input.maxLengthTrim
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
@@ -26,10 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -55,11 +56,11 @@ fun PageControls(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var pageText by remember(state.currentPage) {
-        mutableStateOf(state.currentPage.toString())
+    val pageTextState = remember(state.currentPage) {
+        TextFieldState(state.currentPage.toString())
     }
     val submitPage = {
-        pageText.toIntOrNull()?.takeIf { it > 0 }?.let(onLoadPage)
+        pageTextState.text.toString().toIntOrNull()?.takeIf { it > 0 }?.let(onLoadPage)
         Unit
     }
 
@@ -92,10 +93,7 @@ fun PageControls(
             }
             if (state.canJumpToPage) {
                 PageNumberField(
-                    value = pageText,
-                    onValueChange = { value ->
-                        pageText = value.filter { it.isDigit() }.take(5)
-                    },
+                    state = pageTextState,
                     enabled = !state.isLoading,
                     onSubmit = submitPage,
                 )
@@ -146,8 +144,7 @@ fun PageControls(
 
 @Composable
 private fun PageNumberField(
-    value: String,
-    onValueChange: (String) -> Unit,
+    state: TextFieldState,
     enabled: Boolean,
     onSubmit: () -> Unit,
 ) {
@@ -166,17 +163,15 @@ private fun PageNumberField(
             contentAlignment = Alignment.Center,
         ) {
             BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
+                state = state,
                 enabled = enabled,
-                singleLine = true,
+                inputTransformation = PageNumberInputTransformation,
+                lineLimits = TextFieldLineLimits.SingleLine,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Go,
                 ),
-                keyboardActions = KeyboardActions(
-                    onGo = { onSubmit() },
-                ),
+                onKeyboardAction = { onSubmit() },
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     color = if (enabled) {
                         MaterialTheme.colorScheme.onSurface
@@ -191,3 +186,13 @@ private fun PageNumberField(
         }
     }
 }
+
+/** 页码最多允许输入的位数。 */
+private const val MAX_PAGE_NUMBER_DIGITS = 5
+
+/** 页码输入只保留数字，并将超出长度的部分截断。 */
+private val PageNumberInputTransformation = InputTransformation {
+    for (index in length - 1 downTo 0) {
+        if (!charAt(index).isDigit()) delete(index, index + 1)
+    }
+}.maxLengthTrim(MAX_PAGE_NUMBER_DIGITS)

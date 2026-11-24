@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Code
@@ -21,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,11 +39,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
@@ -96,6 +101,7 @@ import com.mrl.pixiv.strings.load_failed
 import com.mrl.pixiv.strings.save
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -135,7 +141,7 @@ internal fun AiTranslationSettingContent(
 ) {
     var providerName by rememberSaveable { mutableStateOf(currentConfig.provider.name) }
     var endpoint by rememberSaveable { mutableStateOf(currentConfig.endpoint) }
-    var apiKey by rememberSaveable { mutableStateOf(currentConfig.apiKey) }
+    val apiKeyState = rememberTextFieldState(currentConfig.apiKey)
     var model by rememberSaveable { mutableStateOf(currentConfig.model) }
     var generationTimeoutInput by rememberSaveable {
         mutableStateOf(currentConfig.generationTimeoutSeconds.toString())
@@ -163,11 +169,18 @@ internal fun AiTranslationSettingContent(
         isRefreshingModels = false
     }
 
+    LaunchedEffect(apiKeyState) {
+        // API Key 变化后已拉取的模型列表不再可信，与其他字段编辑时的行为保持一致
+        snapshotFlow { apiKeyState.text.toString() }
+            .drop(1)
+            .collect { resetModelCatalog() }
+    }
+
     LaunchedEffect(currentConfig) {
         resetModelCatalog()
         providerName = currentConfig.provider.name
         endpoint = currentConfig.endpoint
-        apiKey = currentConfig.apiKey
+        apiKeyState.setTextAndPlaceCursorAtEnd(currentConfig.apiKey)
         model = currentConfig.model
         generationTimeoutInput = currentConfig.generationTimeoutSeconds.toString()
         maxConcurrentRequestsInput = currentConfig.maxConcurrentRequests.toString()
@@ -241,7 +254,7 @@ internal fun AiTranslationSettingContent(
                                     endpoint = requireNotNull(
                                         endpointValidation.normalizedEndpoint
                                     ),
-                                    apiKey = apiKey.trim(),
+                                    apiKey = apiKeyState.text.toString().trim(),
                                     model = model.trim().ifEmpty {
                                         AiTranslationConfig.defaultModel(selectedProvider).modelId
                                     },
@@ -273,7 +286,7 @@ internal fun AiTranslationSettingContent(
                     providerName = nextProvider.name
                     endpoint = AiTranslationConfig.defaultEndpoint(nextProvider)
                     model = AiTranslationConfig.defaultModel(nextProvider).modelId
-                    apiKey = ""
+                    apiKeyState.clearText()
                     extraBody = ""
                     extraBodyError = false
                 },
@@ -303,17 +316,12 @@ internal fun AiTranslationSettingContent(
                     singleLine = true,
                 )
 
-                OutlinedTextField(
+                OutlinedSecureTextField(
+                    state = apiKeyState,
                     modifier = Modifier.fillMaxWidth(),
                     shape = fieldShape,
-                    value = apiKey,
-                    onValueChange = {
-                        resetModelCatalog()
-                        apiKey = it
-                    },
                     label = { Text(text = stringResource(RStrings.ai_api_key)) },
-                    visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true,
+                    textObfuscationMode = TextObfuscationMode.Hidden,
                 )
 
                 OutlinedTextField(
@@ -469,7 +477,7 @@ internal fun AiTranslationSettingContent(
                         val refreshConfig = AiTranslationConfig(
                             provider = selectedProvider,
                             endpoint = requireNotNull(endpointValidation.normalizedEndpoint),
-                            apiKey = apiKey.trim(),
+                            apiKey = apiKeyState.text.toString().trim(),
                         )
                         modelRefreshJob?.cancel()
                         modelRefreshJob = coroutineScope.launch {

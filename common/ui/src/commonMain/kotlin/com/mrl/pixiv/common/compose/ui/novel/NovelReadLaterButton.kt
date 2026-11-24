@@ -16,7 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.platform.LocalLocale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.rememberThrottleClick
 import com.mrl.pixiv.common.data.Novel
@@ -105,7 +105,7 @@ private fun NovelReadLaterAction(
     val preference by requireUserPreferenceFlow.collectAsStateWithLifecycle()
     val targetLanguage = preference.appLanguage
         ?.takeIf { it.isNotBlank() }
-        ?: Locale.current.toLanguageTag().ifBlank { "en" }
+        ?: LocalLocale.current.toLanguageTag().ifBlank { "en" }
     val itemFlow = remember(novel.id, targetLanguage) {
         repository.observeItem(
             novelId = novel.id,

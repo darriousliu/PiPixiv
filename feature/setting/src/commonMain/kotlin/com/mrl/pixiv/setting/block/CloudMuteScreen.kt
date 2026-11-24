@@ -365,13 +365,6 @@ internal fun CloudMuteContent(
                                     }
                                 }
                             },
-                            headlineContent = {
-                                Text(
-                                    muted.user.name.ifBlank { muted.user.id.toString() },
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
                             supportingContent = {
                                 Text(
                                     "ID: ${muted.user.id}",
@@ -389,7 +382,13 @@ internal fun CloudMuteContent(
                                     )
                                 }
                             },
-                        )
+                        ) {
+                            Text(
+                                muted.user.name.ifBlank { muted.user.id.toString() },
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
                 if (data.mutedUsers.isEmpty()) item(key = "users-empty") { CloudMuteEmptySection() }
@@ -410,13 +409,6 @@ internal fun CloudMuteContent(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             },
-                            headlineContent = {
-                                Text(
-                                    muted.tag.name,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
                             trailingContent = {
                                 IconButton(
                                     onClick = { onRemoveTag(muted.tag.name) },
@@ -428,7 +420,13 @@ internal fun CloudMuteContent(
                                     )
                                 }
                             },
-                        )
+                        ) {
+                            Text(
+                                muted.tag.name,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
                 if (data.mutedTags.isEmpty()) item(key = "tags-empty") { CloudMuteEmptySection() }
