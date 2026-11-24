@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlexAlignItems
+import androidx.compose.foundation.layout.FlexBox
+import androidx.compose.foundation.layout.FlexWrap
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -136,10 +138,14 @@ internal fun AppearanceOptions(
     val baseline = remember(darkTheme) { if (darkTheme) darkColorScheme() else expressiveLightColorScheme() }
     val resolved = appearance.resolve(wallpaper != null)
     SettingSectionTitle(stringResource(RStrings.appearance_section_theme_color))
-    FlowRow(
-        Modifier.fillMaxWidth().selectableGroup(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    val swatchBasis = 64.dp + 44.dp * (LocalDensity.current.fontScale - 1f).coerceAtLeast(0f)
+    FlexBox(
+        modifier = Modifier.fillMaxWidth().selectableGroup(),
+        config = {
+            wrap(FlexWrap.Wrap)
+            gap(8.dp)
+            alignItems(FlexAlignItems.Stretch)
+        },
     ) {
         for (color in ThemeColor.entries) {
             if (color == ThemeColor.DYNAMIC && wallpaper == null) continue
@@ -160,6 +166,7 @@ internal fun AppearanceOptions(
                     if (color == ThemeColor.CUSTOM) onCustomColor()
                     else onAppearanceChange(appearance.copy(themeColor = color.name))
                 },
+                modifier = Modifier.flex { grow(1f) }.width(swatchBasis),
             )
         }
     }
@@ -217,12 +224,11 @@ private fun ThemeSwatch(
     scheme: ColorScheme,
     unusedCustom: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val fontScale = LocalDensity.current.fontScale
-    val labelWidth = 64.dp + 44.dp * (fontScale - 1f).coerceAtLeast(0f)
     val labelStyle = if (selected) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge
     Column(
-        Modifier.width(labelWidth).clip(MaterialTheme.shapes.medium)
+        modifier.clip(MaterialTheme.shapes.medium)
             .selectable(selected, role = Role.RadioButton, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
