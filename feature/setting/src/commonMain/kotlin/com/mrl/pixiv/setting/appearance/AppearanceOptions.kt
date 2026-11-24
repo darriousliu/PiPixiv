@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
@@ -38,6 +37,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +52,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mrl.pixiv.common.compose.theme.platformDynamicColorScheme
 import com.mrl.pixiv.common.compose.theme.previewColorScheme
@@ -98,6 +101,30 @@ import com.mrl.pixiv.strings.theme_system
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
+private val SwatchGap = 8.dp
+
+/** 在不增加行数的前提下取最少列数，让各行色板数量尽量相同。 */
+internal fun balancedColumns(count: Int, maxColumns: Int): Int {
+    if (count <= 0) return 1
+    val limit = maxColumns.coerceIn(1, count)
+    val rows = (count + limit - 1) / limit
+    return (count + rows - 1) / rows
+}
+
+/** 按容器宽度能放下的列数计算色板列数，容器与各色板共用同一结果。 */
+private fun Density.swatchColumns(maxWidthPx: Int, count: Int, basis: Dp): Int {
+    if (maxWidthPx == Constraints.Infinity) return count.coerceAtLeast(1)
+    val gap = SwatchGap.roundToPx()
+    return balancedColumns(count, (maxWidthPx + gap) / (basis.roundToPx() + gap))
+}
+
+/** 按像素向下取整，保证一行的列宽与间距之和不超过容器，避免提前换行。 */
+private fun Density.swatchWidth(maxWidthPx: Int, columns: Int, basis: Dp): Dp {
+    if (maxWidthPx == Constraints.Infinity) return basis
+    val gap = SwatchGap.roundToPx()
+    return ((maxWidthPx - gap * (columns - 1)) / columns).toDp()
+}
+
 internal val ThemeColor.labelResource: StringResource
     get() = when (this) {
         ThemeColor.DYNAMIC -> RStrings.theme_color_dynamic
@@ -138,36 +165,44 @@ internal fun AppearanceOptions(
     val baseline = remember(darkTheme) { if (darkTheme) darkColorScheme() else expressiveLightColorScheme() }
     val resolved = appearance.resolve(wallpaper != null)
     SettingSectionTitle(stringResource(RStrings.appearance_section_theme_color))
+    val colors = ThemeColor.entries.filter { it != ThemeColor.DYNAMIC || wallpaper != null }
     val swatchBasis = 64.dp + 44.dp * (LocalDensity.current.fontScale - 1f).coerceAtLeast(0f)
     FlexBox(
         modifier = Modifier.fillMaxWidth().selectableGroup(),
         config = {
             wrap(FlexWrap.Wrap)
-            gap(8.dp)
+            gap(SwatchGap)
             alignItems(FlexAlignItems.Stretch)
+            maxItemsInEachLine(swatchColumns(constraints.maxWidth, colors.size, swatchBasis))
         },
     ) {
-        for (color in ThemeColor.entries) {
-            if (color == ThemeColor.DYNAMIC && wallpaper == null) continue
-            val source = appearance.copy(themeColor = color.name).resolve(wallpaper != null)
-            val scheme = when (source) {
-                ResolvedThemeColor.Baseline -> baseline
-                ResolvedThemeColor.Dynamic -> requireNotNull(wallpaper)
-                is ResolvedThemeColor.Seeded -> remember(source, darkTheme) {
-                    previewColorScheme(source.seed, source.style, darkTheme)
+        for (color in colors) {
+            key(color) {
+                val source = appearance.copy(themeColor = color.name).resolve(wallpaper != null)
+                val scheme = when (source) {
+                    ResolvedThemeColor.Baseline -> baseline
+                    ResolvedThemeColor.Dynamic -> requireNotNull(wallpaper)
+                    is ResolvedThemeColor.Seeded -> remember(source, darkTheme) {
+                        previewColorScheme(source.seed, source.style, darkTheme)
+                    }
                 }
+                ThemeSwatch(
+                    color = color,
+                    selected = resolved.color == color,
+                    scheme = scheme,
+                    unusedCustom = color == ThemeColor.CUSTOM && appearance.customColor == null,
+                    onClick = {
+                        if (color == ThemeColor.CUSTOM) onCustomColor()
+                        else onAppearanceChange(appearance.copy(themeColor = color.name))
+                    },
+                    // 所有色板固定为同一列宽且不拉伸，最后一行不满时仍与上方各列对齐。
+                    modifier = Modifier.flex {
+                        val columns = swatchColumns(flexBoxMainAxisMaxPx, colors.size, swatchBasis)
+                        basis(swatchWidth(flexBoxMainAxisMaxPx, columns, swatchBasis))
+                        grow(0f)
+                    },
+                )
             }
-            ThemeSwatch(
-                color = color,
-                selected = resolved.color == color,
-                scheme = scheme,
-                unusedCustom = color == ThemeColor.CUSTOM && appearance.customColor == null,
-                onClick = {
-                    if (color == ThemeColor.CUSTOM) onCustomColor()
-                    else onAppearanceChange(appearance.copy(themeColor = color.name))
-                },
-                modifier = Modifier.flex { grow(1f) }.width(swatchBasis),
-            )
         }
     }
     val android = platform as? Platform.Android

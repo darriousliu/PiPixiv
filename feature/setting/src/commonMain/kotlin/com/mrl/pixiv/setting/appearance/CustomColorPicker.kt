@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -46,6 +47,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
@@ -222,10 +224,12 @@ private fun ColorInputs(
                     PaletteDisc(MaterialTheme.colorScheme, circle)
                 }
             }
+            var hexFocused by remember { mutableStateOf(false) }
             OutlinedTextField(
                 state = hexField,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().onFocusChanged { hexFocused = it.isFocused },
                 label = { Text(stringResource(RStrings.custom_color_hex)) },
+                isError = hexField.text.toString().showsColorHexError(hexFocused),
                 lineLimits = TextFieldLineLimits.SingleLine,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Ascii,
@@ -288,7 +292,17 @@ private fun ColorSample(label: String, modifier: Modifier = Modifier, sample: @C
 
 private fun Long.toColorHex(): String = "#" + (this and 0xFFFFFF).toString(16).uppercase().padStart(6, '0')
 
-private val ColorHexPattern = Regex("#[0-9a-fA-F]{6}")
+private val ColorHexPattern = Regex("#?[0-9a-fA-F]{6}")
 
-private fun String.parseColorHex(): Long? =
-    if (matches(ColorHexPattern)) 0xFF000000 or substring(1).toLong(16) else null
+/** 接受带或不带 # 的六位色值，忽略首尾空白，便于直接粘贴。 */
+internal fun String.parseColorHex(): Long? {
+    val text = trim()
+    return if (text.matches(ColorHexPattern)) 0xFF000000 or text.removePrefix("#").toLong(16) else null
+}
+
+/** 输入中途的短色值不算错误；含非法字符、位数超出或失去焦点时仍无效才提示。 */
+internal fun String.showsColorHexError(focused: Boolean): Boolean {
+    if (parseColorHex() != null) return false
+    val digits = trim().removePrefix("#")
+    return !focused || digits.length > 6 || digits.any { it.digitToIntOrNull(16) == null }
+}
