@@ -2,6 +2,10 @@ package com.mrl.pixiv.setting.network.components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.CapturedAnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -363,7 +367,12 @@ private fun EchEditor(
                 )
             },
         )
-        CapturedAnimatedVisibility(visible = advancedExpanded) {
+        // 沿用 Column 中 AnimatedVisibility 的默认纵向展开/收起效果
+        CapturedAnimatedVisibility(
+            visible = advancedExpanded,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically(),
+        ) {
             SettingRow(
                 title = stringResource(RStrings.ech_doh_url),
                 icon = Icons.Rounded.Dns,
