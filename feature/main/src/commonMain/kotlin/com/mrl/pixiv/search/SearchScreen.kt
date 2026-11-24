@@ -17,8 +17,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.placeCursorAtEnd
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -40,11 +44,13 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -53,9 +59,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -86,6 +90,7 @@ import com.mrl.pixiv.strings.novel
 import com.mrl.pixiv.strings.search_history
 import com.mrl.pixiv.strings.select_pixiv_link
 import com.mrl.pixiv.strings.users
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -119,7 +124,7 @@ fun SearchScreen(
             }
         }
     }.collectAsStateWithLifecycle(emptyList())
-    var textState by remember { mutableStateOf(TextFieldValue(viewModel.searchWords)) }
+    val searchTextState = rememberTextFieldState(viewModel.searchWords)
     var pendingLinks by remember { mutableStateOf<List<PixivLinkTarget>>(emptyList()) }
     fun handlePixivLinks(
         text: String,
@@ -157,10 +162,24 @@ fun SearchScreen(
                     focusRequester.requestFocus()
                 } catch (_: Exception) {
                 }
-                textState = textState.copy(selection = TextRange(textState.text.length))
+                searchTextState.edit { placeCursorAtEnd() }
             }
         }
         onPauseOrDispose { clipboardJob.cancel() }
+    }
+    LaunchedEffect(searchTextState) {
+        // 文本或光标变化时同步搜索词，并按光标所在关键词刷新补全
+        snapshotFlow { searchTextState.text.toString() to searchTextState.selection }
+            .drop(1)
+            .collect { (text, selection) ->
+                dispatch(SearchAction.UpdateSearchWords(text))
+                val token = completionToken(text, selection)
+                if (token.text.isNotBlank()) {
+                    dispatch(SearchAction.SearchAutoComplete(token.text))
+                } else {
+                    dispatch(SearchAction.ClearAutoCompleteSearchWords)
+                }
+            }
     }
     val softwareKeyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -186,32 +205,23 @@ fun SearchScreen(
         },
         topBar = {
             SearchScreenAppBar(
-                textState = textState,
+                state = searchTextState,
                 focusRequester = focusRequester,
-                onValueChange = {
-                    textState = it
-                    dispatch(SearchAction.UpdateSearchWords(it.text))
-                    val token = it.completionToken()
-                    if (token.text.isNotBlank()) {
-                        dispatch(SearchAction.SearchAutoComplete(token.text))
-                    } else {
-                        dispatch(SearchAction.ClearAutoCompleteSearchWords)
-                    }
-                },
                 onBack = { navigationManager.popBackStack() },
                 onSearch = search@{
-                    if (handlePixivLinks(textState.text)) {
+                    val searchWord = searchTextState.text.toString()
+                    if (handlePixivLinks(searchWord)) {
                         focusRequester.freeFocus()
                         return@search
                     }
                     if (state.isIdSearch) {
-                        viewModel.addSearchIdHistory(textState.text)
+                        viewModel.addSearchIdHistory(searchWord)
                     } else {
-                        dispatch(SearchAction.AddSearchHistory(textState.text))
+                        dispatch(SearchAction.AddSearchHistory(searchWord))
                     }
                     focusRequester.freeFocus()
                     navigationManager.navigateToSearchResultScreen(
-                        searchWord = textState.text,
+                        searchWord = searchWord,
                         isIdSearch = state.isIdSearch,
                         searchMode = appViewMode
                     )
@@ -259,7 +269,7 @@ fun SearchScreen(
                         .background(MaterialTheme.colorScheme.background),
                 ) {
                     Text(
-                        text = if (textState.text.isEmpty())
+                        text = if (searchTextState.text.isEmpty())
                             stringResource(RStrings.search_history)
                         else
                             stringResource(RStrings.find_for),
@@ -268,7 +278,7 @@ fun SearchScreen(
                     )
                 }
             }
-            if (textState.text.isEmpty()) {
+            if (searchTextState.text.isEmpty()) {
                 if (state.isIdSearch) {
                     items(
                         items = searchIdHistory,
@@ -346,7 +356,8 @@ fun SearchScreen(
                 ) { word ->
                     ListItem(
                         onClick = rememberThrottleClick {
-                            val query = textState.completionToken().replaceIn(textState.text, word.name)
+                            val query = searchTextState.completionToken()
+                                .replaceIn(searchTextState.text.toString(), word.name)
                             dispatch(SearchAction.AddSearchHistory(query))
                             focusRequester.freeFocus()
                             navigationManager.navigateToSearchResultScreen(
@@ -424,8 +435,7 @@ private fun PixivLinkSelectionDialog(
 
 @Composable
 private fun SearchScreenAppBar(
-    textState: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
+    state: TextFieldState,
     focusRequester: FocusRequester,
     onBack: () -> Unit,
     onSearch: () -> Unit,
@@ -459,29 +469,26 @@ private fun SearchScreenAppBar(
                     shape = MaterialTheme.shapes.extraLarge
                 ) {
                     TextField(
-                        value = textState,
+                        state = state,
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(focusRequester)
                             .throttleClick {
                                 focusRequester.requestFocus()
                             },
-                        onValueChange = onValueChange,
                         placeholder = { Text(stringResource(RStrings.enter_keywords)) },
                         colors = TextFieldDefaults.colors(
                             unfocusedIndicatorColor = Color.Transparent,
                             focusedIndicatorColor = Color.Transparent,
                         ),
-                        singleLine = true,
+                        lineLimits = TextFieldLineLimits.SingleLine,
                         shape = MaterialTheme.shapes.extraLarge,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(
-                            onSearch = { onSearch() }
-                        ),
-                        trailingIcon = if (shouldShowSearchInputClearIcon(textState.text)) {
+                        onKeyboardAction = { onSearch() },
+                        trailingIcon = if (shouldShowSearchInputClearIcon(state.text.toString())) {
                             {
                                 IconButton(
-                                    onClick = { onValueChange(TextFieldValue()) },
+                                    onClick = { state.clearText() },
                                     shapes = IconButtonDefaults.shapes(),
                                 ) {
                                     Icon(

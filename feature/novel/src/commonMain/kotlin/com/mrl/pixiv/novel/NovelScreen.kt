@@ -1,12 +1,12 @@
 package com.mrl.pixiv.novel
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -186,8 +186,7 @@ fun NovelScreen(
         entryNovelId = novelId,
         loadedNovelId = state.novel?.id,
     )
-    val currentNovelId = chapterStateKey
-    val isNovelBlocked = BlockingRepositoryV2.collectNovelBlockAsState(currentNovelId)
+    val isNovelBlocked = BlockingRepositoryV2.collectNovelBlockAsState(chapterStateKey)
     val listState = key(chapterStateKey) {
         rememberLazyListState()
     }
@@ -516,7 +515,7 @@ fun NovelScreen(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = 12.spaceBy,
                 ) {
-                    AnimatedVisibility(
+                    CapturedAnimatedVisibility(
                         visible = showBar && canScrollBack && !state.isTranslating,
                         enter = slideInVertically(initialOffsetY = { it }),
                         exit = slideOutVertically(targetOffsetY = { it }),
@@ -530,7 +529,7 @@ fun NovelScreen(
                             )
                         }
                     }
-                    AnimatedVisibility(
+                    CapturedAnimatedVisibility(
                         visible = showBar && (state.prevNovelId != null || state.nextNovelId != null),
                         enter = slideInVertically(initialOffsetY = { it }),
                         exit = slideOutVertically(targetOffsetY = { it }),

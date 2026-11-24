@@ -6,7 +6,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
@@ -87,7 +87,7 @@ actual fun MigrationCard(
         }
     }
 
-    AnimatedVisibility(
+    CapturedAnimatedVisibility(
         visible = state.oldImageCount > 0,
         enter = expandVertically(),
         exit = shrinkVertically()

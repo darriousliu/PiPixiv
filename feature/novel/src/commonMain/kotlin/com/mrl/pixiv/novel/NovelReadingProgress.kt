@@ -1,6 +1,6 @@
 package com.mrl.pixiv.novel
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -38,7 +38,7 @@ internal fun ReadingProgressIndicator(
         novelReaderContentInsets().getBottom(this).toDp()
     }
 
-    AnimatedVisibility(
+    CapturedAnimatedVisibility(
         visible = percent > 0,
         enter = slideInVertically(initialOffsetY = { it }),
         exit = slideOutVertically(targetOffsetY = { it }),

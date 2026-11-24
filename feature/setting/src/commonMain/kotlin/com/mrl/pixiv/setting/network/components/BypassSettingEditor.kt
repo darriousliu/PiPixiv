@@ -1,7 +1,7 @@
 package com.mrl.pixiv.setting.network.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -363,7 +363,7 @@ private fun EchEditor(
                 )
             },
         )
-        AnimatedVisibility(visible = advancedExpanded) {
+        CapturedAnimatedVisibility(visible = advancedExpanded) {
             SettingRow(
                 title = stringResource(RStrings.ech_doh_url),
                 icon = Icons.Rounded.Dns,

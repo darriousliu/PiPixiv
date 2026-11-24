@@ -1,6 +1,6 @@
 package com.mrl.pixiv.setting
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -156,7 +156,7 @@ internal fun HistorySettingContent(
                     },
                     supportingText = stringResource(RStrings.enable_history_desc),
                 )
-                AnimatedVisibility(
+                CapturedAnimatedVisibility(
                     visible = historySettings.enabled,
                     enter = slideInVertically { -it / 3 } + expandVertically(expandFrom = Alignment.Top) + fadeIn(),
                     exit = slideOutVertically { -it / 3 } + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
@@ -189,7 +189,7 @@ internal fun HistorySettingContent(
                             },
                             supportingText = stringResource(RStrings.history_unlimited_desc),
                         )
-                        AnimatedVisibility(
+                        CapturedAnimatedVisibility(
                             visible = !historySettings.unlimited,
                             enter = slideInVertically { -it / 3 } +
                                 expandVertically(expandFrom = Alignment.Top) + fadeIn(),

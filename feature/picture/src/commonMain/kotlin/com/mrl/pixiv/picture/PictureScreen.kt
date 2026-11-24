@@ -1,6 +1,6 @@
 package com.mrl.pixiv.picture
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -769,7 +769,7 @@ internal fun PictureScreen(
         modifier = modifier,
         topBar = {
             if (!useTwoPaneLayout) {
-                AnimatedVisibility(
+                CapturedAnimatedVisibility(
                     visible = showPreviewControls,
                     enter = fadeIn(),
                     exit = fadeOut(),
@@ -834,7 +834,7 @@ internal fun PictureScreen(
                         ) {
                             illustImageItems()
                         }
-                        AnimatedVisibility(
+                        CapturedAnimatedVisibility(
                             visible = showPreviewControls,
                             enter = fadeIn(),
                             exit = fadeOut(),
@@ -1231,7 +1231,7 @@ private fun PictureTopBar(
                                 showBottomMenu = true
                             },
                     )
-                    this@TopAppBar.AnimatedVisibility(
+                    CapturedAnimatedVisibility(
                         modifier = Modifier.align(Alignment.Center),
                         visible = isBarVisible,
                         enter = fadeIn(),

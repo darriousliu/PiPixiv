@@ -1,36 +1,35 @@
 package com.mrl.pixiv.search
 
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class SearchCompletionTest {
     @Test
     fun additionalKeywordIsSuggestedAndReplacedWithoutLosingTheFirstKeyword() {
-        val query = TextFieldValue("初音 かわ", TextRange(5))
-        val token = query.completionToken()
+        val query = "初音 かわ"
+        val token = completionToken(query, TextRange(5))
         assertEquals("かわ", token.text)
-        assertEquals("初音 かわいい", token.replaceIn(query.text, "かわいい"))
+        assertEquals("初音 かわいい", token.replaceIn(query, "かわいい"))
     }
 
     @Test
     fun editingAMiddleKeywordPreservesTheSuffixAndExclusionOperator() {
-        val query = TextFieldValue("猫 -犬 manga", TextRange(4))
-        val token = query.completionToken()
+        val query = "猫 -犬 manga"
+        val token = completionToken(query, TextRange(4))
         assertEquals("犬", token.text)
-        assertEquals("猫 -狗 manga", token.replaceIn(query.text, "狗"))
+        assertEquals("猫 -狗 manga", token.replaceIn(query, "狗"))
     }
 
     @Test
     fun trailingWhitespaceDoesNotRequestTheEntireQueryAgain() {
-        assertEquals("", TextFieldValue("猫　", TextRange(2)).completionToken().text)
-        assertEquals("", TextFieldValue("").completionToken().text)
+        assertEquals("", completionToken("猫　", TextRange(2)).text)
+        assertEquals("", completionToken("", TextRange.Zero).text)
     }
 
     @Test
     fun reverseSelectionStillReplacesTheSelectedKeyword() {
-        val query = TextFieldValue("猫 dog 鳥", TextRange(5, 2))
-        assertEquals("猫 犬 鳥", query.completionToken().replaceIn(query.text, "犬"))
+        val query = "猫 dog 鳥"
+        assertEquals("猫 犬 鳥", completionToken(query, TextRange(5, 2)).replaceIn(query, "犬"))
     }
 }
