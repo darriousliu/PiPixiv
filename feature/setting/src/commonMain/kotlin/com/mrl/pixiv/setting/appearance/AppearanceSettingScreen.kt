@@ -72,12 +72,11 @@ fun AppearanceSettingScreen(
     val preferences by requireUserPreferenceFlow.collectAsStateWithLifecycle()
     val theme = SettingTheme.entries.find { it.name == preferences.theme } ?: SettingTheme.SYSTEM
     var pickerSeed by rememberSaveable { mutableStateOf<Long?>(null) }
-    if (pickerSeed != null && navigationManager.topEntryId == navigationManager.entryId) {
-        NavigationBackHandler(
-            state = rememberNavigationEventState(NavigationEventInfo.None),
-            onBackCompleted = { pickerSeed = null },
-        )
-    }
+    NavigationBackHandler(
+        state = rememberNavigationEventState(NavigationEventInfo.None),
+        isBackEnabled = pickerSeed != null && navigationManager.topEntryId == navigationManager.entryId,
+        onBackCompleted = { pickerSeed = null },
+    )
     AppearanceSettingContent(
         pickerSeed = pickerSeed,
         onPickerSeedChange = { pickerSeed = it },

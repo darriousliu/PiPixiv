@@ -18,7 +18,6 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.separatingVerticalHingeBounds
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,8 +34,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.metadata
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.navigationevent.DirectNavigationEventInput
-import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
 import com.dokar.sonner.LocalToastContentColor
 import com.dokar.sonner.Toaster
 import com.dokar.sonner.ToasterState
@@ -453,18 +450,7 @@ fun Navigation3MainGraph(
 
     HandleDeeplink(navigationManager)
     LogScreen(navigationManager)
-    if (topRecord.destination == Destination.AppearanceSetting) {
-        // Esc 与系统返回共用分发器，让打开的取色器优先处理返回。
-        val dispatcher = checkNotNull(LocalNavigationEventDispatcherOwner.current).navigationEventDispatcher
-        val input = remember { DirectNavigationEventInput() }
-        DisposableEffect(dispatcher, input) {
-            dispatcher.addInput(input)
-            onDispose { dispatcher.removeInput(input) }
-        }
-        EscBackHandler(input::backCompleted)
-    } else {
-        EscBackHandler(navigationManager::popBackStack)
-    }
+    EscBackHandler()
     SharedTransitionLayout {
         CompositionLocalProvider(
             LocalSharedTransitionScope provides this,

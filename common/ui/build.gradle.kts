@@ -24,6 +24,7 @@ kotlin {
             implementation(libs.bundles.coil3)
             // Navigation3
             implementation(libs.bundles.compose.navigation3)
+            implementation(libs.compose.navigationevent.compose)
             // Toast
             implementation(libs.sonner)
         }
