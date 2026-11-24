@@ -32,6 +32,7 @@ data class UserPreference(
     val novelReaderSettings: NovelReaderSettings = NovelReaderSettings(),
     val useLiquidGlassNavigation: Boolean = true,
     val appApiProxyHost: String = "",
+    val appearance: AppearanceSettings = AppearanceSettings(),
 ) {
     companion object {
         const val TEMPLATE_ILLUST_ID = "{illust_id}"

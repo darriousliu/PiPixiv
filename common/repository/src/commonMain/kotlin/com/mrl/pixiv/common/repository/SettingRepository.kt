@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.setting.AccountPreference
 import com.mrl.pixiv.common.data.setting.AiTranslationConfig
+import com.mrl.pixiv.common.data.setting.AppearanceSettings
 import com.mrl.pixiv.common.data.setting.BrowsingSettings
 import com.mrl.pixiv.common.data.setting.DevicePreference
 import com.mrl.pixiv.common.data.setting.HistorySettings
@@ -123,6 +124,10 @@ object SettingRepository : MMKVApp, AccountScoped {
 
     fun setSettingTheme(theme: SettingTheme) = update {
         it.copy(theme = theme.toString())
+    }
+
+    fun setAppearanceSettings(settings: AppearanceSettings) = update {
+        it.copy(appearance = settings)
     }
 
     fun setPictureSourceHost(host: String) = update {

@@ -1,9 +1,6 @@
 package com.mrl.pixiv
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -19,6 +16,7 @@ import coil3.PlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
+import com.mrl.pixiv.common.compose.theme.rememberAppColorScheme
 import com.mrl.pixiv.common.compose.ui.LocalScrollbarStyle
 import com.mrl.pixiv.common.compose.ui.defaultScrollbarStyle
 import com.mrl.pixiv.common.repository.SettingRepository
@@ -50,10 +48,11 @@ import coil3.util.Logger.Level as CoilLogLevel
 fun App(
     modifier: Modifier = Modifier,
     darkTheme: Boolean = isSystemInDarkTheme(),
-    colorScheme: ColorScheme = if (darkTheme) darkColorScheme() else expressiveLightColorScheme(),
     imageLoaderBuilder: ImageLoader.Builder.() -> Unit = {},
     splashViewModel: SplashViewModel = koinViewModel()
 ) {
+    val appearance by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appearance }
+    val colorScheme = rememberAppColorScheme(appearance, darkTheme)
     val appLanguage by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle { appLanguage }
     val aiEndpoint by SettingRepository.userPreferenceFlow.collectAsStateWithLifecycle {
         aiTranslationConfig.endpoint

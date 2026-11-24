@@ -9,15 +9,10 @@ import android.view.KeyEvent
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import co.touchlab.kermit.Logger
@@ -71,17 +66,6 @@ class MainActivity : BaseActivity() {
             }
 
             App(
-                colorScheme = when {
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                        val context = LocalContext.current
-                        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(
-                            context
-                        )
-                    }
-
-                    darkTheme -> darkColorScheme()
-                    else -> expressiveLightColorScheme()
-                },
                 imageLoaderBuilder = {
                     this.allowRgb565(getSystemService<ActivityManager>()!!.isLowRamDevice)
                         .components {

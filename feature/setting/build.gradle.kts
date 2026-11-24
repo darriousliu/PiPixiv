@@ -22,6 +22,7 @@ kotlin {
 
             implementation(project.dependencies.platform(libs.coil3.bom))
             implementation(libs.bundles.coil3)
+            implementation(libs.colorpicker)
 
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)

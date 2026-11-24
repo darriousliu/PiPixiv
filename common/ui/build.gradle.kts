@@ -15,6 +15,7 @@ kotlin {
             implementation(project(":common:core"))
             implementation(project(":common:icons"))
             implementation(libs.html.converter)
+            implementation(libs.materialkolor)
 
             // Paging
             implementation(libs.bundles.androidx.paging)

@@ -47,11 +47,18 @@ class AccountPreferenceSplitTest {
             novelReaderSettings = NovelReaderSettings(fontSize = 22),
             useLiquidGlassNavigation = false,
             appApiProxyHost = "api.example.invalid",
+            appearance = AppearanceSettings(
+                themeColor = ThemeColor.CUSTOM.name,
+                customColor = 0xFF207585,
+                paletteStyle = AppPaletteStyle.FIDELITY.name,
+                amoledDark = true,
+            ),
         )
         val defaults = json.encodeToJsonElement(UserPreference.serializer(), UserPreference()).jsonObject
         val populated = json.encodeToJsonElement(UserPreference.serializer(), preference).jsonObject
         assertTrue(defaults.all { (key, value) -> populated[key] != value })
 
+        assertEquals(preference.appearance, preference.toDevicePreference().appearance)
         assertEquals(preference, preference.toDevicePreference().toUserPreference(preference.toAccountPreference()))
     }
 }

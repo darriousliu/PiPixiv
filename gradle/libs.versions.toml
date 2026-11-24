@@ -10,6 +10,7 @@ asm = "9.11.1"
 baselineprofile = "1.5.0"
 benchmark-macro-junit4 = "1.5.0"
 coil3 = "3.6.3"
+colorpicker = "1.3.0"
 collections-immutable = "0.5.2"
 compose-bom = "2026.11.01"
 composeHotReload = "1.3.0"
@@ -43,6 +44,7 @@ markdown = "0.46.0"
 material = "1.14.0"
 material3 = "1.5.0"
 material3-navigation3 = "1.3.0"
+materialkolor = "6.0.0"
 miuix = "0.9.4"
 mmkv = "2.4.3"
 mmkv-kotlin = "1.5.2"
@@ -95,6 +97,7 @@ androidx-window = { module = "androidx.window:window", version.ref = "window" }
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark-macro-junit4" }
 coil3-bom = { module = "io.coil-kt.coil3:coil-bom", version.ref = "coil3" }
+colorpicker = { module = "com.github.skydoves:colorpicker-compose", version.ref = "colorpicker" }
 coil3-compose = { module = "io.coil-kt.coil3:coil-compose" }
 coil3-core = { module = "io.coil-kt.coil3:coil-core" }
 coil3-gif = { module = "io.coil-kt.coil3:coil-gif" }
@@ -183,6 +186,7 @@ lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "
 markdown-core = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdown" }
 markdown-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
+materialkolor = { module = "com.materialkolor:material-kolor-material3", version.ref = "materialkolor" }
 miuix-blur = { module = "top.yukonga.miuix.kmp:miuix-blur", version.ref = "miuix" }
 mmkv = { module = "com.tencent:mmkv", version.ref = "mmkv" }
 mmkv-kotlin = { module = "io.github.darriousliu:mmkv-kotlin", version.ref = "mmkv-kotlin" }

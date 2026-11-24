@@ -32,6 +32,7 @@ data class DevicePreference(
     val novelReaderSettings: NovelReaderSettings = NovelReaderSettings(),
     val useLiquidGlassNavigation: Boolean = true,
     val appApiProxyHost: String = "",
+    val appearance: AppearanceSettings = AppearanceSettings(),
 )
 
 @Serializable
@@ -63,6 +64,7 @@ fun UserPreference.toDevicePreference() = DevicePreference(
     novelReaderSettings = novelReaderSettings,
     useLiquidGlassNavigation = useLiquidGlassNavigation,
     appApiProxyHost = appApiProxyHost,
+    appearance = appearance,
 )
 
 fun UserPreference.toAccountPreference() = AccountPreference(
@@ -95,4 +97,5 @@ fun DevicePreference.toUserPreference(account: AccountPreference) = UserPreferen
     novelReaderSettings = novelReaderSettings,
     useLiquidGlassNavigation = useLiquidGlassNavigation,
     appApiProxyHost = appApiProxyHost,
+    appearance = appearance,
 )
