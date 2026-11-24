@@ -38,13 +38,13 @@ export async function generateMetadata(): Promise<Metadata> {
       url: `/${locale}`,
       locale: localeMeta[locale].ogLocale,
       alternateLocale: locales.filter((l) => l !== locale).map((l) => localeMeta[l].ogLocale),
-      images: [{ url: image.src, width: image.width, height: image.height }],
+      images: [{ url: image.src, width: image.width, height: image.height, alt: dict.meta.ogTitle }],
     },
     twitter: {
       card: "summary_large_image",
       title: dict.meta.ogTitle,
       description: dict.meta.description,
-      images: [image.src],
+      images: [{ url: image.src, alt: dict.meta.ogTitle }],
     },
     formatDetection: { telephone: false },
   };

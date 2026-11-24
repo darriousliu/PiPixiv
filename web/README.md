@@ -62,6 +62,8 @@ assets/fonts/        自托管字体
 
 「大屏」区块（`components/BigScreen.tsx`）只在提供了 `desktop` 截图时才会显示。
 
+分享卡片图（Open Graph / Twitter）放在 `assets/og/<code>.jpg`，尺寸 1200×630，更换截图后需要同步更新。
+
 ## 图标字体
 
 `assets/fonts/material-symbols-rounded-subset.woff2` 只包含页面用到的 Material Symbols 图标，清单见 `assets/fonts/material-symbols-icons.txt`。新增图标后需要重新生成：

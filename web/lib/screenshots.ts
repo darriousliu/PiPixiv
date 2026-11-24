@@ -25,6 +25,10 @@ import enDesktopDetail from "@/assets/screenshots/en/desktop-detail.jpg";
 import enDesktopNovel from "@/assets/screenshots/en/desktop-novel.jpg";
 import enDesktopAi from "@/assets/screenshots/en/desktop-ai.jpg";
 
+// 分享卡片图，1200×630。
+import zhSocial from "@/assets/og/zh.jpg";
+import enSocial from "@/assets/og/en.jpg";
+
 /** 对应文案中 `screens.phones` 的键。 */
 export type PhoneShotId = "search" | "detail" | "ranking" | "tags" | "settings" | "network" | "novel";
 /** 对应文案中 `bigScreen.tabs` / `screens.desktop` 的键。 */
@@ -84,7 +88,9 @@ export function getScreenshots(locale: Locale): ScreenshotSet {
   };
 }
 
+const socialImages: Record<Locale, StaticImageData> = { zh: zhSocial, en: enSocial };
+
 /** 用于 Open Graph / Twitter 卡片的图片。 */
 export function getSocialImage(locale: Locale): StaticImageData {
-  return getScreenshots(locale).phones.search;
+  return socialImages[locale];
 }
