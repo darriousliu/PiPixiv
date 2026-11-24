@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">外観</string>
+    <string name="appearance_preview">外観のプレビュー</string>
+    <string name="appearance_section_theme_color">テーマカラー</string>
+    <string name="appearance_section_palette_style">配色スタイル</string>
+    <string name="appearance_section_dark_mode">ダークモード</string>
+    <string name="appearance_section_display">表示</string>
+    <string name="theme_color_dynamic">壁紙</string>
+    <string name="theme_color_dynamic_requirement">壁紙の色は Android 12 以降で使用できます</string>
+    <string name="theme_color_default">標準</string>
+    <string name="theme_color_sky">空色</string>
+    <string name="theme_color_indigo">藍色</string>
+    <string name="theme_color_wisteria">藤色</string>
+    <string name="theme_color_sakura">桜色</string>
+    <string name="theme_color_coral">珊瑚色</string>
+    <string name="theme_color_amber">琥珀色</string>
+    <string name="theme_color_matcha">抹茶色</string>
+    <string name="theme_color_jade">翡翠色</string>
+    <string name="theme_color_ink">墨色</string>
+    <string name="theme_color_custom">カスタム</string>
+    <string name="palette_style_tonal_spot">ソフト</string>
+    <string name="palette_style_neutral">ニュートラル</string>
+    <string name="palette_style_fidelity">原色</string>
+    <string name="palette_style_disabled_dynamic">壁紙の配色はシステムが生成します</string>
+    <string name="palette_style_disabled_default">標準の配色はスタイルを変えても変わりません</string>
+    <string name="palette_style_disabled_ink">墨色は常にモノクロ配色を使用します</string>
+    <string name="amoled_dark">背景を真っ黒にする</string>
+    <string name="amoled_dark_desc">ダークモードで OLED 画面に適した黒背景を使用します</string>
+</resources>

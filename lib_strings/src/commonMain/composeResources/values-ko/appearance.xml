@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">화면 모양</string>
+    <string name="appearance_preview">화면 모양 미리보기</string>
+    <string name="appearance_section_theme_color">테마 색상</string>
+    <string name="appearance_section_palette_style">배색 스타일</string>
+    <string name="appearance_section_dark_mode">다크 모드</string>
+    <string name="appearance_section_display">화면 표시</string>
+    <string name="theme_color_dynamic">배경화면</string>
+    <string name="theme_color_dynamic_requirement">배경화면 색상은 Android 12 이상에서 사용할 수 있습니다</string>
+    <string name="theme_color_default">기본</string>
+    <string name="theme_color_sky">하늘색</string>
+    <string name="theme_color_indigo">남색</string>
+    <string name="theme_color_wisteria">등꽃색</string>
+    <string name="theme_color_sakura">벚꽃색</string>
+    <string name="theme_color_coral">산호색</string>
+    <string name="theme_color_amber">호박색</string>
+    <string name="theme_color_matcha">말차색</string>
+    <string name="theme_color_jade">비취색</string>
+    <string name="theme_color_ink">먹색</string>
+    <string name="theme_color_custom">직접 선택</string>
+    <string name="palette_style_tonal_spot">부드럽게</string>
+    <string name="palette_style_neutral">차분하게</string>
+    <string name="palette_style_fidelity">원색</string>
+    <string name="palette_style_disabled_dynamic">배경화면 배색은 시스템에서 생성합니다</string>
+    <string name="palette_style_disabled_default">기본 배색은 스타일에 따라 바뀌지 않습니다</string>
+    <string name="palette_style_disabled_ink">먹색은 항상 단색 배색을 사용합니다</string>
+    <string name="amoled_dark">완전한 검정 배경</string>
+    <string name="amoled_dark_desc">다크 모드에서 OLED 화면에 적합한 완전한 검정을 사용합니다</string>
+</resources>

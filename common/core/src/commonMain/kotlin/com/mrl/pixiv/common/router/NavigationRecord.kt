@@ -102,6 +102,7 @@ val Destination.paneSpec: DestinationPaneSpec
         is Destination.Report,
         Destination.NetworkSetting,
         Destination.NetworkDiagnostic,
+        Destination.AppearanceSetting,
         Destination.BrowsingSetting,
         Destination.SearchSetting,
         Destination.HistorySetting,

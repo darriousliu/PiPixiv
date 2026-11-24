@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">外观</string>
+    <string name="appearance_preview">外观预览</string>
+    <string name="appearance_section_theme_color">主题色</string>
+    <string name="appearance_section_palette_style">配色风格</string>
+    <string name="appearance_section_dark_mode">深色模式</string>
+    <string name="appearance_section_display">显示</string>
+    <string name="theme_color_dynamic">壁纸</string>
+    <string name="theme_color_dynamic_requirement">「壁纸」仅在 Android 12 及以上可用</string>
+    <string name="theme_color_default">默认</string>
+    <string name="theme_color_sky">天青</string>
+    <string name="theme_color_indigo">靛蓝</string>
+    <string name="theme_color_wisteria">藤紫</string>
+    <string name="theme_color_sakura">樱粉</string>
+    <string name="theme_color_coral">珊瑚</string>
+    <string name="theme_color_amber">琥珀</string>
+    <string name="theme_color_matcha">抹茶</string>
+    <string name="theme_color_jade">青碧</string>
+    <string name="theme_color_ink">墨</string>
+    <string name="theme_color_custom">自定义</string>
+    <string name="palette_style_tonal_spot">柔和</string>
+    <string name="palette_style_neutral">素雅</string>
+    <string name="palette_style_fidelity">原色</string>
+    <string name="palette_style_disabled_dynamic">壁纸配色由系统生成</string>
+    <string name="palette_style_disabled_default">默认配色不随风格变化</string>
+    <string name="palette_style_disabled_ink">「墨」固定使用单色配色</string>
+    <string name="amoled_dark">纯黑背景</string>
+    <string name="amoled_dark_desc">深色模式下使用纯黑，适合 OLED 屏幕</string>
+</resources>

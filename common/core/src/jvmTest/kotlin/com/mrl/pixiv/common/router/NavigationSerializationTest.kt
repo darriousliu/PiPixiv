@@ -77,6 +77,7 @@ class NavigationSerializationTest {
             Destination.Setting,
             Destination.NetworkSetting,
             Destination.NetworkDiagnostic,
+            Destination.AppearanceSetting,
             Destination.BrowsingSetting,
             Destination.SearchSetting,
             Destination.HistorySetting,

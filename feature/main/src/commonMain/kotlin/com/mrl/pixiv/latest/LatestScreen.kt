@@ -106,6 +106,7 @@ fun LatestScreen(
         }
     }
 
+    // 框架调整时同步 feature/setting/.../appearance/MainPageSkeletons.kt 中的 LatestSkeleton。
     Scaffold(
         modifier = modifier,
         floatingActionButton = {

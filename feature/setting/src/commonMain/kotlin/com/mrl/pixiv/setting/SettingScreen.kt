@@ -23,6 +23,7 @@ import androidx.compose.material.icons.rounded.ImportExport
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.NetworkWifi
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Search
@@ -53,8 +54,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.compose.rememberThrottleClick
+import com.mrl.pixiv.common.compose.theme.platformDynamicColorScheme
 import com.mrl.pixiv.common.coroutine.CancelException
-import com.mrl.pixiv.common.repository.SettingRepository
+import com.mrl.pixiv.common.data.setting.resolve
 import com.mrl.pixiv.common.repository.VersionManager
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.NavigationManager
@@ -63,6 +65,7 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.setting.account.RemoveAccountDialog
+import com.mrl.pixiv.setting.appearance.labelResource
 import com.mrl.pixiv.setting.components.SettingChoiceValue
 import com.mrl.pixiv.setting.components.SettingRow
 import com.mrl.pixiv.setting.components.SettingSectionTitle
@@ -71,6 +74,7 @@ import com.mrl.pixiv.strings.about
 import com.mrl.pixiv.strings.ai_translation_setting
 import com.mrl.pixiv.strings.allow_open_link
 import com.mrl.pixiv.strings.app_language
+import com.mrl.pixiv.strings.appearance_setting
 import com.mrl.pixiv.strings.block_settings
 import com.mrl.pixiv.strings.browsing_setting
 import com.mrl.pixiv.strings.data_storage_title
@@ -102,7 +106,7 @@ import org.koin.compose.viewmodel.koinViewModel
 const val KEY_DEFAULT_OPEN_LINK = "default_open_link"
 
 internal enum class SettingPage {
-    Network, Browsing, Search, History, Privacy, Download, AiTranslation, Block, AppData, About,
+    Appearance, Network, Browsing, Search, History, Privacy, Download, AiTranslation, Block, AppData, About,
     AccountManagement,
 }
 
@@ -132,20 +136,19 @@ fun SettingScreen(
             }
         }
     }
+    val themeColor = userPreference.appearance.resolve(platformDynamicColorScheme(false) != null).color
     val topEntryId = navigationManager.topEntryId
     SettingContent(
         currentLanguage = currentLanguage,
         languages = languages,
         hasNewVersion = hasNewVersion,
         hasPendingRecovery = hasPendingRecovery,
-        useLiquidGlassNavigation = userPreference.useLiquidGlassNavigation,
+        themeColorName = stringResource(themeColor.labelResource),
         onLanguageChange = { currentLanguage = it },
-        onUseLiquidGlassNavigationChange = { enabled ->
-            SettingRepository.updateSettings { copy(useLiquidGlassNavigation = enabled) }
-        },
         onBack = navigationManager::popBackStack,
         onNavigate = { page ->
             when (page) {
+                SettingPage.Appearance -> navigationManager.navigateToAppearanceSettingScreen()
                 SettingPage.Network -> navigationManager.navigateToNetworkSettingScreen()
                 SettingPage.Browsing -> navigationManager.navigateToBrowsingSettingScreen()
                 SettingPage.Search -> navigationManager.navigateToSearchSettingScreen()
@@ -177,9 +180,8 @@ internal fun SettingContent(
     languages: List<Language>,
     hasNewVersion: Boolean,
     hasPendingRecovery: Boolean,
-    useLiquidGlassNavigation: Boolean,
+    themeColorName: String,
     onLanguageChange: (String) -> Unit,
-    onUseLiquidGlassNavigationChange: (Boolean) -> Unit,
     onBack: () -> Unit,
     onNavigate: (SettingPage) -> Unit,
     onExportToken: () -> Unit,
@@ -233,11 +235,12 @@ internal fun SettingContent(
                     onLanguageChange = onLanguageChange,
                 )
             }
-            item("liquid_glass_navigation") {
-                LiquidGlassNavigationSetting(
-                    checked = useLiquidGlassNavigation,
-                    onCheckedChange = onUseLiquidGlassNavigationChange,
-                )
+            item("appearance") {
+                SettingDestinationItem(
+                    title = stringResource(RStrings.appearance_setting),
+                    icon = Icons.Rounded.Palette,
+                    supportingText = themeColorName,
+                ) { onNavigate(SettingPage.Appearance) }
             }
             item("network") {
                 SettingDestinationItem(

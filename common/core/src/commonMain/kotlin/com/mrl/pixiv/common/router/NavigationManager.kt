@@ -294,6 +294,10 @@ class NavigationManager(
         navigate(destination = Destination.NetworkDiagnostic)
     }
 
+    fun navigateToAppearanceSettingScreen() {
+        navigate(destination = Destination.AppearanceSetting)
+    }
+
     fun navigateToBrowsingSettingScreen() {
         navigate(destination = Destination.BrowsingSetting)
     }

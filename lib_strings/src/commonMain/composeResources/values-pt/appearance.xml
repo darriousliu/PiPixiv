@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">Aparência</string>
+    <string name="appearance_preview">Prévia da aparência</string>
+    <string name="appearance_section_theme_color">Cor do tema</string>
+    <string name="appearance_section_palette_style">Estilo da paleta</string>
+    <string name="appearance_section_dark_mode">Modo escuro</string>
+    <string name="appearance_section_display">Tela</string>
+    <string name="theme_color_dynamic">Papel de parede</string>
+    <string name="theme_color_dynamic_requirement">As cores do papel de parede estão disponíveis a partir do Android 12</string>
+    <string name="theme_color_default">Padrão</string>
+    <string name="theme_color_sky">Céu</string>
+    <string name="theme_color_indigo">Índigo</string>
+    <string name="theme_color_wisteria">Glicínia</string>
+    <string name="theme_color_sakura">Flor de cerejeira</string>
+    <string name="theme_color_coral">Coral</string>
+    <string name="theme_color_amber">Âmbar</string>
+    <string name="theme_color_matcha">Matcha</string>
+    <string name="theme_color_jade">Jade</string>
+    <string name="theme_color_ink">Tinta</string>
+    <string name="theme_color_custom">Personalizada</string>
+    <string name="palette_style_tonal_spot">Suave</string>
+    <string name="palette_style_neutral">Neutro</string>
+    <string name="palette_style_fidelity">Fiel</string>
+    <string name="palette_style_disabled_dynamic">O sistema gera a paleta a partir do papel de parede</string>
+    <string name="palette_style_disabled_default">O estilo não altera a paleta padrão</string>
+    <string name="palette_style_disabled_ink">Tinta sempre usa uma paleta monocromática</string>
+    <string name="amoled_dark">Fundo preto puro</string>
+    <string name="amoled_dark_desc">Usar preto puro no modo escuro em telas OLED</string>
+</resources>

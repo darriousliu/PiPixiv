@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">Darstellung</string>
+    <string name="appearance_preview">Darstellungsvorschau</string>
+    <string name="appearance_section_theme_color">Themenfarbe</string>
+    <string name="appearance_section_palette_style">Farbstil</string>
+    <string name="appearance_section_dark_mode">Dunkelmodus</string>
+    <string name="appearance_section_display">Anzeige</string>
+    <string name="theme_color_dynamic">Hintergrundbild</string>
+    <string name="theme_color_dynamic_requirement">Farben aus dem Hintergrundbild sind ab Android 12 verfügbar</string>
+    <string name="theme_color_default">Standard</string>
+    <string name="theme_color_sky">Himmelblau</string>
+    <string name="theme_color_indigo">Indigo</string>
+    <string name="theme_color_wisteria">Glyzinie</string>
+    <string name="theme_color_sakura">Kirschblüte</string>
+    <string name="theme_color_coral">Koralle</string>
+    <string name="theme_color_amber">Bernstein</string>
+    <string name="theme_color_matcha">Matcha</string>
+    <string name="theme_color_jade">Jade</string>
+    <string name="theme_color_ink">Tusche</string>
+    <string name="theme_color_custom">Eigene Farbe</string>
+    <string name="palette_style_tonal_spot">Sanft</string>
+    <string name="palette_style_neutral">Neutral</string>
+    <string name="palette_style_fidelity">Original</string>
+    <string name="palette_style_disabled_dynamic">Das System erzeugt die Palette aus dem Hintergrundbild</string>
+    <string name="palette_style_disabled_default">Der Farbstil hat keinen Einfluss auf die Standardfarben</string>
+    <string name="palette_style_disabled_ink">Tusche verwendet immer eine monochrome Palette</string>
+    <string name="amoled_dark">Tiefschwarzer Hintergrund</string>
+    <string name="amoled_dark_desc">Im Dunkelmodus reines Schwarz für OLED-Displays verwenden</string>
+</resources>

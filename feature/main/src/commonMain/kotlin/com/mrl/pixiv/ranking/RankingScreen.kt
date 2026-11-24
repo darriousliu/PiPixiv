@@ -191,6 +191,7 @@ fun RankingScreen(
         }
     }
 
+    // 框架调整时同步 feature/setting/.../appearance/MainPageSkeletons.kt 中的 RankingSkeleton。
     Scaffold(
         modifier = modifier,
         topBar = {

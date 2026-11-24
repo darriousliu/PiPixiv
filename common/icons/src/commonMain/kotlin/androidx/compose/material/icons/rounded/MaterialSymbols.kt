@@ -16,6 +16,7 @@ import com.mrl.pixiv.common.icons.rounded.Book
 import com.mrl.pixiv.common.icons.rounded.Bookmark
 import com.mrl.pixiv.common.icons.rounded.BookmarkBorder
 import com.mrl.pixiv.common.icons.rounded.Bookmarks
+import com.mrl.pixiv.common.icons.rounded.BrightnessMedium
 import com.mrl.pixiv.common.icons.rounded.CalendarMonth
 import com.mrl.pixiv.common.icons.rounded.Check
 import com.mrl.pixiv.common.icons.rounded.CheckCircle
@@ -27,6 +28,7 @@ import com.mrl.pixiv.common.icons.rounded.CloudOff
 import com.mrl.pixiv.common.icons.rounded.Code
 import com.mrl.pixiv.common.icons.rounded.Collections
 import com.mrl.pixiv.common.icons.rounded.CollectionsBookmark
+import com.mrl.pixiv.common.icons.rounded.Colorize
 import com.mrl.pixiv.common.icons.rounded.ContentCopy
 import com.mrl.pixiv.common.icons.rounded.ContentPaste
 import com.mrl.pixiv.common.icons.rounded.Delete
@@ -92,6 +94,7 @@ import com.mrl.pixiv.common.icons.rounded.Upload
 import com.mrl.pixiv.common.icons.rounded.ViewModule
 import com.mrl.pixiv.common.icons.rounded.Visibility
 import com.mrl.pixiv.common.icons.rounded.VisibilityOff
+import com.mrl.pixiv.common.icons.rounded.Wallpaper
 import com.mrl.pixiv.common.icons.rounded.Warning
 import com.mrl.pixiv.common.icons.rounded.WatchLater
 import com.mrl.pixiv.common.icons.rounded._18UpRating
@@ -139,6 +142,9 @@ val Icons.Rounded.BookmarkBorder: ImageVector
 val Icons.Rounded.Bookmarks: ImageVector
     get() = MaterialSymbols.Rounded.Bookmarks
 
+val Icons.Rounded.BrightnessMedium: ImageVector
+    get() = MaterialSymbols.Rounded.BrightnessMedium
+
 val Icons.Rounded.CalendarMonth: ImageVector
     get() = MaterialSymbols.Rounded.CalendarMonth
 
@@ -171,6 +177,9 @@ val Icons.Rounded.Collections: ImageVector
 
 val Icons.Rounded.CollectionsBookmark: ImageVector
     get() = MaterialSymbols.Rounded.CollectionsBookmark
+
+val Icons.Rounded.Colorize: ImageVector
+    get() = MaterialSymbols.Rounded.Colorize
 
 val Icons.Rounded.ContentCopy: ImageVector
     get() = MaterialSymbols.Rounded.ContentCopy
@@ -366,6 +375,9 @@ val Icons.Rounded.Visibility: ImageVector
 
 val Icons.Rounded.VisibilityOff: ImageVector
     get() = MaterialSymbols.Rounded.VisibilityOff
+
+val Icons.Rounded.Wallpaper: ImageVector
+    get() = MaterialSymbols.Rounded.Wallpaper
 
 val Icons.Rounded.Warning: ImageVector
     get() = MaterialSymbols.Rounded.Warning

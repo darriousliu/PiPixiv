@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">Оформление</string>
+    <string name="appearance_preview">Предпросмотр оформления</string>
+    <string name="appearance_section_theme_color">Цвет темы</string>
+    <string name="appearance_section_palette_style">Стиль палитры</string>
+    <string name="appearance_section_dark_mode">Тёмный режим</string>
+    <string name="appearance_section_display">Отображение</string>
+    <string name="theme_color_dynamic">Обои</string>
+    <string name="theme_color_dynamic_requirement">Цвета обоев доступны в Android 12 и новее</string>
+    <string name="theme_color_default">Стандартный</string>
+    <string name="theme_color_sky">Небо</string>
+    <string name="theme_color_indigo">Индиго</string>
+    <string name="theme_color_wisteria">Глициния</string>
+    <string name="theme_color_sakura">Сакура</string>
+    <string name="theme_color_coral">Коралл</string>
+    <string name="theme_color_amber">Янтарь</string>
+    <string name="theme_color_matcha">Матча</string>
+    <string name="theme_color_jade">Нефрит</string>
+    <string name="theme_color_ink">Тушь</string>
+    <string name="theme_color_custom">Свой цвет</string>
+    <string name="palette_style_tonal_spot">Мягкий</string>
+    <string name="palette_style_neutral">Нейтральный</string>
+    <string name="palette_style_fidelity">Исходный</string>
+    <string name="palette_style_disabled_dynamic">Палитру обоев создаёт система</string>
+    <string name="palette_style_disabled_default">Стиль не влияет на стандартную палитру</string>
+    <string name="palette_style_disabled_ink">Для цвета «Тушь» всегда используется монохромная палитра</string>
+    <string name="amoled_dark">Чисто чёрный фон</string>
+    <string name="amoled_dark_desc">Использовать чистый чёрный цвет в тёмном режиме на экранах OLED</string>
+</resources>

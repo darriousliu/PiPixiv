@@ -151,6 +151,7 @@ internal fun ProfileContent(
     modifier: Modifier = Modifier,
     notificationBadge: @Composable () -> Unit = {},
 ) {
+    // 框架调整时同步 feature/setting/.../appearance/MainPageSkeletons.kt 中的 ProfileSkeleton。
     Scaffold(
         modifier = modifier,
         topBar = { ProfileAppBar(currentTheme, onChangeTheme) },

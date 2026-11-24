@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">दिखावट</string>
+    <string name="appearance_preview">दिखावट की झलक</string>
+    <string name="appearance_section_theme_color">थीम का रंग</string>
+    <string name="appearance_section_palette_style">रंग शैली</string>
+    <string name="appearance_section_dark_mode">डार्क मोड</string>
+    <string name="appearance_section_display">डिस्प्ले</string>
+    <string name="theme_color_dynamic">वॉलपेपर</string>
+    <string name="theme_color_dynamic_requirement">वॉलपेपर के रंग Android 12 और उसके बाद के वर्शन में उपलब्ध हैं</string>
+    <string name="theme_color_default">डिफ़ॉल्ट</string>
+    <string name="theme_color_sky">आसमानी</string>
+    <string name="theme_color_indigo">नील</string>
+    <string name="theme_color_wisteria">हल्का बैंगनी</string>
+    <string name="theme_color_sakura">चेरी का फूल</string>
+    <string name="theme_color_coral">मूंगा</string>
+    <string name="theme_color_amber">अंबर</string>
+    <string name="theme_color_matcha">हरी चाय</string>
+    <string name="theme_color_jade">हरिताश्म</string>
+    <string name="theme_color_ink">स्याही</string>
+    <string name="theme_color_custom">मनपसंद</string>
+    <string name="palette_style_tonal_spot">सौम्य</string>
+    <string name="palette_style_neutral">तटस्थ</string>
+    <string name="palette_style_fidelity">मूल</string>
+    <string name="palette_style_disabled_dynamic">सिस्टम वॉलपेपर से रंगों का पैलेट बनाता है</string>
+    <string name="palette_style_disabled_default">शैली बदलने से डिफ़ॉल्ट रंग नहीं बदलते</string>
+    <string name="palette_style_disabled_ink">स्याही के लिए हमेशा एकरंगी पैलेट इस्तेमाल होता है</string>
+    <string name="amoled_dark">पूरी तरह काली पृष्ठभूमि</string>
+    <string name="amoled_dark_desc">OLED स्क्रीन के लिए डार्क मोड में शुद्ध काला रंग इस्तेमाल करें</string>
+</resources>

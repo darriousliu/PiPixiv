@@ -146,6 +146,7 @@ internal fun HomeScaffold(
 ) {
     val scope = rememberCoroutineScope()
 
+    // 框架调整时同步 feature/setting/.../appearance/MainPageSkeletons.kt 中的 HomeSkeleton。
     Scaffold(
         modifier = modifier,
         topBar = {

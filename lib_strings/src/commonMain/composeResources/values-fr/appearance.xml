@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">Apparence</string>
+    <string name="appearance_preview">Aperçu de l’apparence</string>
+    <string name="appearance_section_theme_color">Couleur du thème</string>
+    <string name="appearance_section_palette_style">Style de palette</string>
+    <string name="appearance_section_dark_mode">Mode sombre</string>
+    <string name="appearance_section_display">Affichage</string>
+    <string name="theme_color_dynamic">Fond d’écran</string>
+    <string name="theme_color_dynamic_requirement">Les couleurs du fond d’écran sont disponibles à partir d’Android 12</string>
+    <string name="theme_color_default">Par défaut</string>
+    <string name="theme_color_sky">Ciel</string>
+    <string name="theme_color_indigo">Indigo</string>
+    <string name="theme_color_wisteria">Glycine</string>
+    <string name="theme_color_sakura">Fleur de cerisier</string>
+    <string name="theme_color_coral">Corail</string>
+    <string name="theme_color_amber">Ambre</string>
+    <string name="theme_color_matcha">Matcha</string>
+    <string name="theme_color_jade">Jade</string>
+    <string name="theme_color_ink">Encre</string>
+    <string name="theme_color_custom">Sur mesure</string>
+    <string name="palette_style_tonal_spot">Doux</string>
+    <string name="palette_style_neutral">Neutre</string>
+    <string name="palette_style_fidelity">Fidèle</string>
+    <string name="palette_style_disabled_dynamic">Le système génère la palette à partir du fond d’écran</string>
+    <string name="palette_style_disabled_default">Le style ne modifie pas la palette par défaut</string>
+    <string name="palette_style_disabled_ink">Encre utilise toujours une palette monochrome</string>
+    <string name="amoled_dark">Fond noir pur</string>
+    <string name="amoled_dark_desc">Utiliser du noir pur en mode sombre pour les écrans OLED</string>
+</resources>

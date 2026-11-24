@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">المظهر</string>
+    <string name="appearance_preview">معاينة المظهر</string>
+    <string name="appearance_section_theme_color">لون السمة</string>
+    <string name="appearance_section_palette_style">نمط الألوان</string>
+    <string name="appearance_section_dark_mode">الوضع الداكن</string>
+    <string name="appearance_section_display">العرض</string>
+    <string name="theme_color_dynamic">الخلفية</string>
+    <string name="theme_color_dynamic_requirement">تتوفر ألوان الخلفية في Android 12 والإصدارات الأحدث</string>
+    <string name="theme_color_default">افتراضي</string>
+    <string name="theme_color_sky">سماوي</string>
+    <string name="theme_color_indigo">نيلي</string>
+    <string name="theme_color_wisteria">وستارية</string>
+    <string name="theme_color_sakura">زهر الكرز</string>
+    <string name="theme_color_coral">مرجاني</string>
+    <string name="theme_color_amber">كهرماني</string>
+    <string name="theme_color_matcha">شاي أخضر</string>
+    <string name="theme_color_jade">يشمي</string>
+    <string name="theme_color_ink">حبر</string>
+    <string name="theme_color_custom">مخصص</string>
+    <string name="palette_style_tonal_spot">ناعم</string>
+    <string name="palette_style_neutral">محايد</string>
+    <string name="palette_style_fidelity">أصلي</string>
+    <string name="palette_style_disabled_dynamic">ينشئ النظام لوحة الألوان من الخلفية</string>
+    <string name="palette_style_disabled_default">لا يؤثر النمط في لوحة الألوان الافتراضية</string>
+    <string name="palette_style_disabled_ink">يستخدم لون الحبر دائمًا لوحة أحادية اللون</string>
+    <string name="amoled_dark">خلفية سوداء خالصة</string>
+    <string name="amoled_dark_desc">استخدام الأسود الخالص في الوضع الداكن لشاشات OLED</string>
+</resources>

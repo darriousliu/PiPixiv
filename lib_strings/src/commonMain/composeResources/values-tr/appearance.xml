@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">Görünüm</string>
+    <string name="appearance_preview">Görünüm önizlemesi</string>
+    <string name="appearance_section_theme_color">Tema rengi</string>
+    <string name="appearance_section_palette_style">Palet stili</string>
+    <string name="appearance_section_dark_mode">Koyu mod</string>
+    <string name="appearance_section_display">Ekran</string>
+    <string name="theme_color_dynamic">Duvar kâğıdı</string>
+    <string name="theme_color_dynamic_requirement">Duvar kâğıdı renkleri Android 12 ve sonraki sürümlerde kullanılabilir</string>
+    <string name="theme_color_default">Varsayılan</string>
+    <string name="theme_color_sky">Gök mavisi</string>
+    <string name="theme_color_indigo">Çivit</string>
+    <string name="theme_color_wisteria">Mor salkım</string>
+    <string name="theme_color_sakura">Kiraz çiçeği</string>
+    <string name="theme_color_coral">Mercan</string>
+    <string name="theme_color_amber">Kehribar</string>
+    <string name="theme_color_matcha">Yeşil çay</string>
+    <string name="theme_color_jade">Yeşim</string>
+    <string name="theme_color_ink">Mürekkep</string>
+    <string name="theme_color_custom">Özel</string>
+    <string name="palette_style_tonal_spot">Yumuşak</string>
+    <string name="palette_style_neutral">Nötr</string>
+    <string name="palette_style_fidelity">Özgün</string>
+    <string name="palette_style_disabled_dynamic">Duvar kâğıdının renk paletini sistem oluşturur</string>
+    <string name="palette_style_disabled_default">Stil, varsayılan renk paletini değiştirmez</string>
+    <string name="palette_style_disabled_ink">Mürekkep her zaman tek renkli bir palet kullanır</string>
+    <string name="amoled_dark">Saf siyah arka plan</string>
+    <string name="amoled_dark_desc">OLED ekranlar için koyu modda saf siyah kullan</string>
+</resources>

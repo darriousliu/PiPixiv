@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appearance_setting">Appearance</string>
+    <string name="appearance_preview">Appearance preview</string>
+    <string name="appearance_section_theme_color">Theme color</string>
+    <string name="appearance_section_palette_style">Palette style</string>
+    <string name="appearance_section_dark_mode">Dark mode</string>
+    <string name="appearance_section_display">Display</string>
+    <string name="theme_color_dynamic">Wallpaper</string>
+    <string name="theme_color_dynamic_requirement">Wallpaper colors are available on Android 12 and later</string>
+    <string name="theme_color_default">Default</string>
+    <string name="theme_color_sky">Sky</string>
+    <string name="theme_color_indigo">Indigo</string>
+    <string name="theme_color_wisteria">Wisteria</string>
+    <string name="theme_color_sakura">Sakura</string>
+    <string name="theme_color_coral">Coral</string>
+    <string name="theme_color_amber">Amber</string>
+    <string name="theme_color_matcha">Matcha</string>
+    <string name="theme_color_jade">Jade</string>
+    <string name="theme_color_ink">Ink</string>
+    <string name="theme_color_custom">Custom</string>
+    <string name="palette_style_tonal_spot">Soft</string>
+    <string name="palette_style_neutral">Neutral</string>
+    <string name="palette_style_fidelity">True color</string>
+    <string name="palette_style_disabled_dynamic">Your system generates the wallpaper palette</string>
+    <string name="palette_style_disabled_default">Palette style does not affect the default colors</string>
+    <string name="palette_style_disabled_ink">Ink always uses a monochrome palette</string>
+    <string name="amoled_dark">Pure black background</string>
+    <string name="amoled_dark_desc">Use pure black in dark mode for OLED screens</string>
+</resources>

@@ -103,6 +103,7 @@ import com.mrl.pixiv.setting.about.AboutScreen
 import com.mrl.pixiv.setting.account.AccountManagementScreen
 import com.mrl.pixiv.setting.ai.AiTranslationSettingScreen
 import com.mrl.pixiv.setting.appdata.AppDataScreen
+import com.mrl.pixiv.setting.appearance.AppearanceSettingScreen
 import com.mrl.pixiv.setting.applog.AppLogScreen
 import com.mrl.pixiv.setting.block.BlockIllustScreen
 import com.mrl.pixiv.setting.block.BlockNovelScreen
@@ -252,6 +253,9 @@ fun Navigation3MainGraph(
             NetworkDiagnosticScreen()
         }
 
+        entry<Destination.AppearanceSetting> {
+            AppearanceSettingScreen()
+        }
         entry<Destination.BrowsingSetting> {
             BrowsingSettingScreen()
         }

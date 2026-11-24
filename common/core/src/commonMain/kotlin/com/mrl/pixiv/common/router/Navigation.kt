@@ -87,6 +87,9 @@ sealed class Destination : NavKey {
     data object NetworkDiagnostic : Destination()
 
     @Serializable
+    data object AppearanceSetting : Destination()
+
+    @Serializable
     data object BrowsingSetting : Destination()
 
     @Serializable
