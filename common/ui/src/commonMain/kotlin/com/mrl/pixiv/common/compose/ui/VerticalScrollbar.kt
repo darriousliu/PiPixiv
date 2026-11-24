@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -67,7 +68,7 @@ private fun ScrollbarImpl(
     }
 
     val isHovered by interactionSource.collectIsHoveredAsState()
-    val isDragging by remember { derivedStateOf { dragInteraction.value != null } }
+    val isDragging by remember { computedStateOf { dragInteraction.value != null } }
 
     var lastInteractionTime by remember { mutableLongStateOf(0L) }
     LaunchedEffect(isScrollInProgress, isDragging, isHovered) {

@@ -54,7 +54,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -261,14 +261,14 @@ internal fun PictureScreen(
     val pictureSplitState = rememberSplitPaneState(key = illust.id, initialFraction = 0.5f)
     val rightListState = rememberLazyListState()
     val currPage by remember {
-        derivedStateOf {
+        computedStateOf {
             minOf(
                 lazyListState.firstVisibleItemIndex,
                 illust.pageCount - 1
             )
         }
     }
-    val isBarVisible by remember { derivedStateOf { lazyListState.firstVisibleItemIndex <= illust.pageCount } }
+    val isBarVisible by remember { computedStateOf { lazyListState.firstVisibleItemIndex <= illust.pageCount } }
 
     val isBookmarked = illust.isBookmark
     val browsingSettings by requireUserPreferenceFlow.collectAsStateWithLifecycle {

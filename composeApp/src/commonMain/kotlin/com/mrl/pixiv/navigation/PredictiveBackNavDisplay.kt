@@ -3,7 +3,7 @@ package com.mrl.pixiv.navigation
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -68,7 +68,7 @@ internal fun <T : Any> PredictiveBackNavDisplay(
     // 计时器只关心 Idle 与 InProgress 之间的切换。每次进度更新由 NavDisplay 自行观察，
     // 避免管理导航条目与历史记录的这一层随每个进度事件重组。
     val inProgress by remember(gestureState) {
-        derivedStateOf { gestureState.transitionState is InProgress }
+        computedStateOf { gestureState.transitionState is InProgress }
     }
     val observedSequence = gestureSequence
 

@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,7 +88,7 @@ internal fun MainPageContent(
     ) { page ->
         val index = mainNavigationItems.indexOfFirst { it.first == page }
         val active by remember(transition, selectedPage, page) {
-            derivedStateOf {
+            computedStateOf {
                 page == selectedPage &&
                     transition.currentState == EnterExitState.Visible &&
                     transition.targetState == EnterExitState.Visible

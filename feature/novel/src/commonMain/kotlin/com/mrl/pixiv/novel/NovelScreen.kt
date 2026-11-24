@@ -60,6 +60,7 @@ import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -191,7 +192,7 @@ fun NovelScreen(
         rememberLazyListState()
     }
     val scrollScope = rememberCoroutineScope()
-    val canScrollBack by remember(listState) { derivedStateOf { listState.canScrollBackward } }
+    val canScrollBack by remember(listState) { computedStateOf { listState.canScrollBackward } }
     var readerContentWidthPx by remember {
         mutableIntStateOf(with(density) {
             (paneInfo.size.width.roundToPx() - 2 * 16.dp.roundToPx()).coerceAtLeast(0)
@@ -229,7 +230,7 @@ fun NovelScreen(
 
     // 沉浸逻辑: 滚动到正文区域时隐藏TopBar和FAB
     val isContentVisible by remember(listState) {
-        derivedStateOf {
+        computedStateOf {
             listState.layoutInfo.visibleItemsInfo.firstOrNull()?.key is Int // index
         }
     }
@@ -258,8 +259,8 @@ fun NovelScreen(
         }
     }
     val currentMarkerPage by remember(state.novel?.id, state.paragraphSpans, listState) {
-        derivedStateOf {
-            val novel = state.novel ?: return@derivedStateOf 1
+        computedStateOf {
+            val novel = state.novel ?: return@computedStateOf 1
             val paragraphStartIndex =
                 paragraphStartItemIndex(novel.series.title != null, novel.caption.isNotEmpty())
             val paragraphItem = listState.layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->

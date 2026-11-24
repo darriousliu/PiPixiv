@@ -5,7 +5,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.computedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -18,7 +18,7 @@ val LazyListState.isScrollToTop: Boolean
     @Composable
     get() {
         val isTop by remember {
-            derivedStateOf {
+            computedStateOf {
                 firstVisibleItemIndex == 0 && firstVisibleItemScrollOffset == 0
             }
         }
@@ -29,7 +29,7 @@ val LazyGridState.isScrollToTop: Boolean
     @Composable
     get() {
         val isTop by remember {
-            derivedStateOf {
+            computedStateOf {
                 firstVisibleItemIndex == 0 && firstVisibleItemScrollOffset == 0
             }
         }
@@ -40,7 +40,7 @@ val LazyStaggeredGridState.isScrollToTop: Boolean
     @Composable
     get() {
         val isTop by remember {
-            derivedStateOf {
+            computedStateOf {
                 firstVisibleItemIndex == 0 && firstVisibleItemScrollOffset == 0
             }
         }
@@ -51,9 +51,9 @@ val LazyListState.isScrollToBottom: Boolean
     @Composable
     get() {
         val isBottom by remember {
-            derivedStateOf {
+            computedStateOf {
                 val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                    ?: return@derivedStateOf false
+                    ?: return@computedStateOf false
                 lastVisibleItem.index >= layoutInfo.totalItemsCount - 1
             }
         }
@@ -64,9 +64,9 @@ val LazyGridState.isScrollToBottom: Boolean
     @Composable
     get() {
         val isBottom by remember {
-            derivedStateOf {
+            computedStateOf {
                 val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                    ?: return@derivedStateOf false
+                    ?: return@computedStateOf false
                 lastVisibleItem.index >= layoutInfo.totalItemsCount - 1
             }
         }
@@ -77,9 +77,9 @@ val LazyStaggeredGridState.isScrollToBottom: Boolean
     @Composable
     get() {
         val isBottom by remember {
-            derivedStateOf {
+            computedStateOf {
                 val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                    ?: return@derivedStateOf false
+                    ?: return@computedStateOf false
                 lastVisibleItem.index >= layoutInfo.totalItemsCount - 1
             }
         }
@@ -133,7 +133,7 @@ private fun ScrollToBottomEffect(
 ) {
     val updatedBlock by rememberUpdatedState(block)
     val shouldLoadMore by remember {
-        derivedStateOf {
+        computedStateOf {
             shouldLoadMoreBlock()
         }
     }
