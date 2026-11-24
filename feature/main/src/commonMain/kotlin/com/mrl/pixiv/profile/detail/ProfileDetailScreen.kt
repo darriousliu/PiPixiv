@@ -43,6 +43,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -52,6 +53,8 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.blur.BlurRadiusSpec
+import androidx.compose.ui.graphics.blur.BlurStop
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -74,9 +77,11 @@ import com.mrl.pixiv.common.repository.viewmodel.follow.FollowState
 import com.mrl.pixiv.common.repository.viewmodel.follow.isFollowing
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
+import com.mrl.pixiv.common.util.Platform
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.allowRgb565
 import com.mrl.pixiv.common.util.copyToClipboard
+import com.mrl.pixiv.common.util.platform
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.profile.detail.components.IllustWidget
 import com.mrl.pixiv.profile.detail.components.NovelBookmarkWidget
@@ -524,6 +529,7 @@ internal fun ProfileDetailAppBar(
         userInfo.user.profileImageUrls.medium
     }
     var showMenu by rememberSaveable { mutableStateOf(false) }
+    val progressiveBlur = remember { supportsProgressiveBlur() }
 
     if (backgroundUrl.isNotEmpty()) {
         AsyncImage(
@@ -536,7 +542,7 @@ internal fun ProfileDetailAppBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(backgroundHeight)
-                .blur(10.dp)
+                .profileHeaderBlur(progressiveBlur)
                 .drawWithCache {
                     val color = Color.Black.copy(alpha = 0.5f)
                     onDrawWithContent {
@@ -655,3 +661,22 @@ internal fun ProfileDetailAppBar(
         scrollBehavior = scrollBehavior
     )
 }
+
+/** 头图模糊：上方保留更多画面细节，向下逐渐加深，让头像所在区域更柔和。 */
+private val ProfileHeaderBlurSpec = BlurRadiusSpec.verticalGradient(
+    listOf(
+        BlurStop(fraction = 0f, radius = 2.dp),
+        BlurStop(fraction = 0.5f, radius = 8.dp),
+        BlurStop(fraction = 1f, radius = 20.dp),
+    )
+)
+
+/**
+ * 渐变半径模糊目前仅 Android 13 及以上生效；Android 12 及以下会直接忽略，
+ * iOS 与桌面端在 CMP 1.13 中仍为空实现，因此这些平台继续使用均匀模糊。
+ */
+private fun supportsProgressiveBlur(): Boolean =
+    (platform as? Platform.Android)?.version?.let { it >= 33 } == true
+
+private fun Modifier.profileHeaderBlur(progressive: Boolean): Modifier =
+    if (progressive) blur(ProfileHeaderBlurSpec) else blur(10.dp)
