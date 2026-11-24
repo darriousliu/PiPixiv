@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">Tusche verwendet immer eine monochrome Palette</string>
     <string name="amoled_dark">Tiefschwarzer Hintergrund</string>
     <string name="amoled_dark_desc">Im Dunkelmodus reines Schwarz für OLED-Displays verwenden</string>
+    <string name="custom_color_title">Eigene Farbe</string>
+    <string name="custom_color_selected">Gewählt</string>
+    <string name="custom_color_generated">Erzeugt</string>
+    <string name="custom_color_hex">Hexwert</string>
+    <string name="custom_color_wheel">Farbkreis</string>
+    <string name="custom_color_brightness">Helligkeit</string>
+    <string name="custom_color_style_hint">„%1$s“ verringert die Sättigung</string>
+    <string name="custom_color_use_fidelity">Original verwenden</string>
 </resources>

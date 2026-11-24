@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">Encre utilise toujours une palette monochrome</string>
     <string name="amoled_dark">Fond noir pur</string>
     <string name="amoled_dark_desc">Utiliser du noir pur en mode sombre pour les écrans OLED</string>
+    <string name="custom_color_title">Couleur personnalisée</string>
+    <string name="custom_color_selected">Choisie</string>
+    <string name="custom_color_generated">Générée</string>
+    <string name="custom_color_hex">Code hex.</string>
+    <string name="custom_color_wheel">Cercle chromatique</string>
+    <string name="custom_color_brightness">Luminosité</string>
+    <string name="custom_color_style_hint">Le style « %1$s » réduit la saturation</string>
+    <string name="custom_color_use_fidelity">Utiliser Fidèle</string>
 </resources>

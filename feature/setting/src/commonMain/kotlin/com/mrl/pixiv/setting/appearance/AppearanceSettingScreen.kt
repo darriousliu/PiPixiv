@@ -5,10 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,21 +27,32 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
+import com.mrl.pixiv.common.compose.theme.platformDynamicColorScheme
 import com.mrl.pixiv.common.compose.theme.rememberAppColorScheme
+import com.mrl.pixiv.common.data.setting.AppPaletteStyle
 import com.mrl.pixiv.common.data.setting.AppearanceSettings
+import com.mrl.pixiv.common.data.setting.ResolvedThemeColor
 import com.mrl.pixiv.common.data.setting.SettingTheme
+import com.mrl.pixiv.common.data.setting.ThemeColor
+import com.mrl.pixiv.common.data.setting.resolve
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 import com.mrl.pixiv.common.router.MainPage
@@ -54,7 +71,16 @@ fun AppearanceSettingScreen(
 ) {
     val preferences by requireUserPreferenceFlow.collectAsStateWithLifecycle()
     val theme = SettingTheme.entries.find { it.name == preferences.theme } ?: SettingTheme.SYSTEM
+    var pickerSeed by rememberSaveable { mutableStateOf<Long?>(null) }
+    if (pickerSeed != null && navigationManager.topEntryId == navigationManager.entryId) {
+        NavigationBackHandler(
+            state = rememberNavigationEventState(NavigationEventInfo.None),
+            onBackCompleted = { pickerSeed = null },
+        )
+    }
     AppearanceSettingContent(
+        pickerSeed = pickerSeed,
+        onPickerSeedChange = { pickerSeed = it },
         appearance = preferences.appearance,
         theme = theme,
         darkTheme = when (theme) {
@@ -79,6 +105,8 @@ fun AppearanceSettingScreen(
 
 @Composable
 internal fun AppearanceSettingContent(
+    pickerSeed: Long?,
+    onPickerSeedChange: (Long?) -> Unit,
     appearance: AppearanceSettings,
     theme: SettingTheme,
     darkTheme: Boolean,
@@ -91,8 +119,91 @@ internal fun AppearanceSettingContent(
     modifier: Modifier = Modifier,
 ) {
     var pageIndex by rememberSaveable { mutableIntStateOf(0) }
+    var useFidelity by rememberSaveable { mutableStateOf(false) }
+    val draftStyle = if (useFidelity) AppPaletteStyle.FIDELITY else appearance.resolvedPaletteStyle
+    val resolved = appearance.resolve(platformDynamicColorScheme(darkTheme) != null)
+    val currentPrimary = MaterialTheme.colorScheme.primary.toArgb().toUInt().toLong()
+    val previewAppearance = if (pickerSeed == null) appearance else appearance.copy(
+        themeColor = ThemeColor.CUSTOM.name,
+        customColor = pickerSeed,
+        paletteStyle = draftStyle.name,
+    )
+    val scheme = if (pickerSeed == null) {
+        MaterialTheme.colorScheme
+    } else {
+        rememberAppColorScheme(previewAppearance, darkTheme)
+    }
+    MaterialTheme(colorScheme = scheme) {
+        AppearanceLayout(
+            pickerOpen = pickerSeed != null,
+            onBack = { if (pickerSeed == null) onBack() else onPickerSeedChange(null) },
+            preview = { wide, previewModifier ->
+                PreviewCard(
+                    appearance = previewAppearance,
+                    darkTheme = darkTheme,
+                    wide = wide,
+                    useLiquidGlassNavigation = useLiquidGlassNavigation,
+                    spanCount = spanCount,
+                    selectedPage = previewPages[pageIndex],
+                    onSelectPage = { pageIndex = previewPages.indexOf(it) },
+                    modifier = previewModifier,
+                )
+            },
+            options = {
+                AppearanceOptions(
+                    appearance = appearance,
+                    theme = theme,
+                    darkTheme = darkTheme,
+                    useLiquidGlassNavigation = useLiquidGlassNavigation,
+                    onAppearanceChange = onAppearanceChange,
+                    onThemeChange = onThemeChange,
+                    onGlassChange = onGlassChange,
+                    onCustomColor = {
+                        useFidelity = false
+                        val seed = appearance.customColor ?: (resolved as? ResolvedThemeColor.Seeded)?.seed
+                        onPickerSeedChange(seed ?: currentPrimary)
+                    },
+                )
+            },
+            picker = { wide, panelModifier ->
+                if (pickerSeed != null) {
+                    CustomColorPicker(
+                        seed = pickerSeed,
+                        style = draftStyle,
+                        wide = wide,
+                        onSeedChange = onPickerSeedChange,
+                        onUseFidelity = { useFidelity = true },
+                        onCancel = { onPickerSeedChange(null) },
+                        onApply = { seed ->
+                            onAppearanceChange(previewAppearance.copy(customColor = seed))
+                            onPickerSeedChange(null)
+                        },
+                        modifier = panelModifier,
+                    )
+                }
+            },
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun AppearanceLayout(
+    pickerOpen: Boolean,
+    onBack: () -> Unit,
+    preview: @Composable (wide: Boolean, modifier: Modifier) -> Unit,
+    options: @Composable () -> Unit,
+    picker: @Composable (wide: Boolean, modifier: Modifier) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val optionsScroll = rememberScrollState()
     Scaffold(
         modifier = modifier,
+        contentWindowInsets = if (pickerOpen) {
+            ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+        } else {
+            ScaffoldDefaults.contentWindowInsets
+        },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(RStrings.appearance_setting)) },
@@ -104,47 +215,33 @@ internal fun AppearanceSettingContent(
             )
         },
     ) { padding ->
-        BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
-            val wide = maxWidth >= 600.dp
-            val preview: @Composable (Modifier) -> Unit = { previewModifier ->
-                PreviewCard(
-                    appearance = appearance,
-                    darkTheme = darkTheme,
-                    wide = wide,
-                    useLiquidGlassNavigation = useLiquidGlassNavigation,
-                    spanCount = spanCount,
-                    selectedPage = previewPages[pageIndex],
-                    onSelectPage = { pageIndex = previewPages.indexOf(it) },
-                    modifier = previewModifier,
-                )
-            }
-            val options: @Composable () -> Unit = {
-                AppearanceOptions(
-                    appearance = appearance,
-                    theme = theme,
-                    darkTheme = darkTheme,
-                    useLiquidGlassNavigation = useLiquidGlassNavigation,
-                    onAppearanceChange = onAppearanceChange,
-                    onThemeChange = onThemeChange,
-                    onGlassChange = onGlassChange,
-                )
-            }
-            if (wide) {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding).imePadding()) {
+            if (maxWidth >= 600.dp) {
                 Row(
-                    Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 12.dp),
+                    Modifier.fillMaxSize().navigationBarsPadding().padding(horizontal = 24.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
-                    preview(Modifier.weight(1f).fillMaxHeight())
-                    Column(Modifier.width(400.dp).verticalScroll(rememberScrollState()).padding(bottom = 16.dp)) {
-                        options()
+                    preview(true, Modifier.weight(1f).fillMaxHeight())
+                    if (pickerOpen) {
+                        picker(true, Modifier.width(400.dp))
+                    } else {
+                        Column(Modifier.width(400.dp).verticalScroll(optionsScroll).padding(bottom = 16.dp)) {
+                            options()
+                        }
                     }
+                }
+            } else if (pickerOpen) {
+                val maxPanelHeight = maxHeight * 0.76f
+                Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    preview(false, Modifier.fillMaxWidth().weight(1f).padding(horizontal = 16.dp))
+                    picker(false, Modifier.heightIn(max = maxPanelHeight))
                 }
             } else {
                 Column(
-                    Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                    Modifier.fillMaxSize().verticalScroll(optionsScroll)
                         .padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
                 ) {
-                    preview(Modifier.fillMaxWidth().height(468.dp))
+                    preview(false, Modifier.fillMaxWidth().height(468.dp))
                     options()
                 }
             }

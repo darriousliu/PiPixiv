@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">「墨」固定使用单色配色</string>
     <string name="amoled_dark">纯黑背景</string>
     <string name="amoled_dark_desc">深色模式下使用纯黑，适合 OLED 屏幕</string>
+    <string name="custom_color_title">自定义颜色</string>
+    <string name="custom_color_selected">所选</string>
+    <string name="custom_color_generated">生成</string>
+    <string name="custom_color_hex">色值</string>
+    <string name="custom_color_wheel">色轮</string>
+    <string name="custom_color_brightness">亮度</string>
+    <string name="custom_color_style_hint">「%1$s」会降低饱和度</string>
+    <string name="custom_color_use_fidelity">改用原色</string>
 </resources>

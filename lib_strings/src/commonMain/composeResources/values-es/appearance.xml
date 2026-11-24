@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">Tinta siempre usa una paleta monocromática</string>
     <string name="amoled_dark">Fondo negro puro</string>
     <string name="amoled_dark_desc">Usar negro puro en el modo oscuro para pantallas OLED</string>
+    <string name="custom_color_title">Color personalizado</string>
+    <string name="custom_color_selected">Elegido</string>
+    <string name="custom_color_generated">Generado</string>
+    <string name="custom_color_hex">Código hex.</string>
+    <string name="custom_color_wheel">Rueda de color</string>
+    <string name="custom_color_brightness">Brillo</string>
+    <string name="custom_color_style_hint">El estilo «%1$s» reduce la saturación</string>
+    <string name="custom_color_use_fidelity">Usar el estilo fiel</string>
 </resources>

@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">Ink always uses a monochrome palette</string>
     <string name="amoled_dark">Pure black background</string>
     <string name="amoled_dark_desc">Use pure black in dark mode for OLED screens</string>
+    <string name="custom_color_title">Custom color</string>
+    <string name="custom_color_selected">Selected</string>
+    <string name="custom_color_generated">Generated</string>
+    <string name="custom_color_hex">Hex code</string>
+    <string name="custom_color_wheel">Color wheel</string>
+    <string name="custom_color_brightness">Brightness</string>
+    <string name="custom_color_style_hint">%1$s reduces saturation</string>
+    <string name="custom_color_use_fidelity">Use true color</string>
 </resources>

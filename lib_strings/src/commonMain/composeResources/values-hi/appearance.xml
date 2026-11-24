@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">स्याही के लिए हमेशा एकरंगी पैलेट इस्तेमाल होता है</string>
     <string name="amoled_dark">पूरी तरह काली पृष्ठभूमि</string>
     <string name="amoled_dark_desc">OLED स्क्रीन के लिए डार्क मोड में शुद्ध काला रंग इस्तेमाल करें</string>
+    <string name="custom_color_title">मनपसंद रंग</string>
+    <string name="custom_color_selected">चुना हुआ</string>
+    <string name="custom_color_generated">तैयार रंग</string>
+    <string name="custom_color_hex">हेक्स कोड</string>
+    <string name="custom_color_wheel">रंग चक्र</string>
+    <string name="custom_color_brightness">चमक</string>
+    <string name="custom_color_style_hint">“%1$s” शैली से रंगों की संतृप्ति कम होती है</string>
+    <string name="custom_color_use_fidelity">मूल रंग इस्तेमाल करें</string>
 </resources>

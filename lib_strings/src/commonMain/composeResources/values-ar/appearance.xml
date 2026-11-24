@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">يستخدم لون الحبر دائمًا لوحة أحادية اللون</string>
     <string name="amoled_dark">خلفية سوداء خالصة</string>
     <string name="amoled_dark_desc">استخدام الأسود الخالص في الوضع الداكن لشاشات OLED</string>
+    <string name="custom_color_title">لون مخصص</string>
+    <string name="custom_color_selected">المختار</string>
+    <string name="custom_color_generated">الناتج</string>
+    <string name="custom_color_hex">رمز اللون</string>
+    <string name="custom_color_wheel">عجلة الألوان</string>
+    <string name="custom_color_brightness">السطوع</string>
+    <string name="custom_color_style_hint">يقلل النمط «%1$s» من تشبع الألوان</string>
+    <string name="custom_color_use_fidelity">استخدام اللون الأصلي</string>
 </resources>

@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">먹색은 항상 단색 배색을 사용합니다</string>
     <string name="amoled_dark">완전한 검정 배경</string>
     <string name="amoled_dark_desc">다크 모드에서 OLED 화면에 적합한 완전한 검정을 사용합니다</string>
+    <string name="custom_color_title">사용자 지정 색상</string>
+    <string name="custom_color_selected">선택 색상</string>
+    <string name="custom_color_generated">생성 색상</string>
+    <string name="custom_color_hex">색상 코드</string>
+    <string name="custom_color_wheel">색상환</string>
+    <string name="custom_color_brightness">밝기</string>
+    <string name="custom_color_style_hint">‘%1$s’ 스타일은 채도를 낮춥니다</string>
+    <string name="custom_color_use_fidelity">원색으로 변경</string>
 </resources>

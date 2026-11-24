@@ -20,8 +20,10 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.BrightnessMedium
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Colorize
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ColorScheme
@@ -40,6 +42,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -126,6 +130,7 @@ internal fun AppearanceOptions(
     onAppearanceChange: (AppearanceSettings) -> Unit,
     onThemeChange: (SettingTheme) -> Unit,
     onGlassChange: (Boolean) -> Unit,
+    onCustomColor: () -> Unit,
 ) {
     val wallpaper = platformDynamicColorScheme(darkTheme)
     val baseline = remember(darkTheme) { if (darkTheme) darkColorScheme() else expressiveLightColorScheme() }
@@ -138,7 +143,6 @@ internal fun AppearanceOptions(
     ) {
         for (color in ThemeColor.entries) {
             if (color == ThemeColor.DYNAMIC && wallpaper == null) continue
-            if (color == ThemeColor.CUSTOM && appearance.customColor == null) continue
             val source = appearance.copy(themeColor = color.name).resolve(wallpaper != null)
             val scheme = when (source) {
                 ResolvedThemeColor.Baseline -> baseline
@@ -151,7 +155,11 @@ internal fun AppearanceOptions(
                 color = color,
                 selected = resolved.color == color,
                 scheme = scheme,
-                onClick = { onAppearanceChange(appearance.copy(themeColor = color.name)) },
+                unusedCustom = color == ThemeColor.CUSTOM && appearance.customColor == null,
+                onClick = {
+                    if (color == ThemeColor.CUSTOM) onCustomColor()
+                    else onAppearanceChange(appearance.copy(themeColor = color.name))
+                },
             )
         }
     }
@@ -203,7 +211,13 @@ internal fun AppearanceOptions(
 }
 
 @Composable
-private fun ThemeSwatch(color: ThemeColor, selected: Boolean, scheme: ColorScheme, onClick: () -> Unit) {
+private fun ThemeSwatch(
+    color: ThemeColor,
+    selected: Boolean,
+    scheme: ColorScheme,
+    unusedCustom: Boolean,
+    onClick: () -> Unit,
+) {
     val fontScale = LocalDensity.current.fontScale
     val labelWidth = 64.dp + 44.dp * (fontScale - 1f).coerceAtLeast(0f)
     val labelStyle = if (selected) MaterialTheme.typography.labelLargeEmphasized else MaterialTheme.typography.labelLarge
@@ -217,9 +231,21 @@ private fun ThemeSwatch(color: ThemeColor, selected: Boolean, scheme: ColorSchem
             Modifier.size(56.dp).clip(if (selected) MaterialShapes.Cookie9Sided.toShape() else CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            PaletteDisc(scheme, Modifier.fillMaxSize())
+            if (unusedCustom) {
+                Canvas(Modifier.fillMaxSize()) {
+                    drawCircle(
+                        Brush.sweepGradient(
+                            listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
+                        )
+                    )
+                }
+            } else {
+                PaletteDisc(scheme, Modifier.fillMaxSize())
+            }
             val badge: ImageVector? = when {
                 selected -> Icons.Rounded.Check
+                unusedCustom -> Icons.Rounded.Add
+                color == ThemeColor.CUSTOM -> Icons.Rounded.Colorize
                 color == ThemeColor.DYNAMIC -> Icons.Rounded.Wallpaper
                 else -> null
             }

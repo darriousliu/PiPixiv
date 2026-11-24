@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">Mürekkep her zaman tek renkli bir palet kullanır</string>
     <string name="amoled_dark">Saf siyah arka plan</string>
     <string name="amoled_dark_desc">OLED ekranlar için koyu modda saf siyah kullan</string>
+    <string name="custom_color_title">Özel renk</string>
+    <string name="custom_color_selected">Seçilen</string>
+    <string name="custom_color_generated">Oluşturulan</string>
+    <string name="custom_color_hex">Hex kodu</string>
+    <string name="custom_color_wheel">Renk çarkı</string>
+    <string name="custom_color_brightness">Parlaklık</string>
+    <string name="custom_color_style_hint">“%1$s” stili doygunluğu azaltır</string>
+    <string name="custom_color_use_fidelity">Özgün rengi kullan</string>
 </resources>

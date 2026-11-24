@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">墨色は常にモノクロ配色を使用します</string>
     <string name="amoled_dark">背景を真っ黒にする</string>
     <string name="amoled_dark_desc">ダークモードで OLED 画面に適した黒背景を使用します</string>
+    <string name="custom_color_title">カスタムカラー</string>
+    <string name="custom_color_selected">選択色</string>
+    <string name="custom_color_generated">生成色</string>
+    <string name="custom_color_hex">カラーコード</string>
+    <string name="custom_color_wheel">色相環</string>
+    <string name="custom_color_brightness">明るさ</string>
+    <string name="custom_color_style_hint">「%1$s」では彩度が下がります</string>
+    <string name="custom_color_use_fidelity">原色に変更</string>
 </resources>

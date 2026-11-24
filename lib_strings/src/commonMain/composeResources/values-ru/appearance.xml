@@ -27,4 +27,12 @@
     <string name="palette_style_disabled_ink">Для цвета «Тушь» всегда используется монохромная палитра</string>
     <string name="amoled_dark">Чисто чёрный фон</string>
     <string name="amoled_dark_desc">Использовать чистый чёрный цвет в тёмном режиме на экранах OLED</string>
+    <string name="custom_color_title">Свой цвет</string>
+    <string name="custom_color_selected">Выбранный</string>
+    <string name="custom_color_generated">Итоговый</string>
+    <string name="custom_color_hex">HEX-код</string>
+    <string name="custom_color_wheel">Цветовой круг</string>
+    <string name="custom_color_brightness">Яркость</string>
+    <string name="custom_color_style_hint">Стиль «%1$s» снижает насыщенность</string>
+    <string name="custom_color_use_fidelity">Выбрать исходный</string>
 </resources>
