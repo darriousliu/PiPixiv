@@ -183,16 +183,29 @@ private fun ArtworkCard(height: Dp, rank: Int?) {
             if (rank != null) {
                 PlaceholderBar(16.dp, 20.dp, if (rank <= 3) colors.primary else colors.onSurfaceVariant)
             }
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                PlaceholderBar(64.dp, 10.dp)
-                PlaceholderBar(40.dp, 8.dp)
-            }
+            LabelSkeleton()
         }
     }
 }
 
 @Composable
-private fun ChipSkeleton(selected: Boolean, shape: Shape = MaterialTheme.shapes.small) {
+private fun LabelSkeleton(modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        PlaceholderBar(64.dp, 10.dp)
+        PlaceholderBar(40.dp, 8.dp)
+    }
+}
+
+@Composable
+private fun ChipSkeleton(
+    selected: Boolean,
+    shape: Shape,
+    labelColor: Color = if (selected) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    },
+) {
     val colors = MaterialTheme.colorScheme
     val modifier = if (selected) {
         Modifier.background(colors.secondaryContainer, shape)
@@ -200,7 +213,7 @@ private fun ChipSkeleton(selected: Boolean, shape: Shape = MaterialTheme.shapes.
         Modifier.background(colors.surface, shape).border(1.dp, colors.outline, shape)
     }
     Box(modifier.size(76.dp, 32.dp), contentAlignment = Alignment.Center) {
-        PlaceholderBar(36.dp, 8.dp, if (selected) colors.onSecondaryContainer else colors.onSurfaceVariant)
+        PlaceholderBar(36.dp, 8.dp, labelColor)
     }
 }
 
@@ -217,12 +230,11 @@ internal fun SearchSkeleton(navigationInset: Dp) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
                 .wrapContentHeight(Alignment.Top, unbounded = true),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Box(Modifier.fillMaxWidth().height(64.dp), contentAlignment = Alignment.Center) {
                 Row(
                     modifier = Modifier.fillMaxWidth().height(56.dp)
-                        .background(colors.surfaceContainerHigh, MaterialTheme.shapes.extraLarge)
+                        .background(colors.surfaceContainerHigh, CircleShape)
                         .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -231,24 +243,32 @@ internal fun SearchSkeleton(navigationInset: Dp) {
                     PlaceholderBar(72.dp, 12.dp)
                 }
             }
-            Column(
-                modifier = Modifier.fillMaxWidth()
-                    .background(colors.surfaceContainerLow, MaterialTheme.shapes.extraLarge).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+            Spacer(Modifier.height(8.dp))
+            Row(Modifier.fillMaxWidth().height(48.dp), verticalAlignment = Alignment.CenterVertically) {
                 PlaceholderBar(72.dp, 16.dp)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    repeat(3) { ChipSkeleton(selected = false) }
+                Spacer(Modifier.weight(1f))
+                PlaceholderBar(36.dp, 10.dp, colors.primary)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                repeat(3) {
+                    ChipSkeleton(selected = false, shape = MaterialTheme.shapes.small, labelColor = colors.primary)
                 }
             }
-            PlaceholderBar(90.dp, 18.dp)
+            Spacer(Modifier.height(24.dp))
+            Box(Modifier.height(48.dp), contentAlignment = Alignment.CenterStart) {
+                PlaceholderBar(90.dp, 16.dp)
+            }
             repeat(5) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    repeat(3) {
-                        Spacer(
-                            Modifier.weight(1f).aspectRatio(1f)
-                                .background(colors.surfaceContainerHigh, MaterialTheme.shapes.medium)
-                        )
+                Spacer(Modifier.height(16.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    repeat(2) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Spacer(
+                                Modifier.fillMaxWidth().aspectRatio(1f)
+                                    .background(colors.surfaceContainerHigh, MaterialTheme.shapes.large)
+                            )
+                            LabelSkeleton(Modifier.padding(horizontal = 4.dp))
+                        }
                     }
                 }
             }
