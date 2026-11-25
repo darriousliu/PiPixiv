@@ -101,10 +101,11 @@ class MainActivity : BaseActivity() {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val handled = super.dispatchKeyEvent(event)
         // Text input, focused controls and the split handle consume their keys first.
-        if (!handled) {
-            scope.launch { flow.emit(ComposeKeyEvent(event)) }
-        }
-        return handled
+        if (handled) return true
+        scope.launch { flow.emit(ComposeKeyEvent(event)) }
+        // Esc 已交给 EscBackHandler 返回。Android 8.x 会把未消费的 Esc 回退成 BACK，
+        // 不在这里消费就会再返回一次。
+        return event.keyCode == KeyEvent.KEYCODE_ESCAPE
     }
 
     private fun handleIntent(intent: Intent) {

@@ -23,6 +23,8 @@ import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 
 fun MainViewController(onStatusBarVisibilityChange: (Boolean) -> Unit) = run {
+    // 外接键盘的 Esc 已由 Compose 内置的返回输入交给返回处理器，不经过这里。
+    // 以后若向这里写入按键，须跳过 Esc，否则 EscBackHandler 会再返回一次。
     val keyStateFlow = MutableSharedFlow<KeyEvent>()
     AppUtil.init(PlatformContext.INSTANCE, FLAVOR)
     ComposeUIViewController {
