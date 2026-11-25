@@ -6,15 +6,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowUpward
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -53,14 +50,9 @@ fun BackToTopButton(
                     onBackToTop()
                 }
             }
-            val shape = FloatingActionButtonDefaults.shape
-            FilledTonalIconButton(
-                modifier = Modifier.size(48.dp).border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape),
-                shape = shape,
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
+            FloatingActionButton(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 onClick = {
                     scope.launch {
                         onBackToTop()
@@ -79,7 +71,7 @@ fun BackToTopButton(
                     onRefresh()
                 }
             }
-            Spacer(modifier = Modifier.size(48.dp))
+            Spacer(modifier = Modifier.size(56.dp))
         }
     }
 }
