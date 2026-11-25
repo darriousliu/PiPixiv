@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -78,12 +79,13 @@ internal fun LatestSkeleton(spanCount: Int, navigationInset: Dp) {
             SkeletonTopBar()
             SkeletonTabs(listOf(36.dp, 60.dp, 36.dp, 36.dp), scrollable = true)
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).heightIn(min = 48.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 repeat(3) { ChipSkeleton(selected = it == 0, shape = CircleShape) }
             }
-            ArtworkGrid(spanCount)
+            ArtworkGrid(spanCount, topPadding = 4.dp)
         }
     }
 }
@@ -130,7 +132,11 @@ private fun SkeletonTabs(labelWidths: List<Dp>, scrollable: Boolean = false) {
         HorizontalDivider(Modifier.align(Alignment.BottomCenter))
         Row(Modifier.fillMaxSize().padding(horizontal = if (scrollable) 16.dp else 0.dp)) {
             labelWidths.forEachIndexed { index, width ->
-                val tabWidth = if (scrollable) Modifier.width(width + 32.dp) else Modifier.weight(1f)
+                val tabWidth = if (scrollable) {
+                    Modifier.width((width + 32.dp).coerceAtLeast(48.dp))
+                } else {
+                    Modifier.weight(1f)
+                }
                 Box(tabWidth.height(48.dp), contentAlignment = Alignment.Center) {
                     PlaceholderBar(width, 12.dp, if (index == 0) colors.primary else colors.onSurfaceVariant)
                     if (index == 0) {
@@ -148,10 +154,11 @@ private fun SkeletonTabs(labelWidths: List<Dp>, scrollable: Boolean = false) {
 private val cardHeights = listOf(180.dp, 240.dp, 200.dp, 160.dp, 220.dp, 260.dp)
 
 @Composable
-private fun ArtworkGrid(spanCount: Int, showRank: Boolean = false) {
+private fun ArtworkGrid(spanCount: Int, showRank: Boolean = false, topPadding: Dp = 12.dp) {
     val columns = if (spanCount == -1) 2 else spanCount.coerceIn(1, 4)
     Row(
-        modifier = Modifier.fillMaxWidth().clipToBounds().padding(start = 16.dp, top = 12.dp, end = 16.dp),
+        modifier = Modifier.fillMaxWidth().clipToBounds()
+            .padding(start = 16.dp, top = topPadding, end = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         repeat(columns) { column ->
@@ -250,7 +257,11 @@ internal fun SearchSkeleton(navigationInset: Dp) {
                 Spacer(Modifier.weight(1f))
                 PlaceholderBar(36.dp, 10.dp, colors.primary)
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.heightIn(min = 48.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 repeat(3) {
                     ChipSkeleton(selected = false, shape = MaterialTheme.shapes.small, labelColor = colors.primary)
                 }
@@ -259,16 +270,17 @@ internal fun SearchSkeleton(navigationInset: Dp) {
             Box(Modifier.height(48.dp), contentAlignment = Alignment.CenterStart) {
                 PlaceholderBar(90.dp, 16.dp)
             }
-            repeat(5) {
-                Spacer(Modifier.height(16.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    repeat(2) {
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Spacer(
-                                Modifier.fillMaxWidth().aspectRatio(1f)
-                                    .background(colors.surfaceContainerHigh, MaterialTheme.shapes.large)
-                            )
-                            LabelSkeleton(Modifier.padding(horizontal = 4.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                repeat(5) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        repeat(2) {
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Spacer(
+                                    Modifier.fillMaxWidth().aspectRatio(1f)
+                                        .background(colors.surfaceContainerHigh, MaterialTheme.shapes.large)
+                                )
+                                LabelSkeleton(Modifier.padding(horizontal = 4.dp))
+                            }
                         }
                     }
                 }

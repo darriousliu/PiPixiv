@@ -87,7 +87,7 @@ internal fun MangaSeriesContextContent(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {

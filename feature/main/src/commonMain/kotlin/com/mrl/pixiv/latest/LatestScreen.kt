@@ -4,14 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Tab
@@ -25,14 +23,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.mrl.pixiv.MainPageFloatingActions
+import com.mrl.pixiv.MainPageScrollableTabRow
 import com.mrl.pixiv.common.analytics.trackTab
-import com.mrl.pixiv.common.compose.IllustGridSpacing
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.ui.BackToTopButton
@@ -206,12 +203,7 @@ internal fun LatestScreenContent(
 
 @Composable
 internal fun LatestTabs(pages: List<LatestPage>, selectedIndex: Int, onSelect: (Int) -> Unit) {
-    PrimaryScrollableTabRow(
-        selectedTabIndex = selectedIndex,
-        modifier = Modifier.fillMaxWidth(),
-        edgePadding = IllustGridSpacing.edgePadding(currentPaneLayoutInfo()),
-        minTabWidth = 48.dp,
-    ) {
+    MainPageScrollableTabRow(selectedIndex = selectedIndex) {
         pages.forEachIndexed { index, page ->
             Tab(
                 selected = selectedIndex == index,

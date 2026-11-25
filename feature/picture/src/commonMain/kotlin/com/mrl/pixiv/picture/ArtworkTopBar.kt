@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.compose.theme.tabularNumbers
 import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.strings.back
@@ -46,6 +48,10 @@ internal fun ArtworkTopBar(
     onMore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val buttonColors = IconButtonDefaults.filledTonalIconButtonColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
     Box(
         modifier = modifier.fillMaxWidth()
             .statusBarsPadding()
@@ -56,10 +62,10 @@ internal fun ArtworkTopBar(
             modifier = Modifier.align(Alignment.CenterStart),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            FilledTonalIconButton(onClick = throttleClick(onClick = onBack)) {
+            FilledTonalIconButton(onClick = throttleClick(onClick = onBack), colors = buttonColors) {
                 Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(RStrings.back))
             }
-            FilledTonalIconButton(onClick = throttleClick(onClick = onHome)) {
+            FilledTonalIconButton(onClick = throttleClick(onClick = onHome), colors = buttonColors) {
                 Icon(Icons.Rounded.Home, contentDescription = stringResource(RStrings.home))
             }
         }
@@ -78,13 +84,14 @@ internal fun ArtworkTopBar(
                     Text(
                         text = "$currentPage/$pageCount",
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
+                        style = MaterialTheme.typography.labelLarge.tabularNumbers,
                     )
                 }
             }
             FilledTonalIconButton(
                 onClick = throttleClick(onClick = onMore),
                 modifier = Modifier.align(Alignment.CenterEnd),
+                colors = buttonColors,
             ) {
                 Icon(Icons.Rounded.MoreVert, contentDescription = stringResource(RStrings.more))
             }

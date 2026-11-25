@@ -18,7 +18,6 @@ import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -41,9 +40,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.MainPageFloatingActions
+import com.mrl.pixiv.MainPageScrollableTabRow
 import com.mrl.pixiv.common.analytics.logScreenView
 import com.mrl.pixiv.common.analytics.trackTab
-import com.mrl.pixiv.common.compose.IllustGridSpacing
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
@@ -438,13 +437,8 @@ internal fun HomeFeedTabs(selectedIndex: Int, onSelect: (Int) -> Unit) {
             )
         }
     }
-    val paneInfo = currentPaneLayoutInfo()
-    if (paneInfo.sizeClass.isWidthAtLeastMedium) {
-        PrimaryScrollableTabRow(
-            selectedTabIndex = selectedIndex,
-            edgePadding = IllustGridSpacing.edgePadding(paneInfo),
-            tabs = tabs,
-        )
+    if (currentPaneLayoutInfo().sizeClass.isWidthAtLeastMedium) {
+        MainPageScrollableTabRow(selectedIndex = selectedIndex, tabs = tabs)
     } else {
         PrimaryTabRow(selectedTabIndex = selectedIndex, modifier = Modifier.fillMaxWidth(), tabs = tabs)
     }

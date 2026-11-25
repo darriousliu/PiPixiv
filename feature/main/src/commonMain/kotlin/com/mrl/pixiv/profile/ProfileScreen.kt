@@ -65,6 +65,7 @@ import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.rememberThrottleClick
+import com.mrl.pixiv.common.compose.theme.tabularNumbers
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.User
@@ -262,7 +263,7 @@ private fun ProfileIdentityCard(user: User, onProfile: () -> Unit) {
                 )
                 Text(
                     text = "ID: ${user.id}",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelMedium.tabularNumbers,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(

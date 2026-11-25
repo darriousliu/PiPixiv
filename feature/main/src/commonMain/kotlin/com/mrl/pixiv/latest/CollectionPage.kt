@@ -137,11 +137,7 @@ private fun CollectionIllustPage(
                 columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
                 state = lazyGridState,
-                contentPadding = PaddingValues(
-                    start = layoutParams.edgePadding,
-                    top = 12.dp,
-                    end = layoutParams.edgePadding,
-                ).withMainNavigationBottomInset(),
+                contentPadding = latestArtworkGridPadding(layoutParams.edgePadding),
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,
             ) {

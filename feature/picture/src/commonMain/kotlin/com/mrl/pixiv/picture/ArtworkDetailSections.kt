@@ -1,7 +1,6 @@
 package com.mrl.pixiv.picture
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlexBox
@@ -9,8 +8,10 @@ import androidx.compose.foundation.layout.FlexWrap
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Comment
@@ -27,11 +28,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
+import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.IllustGridSpacing
+import com.mrl.pixiv.common.compose.theme.tabularNumbers
 import com.mrl.pixiv.common.compose.ui.FollowButton
 import com.mrl.pixiv.common.compose.ui.TagItem
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
@@ -46,8 +51,37 @@ import com.mrl.pixiv.strings.view_comments
 import com.mrl.pixiv.strings.viewed
 import org.jetbrains.compose.resources.stringResource
 
+private const val KEY_ILLUST_TITLE = "illust_title"
+private const val KEY_ILLUST_DATA = "illust_data"
+private const val KEY_ILLUST_TAGS = "illust_tags"
+
+internal fun LazyListScope.artworkInfoItems(
+    illust: Illust,
+    inset: Modifier,
+    onSearch: (Tag) -> Unit,
+    series: @Composable (Modifier) -> Unit,
+) {
+    item(key = KEY_ILLUST_TITLE) {
+        ArtworkTitleSection(illust, modifier = inset.padding(top = 20.dp))
+    }
+    if (illust.caption.isNotBlank()) {
+        item(key = KEY_ILLUST_DATA) {
+            ArtworkCaption(illust.caption, modifier = inset.padding(top = 16.dp))
+        }
+    }
+    if (illust.series?.id?.let { it > 0 } == true) {
+        item(key = "manga_series_context") { series(inset.padding(top = 16.dp)) }
+    }
+    val tags = illust.tags.orEmpty()
+    if (tags.isNotEmpty()) {
+        item(key = KEY_ILLUST_TAGS) {
+            ArtworkTags(tags = tags, onSearch = onSearch, modifier = inset.padding(top = 16.dp))
+        }
+    }
+}
+
 @Composable
-internal fun ArtworkTitleSection(illust: Illust, modifier: Modifier = Modifier) {
+private fun ArtworkTitleSection(illust: Illust, modifier: Modifier = Modifier) {
     SelectionContainer(modifier) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
@@ -59,7 +93,7 @@ internal fun ArtworkTitleSection(illust: Illust, modifier: Modifier = Modifier) 
                 modifier = Modifier.fillMaxWidth(),
                 config = {
                     wrap(FlexWrap.Wrap)
-                    gap(16.dp)
+                    gap(row = 6.dp, column = 16.dp)
                 },
             ) {
                 ArtworkStat(Icons.Rounded.Visibility, illust.totalView.toString(), stringResource(RStrings.viewed))
@@ -79,12 +113,12 @@ private fun ArtworkStat(icon: ImageVector, value: String, label: String?) {
     ) {
         val color = MaterialTheme.colorScheme.onSurfaceVariant
         Icon(icon, contentDescription = label, modifier = Modifier.size(16.dp), tint = color)
-        Text(text = value, style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"), color = color)
+        Text(text = value, style = MaterialTheme.typography.labelLarge.tabularNumbers, color = color)
     }
 }
 
 @Composable
-internal fun ArtworkCaption(caption: String, modifier: Modifier = Modifier) {
+private fun ArtworkCaption(caption: String, modifier: Modifier = Modifier) {
     val text = remember(caption) { htmlToAnnotatedString(html = caption, compactMode = true) }
     SelectionContainer(modifier) {
         Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -92,7 +126,7 @@ internal fun ArtworkCaption(caption: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun ArtworkTags(tags: List<Tag>, onSearch: (Tag) -> Unit, modifier: Modifier = Modifier) {
+private fun ArtworkTags(tags: List<Tag>, onSearch: (Tag) -> Unit, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val tagMaxWidth = maxWidth
         FlexBox(
@@ -103,9 +137,11 @@ internal fun ArtworkTags(tags: List<Tag>, onSearch: (Tag) -> Unit, modifier: Mod
             },
         ) {
             tags.forEach { tag ->
-                Box(Modifier.widthIn(max = tagMaxWidth)) {
-                    TagItem(tag = tag, onClick = { onSearch(tag) })
-                }
+                TagItem(
+                    tag = tag,
+                    onClick = { onSearch(tag) },
+                    modifier = Modifier.widthIn(max = tagMaxWidth),
+                )
             }
         }
     }
@@ -141,7 +177,7 @@ internal fun ArtworkAuthor(
                 )
                 Text(
                     text = "ID: ${user.id}",
-                    style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
+                    style = MaterialTheme.typography.labelMedium.tabularNumbers,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -165,10 +201,22 @@ internal fun ArtworkComments(count: Int?, onClick: () -> Unit, modifier: Modifie
             )
         },
         trailingContent = count?.let {
-            { Text(text = it.toString(), style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum")) }
+            { Text(text = it.toString(), style = MaterialTheme.typography.labelLarge.tabularNumbers) }
         },
     ) {
         Text(stringResource(RStrings.view_comments))
+    }
+}
+
+@Composable
+internal fun artworkAuthorColumnCount(paneWidth: Dp, edgePadding: Dp, isSplit: Boolean): Int {
+    val density = LocalDensity.current
+    val cells = IllustGridDefaults.userWorkCells(paneWidth, isSplit)
+    return with(cells) {
+        with(density) {
+            val available = (paneWidth.roundToPx() - 2 * edgePadding.roundToPx()).coerceAtLeast(0)
+            calculateCrossAxisCellSizes(available, IllustGridSpacing.Thumbnail.roundToPx()).size
+        }
     }
 }
 

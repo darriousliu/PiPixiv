@@ -42,12 +42,13 @@ import org.jetbrains.compose.resources.stringResource
 fun TagItem(
     tag: Tag,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
     var showCollectionDialog by rememberSaveable { mutableStateOf(false) }
     val shape = MaterialTheme.shapes.small
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(shape)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
             .throttleClick(
@@ -56,7 +57,7 @@ fun TagItem(
                 onClick = onClick,
             )
             .heightIn(min = 32.dp)
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 12.dp, vertical = 4.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         TagText(tag)

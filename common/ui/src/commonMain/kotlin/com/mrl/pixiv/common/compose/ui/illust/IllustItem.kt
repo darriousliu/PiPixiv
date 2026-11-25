@@ -48,6 +48,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.navigationSharedImage
+import com.mrl.pixiv.common.compose.theme.tabularNumbers
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
 import com.mrl.pixiv.common.data.AiType
@@ -236,7 +237,7 @@ internal fun IllustFrame(
                 alignment = if (square) Alignment.Center else Alignment.TopCenter,
             )
             IllustInfoPill(illust, Modifier.align(Alignment.TopStart).padding(8.dp))
-            if (!square || !isBlocked) {
+            if (!isBlocked) {
                 BookmarkTooltipBox(shouldShowTip, Modifier.align(Alignment.BottomEnd)) {
                     IllustBookmarkButton(
                         isBookmarked = isBookmarked,
@@ -285,7 +286,7 @@ private fun IllustInfoPill(illust: Illust, modifier: Modifier = Modifier) {
             }
             Text(
                 text = parts.joinToString(" · "),
-                style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
+                style = MaterialTheme.typography.labelSmall.tabularNumbers,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -326,7 +327,7 @@ private fun IllustLabel(illust: Illust, rank: Int?, modifier: Modifier = Modifie
         if (rank != null) {
             Text(
                 text = rank.toString(),
-                style = MaterialTheme.typography.titleLargeEmphasized.copy(fontFeatureSettings = "tnum"),
+                style = MaterialTheme.typography.titleLargeEmphasized.tabularNumbers,
                 color = if (rank <= 3) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

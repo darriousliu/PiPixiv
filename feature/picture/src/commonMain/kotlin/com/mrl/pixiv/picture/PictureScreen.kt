@@ -171,9 +171,6 @@ fun PictureDeeplinkScreen(
 }
 
 private const val KEY_UGOIRA = "ugoira"
-private const val KEY_ILLUST_TITLE = "illust_title"
-private const val KEY_ILLUST_DATA = "illust_data"
-private const val KEY_ILLUST_TAGS = "illust_tags"
 private const val KEY_ILLUST_AUTHOR = "illust_author"
 private const val KEY_ILLUST_AUTHOR_OTHER_WORKS = "illust_author_other_works"
 private const val KEY_VIEW_COMMENTS = "view_comments"
@@ -208,16 +205,12 @@ internal fun PictureScreen(
     val relatedLayoutParams = IllustGridDefaults.relatedLayoutParameters(
         if (useTwoPaneLayout) paneLayoutInfo.copy(isSplit = true) else paneLayoutInfo,
     )
-    val userLayoutParams = IllustGridDefaults.userLayoutParameters(paneLayoutInfo)
     val density = LocalDensity.current
-    val userSpanCount = with(userLayoutParams.gridCells) {
-        with(density) {
-            density.calculateCrossAxisCellSizes(
-                paneLayoutInfo.size.width.roundToPx(),
-                relatedLayoutParams.horizontalArrangement.spacing.roundToPx(),
-            ).size
-        }
-    }
+    val userSpanCount = artworkAuthorColumnCount(
+        paneWidth = paneLayoutInfo.size.width,
+        edgePadding = relatedLayoutParams.edgePadding,
+        isSplit = paneLayoutInfo.isSplit,
+    )
     val relatedSpanCount = with(relatedLayoutParams.gridCells) {
         with(density) {
             density.calculateCrossAxisCellSizes(
@@ -511,35 +504,20 @@ internal fun PictureScreen(
         currentRelatedRowCount: Int,
     ) {
         val inset = Modifier.padding(horizontal = margin)
-        item(key = KEY_ILLUST_TITLE) {
-            ArtworkTitleSection(illust, modifier = inset.padding(top = 20.dp))
-        }
-        if (illust.caption.isNotBlank()) {
-            item(key = KEY_ILLUST_DATA) {
-                ArtworkCaption(illust.caption, modifier = inset.padding(top = 16.dp))
-            }
-        }
-        if (illust.series?.id?.let { it > 0 } == true) {
-            item(key = "manga_series_context") {
-                MangaSeriesContextCard(
-                    illust = illust,
-                    onSeriesClick = navigationManager::navigateToMangaSeriesScreen,
-                    onEpisodeClick = navigationManager::navigateToSinglePictureScreen,
-                )
-            }
-        }
-        val tags = illust.tags.orEmpty()
-        if (tags.isNotEmpty()) {
-            item(key = KEY_ILLUST_TAGS) {
-                ArtworkTags(
-                    tags = tags,
-                    onSearch = { tag ->
-                        navToSearchResultScreen(tag.name, false, AppViewMode.ILLUST)
-                        dispatch(PictureAction.AddSearchHistory(tag.name))
-                    },
-                    modifier = inset.padding(top = 16.dp),
-                )
-            }
+        artworkInfoItems(
+            illust = illust,
+            inset = inset,
+            onSearch = { tag ->
+                navToSearchResultScreen(tag.name, false, AppViewMode.ILLUST)
+                dispatch(PictureAction.AddSearchHistory(tag.name))
+            },
+        ) { modifier ->
+            MangaSeriesContextCard(
+                illust = illust,
+                onSeriesClick = navigationManager::navigateToMangaSeriesScreen,
+                onEpisodeClick = navigationManager::navigateToSinglePictureScreen,
+                modifier = modifier,
+            )
         }
         item(key = KEY_ILLUST_AUTHOR) {
             UserFollowInfo(
@@ -711,14 +689,8 @@ internal fun PictureScreen(
                                 ).size
                             }
                         }
-                        val rightUserSpanCount = with(userLayoutParams.gridCells) {
-                            with(density) {
-                                calculateCrossAxisCellSizes(
-                                    rightPaneWidth.roundToPx(),
-                                    relatedLayoutParams.horizontalArrangement.spacing.roundToPx()
-                                ).size
-                            }
-                        }
+                        val rightMargin = 24.dp
+                        val rightUserSpanCount = artworkAuthorColumnCount(rightPaneWidth, rightMargin, isSplit = true)
                         val rightRelatedRowCount =
                             if (relatedIllusts.itemCount % rightRelatedSpanCount == 0) {
                                 relatedIllusts.itemCount / rightRelatedSpanCount
@@ -731,7 +703,7 @@ internal fun PictureScreen(
                             contentPadding = PaddingValues(bottom = with(density) { controlsHeight.toDp() }),
                         ) {
                             illustDetailItems(
-                                margin = 24.dp,
+                                margin = rightMargin,
                                 currentUserSpanCount = rightUserSpanCount,
                                 currentRelatedSpanCount = rightRelatedSpanCount,
                                 currentRelatedRowCount = rightRelatedRowCount,

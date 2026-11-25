@@ -128,6 +128,7 @@ internal fun SearchPreviewContent(
     val pullRefreshState = rememberPullToRefreshState()
     val paneInfo = currentPaneLayoutInfo()
     val edgePadding = IllustGridSpacing.edgePadding(paneInfo)
+    val rowSpacing = IllustGridSpacing.LabeledRow
 
     // 框架调整时同步 feature/setting/.../appearance/MainPageSkeletons.kt 中的 SearchSkeleton。
     Scaffold(
@@ -158,7 +159,12 @@ internal fun SearchPreviewContent(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
                                 Icon(Icons.Rounded.Search, contentDescription = null, modifier = Modifier.size(24.dp))
-                                Text(stringResource(RStrings.enter_keywords), style = MaterialTheme.typography.bodyLarge)
+                                Text(
+                                    text = stringResource(RStrings.enter_keywords),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
                             }
                         }
                     }
@@ -190,12 +196,12 @@ internal fun SearchPreviewContent(
                     start = edgePadding,
                     top = 8.dp,
                     end = edgePadding,
-                    bottom = 88.dp + maxOf(
+                    // 最后一行卡片或状态项已经包含行末留白。
+                    bottom = 88.dp - rowSpacing + maxOf(
                         LocalMainNavigationBottomInset.current,
                         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                     ),
                 ),
-                verticalArrangement = Arrangement.spacedBy(IllustGridSpacing.LabeledRow),
                 horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.LabeledColumn),
             ) {
                 item(key = "bookmarked_tags", span = { GridItemSpan(maxLineSpan) }) {
@@ -208,16 +214,22 @@ internal fun SearchPreviewContent(
                 item(key = "popular_tags_title", span = { GridItemSpan(maxLineSpan) }) {
                     SectionHeader(
                         text = stringResource(RStrings.popular_tags),
-                        modifier = Modifier.padding(top = 8.dp),
+                        modifier = Modifier.padding(top = rowSpacing + 8.dp),
                     )
                 }
                 if (state.trendingTags.isEmpty() || state.failed && !state.refreshing) {
                     item(key = "trending_status", span = { GridItemSpan(maxLineSpan) }) {
-                        TrendingTagsStatus(state = state, onRetry = onRefresh)
+                        Box(Modifier.padding(vertical = rowSpacing)) {
+                            TrendingTagsStatus(state = state, onRetry = onRefresh)
+                        }
                     }
                 }
                 items(items = state.trendingTags, key = { "trending_${it.tag}" }) { tag ->
-                    TrendingItem(trendingTag = tag, onSearch = onSearchTag)
+                    TrendingItem(
+                        trendingTag = tag,
+                        onSearch = onSearchTag,
+                        modifier = Modifier.padding(bottom = rowSpacing),
+                    )
                 }
             }
         }
@@ -251,7 +263,7 @@ private fun BookmarkedTagsSection(
                     modifier = Modifier.fillMaxWidth(),
                     config = {
                         wrap(FlexWrap.Wrap)
-                        gap(8.dp)
+                        gap(row = 0.dp, column = 8.dp)
                     },
                 ) {
                     tags.take(6).forEach { tag ->

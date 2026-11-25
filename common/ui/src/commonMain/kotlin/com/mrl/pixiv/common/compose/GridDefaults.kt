@@ -100,24 +100,12 @@ object IllustGridDefaults {
         )
     }
 
-    @Composable
-    fun userLayoutParameters(paneInfo: PaneLayoutInfo = currentPaneLayoutInfo()): GridLayoutParams {
-        val windowSizeClass = paneInfo.sizeClass
-        val horizontalArrangement = when {
-            windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
-            windowSizeClass.isWidthAtLeastMedium -> 5f.spaceBy
-            else -> 5f.spaceBy
+    fun userWorkCells(paneWidth: Dp, isSplit: Boolean): GridCells =
+        if (paneWidth < 600.dp) {
+            ConstrainedGridCells(preferredCount = 3, minSize = if (isSplit) 120.dp else 96.dp)
+        } else {
+            GridCells.Adaptive(minSize = 120.dp)
         }
-        return GridLayoutParams(
-            gridCells = when {
-                windowSizeClass.isWidthCompact -> ConstrainedGridCells(3, minSize = 96.dp)
-                else -> GridCells.Adaptive(minSize = 120.dp)
-            },
-            horizontalArrangement = horizontalArrangement,
-            verticalArrangement = horizontalArrangement,
-            edgePadding = IllustGridSpacing.edgePadding(paneInfo),
-        )
-    }
 
     @Composable
     fun userFollowingParameters(paneInfo: PaneLayoutInfo = currentPaneLayoutInfo()): GridLayoutParams {

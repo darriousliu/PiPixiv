@@ -26,11 +26,12 @@ import com.mrl.pixiv.common.util.throttleClick
 fun TrendingItem(
     trendingTag: TrendingTag,
     onSearch: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalPlatformContext.current
     val imageUrl = trendingTag.illust.imageUrls.squareMedium
     Column(
-        modifier = Modifier.throttleClick { onSearch(trendingTag.tag) },
+        modifier = modifier.throttleClick { onSearch(trendingTag.tag) },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         AsyncImage(

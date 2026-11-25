@@ -19,7 +19,6 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SelectableDates
@@ -49,12 +48,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.mrl.pixiv.MainPageFloatingActions
+import com.mrl.pixiv.MainPageScrollableTabRow
 import com.mrl.pixiv.common.analytics.trackTab
-import com.mrl.pixiv.common.compose.IllustGridSpacing
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
-import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
@@ -295,9 +293,8 @@ internal fun RankingScaffold(
                         }
                     },
                 )
-                PrimaryScrollableTabRow(
-                    selectedTabIndex = selectedIndex.coerceAtMost(availableModes.lastIndex.coerceAtLeast(0)),
-                    edgePadding = IllustGridSpacing.edgePadding(currentPaneLayoutInfo()),
+                MainPageScrollableTabRow(
+                    selectedIndex = selectedIndex.coerceAtMost(availableModes.lastIndex.coerceAtLeast(0)),
                 ) {
                     availableModes.forEachIndexed { index, mode ->
                         Tab(
