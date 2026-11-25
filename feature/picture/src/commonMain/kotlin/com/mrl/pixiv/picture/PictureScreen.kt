@@ -172,7 +172,6 @@ fun PictureDeeplinkScreen(
 
 private const val KEY_UGOIRA = "ugoira"
 private const val KEY_ILLUST_AUTHOR = "illust_author"
-private const val KEY_ILLUST_AUTHOR_OTHER_WORKS = "illust_author_other_works"
 private const val KEY_VIEW_COMMENTS = "view_comments"
 private const val KEY_ILLUST_RELATED_TITLE = "illust_related_title"
 
@@ -206,16 +205,17 @@ internal fun PictureScreen(
         if (useTwoPaneLayout) paneLayoutInfo.copy(isSplit = true) else paneLayoutInfo,
     )
     val density = LocalDensity.current
+    val detailMargin = if (paneLayoutInfo.size.width >= 600.dp) 24.dp else 12.dp
     val relatedCardGap = IllustGridSpacing.cardGap(paneLayoutInfo.size.width)
     val userSpanCount = artworkAuthorColumnCount(
         paneWidth = paneLayoutInfo.size.width,
-        edgePadding = relatedLayoutParams.edgePadding,
+        edgePadding = detailMargin,
         isSplit = paneLayoutInfo.isSplit,
     )
     val relatedSpanCount = with(relatedLayoutParams.gridCells) {
         with(density) {
             density.calculateCrossAxisCellSizes(
-                (paneLayoutInfo.size.width - relatedLayoutParams.edgePadding * 2).roundToPx(),
+                (paneLayoutInfo.size.width - detailMargin * 2).roundToPx(),
                 relatedCardGap.roundToPx(),
             ).size
         }
@@ -522,41 +522,39 @@ internal fun PictureScreen(
             )
         }
         item(key = KEY_ILLUST_AUTHOR) {
-            UserFollowInfo(
-                illust = illust,
-                navToUserDetailScreen = navToUserDetailScreen,
-                isFollowed = isFollowed,
-                modifier = inset.padding(top = 24.dp),
-            )
-        }
-        if (state.userIllusts.isNotEmpty()) {
-            item(key = KEY_ILLUST_AUTHOR_OTHER_WORKS) {
-                val works = state.userIllusts.take(currentUserSpanCount)
-                ArtworkWorkRow(
-                    columns = currentUserSpanCount,
-                    itemCount = works.size,
-                    spacing = IllustGridSpacing.Thumbnail,
-                    modifier = inset.padding(top = 12.dp),
-                ) { index, cell ->
-                    val work = works[index]
-                    DetailWorkItem(
-                        work = work,
-                        onOpen = { source -> navToPictureScreen(works, index, source) },
-                        sharedElementSlot = "picture:$pictureIndex:other-works:$index",
-                        modifier = cell,
+            val works = state.userIllusts.take(currentUserSpanCount)
+            ArtworkAuthorGroup(
+                columns = currentUserSpanCount,
+                workCount = works.size,
+                modifier = inset.padding(top = 12.dp),
+                author = {
+                    UserFollowInfo(
+                        illust = illust,
+                        navToUserDetailScreen = navToUserDetailScreen,
+                        isFollowed = isFollowed,
                     )
-                }
+                },
+            ) { index, cell ->
+                DetailWorkItem(
+                    work = works[index],
+                    onOpen = { source -> navToPictureScreen(works, index, source) },
+                    sharedElementSlot = "picture:$pictureIndex:other-works:$index",
+                    modifier = cell,
+                )
             }
         }
         item(key = KEY_VIEW_COMMENTS) {
             ArtworkComments(
                 count = illust.totalComments,
                 onClick = { navigationManager.navigateToCommentScreen(illust.id, CommentType.ILLUST) },
-                modifier = inset.padding(top = 24.dp),
+                modifier = inset.padding(top = 12.dp),
             )
         }
         item(key = KEY_ILLUST_RELATED_TITLE) {
-            SectionHeader(text = stringResource(RStrings.related_artworks), modifier = inset.padding(top = 24.dp))
+            SectionHeader(
+                text = stringResource(RStrings.related_artworks),
+                modifier = inset.padding(start = 4.dp, top = 12.dp),
+            )
         }
         items(
             count = currentRelatedRowCount,
@@ -683,16 +681,16 @@ internal fun PictureScreen(
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         var controlsHeight by remember { mutableIntStateOf(0) }
                         val rightPaneWidth = maxWidth
+                        val rightMargin = 16.dp
                         val rightCardGap = IllustGridSpacing.cardGap(rightPaneWidth)
                         val rightRelatedSpanCount = with(relatedLayoutParams.gridCells) {
                             with(density) {
                                 calculateCrossAxisCellSizes(
-                                    (rightPaneWidth - relatedLayoutParams.edgePadding * 2).roundToPx(),
+                                    (rightPaneWidth - rightMargin * 2).roundToPx(),
                                     rightCardGap.roundToPx(),
                                 ).size
                             }
                         }
-                        val rightMargin = 24.dp
                         val rightUserSpanCount = artworkAuthorColumnCount(rightPaneWidth, rightMargin, isSplit = true)
                         val rightRelatedRowCount =
                             if (relatedIllusts.itemCount % rightRelatedSpanCount == 0) {
@@ -731,7 +729,7 @@ internal fun PictureScreen(
                 ) {
                     illustImageItems()
                     illustDetailItems(
-                        margin = relatedLayoutParams.edgePadding,
+                        margin = detailMargin,
                         cardGap = relatedCardGap,
                         currentUserSpanCount = userSpanCount,
                         currentRelatedSpanCount = relatedSpanCount,
@@ -967,6 +965,7 @@ private fun DetailWorkItem(
         navToPictureScreen = onOpen,
         sharedElementSlot = sharedElementSlot,
         modifier = modifier,
+        shape = if (showLabel) MaterialTheme.shapes.large else MaterialTheme.shapes.medium,
         showLabel = showLabel,
         shouldShowTip = shouldShowTip,
     )

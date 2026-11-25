@@ -3,11 +3,13 @@ package com.mrl.pixiv.picture
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlexBox
 import androidx.compose.foundation.layout.FlexWrap
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -19,9 +21,8 @@ import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -52,8 +53,7 @@ import com.mrl.pixiv.strings.viewed
 import org.jetbrains.compose.resources.stringResource
 
 private const val KEY_ILLUST_TITLE = "illust_title"
-private const val KEY_ILLUST_DATA = "illust_data"
-private const val KEY_ILLUST_TAGS = "illust_tags"
+private val InfoGroupPadding = 16.dp
 
 internal fun LazyListScope.artworkInfoItems(
     illust: Illust,
@@ -62,27 +62,44 @@ internal fun LazyListScope.artworkInfoItems(
     series: @Composable (Modifier) -> Unit,
 ) {
     item(key = KEY_ILLUST_TITLE) {
-        ArtworkTitleSection(illust, modifier = inset.padding(top = 20.dp))
-    }
-    if (illust.caption.isNotBlank()) {
-        item(key = KEY_ILLUST_DATA) {
-            ArtworkCaption(illust.caption, modifier = inset.padding(top = 16.dp))
+        ArtworkInfoGroup(modifier = inset.padding(top = 12.dp)) {
+            ArtworkTitleSection(illust)
+            if (illust.caption.isNotBlank()) {
+                ArtworkCaption(illust.caption)
+            }
+            val tags = illust.tags.orEmpty()
+            if (tags.isNotEmpty()) {
+                ArtworkTags(tags = tags, onSearch = onSearch)
+            }
         }
     }
     if (illust.series?.id?.let { it > 0 } == true) {
-        item(key = "manga_series_context") { series(inset.padding(top = 16.dp)) }
-    }
-    val tags = illust.tags.orEmpty()
-    if (tags.isNotEmpty()) {
-        item(key = KEY_ILLUST_TAGS) {
-            ArtworkTags(tags = tags, onSearch = onSearch, modifier = inset.padding(top = 16.dp))
-        }
+        item(key = "manga_series_context") { series(inset.padding(top = 12.dp)) }
     }
 }
 
 @Composable
-private fun ArtworkTitleSection(illust: Illust, modifier: Modifier = Modifier) {
-    SelectionContainer(modifier) {
+internal fun ArtworkInfoGroup(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shadowElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(InfoGroupPadding),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+            content = content,
+        )
+    }
+}
+
+@Composable
+private fun ArtworkTitleSection(illust: Illust) {
+    SelectionContainer {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = illust.title,
@@ -118,16 +135,16 @@ private fun ArtworkStat(icon: ImageVector, value: String, label: String?) {
 }
 
 @Composable
-private fun ArtworkCaption(caption: String, modifier: Modifier = Modifier) {
+private fun ArtworkCaption(caption: String) {
     val text = remember(caption) { htmlToAnnotatedString(html = caption, compactMode = true) }
-    SelectionContainer(modifier) {
-        Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    SelectionContainer {
+        Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
 @Composable
-private fun ArtworkTags(tags: List<Tag>, onSearch: (Tag) -> Unit, modifier: Modifier = Modifier) {
-    BoxWithConstraints(modifier.fillMaxWidth()) {
+private fun ArtworkTags(tags: List<Tag>, onSearch: (Tag) -> Unit) {
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
         val tagMaxWidth = maxWidth
         FlexBox(
             modifier = Modifier.fillMaxWidth(),
@@ -143,6 +160,27 @@ private fun ArtworkTags(tags: List<Tag>, onSearch: (Tag) -> Unit, modifier: Modi
                     modifier = Modifier.widthIn(max = tagMaxWidth),
                 )
             }
+        }
+    }
+}
+
+@Composable
+internal fun ArtworkAuthorGroup(
+    columns: Int,
+    workCount: Int,
+    modifier: Modifier = Modifier,
+    author: @Composable () -> Unit,
+    work: @Composable (Int, Modifier) -> Unit,
+) {
+    ArtworkInfoGroup(modifier) {
+        author()
+        if (workCount > 0) {
+            ArtworkWorkRow(
+                columns = columns,
+                itemCount = workCount,
+                spacing = IllustGridSpacing.Thumbnail,
+                item = work,
+            )
         }
     }
 }
@@ -188,23 +226,36 @@ internal fun ArtworkAuthor(
 
 @Composable
 internal fun ArtworkComments(count: Int?, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    SegmentedListItem(
+    Surface(
         onClick = throttleClick(onClick = onClick),
         modifier = modifier.fillMaxWidth(),
-        shapes = ListItemDefaults.segmentedShapes(0, 1),
-        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        leadingContent = {
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shadowElevation = 1.dp,
+    ) {
+        Row(
+            modifier = Modifier.heightIn(min = 56.dp).padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Icon(
                 Icons.AutoMirrored.Rounded.Comment,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        },
-        trailingContent = count?.let {
-            { Text(text = it.toString(), style = MaterialTheme.typography.labelLarge.tabularNumbers) }
-        },
-    ) {
-        Text(stringResource(RStrings.view_comments))
+            Text(
+                text = stringResource(RStrings.view_comments),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            if (count != null) {
+                Text(
+                    text = count.toString(),
+                    style = MaterialTheme.typography.labelLarge.tabularNumbers,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 
@@ -214,7 +265,8 @@ internal fun artworkAuthorColumnCount(paneWidth: Dp, edgePadding: Dp, isSplit: B
     val cells = IllustGridDefaults.userWorkCells(paneWidth, isSplit)
     return with(cells) {
         with(density) {
-            val available = (paneWidth.roundToPx() - 2 * edgePadding.roundToPx()).coerceAtLeast(0)
+            val inset = edgePadding.roundToPx() + InfoGroupPadding.roundToPx()
+            val available = (paneWidth.roundToPx() - 2 * inset).coerceAtLeast(0)
             calculateCrossAxisCellSizes(available, IllustGridSpacing.Thumbnail.roundToPx()).size
         }
     }

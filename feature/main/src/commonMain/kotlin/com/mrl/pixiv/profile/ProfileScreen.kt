@@ -239,6 +239,7 @@ private fun ProfileIdentityCard(user: User, onProfile: () -> Unit) {
         onClick = rememberThrottleClick(onClick = onProfile),
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shadowElevation = 1.dp,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(20.dp),

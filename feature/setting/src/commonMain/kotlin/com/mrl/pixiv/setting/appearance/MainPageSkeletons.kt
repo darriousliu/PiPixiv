@@ -319,17 +319,22 @@ internal fun ProfileSkeleton(navigationInset: Dp) {
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(colors.surfaceContainerLow, MaterialTheme.shapes.extraLarge).padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                Surface(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = colors.surfaceContainerLow,
+                    shadowElevation = 1.dp,
                 ) {
-                    Spacer(Modifier.size(64.dp).background(colors.surfaceContainerHigh, CircleShape))
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        PlaceholderBar(76.dp, 16.dp)
-                        PlaceholderBar(56.dp, 8.dp)
-                        PlaceholderBar(68.dp, 8.dp, colors.primary)
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        Spacer(Modifier.size(64.dp).background(colors.surfaceContainerHigh, CircleShape))
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            PlaceholderBar(76.dp, 16.dp)
+                            PlaceholderBar(56.dp, 8.dp)
+                            PlaceholderBar(68.dp, 8.dp, colors.primary)
+                        }
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
