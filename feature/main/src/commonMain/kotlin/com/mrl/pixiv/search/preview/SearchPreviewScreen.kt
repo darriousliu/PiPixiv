@@ -128,7 +128,7 @@ internal fun SearchPreviewContent(
     val pullRefreshState = rememberPullToRefreshState()
     val paneInfo = currentPaneLayoutInfo()
     val edgePadding = IllustGridSpacing.edgePadding(paneInfo)
-    val rowSpacing = IllustGridSpacing.LabeledRow
+    val cardGap = IllustGridSpacing.cardGap(paneInfo.size.width)
 
     // 框架调整时同步 feature/setting/.../appearance/MainPageSkeletons.kt 中的 SearchSkeleton。
     Scaffold(
@@ -197,12 +197,12 @@ internal fun SearchPreviewContent(
                     top = 8.dp,
                     end = edgePadding,
                     // 最后一行卡片或状态项已经包含行末留白。
-                    bottom = 88.dp - rowSpacing + maxOf(
+                    bottom = 88.dp - cardGap + maxOf(
                         LocalMainNavigationBottomInset.current,
                         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                     ),
                 ),
-                horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.LabeledColumn),
+                horizontalArrangement = Arrangement.spacedBy(cardGap),
             ) {
                 item(key = "bookmarked_tags", span = { GridItemSpan(maxLineSpan) }) {
                     BookmarkedTagsSection(
@@ -214,12 +214,12 @@ internal fun SearchPreviewContent(
                 item(key = "popular_tags_title", span = { GridItemSpan(maxLineSpan) }) {
                     SectionHeader(
                         text = stringResource(RStrings.popular_tags),
-                        modifier = Modifier.padding(top = rowSpacing + 8.dp),
+                        modifier = Modifier.padding(top = 24.dp),
                     )
                 }
                 if (state.trendingTags.isEmpty() || state.failed && !state.refreshing) {
                     item(key = "trending_status", span = { GridItemSpan(maxLineSpan) }) {
-                        Box(Modifier.padding(vertical = rowSpacing)) {
+                        Box(Modifier.padding(vertical = cardGap)) {
                             TrendingTagsStatus(state = state, onRetry = onRefresh)
                         }
                     }
@@ -228,7 +228,7 @@ internal fun SearchPreviewContent(
                     TrendingItem(
                         trendingTag = tag,
                         onSearch = onSearchTag,
-                        modifier = Modifier.padding(bottom = rowSpacing),
+                        modifier = Modifier.padding(bottom = cardGap),
                     )
                 }
             }

@@ -204,10 +204,13 @@ private fun ArtworkCard(height: Dp, rank: Int?) {
 }
 
 @Composable
-private fun LabelSkeleton(modifier: Modifier = Modifier) {
+private fun LabelSkeleton(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        PlaceholderBar(64.dp, 10.dp)
-        PlaceholderBar(40.dp, 8.dp)
+        PlaceholderBar(64.dp, 10.dp, color)
+        PlaceholderBar(40.dp, 8.dp, color)
     }
 }
 
@@ -277,16 +280,22 @@ internal fun SearchSkeleton(navigationInset: Dp) {
             Box(Modifier.height(48.dp), contentAlignment = Alignment.CenterStart) {
                 PlaceholderBar(90.dp, 16.dp)
             }
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 repeat(5) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         repeat(2) {
-                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Spacer(
-                                    Modifier.fillMaxWidth().aspectRatio(1f)
-                                        .background(colors.surfaceContainerHigh, MaterialTheme.shapes.large)
-                                )
-                                LabelSkeleton(Modifier.padding(horizontal = 4.dp))
+                            Surface(
+                                modifier = Modifier.weight(1f).aspectRatio(1f),
+                                shape = MaterialTheme.shapes.large,
+                                color = colors.surfaceContainerHigh,
+                                shadowElevation = 1.dp,
+                            ) {
+                                Box(
+                                    modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 8.dp),
+                                    contentAlignment = Alignment.BottomStart,
+                                ) {
+                                    LabelSkeleton(color = colors.surfaceContainerLowest)
+                                }
                             }
                         }
                     }

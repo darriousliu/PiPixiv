@@ -19,8 +19,6 @@ import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifec
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 
 object IllustGridSpacing {
-    val LabeledColumn = 12.dp
-    val LabeledRow = 16.dp
     val Thumbnail = 8.dp
 
     fun cardGap(paneWidth: Dp): Dp = if (paneWidth >= 600.dp) 12.dp else 8.dp
