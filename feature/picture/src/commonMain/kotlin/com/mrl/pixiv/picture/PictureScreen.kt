@@ -206,6 +206,7 @@ internal fun PictureScreen(
         if (useTwoPaneLayout) paneLayoutInfo.copy(isSplit = true) else paneLayoutInfo,
     )
     val density = LocalDensity.current
+    val relatedCardGap = IllustGridSpacing.cardGap(paneLayoutInfo.size.width)
     val userSpanCount = artworkAuthorColumnCount(
         paneWidth = paneLayoutInfo.size.width,
         edgePadding = relatedLayoutParams.edgePadding,
@@ -215,7 +216,7 @@ internal fun PictureScreen(
         with(density) {
             density.calculateCrossAxisCellSizes(
                 (paneLayoutInfo.size.width - relatedLayoutParams.edgePadding * 2).roundToPx(),
-                IllustGridSpacing.LabeledColumn.roundToPx(),
+                relatedCardGap.roundToPx(),
             ).size
         }
     }
@@ -499,6 +500,7 @@ internal fun PictureScreen(
 
     fun LazyListScope.illustDetailItems(
         margin: Dp,
+        cardGap: Dp,
         currentUserSpanCount: Int,
         currentRelatedSpanCount: Int,
         currentRelatedRowCount: Int,
@@ -566,8 +568,8 @@ internal fun PictureScreen(
             ArtworkWorkRow(
                 columns = currentRelatedSpanCount,
                 itemCount = count,
-                spacing = IllustGridSpacing.LabeledColumn,
-                modifier = inset.padding(bottom = IllustGridSpacing.LabeledRow),
+                spacing = cardGap,
+                modifier = inset.padding(bottom = cardGap),
             ) { column, cell ->
                 val index = firstIndex + column
                 val work = relatedIllusts[index]
@@ -681,11 +683,12 @@ internal fun PictureScreen(
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         var controlsHeight by remember { mutableIntStateOf(0) }
                         val rightPaneWidth = maxWidth
+                        val rightCardGap = IllustGridSpacing.cardGap(rightPaneWidth)
                         val rightRelatedSpanCount = with(relatedLayoutParams.gridCells) {
                             with(density) {
                                 calculateCrossAxisCellSizes(
                                     (rightPaneWidth - relatedLayoutParams.edgePadding * 2).roundToPx(),
-                                    IllustGridSpacing.LabeledColumn.roundToPx(),
+                                    rightCardGap.roundToPx(),
                                 ).size
                             }
                         }
@@ -704,6 +707,7 @@ internal fun PictureScreen(
                         ) {
                             illustDetailItems(
                                 margin = rightMargin,
+                                cardGap = rightCardGap,
                                 currentUserSpanCount = rightUserSpanCount,
                                 currentRelatedSpanCount = rightRelatedSpanCount,
                                 currentRelatedRowCount = rightRelatedRowCount,
@@ -728,6 +732,7 @@ internal fun PictureScreen(
                     illustImageItems()
                     illustDetailItems(
                         margin = relatedLayoutParams.edgePadding,
+                        cardGap = relatedCardGap,
                         currentUserSpanCount = userSpanCount,
                         currentRelatedSpanCount = relatedSpanCount,
                         currentRelatedRowCount = relatedRowCount,

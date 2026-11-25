@@ -3,7 +3,10 @@ package com.mrl.pixiv.common.compose.ui.illust
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlexBox
+import androidx.compose.foundation.layout.FlexWrap
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -206,51 +209,92 @@ internal fun IllustFrame(
     sharedImage: PictureImageKey? = null,
     shouldShowTip: Boolean = false,
 ) {
-    val imageUrl = illust.frameCoverUrl(square, showLabel)
-    val context = LocalPlatformContext.current
-    Column(
-        modifier = modifier.throttleClick(onClick = onOpen),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Box(
-            Modifier
-                .aspectRatio(if (square) 1f else calculateIllustAspectRatio(illust.width, illust.height))
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-        ) {
-            AsyncImage(
-                model = remember(context, imageUrl) {
-                    ImageRequest.Builder(context)
-                        .data(imageUrl)
-                        .allowRgb565(true)
-                        .crossfade(1.seconds.inWholeMilliseconds.toInt())
-                        .placeholderMemoryCacheKey(imageUrl)
-                        .memoryCacheKey(imageUrl)
-                        .build()
-                },
-                contentDescription = null,
-                modifier = Modifier.matchParentSize()
-                    .navigationSharedImage(sharedImage)
-                    .clip(shape)
-                    .conditionally(isBlocked) { blur(50.dp, BlurredEdgeTreatment(shape)) },
-                contentScale = if (square) ContentScale.Crop else ContentScale.Fit,
-                alignment = if (square) Alignment.Center else Alignment.TopCenter,
-            )
-            IllustInfoPill(illust, Modifier.align(Alignment.TopStart).padding(8.dp))
-            if (!isBlocked) {
-                BookmarkTooltipBox(shouldShowTip, Modifier.align(Alignment.BottomEnd)) {
-                    IllustBookmarkButton(
-                        isBookmarked = isBookmarked,
-                        isPrivate = isPrivate,
-                        onClick = throttleClick(onClick = onBookmarkClick),
-                        onLongClick = onBookmarkLongClick,
-                    )
-                }
+    val bookmark: @Composable (Modifier) -> Unit = { anchor ->
+        if (!isBlocked) {
+            BookmarkTooltipBox(shouldShowTip, modifier = anchor) {
+                IllustBookmarkButton(
+                    isBookmarked = isBookmarked,
+                    isPrivate = isPrivate,
+                    onImage = !showLabel,
+                    onClick = throttleClick(onClick = onBookmarkClick),
+                    onLongClick = onBookmarkLongClick,
+                )
             }
         }
-        if (showLabel) {
-            IllustLabel(illust = illust, rank = rank)
+    }
+    val cover: @Composable (Modifier) -> Unit = { coverModifier ->
+        IllustCover(
+            illust = illust,
+            square = square,
+            imageUrl = illust.frameCoverUrl(square, showLabel),
+            shape = if (showLabel) null else shape,
+            sharedImage = sharedImage,
+            isBlocked = isBlocked,
+            modifier = coverModifier,
+        ) {
+            if (!showLabel) bookmark(Modifier.align(Alignment.BottomEnd))
         }
+    }
+
+    if (showLabel) {
+        Surface(
+            modifier = modifier,
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            shadowElevation = 1.dp,
+        ) {
+            Column(modifier = Modifier.throttleClick(onClick = onOpen)) {
+                cover(Modifier)
+                IllustLabel(illust = illust, rank = rank) { bookmark(Modifier) }
+            }
+        }
+    } else {
+        cover(modifier.throttleClick(onClick = onOpen))
+    }
+}
+
+@Composable
+private fun IllustCover(
+    illust: Illust,
+    square: Boolean,
+    imageUrl: String,
+    shape: Shape?,
+    sharedImage: PictureImageKey?,
+    isBlocked: Boolean,
+    modifier: Modifier = Modifier,
+    overlay: @Composable BoxScope.() -> Unit,
+) {
+    val context = LocalPlatformContext.current
+    val imageClip = if (shape != null) Modifier.clip(shape) else Modifier
+    Box(
+        modifier
+            .fillMaxWidth()
+            .aspectRatio(if (square) 1f else calculateIllustAspectRatio(illust.width, illust.height))
+            .then(imageClip)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+    ) {
+        AsyncImage(
+            model = remember(context, imageUrl) {
+                ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .allowRgb565(true)
+                    .crossfade(1.seconds.inWholeMilliseconds.toInt())
+                    .placeholderMemoryCacheKey(imageUrl)
+                    .memoryCacheKey(imageUrl)
+                    .build()
+            },
+            contentDescription = null,
+            modifier = Modifier.matchParentSize()
+                .navigationSharedImage(sharedImage)
+                .then(imageClip)
+                .conditionally(isBlocked) {
+                    blur(50.dp, if (shape != null) BlurredEdgeTreatment(shape) else BlurredEdgeTreatment.Rectangle)
+                },
+            contentScale = if (square) ContentScale.Crop else ContentScale.Fit,
+            alignment = if (square) Alignment.Center else Alignment.TopCenter,
+        )
+        IllustInfoPills(illust, Modifier.align(Alignment.TopStart).padding(8.dp))
+        overlay()
     }
 }
 
@@ -259,34 +303,41 @@ private fun Illust.frameCoverUrl(square: Boolean, showLabel: Boolean): String =
     if (square && !showLabel) imageUrls.squareMedium else imageUrls.medium
 
 @Composable
-private fun IllustInfoPill(illust: Illust, modifier: Modifier = Modifier) {
-    val hasPages = illust.pageCount > 1
-    val parts = buildList {
-        if (hasPages) add(illust.pageCount.toString())
-        if (illust.illustAIType == AiType.AiGeneratedWorks) add("AI")
-        if (illust.type == Type.Ugoira) add("GIF")
-        if (illust.type == Type.Manga) add(stringResource(RStrings.manga))
-        if (illust.series != null) add(stringResource(RStrings.series))
-    }
-    if (parts.isEmpty()) return
-
-    Surface(
+private fun IllustInfoPills(illust: Illust, modifier: Modifier = Modifier) {
+    FlexBox(
         modifier = modifier,
+        config = {
+            wrap(FlexWrap.Wrap)
+            gap(row = 4.dp, column = 4.dp)
+        },
+    ) {
+        if (illust.pageCount > 1) IllustInfoPill(illust.pageCount.toString(), isPageCount = true)
+        if (illust.illustAIType == AiType.AiGeneratedWorks) IllustInfoPill("AI")
+        if (illust.type == Type.Ugoira) IllustInfoPill("GIF")
+        if (illust.type == Type.Manga) IllustInfoPill(stringResource(RStrings.manga))
+        if (illust.series != null) IllustInfoPill(stringResource(RStrings.series))
+    }
+}
+
+@Composable
+private fun IllustInfoPill(text: String, isPageCount: Boolean = false) {
+    Surface(
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.inverseSurface,
-        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (hasPages) {
+            if (isPageCount) {
                 Icon(Icons.Rounded.FileCopy, contentDescription = null, modifier = Modifier.size(12.dp))
             }
+            val labelStyle = MaterialTheme.typography.labelSmall
             Text(
-                text = parts.joinToString(" · "),
-                style = MaterialTheme.typography.labelSmall.tabularNumbers,
+                text = text,
+                style = if (isPageCount) labelStyle.tabularNumbers else labelStyle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -298,19 +349,25 @@ private fun IllustInfoPill(illust: Illust, modifier: Modifier = Modifier) {
 private fun IllustBookmarkButton(
     isBookmarked: Boolean,
     isPrivate: Boolean,
+    onImage: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    IconButton(onClick = onClick, onLongClick = onLongClick, modifier = modifier.size(48.dp)) {
+    IconButton(
+        onClick = onClick,
+        onLongClick = onLongClick,
+        modifier = if (onImage) Modifier.size(48.dp) else Modifier,
+    ) {
         Box(
-            modifier = Modifier.size(32.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
+            modifier = Modifier.conditionally(onImage) {
+                size(32.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
+            },
             contentAlignment = Alignment.Center,
         ) {
             BookmarkIcon(
                 isBookmarked = isBookmarked,
                 isPrivate = isPrivate,
-                iconSize = 18.dp,
+                iconSize = if (onImage) 18.dp else 20.dp,
                 contentDescription = stringResource(if (isBookmarked) RStrings.cancel_favorite else RStrings.liked),
             )
         }
@@ -318,9 +375,14 @@ private fun IllustBookmarkButton(
 }
 
 @Composable
-private fun IllustLabel(illust: Illust, rank: Int?, modifier: Modifier = Modifier) {
+private fun IllustLabel(
+    illust: Illust,
+    rank: Int?,
+    modifier: Modifier = Modifier,
+    bookmark: @Composable () -> Unit,
+) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp),
+        modifier = modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -347,6 +409,7 @@ private fun IllustLabel(illust: Illust, rank: Int?, modifier: Modifier = Modifie
                 overflow = TextOverflow.Ellipsis,
             )
         }
+        bookmark()
     }
 }
 

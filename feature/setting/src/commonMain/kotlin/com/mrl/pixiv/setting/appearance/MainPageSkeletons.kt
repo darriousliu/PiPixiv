@@ -37,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -159,12 +160,12 @@ private fun ArtworkGrid(spanCount: Int, showRank: Boolean = false, topPadding: D
     Row(
         modifier = Modifier.fillMaxWidth().clipToBounds()
             .padding(start = 16.dp, top = topPadding, end = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         repeat(columns) { column ->
             Column(
                 modifier = Modifier.weight(1f).wrapContentHeight(Alignment.Top, unbounded = true),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 repeat(5) { row ->
                     val index = row * columns + column
@@ -178,20 +179,26 @@ private fun ArtworkGrid(spanCount: Int, showRank: Boolean = false, topPadding: D
 @Composable
 private fun ArtworkCard(height: Dp, rank: Int?) {
     val colors = MaterialTheme.colorScheme
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Spacer(
-            Modifier.fillMaxWidth().height(height)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.shapes.large)
-        )
-        Row(
-            Modifier.padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            if (rank != null) {
-                PlaceholderBar(16.dp, 20.dp, if (rank <= 3) colors.primary else colors.onSurfaceVariant)
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = colors.surfaceContainerLow,
+        shadowElevation = 1.dp,
+    ) {
+        Column {
+            Spacer(Modifier.fillMaxWidth().height(height).background(colors.surfaceContainerHigh))
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 6.dp)
+                    .heightIn(min = 48.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                if (rank != null) {
+                    PlaceholderBar(16.dp, 20.dp, if (rank <= 3) colors.primary else colors.onSurfaceVariant)
+                }
+                LabelSkeleton(Modifier.weight(1f))
+                Spacer(Modifier.size(18.dp).background(colors.onSurfaceVariant, CircleShape))
             }
-            LabelSkeleton()
         }
     }
 }

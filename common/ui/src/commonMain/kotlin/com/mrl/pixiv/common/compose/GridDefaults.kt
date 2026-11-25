@@ -23,6 +23,8 @@ object IllustGridSpacing {
     val LabeledRow = 16.dp
     val Thumbnail = 8.dp
 
+    fun cardGap(paneWidth: Dp): Dp = if (paneWidth >= 600.dp) 12.dp else 8.dp
+
     fun edgePadding(paneInfo: PaneLayoutInfo): Dp =
         if (paneInfo.sizeClass.isWidthAtLeastMedium) 24.dp else 16.dp
 }
@@ -58,6 +60,7 @@ object RecommendGridDefaults {
     ): StaggeredGridLayoutParams {
         val isPortrait = paneInfo.size.height >= paneInfo.size.width
         val spanCount = if (isPortrait) spanCountPortrait else spanCountLandscape
+        val cardGap = IllustGridSpacing.cardGap(paneInfo.size.width)
 
         return StaggeredGridLayoutParams(
             gridCells = when {
@@ -65,8 +68,8 @@ object RecommendGridDefaults {
                 paneInfo.isSplit -> ConstrainedStaggeredGridCells(preferredCount = spanCount, minSize = 150.dp)
                 else -> StaggeredGridCells.Fixed(spanCount.coerceAtLeast(1))
             },
-            horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.LabeledColumn),
-            verticalArrangement = Arrangement.spacedBy(IllustGridSpacing.LabeledRow),
+            horizontalArrangement = Arrangement.spacedBy(cardGap),
+            verticalArrangement = Arrangement.spacedBy(cardGap),
             edgePadding = IllustGridSpacing.edgePadding(paneInfo),
         )
     }
