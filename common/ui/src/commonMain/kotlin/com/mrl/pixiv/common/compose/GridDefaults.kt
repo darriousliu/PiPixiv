@@ -3,11 +3,9 @@ package com.mrl.pixiv.common.compose
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -20,12 +18,21 @@ import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.requireUserPreferenceFlow
 
+object IllustGridSpacing {
+    val LabeledColumn = 12.dp
+    val LabeledRow = 16.dp
+    val Thumbnail = 8.dp
+
+    fun edgePadding(paneInfo: PaneLayoutInfo): Dp =
+        if (paneInfo.sizeClass.isWidthAtLeastMedium) 24.dp else 16.dp
+}
+
 @Stable
 data class GridLayoutParams(
     val gridCells: GridCells,
     val horizontalArrangement: Arrangement.Horizontal,
     val verticalArrangement: Arrangement.Vertical,
-    val cardShape: Shape,
+    val edgePadding: Dp,
 )
 
 @Stable
@@ -33,7 +40,7 @@ data class StaggeredGridLayoutParams(
     val gridCells: StaggeredGridCells,
     val horizontalArrangement: Arrangement.Horizontal,
     val verticalArrangement: Arrangement.Vertical,
-    val cardShape: Shape,
+    val edgePadding: Dp,
 )
 
 object RecommendGridDefaults {
@@ -44,21 +51,13 @@ object RecommendGridDefaults {
         return coverLayoutParameters(paneInfo, spanCountPortrait, spanCountLandscape)
     }
 
-    @Composable
     internal fun coverLayoutParameters(
         paneInfo: PaneLayoutInfo,
         spanCountPortrait: Int,
         spanCountLandscape: Int,
     ): StaggeredGridLayoutParams {
-        val windowSizeClass = paneInfo.sizeClass
         val isPortrait = paneInfo.size.height >= paneInfo.size.width
         val spanCount = if (isPortrait) spanCountPortrait else spanCountLandscape
-
-        val horizontalArrangement = when {
-            windowSizeClass.isWidthAtLeastExpanded -> 9f.spaceBy
-            windowSizeClass.isWidthAtLeastMedium -> 7f.spaceBy
-            else -> 5f.spaceBy
-        }
 
         return StaggeredGridLayoutParams(
             gridCells = when {
@@ -66,9 +65,9 @@ object RecommendGridDefaults {
                 paneInfo.isSplit -> ConstrainedStaggeredGridCells(preferredCount = spanCount, minSize = 150.dp)
                 else -> StaggeredGridCells.Fixed(spanCount.coerceAtLeast(1))
             },
-            horizontalArrangement = horizontalArrangement,
-            verticalArrangement = horizontalArrangement,
-            cardShape = MaterialTheme.shapes.medium
+            horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.LabeledColumn),
+            verticalArrangement = Arrangement.spacedBy(IllustGridSpacing.LabeledRow),
+            edgePadding = IllustGridSpacing.edgePadding(paneInfo),
         )
     }
 }
@@ -81,30 +80,23 @@ object IllustGridDefaults {
         return relatedLayoutParameters(paneInfo, spanCountPortrait, spanCountLandscape)
     }
 
-    @Composable
     internal fun relatedLayoutParameters(
         paneInfo: PaneLayoutInfo,
         spanCountPortrait: Int,
         spanCountLandscape: Int,
     ): GridLayoutParams {
-        val windowSizeClass = paneInfo.sizeClass
         val isPortrait = paneInfo.size.height >= paneInfo.size.width
         val spanCount = if (isPortrait) spanCountPortrait else spanCountLandscape
 
-        val horizontalArrangement = when {
-            windowSizeClass.isWidthAtLeastExpanded -> 7f.spaceBy
-            windowSizeClass.isWidthAtLeastMedium -> 5f.spaceBy
-            else -> 5f.spaceBy
-        }
         return GridLayoutParams(
             gridCells = when {
                 spanCount < 0 -> GridCells.Adaptive(minSize = 150.dp)
                 paneInfo.isSplit -> ConstrainedGridCells(preferredCount = spanCount, minSize = 150.dp)
                 else -> GridCells.Fixed(spanCount.coerceAtLeast(1))
             },
-            horizontalArrangement = horizontalArrangement,
-            verticalArrangement = horizontalArrangement,
-            cardShape = MaterialTheme.shapes.medium
+            horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.Thumbnail),
+            verticalArrangement = Arrangement.spacedBy(IllustGridSpacing.Thumbnail),
+            edgePadding = IllustGridSpacing.edgePadding(paneInfo),
         )
     }
 
@@ -123,7 +115,7 @@ object IllustGridDefaults {
             },
             horizontalArrangement = horizontalArrangement,
             verticalArrangement = horizontalArrangement,
-            cardShape = MaterialTheme.shapes.small
+            edgePadding = IllustGridSpacing.edgePadding(paneInfo),
         )
     }
 
@@ -144,7 +136,7 @@ object IllustGridDefaults {
             },
             horizontalArrangement = horizontalArrangement,
             verticalArrangement = horizontalArrangement,
-            cardShape = MaterialTheme.shapes.small
+            edgePadding = IllustGridSpacing.edgePadding(paneInfo),
         )
     }
 }
@@ -168,7 +160,7 @@ object BlockingGridDefaults {
             },
             horizontalArrangement = horizontalArrangement,
             verticalArrangement = horizontalArrangement,
-            cardShape = MaterialTheme.shapes.small
+            edgePadding = IllustGridSpacing.edgePadding(paneInfo),
         )
     }
 }

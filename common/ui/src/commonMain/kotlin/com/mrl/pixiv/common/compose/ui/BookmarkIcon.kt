@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.mrl.pixiv.common.compose.FavoriteDualColor
 
 @Composable
 fun BookmarkIcon(
@@ -28,7 +27,7 @@ fun BookmarkIcon(
     iconSize: Dp = 24.dp,
     bookmarkedImageVector: ImageVector = Icons.Rounded.Favorite,
     unbookmarkedImageVector: ImageVector = Icons.Rounded.FavoriteBorder,
-    tint: Color = FavoriteDualColor(isBookmarked),
+    tint: Color = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
     contentDescription: String? = null,
 ) {
     Box(modifier = modifier.size(iconSize)) {

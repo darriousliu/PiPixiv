@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.TextFields
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -42,7 +43,6 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.mrl.pixiv.common.compose.ui.BookmarkIcon
 import com.mrl.pixiv.common.compose.ui.NovelBottomBookmarkSheet
-import com.mrl.pixiv.common.compose.ui.illust.AIBadge
 import com.mrl.pixiv.common.data.AiType
 import com.mrl.pixiv.common.data.Novel
 import com.mrl.pixiv.common.data.Restrict
@@ -272,7 +272,7 @@ internal fun NovelItemContent(
                                     )
                                     if (isAI) {
                                         8.HSpacer
-                                        AIBadge()
+                                        NovelAiBadge()
                                     }
                                 }
                             }
@@ -311,7 +311,7 @@ internal fun NovelItemContent(
                                 )
                                 if (isAI) {
                                     8.HSpacer
-                                    AIBadge()
+                                    NovelAiBadge()
                                 }
                             }
                         }
@@ -400,5 +400,19 @@ internal fun NovelItemContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun NovelAiBadge() {
+    Badge(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    ) {
+        Text(
+            text = "AI",
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+        )
     }
 }

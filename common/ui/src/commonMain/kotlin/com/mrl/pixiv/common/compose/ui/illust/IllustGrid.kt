@@ -69,6 +69,7 @@ fun LazyStaggeredGridScope.illustGrid(
     navToPictureScreen: NavigateToHorizontalPictureScreen,
     sharedElementGroup: String,
     enableLoading: Boolean = false,
+    showRank: Boolean = false,
 ) {
     if (enableLoading && illusts.loadState.refresh is LoadState.Loading && illusts.itemCount == 0) {
         item(key = KEY_LOADING, span = StaggeredGridItemSpan.FullLine) {
@@ -102,7 +103,8 @@ fun LazyStaggeredGridScope.illustGrid(
                 navToPictureScreen(illusts.itemSnapshotList.items, index, cover)
             },
             sharedElementSlot = "$sharedElementGroup:$index",
-            enableTransition = true
+            enableTransition = true,
+            rank = if (showRank) index + 1 else null,
         )
     }
 }

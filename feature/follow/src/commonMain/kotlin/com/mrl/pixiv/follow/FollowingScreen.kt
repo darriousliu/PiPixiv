@@ -433,7 +433,6 @@ fun FollowingUserCard(
                         },
                         sharedElementSlot = "$sharedElementGroup:$index",
                         modifier = Modifier.weight(1f),
-                        elevation = 0.dp,
                         shape = RectangleShape
                     )
                 }

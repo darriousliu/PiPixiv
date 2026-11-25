@@ -1,5 +1,6 @@
 package com.mrl.pixiv.profile.detail.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -20,9 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mrl.pixiv.common.compose.IllustGridSpacing
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
 import com.mrl.pixiv.common.data.Illust
-import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigateToHorizontalPictureScreen
@@ -77,9 +78,9 @@ fun IllustWidget(
 
         }
         FlowRow(
-            modifier = Modifier.padding(top = 10.dp),
-            horizontalArrangement = 5f.spaceBy,
-            verticalArrangement = 5f.spaceBy,
+            modifier = Modifier.padding(top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.Thumbnail),
+            verticalArrangement = Arrangement.spacedBy(IllustGridSpacing.Thumbnail),
             maxItemsInEachRow = SPAN_COUNT,
         ) {
             val takenIllusts = illusts.take(MAX_SHOW_ILLUST_COUNT)
@@ -104,8 +105,8 @@ fun IllustWidget(
                     modifier = Modifier.weight(1f)
                 )
             }
-            if (spacerCount > 0) {
-                Spacer(modifier = Modifier.weight(spacerCount.toFloat()))
+            repeat(spacerCount) {
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }

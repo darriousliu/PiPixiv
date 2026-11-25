@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
@@ -39,7 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -154,13 +152,13 @@ private val cardHeights = listOf(180.dp, 240.dp, 200.dp, 160.dp, 220.dp, 260.dp)
 private fun ArtworkGrid(spanCount: Int, modifier: Modifier = Modifier) {
     val columns = if (spanCount == -1) 2 else spanCount.coerceIn(1, 4)
     Row(
-        modifier = modifier.fillMaxWidth().clipToBounds().padding(5.dp),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = modifier.fillMaxWidth().clipToBounds().padding(start = 16.dp, top = 12.dp, end = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         repeat(columns) { column ->
             Column(
                 modifier = Modifier.weight(1f).wrapContentHeight(Alignment.Top, unbounded = true),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 repeat(5) { row ->
                     val height = cardHeights[(row * columns + column) % cardHeights.size]
@@ -173,17 +171,13 @@ private fun ArtworkGrid(spanCount: Int, modifier: Modifier = Modifier) {
 
 @Composable
 private fun ArtworkCard(height: Dp) {
-    val colors = MaterialTheme.colorScheme
-    Column(
-        modifier = Modifier.fillMaxWidth().height(height).clip(RoundedCornerShape(10.dp))
-            .background(colors.surface).padding(1.dp),
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Spacer(
-            Modifier.fillMaxWidth().weight(1f)
-                .background(colors.surfaceContainerHigh, RoundedCornerShape(topStart = 9.dp, topEnd = 9.dp))
+            Modifier.fillMaxWidth().height(height)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.shapes.large)
         )
         Column(
-            modifier = Modifier.padding(6.dp),
+            modifier = Modifier.padding(horizontal = 4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             PlaceholderBar(64.dp, 10.dp)

@@ -139,7 +139,6 @@ private fun PreviewIllust(
         },
         sharedElementSlot = sharedElementSlot,
         modifier = modifier,
-        elevation = 0.dp,
         shape = RectangleShape,
     )
 }

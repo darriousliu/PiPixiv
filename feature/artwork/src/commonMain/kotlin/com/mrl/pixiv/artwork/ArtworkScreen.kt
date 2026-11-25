@@ -225,9 +225,9 @@ private fun UserIllustPage(
             verticalArrangement = layoutParams.verticalArrangement,
             horizontalArrangement = layoutParams.horizontalArrangement,
             contentPadding = PaddingValues(
-                start = 8.dp,
-                top = 8.dp,
-                end = 8.dp,
+                start = layoutParams.edgePadding,
+                top = 12.dp,
+                end = layoutParams.edgePadding,
                 bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             ),
         ) {

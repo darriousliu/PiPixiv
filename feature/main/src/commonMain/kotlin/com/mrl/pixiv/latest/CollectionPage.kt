@@ -150,8 +150,9 @@ private fun CollectionIllustPage(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyGridState,
                 contentPadding = PaddingValues(
-                    horizontal = 5.dp,
-                    vertical = 10.dp
+                    start = layoutParams.edgePadding,
+                    top = 12.dp,
+                    end = layoutParams.edgePadding,
                 ).withMainNavigationBottomInset(),
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,

@@ -66,6 +66,8 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import com.mrl.pixiv.common.compose.IllustGridSpacing
+import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.ui.BlockSurface
 import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.Restrict
@@ -221,12 +223,15 @@ fun ProfileDetailScreen(
                 }
             )
         } else {
+            val contentPadding = 15.dp
+            val artworkPadding = IllustGridSpacing.edgePadding(currentPaneLayoutInfo())
+            val artworkModifier = Modifier.fillMaxWidth().padding(horizontal = artworkPadding - contentPadding)
             LazyColumn(
                 modifier = Modifier
                     .padding(it)
                     .fillMaxWidth(),
                 state = lazyListState,
-                contentPadding = PaddingValues(horizontal = 15.dp)
+                contentPadding = PaddingValues(horizontal = contentPadding)
             ) {
                 item(key = KEY_USER_INFO) {
                     ProfileIdentityHeader(
@@ -265,7 +270,7 @@ fun ProfileDetailScreen(
                             navToPictureScreen = navigationManager::navigateToPictureScreen,
                             illusts = state.userIllusts,
                             sharedElementGroup = KEY_USER_ILLUSTS,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = artworkModifier,
                             onAllClick = {
                                 navigationManager.navigateToUserIllustScreen(uid)
                             }
@@ -281,7 +286,7 @@ fun ProfileDetailScreen(
                             navToPictureScreen = navigationManager::navigateToPictureScreen,
                             illusts = state.userMangas,
                             sharedElementGroup = KEY_USER_MANGAS,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = artworkModifier,
                             onAllClick = {
                                 navigationManager.navigateToUserIllustScreen(uid, Type.Manga)
                             }
@@ -312,7 +317,7 @@ fun ProfileDetailScreen(
                             navToPictureScreen = navigationManager::navigateToPictureScreen,
                             illusts = state.userBookmarksIllusts,
                             sharedElementGroup = KEY_USER_BOOKMARKS_ILLUSTS,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = artworkModifier,
                             onAllClick = {
                                 navigationManager.navigateToCollectionScreen(uid)
                             }

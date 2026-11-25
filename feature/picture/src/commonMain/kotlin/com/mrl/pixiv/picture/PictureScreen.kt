@@ -86,6 +86,7 @@ import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.mrl.pixiv.common.compose.IllustGridDefaults
+import com.mrl.pixiv.common.compose.IllustGridSpacing
 import com.mrl.pixiv.common.compose.layout.ResizableSplitLayout
 import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
@@ -246,8 +247,8 @@ internal fun PictureScreen(
     val relatedSpanCount = with(relatedLayoutParams.gridCells) {
         with(density) {
             density.calculateCrossAxisCellSizes(
-                paneLayoutInfo.size.width.roundToPx(),
-                relatedLayoutParams.horizontalArrangement.spacing.roundToPx()
+                (paneLayoutInfo.size.width - relatedLayoutParams.edgePadding * 2).roundToPx(),
+                IllustGridSpacing.LabeledColumn.roundToPx(),
             ).size
         }
     }
@@ -644,9 +645,9 @@ internal fun PictureScreen(
         item(key = KEY_ILLUST_AUTHOR_OTHER_WORKS) {
             FlowRow(
                 modifier = Modifier
-                    .padding(horizontal = 15.dp)
-                    .padding(top = 10.dp),
-                horizontalArrangement = 5f.spaceBy,
+                    .padding(horizontal = relatedLayoutParams.edgePadding)
+                    .padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.Thumbnail),
                 maxLines = 1,
             ) {
                 val illusts = state.userIllusts.take(currentUserSpanCount)
@@ -664,11 +665,11 @@ internal fun PictureScreen(
                         },
                         navToPictureScreen = { source -> navToPictureScreen(illusts, index, source) },
                         sharedElementSlot = "picture:$pictureIndex:other-works:$index",
-                        modifier = Modifier.weight(1f / currentUserSpanCount),
+                        modifier = Modifier.weight(1f),
                     )
                 }
-                if (illusts.size < currentUserSpanCount) {
-                    Spacer(modifier = Modifier.weight((currentUserSpanCount - illusts.size) / currentUserSpanCount.toFloat()))
+                repeat(currentUserSpanCount - illusts.size) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -736,8 +737,10 @@ internal fun PictureScreen(
             if (illustsPair.isEmpty()) return@items
             // 相关作品
             Row(
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 5.dp),
-                horizontalArrangement = relatedLayoutParams.horizontalArrangement
+                modifier = Modifier
+                    .padding(horizontal = relatedLayoutParams.edgePadding)
+                    .padding(bottom = IllustGridSpacing.LabeledRow),
+                horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.LabeledColumn),
             ) {
                 illustsPair.forEach { (illust, isBookmarked, index) ->
                     RectangleIllustItem(
@@ -754,12 +757,12 @@ internal fun PictureScreen(
                             navToPictureScreen(relatedIllusts.itemSnapshotList.items, index, source)
                         },
                         sharedElementSlot = "picture:$pictureIndex:related:$index",
-                        modifier = Modifier.weight(1f / currentRelatedSpanCount.toFloat()),
+                        modifier = Modifier.weight(1f),
                         shouldShowTip = index == 0
                     )
                 }
-                if (illustsPair.size < currentRelatedSpanCount) {
-                    Spacer(modifier = Modifier.weight((currentRelatedSpanCount - illustsPair.size) / currentRelatedSpanCount.toFloat()))
+                repeat(currentRelatedSpanCount - illustsPair.size) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -862,8 +865,8 @@ internal fun PictureScreen(
                         val rightRelatedSpanCount = with(relatedLayoutParams.gridCells) {
                             with(density) {
                                 calculateCrossAxisCellSizes(
-                                    rightPaneWidth.roundToPx(),
-                                    relatedLayoutParams.horizontalArrangement.spacing.roundToPx()
+                                    (rightPaneWidth - relatedLayoutParams.edgePadding * 2).roundToPx(),
+                                    IllustGridSpacing.LabeledColumn.roundToPx(),
                                 ).size
                             }
                         }

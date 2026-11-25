@@ -422,9 +422,9 @@ fun SearchResultsScreen(
                                             horizontalArrangement =
                                                 squareLayoutParams.horizontalArrangement,
                                             contentPadding = PaddingValues(
-                                                start = 8.dp,
-                                                top = 8.dp,
-                                                end = 8.dp,
+                                                start = squareLayoutParams.edgePadding,
+                                                top = 12.dp,
+                                                end = squareLayoutParams.edgePadding,
                                                 bottom = bottomContentPadding,
                                             ),
                                         ) {
@@ -480,9 +480,9 @@ fun SearchResultsScreen(
                                             horizontalArrangement =
                                                 originalAspectRatioLayoutParams.horizontalArrangement,
                                             contentPadding = PaddingValues(
-                                                start = 8.dp,
-                                                top = 8.dp,
-                                                end = 8.dp,
+                                                start = originalAspectRatioLayoutParams.edgePadding,
+                                                top = 12.dp,
+                                                end = originalAspectRatioLayoutParams.edgePadding,
                                                 bottom = bottomContentPadding,
                                             ),
                                         ) {

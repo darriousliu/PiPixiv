@@ -357,7 +357,12 @@ private fun IllustMode(
         val layoutParams = RecommendGridDefaults.coverLayoutParameters()
         AdaptiveVerticalStaggeredGrid(
             state = lazyStaggeredGridState,
-            contentPadding = PaddingValues(5.dp).withMainNavigationBottomInset(),
+            contentPadding = PaddingValues(
+                start = layoutParams.edgePadding,
+                top = 12.dp,
+                end = layoutParams.edgePadding,
+                bottom = 5.dp,
+            ).withMainNavigationBottomInset(),
             columns = layoutParams.gridCells,
             verticalItemSpacing = layoutParams.verticalArrangement.spacing,
             horizontalArrangement = layoutParams.horizontalArrangement,
