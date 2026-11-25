@@ -88,7 +88,7 @@ internal fun AppearancePreview(
                         MainPage.Ranking -> RankingSkeleton(spanCount, navigationInset)
                         MainPage.Latest -> LatestSkeleton(spanCount, navigationInset)
                         MainPage.Search -> SearchSkeleton(navigationInset)
-                        MainPage.Profile -> ProfileSkeleton()
+                        MainPage.Profile -> ProfileSkeleton(navigationInset)
                     }
                 }
                 PreviewNavigation(

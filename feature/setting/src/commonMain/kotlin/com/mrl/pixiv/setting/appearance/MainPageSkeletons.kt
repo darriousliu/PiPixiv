@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Bookmarks
@@ -34,7 +33,9 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -278,13 +279,16 @@ internal fun SearchSkeleton(navigationInset: Dp) {
 
 /** 对应 feature/main/.../profile/ProfileScreen.kt 的 ProfileContent；修改其框架时同步此骨架。 */
 @Composable
-internal fun ProfileSkeleton() {
+internal fun ProfileSkeleton(navigationInset: Dp) {
     val colors = MaterialTheme.colorScheme
-    Column(Modifier.fillMaxSize().clipToBounds().wrapContentHeight(Alignment.Top, unbounded = true)) {
+    Column(
+        Modifier.fillMaxSize().padding(bottom = navigationInset).clipToBounds()
+            .wrapContentHeight(Alignment.Top, unbounded = true)
+    ) {
         SkeletonTopBar(Icons.Rounded.Palette)
         Column(
             modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
@@ -299,7 +303,6 @@ internal fun ProfileSkeleton() {
                         PlaceholderBar(56.dp, 8.dp)
                         PlaceholderBar(68.dp, 8.dp, colors.primary)
                     }
-                    ProfileArrow()
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     listOf(Icons.Rounded.HowToReg, Icons.Rounded.People).forEach { icon ->
@@ -334,28 +337,20 @@ internal fun ProfileSkeleton() {
 @Composable
 private fun ProfileMenu(vararg icons: ImageVector) {
     val colors = MaterialTheme.colorScheme
-    Column(Modifier.fillMaxWidth().background(colors.surfaceContainerLow, MaterialTheme.shapes.extraLarge)) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+    ) {
         icons.forEachIndexed { index, icon ->
-            if (index > 0) HorizontalDivider(Modifier.padding(start = 56.dp, end = 16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            SegmentedListItem(
+                shapes = ListItemDefaults.segmentedShapes(index, icons.size),
+                colors = ListItemDefaults.segmentedColors(containerColor = colors.surfaceContainerLow),
+                leadingContent = {
+                    Icon(icon, contentDescription = null, tint = colors.onSurfaceVariant)
+                },
             ) {
-                Icon(icon, contentDescription = null, tint = colors.primary)
-                Spacer(Modifier.width(16.dp))
                 PlaceholderBar(64.dp, 12.dp)
-                Spacer(Modifier.weight(1f))
-                ProfileArrow()
             }
         }
     }
-}
-
-@Composable
-private fun ProfileArrow() {
-    Icon(
-        Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
 }
