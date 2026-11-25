@@ -151,7 +151,7 @@ private fun IllustItem(
     val isIllustBlocked = BlockingRepositoryV2.collectIllustBlockAsState(illust.id)
     val isUserBlocked = BlockingRepositoryV2.collectUserBlockAsState(illust.user.id)
     val isBlocked = isIllustBlocked || isUserBlocked
-    val imageUrl = if (square) illust.imageUrls.squareMedium else illust.imageUrls.medium
+    val imageUrl = illust.frameCoverUrl(square, showLabel)
     val cover = pictureCoverSource(illust, sharedElementSlot, imageUrl, enableTransition && !isBlocked)
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
 
@@ -205,7 +205,7 @@ internal fun IllustFrame(
     sharedImage: PictureImageKey? = null,
     shouldShowTip: Boolean = false,
 ) {
-    val imageUrl = if (square) illust.imageUrls.squareMedium else illust.imageUrls.medium
+    val imageUrl = illust.frameCoverUrl(square, showLabel)
     val context = LocalPlatformContext.current
     Column(
         modifier = modifier.throttleClick(onClick = onOpen),
@@ -252,6 +252,10 @@ internal fun IllustFrame(
         }
     }
 }
+
+// 相关作品将原比例封面裁成方图，打开详情时仍可复用该封面作为首图占位。
+private fun Illust.frameCoverUrl(square: Boolean, showLabel: Boolean): String =
+    if (square && !showLabel) imageUrls.squareMedium else imageUrls.medium
 
 @Composable
 private fun IllustInfoPill(illust: Illust, modifier: Modifier = Modifier) {

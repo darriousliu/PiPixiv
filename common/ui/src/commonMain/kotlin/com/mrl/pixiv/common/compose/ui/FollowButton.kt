@@ -9,6 +9,7 @@ import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -27,6 +28,7 @@ fun FollowButton(
     modifier: Modifier = Modifier,
     isUpdating: Boolean = false,
     enabled: Boolean = true,
+    emphasized: Boolean = true,
 ) {
     if (isFollowing) {
         OutlinedButton(
@@ -36,6 +38,15 @@ fun FollowButton(
             shapes = ButtonDefaults.shapes(),
         ) {
             FollowButtonContent(isFollowing = true, isUpdating = isUpdating)
+        }
+    } else if (!emphasized) {
+        FilledTonalButton(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled && !isUpdating,
+            shapes = ButtonDefaults.shapes(),
+        ) {
+            FollowButtonContent(isFollowing = false, isUpdating = isUpdating)
         }
     } else {
         Button(

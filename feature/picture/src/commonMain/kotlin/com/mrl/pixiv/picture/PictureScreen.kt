@@ -4,11 +4,9 @@ import androidx.compose.animation.CapturedAnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,33 +20,23 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.Comment
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.HideImage
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Image
-import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -65,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isSecondaryPressed
@@ -74,14 +61,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.compose.collectAsLazyPagingItems
-import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -93,18 +77,14 @@ import com.mrl.pixiv.common.compose.layout.isWidthAtLeastExpanded
 import com.mrl.pixiv.common.compose.layout.rememberSplitPaneState
 import com.mrl.pixiv.common.compose.navigationSharedImage
 import com.mrl.pixiv.common.compose.ui.BlockSurface
-import com.mrl.pixiv.common.compose.ui.FollowButton
 import com.mrl.pixiv.common.compose.ui.IllustBottomBookmarkSheet
-import com.mrl.pixiv.common.compose.ui.TagItem
-import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
+import com.mrl.pixiv.common.compose.ui.SectionHeader
 import com.mrl.pixiv.common.compose.ui.illust.SquareIllustItem
-import com.mrl.pixiv.common.compose.ui.image.UserAvatar
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.data.Illust
 import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.data.Type
 import com.mrl.pixiv.common.data.setting.PreviewImageQuality
-import com.mrl.pixiv.common.kts.HSpacer
 import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.BlockingRepositoryV2
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
@@ -125,7 +105,6 @@ import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.util.ShareUtil
 import com.mrl.pixiv.common.util.adaptiveFileSize1
 import com.mrl.pixiv.common.util.conditionally
-import com.mrl.pixiv.common.util.convertUtcStringToLocalDateTime
 import com.mrl.pixiv.common.util.copyToClipboard
 import com.mrl.pixiv.common.util.getScreenHeight
 import com.mrl.pixiv.common.util.isDesktop
@@ -143,15 +122,11 @@ import com.mrl.pixiv.strings.download_with_size
 import com.mrl.pixiv.strings.export_failed
 import com.mrl.pixiv.strings.hide_illust
 import com.mrl.pixiv.strings.illust_hidden
-import com.mrl.pixiv.strings.liked
 import com.mrl.pixiv.strings.related_artworks
 import com.mrl.pixiv.strings.save_as
 import com.mrl.pixiv.strings.share
 import com.mrl.pixiv.strings.show_illust
 import com.mrl.pixiv.strings.user_blocked
-import com.mrl.pixiv.strings.view_comments
-import com.mrl.pixiv.strings.view_comments_count
-import com.mrl.pixiv.strings.viewed
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
 import kotlinx.coroutines.delay
@@ -199,7 +174,6 @@ private const val KEY_UGOIRA = "ugoira"
 private const val KEY_ILLUST_TITLE = "illust_title"
 private const val KEY_ILLUST_DATA = "illust_data"
 private const val KEY_ILLUST_TAGS = "illust_tags"
-private const val KEY_ILLUST_DIVIDER_1 = "illust_divider_1"
 private const val KEY_ILLUST_AUTHOR = "illust_author"
 private const val KEY_ILLUST_AUTHOR_OTHER_WORKS = "illust_author_other_works"
 private const val KEY_VIEW_COMMENTS = "view_comments"
@@ -531,70 +505,18 @@ internal fun PictureScreen(
     }
 
     fun LazyListScope.illustDetailItems(
+        margin: Dp,
         currentUserSpanCount: Int,
         currentRelatedSpanCount: Int,
         currentRelatedRowCount: Int,
     ) {
+        val inset = Modifier.padding(horizontal = margin)
         item(key = KEY_ILLUST_TITLE) {
-            UserInfo(
-                illust = illust,
-                navToUserDetailScreen = navToUserDetailScreen
-            )
+            ArtworkTitleSection(illust, modifier = inset.padding(top = 20.dp))
         }
-        item(key = KEY_ILLUST_DATA) {
-            val caption = remember(illust.caption) {
-                illust.caption.takeIf { it.isNotEmpty() }?.let {
-                    htmlToAnnotatedString(
-                        html = illust.caption,
-                        compactMode = true,
-                    )
-                }
-            }
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                shape = MaterialTheme.shapes.large,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                ),
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    SelectionContainer {
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            Text(
-                                text = convertUtcStringToLocalDateTime(illust.createDate),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Text(
-                                text = "${illust.totalView} ${stringResource(RStrings.viewed)}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Text(
-                                text = "${illust.totalBookmarks} ${stringResource(RStrings.liked)}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                    if (caption != null) {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        SelectionContainer {
-                            Text(
-                                text = caption,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                    }
-                }
+        if (illust.caption.isNotBlank()) {
+            item(key = KEY_ILLUST_DATA) {
+                ArtworkCaption(illust.caption, modifier = inset.padding(top = 16.dp))
             }
         }
         if (illust.series?.id?.let { it > 0 } == true) {
@@ -606,163 +528,82 @@ internal fun PictureScreen(
                 )
             }
         }
-        // tag
-        item(key = KEY_ILLUST_TAGS) {
-            FlowRow(
-                modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp),
-                horizontalArrangement = 5f.spaceBy,
-                verticalArrangement = 5f.spaceBy,
-            ) {
-                illust.tags?.forEach { tag ->
-                    TagItem(
-                        tag = tag,
-                        onClick = {
-                            navToSearchResultScreen(tag.name, false, AppViewMode.ILLUST)
-                            dispatch(PictureAction.AddSearchHistory(tag.name))
-                        }
-                    )
-                }
+        val tags = illust.tags.orEmpty()
+        if (tags.isNotEmpty()) {
+            item(key = KEY_ILLUST_TAGS) {
+                ArtworkTags(
+                    tags = tags,
+                    onSearch = { tag ->
+                        navToSearchResultScreen(tag.name, false, AppViewMode.ILLUST)
+                        dispatch(PictureAction.AddSearchHistory(tag.name))
+                    },
+                    modifier = inset.padding(top = 16.dp),
+                )
             }
         }
-        item(key = KEY_ILLUST_DIVIDER_1) {
-            HorizontalDivider(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 24.dp, bottom = 8.dp)
-            )
-        }
         item(key = KEY_ILLUST_AUTHOR) {
-            //作者头像、名字、关注按钮
             UserFollowInfo(
                 illust = illust,
                 navToUserDetailScreen = navToUserDetailScreen,
                 isFollowed = isFollowed,
-                modifier = Modifier
-                    .padding(horizontal = 15.dp)
-                    .padding(top = 10.dp)
+                modifier = inset.padding(top = 24.dp),
             )
         }
-        item(key = KEY_ILLUST_AUTHOR_OTHER_WORKS) {
-            FlowRow(
-                modifier = Modifier
-                    .padding(horizontal = relatedLayoutParams.edgePadding)
-                    .padding(top = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.Thumbnail),
-                maxLines = 1,
-            ) {
-                val illusts = state.userIllusts.take(currentUserSpanCount)
-                illusts.forEachIndexed { index, it ->
-                    val innerIsBookmarked = it.isBookmark
-                    SquareIllustItem(
-                        illust = it,
-                        isBookmarked = innerIsBookmarked,
-                        onBookmarkClick = { restrict, tags, isEdit ->
-                            if (isEdit || !innerIsBookmarked) {
-                                BookmarkState.bookmarkIllust(it.id, restrict, tags)
-                            } else {
-                                BookmarkState.deleteBookmarkIllust(it.id)
-                            }
-                        },
-                        navToPictureScreen = { source -> navToPictureScreen(illusts, index, source) },
+        if (state.userIllusts.isNotEmpty()) {
+            item(key = KEY_ILLUST_AUTHOR_OTHER_WORKS) {
+                val works = state.userIllusts.take(currentUserSpanCount)
+                ArtworkWorkRow(
+                    columns = currentUserSpanCount,
+                    itemCount = works.size,
+                    spacing = IllustGridSpacing.Thumbnail,
+                    modifier = inset.padding(top = 12.dp),
+                ) { index, cell ->
+                    val work = works[index]
+                    DetailWorkItem(
+                        work = work,
+                        onOpen = { source -> navToPictureScreen(works, index, source) },
                         sharedElementSlot = "picture:$pictureIndex:other-works:$index",
-                        modifier = Modifier.weight(1f),
+                        modifier = cell,
                     )
-                }
-                repeat(currentUserSpanCount - illusts.size) {
-                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
         item(key = KEY_VIEW_COMMENTS) {
-            Row(
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .fillMaxWidth()
-                    .throttleClick(indication = ripple()) {
-                        navigationManager.navigateToCommentScreen(
-                            illust.id,
-                            CommentType.ILLUST
-                        )
-                    },
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.Comment,
-                    contentDescription = stringResource(RStrings.view_comments)
-                )
-                5.HSpacer
-                Text(
-                    text = if (illust.totalComments != null) {
-                        stringResource(
-                            RStrings.view_comments_count,
-                            illust.totalComments!!
-                        )
-                    } else {
-                        stringResource(RStrings.view_comments)
-                    },
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+            ArtworkComments(
+                count = illust.totalComments,
+                onClick = { navigationManager.navigateToCommentScreen(illust.id, CommentType.ILLUST) },
+                modifier = inset.padding(top = 24.dp),
+            )
         }
         item(key = KEY_ILLUST_RELATED_TITLE) {
-            //相关作品文字，显示在中间
-            Text(
-                text = stringResource(RStrings.related_artworks),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 50.dp, bottom = 10.dp),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                ),
-            )
+            SectionHeader(text = stringResource(RStrings.related_artworks), modifier = inset.padding(top = 24.dp))
         }
         items(
             count = currentRelatedRowCount,
             key = { index -> "${illust.id}_related_${index}" },
-            contentType = { "related_illusts" }
+            contentType = { "related_illusts" },
         ) { rowIndex ->
-            val illustsPair = (0..<currentRelatedSpanCount).mapNotNull { columnIndex ->
-                val index = rowIndex * currentRelatedSpanCount + columnIndex
-                if (index >= relatedIllusts.itemCount) return@mapNotNull null
-                val illust = relatedIllusts[index] ?: return@mapNotNull null
-                Triple(
-                    illust,
-                    illust.isBookmark,
-                    index
-                )
-            }
-            if (illustsPair.isEmpty()) return@items
-            // 相关作品
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = relatedLayoutParams.edgePadding)
-                    .padding(bottom = IllustGridSpacing.LabeledRow),
-                horizontalArrangement = Arrangement.spacedBy(IllustGridSpacing.LabeledColumn),
-            ) {
-                illustsPair.forEach { (illust, isBookmarked, index) ->
-                    RectangleIllustItem(
-                        illust = illust,
-                        isBookmarked = isBookmarked,
-                        onBookmarkClick = { restrict, tags, isEdit ->
-                            if (isEdit || !isBookmarked) {
-                                BookmarkState.bookmarkIllust(illust.id, restrict, tags)
-                            } else {
-                                BookmarkState.deleteBookmarkIllust(illust.id)
-                            }
-                        },
-                        navToPictureScreen = { source ->
-                            navToPictureScreen(relatedIllusts.itemSnapshotList.items, index, source)
-                        },
+            val firstIndex = rowIndex * currentRelatedSpanCount
+            val count = (relatedIllusts.itemCount - firstIndex).coerceIn(0, currentRelatedSpanCount)
+            ArtworkWorkRow(
+                columns = currentRelatedSpanCount,
+                itemCount = count,
+                spacing = IllustGridSpacing.LabeledColumn,
+                modifier = inset.padding(bottom = IllustGridSpacing.LabeledRow),
+            ) { column, cell ->
+                val index = firstIndex + column
+                val work = relatedIllusts[index]
+                if (work == null) {
+                    Spacer(cell)
+                } else {
+                    DetailWorkItem(
+                        work = work,
+                        onOpen = { source -> navToPictureScreen(relatedIllusts.itemSnapshotList.items, index, source) },
                         sharedElementSlot = "picture:$pictureIndex:related:$index",
-                        modifier = Modifier.weight(1f),
-                        shouldShowTip = index == 0
+                        modifier = cell,
+                        showLabel = true,
+                        shouldShowTip = index == 0,
                     )
-                }
-                repeat(currentRelatedSpanCount - illustsPair.size) {
-                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -771,9 +612,9 @@ internal fun PictureScreen(
     Scaffold(
         modifier = modifier,
         topBar = {
-            if (!useTwoPaneLayout) {
+            if (!useTwoPaneLayout || isAnyBlocked) {
                 CapturedAnimatedVisibility(
-                    visible = showPreviewControls,
+                    visible = isAnyBlocked || showPreviewControls,
                     enter = fadeIn(),
                     exit = fadeOut(),
                 ) {
@@ -890,6 +731,7 @@ internal fun PictureScreen(
                             contentPadding = PaddingValues(bottom = with(density) { controlsHeight.toDp() }),
                         ) {
                             illustDetailItems(
+                                margin = 24.dp,
                                 currentUserSpanCount = rightUserSpanCount,
                                 currentRelatedSpanCount = rightRelatedSpanCount,
                                 currentRelatedRowCount = rightRelatedRowCount,
@@ -913,6 +755,7 @@ internal fun PictureScreen(
                 ) {
                     illustImageItems()
                     illustDetailItems(
+                        margin = relatedLayoutParams.edgePadding,
                         currentUserSpanCount = userSpanCount,
                         currentRelatedSpanCount = relatedSpanCount,
                         currentRelatedRowCount = relatedRowCount,
@@ -1125,62 +968,51 @@ private fun BottomMenu(
 }
 
 @Composable
+private fun DetailWorkItem(
+    work: Illust,
+    onOpen: (PictureCoverSource?) -> Unit,
+    sharedElementSlot: String,
+    modifier: Modifier = Modifier,
+    showLabel: Boolean = false,
+    shouldShowTip: Boolean = false,
+) {
+    val isBookmarked = work.isBookmark
+    SquareIllustItem(
+        illust = work,
+        isBookmarked = isBookmarked,
+        onBookmarkClick = { restrict, tags, isEdit ->
+            if (isEdit || !isBookmarked) {
+                BookmarkState.bookmarkIllust(work.id, restrict, tags)
+            } else {
+                BookmarkState.deleteBookmarkIllust(work.id)
+            }
+        },
+        navToPictureScreen = onOpen,
+        sharedElementSlot = sharedElementSlot,
+        modifier = modifier,
+        showLabel = showLabel,
+        shouldShowTip = shouldShowTip,
+    )
+}
+
+@Composable
 private fun UserFollowInfo(
     illust: Illust,
     navToUserDetailScreen: (Long) -> Unit,
     isFollowed: Boolean,
     modifier: Modifier = Modifier,
-    isUpdatingFollow: Boolean = FollowState.isUpdating(illust.user.id),
 ) {
-    Row(
-        modifier = modifier
-    ) {
-        UserAvatar(
-            url = illust.user.profileImageUrls.medium,
-            modifier = Modifier
-                .size(30.dp)
-                .align(Alignment.CenterVertically),
-            onClick = {
-                navToUserDetailScreen(illust.user.id)
-            },
-        )
-        SelectionContainer(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 10.dp)
-                .align(Alignment.CenterVertically)
-        ) {
-            Column {
-                Text(
-                    text = illust.user.name,
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                    ),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = "ID: ${illust.user.id}",
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                    ),
-                )
-            }
-        }
-        FollowButton(
-            isFollowing = isFollowed,
-            isUpdating = isUpdatingFollow,
-            onClick = {
-                if (isFollowed) {
-                    FollowState.unFollowUser(illust.user.id)
-                } else {
-                    FollowState.followUser(illust.user.id)
-                }
-            },
-        )
-    }
+    val user = illust.user
+    ArtworkAuthor(
+        user = user,
+        isFollowed = isFollowed,
+        isUpdating = FollowState.isUpdating(user.id),
+        onOpen = { navToUserDetailScreen(user.id) },
+        onFollow = {
+            if (isFollowed) FollowState.unFollowUser(user.id) else FollowState.followUser(user.id)
+        },
+        modifier = modifier,
+    )
 }
 
 @Composable
@@ -1198,58 +1030,15 @@ private fun PictureTopBar(
     modifier: Modifier = Modifier,
 ) {
     var showBottomMenu by rememberSaveable { mutableStateOf(false) }
-    TopAppBar(
-        title = {},
+    ArtworkTopBar(
+        currentPage = currPage + 1,
+        pageCount = illust.pageCount,
+        showPage = isBarVisible,
+        isBlocked = isIllustBlocked || isUserBlocked,
+        onBack = onBack,
+        onHome = popBackToHomeScreen,
+        onMore = { showBottomMenu = true },
         modifier = modifier,
-        actions = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 15.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart),
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = null,
-                        modifier = Modifier.throttleClick { onBack() },
-                    )
-                    Icon(
-                        imageVector = Icons.Rounded.Home,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(start = 15.dp)
-                            .throttleClick { popBackToHomeScreen() }
-                    )
-                }
-                if (!isIllustBlocked && !isUserBlocked) {
-                    Icon(
-                        imageVector = Icons.Rounded.MoreVert,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .throttleClick {
-                                showBottomMenu = true
-                            },
-                    )
-                    CapturedAnimatedVisibility(
-                        modifier = Modifier.align(Alignment.Center),
-                        visible = isBarVisible,
-                        enter = fadeIn(),
-                        exit = fadeOut(),
-                    ) {
-                        Text(
-                            text = "${currPage + 1}/${illust.pageCount}",
-                        )
-                    }
-                }
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-        )
     )
     if (showBottomMenu) {
         ModalBottomSheet(
@@ -1308,48 +1097,5 @@ private fun BottomMenuItem(
             style = TextStyle(fontSize = 16.sp),
             modifier = Modifier.weight(1f)
         )
-    }
-}
-
-@Composable
-private fun UserInfo(
-    illust: Illust,
-    navToUserDetailScreen: (Long) -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        UserAvatar(
-            url = illust.user.profileImageUrls.medium,
-            modifier = Modifier
-                .size(40.dp),
-            onClick = {
-                navToUserDetailScreen(illust.user.id)
-            },
-        )
-        SelectionContainer(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 12.dp),
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                Text(
-                    text = illust.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = illust.user.name,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
     }
 }
