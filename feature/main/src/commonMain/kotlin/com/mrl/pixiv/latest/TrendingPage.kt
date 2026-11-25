@@ -1,18 +1,11 @@
 package com.mrl.pixiv.latest
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,24 +30,15 @@ import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.AppViewMode
-import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.itemIndexKey
-import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
-import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.strings.all
-import com.mrl.pixiv.strings.word_private
-import com.mrl.pixiv.strings.word_public
 import kotlinx.coroutines.flow.SharedFlow
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-
-private const val KEY_TOP_SPACE = "top_space"
 
 @Composable
 fun TrendingPage(
@@ -113,14 +97,22 @@ private fun TrendingIllustPage(
         }
     }
 
-    ContentPullToRefreshBox(
-        hasContent = illustsFollowing.itemCount > 0,
-        isRefreshing = isRefreshing,
-        onRefresh = { illustsFollowing.refresh() },
-        modifier = modifier.fillMaxSize(),
-        state = pullRefreshState,
-    ) {
-        Box {
+    Column(modifier = modifier.fillMaxSize()) {
+        LatestFilterRow(
+            selected = trendingFilter,
+            onSelect = { restrict ->
+                viewModel.updateRestrict(restrict)
+                illustsFollowing.refresh()
+            },
+            showAll = true,
+        )
+        ContentPullToRefreshBox(
+            hasContent = illustsFollowing.itemCount > 0,
+            isRefreshing = isRefreshing,
+            onRefresh = { illustsFollowing.refresh() },
+            modifier = Modifier.fillMaxSize(),
+            state = pullRefreshState,
+        ) {
             AdaptiveVerticalStaggeredGrid(
                 columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
@@ -133,12 +125,6 @@ private fun TrendingIllustPage(
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,
             ) {
-                item(
-                    key = KEY_TOP_SPACE,
-                    span = StaggeredGridItemSpan.FullLine
-                ) {
-                    Spacer(modifier = Modifier.height(40.dp))
-                }
                 items(
                     count = illustsFollowing.itemCount,
                     key = illustsFollowing.itemIndexKey { index, item -> "${index}_${item.id}" }
@@ -194,33 +180,6 @@ private fun TrendingIllustPage(
                 state = lazyGridState,
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
-            Row(
-                modifier = Modifier.align(Alignment.TopCenter),
-                horizontalArrangement = 8f.spaceBy
-            ) {
-                val options = listOf(
-                    RStrings.all to Restrict.ALL,
-                    RStrings.word_public to Restrict.PUBLIC,
-                    RStrings.word_private to Restrict.PRIVATE,
-                )
-                options.forEach { (label, restrict) ->
-                    FilterChip(
-                        selected = trendingFilter == restrict,
-                        onClick = {
-                            viewModel.updateRestrict(restrict)
-                            illustsFollowing.refresh()
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(label)
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                }
-            }
         }
     }
 }
@@ -251,18 +210,26 @@ private fun TrendingNovelPage(
         }
     }
 
-    ContentPullToRefreshBox(
-        hasContent = novelsFollowing.itemCount > 0,
-        isRefreshing = isRefreshing,
-        onRefresh = { novelsFollowing.refresh() },
-        modifier = modifier.fillMaxSize(),
-        state = pullRefreshState,
-    ) {
-        Box {
+    Column(modifier = modifier.fillMaxSize()) {
+        LatestFilterRow(
+            selected = trendingFilter,
+            onSelect = { restrict ->
+                viewModel.updateRestrict(restrict)
+                novelsFollowing.refresh()
+            },
+            showAll = true,
+        )
+        ContentPullToRefreshBox(
+            hasContent = novelsFollowing.itemCount > 0,
+            isRefreshing = isRefreshing,
+            onRefresh = { novelsFollowing.refresh() },
+            modifier = Modifier.fillMaxSize(),
+            state = pullRefreshState,
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
-                contentPadding = PaddingValues(vertical = 50.dp).withMainNavigationBottomInset(),
+                contentPadding = PaddingValues().withMainNavigationBottomInset(),
             ) {
                 items(
                     count = novelsFollowing.itemCount,
@@ -314,33 +281,6 @@ private fun TrendingNovelPage(
                 state = lazyListState,
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
-            Row(
-                modifier = Modifier.align(Alignment.TopCenter),
-                horizontalArrangement = 8f.spaceBy
-            ) {
-                val options = listOf(
-                    RStrings.all to Restrict.ALL,
-                    RStrings.word_public to Restrict.PUBLIC,
-                    RStrings.word_private to Restrict.PRIVATE,
-                )
-                options.forEach { (label, restrict) ->
-                    FilterChip(
-                        selected = trendingFilter == restrict,
-                        onClick = {
-                            viewModel.updateRestrict(restrict)
-                            novelsFollowing.refresh()
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(label)
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                }
-            }
         }
     }
 }

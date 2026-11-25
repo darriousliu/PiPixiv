@@ -84,7 +84,8 @@ internal fun MainNavigationLayout(
     val scaffoldType = when {
         !isBottomNavigation -> layoutType
         !showBottomNavigation || floatingNavigation -> NavigationSuiteType.None
-        else -> NavigationSuiteType.NavigationBar
+        layoutType == NavigationSuiteType.ShortNavigationBarMedium -> layoutType
+        else -> NavigationSuiteType.ShortNavigationBarCompact
     }
     val contentLayer = if (floatingNavigation && isRuntimeShaderSupported()) {
         rememberGraphicsLayer()
@@ -108,7 +109,7 @@ internal fun MainNavigationLayout(
                         Text(
                             text = stringResource(title),
                             textAlign = TextAlign.Center,
-                            style = if (scaffoldType == NavigationSuiteType.NavigationBar) {
+                            style = if (scaffoldType.isBottomNavigation) {
                                 style.copy(hyphens = Hyphens.Auto)
                             } else style,
                         )

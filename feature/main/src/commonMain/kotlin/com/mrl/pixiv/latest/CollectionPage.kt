@@ -1,23 +1,11 @@
 package com.mrl.pixiv.latest
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,9 +35,7 @@ import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
 import com.mrl.pixiv.common.compose.ui.illust.RectangleIllustItem
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.AppViewMode
-import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.kts.itemIndexKey
-import com.mrl.pixiv.common.kts.spaceBy
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.repository.isSelf
@@ -57,18 +43,11 @@ import com.mrl.pixiv.common.repository.viewmodel.bookmark.BookmarkState
 import com.mrl.pixiv.common.repository.viewmodel.bookmark.isBookmark
 import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.currentNavigationManager
-import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.common.viewmodel.asState
-import com.mrl.pixiv.strings.discovery_collection_filters
-import com.mrl.pixiv.strings.word_private
-import com.mrl.pixiv.strings.word_public
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-
-private const val KEY_TOP_SPACE = "top_space"
 
 @Composable
 fun CollectionPage(
@@ -137,14 +116,23 @@ private fun CollectionIllustPage(
         }
     }
 
-    ContentPullToRefreshBox(
-        hasContent = userBookmarksIllusts.itemCount > 0,
-        isRefreshing = isRefreshing,
-        onRefresh = { userBookmarksIllusts.refresh() },
-        modifier = modifier.fillMaxSize(),
-        state = pullRefreshState,
-    ) {
-        Box {
+    Column(modifier = modifier.fillMaxSize()) {
+        LatestFilterRow(
+            selected = state.restrict,
+            onSelect = { restrict ->
+                viewModel.updateFilterTag(restrict, state.filterTag)
+                if (state.restrict != restrict) scope.launch { lazyGridState.scrollToItem(0) }
+            },
+            showPrivate = uid.isSelf,
+            onOpenFilters = { showFilterDialog = true },
+        )
+        ContentPullToRefreshBox(
+            hasContent = userBookmarksIllusts.itemCount > 0,
+            isRefreshing = isRefreshing,
+            onRefresh = { userBookmarksIllusts.refresh() },
+            modifier = Modifier.fillMaxSize(),
+            state = pullRefreshState,
+        ) {
             AdaptiveVerticalStaggeredGrid(
                 columns = layoutParams.gridCells,
                 modifier = Modifier.fillMaxSize(),
@@ -157,12 +145,6 @@ private fun CollectionIllustPage(
                 verticalItemSpacing = layoutParams.verticalArrangement.spacing,
                 horizontalArrangement = layoutParams.horizontalArrangement,
             ) {
-                item(
-                    key = KEY_TOP_SPACE,
-                    span = StaggeredGridItemSpan.FullLine
-                ) {
-                    Spacer(modifier = Modifier.height(40.dp))
-                }
                 items(
                     count = userBookmarksIllusts.itemCount,
                     key = userBookmarksIllusts.itemIndexKey { index, item -> "${index}_${item.id}" }
@@ -218,48 +200,6 @@ private fun CollectionIllustPage(
                 state = lazyGridState,
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
-            Row(
-                modifier = Modifier.align(Alignment.TopCenter),
-                horizontalArrangement = 8f.spaceBy
-            ) {
-                val options = if (uid.isSelf) listOf(
-                    RStrings.word_public to Restrict.PUBLIC,
-                    RStrings.word_private to Restrict.PRIVATE,
-                ) else listOf(RStrings.word_public to Restrict.PUBLIC)
-                options.forEach { (label, restrict) ->
-                    FilterChip(
-                        selected = state.restrict == restrict,
-                        onClick = {
-                            viewModel.updateFilterTag(restrict, state.filterTag)
-                            if (state.restrict != restrict) scope.launch {
-                                lazyGridState.scrollToItem(
-                                    0
-                                )
-                            }
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(label)
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                }
-                IconButton(
-                    onClick = { showFilterDialog = true },
-                    shapes = IconButtonDefaults.shapes(),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.FilterList,
-                        contentDescription = stringResource(RStrings.discovery_collection_filters)
-                    )
-                }
-            }
         }
     }
     if (showFilterDialog) {
@@ -307,18 +247,27 @@ private fun CollectionNovelPage(
         }
     }
 
-    ContentPullToRefreshBox(
-        hasContent = userBookmarksNovels.itemCount > 0,
-        isRefreshing = isRefreshing,
-        onRefresh = { userBookmarksNovels.refresh() },
-        modifier = modifier.fillMaxSize(),
-        state = pullRefreshState,
-    ) {
-        Box {
+    Column(modifier = modifier.fillMaxSize()) {
+        LatestFilterRow(
+            selected = state.novelRestrict,
+            onSelect = { restrict ->
+                viewModel.updateNovelFilterTag(restrict, state.novelFilterTag)
+                if (state.novelRestrict != restrict) scope.launch { lazyListState.scrollToItem(0) }
+            },
+            showPrivate = uid.isSelf,
+            onOpenFilters = { showFilterDialog = true },
+        )
+        ContentPullToRefreshBox(
+            hasContent = userBookmarksNovels.itemCount > 0,
+            isRefreshing = isRefreshing,
+            onRefresh = { userBookmarksNovels.refresh() },
+            modifier = Modifier.fillMaxSize(),
+            state = pullRefreshState,
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
-                contentPadding = PaddingValues(vertical = 50.dp).withMainNavigationBottomInset(),
+                contentPadding = PaddingValues().withMainNavigationBottomInset(),
             ) {
                 items(
                     count = userBookmarksNovels.itemCount,
@@ -370,46 +319,6 @@ private fun CollectionNovelPage(
                 state = lazyListState,
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
-            Row(
-                modifier = Modifier.align(Alignment.TopCenter),
-                horizontalArrangement = 8f.spaceBy
-            ) {
-                val options = if (uid.isSelf) listOf(
-                    RStrings.word_public to Restrict.PUBLIC,
-                    RStrings.word_private to Restrict.PRIVATE,
-                ) else listOf(RStrings.word_public to Restrict.PUBLIC)
-                options.forEach { (label, restrict) ->
-                    FilterChip(
-                        selected = state.novelRestrict == restrict,
-                        onClick = {
-                            viewModel.updateNovelFilterTag(restrict, state.novelFilterTag)
-                            if (state.novelRestrict != restrict) scope.launch {
-                                lazyListState.scrollToItem(
-                                    0
-                                )
-                            }
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(label)
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                }
-                IconButton(
-                    onClick = { showFilterDialog = true },
-                    shapes = IconButtonDefaults.shapes(),
-                    colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                ) {
-                    Icon(
-                        Icons.Rounded.FilterList,
-                        stringResource(RStrings.discovery_collection_filters)
-                    )
-                }
-            }
         }
     }
 

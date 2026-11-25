@@ -18,6 +18,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -47,10 +48,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.MainPageFloatingActions
 import com.mrl.pixiv.common.analytics.trackTab
+import com.mrl.pixiv.common.compose.IllustGridSpacing
 import com.mrl.pixiv.common.compose.RecommendGridDefaults
 import com.mrl.pixiv.common.compose.layout.AdaptiveVerticalStaggeredGrid
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
 import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
@@ -59,12 +63,10 @@ import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
 import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
-import com.mrl.pixiv.common.compose.ui.ViewModeToggleButton
 import com.mrl.pixiv.common.compose.ui.illust.illustGrid
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.AppViewMode
 import com.mrl.pixiv.common.kts.HSpacer
-import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
@@ -191,99 +193,41 @@ fun RankingScreen(
         }
     }
 
-    // 框架调整时同步 feature/setting/.../appearance/MainPageSkeletons.kt 中的 RankingSkeleton。
-    Scaffold(
+    val r18Enabled by requireUserPreferenceFlow.collectAsStateWithLifecycle { isR18Enabled }
+    LaunchedEffect(Unit) {
+        requireUserPreferenceFlow.map { it.isR18Enabled }.distinctUntilChanged().collect { enabled ->
+            if (!enabled && state.showR18) viewModel.toggleR18()
+        }
+    }
+    RankingScaffold(
+        appViewMode = appViewMode,
+        r18Enabled = r18Enabled,
+        showR18 = state.showR18,
+        availableModes = availableModes,
+        selectedIndex = pagerState.currentPage,
+        onSelectTab = { index -> scope.launch { pagerState.scrollToPage(index) } },
+        onToggleR18 = viewModel::toggleR18,
+        onSelectDate = { showDatePicker = true },
+        onModeChange = viewModel::switchViewMode,
         modifier = modifier,
-        topBar = {
-            Column {
-                TopAppBar(
-                    title = { Text(text = stringResource(RStrings.ranking)) },
-                    actions = {
-                        val r18Enabled by requireUserPreferenceFlow.collectAsStateWithLifecycle { isR18Enabled }
-                        LaunchedEffect(Unit) {
-                            requireUserPreferenceFlow.map { it.isR18Enabled }.distinctUntilChanged()
-                                .collect { r18Enabled ->
-                                    if (!r18Enabled && state.showR18) {
-                                        viewModel.toggleR18()
-                                    }
-                                }
-                        }
-                        if (r18Enabled) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = stringResource(RStrings.r18))
-                                5.HSpacer
-                                Switch(
-                                    checked = state.showR18,
-                                    onCheckedChange = { viewModel.toggleR18() }
-                                )
-                                8.HSpacer
-                            }
-                        }
-                    }
-                )
-                Row {
-                    PrimaryScrollableTabRow(
-                        selectedTabIndex = pagerState.currentPage.coerceAtMost(
-                            availableModes.lastIndex.coerceAtLeast(0)
-                        ),
-                        modifier = Modifier.weight(1f),
-                        edgePadding = 0.dp
-                    ) {
-                        availableModes.forEachIndexed { index, mode ->
-                            Tab(
-                                selected = pagerState.currentPage == index,
-                                onClick = {
-                                    scope.launch {
-                                        pagerState.scrollToPage(index)
-                                    }
-                                },
-                                text = {
-                                    Text(text = stringResource(mode.title))
-                                }
-                            )
-                        }
-                    }
-                    IconButton(
-                        onClick = { showDatePicker = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.EditCalendar,
-                            contentDescription = null
-                        )
-                    }
-                }
-            }
-        },
-        floatingActionButton = {
-            Column(Modifier.padding(bottom = LocalMainNavigationBottomInset.current)) {
-                val mode = availableModes.getOrNull(pagerState.currentPage)
-                if (mode != null) {
-                    val scrollToTop = suspend {
+        backToTop = {
+            val mode = availableModes.getOrNull(pagerState.currentPage)
+            if (mode != null) {
+                BackToTopButton(
+                    visibility = when (appViewMode) {
+                        AppViewMode.ILLUST -> viewModel.getLazyStaggeredGridState(mode).canScrollBackward
+                        AppViewMode.NOVEL -> viewModel.getLazyListState(mode).canScrollBackward
+                    },
+                    onBackToTop = {
                         when (appViewMode) {
-                            AppViewMode.ILLUST -> viewModel.getLazyStaggeredGridState(mode)
-                                .scrollToItem(0)
-
+                            AppViewMode.ILLUST -> viewModel.getLazyStaggeredGridState(mode).scrollToItem(0)
                             AppViewMode.NOVEL -> viewModel.getLazyListState(mode).scrollToItem(0)
                         }
-                    }
-                    BackToTopButton(
-                        visibility = when (appViewMode) {
-                            AppViewMode.ILLUST -> viewModel.getLazyStaggeredGridState(mode).canScrollBackward
-                            AppViewMode.NOVEL -> viewModel.getLazyListState(mode).canScrollBackward
-                        },
-                        modifier = Modifier,
-                        onBackToTop = scrollToTop,
-                        onRefresh = { viewModel.refresh(mode) }
-                    )
-                }
-                8.VSpacer
-                ViewModeToggleButton(
-                    currentMode = appViewMode,
-                    onModeChange = viewModel::switchViewMode
+                    },
+                    onRefresh = { viewModel.refresh(mode) },
                 )
             }
         },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) { paddingValues ->
         HorizontalPager(
             state = pagerState,
@@ -313,6 +257,68 @@ fun RankingScreen(
             }
         }
     }
+}
+
+@Composable
+internal fun RankingScaffold(
+    appViewMode: AppViewMode,
+    r18Enabled: Boolean,
+    showR18: Boolean,
+    availableModes: List<RankingMode>,
+    selectedIndex: Int,
+    onSelectTab: (Int) -> Unit,
+    onToggleR18: () -> Unit,
+    onSelectDate: () -> Unit,
+    onModeChange: (AppViewMode) -> Unit,
+    backToTop: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    // 框架调整时同步 feature/setting/.../appearance/MainPageSkeletons.kt 中的 RankingSkeleton。
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            Column {
+                TopAppBar(
+                    title = { Text(text = stringResource(RStrings.ranking)) },
+                    actions = {
+                        if (r18Enabled) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = stringResource(RStrings.r18))
+                                5.HSpacer
+                                Switch(checked = showR18, onCheckedChange = { onToggleR18() })
+                                8.HSpacer
+                            }
+                        }
+                        IconButton(onClick = onSelectDate, shapes = IconButtonDefaults.shapes()) {
+                            Icon(Icons.Rounded.EditCalendar, contentDescription = null)
+                        }
+                    },
+                )
+                PrimaryScrollableTabRow(
+                    selectedTabIndex = selectedIndex.coerceAtMost(availableModes.lastIndex.coerceAtLeast(0)),
+                    edgePadding = IllustGridSpacing.edgePadding(currentPaneLayoutInfo()),
+                ) {
+                    availableModes.forEachIndexed { index, mode ->
+                        Tab(
+                            selected = selectedIndex == index,
+                            onClick = { onSelectTab(index) },
+                            text = { Text(text = stringResource(mode.title)) },
+                        )
+                    }
+                }
+            }
+        },
+        floatingActionButton = {
+            MainPageFloatingActions(
+                currentMode = appViewMode,
+                onModeChange = onModeChange,
+                backToTop = backToTop,
+            )
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
+        content = content,
+    )
 }
 
 @Composable
@@ -372,6 +378,7 @@ private fun IllustMode(
                 illusts = rankingList,
                 navToPictureScreen = navigateToPictureScreen,
                 sharedElementGroup = "ranking:${mode.value}",
+                showRank = true,
             )
 
             if (

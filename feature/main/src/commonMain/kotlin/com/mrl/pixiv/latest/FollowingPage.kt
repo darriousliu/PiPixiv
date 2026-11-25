@@ -2,9 +2,6 @@ package com.mrl.pixiv.latest
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Tab
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,16 +17,13 @@ import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
 import com.mrl.pixiv.common.data.AppViewMode
+import com.mrl.pixiv.common.data.Restrict
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
 import com.mrl.pixiv.common.router.currentNavigationManager
-import com.mrl.pixiv.common.util.RStrings
 import com.mrl.pixiv.follow.FollowingScreenBody
 import com.mrl.pixiv.follow.FollowingViewModel
-import com.mrl.pixiv.strings.word_private
-import com.mrl.pixiv.strings.word_public
 import kotlinx.coroutines.flow.SharedFlow
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import com.mrl.pixiv.follow.FollowingPage as FollowingTab
@@ -79,15 +73,13 @@ fun FollowingPage(
     }
     Column(modifier = modifier.fillMaxSize()) {
         if (viewModel.pages.size > 1) {
-            PrimaryTabRow(selectedTabIndex = pageIndex) {
-                viewModel.pages.forEachIndexed { index, _ ->
-                    Tab(
-                        selected = pageIndex == index,
-                        onClick = { selectedPage = index },
-                        text = { Text(stringResource(if (index == 0) RStrings.word_public else RStrings.word_private)) },
-                    )
-                }
-            }
+            LatestFilterRow(
+                selected = if (viewModel.pages[pageIndex] == FollowingTab.Public) Restrict.PUBLIC else Restrict.PRIVATE,
+                onSelect = { restrict ->
+                    val page = if (restrict == Restrict.PUBLIC) FollowingTab.Public else FollowingTab.Private
+                    selectedPage = viewModel.pages.indexOf(page)
+                },
+            )
         }
         FollowingScreenBody(
             followingUsers = followingUsers,

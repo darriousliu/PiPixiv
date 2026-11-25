@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,7 +51,7 @@ internal fun HomeSkeleton(spanCount: Int, navigationInset: Dp) {
     PageWithFab(navigationInset) {
         Column {
             SkeletonTopBar(Icons.Rounded.PersonSearch, Icons.Rounded.Refresh)
-            SkeletonTabs(2)
+            SkeletonTabs(listOf(36.dp, 36.dp))
             ArtworkGrid(spanCount)
         }
     }
@@ -61,12 +62,9 @@ internal fun HomeSkeleton(spanCount: Int, navigationInset: Dp) {
 internal fun RankingSkeleton(spanCount: Int, navigationInset: Dp) {
     PageWithFab(navigationInset) {
         Column {
-            SkeletonTopBar()
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                SkeletonTabs(4, Modifier.weight(1f))
-                ActionIcon(Icons.Rounded.EditCalendar)
-            }
-            ArtworkGrid(spanCount)
+            SkeletonTopBar(Icons.Rounded.EditCalendar)
+            SkeletonTabs(listOf(36.dp, 36.dp, 36.dp, 52.dp), scrollable = true)
+            ArtworkGrid(spanCount, showRank = true)
         }
     }
 }
@@ -76,16 +74,15 @@ internal fun RankingSkeleton(spanCount: Int, navigationInset: Dp) {
 internal fun LatestSkeleton(spanCount: Int, navigationInset: Dp) {
     PageWithFab(navigationInset) {
         Column {
-            SkeletonTabs(3, Modifier.padding(horizontal = 16.dp))
-            Box {
-                ArtworkGrid(spanCount, Modifier.padding(top = 40.dp))
-                Row(
-                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    repeat(3) { ChipSkeleton(selected = it == 0) }
-                }
+            SkeletonTopBar()
+            SkeletonTabs(listOf(36.dp, 60.dp, 36.dp, 36.dp), scrollable = true)
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                repeat(3) { ChipSkeleton(selected = it == 0, shape = CircleShape) }
             }
+            ArtworkGrid(spanCount)
         }
     }
 }
@@ -126,17 +123,18 @@ private fun ActionIcon(icon: ImageVector) {
 }
 
 @Composable
-private fun SkeletonTabs(count: Int, modifier: Modifier = Modifier) {
+private fun SkeletonTabs(labelWidths: List<Dp>, scrollable: Boolean = false) {
     val colors = MaterialTheme.colorScheme
-    Box(modifier.fillMaxWidth().height(48.dp)) {
+    Box(Modifier.fillMaxWidth().height(48.dp).clipToBounds()) {
         HorizontalDivider(Modifier.align(Alignment.BottomCenter))
-        Row(Modifier.fillMaxSize()) {
-            repeat(count) { index ->
-                Box(Modifier.weight(1f).height(48.dp), contentAlignment = Alignment.Center) {
-                    PlaceholderBar(36.dp, 12.dp, if (index == 0) colors.primary else colors.onSurfaceVariant)
+        Row(Modifier.fillMaxSize().padding(horizontal = if (scrollable) 16.dp else 0.dp)) {
+            labelWidths.forEachIndexed { index, width ->
+                val tabWidth = if (scrollable) Modifier.width(width + 32.dp) else Modifier.weight(1f)
+                Box(tabWidth.height(48.dp), contentAlignment = Alignment.Center) {
+                    PlaceholderBar(width, 12.dp, if (index == 0) colors.primary else colors.onSurfaceVariant)
                     if (index == 0) {
                         Spacer(
-                            Modifier.align(Alignment.BottomCenter).size(36.dp, 3.dp)
+                            Modifier.align(Alignment.BottomCenter).size(width, 3.dp)
                                 .background(colors.primary, CircleShape)
                         )
                     }
@@ -149,10 +147,10 @@ private fun SkeletonTabs(count: Int, modifier: Modifier = Modifier) {
 private val cardHeights = listOf(180.dp, 240.dp, 200.dp, 160.dp, 220.dp, 260.dp)
 
 @Composable
-private fun ArtworkGrid(spanCount: Int, modifier: Modifier = Modifier) {
+private fun ArtworkGrid(spanCount: Int, showRank: Boolean = false) {
     val columns = if (spanCount == -1) 2 else spanCount.coerceIn(1, 4)
     Row(
-        modifier = modifier.fillMaxWidth().clipToBounds().padding(start = 16.dp, top = 12.dp, end = 16.dp),
+        modifier = Modifier.fillMaxWidth().clipToBounds().padding(start = 16.dp, top = 12.dp, end = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         repeat(columns) { column ->
@@ -161,8 +159,8 @@ private fun ArtworkGrid(spanCount: Int, modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 repeat(5) { row ->
-                    val height = cardHeights[(row * columns + column) % cardHeights.size]
-                    ArtworkCard(height)
+                    val index = row * columns + column
+                    ArtworkCard(cardHeights[index % cardHeights.size], rank = if (showRank) index + 1 else null)
                 }
             }
         }
@@ -170,26 +168,32 @@ private fun ArtworkGrid(spanCount: Int, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ArtworkCard(height: Dp) {
+private fun ArtworkCard(height: Dp, rank: Int?) {
+    val colors = MaterialTheme.colorScheme
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Spacer(
             Modifier.fillMaxWidth().height(height)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.shapes.large)
         )
-        Column(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+        Row(
+            Modifier.padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            PlaceholderBar(64.dp, 10.dp)
-            PlaceholderBar(40.dp, 8.dp)
+            if (rank != null) {
+                PlaceholderBar(16.dp, 20.dp, if (rank <= 3) colors.primary else colors.onSurfaceVariant)
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                PlaceholderBar(64.dp, 10.dp)
+                PlaceholderBar(40.dp, 8.dp)
+            }
         }
     }
 }
 
 @Composable
-private fun ChipSkeleton(selected: Boolean) {
+private fun ChipSkeleton(selected: Boolean, shape: Shape = MaterialTheme.shapes.small) {
     val colors = MaterialTheme.colorScheme
-    val shape = MaterialTheme.shapes.small
     val modifier = if (selected) {
         Modifier.background(colors.secondaryContainer, shape)
     } else {

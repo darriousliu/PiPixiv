@@ -78,7 +78,7 @@ internal fun AppearancePreview(
             border = BorderStroke(1.dp, colorScheme.outlineVariant),
         ) {
             Box(Modifier.scaledPhoneCanvas()) {
-                val navigationInset = if (useLiquidGlassNavigation) 76.dp else 80.dp
+                val navigationInset = if (useLiquidGlassNavigation) 76.dp else 64.dp
                 Crossfade(
                     targetState = selectedPage,
                     modifier = Modifier.fillMaxSize().clearAndSetSemantics {},
@@ -130,7 +130,7 @@ private fun PreviewNavigation(
             .height(64.dp).background(colors.surfaceContainer, CircleShape)
             .padding(horizontal = 6.dp)
     } else {
-        Modifier.height(80.dp).background(colors.surfaceContainer)
+        Modifier.height(64.dp).background(colors.surfaceContainer)
     }
     Row(modifier.fillMaxWidth().then(bar).selectableGroup()) {
         previewPages.forEach { page ->

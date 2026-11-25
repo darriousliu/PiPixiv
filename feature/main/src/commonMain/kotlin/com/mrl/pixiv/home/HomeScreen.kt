@@ -18,6 +18,7 @@ import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -39,9 +40,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.mrl.pixiv.MainPageFloatingActions
 import com.mrl.pixiv.common.analytics.logScreenView
 import com.mrl.pixiv.common.analytics.trackTab
+import com.mrl.pixiv.common.compose.IllustGridSpacing
 import com.mrl.pixiv.common.compose.layout.LocalMainNavigationBottomInset
+import com.mrl.pixiv.common.compose.layout.currentPaneLayoutInfo
+import com.mrl.pixiv.common.compose.layout.isWidthAtLeastMedium
 import com.mrl.pixiv.common.compose.layout.withMainNavigationBottomInset
 import com.mrl.pixiv.common.compose.listener.KeyEventListener
 import com.mrl.pixiv.common.compose.listener.keyboardScrollerController
@@ -50,10 +55,8 @@ import com.mrl.pixiv.common.compose.ui.ContentPullToRefreshBox
 import com.mrl.pixiv.common.compose.ui.PagingAppendState
 import com.mrl.pixiv.common.compose.ui.PagingContentState
 import com.mrl.pixiv.common.compose.ui.VerticalScrollbar
-import com.mrl.pixiv.common.compose.ui.ViewModeToggleButton
 import com.mrl.pixiv.common.compose.ui.novel.NovelItem
 import com.mrl.pixiv.common.data.AppViewMode
-import com.mrl.pixiv.common.kts.VSpacer
 import com.mrl.pixiv.common.kts.itemIndexKey
 import com.mrl.pixiv.common.repository.SettingRepository
 import com.mrl.pixiv.common.repository.SettingRepository.collectAsStateWithLifecycle
@@ -159,16 +162,11 @@ internal fun HomeScaffold(
             )
         },
         floatingActionButton = {
-            Column(modifier = Modifier.padding(bottom = LocalMainNavigationBottomInset.current)) {
+            MainPageFloatingActions(currentMode = appViewMode, onModeChange = onModeChange) {
                 BackToTopButton(
                     visibility = canScrollBackward,
                     onBackToTop = onBackToTop,
                     onRefresh = onRefresh
-                )
-                8.VSpacer
-                ViewModeToggleButton(
-                    currentMode = appViewMode,
-                    onModeChange = onModeChange
                 )
             }
         },
@@ -422,7 +420,7 @@ internal fun HomeTopBar(onRecommendedUsers: () -> Unit, onRefresh: () -> Unit) {
 
 @Composable
 internal fun HomeFeedTabs(selectedIndex: Int, onSelect: (Int) -> Unit) {
-    PrimaryTabRow(selectedTabIndex = selectedIndex, modifier = Modifier.fillMaxWidth()) {
+    val tabs: @Composable () -> Unit = {
         HomeImageFeedMode.entries.forEachIndexed { index, mode ->
             Tab(
                 selected = selectedIndex == index,
@@ -439,5 +437,15 @@ internal fun HomeFeedTabs(selectedIndex: Int, onSelect: (Int) -> Unit) {
                 },
             )
         }
+    }
+    val paneInfo = currentPaneLayoutInfo()
+    if (paneInfo.sizeClass.isWidthAtLeastMedium) {
+        PrimaryScrollableTabRow(
+            selectedTabIndex = selectedIndex,
+            edgePadding = IllustGridSpacing.edgePadding(paneInfo),
+            tabs = tabs,
+        )
+    } else {
+        PrimaryTabRow(selectedTabIndex = selectedIndex, modifier = Modifier.fillMaxWidth(), tabs = tabs)
     }
 }
