@@ -1,7 +1,6 @@
 package com.mrl.pixiv.setting
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -30,7 +29,6 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.Badge
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,7 +64,7 @@ import com.mrl.pixiv.common.util.ToastUtil
 import com.mrl.pixiv.common.viewmodel.SideEffect
 import com.mrl.pixiv.setting.account.RemoveAccountDialog
 import com.mrl.pixiv.setting.appearance.labelResource
-import com.mrl.pixiv.setting.components.SettingChoiceValue
+import com.mrl.pixiv.setting.components.SettingDropdownRow
 import com.mrl.pixiv.setting.components.SettingRow
 import com.mrl.pixiv.setting.components.SettingSectionTitle
 import com.mrl.pixiv.setting.components.SettingSwitchRow
@@ -391,30 +389,29 @@ private fun LanguageSettingItem(
     var expanded by remember { mutableStateOf(false) }
     val currentDisplayName = languages.firstOrNull { it.langTag == currentLanguage }?.displayName
         ?: currentLanguage
-    SettingDestinationItem(
+    SettingDropdownRow(
         title = stringResource(RStrings.app_language),
         icon = Icons.Rounded.Translate,
-        trailingContent = {
-            Box {
-                SettingChoiceValue(value = currentDisplayName, maxLines = 1)
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    languages.forEach { language ->
-                        DropdownMenuItem(
-                            text = { Text(language.displayName) },
-                            trailingIcon = if (language.langTag == currentLanguage) {
-                                { Icon(Icons.Rounded.Check, contentDescription = null) }
-                            } else null,
-                            onClick = {
-                                expanded = false
-                                onLanguageChange(language.langTag)
-                            },
-                        )
-                    }
-                }
-            }
-        },
+        current = currentDisplayName,
+        expanded = expanded,
         onClick = { expanded = !expanded },
-    )
+        onDismissRequest = { expanded = false },
+        clickWholeRow = true,
+        maxValueLines = 1,
+    ) {
+        languages.forEach { language ->
+            DropdownMenuItem(
+                text = { Text(language.displayName) },
+                trailingIcon = if (language.langTag == currentLanguage) {
+                    { Icon(Icons.Rounded.Check, contentDescription = null) }
+                } else null,
+                onClick = {
+                    expanded = false
+                    onLanguageChange(language.langTag)
+                },
+            )
+        }
+    }
 }
 
 @Composable

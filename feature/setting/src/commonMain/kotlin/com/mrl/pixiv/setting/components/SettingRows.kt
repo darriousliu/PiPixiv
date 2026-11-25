@@ -1,19 +1,14 @@
 package com.mrl.pixiv.setting.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -24,8 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -33,11 +26,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.text.style.Hyphens
-import androidx.compose.ui.text.style.LineBreak
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.compose.rememberThrottleClick
 
 @Composable
 internal fun SettingSectionTitle(title: String) {
@@ -50,7 +40,6 @@ internal fun SettingSectionTitle(title: String) {
 }
 
 @Composable
-@Suppress("DEPRECATION")
 internal fun SettingRow(
     title: String,
     icon: ImageVector,
@@ -59,29 +48,31 @@ internal fun SettingRow(
     supportingContent: (@Composable () -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
 ) {
-    val shape = MaterialTheme.shapes.large
+    val shapes = ListItemDefaults.shapes(shape = MaterialTheme.shapes.large)
     val colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     val headline: @Composable () -> Unit = { Text(title) }
     val leading: @Composable () -> Unit = { Icon(icon, contentDescription = null) }
     if (onClick == null) {
-        // The shared Material 3 version exposes only this overload for non-clickable rows.
         ListItem(
-            headlineContent = headline,
-            modifier = modifier.clip(shape),
-            supportingContent = supportingContent,
+            modifier = modifier,
             leadingContent = leading,
             trailingContent = trailingContent,
+            supportingContent = supportingContent,
+            verticalAlignment = Alignment.CenterVertically,
+            shapes = shapes,
             colors = colors,
+            content = headline,
         )
     } else {
         ListItem(
             onClick = onClick,
             modifier = modifier,
-            shapes = ListItemDefaults.shapes(shape = shape),
-            colors = colors,
             leadingContent = leading,
-            supportingContent = supportingContent,
             trailingContent = trailingContent,
+            supportingContent = supportingContent,
+            verticalAlignment = Alignment.CenterVertically,
+            shapes = shapes,
+            colors = colors,
             content = headline,
         )
     }
@@ -155,6 +146,8 @@ internal fun SettingDropdownRow(
     onClick: () -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
+    clickWholeRow: Boolean = false,
+    maxValueLines: Int = Int.MAX_VALUE,
     items: @Composable ColumnScope.() -> Unit,
 ) {
     BoxWithConstraints(modifier) {
@@ -167,51 +160,20 @@ internal fun SettingDropdownRow(
         val choice: @Composable () -> Unit = {
             DropDownSelector(
                 expanded = expanded,
-                onClick = onClick,
+                onClick = if (clickWholeRow) null else onClick,
                 onDismissRequest = onDismissRequest,
                 current = current,
                 maxValueWidth = valueWidth,
+                maxLines = maxValueLines,
                 items = items,
             )
         }
         SettingRow(
             title = title,
             icon = icon,
+            onClick = if (clickWholeRow) rememberThrottleClick(onClick = onClick) else null,
             supportingContent = if (stackValue) choice else null,
             trailingContent = if (stackValue) null else choice,
-        )
-    }
-}
-
-@Composable
-internal fun SettingChoiceValue(
-    value: String,
-    modifier: Modifier = Modifier,
-    maxLines: Int = Int.MAX_VALUE,
-    maxValueWidth: Dp = 96.dp,
-    contentColor: Color? = null,
-) {
-    val style = MaterialTheme.typography.bodyMedium
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = value,
-            modifier = Modifier.widthIn(max = maxValueWidth),
-            style = if (maxLines == 1) style else style.copy(
-                hyphens = Hyphens.Auto,
-                lineBreak = LineBreak.Paragraph,
-            ),
-            color = contentColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = maxLines,
-            overflow = if (maxLines == 1) TextOverflow.Ellipsis else TextOverflow.Clip,
-        )
-        Icon(
-            imageVector = Icons.Rounded.ArrowDropDown,
-            contentDescription = null,
-            tint = contentColor ?: LocalContentColor.current,
         )
     }
 }
