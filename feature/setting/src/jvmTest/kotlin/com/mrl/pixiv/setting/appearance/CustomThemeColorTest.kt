@@ -1,10 +1,7 @@
 package com.mrl.pixiv.setting.appearance
 
 import androidx.compose.material3.MaterialExpressiveTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
@@ -38,15 +35,13 @@ class CustomThemeColorTest {
                 val writes = mutableListOf<AppearanceSettings>()
                 setContent {
                     MaterialExpressiveTheme {
-                        var pickerSeed by remember { mutableStateOf<Long?>(null) }
                         AppearanceSettingContent(
+                            draft = remember { CustomColorDraft() },
                             appearance = initial,
                             theme = SettingTheme.LIGHT,
                             darkTheme = false,
                             useLiquidGlassNavigation = true,
                             spanCount = 2,
-                            pickerSeed = pickerSeed,
-                            onPickerSeedChange = { pickerSeed = it },
                             onAppearanceChange = { writes += it },
                             onThemeChange = {},
                             onGlassChange = {},
@@ -87,6 +82,60 @@ class CustomThemeColorTest {
                                 paletteStyle = AppPaletteStyle.FIDELITY.name,
                             ),
                         ),
+                        writes,
+                    )
+                }
+            }
+        } finally {
+            Locale.setDefault(previousLocale)
+        }
+    }
+
+    @Test
+    fun compactPickerOpensInBottomSheetAndClosesAfterApply() {
+        val previousLocale = Locale.getDefault()
+        Locale.setDefault(Locale.SIMPLIFIED_CHINESE)
+        try {
+            runDesktopComposeUiTest(width = 400, height = 760, testTimeout = 30.seconds) {
+                val initial = AppearanceSettings(themeColor = ThemeColor.SKY.name)
+                val writes = mutableListOf<AppearanceSettings>()
+                val draft = CustomColorDraft()
+                setContent {
+                    MaterialExpressiveTheme {
+                        AppearanceSettingContent(
+                            draft = draft,
+                            appearance = initial,
+                            theme = SettingTheme.LIGHT,
+                            darkTheme = false,
+                            useLiquidGlassNavigation = true,
+                            spanCount = 2,
+                            onAppearanceChange = { writes += it },
+                            onThemeChange = {},
+                            onGlassChange = {},
+                            onBack = {},
+                        )
+                    }
+                }
+
+                // 取消要等弹窗收起后才关闭取色器，且不写入设置。
+                onNodeWithText("自定义").performScrollTo().performClick()
+                onNodeWithText("自定义颜色").assertExists()
+                onNode(hasSetTextAction()).performTextReplacement("#AABBCC")
+                onNodeWithText("取消").performClick()
+                onNodeWithText("自定义颜色").assertDoesNotExist()
+                runOnIdle {
+                    assertEquals(null, draft.seed)
+                    assertEquals(emptyList(), writes)
+                }
+
+                onNodeWithText("自定义").performScrollTo().performClick()
+                onNode(hasSetTextAction()).performTextReplacement("2468ac")
+                onNodeWithText("应用").performClick()
+                onNodeWithText("自定义颜色").assertDoesNotExist()
+                runOnIdle {
+                    assertEquals(null, draft.seed)
+                    assertEquals(
+                        listOf(initial.copy(themeColor = ThemeColor.CUSTOM.name, customColor = 0xFF2468AC)),
                         writes,
                     )
                 }

@@ -33,8 +33,6 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -56,8 +54,9 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mrl.pixiv.common.compose.theme.baselineColorScheme
 import com.mrl.pixiv.common.compose.theme.platformDynamicColorScheme
-import com.mrl.pixiv.common.compose.theme.previewColorScheme
+import com.mrl.pixiv.common.compose.theme.rememberSeededColorScheme
 import com.mrl.pixiv.common.data.setting.AppPaletteStyle
 import com.mrl.pixiv.common.data.setting.AppearanceSettings
 import com.mrl.pixiv.common.data.setting.ResolvedThemeColor
@@ -162,7 +161,7 @@ internal fun AppearanceOptions(
     onCustomColor: () -> Unit,
 ) {
     val wallpaper = platformDynamicColorScheme(darkTheme)
-    val baseline = remember(darkTheme) { if (darkTheme) darkColorScheme() else expressiveLightColorScheme() }
+    val baseline = remember(darkTheme) { baselineColorScheme(darkTheme) }
     val resolved = appearance.resolve(wallpaper != null)
     SettingSectionTitle(stringResource(RStrings.appearance_section_theme_color))
     val colors = ThemeColor.entries.filter { it != ThemeColor.DYNAMIC || wallpaper != null }
@@ -179,12 +178,11 @@ internal fun AppearanceOptions(
         for (color in colors) {
             key(color) {
                 val source = appearance.copy(themeColor = color.name).resolve(wallpaper != null)
+                // 种子色配色在后台生成，打开页面或切换深浅时不在主线程上逐个计算。
                 val scheme = when (source) {
                     ResolvedThemeColor.Baseline -> baseline
                     ResolvedThemeColor.Dynamic -> requireNotNull(wallpaper)
-                    is ResolvedThemeColor.Seeded -> remember(source, darkTheme) {
-                        previewColorScheme(source.seed, source.style, darkTheme)
-                    }
+                    is ResolvedThemeColor.Seeded -> rememberSeededColorScheme(source.seed, source.style, darkTheme)
                 }
                 ThemeSwatch(
                     color = color,
@@ -256,7 +254,7 @@ internal fun AppearanceOptions(
 private fun ThemeSwatch(
     color: ThemeColor,
     selected: Boolean,
-    scheme: ColorScheme,
+    scheme: ColorScheme?,
     unusedCustom: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -280,8 +278,11 @@ private fun ThemeSwatch(
                         )
                     )
                 }
+            } else if (scheme != null) {
+                PaletteDisc({ scheme }, Modifier.fillMaxSize())
             } else {
-                PaletteDisc(scheme, Modifier.fillMaxSize())
+                // 配色生成前的占位。
+                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerHighest))
             }
             val badge: ImageVector? = when {
                 selected -> Icons.Rounded.Check
@@ -291,11 +292,12 @@ private fun ThemeSwatch(
                 else -> null
             }
             if (badge != null) {
+                val badgeColors = scheme ?: MaterialTheme.colorScheme
                 Box(
-                    Modifier.size(28.dp).background(scheme.surfaceContainerLowest, CircleShape),
+                    Modifier.size(28.dp).background(badgeColors.surfaceContainerLowest, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(badge, null, Modifier.size(18.dp), tint = scheme.onSurface)
+                    Icon(badge, null, Modifier.size(18.dp), tint = badgeColors.onSurface)
                 }
             }
         }
@@ -308,13 +310,15 @@ private fun ThemeSwatch(
     }
 }
 
+/** 三分圆盘。配色在绘制时读取，配色连续变化时只重绘、不重组。 */
 @Composable
-internal fun PaletteDisc(scheme: ColorScheme, modifier: Modifier = Modifier) {
+internal fun PaletteDisc(scheme: () -> ColorScheme, modifier: Modifier = Modifier) {
     Canvas(modifier) {
+        val colors = scheme()
         val half = Size(size.width / 2, size.height / 2)
-        drawRect(scheme.primary)
-        drawRect(scheme.secondaryContainer, Offset(0f, half.height), half)
-        drawRect(scheme.tertiary, Offset(half.width, half.height), half)
+        drawRect(colors.primary)
+        drawRect(colors.secondaryContainer, Offset(0f, half.height), half)
+        drawRect(colors.tertiary, Offset(half.width, half.height), half)
     }
 }
 

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,9 +25,9 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BrightnessMedium
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -85,6 +84,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun CustomColorPicker(
     seed: Long,
     style: AppPaletteStyle,
+    generatedScheme: () -> ColorScheme,
     wide: Boolean,
     onSeedChange: (Long) -> Unit,
     onUseFidelity: () -> Unit,
@@ -109,20 +109,14 @@ internal fun CustomColorPicker(
         }
     }
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = if (wide) MaterialTheme.shapes.extraLarge else BottomSheetDefaults.ExpandedShape,
-        color = if (wide) MaterialTheme.colorScheme.surfaceContainerLow else BottomSheetDefaults.ContainerColor,
-    ) {
+    // 宽屏是右栏中的卡片；窄屏放在底部弹窗里，容器、拖动条和底部边距都由弹窗提供。
+    val body: @Composable () -> Unit = {
         Column(
-            modifier = Modifier
-                .then(if (wide) Modifier else Modifier.navigationBarsPadding())
-                .padding(
-                    horizontal = if (wide) 20.dp else 24.dp,
-                    vertical = if (wide) 20.dp else 0.dp,
-                ),
+            modifier = Modifier.padding(
+                horizontal = if (wide) 20.dp else 24.dp,
+                vertical = if (wide) 20.dp else 0.dp,
+            ),
         ) {
-            if (!wide) BottomSheetDefaults.DragHandle(Modifier.align(Alignment.CenterHorizontally))
             Column(
                 modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -132,7 +126,7 @@ internal fun CustomColorPicker(
                     modifier = Modifier.semantics { heading() },
                     style = MaterialTheme.typography.titleLarge,
                 )
-                ColorInputs(selectedColor, controller, hexField) { color ->
+                ColorInputs(selectedColor, generatedScheme, controller, hexField) { color ->
                     val newSeed = color.toArgb().toUInt().toLong()
                     synchronizedSeed = newSeed
                     onSeedChange(newSeed)
@@ -180,11 +174,22 @@ internal fun CustomColorPicker(
             }
         }
     }
+    if (wide) {
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            content = body,
+        )
+    } else {
+        Box(modifier.fillMaxWidth()) { body() }
+    }
 }
 
 @Composable
 private fun ColorInputs(
     selectedColor: Color,
+    generatedScheme: () -> ColorScheme,
     controller: ColorPickerController,
     hexField: TextFieldState,
     onWheelColorChange: (Color) -> Unit,
@@ -221,7 +226,7 @@ private fun ColorInputs(
                     Box(circle.background(selectedColor))
                 }
                 ColorSample(stringResource(RStrings.custom_color_generated), Modifier.weight(1f)) {
-                    PaletteDisc(MaterialTheme.colorScheme, circle)
+                    PaletteDisc(generatedScheme, circle)
                 }
             }
             var hexFocused by remember { mutableStateOf(false) }
