@@ -9,6 +9,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -134,6 +135,63 @@ class AppApiProxyTest {
                     assertEquals("Bearer fixture-access-token", request.headers[HttpHeaders.Authorization])
                 }
                 assertEquals(1, clientCreations)
+            }
+        }
+    }
+
+    @Test
+    fun retriesOnlyBadRequestAndUnauthorizedWithoutRetryingRateLimits() = runBlocking {
+        val loopback = InetAddress.getByName("127.0.0.1")
+        val certificate = HeldCertificate.Builder()
+            .addSubjectAlternativeName(API_HOST)
+            .addSubjectAlternativeName("localhost")
+            .build()
+        val serverCertificates = HandshakeCertificates.Builder().heldCertificate(certificate).build()
+        val clientCertificates = HandshakeCertificates.Builder().addTrustedCertificate(certificate.certificate).build()
+
+        MockWebServer().use { server ->
+            server.protocols = listOf(Protocol.HTTP_1_1)
+            server.useHttps(serverCertificates.sslSocketFactory())
+            server.start(loopback, 0)
+            val url = "https://$API_HOST:${server.port}/v1/illust/recommended"
+
+            HttpClient(OkHttp) {
+                engine {
+                    config {
+                        proxy(Proxy.NO_PROXY)
+                        protocols(listOf(Protocol.HTTP_1_1))
+                        sslSocketFactory(clientCertificates.sslSocketFactory(), clientCertificates.trustManager)
+                        dns { listOf(loopback) }
+                    }
+                }
+            }.applyAppApiRequests(
+                readProxyHost = { "localhost" },
+                readAccessToken = { "fixture-access-token" },
+            ).use { client ->
+                val nonRetryableStatuses = listOf(
+                    HttpStatusCode.TooManyRequests,
+                    HttpStatusCode.Forbidden,
+                    HttpStatusCode.NotFound,
+                )
+                for (status in nonRetryableStatuses) {
+                    server.enqueue(MockResponse(code = status.value, body = "err-${status.value}"))
+                    val response = client.get(url)
+                    assertEquals(status, response.status)
+                    assertNotNull(server.takeRequest(2, TimeUnit.SECONDS))
+                    assertNull(server.takeRequest(100, TimeUnit.MILLISECONDS))
+                }
+
+                for (status in listOf(HttpStatusCode.BadRequest, HttpStatusCode.Unauthorized)) {
+                    server.enqueue(MockResponse(code = status.value, body = "first"))
+                    server.enqueue(MockResponse(code = HttpStatusCode.OK.value, body = "retried"))
+                    val response = client.get(url)
+                    assertEquals(HttpStatusCode.OK, response.status)
+                    assertEquals("retried", response.bodyAsText())
+                    val firstRequest = assertNotNull(server.takeRequest(2, TimeUnit.SECONDS))
+                    val secondRequest = assertNotNull(server.takeRequest(2, TimeUnit.SECONDS))
+                    assertEquals("Bearer fixture-access-token", firstRequest.headers[HttpHeaders.Authorization])
+                    assertEquals("Bearer fixture-access-token", secondRequest.headers[HttpHeaders.Authorization])
+                }
             }
         }
     }

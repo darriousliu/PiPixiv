@@ -32,11 +32,14 @@ internal fun HttpClient.applyAppApiRequests(
         request.url.applyAppApiProxyHost(readProxyHost())
         NetworkUtil.addAuthHeader(request, readAccessToken)
         var call = execute(request)
-        if (call.response.status in HttpStatusCode.BadRequest..HttpStatusCode.RequestHeaderFieldTooLarge) {
-            // Keep the original account's credentials when retrying an in-flight request.
+        if (call.response.status.shouldRetryAppApiRequest()) {
+            // 重试在途请求时保留原账号的认证凭据，仅刷新签名请求头，避免对 429/403/404 等状态码零退避重试。
             NetworkUtil.addAppHeaders(request)
             call = execute(request)
         }
         call
     }
 }
+
+internal fun HttpStatusCode.shouldRetryAppApiRequest(): Boolean =
+    this == HttpStatusCode.BadRequest || this == HttpStatusCode.Unauthorized

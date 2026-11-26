@@ -311,11 +311,27 @@ jobs:
         working-directory: iosApp
         run: xcodebuild -resolvePackageDependencies -project PiPixiv.xcodeproj -scheme PiPixiv
 
+      - name: Setup Sentry CLI
+        run: python3 .github/scripts/setup-sentry-cli.py
+
       - name: Build iOS IPA
         env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: ./gradlew :composeApp:buildReleaseIpa -Pdebug=false
+
+      - name: Upload iOS dSYMs to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: pipixiv
+          SENTRY_PROJECT: pipixiv
+        run: |
+          dsym_dir="composeApp/build/archives/release/PiPixiv.xcarchive/dSYMs"
+          test -d "$dsym_dir"
+          find "$dsym_dir" -maxdepth 1 -name '*.dSYM' | grep -q .
+          "$SENTRY_CLI_EXECUTABLE" debug-files upload \
+            --org "$SENTRY_ORG" \
+            --project "$SENTRY_PROJECT" \
+            "$dsym_dir"
 
       - name: Upload iOS Artifacts
         uses: actions/upload-artifact@v7

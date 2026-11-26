@@ -36,6 +36,10 @@ actual suspend fun readTextFromClipboard(): String? = try {
     null
 }
 
+actual suspend fun readLinkTextFromClipboard(): String? = readTextFromClipboard()
+
+actual suspend fun clipboardChangeCount(): Long? = null
+
 internal suspend fun Clipboard.writePlainText(text: String) {
     setClipEntry(ClipEntry(StringSelection(text)))
 }

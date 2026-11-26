@@ -134,6 +134,13 @@ class SearchViewModel : BaseMviViewModel<SearchState, SearchAction>(
         SettingRepository.setAppViewMode(mode)
     }
 
+    fun shouldReadClipboard(changeCount: Long?): Boolean =
+        clipboardTextTracker.shouldRead(changeCount)
+
+    fun markClipboardChecked(changeCount: Long?) {
+        clipboardTextTracker.markChecked(changeCount)
+    }
+
     fun isClipboardTextChanged(text: String): Boolean = clipboardTextTracker.hasChanged(text)
 
     private companion object {
@@ -144,6 +151,18 @@ class SearchViewModel : BaseMviViewModel<SearchState, SearchAction>(
 internal class ClipboardTextChangeTracker {
     private var initialized = false
     private var lastText = ""
+    private var lastChangeCount: Long? = null
+
+    fun shouldRead(changeCount: Long?): Boolean {
+        if (changeCount == null) return true
+        return lastChangeCount != changeCount
+    }
+
+    fun markChecked(changeCount: Long?) {
+        if (changeCount != null) {
+            lastChangeCount = changeCount
+        }
+    }
 
     fun hasChanged(text: String): Boolean {
         if (initialized && text == lastText) return false

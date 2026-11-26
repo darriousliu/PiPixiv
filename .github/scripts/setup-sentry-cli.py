@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install a pinned official sentry-cli binary for the desktop CI runners."""
+"""Install a pinned official sentry-cli binary for the desktop and iOS CI runners."""
 
 import hashlib
 import os

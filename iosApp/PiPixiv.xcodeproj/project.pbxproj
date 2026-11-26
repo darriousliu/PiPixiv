@@ -799,7 +799,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\nif which sentry-cli >/dev/null; then\nexport SENTRY_ORG=pipixiv\nexport SENTRY_PROJECT=pipixiv\n\nERROR=$(sentry-cli debug-files upload \\\n\"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\nif [ ! $? -eq 0 ]; then\necho \"warning: sentry-cli - $ERROR\"\nfi\nelse\necho \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
+				shellScript = "if [ \"${CI:-}\" = \"true\" ]; then\n    exit 0\nfi\nif [ \"$CONFIGURATION\" = \"Debug\" ] || [ -z \"${SENTRY_AUTH_TOKEN:-}\" ]; then\n    exit 0\nfi\nif [ \"$(uname -m)\" = \"arm64\" ]; then\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\nSENTRY_CLI=\"${SENTRY_CLI_EXECUTABLE:-$(command -v sentry-cli || true)}\"\nif [ -n \"$SENTRY_CLI\" ]; then\nexport SENTRY_ORG=pipixiv\nexport SENTRY_PROJECT=pipixiv\n\nERROR=$(\"$SENTRY_CLI\" debug-files upload \\\n\"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\nif [ ! $? -eq 0 ]; then\necho \"warning: sentry-cli - $ERROR\"\nfi\nelse\necho \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

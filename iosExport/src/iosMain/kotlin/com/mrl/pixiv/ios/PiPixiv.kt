@@ -9,10 +9,14 @@ import com.mrl.pixiv.di.initIOSKoin
 import platform.UIKit.UIViewController
 
 object PiPixiv {
+    private var initialized = false
+
     fun initialize(
         zipUtil: ZipUtil,
         photoUtil: PhotoUtil,
     ) {
+        if (initialized) return
+        initialized = true
         Initialization.initKoin {
             initIOSKoin(
                 di = listOf(zipUtil, photoUtil),

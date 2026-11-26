@@ -6,7 +6,8 @@ struct ComposeView: UIViewControllerRepresentable {
     @Binding var isStatusBarHidden: Bool
 
     func makeUIViewController(context: Context) -> UIViewController {
-        PiPixiv.shared.makeMainViewController { hidden in
+        AppDelegate.ensureInitialized()
+        return PiPixiv.shared.makeMainViewController { hidden in
             DispatchQueue.main.async {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isStatusBarHidden = hidden

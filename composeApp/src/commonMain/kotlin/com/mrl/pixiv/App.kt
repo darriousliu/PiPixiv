@@ -157,9 +157,7 @@ internal object CoilMemoryCache {
 
     fun get(context: PlatformContext): MemoryCache {
         return instance ?: run {
-            MemoryCache.Builder()
-                .maxSizePercent(context, 0.25)
-                .build()
+            createPlatformCoilMemoryCache(context)
                 .also { instance = it }
         }
     }

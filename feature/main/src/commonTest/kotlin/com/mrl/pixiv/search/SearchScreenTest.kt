@@ -25,6 +25,20 @@ class SearchScreenTest {
     }
 
     @Test
+    fun clipboardChangeCountSkipsRepeatedReadsUntilChanged() {
+        val tracker = ClipboardTextChangeTracker()
+
+        assertTrue(tracker.shouldRead(null))
+        assertTrue(tracker.shouldRead(10L))
+        tracker.markChecked(10L)
+        assertFalse(tracker.shouldRead(10L))
+        assertTrue(tracker.shouldRead(11L))
+        tracker.markChecked(11L)
+        assertFalse(tracker.shouldRead(11L))
+        assertTrue(tracker.shouldRead(null))
+    }
+
+    @Test
     fun multipleLinksSubmittedFromSearchBoxShowSelectionDialog() {
         val text = """
             https://www.pixiv.net/artworks/123

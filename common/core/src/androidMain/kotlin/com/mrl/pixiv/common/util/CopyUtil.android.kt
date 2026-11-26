@@ -19,3 +19,7 @@ actual suspend fun readTextFromClipboard(): String? = runCatching {
     if (clip.itemCount == 0) return@runCatching null
     clip.getItemAt(0).coerceToText(AppUtil.appContext)?.toString()
 }.getOrNull()
+
+actual suspend fun readLinkTextFromClipboard(): String? = readTextFromClipboard()
+
+actual suspend fun clipboardChangeCount(): Long? = null

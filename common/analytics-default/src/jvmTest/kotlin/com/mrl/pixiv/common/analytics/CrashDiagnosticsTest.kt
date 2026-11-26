@@ -122,4 +122,111 @@ class CrashDiagnosticsTest {
         assertNull(options.cacheDirPath)
         assertFalse(options.integrations.any { it is SendCachedEnvelopeFireAndForgetIntegration })
     }
+
+    @Test
+    fun formatsIosReleaseConsistentlyAcrossResignedAndContainerizedInstalls() {
+        assertEquals("com.mrl.pixiv.PiPixiv@2.7.0+20700", formatIosSentryRelease("2.7.0", 20700))
+    }
+
+    @Test
+    fun classifiesStandardAndLiveContainerIosRuntimes() {
+        val standard = classifyIosRuntime(
+            bundleIdentifier = "com.mrl.pixiv.PiPixivABC123",
+            bundlePath = "/var/containers/Bundle/Application/UUID/PiPixiv.app",
+            executablePath = "/var/containers/Bundle/Application/UUID/PiPixiv.app/PiPixiv",
+            mainExecutableImagePath = "/var/containers/Bundle/Application/UUID/PiPixiv.app/PiPixiv",
+            loadedImagePaths = listOf("/var/containers/Bundle/Application/UUID/PiPixiv.app/PiPixiv", SYSTEM_IMAGE),
+            processName = "PiPixiv",
+            environmentKeys = emptySet(),
+            dyldInsertLibraries = null,
+            hasLiveContainerClass = false,
+        )
+        assertEquals(IosRuntimeInfo("standard", isLiveContainer = false, isAppExtension = false), standard)
+
+        val liveContainerMain = classifyIosRuntime(
+            bundleIdentifier = "com.kdt.livecontainer",
+            bundlePath = "/var/containers/Bundle/Application/UUID/LiveContainer.app",
+            executablePath = "/var/containers/Bundle/Application/UUID/LiveContainer.app/LiveContainer",
+            mainExecutableImagePath = "/var/containers/Bundle/Application/UUID/LiveContainer.app/LiveContainer",
+            loadedImagePaths = listOf("/var/containers/Bundle/Application/UUID/LiveContainer.app/LiveContainer", SYSTEM_IMAGE),
+            processName = "LiveContainer",
+            environmentKeys = emptySet(),
+            dyldInsertLibraries = null,
+            hasLiveContainerClass = false,
+        )
+        assertEquals(IosRuntimeInfo("livecontainer", isLiveContainer = true, isAppExtension = false), liveContainerMain)
+
+        val liveProcessExtension = classifyIosRuntime(
+            bundleIdentifier = "com.custom.resign.liveprocess",
+            bundlePath = "/var/containers/Bundle/Application/UUID/LiveContainer.app/PlugIns/LiveProcess.appex",
+            executablePath = "/var/containers/Bundle/Application/UUID/LiveContainer.app/PlugIns/LiveProcess.appex/LiveProcess",
+            mainExecutableImagePath = "/var/containers/Bundle/Application/UUID/LiveContainer.app/PlugIns/LiveProcess.appex/LiveProcess",
+            loadedImagePaths = listOf("/var/containers/Bundle/Application/UUID/LiveContainer.app/PlugIns/LiveProcess.appex/LiveProcess", SYSTEM_IMAGE),
+            processName = "LiveProcess",
+            environmentKeys = setOf("LC_HOME_PATH"),
+            dyldInsertLibraries = null,
+            hasLiveContainerClass = true,
+        )
+        assertEquals(
+            IosRuntimeInfo("livecontainer_extension", isLiveContainer = true, isAppExtension = true),
+            liveProcessExtension,
+        )
+
+        val liveContainerViaClassOnly = classifyIosRuntime(
+            bundleIdentifier = "com.example.custom",
+            bundlePath = "/var/containers/Bundle/Application/UUID/Custom.app",
+            executablePath = "/var/containers/Bundle/Application/UUID/Custom.app/Custom",
+            mainExecutableImagePath = "/var/containers/Bundle/Application/UUID/Custom.app/Custom",
+            loadedImagePaths = listOf("/var/containers/Bundle/Application/UUID/Custom.app/Custom", SYSTEM_IMAGE),
+            processName = "Custom",
+            environmentKeys = emptySet(),
+            dyldInsertLibraries = null,
+            hasLiveContainerClass = true,
+        )
+        assertEquals(
+            IosRuntimeInfo("livecontainer", isLiveContainer = true, isAppExtension = false),
+            liveContainerViaClassOnly,
+        )
+    }
+
+    @Test
+    fun classifiesLiveContainerFromDyldImagesWhenMainBundleIsRewritten() {
+        // 与 Sentry 事件中观察到的布局一致：mainBundle 指向数据容器里的 PiPixiv，宿主只出现在 dyld 镜像中。
+        val guestBundle = "/private/var/mobile/Containers/Data/Application/UUID/Documents/Applications/com.mrl.pixiv.PiPixiv.app"
+        val hostApp = "/private/var/containers/Bundle/Application/UUID/LiveContainer.app"
+        val rewrittenBundle = { mainExecutable: String, extraImages: List<String> ->
+            classifyIosRuntime(
+                bundleIdentifier = "com.mrl.pixiv.PiPixiv",
+                bundlePath = guestBundle,
+                executablePath = "$guestBundle/PiPixiv",
+                mainExecutableImagePath = mainExecutable,
+                loadedImagePaths = listOf(mainExecutable, SYSTEM_IMAGE) + extraImages + "$guestBundle/PiPixiv",
+                processName = "PiPixiv",
+                environmentKeys = emptySet(),
+                dyldInsertLibraries = null,
+                hasLiveContainerClass = false,
+            )
+        }
+
+        assertEquals(
+            IosRuntimeInfo("livecontainer_extension", isLiveContainer = true, isAppExtension = true),
+            rewrittenBundle(
+                "$hostApp/PlugIns/LiveProcess.appex/LiveProcess",
+                listOf("$hostApp/Frameworks/LiveContainerShared.framework/LiveContainerShared"),
+            ),
+        )
+        assertEquals(
+            IosRuntimeInfo("livecontainer", isLiveContainer = true, isAppExtension = false),
+            rewrittenBundle("$hostApp/LiveContainer", emptyList()),
+        )
+        // 宿主被改名时，仍可凭 App 包位于数据容器识别出来。
+        assertEquals(
+            IosRuntimeInfo("livecontainer", isLiveContainer = true, isAppExtension = false),
+            rewrittenBundle("/private/var/containers/Bundle/Application/UUID/Host.app/Host", emptyList()),
+        )
+    }
+
+    private companion object {
+        const val SYSTEM_IMAGE = "/System/Library/Frameworks/UIKit.framework/UIKit"
+    }
 }

@@ -77,7 +77,8 @@ import com.mrl.pixiv.common.router.NavigationManager
 import com.mrl.pixiv.common.router.PixivLinkTarget
 import com.mrl.pixiv.common.router.currentNavigationManager
 import com.mrl.pixiv.common.util.RStrings
-import com.mrl.pixiv.common.util.readTextFromClipboard
+import com.mrl.pixiv.common.util.clipboardChangeCount
+import com.mrl.pixiv.common.util.readLinkTextFromClipboard
 import com.mrl.pixiv.common.util.throttleClick
 import com.mrl.pixiv.common.viewmodel.asState
 import com.mrl.pixiv.strings.cancel
@@ -149,11 +150,17 @@ fun SearchScreen(
     LifecycleResumeEffect(readClipboardOnSearch) {
         val clipboardJob = coroutineScope.launch {
             val handledClipboardLink = if (readClipboardOnSearch) {
-                val clipboardText = readTextFromClipboard().orEmpty()
-                viewModel.isClipboardTextChanged(clipboardText) && handlePixivLinks(
-                    text = clipboardText,
-                    alwaysShowSelection = true,
-                )
+                val changeCount = clipboardChangeCount()
+                if (viewModel.shouldReadClipboard(changeCount)) {
+                    val clipboardText = readLinkTextFromClipboard().orEmpty()
+                    viewModel.markClipboardChecked(changeCount)
+                    viewModel.isClipboardTextChanged(clipboardText) && handlePixivLinks(
+                        text = clipboardText,
+                        alwaysShowSelection = true,
+                    )
+                } else {
+                    false
+                }
             } else {
                 false
             }
