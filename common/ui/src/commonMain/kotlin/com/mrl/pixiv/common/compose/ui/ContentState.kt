@@ -1,5 +1,6 @@
 package com.mrl.pixiv.common.compose.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -204,12 +205,13 @@ private fun ContentStateLayout(
 
 @Composable
 private fun ContentStateIcon(icon: ImageVector) {
-    Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-        Icon(
-            icon,
-            contentDescription = null,
-            modifier = Modifier.padding(20.dp).size(32.dp),
-            tint = MaterialTheme.colorScheme.primary,
-        )
-    }
+    Icon(
+        icon,
+        contentDescription = null,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
+            .padding(20.dp)
+            .size(32.dp),
+        tint = MaterialTheme.colorScheme.primary,
+    )
 }
