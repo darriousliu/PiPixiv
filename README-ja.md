@@ -1,6 +1,6 @@
 <div align="center">
 
-[简体中文](./README.md) &nbsp;|&nbsp; [繁體中文](./README-zh-TW.md) &nbsp;|&nbsp; [English](./README-en.md) &nbsp;|&nbsp; **日本語**
+[简体中文](./README.md) | [繁體中文](./README-zh-TW.md) | [English](./README-en.md) | **日本語**
 
 <a href="https://github.com/darriousliu/PiPixiv">
   <img src=".idea/icon.svg" width="88" height="88" alt="PiPixiv Logo" />
@@ -12,21 +12,21 @@ Compose Multiplatform で開発したオープンソースの非公式 pixiv ク
 
 **[公式サイト（英語）](https://pipixiv.com/en)** &nbsp;·&nbsp; **[インストール方法](#ダウンロード)** &nbsp;·&nbsp; **[機能](#機能)** &nbsp;·&nbsp; **[アーキテクチャ](#アーキテクチャ)**
 
-[![最新版をダウンロード](https://img.shields.io/github/v/release/darriousliu/PiPixiv?style=for-the-badge&logo=github&logoColor=white&label=%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89&labelColor=1689DD&color=0068B8)](https://github.com/darriousliu/PiPixiv/releases/latest) &nbsp;[![F-Droid](https://img.shields.io/f-droid/v/com.mrl.pixiv?style=for-the-badge&logo=f-droid&logoColor=white&label=F-Droid&labelColor=24292F&color=3B434E)](https://f-droid.org/packages/com.mrl.pixiv/)
-
 [![Android](https://img.shields.io/badge/Android-24292F?style=flat-square&logo=android&logoColor=3DDC84)](#ダウンロード)
 [![iOS](https://img.shields.io/badge/iOS-24292F?style=flat-square&logo=apple&logoColor=FFFFFF)](#ダウンロード)
 [![Windows][windows-badge]](#ダウンロード)
 [![macOS](https://img.shields.io/badge/macOS-24292F?style=flat-square&logo=apple&logoColor=FFFFFF)](#ダウンロード)
 [![Linux](https://img.shields.io/badge/Linux-24292F?style=flat-square&logo=linux&logoColor=FCC624)](#ダウンロード)
-<br/>
+
+[![最新版をダウンロード](https://img.shields.io/github/v/release/darriousliu/PiPixiv?style=for-the-badge&logo=github&logoColor=white&label=%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89&labelColor=1689DD&color=0068B8)](https://github.com/darriousliu/PiPixiv/releases/latest)
+[![F-Droid](https://img.shields.io/f-droid/v/com.mrl.pixiv?style=for-the-badge&logo=f-droid&logoColor=white&label=F-Droid&labelColor=24292F&color=3B434E)](https://f-droid.org/packages/com.mrl.pixiv/)
+
 [![ダウンロード数](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?style=flat-square&logo=github&logoColor=FFFFFF&label=%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E6%95%B0&labelColor=24292F&color=3B434E)](https://github.com/darriousliu/PiPixiv/releases)
 [![ビルド状況](https://img.shields.io/github/actions/workflow/status/darriousliu/PiPixiv/release.yml?style=flat-square&logo=githubactions&logoColor=58A6FF&label=%E3%83%93%E3%83%AB%E3%83%89&labelColor=24292F)](https://github.com/darriousliu/PiPixiv/actions/workflows/release.yml)
 [![Telegram](https://img.shields.io/badge/Telegram-%40PiPixivChannel-3B434E?style=flat-square&logo=telegram&logoColor=26A5E4&labelColor=24292F)](https://t.me/PiPixivChannel)
-<br/>
+
 [![Kotlin](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdarriousliu%2FPiPixiv%2Fmaster%2Fgradle%2Flibs.versions.toml&query=%24.versions.kotlin&style=flat-square&label=Kotlin&logo=kotlin&logoColor=A97BFF&labelColor=24292F&color=3B434E)](https://kotlinlang.org)
 [![Compose Multiplatform](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdarriousliu%2FPiPixiv%2Fmaster%2Fgradle%2Flibs.versions.toml&query=%24.versions.composeMultiplatform&style=flat-square&label=Compose%20Multiplatform&logo=jetpackcompose&logoColor=4285F4&labelColor=24292F&color=3B434E)](https://www.jetbrains.com/compose-multiplatform/)
-[![License: Apache-2.0](https://img.shields.io/github/license/darriousliu/PiPixiv?style=flat-square&label=License&labelColor=24292F&color=3B434E)](./LICENSE)
 
 <img width="100%" alt="タブレット、ノートパソコン、スマートフォンで動作する PiPixiv" src="docs/preview.png" />
 
