@@ -1,29 +1,38 @@
 <div align="center">
 
+**简体中文** &nbsp;|&nbsp; [繁體中文](./README-zh-TW.md) &nbsp;|&nbsp; [English](./README-en.md) &nbsp;|&nbsp; [日本語](./README-ja.md)
+
 <a href="https://github.com/darriousliu/PiPixiv">
-<img src=".idea/icon.svg" width="96" alt="PiPixiv Logo">
+  <img src=".idea/icon.svg" width="88" height="88" alt="PiPixiv Logo" />
 </a>
 
 # PiPixiv
 
-一款用 Compose Multiplatform 开发的开源 Pixiv 第三方客户端<br/>
-一套代码运行在 Android、iOS、Windows、macOS 和 Linux 上
+一款用 Compose Multiplatform 开发的开源 Pixiv 第三方客户端
 
-**[官网](https://pipixiv.com/zh)** · **[下载](#下载)** · **[功能](#功能)** · **[架构](#架构)** · **[English](./.github/README-en.md)**
+**[官网](https://pipixiv.com/zh)** &nbsp;·&nbsp; **[安装说明](#下载)** &nbsp;·&nbsp; **[功能](#功能)** &nbsp;·&nbsp; **[架构](#架构)**
 
-[![稳定版](https://img.shields.io/github/v/release/darriousliu/PiPixiv?label=稳定版)](https://github.com/darriousliu/PiPixiv/releases/latest)
-[![下载量](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?label=下载量&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF)](https://github.com/darriousliu/PiPixiv/releases)
-[![F-Droid](https://img.shields.io/f-droid/v/com.mrl.pixiv)](https://f-droid.org/packages/com.mrl.pixiv/)
-[![构建状态](https://img.shields.io/github/actions/workflow/status/darriousliu/PiPixiv/release.yml?label=构建)](https://github.com/darriousliu/PiPixiv/actions/workflows/release.yml)
-[![Telegram](https://img.shields.io/badge/Telegram-%40PiPixivChannel-26A5E4?logo=telegram&logoColor=white)](https://t.me/PiPixivChannel)
+[![下载最新版](https://img.shields.io/github/v/release/darriousliu/PiPixiv?style=for-the-badge&logo=github&logoColor=white&label=%E4%B8%8B%E8%BD%BD%E6%9C%80%E6%96%B0%E7%89%88&labelColor=1689DD&color=0068B8)](https://github.com/darriousliu/PiPixiv/releases/latest) &nbsp;[![F-Droid](https://img.shields.io/f-droid/v/com.mrl.pixiv?style=for-the-badge&logo=f-droid&logoColor=white&label=F-Droid&labelColor=24292F&color=3B434E)](https://f-droid.org/packages/com.mrl.pixiv/)
+
+[![Android](https://img.shields.io/badge/Android-24292F?style=flat-square&logo=android&logoColor=3DDC84)](#下载)
+[![iOS](https://img.shields.io/badge/iOS-24292F?style=flat-square&logo=apple&logoColor=FFFFFF)](#下载)
+[![Windows][windows-badge]](#下载)
+[![macOS](https://img.shields.io/badge/macOS-24292F?style=flat-square&logo=apple&logoColor=FFFFFF)](#下载)
+[![Linux](https://img.shields.io/badge/Linux-24292F?style=flat-square&logo=linux&logoColor=FCC624)](#下载)
 <br/>
-[![Kotlin](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdarriousliu%2FPiPixiv%2Fmaster%2Fgradle%2Flibs.versions.toml&query=%24.versions.kotlin&label=Kotlin&logo=kotlin&color=7F52FF)](https://kotlinlang.org)
-[![Compose Multiplatform](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdarriousliu%2FPiPixiv%2Fmaster%2Fgradle%2Flibs.versions.toml&query=%24.versions.composeMultiplatform&label=Compose%20Multiplatform&color=4285F4)](https://www.jetbrains.com/compose-multiplatform/)
-[![License: Apache-2.0](https://img.shields.io/github/license/darriousliu/PiPixiv?labelColor=27303D&color=0877d2)](./LICENSE)
+[![下载量](https://img.shields.io/github/downloads/darriousliu/PiPixiv/total?style=flat-square&logo=github&logoColor=FFFFFF&label=%E4%B8%8B%E8%BD%BD%E9%87%8F&labelColor=24292F&color=3B434E)](https://github.com/darriousliu/PiPixiv/releases)
+[![构建状态](https://img.shields.io/github/actions/workflow/status/darriousliu/PiPixiv/release.yml?style=flat-square&logo=githubactions&logoColor=58A6FF&label=%E6%9E%84%E5%BB%BA&labelColor=24292F)](https://github.com/darriousliu/PiPixiv/actions/workflows/release.yml)
+[![Telegram](https://img.shields.io/badge/Telegram-%40PiPixivChannel-3B434E?style=flat-square&logo=telegram&logoColor=26A5E4&labelColor=24292F)](https://t.me/PiPixivChannel)
+<br/>
+[![Kotlin](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdarriousliu%2FPiPixiv%2Fmaster%2Fgradle%2Flibs.versions.toml&query=%24.versions.kotlin&style=flat-square&label=Kotlin&logo=kotlin&logoColor=A97BFF&labelColor=24292F&color=3B434E)](https://kotlinlang.org)
+[![Compose Multiplatform](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdarriousliu%2FPiPixiv%2Fmaster%2Fgradle%2Flibs.versions.toml&query=%24.versions.composeMultiplatform&style=flat-square&label=Compose%20Multiplatform&logo=jetpackcompose&logoColor=4285F4&labelColor=24292F&color=3B434E)](https://www.jetbrains.com/compose-multiplatform/)
+[![License: Apache-2.0](https://img.shields.io/github/license/darriousliu/PiPixiv?style=flat-square&label=License&labelColor=24292F&color=3B434E)](./LICENSE)
 
 <img width="100%" alt="PiPixiv 在平板、笔记本和手机上的界面预览" src="docs/preview.png" />
 
 </div>
+
+[windows-badge]: https://img.shields.io/badge/Windows-24292F?style=flat-square&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iIzAwQTRFRiIgZD0iTTAgMGgxMS4zNzd2MTEuMzcySDB6bTEyLjYyMyAwSDI0djExLjM3MkgxMi42MjN6TTAgMTIuNjIzaDExLjM3N1YyNEgwem0xMi42MjMgMEgyNFYyNEgxMi42MjN6Ii8%2BPC9zdmc%2B
 
 ## 功能
 

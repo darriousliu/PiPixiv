@@ -17,7 +17,7 @@ export const siteConfig = {
   },
   readme: {
     zh: `${github}#readme`,
-    en: `${github}/blob/master/.github/README-en.md`,
+    en: `${github}/blob/master/README-en.md`,
   } satisfies Record<Locale, string>,
   platformCount: 5,
   license: "Apache-2.0",

@@ -12,7 +12,7 @@
 后续版本发布统一使用 Git Flow：生产分支为 `master`，开发分支为 `develop`，发布分支为 `release/vX.Y.Z`，正式版本使用注释标签 `vX.Y.Z`。
 
 1. 发布前检查工作区、远端分支及目标标签和 Release 的状态，保留用户已有修改。从最新的 `develop` 创建 `release/vX.Y.Z`；使用 Git Flow 命令时执行 `git flow release start vX.Y.Z`，当前配置的版本标签前缀为空，版本参数本身须包含 `v`。
-2. 在发布分支更新并提交版本：同步 `gradle.properties` 的 `versionName` / `versionCode`、`iosApp/Configuration/Config.xcconfig` 的 `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION`，以及 `README.md`、`.github/README-en.md` 的当前源码版本。Gradle 与 iOS 的版本名、构建号须一致，构建号沿用项目现有编码，例如 `2.6.0 → 20600`。提交信息使用 `chore(release): 升级版本至 X.Y.Z`。
+2. 在发布分支更新并提交版本：同步 `gradle.properties` 的 `versionName` / `versionCode`、`iosApp/Configuration/Config.xcconfig` 的 `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION`，以及根目录 `README.md`、`README-zh-TW.md`、`README-en.md`、`README-ja.md` 的当前源码版本。Gradle 与 iOS 的版本名、构建号须一致，构建号沿用项目现有编码，例如 `2.6.0 → 20600`。提交信息使用 `chore(release): 升级版本至 X.Y.Z`。
 3. 完成版本配置检查及受影响的验证，检查暂存差异并运行 `git diff --check`，再将发布分支以 `--no-ff` 合并到 `master`，提交信息使用 `chore(release): 发布 vX.Y.Z`。
 4. 在 `master` 的发布合并提交上创建注释标签 `vX.Y.Z`，标签必须指向该发布提交，不直接指向 `develop` 或发布分支的 tip。随后将该标签以 `--no-ff` 合并回 `develop`，提交信息使用 `chore(release): 将 vX.Y.Z 发布结果合并回开发分支`。
 5. 正常推送 `master`、`develop` 与版本标签，并核对远端合并关系及标签指向。正常发布不重写已推送的分支历史，已发布的版本标签不得移动或覆盖；已有同名标签或 Release 时先核对其状态和提交，避免重复发布。
