@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { LOCALE_COOKIE, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import logo from "@/public/logo.svg";
-import { GitHubIcon } from "./BrandIcons";
+import { GitHubIcon, TelegramIcon } from "./BrandIcons";
 import { Icon } from "./Icon";
 import styles from "./Nav.module.css";
 
@@ -88,12 +88,14 @@ export function Nav({
   stars,
   localeOptions,
   githubUrl,
+  telegramUrl,
 }: {
   locale: Locale;
   dict: Dictionary["nav"];
   stars: string | null;
   localeOptions: LocaleOption[];
   githubUrl: string;
+  telegramUrl: string;
 }) {
   const scrolled = useScrolled();
   const theme = useTheme();
@@ -204,6 +206,17 @@ export function Nav({
           >
             <Icon name={theme === "dark" ? "light_mode" : "dark_mode"} />
           </button>
+
+          <a
+            className={styles.iconBtn}
+            href={telegramUrl}
+            target="_blank"
+            rel="noopener"
+            aria-label={dict.telegramLabel}
+            title={dict.telegramLabel}
+          >
+            <TelegramIcon />
+          </a>
 
           <a
             className={styles.ghBtn}

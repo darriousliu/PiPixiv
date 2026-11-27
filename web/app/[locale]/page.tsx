@@ -50,6 +50,7 @@ export default async function HomePage() {
         stars={stats ? new Intl.NumberFormat(numberLocale).format(stats.stars) : null}
         localeOptions={locales.map((l) => ({ locale: l, label: localeMeta[l].label, short: localeMeta[l].short }))}
         githubUrl={siteConfig.links.github}
+        telegramUrl={siteConfig.links.telegram}
       />
       <main id="main">
         <Hero

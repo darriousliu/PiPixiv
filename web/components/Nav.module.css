@@ -105,6 +105,11 @@
 .iconBtn :global(.ms) {
   font-size: 22px;
 }
+.iconBtn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
 
 .lang {
   position: relative;
@@ -186,7 +191,7 @@
   display: none;
 }
 
-@media (max-width: 1040px) {
+@media (max-width: 1100px) {
   .links {
     position: absolute;
     top: calc(100% + 8px);
@@ -236,5 +241,29 @@
   }
   .ghBtn {
     padding: 0 6px 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .inner {
+    gap: 8px;
+    padding: 0 8px 0 12px;
+  }
+  .actions {
+    gap: 2px;
+  }
+  .iconBtn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0;
+  }
+  .ghCount {
+    display: none;
+  }
+  .ghBtn {
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0;
   }
 }
